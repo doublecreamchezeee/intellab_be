@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: identity-service
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8001
+  servlet:
+    context-path: /identity
+
+jwt:
+  signerKey: "Yb5l4M8yFuHoXXLrEecnyRJOAEbgU0sdoXh2rFHTdq3SJ4ikikIuJssfvn/xP//z"
+  valid-duration: 3600
+  refreshable-duration: 360000
