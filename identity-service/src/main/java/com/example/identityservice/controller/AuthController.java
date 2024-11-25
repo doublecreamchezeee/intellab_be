@@ -2,10 +2,12 @@ package com.example.identityservice.controller;
 
 import com.example.identityservice.dto.request.UserCreationRequest;
 import com.example.identityservice.dto.request.UserLoginRequest;
+import com.example.identityservice.dto.response.FirebaseGoogleSignInResponse;
 import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.TokenSuccessResponse;
 import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.service.AuthService;
+import com.google.firebase.auth.FirebaseAuthException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +38,14 @@ public class AuthController {
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenSuccessResponse> login(@Valid @RequestBody final UserLoginRequest userLoginRequest) {
         final var response = authService.login(userLoginRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PublicEndpoint
+    @PostMapping(value = "/login/google")
+    public ResponseEntity<FirebaseGoogleSignInResponse> loginWithGoogle(@RequestBody final Map<String, String> body) throws FirebaseAuthException {
+        String idToken = body.get("idToken");
+        FirebaseGoogleSignInResponse response = authService.loginWithGoogle(idToken);
         return ResponseEntity.ok(response);
     }
 
