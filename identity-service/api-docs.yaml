@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: User Authentication API
+  description: API to manage user authentication including registration, login, and token refresh.
+  version: 1.0.0
+servers:
+  - url: https://your-domain.com/api/v1
+    description: Main API server
+
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      description: This endpoint registers a new user by providing their email and password.
+      operationId: registerUser
+      tags:
+        - Authentication
+      requestBody:
+        description: User credentials for registration
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emailId:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully"
+        '400':
+          description: Bad Request - Invalid input or already existing email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Account with provided email-id already exists"
+        '500':
+          description: Internal server error
+
+  /login:
+    post:
+      summary: Login with existing credentials
+      description: This endpoint logs in the user by verifying their email and password.
+      operationId: loginUser
+      tags:
+        - Authentication
+      requestBody:
+        description: User credentials for login
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emailId:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful, returns access and refresh tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTIzNDU2Nzg5MCIsImlhdCI6MTYxNTg3Mjg3MX0._Ue1VQj9PllfWGHYOBwZ"
+                  refreshToken:
+                    type: string
+                    example: "def50200c9b142df...."
+        '401':
+          description: Unauthorized - Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid credentials"
+        '400':
+          description: Bad Request - Invalid input format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid request body"
+
+  /refresh:
+    post:
+      summary: Refresh the access token
+      description: This endpoint allows the user to refresh their expired access token using a valid refresh token.
+      operationId: refreshToken
+      tags:
+        - Authentication
+      requestBody:
+        description: Refresh token to obtain a new access token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  example: "def50200c9b142df...."
+      responses:
+        '200':
+          description: Token refreshed successfully, returns a new access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTIzNDU2Nzg5MCIsImlhdCI6MTYxNTg3Mjg3MX0._Ue1VQj9PllfWGHYOBwZ"
+                  refreshToken:
+                    type: string
+                    example: "def50200c9b142df...." # New refresh token if returned
+        '400':
+          description: Bad Request - Invalid refresh token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid refresh token"
+        '401':
+          description: Unauthorized - Refresh token expired or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
