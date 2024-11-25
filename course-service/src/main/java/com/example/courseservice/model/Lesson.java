@@ -13,11 +13,12 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "\"lesson\"")
 public class Lesson {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     String name;
     String description;
     String content;
+    int lessonOrder;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)

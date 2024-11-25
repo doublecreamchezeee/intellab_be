@@ -16,7 +16,7 @@ import java.util.List;
 @Table(name = "\"course\"")
 public class Course {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     String name;
     String description;

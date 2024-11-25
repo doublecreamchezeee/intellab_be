@@ -10,8 +10,11 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface AccountMapper {
+    @Mapping(target = "username", source = "username")
+    @Mapping(target = "password", source = "password")
     Account toAccount(AccountCreationRequest request);
+
     AccountResponse toAccountResponse(Account account);
-//    @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     void updateAccount(@MappingTarget Account account, AccountUpdateRequest request);
 }
