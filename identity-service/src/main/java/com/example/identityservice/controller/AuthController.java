@@ -5,7 +5,7 @@ import com.example.identityservice.dto.request.UserLoginRequest;
 import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.TokenSuccessResponse;
 import com.example.identityservice.configuration.PublicEndpoint;
-import com.example.identityservice.service.UserService;
+import com.example.identityservice.service.AuthService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,22 +20,22 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user")
-public class UserController {
+@RequestMapping("/auth")
+public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
     @PublicEndpoint
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> createUser(@Valid @RequestBody final UserCreationRequest userCreationRequest) {
-        userService.create(userCreationRequest);
+        authService.create(userCreationRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PublicEndpoint
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenSuccessResponse> login(@Valid @RequestBody final UserLoginRequest userLoginRequest) {
-        final var response = userService.login(userLoginRequest);
+        final var response = authService.login(userLoginRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -43,7 +43,7 @@ public class UserController {
     @PostMapping(value = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RefreshTokenSuccessResponse> refreshToken(@RequestBody Map<String, String> body) {
         String refreshToken = body.get("refreshToken");
-        RefreshTokenSuccessResponse response = userService.refreshAccessToken(refreshToken);
+        RefreshTokenSuccessResponse response = authService.refreshAccessToken(refreshToken);
         return ResponseEntity.ok(response);
     }
 

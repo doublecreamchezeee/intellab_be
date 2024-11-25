@@ -1,6 +1,6 @@
 package com.example.identityservice.client;
 
-import com.example.identityservice.configuration.FirebaseConfigurationProperties;
+import com.example.identityservice.configuration.firebase.FirebaseConfigurationProperties;
 import com.example.identityservice.dto.request.FirebaseSignInRequest;
 import com.example.identityservice.dto.request.UserLoginRequest;
 import com.example.identityservice.dto.response.FirebaseSignInResponse;

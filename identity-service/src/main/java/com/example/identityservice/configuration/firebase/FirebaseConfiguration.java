@@ -1,4 +1,4 @@
-package com.example.identityservice.configuration;
+package com.example.identityservice.configuration.firebase;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;

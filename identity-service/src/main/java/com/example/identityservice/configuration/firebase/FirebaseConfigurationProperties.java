@@ -1,4 +1,4 @@
-package com.example.identityservice.configuration;
+package com.example.identityservice.configuration.firebase;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
