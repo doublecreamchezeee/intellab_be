@@ -1,12 +1,23 @@
 services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=identity-service'
-      - 'POSTGRES_PASSWORD=htht01225923050'
-      - 'POSTGRES_USER=postgres'
-#      - 'POSTGRES_DB=mydatabase'
-#      - 'POSTGRES_PASSWORD=secret'
-#      - 'POSTGRES_USER=myuser'
+  app:
+    build:
+      context: .
     ports:
-      - '5432:5432'
+      - "8002:8102"
+    container_name: course-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/course-service
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: htht01225923050
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    container_name: postgres-1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: htht01225923050
+      POSTGRES_DB: course-service
+    ports:
+      - "5432:5432"
