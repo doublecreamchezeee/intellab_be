@@ -35,5 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
-identity-service/src/main/resources/application.yaml
 course-service/src/main/resources/application.yaml
+identity-service/src/main/resources/application.yaml
+identity-service/src/main/resources/private-key.json
