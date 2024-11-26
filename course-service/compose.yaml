@@ -2,8 +2,9 @@ services:
   app:
     build:
       context: .
+      dockerfile: Dockerfile
     ports:
-      - "8002:8102"
+      - "8102:8002" # Match the exposed port in the Dockerfile
     container_name: course-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/course-service
@@ -20,4 +21,4 @@ services:
       POSTGRES_PASSWORD: htht01225923050
       POSTGRES_DB: course-service
     ports:
-      - "5432:5432"
+      - "5433:5432"

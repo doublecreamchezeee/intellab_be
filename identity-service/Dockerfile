@@ -30,7 +30,7 @@ WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
 # Expose the port the application runs on
-EXPOSE 8081
+EXPOSE 8101
 
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=optional:classpath:/,optional:file:config/"]

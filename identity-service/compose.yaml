@@ -1,5 +1,5 @@
 services:
-  identity-service:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,6 +7,7 @@ services:
       - "8101:8001"
     networks:
       - backend-network
+    container_name: identity-service
 networks:
   backend-network:
     driver: bridge

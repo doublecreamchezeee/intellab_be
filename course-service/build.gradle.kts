@@ -1,7 +1,11 @@
 plugins {
     id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management")
+    id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "1.9.0"
+}
+
+repositories {
+    mavenCentral()
 }
 
 java {
@@ -28,6 +32,8 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security:spring-security-oauth2-jose")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 dependencyManagement {
