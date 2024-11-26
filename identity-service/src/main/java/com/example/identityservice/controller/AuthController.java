@@ -2,10 +2,12 @@ package com.example.identityservice.controller;
 
 import com.example.identityservice.dto.request.UserCreationRequest;
 import com.example.identityservice.dto.request.UserLoginRequest;
+import com.example.identityservice.dto.response.FirebaseGoogleSignInResponse;
 import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.TokenSuccessResponse;
 import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.service.AuthService;
+import com.google.firebase.auth.FirebaseAuthException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,10 +42,22 @@ public class AuthController {
     }
 
     @PublicEndpoint
+    @PostMapping(value = "/login/google")
+    public ResponseEntity<FirebaseGoogleSignInResponse> loginWithGoogle(@RequestBody final Map<String, String> body) throws FirebaseAuthException {
+        String idToken = body.get("idToken");
+        FirebaseGoogleSignInResponse response = authService.loginWithGoogle(idToken);
+        return ResponseEntity.ok(response);
+    }
+
+    @PublicEndpoint
     @PostMapping(value = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RefreshTokenSuccessResponse> refreshToken(@RequestBody Map<String, String> body) {
+    public ResponseEntity<TokenSuccessResponse> refreshToken(@RequestBody Map<String, String> body) {
         String refreshToken = body.get("refreshToken");
-        RefreshTokenSuccessResponse response = authService.refreshAccessToken(refreshToken);
+        RefreshTokenSuccessResponse refreshTokenResponse = authService.refreshAccessToken(refreshToken);
+        TokenSuccessResponse response = TokenSuccessResponse.builder()
+                .accessToken(refreshTokenResponse.getId_token())
+                .refreshToken(refreshTokenResponse.getRefresh_token())
+                .build();
         return ResponseEntity.ok(response);
     }
 

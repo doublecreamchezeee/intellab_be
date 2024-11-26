@@ -3,11 +3,13 @@ package com.example.identityservice.service;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.request.UserCreationRequest;
 import com.example.identityservice.dto.request.UserLoginRequest;
+import com.example.identityservice.dto.response.FirebaseGoogleSignInResponse;
 import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.TokenSuccessResponse;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,14 @@ public class AuthService {
         return firebaseAuthClient.login(userLoginRequest);
     }
 
+    public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
+        FirebaseToken firebaseToken = firebaseAuthClient.verifyToken(idToken);
+
+        return FirebaseGoogleSignInResponse.builder()
+                .uid(firebaseToken.getUid())
+                .email(firebaseToken.getEmail())
+                .build();
+    }
     public RefreshTokenSuccessResponse refreshAccessToken(@NonNull final String refreshToken) {
         return firebaseAuthClient.refreshAccessToken(refreshToken);
     }

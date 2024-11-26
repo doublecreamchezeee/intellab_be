@@ -7,6 +7,9 @@ import com.example.identityservice.dto.response.FirebaseSignInResponse;
 import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.TokenSuccessResponse;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,6 +31,7 @@ public class FirebaseAuthClient {
     private static final String API_KEY_PARAM = "key";
     private static final String INVALID_CREDENTIALS_ERROR = "INVALID_LOGIN_CREDENTIALS";
     private static final String REFRESH_TOKEN_URL = "https://securetoken.googleapis.com/v1/token";
+    private final FirebaseAuth firebaseAuth;
 
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) {
         final var requestBody = prepareRequestBody(userLoginRequest);
@@ -36,6 +40,10 @@ public class FirebaseAuthClient {
                 .accessToken(response.getIdToken())
                 .refreshToken(response.getRefreshToken())
                 .build();
+    }
+
+    public FirebaseToken verifyToken(@NonNull final String idToken) throws FirebaseAuthException {
+        return firebaseAuth.verifyIdToken(idToken);
     }
 
     private FirebaseSignInResponse sendSignInRequest(@NonNull final FirebaseSignInRequest request) {
