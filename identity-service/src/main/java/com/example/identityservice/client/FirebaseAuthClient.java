@@ -68,7 +68,7 @@ public class FirebaseAuthClient {
 
     private FirebaseSignInRequest prepareRequestBody(@NonNull final UserLoginRequest userLoginRequest) {
         final var request = new FirebaseSignInRequest();
-        request.setEmail(userLoginRequest.getEmailId());
+        request.setEmail(userLoginRequest.getEmail());
         request.setPassword(userLoginRequest.getPassword());
         request.setReturnSecureToken(Boolean.TRUE);
         return request;

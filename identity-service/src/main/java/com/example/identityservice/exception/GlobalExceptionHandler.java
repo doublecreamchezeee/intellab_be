@@ -1,47 +1,39 @@
-//package com.example.identityservice.exception;
-//
-//import com.example.identityservice.dto.ApiResponse;
-//import kotlin.io.AccessDeniedException;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.MethodArgumentNotValidException;
-//import org.springframework.web.bind.annotation.ControllerAdvice;
-//import org.springframework.web.bind.annotation.ExceptionHandler;
-//
-//@ControllerAdvice
-//public class GlobalExceptionHandler {
-//    @ExceptionHandler(value = Exception.class)
-//    ResponseEntity<ApiResponse> handlingException(Exception e) {
-//        ApiResponse apiResponse = new ApiResponse();
-//        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-//        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-//        return ResponseEntity.badRequest().body(apiResponse);
-//    }
-//    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-//    ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException e) {
-//        String enumkey = e.getFieldError().getDefaultMessage();
-//        ErrorCode errorCode = ErrorCode.valueOf(enumkey);
-//        ApiResponse apiResponse = new ApiResponse();
-//        apiResponse.setMessage(errorCode.getMessage());
-//        apiResponse.setCode(errorCode.getCode());
-//        return ResponseEntity.badRequest().body(apiResponse);
-//    }
-//    @ExceptionHandler(value = AppException.class)
-//    ResponseEntity<ApiResponse> handlingAppException(AppException e) {
-//        ErrorCode errorCode = e.getErrorCode();
-//        ApiResponse apiResponse = new ApiResponse();
-//        apiResponse.setCode(errorCode.getCode());
-//        apiResponse.setMessage(errorCode.getMessage());
-//        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
-//    }
-//
-//    @ExceptionHandler(value = AccessDeniedException.class)
-//    ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException e) {
-//        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
-//        return ResponseEntity.status(errorCode.getStatusCode()).body(
-//                ApiResponse.builder()
-//                    .code(errorCode.getCode())
-//                    .message(errorCode.getMessage())
-//                    .build()
-//                );
-//    }
-//}
+package com.example.identityservice.exception;
+
+import com.google.firebase.auth.FirebaseAuthException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        log.error("Validation error: {}", ex.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(FirebaseAuthException.class)
+    public ResponseEntity<String> handleFirebaseAuthException(FirebaseAuthException ex) {
+        log.error("Firebase Authentication error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericExceptions(Exception ex) {
+        log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+    }
+}

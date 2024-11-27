@@ -3,6 +3,7 @@ package com.example.identityservice.service;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.request.UserCreationRequest;
 import com.example.identityservice.dto.request.UserLoginRequest;
+import com.example.identityservice.dto.request.UserUpdateRequest;
 import com.example.identityservice.dto.response.FirebaseGoogleSignInResponse;
 import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.TokenSuccessResponse;
@@ -14,8 +15,10 @@ import com.google.firebase.auth.UserRecord;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -25,18 +28,26 @@ public class AuthService {
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
-        final var request = new UserRecord.CreateRequest();
-        request.setEmail(userCreationRequest.getEmailId());
-        request.setPassword(userCreationRequest.getPassword());
-        request.setEmailVerified(Boolean.TRUE);
+        log.info("Creating user with email: {}", userCreationRequest.getEmail());
+        final var request = new UserRecord.CreateRequest()
+                .setEmail(userCreationRequest.getEmail())
+                .setPassword(userCreationRequest.getPassword())
+                .setEmailVerified(Boolean.TRUE)
+                .setDisplayName(userCreationRequest.getDisplayName())
+                .setPhoneNumber(userCreationRequest.getPhoneNumber())
+                .setPhotoUrl(userCreationRequest.getPhotoUrl());
 
         try {
             firebaseAuth.createUser(request);
+            log.info("User successfully created: {}", userCreationRequest.getEmail());
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
-                throw new AccountAlreadyExistsException("Account with provided email-id already exists");
+                throw new AccountAlreadyExistsException("Account with provided email already exists");
             }
-            throw exception;
+            if (exception.getMessage().contains("PHONE_NUMBER_EXISTS")) {
+                throw new AccountAlreadyExistsException("Account with provided phone number already exists");
+            }
+            throw new RuntimeException("Error creating user: " + exception.getMessage(), exception);
         }
     }
 
@@ -52,7 +63,44 @@ public class AuthService {
                 .email(firebaseToken.getEmail())
                 .build();
     }
+
     public RefreshTokenSuccessResponse refreshAccessToken(@NonNull final String refreshToken) {
         return firebaseAuthClient.refreshAccessToken(refreshToken);
+    }
+
+    public void updateByEmail(@NonNull String email, @NonNull UserUpdateRequest userUpdateRequest) {
+        try {
+            UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+
+            update(userRecord.getUid(), userUpdateRequest);
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error finding user by email: " + e.getMessage(), e);
+        }
+    }
+
+    public void update(@NonNull String uid, @NonNull UserUpdateRequest userUpdateRequest) {
+        final var request = new UserRecord.UpdateRequest(uid);
+
+        if (userUpdateRequest.getEmail() != null) {
+            request.setEmail(userUpdateRequest.getEmail());
+        }
+        if (userUpdateRequest.getDisplayName() != null) {
+            request.setDisplayName(userUpdateRequest.getDisplayName());
+        }
+        if (userUpdateRequest.getPhoneNumber() != null) {
+            request.setPhoneNumber(userUpdateRequest.getPhoneNumber());
+        }
+        if (userUpdateRequest.getPhotoUrl() != null) {
+            request.setPhotoUrl(userUpdateRequest.getPhotoUrl());
+        }
+        if (userUpdateRequest.getPassword() != null) {
+            request.setPassword(userUpdateRequest.getPassword());
+        }
+
+        try {
+            firebaseAuth.updateUser(request);
+        } catch (final Exception exception) {
+            throw new RuntimeException("Error updating user: " + exception.getMessage(), exception);
+        }
     }
 }
