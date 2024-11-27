@@ -33,9 +33,9 @@ public class AuthService {
                 .setEmail(userCreationRequest.getEmail())
                 .setPassword(userCreationRequest.getPassword())
                 .setEmailVerified(Boolean.TRUE)
-                .setDisplayName(userCreationRequest.getDisplayName())
-                .setPhoneNumber(userCreationRequest.getPhoneNumber())
-                .setPhotoUrl(userCreationRequest.getPhotoUrl());
+                .setDisplayName(userCreationRequest.getDisplayName());
+//                .setPhoneNumber(userCreationRequest.getPhoneNumber())
+//                .setPhotoUrl(userCreationRequest.getPhotoUrl());
 
         try {
             firebaseAuth.createUser(request);
