@@ -1,11 +1,11 @@
 package com.example.identityservice.client;
 
 import com.example.identityservice.configuration.firebase.FirebaseConfigurationProperties;
-import com.example.identityservice.dto.request.FirebaseSignInRequest;
-import com.example.identityservice.dto.request.UserLoginRequest;
-import com.example.identityservice.dto.response.FirebaseSignInResponse;
-import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
-import com.example.identityservice.dto.response.TokenSuccessResponse;
+import com.example.identityservice.dto.request.auth.FirebaseSignInRequest;
+import com.example.identityservice.dto.request.auth.UserLoginRequest;
+import com.example.identityservice.dto.response.auth.FirebaseSignInResponse;
+import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
+import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;

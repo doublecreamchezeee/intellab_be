@@ -1,4 +1,4 @@
-package com.example.identityservice.dto.request;
+package com.example.identityservice.dto.request.auth;
 
 import lombok.Getter;
 import lombok.Setter;
