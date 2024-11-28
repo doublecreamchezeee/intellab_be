@@ -18,7 +18,7 @@ COPY build.gradle.kts settings.gradle.kts ./
 COPY src ./src
 
 # Build the application
-RUN gradle build --no-daemon
+RUN gradle build -x test --no-daemon
 
 # Stage 2: Create the runtime image
 FROM openjdk:17-jdk-slim

@@ -1,11 +1,11 @@
 package com.example.identityservice.controller;
 
-import com.example.identityservice.dto.request.UserCreationRequest;
-import com.example.identityservice.dto.request.UserLoginRequest;
-import com.example.identityservice.dto.request.UserUpdateRequest;
-import com.example.identityservice.dto.response.FirebaseGoogleSignInResponse;
-import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
-import com.example.identityservice.dto.response.TokenSuccessResponse;
+import com.example.identityservice.dto.request.auth.UserCreationRequest;
+import com.example.identityservice.dto.request.auth.UserLoginRequest;
+import com.example.identityservice.dto.request.auth.UserUpdateRequest;
+import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInResponse;
+import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
+import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
 import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.service.AuthService;
 import com.google.firebase.auth.FirebaseAuthException;

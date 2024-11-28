@@ -1,12 +1,12 @@
 package com.example.identityservice.service;
 
 import com.example.identityservice.client.FirebaseAuthClient;
-import com.example.identityservice.dto.request.UserCreationRequest;
-import com.example.identityservice.dto.request.UserLoginRequest;
-import com.example.identityservice.dto.request.UserUpdateRequest;
-import com.example.identityservice.dto.response.FirebaseGoogleSignInResponse;
-import com.example.identityservice.dto.response.RefreshTokenSuccessResponse;
-import com.example.identityservice.dto.response.TokenSuccessResponse;
+import com.example.identityservice.dto.request.auth.UserCreationRequest;
+import com.example.identityservice.dto.request.auth.UserLoginRequest;
+import com.example.identityservice.dto.request.auth.UserUpdateRequest;
+import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInResponse;
+import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
+import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
