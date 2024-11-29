@@ -12,5 +12,4 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface IdentityClient {
     @PostMapping(value ="/auth/introspect", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request);
-
 }
