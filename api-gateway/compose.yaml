@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8000"
+    networks:
+      - backend-network
+    container_name: api-gateway
+networks:
+  backend-network:
+    driver: bridge
