@@ -8,6 +8,7 @@ import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInRespons
 import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
+import com.google.common.base.Strings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -33,9 +34,13 @@ public class AuthService {
                 .setEmail(userCreationRequest.getEmail())
                 .setPassword(userCreationRequest.getPassword())
                 .setEmailVerified(Boolean.TRUE)
-                .setDisplayName(userCreationRequest.getDisplayName());
-//                .setPhoneNumber(userCreationRequest.getPhoneNumber())
-//                .setPhotoUrl(userCreationRequest.getPhotoUrl());
+                .setDisplayName(userCreationRequest.getDisplayName())
+                .setPhoneNumber(userCreationRequest.getPhoneNumber());
+                //.setPhotoUrl(userCreationRequest.getPhotoUrl());
+
+        if (!Strings.isNullOrEmpty(userCreationRequest.getPhotoUrl())) {
+            request.setPhotoUrl(userCreationRequest.getPhotoUrl());
+        }
 
         try {
             firebaseAuth.createUser(request);
@@ -90,7 +95,8 @@ public class AuthService {
         if (userUpdateRequest.getPhoneNumber() != null) {
             request.setPhoneNumber(userUpdateRequest.getPhoneNumber());
         }
-        if (userUpdateRequest.getPhotoUrl() != null) {
+        if (userUpdateRequest.getPhotoUrl() != null
+                && !Strings.isNullOrEmpty(userUpdateRequest.getPhotoUrl())) {
             request.setPhotoUrl(userUpdateRequest.getPhotoUrl());
         }
         if (userUpdateRequest.getPassword() != null) {

@@ -46,6 +46,7 @@ public class CourseController {
                 .build();
     }
 
+
     @GetMapping
     ApiResponse<List<CourseResponse>> getAllCourse() {
         return ApiResponse.<List<CourseResponse>>builder()
