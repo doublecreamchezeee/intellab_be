@@ -44,6 +44,7 @@ public class CourseService {
 
         course.setLessons(new ArrayList<>());
         course = courseRepository.save(course);
+
         return courseMapper.toCourseResponse(course);
     }
 

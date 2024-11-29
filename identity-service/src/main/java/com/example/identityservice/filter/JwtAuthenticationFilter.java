@@ -1,6 +1,13 @@
 package com.example.identityservice.filter;
 
+import com.example.identityservice.dto.ApiResponse;
+import com.example.identityservice.exception.ErrorCode;
+import com.example.identityservice.exception.GlobalExceptionHandler;
+import com.example.identityservice.exception.TokenVerificationException;
 import com.example.identityservice.utility.ApiEndpointSecurityInspector;
+import com.example.identityservice.utility.JsonUtility;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.servlet.FilterChain;
@@ -10,17 +17,24 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private GlobalExceptionHandler globalExceptionController;
 
     private final FirebaseAuth firebaseAuth;
     private final ApiEndpointSecurityInspector apiEndpointSecurityInspector;
@@ -55,23 +69,66 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     final var authentication = new UsernamePasswordAuthenticationToken(userId, null, null);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                } catch (FirebaseAuthException | IllegalStateException e) {
+                } catch (FirebaseAuthException e){
                     // Log the error and respond with a 401 Unauthorized status
                     logger.error("Authentication failed: {}", e);
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Authentication failed: " + e);
-                    return; // Prevent further processing of the request
+                    /*response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Authentication failed: " + e);*/
+                    //return; // Prevent further processing of the request
+
+                    ResponseEntity<ApiResponse> errorResponse = globalExceptionController.handleFirebaseAuthException(e);
+                    writeErrorResponse(response, errorResponse);
+                    return;
+
+                } catch (IllegalStateException e) {
+
+                    logger.error("Authentication failed: {}", e);
+
+                    ResponseEntity<ApiResponse> errorResponse = globalExceptionController.handleTokenVerificationException(new TokenVerificationException());
+                    response.setStatus(errorResponse.getStatusCodeValue());
+
+                    PrintWriter out = response.getWriter();
+                    out.print(JsonUtility.convertObjectToJson(errorResponse.getBody()));
+                    out.flush();
+
+                    return;
+
                 } catch (IllegalArgumentException e) {
                     // Handle token format errors or other argument-related exceptions
                     logger.error("Invalid token format: {}", e);
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    /*response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("Invalid token format");
-                    return; // Prevent further processing of the request
+                    return; // Prevent further processing of the request*/
+
+                    ResponseEntity<ApiResponse> errorResponse = globalExceptionController.handleTokenVerificationException(new TokenVerificationException());
+                    writeErrorResponse(response, errorResponse);
+
+                    return;
+                } catch (Exception e) {
+                    // Log the error and respond with a 401 Unauthorized status
+                    logger.error("Authentication failed: {}", e);
+                    /*response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Authentication failed: " + e);
+                    return; // Prevent further processing of the request*/
+
+                    ResponseEntity<ApiResponse> errorResponse = globalExceptionController.handleTokenVerificationException(new TokenVerificationException());
+                    writeErrorResponse(response, errorResponse);
+
+                    return;
                 }
             }
         }
 
         // Continue with the filter chain
         filterChain.doFilter(request, response);
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, ResponseEntity<ApiResponse> errorResponse) throws JsonProcessingException, IOException {
+        response.setStatus(errorResponse.getStatusCodeValue());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.print(JsonUtility.convertObjectToJson(errorResponse.getBody()));
+        out.flush();
     }
 }
