@@ -34,13 +34,13 @@ public class AuthService {
                 .setEmail(userCreationRequest.getEmail())
                 .setPassword(userCreationRequest.getPassword())
                 .setEmailVerified(Boolean.TRUE)
-                .setDisplayName(userCreationRequest.getDisplayName())
-                .setPhoneNumber(userCreationRequest.getPhoneNumber());
+                .setDisplayName(userCreationRequest.getDisplayName());
+                //.setPhoneNumber(userCreationRequest.getPhoneNumber());
                 //.setPhotoUrl(userCreationRequest.getPhotoUrl());
 
-        if (!Strings.isNullOrEmpty(userCreationRequest.getPhotoUrl())) {
+        /*if (!Strings.isNullOrEmpty(userCreationRequest.getPhotoUrl())) {
             request.setPhotoUrl(userCreationRequest.getPhotoUrl());
-        }
+        }*/
 
         try {
             firebaseAuth.createUser(request);
@@ -92,13 +92,13 @@ public class AuthService {
         if (userUpdateRequest.getDisplayName() != null) {
             request.setDisplayName(userUpdateRequest.getDisplayName());
         }
-        if (userUpdateRequest.getPhoneNumber() != null) {
+        /*if (userUpdateRequest.getPhoneNumber() != null) {
             request.setPhoneNumber(userUpdateRequest.getPhoneNumber());
         }
         if (userUpdateRequest.getPhotoUrl() != null
                 && !Strings.isNullOrEmpty(userUpdateRequest.getPhotoUrl())) {
             request.setPhotoUrl(userUpdateRequest.getPhotoUrl());
-        }
+        }*/
         if (userUpdateRequest.getPassword() != null) {
             request.setPassword(userUpdateRequest.getPassword());
         }
