@@ -7,6 +7,7 @@ import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInRespons
 import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
 import com.example.identityservice.configuration.PublicEndpoint;
+import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.identityservice.service.AuthService;
 import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.servlet.http.Cookie;
@@ -79,4 +80,10 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PublicEndpoint
+    @PostMapping("/validateToken")
+    public ResponseEntity<ValidatedTokenResponse> validateToken(@RequestBody String token) {
+        ValidatedTokenResponse response = authService.validateToken(token);
+        return ResponseEntity.ok(response);
+    }
 }

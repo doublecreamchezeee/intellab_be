@@ -7,6 +7,7 @@ import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInResponse;
 import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
+import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.google.common.base.Strings;
 import com.google.firebase.auth.FirebaseAuth;
@@ -107,6 +108,27 @@ public class AuthService {
             firebaseAuth.updateUser(request);
         } catch (final Exception exception) {
             throw new RuntimeException("Error updating user: " + exception.getMessage(), exception);
+        }
+    }
+
+    public ValidatedTokenResponse validateToken(@NonNull final String token) {
+        try {
+            FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
+
+            return ValidatedTokenResponse.builder()
+                    .isValidated(true)
+                    .message("Token validation successful.")
+                    .build();
+        } catch (FirebaseAuthException e) {
+            return ValidatedTokenResponse.builder()
+                    .isValidated(false)
+                    .message("Invalid token: " + e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            return ValidatedTokenResponse.builder()
+                    .isValidated(false)
+                    .message("An unexpected error occurred: " + e.getMessage())
+                    .build();
         }
     }
 }
