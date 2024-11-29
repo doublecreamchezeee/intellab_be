@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import javax.annotation.Nullable;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,12 +26,13 @@ public class UserCreationRequest {
     @Size(max = 50, message = "Display name length must not exceed 50 characters")
     private String displayName;
 
-    @Pattern(
-            regexp = "^\\+[1-9][0-9]{1,14}$",
-            message = "Phone number must be E.164 compliant (e.g., +84123456789)"
-    )
-    private String phoneNumber;
-
-    @Size(max = 255, message = "Photo URL length must not exceed 255 characters")
-    private String photoUrl;
+//    @Pattern(
+//            regexp = "^\\+[1-9][0-9]{1,14}$",
+//            message = "Phone number must be E.164 compliant (e.g., +84123456789)"
+//    )
+//    @Nullable
+//    private String phoneNumber;
+//
+//    @Size(max = 255, message = "Photo URL length must not exceed 255 characters")
+//    private String photoUrl;
 }
