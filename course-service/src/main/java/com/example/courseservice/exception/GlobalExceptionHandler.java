@@ -10,13 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingException(Exception e) {
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        return ResponseEntity.badRequest().body(apiResponse);
-    }
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException e) {
         String enumkey = e.getFieldError().getDefaultMessage();
@@ -28,6 +22,9 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse> handlingAppException(AppException e) {
+        e.printStackTrace();
+        System.out.println(e.getCause());
+
         ErrorCode errorCode = e.getErrorCode();
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setCode(errorCode.getCode());
@@ -44,5 +41,15 @@ public class GlobalExceptionHandler {
                     .message(errorCode.getMessage())
                     .build()
                 );
+    }
+
+    @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse> handlingException(Exception e) {
+        e.printStackTrace();
+        System.out.println(e.getCause());
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 }
