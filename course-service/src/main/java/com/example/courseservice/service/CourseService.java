@@ -1,6 +1,5 @@
 package com.example.courseservice.service;
 
-import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.response.course.CourseResponse;
@@ -106,13 +105,9 @@ public class CourseService {
         }
 
         return enrollCourse.getCourseIds().stream()
-                .map(courseId -> {
-                    CourseResponse courseResponse = courseMapper.toCourseResponse(
-                            courseRepository.getReferenceById(courseId)
-                    );
-
-                    return courseResponse;
-                })
+                .map(courseId -> courseMapper.toCourseResponse(
+                        courseRepository.getReferenceById(courseId)
+                ))
                 .collect(Collectors.toList());
     }
 
