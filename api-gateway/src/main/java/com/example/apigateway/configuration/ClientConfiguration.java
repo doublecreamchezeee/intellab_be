@@ -13,7 +13,7 @@ public class ClientConfiguration {
     @Bean
     WebClient webClient(){
         return WebClient.builder()
-                .baseUrl("http://localhost:8001/identity")
+                .baseUrl("http://host.docker.internal:8101/identity")
                 .build();
     }
 
