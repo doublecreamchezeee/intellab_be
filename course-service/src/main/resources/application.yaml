@@ -1,0 +1,22 @@
+
+
+spring:
+  application:
+    name: course-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/course-service #5433
+    username: postgres
+    password: 123456 #htht01225923050
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+server:
+  port: 8002
+  servlet:
+    context-path: /course

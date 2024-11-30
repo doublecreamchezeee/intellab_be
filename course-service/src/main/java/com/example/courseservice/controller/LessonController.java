@@ -1,9 +1,9 @@
 package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
-import com.example.courseservice.dto.request.LessonCreationRequest;
-import com.example.courseservice.dto.request.LessonUpdateRequest;
-import com.example.courseservice.dto.response.LessonResponse;
+import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
+import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.service.LessonService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/lessons")

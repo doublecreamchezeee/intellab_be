@@ -18,6 +18,7 @@ public enum ErrorCode {
     UNAUTHORIZED(501,"Dont have permission", HttpStatus.FORBIDDEN),
     COURSE_NOT_EXISTED(404, "Course not existed", HttpStatus.NOT_FOUND),
     LESSON_NOT_FOUND(404, "Lesson not found", HttpStatus.NOT_FOUND),
+    BAD_REQUEST(400, "Bad request", HttpStatus.BAD_REQUEST),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

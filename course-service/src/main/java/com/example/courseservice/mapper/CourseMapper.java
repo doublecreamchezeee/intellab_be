@@ -1,8 +1,9 @@
 package com.example.courseservice.mapper;
 
-import com.example.courseservice.dto.request.CourseCreationRequest;
-import com.example.courseservice.dto.request.CourseUpdateRequest;
-import com.example.courseservice.dto.response.CourseResponse;
+import com.example.courseservice.dto.request.course.CourseCreationRequest;
+import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.response.course.CourseResponse;
+import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.model.Course;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -26,4 +27,6 @@ public interface CourseMapper {
     void updateCourse(@MappingTarget Course course, CourseUpdateRequest request);
 
     CourseResponse toCourseResponse(Course course);
+
+    DetailCourseResponse toDetailCourseResponse(Course course, boolean isUserEnrolled);
 }

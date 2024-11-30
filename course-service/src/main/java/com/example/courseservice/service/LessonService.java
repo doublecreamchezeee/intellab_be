@@ -1,8 +1,8 @@
 package com.example.courseservice.service;
 
-import com.example.courseservice.dto.request.LessonCreationRequest;
-import com.example.courseservice.dto.request.LessonUpdateRequest;
-import com.example.courseservice.dto.response.LessonResponse;
+import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
+import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.LessonMapper;

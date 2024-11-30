@@ -1,15 +1,15 @@
-package com.example.courseservice.dto.request;
+package com.example.courseservice.dto.response.lesson;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import jakarta.validation.constraints.*;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonCreationRequest {
-    @Min(value = 0, message = "LESSON_ORDER_INVALID")
+public class LessonResponse {
+    String id;
     int lessonOrder;
     String name;
     String description;

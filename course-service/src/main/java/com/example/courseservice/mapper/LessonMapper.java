@@ -1,8 +1,8 @@
 package com.example.courseservice.mapper;
 
-import com.example.courseservice.dto.request.LessonCreationRequest;
-import com.example.courseservice.dto.request.LessonUpdateRequest;
-import com.example.courseservice.dto.response.LessonResponse;
+import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
+import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.model.Lesson;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
