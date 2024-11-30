@@ -2,9 +2,9 @@ spring:
   application:
     name: identity-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/course-service #5433
-    username: postgres
-    password: 123456 #htht01225923050
+    url: ${DB_URL} #5433
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD} #htht01225923050
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -22,5 +22,5 @@ server:
 com:
   example:
     firebase:
-      web-api-key: AIzaSyDsRZMGfdM_zZEUmaaBG1E2BqlIAOem5rM
+      web-api-key: ${WEB_API_KEY}
       private-key: private-key.json

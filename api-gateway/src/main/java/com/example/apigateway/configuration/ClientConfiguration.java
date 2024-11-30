@@ -12,8 +12,11 @@ public class ClientConfiguration {
 
     @Bean
     WebClient webClient(){
+        String hostname = DotenvConfig.get("HOST_NAME");
+        String port = DotenvConfig.get("IDENTITY_PORT");
+        String baseUrl = "http://" + hostname + ":" + port + "/identity";
         return WebClient.builder()
-                .baseUrl("http://localhost:8001/identity")
+                .baseUrl(baseUrl)
                 .build();
     }
 

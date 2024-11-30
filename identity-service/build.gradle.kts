@@ -22,6 +22,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("com.google.firebase:firebase-admin:8.1.0")
+    implementation("io.github.cdimascio:dotenv-java:3.0.0")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("com.nimbusds:nimbus-jose-jwt:9.15.2")
     implementation("org.apache.commons:commons-lang3:3.12.0")

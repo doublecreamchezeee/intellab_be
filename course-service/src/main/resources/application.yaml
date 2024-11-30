@@ -1,12 +1,10 @@
-
-
 spring:
   application:
     name: course-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/course-service #5433
-    username: postgres
-    password: 123456 #htht01225923050
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

@@ -26,6 +26,8 @@ FROM openjdk:17-jdk-slim
 # Set the working directory in the container
 WORKDIR /app
 
+COPY docker.env /app/.env
+
 # Copy the built JAR file from the Gradle build stage
 COPY --from=build /app/build/libs/*.jar app.jar
 

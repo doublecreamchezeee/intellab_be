@@ -36,3 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 identity-service/src/main/resources/private-key.json
+.env
+docker.env
