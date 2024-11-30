@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: identity-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/course-service #5433
+    username: postgres
+    password: 123456 #htht01225923050
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+server:
+  port: 8001
+  servlet:
+    context-path: /identity
+
+com:
+  example:
+    firebase:
+      web-api-key: AIzaSyDsRZMGfdM_zZEUmaaBG1E2BqlIAOem5rM
+      private-key: private-key.json
