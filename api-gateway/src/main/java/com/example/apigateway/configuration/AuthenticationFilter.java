@@ -12,6 +12,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -35,7 +36,20 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-            "/identity/auth/.*"
+            "/identity/auth/.*",
+    };
+
+    @NonFinal
+    private String[] exploredEndpoints = {
+            "/course/courses",
+            "/course/reviews",
+            "/course/lessons",
+            "/course/courses/search"
+    };
+
+    @NonFinal
+    private String[] restrictedEndpoints = {
+            "/course/enrollCourses/.*",
     };
 
     @Value("${app.api-prefix}")
@@ -44,7 +58,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if (isPublicEndpoint(exchange.getRequest())){
+        if (isPublicEndpoint(exchange.getRequest())) {
+            return chain.filter(exchange);
+        }
+
+        if (isExploredEndpoint(exchange.getRequest())) {
             return chain.filter(exchange);
         }
 
@@ -56,15 +74,32 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         return identityService.validateToken(token).flatMap(response -> {
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
+
                 return chain.filter(exchange);
             } else
                 return unauthenticated(exchange.getResponse());
         }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
     }
 
-    private boolean isPublicEndpoint(ServerHttpRequest request){
+    private boolean isPublicEndpoint(ServerHttpRequest request) {
         return Arrays.stream(publicEndpoints)
                 .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
+    }
+
+    private boolean isExploredEndpoint(ServerHttpRequest request) {
+        if (request.getMethod() == HttpMethod.GET) {
+            /*boolean isRestricted = Arrays.stream(restrictedEndpoints)
+                    .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
+
+            if (isRestricted) {
+                return false;
+            }*/
+
+            return Arrays.stream(exploredEndpoints)
+                    .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
+        }
+        return false;
+
     }
 
     @Override

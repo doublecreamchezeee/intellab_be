@@ -2,7 +2,7 @@ package com.example.courseservice.service;
 
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
-import com.example.courseservice.dto.response.course.CourseResponse;
+import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
@@ -31,8 +31,8 @@ public class CourseService {
     CourseMapper courseMapper;
     EnrollCourseRepository enrollCourseRepository;
 
-    public List<CourseResponse> getAllCourses() {
-        return courseRepository.findAll().stream().map(courseMapper::toCourseResponse).toList();
+    public List<CourseCreationResponse> getAllCourses() {
+        return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
     }
     public DetailCourseResponse getCourseById(String id, String userUid) {
         if (userUid != null) {
@@ -49,16 +49,16 @@ public class CourseService {
         courseRepository.deleteById(id);
     }
 
-    public CourseResponse createCourse(CourseCreationRequest request) {
+    public CourseCreationResponse createCourse(CourseCreationRequest request) {
         Course course = courseMapper.toCourse(request);
 
         course.setLessons(new ArrayList<>());
         course = courseRepository.save(course);
 
-        return courseMapper.toCourseResponse(course);
+        return courseMapper.toCourseCreationResponse(course);
     }
 
-    public CourseResponse updateCourse(String courseId, CourseUpdateRequest request) {
+    public CourseCreationResponse updateCourse(String courseId, CourseUpdateRequest request) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
@@ -68,12 +68,12 @@ public class CourseService {
         course.setLessons(lessons);*/
 
         course = courseRepository.save(course);
-        return courseMapper.toCourseResponse(course);
+        return courseMapper.toCourseCreationResponse(course);
     }
 
-    public List<CourseResponse> searchCourses(String keyword) {
+    public List<CourseCreationResponse> searchCourses(String keyword) {
         return courseRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
-                .stream().map(courseMapper::toCourseResponse).toList();
+                .stream().map(courseMapper::toCourseCreationResponse).toList();
     }
 
     public EnrollCourse enrollCourse(String userUid, String courseId) {
@@ -98,14 +98,14 @@ public class CourseService {
         return enrollCourseRepository.save(enrollCourse);
     }
 
-    public List<CourseResponse> getUserCourses(String userUid) {
+    public List<CourseCreationResponse> getUserCourses(String userUid) {
         EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
         if (enrollCourse == null || enrollCourse.getCourseIds().isEmpty()) {
             return Collections.emptyList();
         }
 
         return enrollCourse.getCourseIds().stream()
-                .map(courseId -> courseMapper.toCourseResponse(
+                .map(courseId -> courseMapper.toCourseCreationResponse(
                         courseRepository.getReferenceById(courseId)
                 ))
                 .collect(Collectors.toList());
