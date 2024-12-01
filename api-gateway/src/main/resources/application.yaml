@@ -15,6 +15,7 @@ spring:
               - "http://${HOST_NAME}:${API_GATEWAY_PORT}"
               - "http://${HOST_NAME}:${IDENTITY_PORT}"
               - "http://${HOST_NAME}:${COURSE_PORT}"
+              - "http://${HOST_NAME}:${3000}"
             allowedMethods:
               - GET
               - POST
