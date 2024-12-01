@@ -44,6 +44,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses",
             "/course/reviews",
             "/course/lessons",
+            "/course/courses/search"
     };
 
     @NonFinal
