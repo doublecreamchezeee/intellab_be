@@ -8,12 +8,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CourseResponse {
+public class CourseCreationResponse {
     String id;
     String name;
     String description;
     String level;
-
-    int numberOfReviews;
-    float averageRating;
 }

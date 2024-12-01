@@ -2,6 +2,7 @@ package com.example.courseservice.mapper;
 
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.model.Course;
@@ -24,9 +25,12 @@ public interface CourseMapper {
     Course toCourse(CourseUpdateRequest request);
 
     @Mapping(target = "lessons", ignore = true)
+    @Mapping(target = "reviews", ignore = true)
     void updateCourse(@MappingTarget Course course, CourseUpdateRequest request);
 
-    CourseResponse toCourseResponse(Course course);
+    CourseCreationResponse toCourseCreationResponse(Course course);
 
     DetailCourseResponse toDetailCourseResponse(Course course, boolean isUserEnrolled);
+
+    CourseResponse toCourseResponse(Course course, int numberOfReviews, float averageRating);
 }

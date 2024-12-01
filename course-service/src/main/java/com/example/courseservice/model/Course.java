@@ -24,4 +24,7 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Lesson> lessons = new ArrayList<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Review> reviews = new ArrayList<>();
 }
