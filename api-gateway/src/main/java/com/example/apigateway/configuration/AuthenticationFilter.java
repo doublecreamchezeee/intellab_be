@@ -41,9 +41,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] exploredEndpoints = {
-            "/course/courses/.*",
-            "/course/reviews/.*",
-            "/course/lessons/.*",
+            "/course/courses",
+            "/course/reviews",
+            "/course/lessons",
     };
 
     @NonFinal
