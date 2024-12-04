@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    image: doublecreamcheze/intellab_ops:api-gateway-latest  # Sửa lại tên image
+    ports:
+      - "8100:8000"
+
+  identity-service:
+    image: doublecreamcheze/intellab_ops:identity-service-latest  # Sửa lại tên image
+    ports:
+      - "8101:8001"
+
+  course-service:
+    image: doublecreamcheze/intellab_ops:course-service-latest  # Sửa lại tên image
+    ports:
+      - "8102:8002"  # Expose course service port
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://course-db:5432/course-service
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+    depends_on:
+      - course-db  # Ensure the database is up before course service
+
+  # Database service for course-service
+  course-db:
+    image: postgres:latest  # Official PostgreSQL image
+    container_name: course-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: course-service
+    ports:
+      - "5433:5432"  # Expose port for connecting to the database
