@@ -11,6 +11,7 @@ import com.example.courseservice.model.Course;
 import com.example.courseservice.model.EnrollCourse;
 import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.EnrollCourseRepository;
+import com.example.courseservice.repository.ReviewRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,6 +31,7 @@ public class CourseService {
     CourseRepository courseRepository;
     CourseMapper courseMapper;
     EnrollCourseRepository enrollCourseRepository;
+    ReviewRepository reviewRepository;
 
     public List<CourseCreationResponse> getAllCourses() {
         return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
