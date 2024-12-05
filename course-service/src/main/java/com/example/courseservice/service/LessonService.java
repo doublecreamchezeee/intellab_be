@@ -48,7 +48,7 @@ public class LessonService {
     }
 
     public List<LessonResponse> getLessonsByCourseId(String courseId) {
-        return lessonRepository.findAllByCourseId(UUID.fromString(courseId)).stream()
+        return lessonRepository.findAllByCourseCourseId(UUID.fromString(courseId)).stream()
                 .map(lessonMapper::toLessonResponse).toList();
     }
 

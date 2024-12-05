@@ -17,9 +17,12 @@ import java.util.UUID;
 @Table(name = "\"course\"")
 public class Course {
     @Id
+    @Column(name = "course_id")
     @GeneratedValue
-    UUID course_id;
-    String course_name;
+    UUID courseId;
+
+    @Column(name = "course_name")
+    String courseName;
     String description;
     String level;
 
@@ -32,4 +35,7 @@ public class Course {
     @OneToOne
     @JoinColumn(name = "topic_id", nullable = false)
     Topic topic;
+
+    @OneToMany(mappedBy = "enrollId.course", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<UserCourses> enrollCourses = new ArrayList<>();
 }

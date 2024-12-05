@@ -21,7 +21,7 @@ public class EnrollCourse implements Serializable {
     UUID userUid;
 
     @ManyToOne
-    @JoinColumn(name = "Course_Id",nullable = false)
+    @JoinColumn(name = "course_id",nullable = false)
     Course course;
 
 }

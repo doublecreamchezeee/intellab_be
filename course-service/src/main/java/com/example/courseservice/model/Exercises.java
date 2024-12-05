@@ -23,7 +23,7 @@ public class Exercises {
     @Lob
     String description;
 
-    @OneToOne(mappedBy = "exercises")
+    @OneToOne(mappedBy = "exercise")
     Lesson lesson;
 
 

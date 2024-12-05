@@ -15,5 +15,5 @@ public class ReviewCreationResponse {
     int rating;
     String comment;
     String userUid;
-    UUID course_id;
+    UUID courseId;
 }

@@ -10,7 +10,7 @@ import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.Course;
 import com.example.courseservice.model.EnrollCourse;
 import com.example.courseservice.repository.CourseRepository;
-import com.example.courseservice.repository.EnrollCourseRepository;
+//import com.example.courseservice.repository.EnrollCourseRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class CourseService {
     CourseRepository courseRepository;
     CourseMapper courseMapper;
-    EnrollCourseRepository enrollCourseRepository;
+    //EnrollCourseRepository enrollCourseRepository;
 
     public List<CourseCreationResponse> getAllCourses() {
         return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
@@ -73,7 +73,7 @@ public class CourseService {
     }
 
     public List<CourseCreationResponse> searchCourses(String keyword) {
-        return courseRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
+        return courseRepository.findByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
                 .stream().map(courseMapper::toCourseCreationResponse).toList();
     }
 

@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, UUID> {
-    List<Lesson> findAllByCourseId(UUID courseId);
-    void deleteAllByCourseId(UUID courseId);
+    List<Lesson> findAllByCourseCourseId(UUID courseId);
+    void deleteAllByCourseCourseId(UUID courseId);
 }

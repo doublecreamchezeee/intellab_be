@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CourseCreationResponse {
-    UUID course_id;
+    UUID courseId;
     String course_name;
     String description;
     String level;

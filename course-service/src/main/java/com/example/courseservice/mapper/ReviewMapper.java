@@ -21,6 +21,6 @@ public interface ReviewMapper {
     @Mapping(target = "rating", source = "rating")
     @Mapping(target = "comment", source = "comment")
     @Mapping(target = "userUid", source = "userUid")
-    @Mapping(target = "course_id", source = "course.course_id")
+    @Mapping(target = "courseId", source = "course.courseId")
     ReviewCreationResponse toReviewCreationResponse(Review review);
 }

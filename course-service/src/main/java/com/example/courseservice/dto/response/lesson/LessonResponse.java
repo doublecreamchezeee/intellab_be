@@ -16,5 +16,5 @@ public class LessonResponse {
     String lesson_name;
     String description;
     String content;
-    UUID course_id;
+    UUID courseId;
 }

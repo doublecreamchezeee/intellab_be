@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CourseUpdateRequest {
-    String course_name;
+    String courseName;
     String description;
     String level;
 }

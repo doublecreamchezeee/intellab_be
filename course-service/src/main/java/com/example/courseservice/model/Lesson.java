@@ -15,8 +15,9 @@ import java.util.UUID;
 @Table(name = "\"lesson\"")
 public class Lesson {
     @Id
+    @Column(name = "lesson_id")
     @GeneratedValue
-    UUID lesson_id;
+    UUID lessonId;
     String lesson_name;
     String description;
     String content;
@@ -27,7 +28,7 @@ public class Lesson {
     Course course;
 
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "exercise_id")
     Exercises exercise;
 }

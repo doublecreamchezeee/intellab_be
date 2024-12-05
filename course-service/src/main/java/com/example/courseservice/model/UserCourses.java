@@ -1,6 +1,7 @@
 package com.example.courseservice.model;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -18,9 +19,10 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "\"user_courses\"")
-public class User_courses {
+public class UserCourses {
     @EmbeddedId
-    EnrollCourse EnrollID;
+    EnrollCourse enrollId;
+    @Column(name = "progress_percent")
     Float progress_percent;
     String status;
 
