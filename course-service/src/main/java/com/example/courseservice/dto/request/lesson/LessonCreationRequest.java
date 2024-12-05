@@ -3,6 +3,9 @@ package com.example.courseservice.dto.request.lesson;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import jakarta.validation.constraints.*;
+
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -11,8 +14,8 @@ import jakarta.validation.constraints.*;
 public class LessonCreationRequest {
     @Min(value = 0, message = "LESSON_ORDER_INVALID")
     int lessonOrder;
-    String name;
+    String course_name;
     String description;
     String content;
-    String courseId;
+    UUID course_id;
 }

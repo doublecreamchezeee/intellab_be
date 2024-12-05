@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -16,9 +17,9 @@ import java.util.List;
 @Table(name = "\"course\"")
 public class Course {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
-    String name;
+    @GeneratedValue
+    UUID course_id;
+    String course_name;
     String description;
     String level;
 
@@ -27,4 +28,8 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Review> reviews = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "topic_id", nullable = false)
+    Topic topic;
 }

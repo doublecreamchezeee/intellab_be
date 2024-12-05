@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/courses")
@@ -42,12 +43,12 @@ public class CourseController {
                 .build();
     }
 
-    @GetMapping("/{courseId}")
-    ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") String courseId, @RequestParam(required = false) String userUid) {
-        return ApiResponse.<DetailCourseResponse>builder()
-                .result(courseService.getCourseById(courseId, userUid))
-                .build();
-    }
+//    @GetMapping("/{courseId}")
+//    ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId, @RequestParam(required = false) UUID userUid) {
+//        return ApiResponse.<DetailCourseResponse>builder()
+//                .result(courseService.getCourseById(courseId, userUid))
+//                .build();
+//    }
 
     @GetMapping
     ApiResponse<List<CourseCreationResponse>> getAllCourse() {
@@ -57,7 +58,7 @@ public class CourseController {
     }
 
     @DeleteMapping("/{courseId}")
-    ApiResponse<String> deleteCourseById(@PathVariable("courseId") String courseId) {
+    ApiResponse<String> deleteCourseById(@PathVariable("courseId") UUID courseId) {
         courseService.deleteCourseById(courseId);
         return ApiResponse.<String>builder()
                 .result("Course has been deleted")
@@ -65,7 +66,7 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}")
-    ApiResponse<CourseCreationResponse> updateCourse(@PathVariable("courseId") String courseId, @RequestBody CourseUpdateRequest request) {
+    ApiResponse<CourseCreationResponse> updateCourse(@PathVariable("courseId") UUID courseId, @RequestBody CourseUpdateRequest request) {
         return ApiResponse.<CourseCreationResponse>builder()
                 .result(courseService.updateCourse(courseId, request))
                 .build();
@@ -78,18 +79,18 @@ public class CourseController {
                 .build();
     }
 
-    @PostMapping("/enroll")
-    public ApiResponse<EnrollCourse> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
+//    @PostMapping("/enroll")
+//    public ApiResponse<EnrollCourse> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
+//
+//        return ApiResponse.<EnrollCourse>builder()
+//                .result(courseService.enrollCourse(request.getUserUid(), request.getCourse_id()))
+//                .build();
+//    }
 
-        return ApiResponse.<EnrollCourse>builder()
-                .result(courseService.enrollCourse(request.getUserUid(), request.getCourseId()))
-                .build();
-    }
-
-    @GetMapping("/enrollCourses/{userUid}/")
-    public ApiResponse<List<CourseCreationResponse>> getUserCourses(@PathVariable("userUid") String userUid) {
-        return ApiResponse.<List<CourseCreationResponse>>builder()
-                .result(courseService.getUserCourses(userUid))
-                .build();
-    }
+//    @GetMapping("/enrollCourses/{userUid}/")
+//    public ApiResponse<List<CourseCreationResponse>> getUserCourses(@PathVariable("userUid") UUID userUid) {
+//        return ApiResponse.<List<CourseCreationResponse>>builder()
+//                .result(courseService.getUserCourses(userUid))
+//                .build();
+//    }
 }

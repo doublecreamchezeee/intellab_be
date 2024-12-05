@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class LessonController {
     LessonService lessonService;
 
-    @PostMapping
-    ApiResponse<LessonResponse> createLesson(@RequestBody @Valid LessonCreationRequest request) {
-        return ApiResponse.<LessonResponse>builder()
-                .result(lessonService.createLesson(request))
-                .build();
-    }
+//    @PostMapping
+//    ApiResponse<LessonResponse> createLesson(@RequestBody @Valid LessonCreationRequest request) {
+//        return ApiResponse.<LessonResponse>builder()
+//                .result(lessonService.createLesson(request))
+//                .build();
+//    }
 
     @GetMapping("/{lessonId}")
     ApiResponse<LessonResponse> getLessonById(@PathVariable("lessonId") String lessonId) {

@@ -1,5 +1,7 @@
 package com.example.courseservice.model;
 
+
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,19 +14,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "\"review\"")
-public class Review {
+@Table(name = "\"exercises\"")
+public class Exercises {
     @Id
     @GeneratedValue
-    UUID review_id;
+    UUID exercise_id;
+    String exercise_name;
+    @Lob
+    String description;
 
-    int rating;
-    String comment;
+    @OneToOne(mappedBy = "exercises")
+    Lesson lesson;
 
-    @JoinColumn(name = "user_id", nullable = false)
-    String userUid;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false)
-    Course course;
+
 }

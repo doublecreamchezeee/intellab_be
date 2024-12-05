@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,39 +28,39 @@ public class LessonService {
     LessonMapper lessonMapper;
     CourseRepository courseRepository;
 
-    public LessonResponse createLesson(LessonCreationRequest request) {
-        if (!courseRepository.existsById(request.getCourseId())) {
-            throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
-        }
-
-        Lesson lesson = lessonMapper.toLesson(request);
-        Course course = courseRepository.findById(request.getCourseId()).get();
-        lesson.setCourse(course);
-
-        lesson = lessonRepository.save(lesson);
-        return lessonMapper.toLessonResponse(lesson);
-    }
+//    public LessonResponse createLesson(LessonCreationRequest request) {
+//        if (!courseRepository.existsById(request.getCourse_id())) {
+//            throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
+//        }
+//
+//        Lesson lesson = lessonMapper.toLesson(request);
+//        Course course = courseRepository.findById(request.getCourse_id()).get();
+//        lesson.setCourse(course);
+//
+//        lesson = lessonRepository.save(lesson);
+//        return lessonMapper.toLessonResponse(lesson);
+//    }
 
     public LessonResponse getLessonById(String lessonId) {
-        Lesson lesson = lessonRepository.findById(lessonId)
+        Lesson lesson = lessonRepository.findById(UUID.fromString(lessonId))
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
         return lessonMapper.toLessonResponse(lesson);
     }
 
     public List<LessonResponse> getLessonsByCourseId(String courseId) {
-        return lessonRepository.findAllByCourseId(courseId).stream()
+        return lessonRepository.findAllByCourseId(UUID.fromString(courseId)).stream()
                 .map(lessonMapper::toLessonResponse).toList();
     }
 
     public void deleteLesson(String lessonId) {
-        lessonRepository.deleteById(lessonId);
+        lessonRepository.deleteById(UUID.fromString(lessonId));
     }
 
     public LessonResponse updateLesson(String lessonId, LessonUpdateRequest request) {
-        Course course = courseRepository.findById(request.getCourseId())
+        Course course = courseRepository.findById(request.getCourse_id())
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-        Lesson lesson = lessonRepository.findById(lessonId)
+        Lesson lesson = lessonRepository.findById(UUID.fromString(lessonId))
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
 
         lessonMapper.updateLesson(lesson, request);

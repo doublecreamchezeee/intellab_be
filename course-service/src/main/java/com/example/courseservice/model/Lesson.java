@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,14 +15,19 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "\"lesson\"")
 public class Lesson {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
-    String name;
+    @GeneratedValue
+    UUID lesson_id;
+    String lesson_name;
     String description;
     String content;
     int lessonOrder;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    Course course;
+
+
+    @OneToOne
+    @JoinColumn(name = "exercise_id")
+    Exercises exercise;
 }

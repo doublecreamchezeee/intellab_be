@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,18 +35,18 @@ public class CourseService {
     public List<CourseCreationResponse> getAllCourses() {
         return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
     }
-    public DetailCourseResponse getCourseById(String id, String userUid) {
-        if (userUid != null) {
-            EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
-            if (enrollCourse != null && enrollCourse.getCourseIds().contains(id)) {
-                return courseMapper.toDetailCourseResponse(courseRepository.findById(id).orElse(null), true);
-            }
-            //return null;
-        }
-        return courseMapper.toDetailCourseResponse(courseRepository.findById(id).orElse(null), false);
-    }
+//    public DetailCourseResponse getCourseById(UUID id, UUID userUid) {
+//        if (userUid != null) {
+//            EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
+//            if (enrollCourse != null && enrollCourse.getCourseIds().contains(id)) {
+//                return courseMapper.toDetailCourseResponse(courseRepository.findById(id).orElse(null), true);
+//            }
+//            //return null;
+//        }
+//        return courseMapper.toDetailCourseResponse(courseRepository.findById(id).orElse(null), false);
+//    }
 
-    public void deleteCourseById(String id) {
+    public void deleteCourseById(UUID id) {
         courseRepository.deleteById(id);
     }
 
@@ -58,7 +59,7 @@ public class CourseService {
         return courseMapper.toCourseCreationResponse(course);
     }
 
-    public CourseCreationResponse updateCourse(String courseId, CourseUpdateRequest request) {
+    public CourseCreationResponse updateCourse(UUID courseId, CourseUpdateRequest request) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
@@ -76,39 +77,39 @@ public class CourseService {
                 .stream().map(courseMapper::toCourseCreationResponse).toList();
     }
 
-    public EnrollCourse enrollCourse(String userUid, String courseId) {
-        if (userUid == null || courseId == null) {
-            throw new AppException(ErrorCode.BAD_REQUEST);
-        }
-
-        EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
-
-        // Ensure courseIds is initialized to avoid NullPointerException
-        if (enrollCourse == null) {
-            enrollCourse = new EnrollCourse();
-            enrollCourse.setUserUid(userUid);
-            enrollCourse.setCourseIds(Collections.singletonList(courseId)); // Initialize with courseId
-        } else {
-            if (enrollCourse.getCourseIds() == null) {
-                enrollCourse.setCourseIds(new ArrayList<>());  // Initialize the list if it's null
-            }
-            enrollCourse.getCourseIds().add(courseId); // Add the courseId to the list
-        }
-
-        return enrollCourseRepository.save(enrollCourse);
-    }
-
-    public List<CourseCreationResponse> getUserCourses(String userUid) {
-        EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
-        if (enrollCourse == null || enrollCourse.getCourseIds().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return enrollCourse.getCourseIds().stream()
-                .map(courseId -> courseMapper.toCourseCreationResponse(
-                        courseRepository.getReferenceById(courseId)
-                ))
-                .collect(Collectors.toList());
-    }
+//    public EnrollCourse enrollCourse(UUID userUid, UUID courseId) {
+//        if (userUid == null || courseId == null) {
+//            throw new AppException(ErrorCode.BAD_REQUEST);
+//        }
+//
+//        EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
+//
+//        // Ensure courseIds is initialized to avoid NullPointerException
+//        if (enrollCourse == null) {
+//            enrollCourse = new EnrollCourse();
+//            enrollCourse.setUserUid(userUid);
+//            enrollCourse.setCourseIds(Collections.singletonList(courseId)); // Initialize with courseId
+//        } else {
+//            if (enrollCourse.getCourseIds() == null) {
+//                enrollCourse.setCourseIds(new ArrayList<>());  // Initialize the list if it's null
+//            }
+//            enrollCourse.getCourseIds().add(courseId); // Add the courseId to the list
+//        }
+//
+//        return enrollCourseRepository.save(enrollCourse);
+//    }
+//
+//    public List<CourseCreationResponse> getUserCourses(UUID userUid) {
+//        EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
+//        if (enrollCourse == null || enrollCourse.getCourseIds().isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        return enrollCourse.getCourseIds().stream()
+//                .map(courseId -> courseMapper.toCourseCreationResponse(
+//                        courseRepository.getReferenceById(courseId)
+//                ))
+//                .collect(Collectors.toList());
+//    }
 
 }

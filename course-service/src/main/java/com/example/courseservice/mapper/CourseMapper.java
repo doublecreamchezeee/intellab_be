@@ -12,14 +12,14 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface CourseMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "name", source = "name")
+    @Mapping(target = "course_id", ignore = true)
+    @Mapping(target = "course_name", source = "course_name")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "level", source = "level")
     Course toCourse(CourseCreationRequest request);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "name", source = "name")
+//    @Mapping(target = "course_id", ignore = true)
+    @Mapping(target = "course_name", source = "course_name")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "level", source = "level")
     Course toCourse(CourseUpdateRequest request);

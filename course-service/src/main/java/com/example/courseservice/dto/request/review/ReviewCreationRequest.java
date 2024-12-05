@@ -3,6 +3,8 @@ package com.example.courseservice.dto.request.review;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -11,5 +13,5 @@ import lombok.experimental.FieldDefaults;
 public class ReviewCreationRequest {
     int rating;
     String comment;
-    String userUid;
+    UUID userUid;
 }
