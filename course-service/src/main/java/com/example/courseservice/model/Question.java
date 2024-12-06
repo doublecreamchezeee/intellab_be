@@ -26,11 +26,16 @@ public class Question {
     UUID question_id;
 
     @Column(name = "question_content", columnDefinition = "TEXT")
-            String questionContent;
+    String questionContent;
 
+    // enable, disable, pending
+    @Column(columnDefinition = "VARCHAR(10)")
     String status;
+
     String correct_answer;
-    String question_type;
+
+    // S: single-choice; M: multiple-choice
+    Character question_type;
 
     @CreationTimestamp
     Instant created_at;

@@ -20,6 +20,8 @@ public class Topic {
     @GeneratedValue
     UUID topic_id;
 
+    String title;
+
     @Lob
     @Column(columnDefinition = "TEXT")
     String content;
@@ -28,6 +30,7 @@ public class Topic {
 
     //Ràng buộc miền giá trị dưới DB
     //('Public', 'Unlisted', 'Private')
+    @Column(columnDefinition = "VARCHAR(10)")
     String post_reach;
 
 

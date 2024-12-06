@@ -27,6 +27,7 @@ public class LearningLesson {
     Integer lesson_order;
 
     //có ràng buộc miền giá trị trong db
+    @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
     @UpdateTimestamp

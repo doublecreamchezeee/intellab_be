@@ -26,7 +26,10 @@ public class Problem {
     @Column(columnDefinition = "TEXT")
     String description;
 
+    @Column(columnDefinition = "VARCHAR(20)")
     String problem_level;
+
+    @Column(columnDefinition = "VARCHAR(50)")
     String category;
     Integer score;
 

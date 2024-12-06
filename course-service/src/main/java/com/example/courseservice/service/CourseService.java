@@ -3,12 +3,10 @@ package com.example.courseservice.service;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
-import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.Course;
-import com.example.courseservice.model.EnrollCourse;
 import com.example.courseservice.repository.CourseRepository;
 //import com.example.courseservice.repository.EnrollCourseRepository;
 import lombok.AccessLevel;
@@ -18,10 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

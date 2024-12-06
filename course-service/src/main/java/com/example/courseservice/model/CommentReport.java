@@ -21,6 +21,7 @@ public class CommentReport {
     @Column(columnDefinition = "TEXT")
     String content;
 
+    @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
     @ManyToOne

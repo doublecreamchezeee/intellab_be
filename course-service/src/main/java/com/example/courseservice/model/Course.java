@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "\"course\"")
+@Table(name = "\"courses\"")
 public class Course {
     @Id
     @Column(name = "course_id")
@@ -27,12 +27,15 @@ public class Course {
 
     @Column(columnDefinition = "TEXT")
     String description;
+
+    // beginner, intermediate, advance
+    @Column(columnDefinition = "VARCHAR(20)")
     String level;
 
     @Column(columnDefinition = "DECIMAL(11,2)")
     Float price;
 
-    @Column(name = "unit_price")
+    @Column(name = "unit_price", columnDefinition = "VARCHAR(10)")
     String unitPrice;
 
     @Column(name = "course_logo", columnDefinition = "TEXT")

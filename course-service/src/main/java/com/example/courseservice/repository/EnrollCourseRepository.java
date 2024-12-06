@@ -1,6 +1,6 @@
 //package com.example.courseservice.repository;
 //
-//import com.example.courseservice.model.EnrollCourse;
+//import com.example.courseservice.model.compositeKey.EnrollCourse;
 //import org.springframework.data.jpa.repository.JpaRepository;
 //import org.springframework.stereotype.Repository;
 //

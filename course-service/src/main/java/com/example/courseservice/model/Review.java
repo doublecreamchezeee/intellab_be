@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "\"review\"")
+@Table(name = "\"reviews\"")
 public class Review {
     @Id
     @GeneratedValue

@@ -27,6 +27,7 @@ public class ProblemSubmission {
     @Column(columnDefinition = "TEXT")
     String code;
 
+    @Column(columnDefinition = "VARCHAR(50)")
     String programming_language;
     Integer score_achieved;
 

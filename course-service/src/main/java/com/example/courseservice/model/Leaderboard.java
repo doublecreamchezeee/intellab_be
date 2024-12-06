@@ -17,11 +17,12 @@ import java.util.UUID;
 public class Leaderboard {
 
     @Id
-
     @JoinColumn(name = "user_id")
     UUID user_id;
 
     Integer rank;
+
+    @Column(columnDefinition = "VARCHAR(20)")
     String hierarchy;
     Long Score;
 

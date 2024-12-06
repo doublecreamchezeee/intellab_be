@@ -1,6 +1,7 @@
 package com.example.courseservice.model;
 
 
+import com.example.courseservice.model.compositeKey.EnrollCourse;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +28,9 @@ public class UserCourses {
 
     @Column(name = "progress_percent", columnDefinition = "DECIMAL(5,2)")
     Float progress_percent;
+
+    // Done, Learning, Expired
+    @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
     @UpdateTimestamp

@@ -22,6 +22,8 @@ public class TestCase_Output {
     @Column(columnDefinition = "TEXT")
     String submission_output;
 
+    // success, failed, pending
+    @Column(columnDefinition = "VARCHAR(10)")
     String result_status;
 
 

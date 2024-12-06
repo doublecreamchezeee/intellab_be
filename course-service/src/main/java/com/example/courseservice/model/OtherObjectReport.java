@@ -23,6 +23,8 @@ public class OtherObjectReport {
     @Column(columnDefinition = "TEXT")
     String content;
 
+    // Success, Pending, Failed
+    @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
     @ManyToOne

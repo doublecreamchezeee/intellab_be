@@ -22,7 +22,9 @@ public class ReportOption {
     UUID report_option_id;
 
     // có ràng buộc miền giá trị
+    @Column(columnDefinition = "VARCHAR(20)")
     String type;
+
 
     String report_reason;
     String handle_action;

@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "\"lesson\"")
+@Table(name = "\"lessons\"")
 public class Lesson {
     @Id
     @Column(name = "lesson_id")

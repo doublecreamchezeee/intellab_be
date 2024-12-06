@@ -23,12 +23,13 @@ public class Medal {
     @GeneratedValue
     UUID medal_id;
 
-    @Column(name = "medal_name")
+    @Column(name = "medal_name", nullable = false)
     String name;
 
     @Column(columnDefinition = "TEXT")
     String image;
 
+    @Column(columnDefinition = "VARCHAR(20)")
     String type;
     Integer bonus_score;
 
