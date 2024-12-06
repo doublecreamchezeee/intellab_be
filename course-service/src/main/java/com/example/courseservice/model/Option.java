@@ -1,13 +1,10 @@
 package com.example.courseservice.model;
 
 
+import com.example.courseservice.model.compositeKey.OptionID;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Builder
@@ -19,6 +16,12 @@ import java.util.List;
 public class Option {
     @EmbeddedId
     OptionID option_id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("question_id")
+    @JoinColumn(name = "question_id", nullable = false)
+    Question question;
+
     String content;
 }
 

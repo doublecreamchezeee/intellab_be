@@ -20,9 +20,8 @@ public class EnrollCourse implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     UUID userUid;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id",nullable = false)
-    Course course;
+    UUID course_id;
+
 
 }
 

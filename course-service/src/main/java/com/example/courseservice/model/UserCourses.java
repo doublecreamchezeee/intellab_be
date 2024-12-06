@@ -1,10 +1,7 @@
 package com.example.courseservice.model;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,7 +19,13 @@ import java.time.Instant;
 public class UserCourses {
     @EmbeddedId
     EnrollCourse enrollId;
-    @Column(name = "progress_percent")
+
+    @ManyToOne
+    @MapsId("course_id")
+    @JoinColumn(name = "course_id",nullable = false)
+    Course course;
+
+    @Column(name = "progress_percent", columnDefinition = "DECIMAL(5,2)")
     Float progress_percent;
     String status;
 

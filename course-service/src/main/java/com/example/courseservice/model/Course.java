@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,8 +24,19 @@ public class Course {
 
     @Column(name = "course_name")
     String courseName;
+
+    @Column(columnDefinition = "TEXT")
     String description;
     String level;
+
+    @Column(columnDefinition = "DECIMAL(11,2)")
+    Float price;
+
+    @Column(name = "unit_price")
+    String unitPrice;
+
+    @Column(name = "course_logo", columnDefinition = "TEXT")
+    String courseLogo;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Lesson> lessons = new ArrayList<>();
@@ -32,10 +44,14 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Review> reviews = new ArrayList<>();
 
+
+    @JoinColumn(name = "admin_id")
+    UUID userUid;
+
     @OneToOne
     @JoinColumn(name = "topic_id", nullable = false)
     Topic topic;
 
-    @OneToMany(mappedBy = "enrollId.course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     List<UserCourses> enrollCourses = new ArrayList<>();
 }

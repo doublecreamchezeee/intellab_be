@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -15,16 +17,30 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "\"exercises\"")
-public class Exercises {
+public class Exercise {
     @Id
     @GeneratedValue
     UUID exercise_id;
     String exercise_name;
-    @Lob
+
+    @Column(columnDefinition = "TEXT")
     String description;
 
     @OneToOne(mappedBy = "exercise")
     Lesson lesson;
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "question_list",
+            joinColumns = @JoinColumn(name = "exercise_id"),
+            inverseJoinColumns = @JoinColumn(name = "question_id")
+    )
+    Set<Question> questionsList;
+
+    @OneToMany(mappedBy = "exercise")
+    List<Assignment> assignments;
+
 
 
 

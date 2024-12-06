@@ -9,6 +9,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -23,6 +25,9 @@ public class Question {
     @GeneratedValue
     UUID question_id;
 
+    @Column(name = "question_content", columnDefinition = "TEXT")
+            String questionContent;
+
     String status;
     String correct_answer;
     String question_type;
@@ -32,6 +37,16 @@ public class Question {
 
     @UpdateTimestamp
     Instant updated_at;
+
+    @OneToMany(mappedBy = "question")
+    Set<Option> options;
+
+    @ManyToMany(mappedBy = "questionsList")
+    Set<Exercise> exercises;
+
+    @OneToMany(mappedBy = "question")
+    List<AssignmentDetail> assignmentDetails;
+
 }
 
 //CREATE TABLE Questions (

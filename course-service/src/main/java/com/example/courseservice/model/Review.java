@@ -19,6 +19,8 @@ public class Review {
     UUID review_id;
 
     int rating;
+
+    @Column(columnDefinition = "TEXT")
     String comment;
 
     @JoinColumn(name = "user_id", nullable = false)

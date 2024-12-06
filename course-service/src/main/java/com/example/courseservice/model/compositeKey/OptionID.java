@@ -1,13 +1,11 @@
-package com.example.courseservice.model;
+package com.example.courseservice.model.compositeKey;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,16 +15,11 @@ import java.io.Serializable;
 @Embeddable
 public class OptionID implements Serializable {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id", referencedColumnName = "question_id", nullable = false)
-    Question question;
-
+    UUID question_id;
     Integer option_order;
-    public OptionID(int Option_Order) {
 
+    public OptionID(UUID question_id, int Option_Order) {
+        this.question_id = question_id;
         this.option_order = Option_Order;
     }
-
-
-
 }

@@ -1,8 +1,8 @@
 spring:
   application:
-    name: identity-service
+    name: course-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/course-service
+    url: jdbc:postgresql://localhost:5433/course-service
     username: postgres
     password: 123456
     driver-class-name: org.postgresql.Driver
@@ -16,7 +16,7 @@ spring:
 server:
   port: 8002
   servlet:
-    context-path: /identity
+    context-path: /course
 
 com:
   example:

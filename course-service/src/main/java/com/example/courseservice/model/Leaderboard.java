@@ -1,0 +1,34 @@
+package com.example.courseservice.model;
+
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "\"leaderboard\"")
+public class Leaderboard {
+
+    @Id
+
+    @JoinColumn(name = "user_id")
+    UUID user_id;
+
+    Integer rank;
+    String hierarchy;
+    Long Score;
+
+    @ManyToOne
+    @JoinColumn(name = "medal_id")
+    Medal medal;
+
+
+
+}
