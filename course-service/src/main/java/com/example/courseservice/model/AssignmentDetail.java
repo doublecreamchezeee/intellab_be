@@ -26,11 +26,11 @@ public class AssignmentDetail {
     @Column(columnDefinition = "VARCHAR(20)")
     String answer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id",nullable = false)
     Question question;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("assignment_id")
     @JoinColumn(name = "assignment_id")
     Assignment assignment;

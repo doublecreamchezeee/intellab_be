@@ -37,15 +37,15 @@ public class Topic {
     @JoinColumn(name = "user_id")
     String userUid = null;
 
-    @OneToOne(mappedBy = "topic")
+    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
     Course course;
 
-    @OneToOne(mappedBy = "topic")
+    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
     Problem problem;
 
     @OneToMany(mappedBy = "topic")
     List<Comment> comments;
 
-    @OneToMany(mappedBy = "destination")
+    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
     List<OtherObjectReport> otherObjectReports;
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.awt.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -51,10 +51,10 @@ public class Course {
     @JoinColumn(name = "admin_id")
     UUID userUid;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "topic_id", nullable = false)
     Topic topic;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<UserCourses> enrollCourses = new ArrayList<>();
 }

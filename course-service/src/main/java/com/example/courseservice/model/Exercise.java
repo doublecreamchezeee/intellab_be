@@ -30,7 +30,7 @@ public class Exercise {
     Lesson lesson;
 
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "question_list",
             joinColumns = @JoinColumn(name = "exercise_id"),
@@ -38,7 +38,7 @@ public class Exercise {
     )
     Set<Question> questionsList;
 
-    @OneToMany(mappedBy = "exercise")
+    @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY)
     List<Assignment> assignments;
 
 

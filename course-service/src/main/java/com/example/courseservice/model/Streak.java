@@ -32,7 +32,7 @@ public class Streak {
     @UpdateTimestamp
     Instant last_access;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medal_id")
     Medal medal;
 

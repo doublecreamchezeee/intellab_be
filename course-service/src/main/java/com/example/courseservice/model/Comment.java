@@ -42,14 +42,14 @@ public class Comment {
     @JoinColumn(name = "owner_id")
     UUID user_id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     Comment parent_comment;
 
-    @OneToMany(mappedBy = "parent_comment")
+    @OneToMany(mappedBy = "parent_comment", fetch = FetchType.LAZY, orphanRemoval = true)
     List<Comment> comments;
 
-    @OneToMany(mappedBy = "destination")
+    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
     List<CommentReport> comment_reports;
 
 }

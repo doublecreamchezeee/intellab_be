@@ -32,7 +32,7 @@ public class TestCase_Output {
     @JoinColumn(name = "testcase_id")
     TestCase testcase;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("submission_id")
     @JoinColumn(name = "submission_id")
     ProblemSubmission submission;

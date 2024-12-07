@@ -39,22 +39,20 @@ public class Problem {
     @OneToMany(mappedBy = "problem")
     List<Lesson> lessons;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "topic_id")
     Topic topic;
 
-    @OneToMany(mappedBy = "problem")
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     List<Hint> hints;
 
-    @OneToMany(mappedBy = "problem")
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     List<TestCase> testCases;
 
-    @OneToMany(mappedBy = "problem")
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     List<ProblemSubmission> submissions;
 
-    @OneToMany(mappedBy = "problem")
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     List<Solution> solutions;
-
-
 
 }

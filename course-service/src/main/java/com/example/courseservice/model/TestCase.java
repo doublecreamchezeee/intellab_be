@@ -27,14 +27,14 @@ public class TestCase {
     @Column(columnDefinition = "TEXT")
     String output;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     Problem problem;
 
     @JoinColumn(name = "source_id")
     UUID user_id;
 
-    @OneToMany(mappedBy = "testcase")
+    @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY)
     List<TestCase_Output> submit_outputs;
 
 }

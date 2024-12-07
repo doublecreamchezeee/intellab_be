@@ -34,14 +34,14 @@ public class ProblemSubmission {
     @CreationTimestamp
     Instant submit_date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id")
     Problem problem;
 
     @JoinColumn(name = "user_id")
     UUID userUid;
 
-    @OneToMany(mappedBy = "submission")
+    @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<TestCase_Output> testCases_output;
 
 }

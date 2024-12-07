@@ -29,7 +29,7 @@ public class CommentReport {
     @JoinColumn(name = "report_option_id")
     ReportOption report_option;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("destination_id")
     @JoinColumn(name = "destination_id")
     Comment destination;

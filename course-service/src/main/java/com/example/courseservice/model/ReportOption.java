@@ -29,9 +29,9 @@ public class ReportOption {
     String report_reason;
     String handle_action;
 
-    @OneToMany(mappedBy = "report_option")
+    @OneToMany(mappedBy = "report_option", fetch = FetchType.LAZY)
     List<CommentReport> comment_reports;
 
-    @OneToMany(mappedBy = "report_option")
+    @OneToMany(mappedBy = "report_option", fetch = FetchType.LAZY)
     List<OtherObjectReport> other_object_reports;
 }
