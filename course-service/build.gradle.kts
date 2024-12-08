@@ -25,11 +25,13 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     //developmentOnly("org.springframework.boot:spring-boot-docker-compose")
-    runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("org.postgresql:postgresql:42.5.0")
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("io.github.cdimascio:dotenv-java:3.0.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("org.hibernate:hibernate-core:6.2.10.Final")
+
 }
 
 dependencyManagement {

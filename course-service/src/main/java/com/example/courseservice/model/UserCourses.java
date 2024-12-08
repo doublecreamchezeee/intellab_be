@@ -2,6 +2,7 @@ package com.example.courseservice.model;
 
 
 import com.example.courseservice.model.compositeKey.EnrollCourse;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,8 +23,9 @@ public class UserCourses {
     EnrollCourse enrollId;
 
     @ManyToOne
-    @MapsId("course_id")
+    @MapsId("courseId")
     @JoinColumn(name = "course_id",nullable = false)
+    @JsonBackReference
     Course course;
 
     @Column(name = "progress_percent", columnDefinition = "DECIMAL(5,2)")

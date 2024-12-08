@@ -3,10 +3,15 @@ package com.example.courseservice.controller;
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.request.course.EnrollCourseRequest;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
+import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.model.UserCourses;
+import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
+import com.example.courseservice.utils.ParseUUID;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +19,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.rmi.server.UID;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,12 +46,16 @@ public class CourseController {
                 .build();
     }
 
-//    @GetMapping("/{courseId}")
-//    ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId, @RequestParam(required = false) UUID userUid) {
-//        return ApiResponse.<DetailCourseResponse>builder()
-//                .result(courseService.getCourseById(courseId, userUid))
-//                .build();
-//    }
+    @GetMapping("/{courseId}")
+    ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId, @RequestParam(required = false) String userUid) {
+        UUID userUUID = null;
+        if (userUid != null) {
+            userUUID = ParseUUID.normalizeUID(userUid);
+        }
+        return ApiResponse.<DetailCourseResponse>builder()
+                .result(courseService.getCourseById(courseId, userUUID))
+                .build();
+    }
 
     @GetMapping
     ApiResponse<List<CourseCreationResponse>> getAllCourse() {
@@ -69,20 +79,20 @@ public class CourseController {
                 .build();
     }
 
-    @GetMapping("/search")
-    public ApiResponse<List<CourseCreationResponse>> searchCourses(@RequestParam("keyword") String keyword) {
-        return ApiResponse.<List<CourseCreationResponse>>builder()
-                .result(courseService.searchCourses(keyword))
-                .build();
-    }
-
-//    @PostMapping("/enroll")
-//    public ApiResponse<EnrollCourse> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
-//
-//        return ApiResponse.<EnrollCourse>builder()
-//                .result(courseService.enrollCourse(request.getUserUid(), request.getCourse_id()))
+//    @GetMapping("/search")
+//    public ApiResponse<List<CourseCreationResponse>> searchCourses(@RequestParam("keyword") String keyword) {
+//        return ApiResponse.<List<CourseCreationResponse>>builder()
+//                .result(courseService.searchCourses(keyword))
 //                .build();
 //    }
+
+    @PostMapping("/enroll")
+    public ApiResponse<UserCourses> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
+
+        return ApiResponse.<UserCourses>builder()
+                .result(courseService.enrollCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .build();
+    }
 
 //    @GetMapping("/enrollCourses/{userUid}/")
 //    public ApiResponse<List<CourseCreationResponse>> getUserCourses(@PathVariable("userUid") UUID userUid) {

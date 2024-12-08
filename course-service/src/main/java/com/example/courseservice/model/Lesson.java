@@ -1,8 +1,12 @@
 package com.example.courseservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Type;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +28,7 @@ public class Lesson {
     @Column(columnDefinition = "TEXT")
     String description;
 
-    @Lob
+    @JsonIgnore
     @Column(columnDefinition = "TEXT")
     String content;
 
@@ -32,6 +36,7 @@ public class Lesson {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonBackReference
     Course course;
 
 

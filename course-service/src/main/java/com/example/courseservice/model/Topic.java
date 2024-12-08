@@ -1,9 +1,12 @@
 package com.example.courseservice.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Type;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +25,6 @@ public class Topic {
 
     String title;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     String content;
 
@@ -38,6 +40,7 @@ public class Topic {
     String userUid = null;
 
     @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
+    @JsonBackReference
     Course course;
 
     @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)

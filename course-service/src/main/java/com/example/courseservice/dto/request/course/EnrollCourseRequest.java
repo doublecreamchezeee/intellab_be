@@ -11,6 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EnrollCourseRequest {
-    UUID course_id;
-    UUID userUid;
+    UUID courseId;
+    String userUid;
 }

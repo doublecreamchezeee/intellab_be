@@ -9,6 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, UUID> {
-    List<Course> findByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
-
+//    List<Course> findByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
 }
