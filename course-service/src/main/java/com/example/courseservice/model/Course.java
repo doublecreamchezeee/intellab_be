@@ -51,10 +51,11 @@ public class Course {
     @JoinColumn(name = "admin_id")
     UUID userUid;
 
-    @OneToOne
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id", nullable = false)
     Topic topic;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<UserCourses> enrollCourses = new ArrayList<>();
 }

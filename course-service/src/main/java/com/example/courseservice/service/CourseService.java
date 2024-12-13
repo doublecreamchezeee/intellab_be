@@ -69,7 +69,7 @@ public class CourseService {
     }
 
     public List<CourseCreationResponse> searchCourses(String keyword) {
-        return courseRepository.findByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
+        return courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
                 .stream().map(courseMapper::toCourseCreationResponse).toList();
     }
 

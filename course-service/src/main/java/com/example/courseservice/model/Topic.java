@@ -18,14 +18,17 @@ import java.util.UUID;
 public class Topic {
     @Id
     @GeneratedValue
-    UUID topic_id;
+    @Column(name = "topic_id")
+    UUID topicId;
 
+    @Column(name = "title")
     String title;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", name = "content")
     String content;
 
+    @Column(name = "number_of_likes")
     Integer number_of_likes;
 
     //Ràng buộc miền giá trị dưới DB
