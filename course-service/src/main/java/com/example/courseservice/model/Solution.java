@@ -24,7 +24,7 @@ public class Solution {
     String content;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("problem_id")
     @JoinColumn(name = "problem_id", nullable = false)
     Problem problem;

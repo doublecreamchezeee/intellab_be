@@ -20,7 +20,7 @@ public class Hint {
     @Column(columnDefinition = "TEXT")
     String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("problem_id")
     @JoinColumn(name = "problem_id", nullable = false)
     Problem problem;

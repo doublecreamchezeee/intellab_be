@@ -36,11 +36,11 @@ public class LearningLesson {
     @JoinColumn(name = "student_id", nullable = false)
     UUID user_id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id")
     Lesson lesson;
 
-    @OneToMany(mappedBy = "learningLesson")
+    @OneToMany(mappedBy = "learningLesson", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Assignment> assignments;
 
 }

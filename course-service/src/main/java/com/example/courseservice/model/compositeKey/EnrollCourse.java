@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.rmi.server.UID;
 import java.util.UUID;
 
 
@@ -19,9 +20,8 @@ public class EnrollCourse implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     UUID userUid;
 
-    UUID course_id;
-
-
+    @JoinColumn(name = "course_id", nullable = false)
+    UUID courseId;
 }
 
 

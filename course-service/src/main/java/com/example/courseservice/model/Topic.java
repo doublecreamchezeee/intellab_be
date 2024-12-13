@@ -1,9 +1,12 @@
 package com.example.courseservice.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Type;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +29,7 @@ public class Topic {
 
     @Lob
     @Column(columnDefinition = "TEXT", name = "content")
+    @Column(columnDefinition = "TEXT")
     String content;
 
     @Column(name = "number_of_likes")
@@ -40,15 +44,16 @@ public class Topic {
     @JoinColumn(name = "user_id")
     String userUid = null;
 
-    @OneToOne(mappedBy = "topic")
+    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
+    @JsonBackReference
     Course course;
 
-    @OneToOne(mappedBy = "topic")
+    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
     Problem problem;
 
     @OneToMany(mappedBy = "topic")
     List<Comment> comments;
 
-    @OneToMany(mappedBy = "destination")
+    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
     List<OtherObjectReport> otherObjectReports;
 }

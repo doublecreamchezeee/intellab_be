@@ -27,7 +27,7 @@ public class Achievement {
 
 
     @MapsId("medal_id")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medal_id")
     Medal medal;
 

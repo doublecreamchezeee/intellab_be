@@ -46,10 +46,10 @@ public class Question {
     @OneToMany(mappedBy = "question")
     Set<Option> options;
 
-    @ManyToMany(mappedBy = "questionsList")
+    @ManyToMany(mappedBy = "questionsList", fetch = FetchType.LAZY)
     Set<Exercise> exercises;
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     List<AssignmentDetail> assignmentDetails;
 
 }

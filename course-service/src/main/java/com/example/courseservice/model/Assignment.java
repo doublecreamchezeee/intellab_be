@@ -31,11 +31,11 @@ public class Assignment {
     @CreationTimestamp
     Instant submit_date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id",nullable = false)
     Exercise exercise;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "learning_id",nullable = false)
     LearningLesson learningLesson;
 

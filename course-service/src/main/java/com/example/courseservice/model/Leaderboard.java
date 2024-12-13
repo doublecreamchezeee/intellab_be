@@ -26,7 +26,7 @@ public class Leaderboard {
     String hierarchy;
     Long Score;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medal_id")
     Medal medal;
 
