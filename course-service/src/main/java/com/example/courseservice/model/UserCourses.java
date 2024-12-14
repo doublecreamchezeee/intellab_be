@@ -29,12 +29,13 @@ public class UserCourses {
     Course course;
 
     @Column(name = "progress_percent", columnDefinition = "DECIMAL(5,2)")
-    Float progress_percent;
+    Float progressPercent;
 
     // Done, Learning, Expired
     @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
     @UpdateTimestamp
-    Instant last_accessed_date;
+    @Column(name = "last_accessed_date")
+    Instant lastAccessedDate;
 }

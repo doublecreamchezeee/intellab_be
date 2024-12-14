@@ -1,10 +1,15 @@
 package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
+import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.service.LessonService;
+import com.example.courseservice.utils.ParseUUID;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +25,12 @@ import org.springframework.web.bind.annotation.*;
 public class LessonController {
     LessonService lessonService;
 
-//    @PostMapping
-//    ApiResponse<LessonResponse> createLesson(@RequestBody @Valid LessonCreationRequest request) {
-//        return ApiResponse.<LessonResponse>builder()
-//                .result(lessonService.createLesson(request))
-//                .build();
-//    }
+    @PostMapping
+    ApiResponse<LessonResponse> createLesson(@RequestBody @Valid LessonCreationRequest request) {
+        return ApiResponse.<LessonResponse>builder()
+                .result(lessonService.createLesson(request))
+                .build();
+    }
 
     @GetMapping("/{lessonId}")
     ApiResponse<LessonResponse> getLessonById(@PathVariable("lessonId") String lessonId) {
@@ -46,6 +51,27 @@ public class LessonController {
     ApiResponse<LessonResponse> updateLesson(@PathVariable("lessonId") String lessonId, @RequestBody LessonUpdateRequest request){
         return ApiResponse.<LessonResponse>builder()
                 .result(lessonService.updateLesson(lessonId, request))
+                .build();
+    }
+
+    @PostMapping("/startLesson")
+    ApiResponse<LearningLessonResponse> startLesson(@RequestBody LearningLessonCreationRequest request){
+        return ApiResponse.<LearningLessonResponse>builder()
+                .result(
+                        lessonService.createLearningLesson(
+                        ParseUUID.normalizeUID(request.getUserId()),
+                        request)
+                )
+                .build();
+    }
+
+    @PutMapping("/{learningLessonId}/updateLearningProgress")
+    ApiResponse<LearningLessonResponse> updateLearningProgress(
+            @PathVariable("learningLessonId") String learningLessonId,
+            @RequestBody LearningLessonUpdateRequest request) {
+
+        return ApiResponse.<LearningLessonResponse>builder()
+                .result(lessonService.updateLearningLesson(learningLessonId, request))
                 .build();
     }
 

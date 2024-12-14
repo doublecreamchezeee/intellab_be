@@ -1,19 +1,23 @@
-package com.example.courseservice.dto.request.course;
+package com.example.courseservice.dto.response.userCourses;
 
-import jakarta.validation.Valid;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.Instant;
+
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CourseCreationRequest {
+public class UserCoursesResponse {
     String courseName;
     String description;
     String level;
     float price;
     String unitPrice;
     String courseLogo;
-    String userUid;
+    float progressPercent;
+    String status;
+    Instant lastAccessedDate;
 }

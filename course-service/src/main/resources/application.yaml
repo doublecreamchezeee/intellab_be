@@ -30,3 +30,8 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+# Swagger
+springdoc:
+  swagger-ui:
+    use-root-path: true
+    enabled: true

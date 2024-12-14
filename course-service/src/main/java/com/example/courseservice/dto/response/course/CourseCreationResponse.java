@@ -12,7 +12,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CourseCreationResponse {
     UUID courseId;
-    String course_name;
+    String courseName;
     String description;
     String level;
 }

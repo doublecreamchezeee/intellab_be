@@ -6,6 +6,8 @@ import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
+import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
+import com.example.courseservice.dto.response.learningLesson.LessonUserResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
@@ -35,7 +37,9 @@ public class CourseController {
     @PostMapping("")
     ApiResponse<CourseCreationResponse> createCourse(@RequestBody @Valid CourseCreationRequest request) {
         return ApiResponse.<CourseCreationResponse>builder()
-                .result(courseService.createCourse(request))
+                .result(courseService.createCourse(
+                        ParseUUID.normalizeUID(request.getUserUid()),
+                        request))
                 .build();
     }
 
@@ -43,6 +47,17 @@ public class CourseController {
     ApiResponse<List<LessonResponse>> getLessonsByCourseId(@PathVariable("courseId") String courseId) {
         return ApiResponse.<List<LessonResponse>>builder()
                 .result(lessonService.getLessonsByCourseId(courseId))
+                .build();
+    }
+
+    @GetMapping("/{courseId}/{userUid}/lessons")
+    ApiResponse<List<LessonUserResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
+        return ApiResponse.<List<LessonUserResponse>>builder()
+                .result(lessonService.getLessonProgress(
+                            ParseUUID.normalizeUID(userUid),
+                            UUID.fromString(courseId)
+                        )
+                )
                 .build();
     }
 
@@ -79,12 +94,12 @@ public class CourseController {
                 .build();
     }
 
-//    @GetMapping("/search")
-//    public ApiResponse<List<CourseCreationResponse>> searchCourses(@RequestParam("keyword") String keyword) {
-//        return ApiResponse.<List<CourseCreationResponse>>builder()
-//                .result(courseService.searchCourses(keyword))
-//                .build();
-//    }
+    @GetMapping("/search")
+    public ApiResponse<List<CourseCreationResponse>> searchCourses(@RequestParam("keyword") String keyword) {
+        return ApiResponse.<List<CourseCreationResponse>>builder()
+                .result(courseService.searchCourses(keyword))
+                .build();
+    }
 
     @PostMapping("/enroll")
     public ApiResponse<UserCourses> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
@@ -94,10 +109,18 @@ public class CourseController {
                 .build();
     }
 
-//    @GetMapping("/enrollCourses/{userUid}/")
-//    public ApiResponse<List<CourseCreationResponse>> getUserCourses(@PathVariable("userUid") UUID userUid) {
-//        return ApiResponse.<List<CourseCreationResponse>>builder()
-//                .result(courseService.getUserCourses(userUid))
-//                .build();
-//    }
+    @GetMapping("/{courseId}/users")
+    public ApiResponse<List<UserCourses>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
+        return ApiResponse.<List<UserCourses>>builder()
+                .result(courseService.getEnrolledUsersOfCourse(courseId))
+                .build();
+    }
+
+    @GetMapping("/{userUid}/enrolledCourses")
+    public ApiResponse<List<UserCourses>> getEnrolledCoursesOfUser(@PathVariable("userUid") String userUid) {
+        return ApiResponse.<List<UserCourses>>builder()
+                .result(courseService.getEnrolledCoursesOfUser(ParseUUID.normalizeUID(userUid)))
+                .build();
+    }
+
 }

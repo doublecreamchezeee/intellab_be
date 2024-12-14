@@ -29,7 +29,6 @@ public class Topic {
 
     @Lob
     @Column(columnDefinition = "TEXT", name = "content")
-    @Column(columnDefinition = "TEXT")
     String content;
 
     @Column(name = "number_of_likes")
@@ -40,11 +39,10 @@ public class Topic {
     @Column(columnDefinition = "VARCHAR(10)")
     String post_reach;
 
-
     @JoinColumn(name = "user_id")
     String userUid = null;
 
-    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY, optional = true)
     @JsonBackReference
     Course course;
 

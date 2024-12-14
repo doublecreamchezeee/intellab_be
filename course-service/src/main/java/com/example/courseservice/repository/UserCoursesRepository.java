@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface UserCoursesRepository extends JpaRepository<UserCourses, EnrollCourse> {
     Optional<UserCourses> findByEnrollIdUserUid(UID userUid);
     Optional<UserCourses> findByEnrollId_UserUidAndEnrollId_CourseId(UUID userUid, UUID courseId);
+    List<UserCourses> findAllByEnrollId_CourseId(UUID courseId);
+    List<UserCourses> findAllByEnrollId_UserUid(UUID userUid);
 }
