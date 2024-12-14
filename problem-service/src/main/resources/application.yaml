@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: problem-service
+  datasource:
+    url: ${DB_URL} #5433
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD} #htht01225923050
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+server:
+  servlet:
+    context-path: /problem
+  port: 8003
+
+judge0:
+  api:
+    url: http://localhost:2358
