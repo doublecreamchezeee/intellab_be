@@ -23,6 +23,7 @@ public class ProblemSubmissionController {
             ProblemSubmission createdSubmission = problemSubmissionService.submitProblem(submission);
             return ResponseEntity.ok(createdSubmission); // HTTP 200 OK
         } catch (Exception e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
         }
     }
