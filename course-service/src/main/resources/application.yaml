@@ -12,9 +12,26 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        generate_statistics: true
     show-sql: true
-
 server:
   port: 8002
   servlet:
     context-path: /course
+
+com:
+  example:
+    firebase:
+      web-api-key: AIzaSyDsRZMGfdM_zZEUmaaBG1E2BqlIAOem5rM
+      private-key: private-key.json
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+# Swagger
+springdoc:
+  swagger-ui:
+    use-root-path: true
+    enabled: true
