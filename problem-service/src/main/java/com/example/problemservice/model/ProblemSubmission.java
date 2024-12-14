@@ -19,6 +19,7 @@ import java.util.UUID;
 @Table(name = "\"problem_submissions\"")
 public class ProblemSubmission {
     @Id
+    @GeneratedValue
     UUID submission_id;
 
     Integer submit_order;

@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,6 +19,8 @@ import lombok.experimental.FieldDefaults;
 public class TestCase_Output {
     @EmbeddedId
     testCaseOutputId testCaseOutputID;
+
+    UUID Token;
 
     @Column(columnDefinition = "REAL")
     Float runtime;

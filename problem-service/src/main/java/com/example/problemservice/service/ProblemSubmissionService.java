@@ -33,6 +33,8 @@ public class ProblemSubmissionService {
         );
         submission.setProblem(problem);
 
+        // Lưu ProblemSubmission trước để đảm bảo có ID
+        submission = problemSubmissionRepository.save(submission);
 
         // Lấy danh sách TestCase từ Problem
         List<TestCase> testCases = problem.getTestCases();
@@ -45,8 +47,6 @@ public class ProblemSubmissionService {
             // Gửi mã nguồn và test case đến Judge0
             TestCase_Output output = judge0Client.submitCode(submission, testCase);
 
-            // Lưu ProblemSubmission trước để đảm bảo có ID
-             submission = problemSubmissionRepository.save(submission);
 
             // Khởi tạo composite ID
             testCaseOutputId outputId = new testCaseOutputId();

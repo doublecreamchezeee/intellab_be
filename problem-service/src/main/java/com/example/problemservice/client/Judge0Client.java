@@ -101,9 +101,11 @@ public class Judge0Client {
         if (response.getStatusCode() == HttpStatus.CREATED) {
             // Extract submission ID from the response body
             String submissionId = extractSubmissionId(Objects.requireNonNull(response.getBody()));
-            submission.setSubmission_id(UUID.fromString(submissionId));
+
             // Call the status endpoint to get execution result
-            return getJudge0Result(submissionId, testCase);
+            TestCase_Output result = getJudge0Result(submissionId, testCase);
+            result.setToken(UUID.fromString(submissionId));
+            return result;
         } else {
             throw new RuntimeException("Failed to submit code to Judge0");
         }
@@ -125,8 +127,7 @@ public class Judge0Client {
 
     // Retrieve Judge0 result and update TestCase_Output
     public TestCase_Output getSubmissionResult(TestCase_Output testCaseOutput) {
-        testCaseOutputId id = testCaseOutput.getTestCaseOutputID();
-        String submissionId = id.getSubmission_id().toString();
+        String submissionId = String.valueOf(testCaseOutput.getToken());
 
         // Send GET request to Judge0 to retrieve result
         ResponseEntity<String> response = restTemplate.exchange(
