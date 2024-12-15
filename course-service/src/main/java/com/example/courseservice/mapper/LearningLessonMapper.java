@@ -4,6 +4,7 @@ import com.example.courseservice.dto.request.learningLesson.LearningLessonCreati
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonUserResponse;
 import com.example.courseservice.model.LearningLesson;
+import com.example.courseservice.model.Lesson;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -16,4 +17,5 @@ public interface LearningLessonMapper {
 
       @Mapping(target = "lesson", source = "lesson")
       LessonUserResponse toLessonUserResponse(LearningLesson learningLesson);
+
 }

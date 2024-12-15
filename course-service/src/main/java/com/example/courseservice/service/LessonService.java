@@ -19,15 +19,21 @@ import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.LearningLessonRepository;
 import com.example.courseservice.repository.LessonRepository;
 import com.example.courseservice.repository.UserCoursesRepository;
+import jakarta.persistence.Tuple;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +48,7 @@ public class LessonService {
 
     CourseRepository courseRepository;
     UserCoursesRepository userCoursesRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public LessonResponse createLesson(LessonCreationRequest request) {
         if (!courseRepository.existsById(request.getCourseId())) {
@@ -94,12 +101,12 @@ public class LessonService {
 
     public LearningLessonResponse createLearningLesson(UUID userUid, LearningLessonCreationRequest request) {
 
-        Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
+        Lesson lesson = lessonRepository.findById(UUID.fromString(request.getLessonId())).orElseThrow(
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
 
         learningLessonRepository.findByLesson_LessonIdAndUserId(
-                request.getLessonId(),
+                        UUID.fromString(request.getLessonId()),
                 userUid)
             .ifPresent(learningLesson -> {
                 throw new AppException(ErrorCode.LEARNING_LESSON_EXISTED);
@@ -136,16 +143,26 @@ public class LessonService {
         return learningLessonMapper.toLearningLessonResponse(learningLesson);
     }
 
-    public List<LessonUserResponse> getLessonProgress(UUID userUid, UUID courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+    @Transactional
+    public List<LessonProgressResponse> getLessonProgress(UUID userId, UUID courseId) {
+        // Get the list of tuples from the repository
+        List<Tuple> tuples = learningLessonRepository.getLessonProgress(userId, courseId);
 
-        List<LessonUserResponse> learningLessons =
-                learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId)
-                        .stream().map(learningLessonMapper::toLessonUserResponse).toList();
-        return  learningLessons;
-        //List<LessonProgressResponse> learningLessons = learningLessonRepository.getLessonProgress(userUid, courseId);
-        //return learningLessons;
+        // Initialize the list to store the responses
+        List<LessonProgressResponse> list = new ArrayList<>();
+        // Iterate through each tuple
+        for (int i = 0; i < tuples.size(); i++) {
+            Tuple outerTuple = tuples.get(i);
+
+            // Access the inner tuple (assuming it's a LessonProgressResponse object)
+            LessonProgressResponse innerTuple = (LessonProgressResponse) outerTuple.get(0);
+
+            // Add the inner tuple to the list
+            list.add(innerTuple);
+        }
+        // Return the populated list
+        return list;
     }
+
 
 }

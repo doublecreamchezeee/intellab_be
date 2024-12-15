@@ -51,8 +51,8 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/{userUid}/lessons")
-    ApiResponse<List<LessonUserResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
-        return ApiResponse.<List<LessonUserResponse>>builder()
+    ApiResponse<List<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
+        return ApiResponse.<List<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
                             UUID.fromString(courseId)

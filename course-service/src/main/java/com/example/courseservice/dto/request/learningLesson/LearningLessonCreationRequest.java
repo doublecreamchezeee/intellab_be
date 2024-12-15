@@ -14,7 +14,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LearningLessonCreationRequest {
     @NotBlank
-    UUID lessonId;
+    String lessonId;
     String userId;
 
 }
