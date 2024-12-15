@@ -3,6 +3,8 @@ package com.example.courseservice.model;
 
 
 import com.example.courseservice.model.compositeKey.assignmentDetailID;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -26,10 +28,12 @@ public class AssignmentDetail {
     @Column(columnDefinition = "VARCHAR(20)")
     String answer;
 
+    @JsonManagedReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id",nullable = false)
     Question question;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("assignment_id")
     @JoinColumn(name = "assignment_id")

@@ -2,6 +2,8 @@ package com.example.courseservice.model;
 
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -31,15 +33,18 @@ public class Assignment {
     @CreationTimestamp
     Instant submit_date;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id",nullable = false)
     Exercise exercise;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "learning_id",nullable = false)
     LearningLesson learningLesson;
 
-    @OneToMany(mappedBy = "assignment")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY)
     List<AssignmentDetail> assignment_details;
 
 }

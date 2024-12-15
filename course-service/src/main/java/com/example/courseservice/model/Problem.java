@@ -22,7 +22,7 @@ public class Problem {
 
     String problem_name;
 
-    @Lob
+    //@Lob
     @Column(columnDefinition = "TEXT")
     String description;
 
@@ -36,7 +36,7 @@ public class Problem {
     @Column(columnDefinition = "DECIMAL(5,2)")
     Float acceptance_rate;
 
-    @OneToMany(mappedBy = "problem")
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
     List<Lesson> lessons;
 
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)

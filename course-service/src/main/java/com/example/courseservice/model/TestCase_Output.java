@@ -27,7 +27,7 @@ public class TestCase_Output {
     String result_status;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("testcase_id")
     @JoinColumn(name = "testcase_id")
     TestCase testcase;

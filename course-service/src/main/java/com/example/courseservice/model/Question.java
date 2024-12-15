@@ -1,6 +1,9 @@
 package com.example.courseservice.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,7 +13,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -43,12 +45,16 @@ public class Question {
     @UpdateTimestamp
     Instant updated_at;
 
-    @OneToMany(mappedBy = "question")
-    Set<Option> options;
 
-    @ManyToMany(mappedBy = "questionsList", fetch = FetchType.LAZY)
-    Set<Exercise> exercises;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<Option> options;
 
+    @JsonBackReference
+    @ManyToMany(mappedBy = "questionList", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<Exercise> exercises;
+
+    @JsonBackReference
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     List<AssignmentDetail> assignmentDetails;
 

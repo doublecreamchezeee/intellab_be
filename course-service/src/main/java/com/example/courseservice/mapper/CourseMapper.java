@@ -18,7 +18,7 @@ public interface CourseMapper {
     @Mapping(target = "level", source = "level")
     Course toCourse(CourseCreationRequest request);
 
-//    @Mapping(target = "course_id", ignore = true)
+    //@Mapping(target = "course_id", ignore = true)
     @Mapping(target = "courseName", source = "courseName")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "level", source = "level")
