@@ -4,8 +4,6 @@ import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.UUID;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,8 +12,8 @@ import java.util.UUID;
 public class LessonUpdateRequest {
     @Min(value = 0, message = "LESSON_ORDER_INVALID")
     int lessonOrder;
-    String lessonName;
+    String name;
     String description;
     String content;
-    UUID courseId;
+    String courseId;
 }

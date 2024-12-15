@@ -4,23 +4,19 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.UUID;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "\"reviews\"")
+@Table(name = "\"review\"")
 public class Review {
     @Id
-    @GeneratedValue
-    UUID review_id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
 
     int rating;
-
-    @Column(columnDefinition = "TEXT")
     String comment;
 
     @JoinColumn(name = "user_id", nullable = false)

@@ -3,16 +3,14 @@ package com.example.courseservice.dto.response.course;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.UUID;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DetailCourseResponse {
-    UUID courseId;
-    String courseName;
+    String id;
+    String name;
     String description;
     String level;
     boolean isUserEnrolled;
