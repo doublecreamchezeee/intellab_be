@@ -10,6 +10,8 @@ import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.identityservice.service.AuthService;
 import com.google.firebase.auth.FirebaseAuthException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
@@ -25,10 +27,14 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
+@Tag(name = "Auth")
 public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(
+            summary = "Register user"
+    )
     @PublicEndpoint
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HttpStatus> createUser(@Valid @RequestBody final UserCreationRequest userCreationRequest) {
@@ -36,6 +42,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @Operation(
+            summary = "Login"
+    )
     @PublicEndpoint
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenSuccessResponse> login(@Valid @RequestBody final UserLoginRequest userLoginRequest, HttpServletResponse response) {
@@ -54,6 +63,9 @@ public class AuthController {
         return ResponseEntity.ok(tokenResponse);
     }
 
+    @Operation(
+            summary = "Login with Google"
+    )
     @PublicEndpoint
     @PostMapping(value = "/login/google")
     public ResponseEntity<FirebaseGoogleSignInResponse> loginWithGoogle(@RequestBody final Map<String, String> body) throws FirebaseAuthException {
@@ -62,12 +74,18 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Update user by email"
+    )
     @PutMapping("/update")
     public ResponseEntity<HttpStatus> updateUserByEmail(@RequestParam("email") String email, @Validated @RequestBody UserUpdateRequest userUpdateRequest) {
         authService.updateByEmail(email, userUpdateRequest);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Operation(
+            summary = "Refresh token"
+    )
     @PublicEndpoint
     @PostMapping(value = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenSuccessResponse> refreshToken(@RequestBody Map<String, String> body) {
@@ -80,6 +98,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Validate token, return true if it is valid"
+    )
     @PublicEndpoint
     @PostMapping("/validateToken")
     public ResponseEntity<ValidatedTokenResponse> validateToken(@RequestBody String token) {

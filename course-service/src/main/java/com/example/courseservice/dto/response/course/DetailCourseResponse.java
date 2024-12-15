@@ -15,5 +15,9 @@ public class DetailCourseResponse {
     String courseName;
     String description;
     String level;
+    float price;
+    String unitPrice;
+    String courseLogo;
+    UUID userUid;
     boolean isUserEnrolled;
 }
