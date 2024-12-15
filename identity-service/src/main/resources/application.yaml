@@ -23,3 +23,8 @@ com:
     firebase:
       web-api-key: AIzaSyDsRZMGfdM_zZEUmaaBG1E2BqlIAOem5rM
       private-key: private-key.json
+
+springdoc:
+  swagger-ui:
+    use-root-path: true
+    enabled: true
