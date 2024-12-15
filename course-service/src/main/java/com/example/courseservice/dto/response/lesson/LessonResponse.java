@@ -3,16 +3,18 @@ package com.example.courseservice.dto.response.lesson;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonResponse {
-    String id;
+    UUID lessonId;
     int lessonOrder;
-    String name;
+    String lessonName;
     String description;
     String content;
-    String courseId;
+    UUID courseId;
 }
