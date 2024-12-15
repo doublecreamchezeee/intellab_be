@@ -19,10 +19,13 @@ import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.LearningLessonRepository;
 import com.example.courseservice.repository.LessonRepository;
 import com.example.courseservice.repository.UserCoursesRepository;
+import com.example.courseservice.repository.custom.LearningLessonRepositoryCustom;
+import com.example.courseservice.repository.impl.LearningLessonRepositoryCustomImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,12 +46,15 @@ public class LessonService {
     CourseRepository courseRepository;
     UserCoursesRepository userCoursesRepository;
 
+    //@Qualifier("learningLessonRepositoryCustomImpl")
+    LearningLessonRepositoryCustomImpl learningLessonRepositoryCustom;
+
     public LessonResponse createLesson(LessonCreationRequest request) {
         if (!courseRepository.existsById(request.getCourseId())) {
             throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
         }
 
-        lessonRepository.findByLessonOrder(request.getLessonOrder())
+        lessonRepository.findByLessonOrderAndCourse_CourseId(request.getLessonOrder(), request.getCourseId())
                 .ifPresent(lesson -> {
                     throw new AppException(ErrorCode.LESSON_ORDER_EXISTED);
                 });
@@ -61,9 +67,13 @@ public class LessonService {
         return lessonMapper.toLessonResponse(lesson);
     }
 
-    public LessonResponse getLessonById(String lessonId) {
+    public LessonResponse getLessonById(String lessonId, UUID userId) {
         Lesson lesson = lessonRepository.findById(UUID.fromString(lessonId))
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
+
+        learningLessonRepository.findByUserIdAndLesson_LessonId(userId, lesson.getLessonId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
+
         return lessonMapper.toLessonResponse(lesson);
     }
 
@@ -136,16 +146,33 @@ public class LessonService {
         return learningLessonMapper.toLearningLessonResponse(learningLesson);
     }
 
-    public List<LessonUserResponse> getLessonProgress(UUID userUid, UUID courseId) {
+    /*public List<LessonUserResponse> getLessonProgress(UUID userUid, UUID courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
         List<LessonUserResponse> learningLessons =
                 learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId)
                         .stream().map(learningLessonMapper::toLessonUserResponse).toList();
+
+        learningLessonRepository.getLessonProgress(userUid, courseId);
+        //learningLessonRepositoryCustom.getLessonProgress(userUid, courseId);
+        //List<LessonProgressResponse> learningLessons2 =
         return  learningLessons;
         //List<LessonProgressResponse> learningLessons = learningLessonRepository.getLessonProgress(userUid, courseId);
         //return learningLessons;
+
+        *//*List<LessonUserResponse> learningLessons =
+                learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId)
+                        .stream().map(learningLessonMapper::toLessonUserResponse).toList();
+*//*
+        //learningLessonRepository.getLessonProgress(userUid, courseId);
+    }*/
+
+    public List<LessonProgressResponse> getLessonProgress(UUID userUid, UUID courseId) {
+        courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        return learningLessonRepositoryCustom.getLessonProgress(userUid, courseId);
+
     }
 
 }

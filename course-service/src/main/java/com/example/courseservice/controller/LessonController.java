@@ -32,10 +32,13 @@ public class LessonController {
                 .build();
     }
 
-    @GetMapping("/{lessonId}")
-    ApiResponse<LessonResponse> getLessonById(@PathVariable("lessonId") String lessonId) {
+    @GetMapping("/{lessonId}/{userId}")
+    ApiResponse<LessonResponse> getLessonById(@PathVariable("lessonId") String lessonId, @PathVariable("userId") String userId){
         return ApiResponse.<LessonResponse>builder()
-                .result(lessonService.getLessonById(lessonId))
+                .result(lessonService.getLessonById(
+                        lessonId,
+                        ParseUUID.normalizeUID(userId))
+                )
                 .build();
     }
 
