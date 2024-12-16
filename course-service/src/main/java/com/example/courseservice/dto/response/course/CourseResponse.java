@@ -12,10 +12,13 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CourseResponse {
     UUID courseId;
-    String course_name;
+    String courseName;
     String description;
     String level;
-
+    float price;
+    String unitPrice;
+    String courseLogo;
+    UUID userUid;
     int numberOfReviews;
     float averageRating;
 }

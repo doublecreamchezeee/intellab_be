@@ -8,19 +8,16 @@ spring:
   cloud:
     gateway:
 #      public-paths:
-      global-cors:
+      globalcors:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              - "http://${HOST_NAME}:${API_GATEWAY_PORT}"
-              - "http://${HOST_NAME}:${IDENTITY_PORT}"
-              - "http://${HOST_NAME}:${COURSE_PORT}"
-              - "http://${HOST_NAME}:${3000}"
+#              - "http://${DOCKER_HOST_NAME}:${DOCKER_API_GATEWAY_PORT}"
+#              - "http://${DOCKER_HOST_NAME}:${DOCKER_IDENTITY_PORT}"
+#              - "http://${DOCKER_HOST_NAME}:${DOCKER_COURSE_PORT}"
+              - "http://localhost:3000"
             allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
+              - "*"
             allowedHeaders:
               - "*"
             allowCredentials: true

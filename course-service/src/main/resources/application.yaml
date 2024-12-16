@@ -2,9 +2,9 @@ spring:
   application:
     name: course-service
   datasource:
-    url: jdbc:postgresql://localhost:5433/course-service
-    username: postgres
-    password: 123456
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -30,3 +30,8 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+# Swagger
+springdoc:
+  swagger-ui:
+    use-root-path: true
+    enabled: true

@@ -26,6 +26,9 @@ public enum ErrorCode {
     USER_EXISTED_IN_COURSE(400, "User existed in course", HttpStatus.BAD_REQUEST),
     LESSON_ALREADY_HAD_EXERCISE(400, "Lesson already had exercise", HttpStatus.BAD_REQUEST),
     BAD_REQUEST(400, "Bad request", HttpStatus.BAD_REQUEST),
+    LESSON_ORDER_EXISTED(409, "Lesson order existed", HttpStatus.CONFLICT),
+    LEARNING_LESSON_EXISTED(409, "Learning lesson existed", HttpStatus.CONFLICT),
+    USER_NOT_ENROLLED(404, "User not enrolled", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

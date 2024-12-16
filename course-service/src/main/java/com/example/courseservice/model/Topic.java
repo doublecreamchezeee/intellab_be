@@ -21,13 +21,17 @@ import java.util.UUID;
 public class Topic {
     @Id
     @GeneratedValue
-    UUID topic_id;
+    @Column(name = "topic_id")
+    UUID topicId;
 
+    @Column(name = "title")
     String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(columnDefinition = "TEXT", name = "content")
     String content;
 
+    @Column(name = "number_of_likes")
     Integer number_of_likes;
 
     //Ràng buộc miền giá trị dưới DB
@@ -35,11 +39,10 @@ public class Topic {
     @Column(columnDefinition = "VARCHAR(10)")
     String post_reach;
 
-
     @JoinColumn(name = "user_id")
     String userUid = null;
 
-    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY, optional = true)
     @JsonBackReference
     Course course;
 

@@ -11,9 +11,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonResponse {
-    UUID Lesson_Id;
+    UUID lessonId;
     int lessonOrder;
-    String lesson_name;
+    String lessonName;
     String description;
     String content;
     UUID courseId;

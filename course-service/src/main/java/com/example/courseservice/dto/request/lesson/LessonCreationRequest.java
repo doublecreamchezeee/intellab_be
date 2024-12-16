@@ -14,8 +14,8 @@ import java.util.UUID;
 public class LessonCreationRequest {
     @Min(value = 0, message = "LESSON_ORDER_INVALID")
     int lessonOrder;
-    String course_name;
+    String lessonName;
     String description;
     String content;
-    UUID course_id;
+    UUID courseId;
 }

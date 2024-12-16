@@ -47,6 +47,23 @@ public class ApiEndpointSecurityInspector {
                 }
             }
         });
+
+        // Add swagger-ui to public GET endpoints
+        /*publicGetEndpoints.add("/swagger-ui/**");
+        publicGetEndpoints.add("/v3/api-docs/**,");*/
+        publicGetEndpoints.addAll(
+                List.of(
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/v2/api-docs/**",
+                        "/swagger-resources/**",
+                        "/swagger-resources/**",
+                        "/configuration/ui/**",
+                        "/configuration/security/**",
+                        "/swagger-ui.html",
+                        "/webjars/**")
+        );
     }
 
     public boolean isUnsecureRequest(@NonNull final HttpServletRequest request) {

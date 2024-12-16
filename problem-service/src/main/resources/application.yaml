@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: problem-service
+  datasource:
+    url: ${DB_URL} #5433 jdbc:postgresql://localhost:5432/course-service #
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD} #htht01225923050
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+server:
+  servlet:
+    context-path: /problem
+  port: 8003
+
+judge0:
+  api:
+    url: http://localhost:2358
+
+springdoc:
+  swagger-ui:
+    use-root-path: true
+    enabled: true

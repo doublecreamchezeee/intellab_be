@@ -1,39 +1,46 @@
-#FROM openjdk:17-jdk-alpine
-#LABEL authors="Thành Trí"
+## Stage 1: Build the application
+#FROM gradle:8.10.2-jdk17 AS build
+#
 #WORKDIR /app
-#COPY build/libs/*.jar app.jar
-#EXPOSE 8101
-#ENTRYPOINT ["java", "-jar", "app.jar"]
+#COPY build.gradle.kts settings.gradle.kts ./
+#COPY src ./src
+#
+#RUN gradle build -x test --no-daemon
+#
+## Stage 2: Create the runtime image
+#FROM openjdk:17-jdk-slim
+#
+#WORKDIR /app
+#
+#COPY docker.env /app/.env
+#
+## Accept port as build argument
+#ENV PORT=$PORT
+#
+## Copy built JAR file
+#COPY --from=build /app/build/libs/*.jar app.jar
+#
+#EXPOSE $PORT
+#
+#ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=optional:classpath:/,optional:file:config/"]
 
-# Stage 1: Build the application
-FROM gradle:8.10.2-jdk17 AS build
 
-# Set the working directory in the container
+# Stage 1: Use Gradle image to build locally, then copy the build to the runtime image
+FROM openjdk:17-jdk-slim AS runtime
+
 WORKDIR /app
 
-# Copy the Gradle build files
-COPY build.gradle.kts settings.gradle.kts ./
-
-# Copy the source code
-COPY src ./src
-
-# Build the application
-RUN gradle build -x test --no-daemon
-
-# Stage 2: Create the runtime image
-FROM openjdk:17-jdk-slim
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the docker.env file into the container
+# Copy environment variables (if needed)
 COPY docker.env /app/.env
 
-# Copy the built JAR file from the Gradle build stage
-COPY --from=build /app/build/libs/*.jar app.jar
+# Accept port as a build argument, with a default value of 8100
+ARG PORT=8100
+ENV PORT=$PORT
 
-# Expose the port the application runs on
-EXPOSE 8100
+# Copy the already built JAR file from your local machine
+COPY ./build/libs/*.jar app.jar
 
-# Command to run the application
+EXPOSE $PORT
+
+# Set the entrypoint to run the application
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=optional:classpath:/,optional:file:config/"]

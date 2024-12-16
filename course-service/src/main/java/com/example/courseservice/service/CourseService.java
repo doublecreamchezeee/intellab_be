@@ -1,5 +1,6 @@
 package com.example.courseservice.service;
 
+import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
@@ -8,17 +9,20 @@ import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.Course;
+import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.CourseRepository;
+import com.example.courseservice.repository.LearningLessonRepository;
+import com.example.courseservice.repository.LessonRepository;
 import com.example.courseservice.repository.UserCoursesRepository;
+import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +36,8 @@ public class CourseService {
     CourseRepository courseRepository;
     CourseMapper courseMapper;
     UserCoursesRepository userCoursesRepository;
+    LessonRepository lessonRepository;
+    LearningLessonRepository learningLessonRepository;
 
     public List<CourseCreationResponse> getAllCourses() {
         return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
@@ -41,10 +47,16 @@ public class CourseService {
         courseRepository.deleteById(id);
     }
 
-    public CourseCreationResponse createCourse(CourseCreationRequest request) {
+    public CourseCreationResponse createCourse(UUID userUid, CourseCreationRequest request) {
         Course course = courseMapper.toCourse(request);
 
+        course.setUserUid(userUid);
         course.setLessons(new ArrayList<>());
+        course.setReviews(new ArrayList<>());
+        course.setEnrollCourses(new ArrayList<>());
+
+        course.setTopic(null);
+
         course = courseRepository.save(course);
 
         return courseMapper.toCourseCreationResponse(course);
@@ -55,6 +67,7 @@ public class CourseService {
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
         courseMapper.updateCourse(course, request);
+        course.setUserUid(ParseUUID.normalizeUID(request.getUserUid()));
 
         /*List<Lesson> lessons = lessonRepository.findAllByCourseId(courseId);
         course.setLessons(lessons);*/
@@ -63,17 +76,25 @@ public class CourseService {
         return courseMapper.toCourseCreationResponse(course);
     }
 
-//    public List<CourseCreationResponse> searchCourses(String keyword) {
-//        return courseRepository.findByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
-//                .stream().map(courseMapper::toCourseCreationResponse).toList();
-//    }
+    public List<CourseCreationResponse> searchCourses(String keyword) {
+        return courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
+                .stream().map(courseMapper::toCourseCreationResponse).toList();
+    }
 
     public DetailCourseResponse getCourseById(UUID courseId, UUID userUid) {
         // Check if a userUid is provided
         if (userUid != null) {
             // Find UserCourses by composite key (userUid and courseId)
             UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED_IN_COURSE));
+                    .orElse(null);
+
+            // If user is not enrolled in the course, fetch course details without enrollment flag
+            if (userCourses == null) {
+                return courseMapper.toDetailCourseResponse(
+                        courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED)),
+                        false // User is not enrolled
+                );
+            }
 
             // If user is enrolled in the course, fetch course details
             return courseMapper.toDetailCourseResponse(
@@ -107,12 +128,43 @@ public class CourseService {
                                     .courseId(courseId)
                                     .build())
                             .course(course)  // Đảm bảo course không null
-                            .status("LEARNING")
+                            .status(PredefinedLearningStatus.LEARNING)
+                            .progressPercent(0.0f)
                             .build();
+
+                    // create default learning lesson progress for user
+                    lessonRepository.findAllByCourse_CourseId(courseId).forEach(lesson -> {
+                        LearningLesson learningLesson = LearningLesson.builder()
+                                .lesson(lesson)
+                                .userId(userUid)
+                                .status("NEW")
+                                .assignments(new ArrayList<>())
+                                .build();
+                        learningLessonRepository.save(learningLesson);
+                    });
 
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
                 });
+    }
+
+    public List<UserCourses> getEnrolledUsersOfCourse(UUID courseId) {
+        if (courseId == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        return userCoursesRepository.findAllByEnrollId_CourseId(courseId);
+    }
+
+    public List<UserCourses> getEnrolledCoursesOfUser(UUID userUid) {
+        if (userUid == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        return userCoursesRepository.findAllByEnrollId_UserUid(userUid);
     }
 //
 //    public List<CourseCreationResponse> getUserCourses(UUID userUid) {

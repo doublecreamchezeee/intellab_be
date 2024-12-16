@@ -16,16 +16,27 @@ public interface CourseMapper {
     @Mapping(target = "courseName", source = "courseName")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "level", source = "level")
+    @Mapping(target = "price", source = "price")
+    @Mapping(target = "unitPrice", source = "unitPrice")
+    @Mapping(target = "courseLogo", source = "courseLogo")
+    @Mapping(target = "userUid", ignore = true)//source = "userUid"
     Course toCourse(CourseCreationRequest request);
 
-    //@Mapping(target = "course_id", ignore = true)
+    @Mapping(target = "courseId", ignore = true)
     @Mapping(target = "courseName", source = "courseName")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "level", source = "level")
+    @Mapping(target = "price", source = "price")
+    @Mapping(target = "unitPrice", source = "unitPrice")
+    @Mapping(target = "courseLogo", source = "courseLogo")
+    @Mapping(target = "userUid", ignore = true)//source = "userUid"
     Course toCourse(CourseUpdateRequest request);
 
     @Mapping(target = "lessons", ignore = true)
     @Mapping(target = "reviews", ignore = true)
+    @Mapping(target = "enrollCourses", ignore = true)
+    @Mapping(target = "topic", ignore = true)
+    @Mapping(target = "userUid", ignore = true)
     void updateCourse(@MappingTarget Course course, CourseUpdateRequest request);
 
     CourseCreationResponse toCourseCreationResponse(Course course);

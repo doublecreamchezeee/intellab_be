@@ -55,16 +55,16 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<Review> reviews = new ArrayList<>();
 
-
     @JoinColumn(name = "admin_id")
     UUID userUid;
 
-    @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "topic_id", nullable = false)
+
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
+    @JoinColumn(name = "topic_id", nullable = true)
     @JsonManagedReference
     Topic topic;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<UserCourses> enrollCourses = new ArrayList<>();
 }
