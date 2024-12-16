@@ -4,6 +4,8 @@ import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.service.ProblemSubmissionService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +16,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/problem-submissions")
 @RequiredArgsConstructor
+@Tag(name = "Submission")
 public class ProblemSubmissionController {
     private final ProblemSubmissionService problemSubmissionService;
 
+    @Operation(
+            summary = "Create submission"
+    )
     @PostMapping
     public ResponseEntity<ProblemSubmission> createSubmission(@RequestBody ProblemSubmission submission) {
         try {
@@ -28,12 +34,18 @@ public class ProblemSubmissionController {
         }
     }
 
+    @Operation(
+            summary = "Update submission by id"
+    )
     @PostMapping("/update/{submissionId}")
     public ResponseEntity<ProblemSubmission> updateSubmission(@PathVariable UUID submissionId) {
         ProblemSubmission submission = problemSubmissionService.updateSubmissionResult(submissionId);
         return ResponseEntity.ok(submission);
     }
 
+    @Operation(
+            summary = "Get submission by id"
+    )
     @GetMapping("/{submissionId}")
     public ResponseEntity<ProblemSubmission> getSubmission(@PathVariable UUID submissionId) {
         try {
