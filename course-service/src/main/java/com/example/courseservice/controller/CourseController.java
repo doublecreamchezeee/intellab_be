@@ -144,8 +144,8 @@ public class CourseController {
             summary = "Get all users have enrolled a course"
     )
     @GetMapping("/{courseId}/enrolledUsers")
-    public ApiResponse<List<UserCourses>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
-        return ApiResponse.<List<UserCourses>>builder()
+    public ApiResponse<List<EnrolledCourseResponse>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
+        return ApiResponse.<List<EnrolledCourseResponse>>builder()
                 .result(courseService.getEnrolledUsersOfCourse(courseId))
                 .build();
     }

@@ -10,6 +10,8 @@ import com.example.courseservice.dto.response.exercise.ExerciseDetailResponse;
 import com.example.courseservice.dto.response.exercise.ExerciseResponse;
 import com.example.courseservice.model.Exercise;
 import com.example.courseservice.service.ExerciseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,10 +25,14 @@ import java.util.UUID;
 @RequestMapping("/exercises")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Tag(name = "Exercise")
 public class ExerciseController {
 
     ExerciseService exerciseService;
 
+    @Operation(
+            summary = "Get all exercises"
+    )
     @GetMapping
     ApiResponse<List<ExerciseResponse>> getAllExercises() {
 
@@ -35,6 +41,9 @@ public class ExerciseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get exercise by id"
+    )
     @GetMapping("/{exerciseId}")
     public ApiResponse<ExerciseDetailResponse> getExerciseById(@PathVariable UUID exerciseId) {
         return ApiResponse.<ExerciseDetailResponse>builder()
@@ -42,6 +51,9 @@ public class ExerciseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Create exercise"
+    )
     @PostMapping
     public  ApiResponse<ExerciseResponse> createExercise(@RequestBody ExerciseCreationRequest request) {
         return ApiResponse.<ExerciseResponse>builder()
@@ -49,6 +61,9 @@ public class ExerciseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Add question to exercise"
+    )
     @PostMapping("/{exerciseId}")
     public ApiResponse<List<AddQuestionToExerciseResponse>> addQuestionToExerciseResponseApiResponse(
             @PathVariable UUID exerciseId,
