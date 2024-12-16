@@ -24,7 +24,7 @@ public class CommentReport {
     @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("report_option_id")
     @JoinColumn(name = "report_option_id")
     ReportOption report_option;

@@ -48,15 +48,16 @@ public class Course {
     @Column(name = "course_logo", columnDefinition = "TEXT")
     String courseLogo;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     List<Lesson> lessons = new ArrayList<>();
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<Review> reviews = new ArrayList<>();
 
     @JoinColumn(name = "admin_id")
     UUID userUid;
+
 
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
     @JoinColumn(name = "topic_id", nullable = true)

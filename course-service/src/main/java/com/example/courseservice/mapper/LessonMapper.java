@@ -29,5 +29,6 @@ public interface LessonMapper {
     void updateLesson(@MappingTarget Lesson lesson, LessonUpdateRequest request);
 
     @Mapping(target = "courseId", source = "course.courseId")
+    @Mapping(target = "exerciseId", source = "exercise.exercise_id")
     LessonResponse toLessonResponse(Lesson lesson);
 }
