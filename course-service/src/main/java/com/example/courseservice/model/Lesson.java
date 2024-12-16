@@ -47,9 +47,9 @@ public class Lesson {
     @JoinColumn(name = "exercise_id")
     Exercise exercise;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id")
-    Problem problem;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "problem_id")
+//    Problem problem;
 
     @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY)
     @JsonBackReference

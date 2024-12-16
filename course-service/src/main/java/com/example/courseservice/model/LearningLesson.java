@@ -1,8 +1,5 @@
 package com.example.courseservice.model;
 
-
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -25,22 +22,6 @@ import java.util.UUID;
 @Table(name = "\"learning_lesson\"")
 @SqlResultSetMapping(
     name = "LessonProgressMapping",
-    /*entities={
-            @EntityResult(
-                    entityClass=LessonProgressResponse.class, fields={
-                        @FieldResult(name = "lessonId", column="lesson_id"),
-                        @FieldResult(name = "courseId", column="course_id"),
-                        @FieldResult(name = "lessonOrder", column="lesson_order"),
-                        @FieldResult(name = "lessonName", column="lesson_name"),
-                        @FieldResult(name = "description", column="description"),
-                        @FieldResult(name = "content", column="content"),
-                        @FieldResult(name = "problemId", column="problem_id"),
-                        @FieldResult(name = "exerciseId", column="exercise_id"),
-                        @FieldResult(name = "status", column="status"),
-                        @FieldResult(name = "lastAccessedDate", column="last_accessed_date"),
-                    }
-            )
-    }*/
     classes = @ConstructorResult(
         targetClass = LessonProgressResponse.class,
         columns = {
@@ -53,7 +34,8 @@ import java.util.UUID;
             @ColumnResult(name = "problem_id", type = UUID.class),
             @ColumnResult(name = "exercise_id", type = UUID.class),
             @ColumnResult(name = "status", type = String.class),
-            @ColumnResult(name = "last_accessed_date", type = Instant.class)
+            @ColumnResult(name = "last_accessed_date", type = Instant.class),
+            @ColumnResult(name = "learning_id", type = UUID.class)
         }
     )
 )
@@ -89,3 +71,36 @@ public class LearningLesson {
     List<Assignment> assignments;
 
 }
+
+ /*entities={
+            @EntityResult(
+                    entityClass=LessonProgressResponse.class, fields={
+                        @FieldResult(name = "lessonId", column="lesson_id"),
+                        @FieldResult(name = "courseId", column="course_id"),
+                        @FieldResult(name = "lessonOrder", column="lesson_order"),
+                        @FieldResult(name = "lessonName", column="lesson_name"),
+                        @FieldResult(name = "description", column="description"),
+                        @FieldResult(name = "content", column="content"),
+                        @FieldResult(name = "problemId", column="problem_id"),
+                        @FieldResult(name = "exerciseId", column="exercise_id"),
+                        @FieldResult(name = "status", column="status"),
+                        @FieldResult(name = "lastAccessedDate", column="last_accessed_date"),
+                    }
+            )
+    }*/
+
+    /*classes = @ConstructorResult(
+            targetClass = LessonProgressResponse.class,
+            columns = {
+                    @ColumnResult(name = "lessonId", type = UUID.class),
+                    @ColumnResult(name = "courseId", type = UUID.class),
+                    @ColumnResult(name = "lessonOrder", type = Integer.class),
+                    @ColumnResult(name = "lessonName", type = String.class),
+                    @ColumnResult(name = "description", type = String.class),
+                    @ColumnResult(name = "content", type = String.class),
+                    @ColumnResult(name = "problemId", type = UUID.class),
+                    @ColumnResult(name = "exerciseId", type = UUID.class),
+                    @ColumnResult(name = "status", type = String.class),
+                    @ColumnResult(name = "lastAccessedDate", type = Instant.class)
+            }
+    )*/

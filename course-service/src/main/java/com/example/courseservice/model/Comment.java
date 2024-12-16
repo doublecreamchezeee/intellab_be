@@ -35,7 +35,7 @@ public class Comment {
     @UpdateTimestamp
     Instant last_modified;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
     Topic topic;
 

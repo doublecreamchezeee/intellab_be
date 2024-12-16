@@ -15,9 +15,8 @@ public interface LessonMapper {
     @Mapping(target = "course", ignore = true)
     @Mapping(target = "lessonId", ignore = true)
     @Mapping(target = "exercise", ignore = true)
-    @Mapping(target = "problem", ignore = true)
     @Mapping(target = "learningLessons", ignore = true)
-    //@Mapping(target = "content", source = "request.content")
+    @Mapping(target = "content", source = "request.content")
     Lesson toLesson(LessonCreationRequest request);
 
     @Mapping(target = "course", ignore = true)
@@ -26,10 +25,10 @@ public interface LessonMapper {
     @Mapping(target = "course", ignore = true)
     @Mapping(target = "lessonId", ignore = true)
     @Mapping(target = "exercise", ignore = true)
-    @Mapping(target = "problem", ignore = true)
     @Mapping(target = "learningLessons", ignore = true)
     void updateLesson(@MappingTarget Lesson lesson, LessonUpdateRequest request);
 
     @Mapping(target = "courseId", source = "course.courseId")
+    @Mapping(target = "exerciseId", source = "exercise.exercise_id")
     LessonResponse toLessonResponse(Lesson lesson);
 }

@@ -5,13 +5,17 @@ import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
+import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.Course;
+import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.CourseRepository;
+import com.example.courseservice.repository.LearningLessonRepository;
+import com.example.courseservice.repository.LessonRepository;
 import com.example.courseservice.repository.UserCoursesRepository;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
@@ -33,6 +37,8 @@ public class CourseService {
     CourseRepository courseRepository;
     CourseMapper courseMapper;
     UserCoursesRepository userCoursesRepository;
+    LessonRepository lessonRepository;
+    LearningLessonRepository learningLessonRepository;
 
     public List<CourseCreationResponse> getAllCourses() {
         return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
@@ -83,14 +89,13 @@ public class CourseService {
             UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
                     .orElse(null);
 
+            // If user is not enrolled in the course, fetch course details without enrollment flag
             if (userCourses == null) {
-                // If user is not enrolled in the course, fetch course details without enrollment flag
                 return courseMapper.toDetailCourseResponse(
                         courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED)),
                         false // User is not enrolled
                 );
             }
-
 
             // If user is enrolled in the course, fetch course details
             return courseMapper.toDetailCourseResponse(
@@ -128,20 +133,42 @@ public class CourseService {
                             .progressPercent(0.0f)
                             .build();
 
+                    // create default learning lesson progress for user
+                    lessonRepository.findAllByCourse_CourseId(courseId).forEach(lesson -> {
+                        LearningLesson learningLesson = LearningLesson.builder()
+                                .lesson(lesson)
+                                .userId(userUid)
+                                .status("NEW")
+                                .assignments(new ArrayList<>())
+                                .build();
+                        learningLessonRepository.save(learningLesson);
+                    });
+
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
                 });
     }
 
-    public List<UserCourses> getEnrolledUsersOfCourse(UUID courseId) {
+    public List<EnrolledCourseResponse> getEnrolledUsersOfCourse(UUID courseId) {
         if (courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-
-        return userCoursesRepository.findAllByEnrollId_CourseId(courseId);
+        List<UserCourses> listEnrolledUserInCourse = userCoursesRepository.findAllByEnrollId_CourseId(courseId);
+        List<EnrolledCourseResponse> listEnrolledUsersResponse = new ArrayList<>();
+        for (UserCourses userCourses : listEnrolledUserInCourse) {
+            userCourses.setCourse(course);
+            listEnrolledUsersResponse.add(EnrolledCourseResponse.builder()
+                        .course(course)
+                        .enrollId(userCourses.getEnrollId())
+                        .lastAccessedDate(userCourses.getLastAccessedDate())
+                        .progressPercent(userCourses.getProgressPercent())
+                        .status(userCourses.getStatus())
+                    .build());
+        }
+        return listEnrolledUsersResponse;
     }
 
     public List<UserCourses> getEnrolledCoursesOfUser(UUID userUid) {

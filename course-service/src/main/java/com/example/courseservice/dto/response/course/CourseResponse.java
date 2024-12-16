@@ -15,7 +15,10 @@ public class CourseResponse {
     String courseName;
     String description;
     String level;
-
+    float price;
+    String unitPrice;
+    String courseLogo;
+    UUID userUid;
     int numberOfReviews;
     float averageRating;
 }

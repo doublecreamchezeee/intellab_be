@@ -3,7 +3,7 @@ package com.example.courseservice.dto.response.learningLesson;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -23,5 +23,16 @@ public class LessonProgressResponse {
     UUID problemId;
     UUID exerciseId;
     String status;
-    ZonedDateTime lastAccessedDate;
+    Instant lastAccessedDate;
+    UUID learningId;
+    /*UUID lesson_id;
+    UUID course_id;
+    Integer lesson_order;
+    String lesson_name;
+    String description;
+    String content;
+    UUID problem_id;
+    UUID exercise_id;
+    String status;
+    Instant last_accessed_date;*/
 }

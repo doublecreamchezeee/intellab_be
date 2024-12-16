@@ -9,6 +9,7 @@ import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonUserResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.service.CourseService;
@@ -51,8 +52,8 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/{userUid}/lessons")
-    ApiResponse<List<LessonUserResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
-        return ApiResponse.<List<LessonUserResponse>>builder()
+    ApiResponse<List<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
+        return ApiResponse.<List<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
                             UUID.fromString(courseId)
@@ -60,6 +61,7 @@ public class CourseController {
                 )
                 .build();
     }
+
 
     @GetMapping("/{courseId}")
     ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId, @RequestParam(required = false) String userUid) {
@@ -109,9 +111,9 @@ public class CourseController {
                 .build();
     }
 
-    @GetMapping("/{courseId}/users")
-    public ApiResponse<List<UserCourses>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
-        return ApiResponse.<List<UserCourses>>builder()
+    @GetMapping("/{courseId}/enrolledUsers")
+    public ApiResponse<List<EnrolledCourseResponse>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
+        return ApiResponse.<List<EnrolledCourseResponse>>builder()
                 .result(courseService.getEnrolledUsersOfCourse(courseId))
                 .build();
     }

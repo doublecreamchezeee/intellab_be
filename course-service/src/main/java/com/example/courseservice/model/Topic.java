@@ -46,10 +46,10 @@ public class Topic {
     @JsonBackReference
     Course course;
 
-    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
-    Problem problem;
+//    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
+//    Problem problem;
 
-    @OneToMany(mappedBy = "topic")
+    @OneToMany(mappedBy = "topic", fetch = FetchType.LAZY)
     List<Comment> comments;
 
     @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)

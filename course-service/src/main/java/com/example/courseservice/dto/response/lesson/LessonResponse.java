@@ -17,4 +17,5 @@ public class LessonResponse {
     String description;
     String content;
     UUID courseId;
+    UUID exerciseId;
 }
