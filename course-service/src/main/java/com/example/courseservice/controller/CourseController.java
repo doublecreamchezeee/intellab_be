@@ -51,8 +51,8 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/{userUid}/lessons")
-    ApiResponse<List<LessonUserResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
-        return ApiResponse.<List<LessonUserResponse>>builder()
+    ApiResponse<List<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
+        return ApiResponse.<List<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
                             UUID.fromString(courseId)
@@ -60,6 +60,7 @@ public class CourseController {
                 )
                 .build();
     }
+
 
     @GetMapping("/{courseId}")
     ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId, @RequestParam(required = false) String userUid) {
@@ -109,7 +110,7 @@ public class CourseController {
                 .build();
     }
 
-    @GetMapping("/{courseId}/users")
+    @GetMapping("/{courseId}/enrolledUsers")
     public ApiResponse<List<UserCourses>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
         return ApiResponse.<List<UserCourses>>builder()
                 .result(courseService.getEnrolledUsersOfCourse(courseId))
