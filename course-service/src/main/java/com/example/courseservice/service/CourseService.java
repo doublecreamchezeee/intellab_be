@@ -5,6 +5,7 @@ import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
+import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CourseMapper;
@@ -148,15 +149,26 @@ public class CourseService {
                 });
     }
 
-    public List<UserCourses> getEnrolledUsersOfCourse(UUID courseId) {
+    public List<EnrolledCourseResponse> getEnrolledUsersOfCourse(UUID courseId) {
         if (courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-
-        return userCoursesRepository.findAllByEnrollId_CourseId(courseId);
+        List<UserCourses> listEnrolledUserInCourse = userCoursesRepository.findAllByEnrollId_CourseId(courseId);
+        List<EnrolledCourseResponse> listEnrolledUsersResponse = new ArrayList<>();
+        for (UserCourses userCourses : listEnrolledUserInCourse) {
+            userCourses.setCourse(course);
+            listEnrolledUsersResponse.add(EnrolledCourseResponse.builder()
+                        .course(course)
+                        .enrollId(userCourses.getEnrollId())
+                        .lastAccessedDate(userCourses.getLastAccessedDate())
+                        .progressPercent(userCourses.getProgressPercent())
+                        .status(userCourses.getStatus())
+                    .build());
+        }
+        return listEnrolledUsersResponse;
     }
 
     public List<UserCourses> getEnrolledCoursesOfUser(UUID userUid) {
