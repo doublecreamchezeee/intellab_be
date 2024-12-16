@@ -40,7 +40,7 @@ public class CourseController {
             summary = "Create course"
     )
     @PostMapping("")
-    public ApiResponse<CourseCreationResponse> createCourse(@RequestBody @Valid CourseCreationRequest request) {
+    ApiResponse<CourseCreationResponse> createCourse(@RequestBody @Valid CourseCreationRequest request) {
         return ApiResponse.<CourseCreationResponse>builder()
                 .result(courseService.createCourse(
                         ParseUUID.normalizeUID(request.getUserUid()),
