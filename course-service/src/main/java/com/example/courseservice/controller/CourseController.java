@@ -9,6 +9,7 @@ import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonUserResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.service.CourseService;
@@ -111,8 +112,8 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/enrolledUsers")
-    public ApiResponse<List<UserCourses>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
-        return ApiResponse.<List<UserCourses>>builder()
+    public ApiResponse<List<EnrolledCourseResponse>> getEnrolledUsersOfCourse(@PathVariable("courseId") UUID courseId) {
+        return ApiResponse.<List<EnrolledCourseResponse>>builder()
                 .result(courseService.getEnrolledUsersOfCourse(courseId))
                 .build();
     }
