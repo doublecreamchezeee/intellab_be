@@ -4,6 +4,8 @@ import com.example.problemservice.model.Problem;
 import com.example.problemservice.service.ProblemService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +16,21 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/problems")
 @RequiredArgsConstructor
+@Tag(name = "Problem")
 public class ProblemController {
     private final ProblemService problemService;
 
+    @Operation(
+            summary = "Create problem"
+    )
     @PostMapping
     public ResponseEntity<Problem> createProblem(@RequestBody Problem problem) {
         return ResponseEntity.ok(problemService.createProblem(problem));
     }
 
+    @Operation(
+            summary = "Get problem by id"
+    )
     @GetMapping("/{problemId}")
     public ResponseEntity<Problem> getProblem(@PathVariable UUID problemId) {
         try {
@@ -35,6 +44,9 @@ public class ProblemController {
         }
     }
 
+    @Operation(
+            summary = "Delete problem"
+    )
     @DeleteMapping("/{problemId}")
     public ResponseEntity<Void> deleteProblem(@PathVariable UUID problemId) {
         problemService.deleteProblem(problemId);

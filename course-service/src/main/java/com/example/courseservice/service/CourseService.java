@@ -156,6 +156,12 @@ public class CourseService {
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        // reduce data size response to fe
+        course.setReviews(new ArrayList<>());
+        course.setLessons(new ArrayList<>());
+        course.setEnrollCourses(new ArrayList<>());
+
         List<UserCourses> listEnrolledUserInCourse = userCoursesRepository.findAllByEnrollId_CourseId(courseId);
         List<EnrolledCourseResponse> listEnrolledUsersResponse = new ArrayList<>();
         for (UserCourses userCourses : listEnrolledUserInCourse) {
@@ -178,18 +184,6 @@ public class CourseService {
 
         return userCoursesRepository.findAllByEnrollId_UserUid(userUid);
     }
-//
-//    public List<CourseCreationResponse> getUserCourses(UUID userUid) {
-//        EnrollCourse enrollCourse = enrollCourseRepository.findByUserUid(userUid);
-//        if (enrollCourse == null || enrollCourse.getCourseIds().isEmpty()) {
-//            return Collections.emptyList();
-//        }
-//
-//        return enrollCourse.getCourseIds().stream()
-//                .map(courseId -> courseMapper.toCourseCreationResponse(
-//                        courseRepository.getReferenceById(courseId)
-//                ))
-//                .collect(Collectors.toList());
-//    }
+
 
 }
