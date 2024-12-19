@@ -5,6 +5,7 @@ import com.example.courseservice.dto.request.learningLesson.LearningLessonCreati
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonUserResponse;
@@ -14,10 +15,8 @@ import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.LearningLessonMapper;
 import com.example.courseservice.mapper.LessonMapper;
-import com.example.courseservice.model.Course;
-import com.example.courseservice.model.LearningLesson;
-import com.example.courseservice.model.Exercise;
-import com.example.courseservice.model.Lesson;
+import com.example.courseservice.mapper.QuestionMapper;
+import com.example.courseservice.model.*;
 import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.LearningLessonRepository;
 import com.example.courseservice.repository.LessonRepository;
@@ -33,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -51,6 +51,7 @@ public class LessonService {
 
     //@Qualifier("learningLessonRepositoryCustomImpl")
     LearningLessonRepositoryCustomImpl learningLessonRepositoryCustom;
+    private final QuestionMapper questionMapper;
 
     public LessonResponse createLesson(LessonCreationRequest request) {
         if (!courseRepository.existsById(request.getCourseId())) {
@@ -79,6 +80,21 @@ public class LessonService {
 
         return lessonMapper.toLessonResponse(lesson);
     }
+
+    public QuestionResponse getQuestion(UUID lessonId)
+    {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
+        List<Question> questions = lesson.getExercise().getQuestionList();
+        if(questions.isEmpty())
+            return null;
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(questions.size());
+
+        return questionMapper.toQuestionResponse(questions.get(randomIndex));
+    }
+
 
     public List<LessonResponse> getLessonsByCourseId(String courseId) {
         return lessonRepository.findAllByCourse_CourseId(UUID.fromString(courseId)).stream()
