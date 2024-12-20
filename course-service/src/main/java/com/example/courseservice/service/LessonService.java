@@ -85,9 +85,14 @@ public class LessonService {
     {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
-        List<Question> questions = lesson.getExercise().getQuestionList();
-        if(questions.isEmpty())
+        Exercise exercise = lesson.getExercise();
+        if (exercise == null)
             return null;
+        List<Question> questions = exercise.getQuestionList();
+
+        if(questions.isEmpty()||questions==null)
+            return null;
+
 
         Random random = new Random();
         int randomIndex = random.nextInt(questions.size());
