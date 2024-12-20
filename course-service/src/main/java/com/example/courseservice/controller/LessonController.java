@@ -6,6 +6,7 @@ import com.example.courseservice.dto.request.learningLesson.LearningLessonCreati
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.service.ExerciseService;
@@ -108,6 +109,13 @@ public class LessonController {
 
         return ApiResponse.<LessonResponse>builder()
                 .result(lessonService.addExercise(lessonId,request))
+                .build();
+    }
+
+    @GetMapping("/{lessonId}/quiz")
+    ApiResponse<QuestionResponse> quiz(@PathVariable("lessonId") UUID lessonId){
+        return ApiResponse.<QuestionResponse>builder()
+                .result(lessonService.getQuestion(lessonId))
                 .build();
     }
 
