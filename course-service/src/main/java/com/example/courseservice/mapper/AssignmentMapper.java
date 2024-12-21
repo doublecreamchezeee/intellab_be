@@ -27,6 +27,7 @@ public interface AssignmentMapper {
     @Mapping(target = "score", source = "score")
     @Mapping(target = "submitOrder", source = "submit_order")
     @Mapping(target = "submitDate", source = "submit_date")
+    @Mapping(target = "learningLessonId", source = "learningLesson.learningId")
     AssignmentResponse toResponse(Assignment assignment);
 
     @Mapping(target = "assignment_id", ignore = true)

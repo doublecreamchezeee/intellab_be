@@ -4,12 +4,14 @@ import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.repository.custom.LearningLessonRepositoryCustom;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface LearningLessonRepository extends JpaRepository<LearningLesson, UUID>, LearningLessonRepositoryCustom {
+@Repository
+public interface LearningLessonRepository extends JpaRepository<LearningLesson, UUID> {
     List<LearningLesson> findByUserId(UUID userId);
     List<LearningLesson> findByLesson_LessonId(UUID lessonId);
     Optional<LearningLesson> findByUserIdAndLesson_LessonId(UUID userId, UUID lessonId);

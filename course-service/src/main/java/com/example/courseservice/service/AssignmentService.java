@@ -56,6 +56,7 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 
         detailRequests.forEach(detailRequest -> {
+            //parse float fail unit score
             AssignmentDetail assignmentDetail = assignmentDetailMapper.toAssignmentDetail(detailRequest);
             assignmentDetailID id = new assignmentDetailID();
             id.setAssignment_id(assignmentId);

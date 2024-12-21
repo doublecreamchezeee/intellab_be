@@ -1,23 +1,36 @@
 package com.example.courseservice.dto.response.course;
 
+import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.SqlResultSetMapping;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
+@Setter
+@Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DetailCourseResponse {
     UUID courseId;
+    String courseLogo;
     String courseName;
     String description;
     String level;
     float price;
     String unitPrice;
-    String courseLogo;
     UUID userUid;
+    int lessonCount;
+    float averageRating;
+    int reviewCount;
     boolean isUserEnrolled;
+    UUID latestLessonId;
+    Float progressPercent;
 }

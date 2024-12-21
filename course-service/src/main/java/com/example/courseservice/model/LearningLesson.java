@@ -59,6 +59,12 @@ public class LearningLesson {
     @Column(name = "last_accessed_date")
     Instant lastAccessedDate;
 
+    @Column(name = "is_done_theory")
+    Boolean isDoneTheory;
+
+    @Column(name = "is_done_practice")
+    Boolean isDonePractice;
+
     @JoinColumn(name = "student_id", nullable = false)
     UUID userId;
 

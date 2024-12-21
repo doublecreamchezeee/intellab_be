@@ -1,7 +1,9 @@
 package com.example.courseservice.model;
 
+import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +23,34 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "\"courses\"")
+@SqlResultSetMapping(
+        name = "DetailCourseMapping",
+        classes = @ConstructorResult(
+                targetClass = DetailCourseResponse.class,
+                columns = {
+                        @ColumnResult(name = "course_id", type = UUID.class),
+                        @ColumnResult(name = "course_logo", type = String.class),
+                        @ColumnResult(name = "course_name", type = String.class),
+                        @ColumnResult(name = "description", type = String.class),
+                        @ColumnResult(name = "level", type = String.class),
+                        @ColumnResult(name = "price", type = Float.class),
+                        @ColumnResult(name = "unit_price", type = String.class),
+                        @ColumnResult(name = "user_uid", type = UUID.class),
+                        @ColumnResult(name = "lesson_count", type = Integer.class),
+                        @ColumnResult(name = "average_rating", type = Float.class),
+                        @ColumnResult(name = "review_count", type = Integer.class),
+                        @ColumnResult(name = "is_user_enrolled", type = Boolean.class),
+                        @ColumnResult(name = "latest_lesson_id", type = UUID.class),
+                        @ColumnResult(name = "progress_percent", type = Float.class)
+                }
+        )
+)
+@NamedNativeQuery(
+        name = "Course.getDetailsCourse",
+        query = "SELECT * FROM get_details_course(:courseId, :userId)",
+        resultSetMapping = "DetailCourseMapping"
+)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Course {
     @Id
     @Column(name = "course_id")

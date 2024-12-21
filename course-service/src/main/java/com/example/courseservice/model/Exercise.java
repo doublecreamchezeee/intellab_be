@@ -31,7 +31,6 @@ public class Exercise {
     @OneToOne(mappedBy = "exercise", fetch = FetchType.LAZY)
     Lesson lesson;
 
-
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

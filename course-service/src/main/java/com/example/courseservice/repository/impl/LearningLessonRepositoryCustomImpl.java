@@ -69,6 +69,21 @@ public class LearningLessonRepositoryCustomImpl implements LearningLessonReposit
         //return results.stream().map(this::mapToLessonProgressResponse).collect(Collectors.toList());
     }
 
+    @Override
+    public Boolean markTheoryLessonAsDone(UUID learningId, UUID exerciseId) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("mark_theory_of_lesson_as_done");
+        query.registerStoredProcedureParameter("learningID", UUID.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("exerciseId", UUID.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("is_done_theory", Boolean.class, ParameterMode.OUT);
+
+        query.setParameter("learningID", learningId);
+        query.setParameter("exerciseId", exerciseId);
+
+        query.execute();
+        return (Boolean) query.getOutputParameterValue("is_done_theory");
+
+    }
+
     /*private LessonProgressResponse mapToLessonProgressResponse(Object[] result) {
         return LessonProgressResponse.builder()
                 .lesson_id((UUID) result[0])

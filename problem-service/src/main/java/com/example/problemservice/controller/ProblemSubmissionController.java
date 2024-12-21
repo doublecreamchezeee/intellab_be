@@ -1,5 +1,6 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.service.ProblemSubmissionService;
 import com.example.problemservice.exception.AppException;
@@ -58,5 +59,20 @@ public class ProblemSubmissionController {
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
         }
+    }
+
+    @Operation(
+            summary = "Get submission details by problem id and user uid"
+    )
+    @GetMapping("/details/{problemId}/{userId}")
+    public DetailsProblemSubmissionResponse getSubmissionDetailsByProblemIdAndUserUid(
+            @PathVariable("problemId") UUID problemId,
+            @PathVariable("userId") UUID userUid) {
+        return problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(
+                problemId,
+                userUid
+                /*UUID.fromString(problemId),
+                UUID.fromString(userId)*/
+        );
     }
 }

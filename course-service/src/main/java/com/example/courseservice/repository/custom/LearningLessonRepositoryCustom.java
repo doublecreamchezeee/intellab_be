@@ -11,4 +11,5 @@ import com.example.courseservice.dto.response.learningLesson.LessonProgressRespo
 @Repository
 public interface LearningLessonRepositoryCustom {
     List<LessonProgressResponse> getLessonProgress(UUID userId, UUID courseId);
+    Boolean markTheoryLessonAsDone(UUID learningId, UUID exerciseId);
 }
