@@ -1,5 +1,6 @@
 package com.example.courseservice.dto.request.lesson;
 
+import jakarta.annotation.Nullable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import jakarta.validation.constraints.*;
@@ -18,4 +19,7 @@ public class LessonCreationRequest {
     String description;
     String content;
     UUID courseId;
+
+    @Nullable
+    UUID problemId;
 }

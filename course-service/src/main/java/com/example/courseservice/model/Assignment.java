@@ -34,8 +34,8 @@ public class Assignment {
     Instant submit_date;
 
     @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exercise_id",nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "exercise_id", nullable = true)
     Exercise exercise;
 
     @JsonBackReference

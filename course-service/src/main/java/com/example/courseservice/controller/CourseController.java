@@ -22,6 +22,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -91,10 +93,14 @@ public class CourseController {
     @Operation(
             summary = "Get all courses"
     )
-    @GetMapping
-    ApiResponse<List<CourseCreationResponse>> getAllCourse() {
-        return ApiResponse.<List<CourseCreationResponse>>builder()
-                .result(courseService.getAllCourses())
+    @GetMapping("")
+    ApiResponse<Page<CourseCreationResponse>> getAllCourse(
+            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, Pageable pageable) {
+        return ApiResponse.<Page<CourseCreationResponse>>builder()
+                .result(courseService.getAllCourses(
+                        userUid == null ? null : ParseUUID.normalizeUID(userUid),
+                        pageable
+                ))
                 .build();
     }
 

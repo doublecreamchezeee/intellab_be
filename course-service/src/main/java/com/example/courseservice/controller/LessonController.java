@@ -8,6 +8,7 @@ import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
+import com.example.courseservice.dto.response.lesson.DetailsLessonResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.service.ExerciseService;
 import com.example.courseservice.model.LearningLesson;
@@ -44,11 +45,11 @@ public class LessonController {
     }
 
     @Operation(
-            summary = "Get lesson by id, provide userUid to check user has enrolled course or not, else 403"
+            summary = "Get one lesson by id, provide userUid to check user has enrolled course or not, else 403"
     )
     @GetMapping("/{lessonId}/{userId}")
-    ApiResponse<LessonResponse> getLessonById(@PathVariable("lessonId") String lessonId, @PathVariable("userId") String userId){
-        return ApiResponse.<LessonResponse>builder()
+    ApiResponse<DetailsLessonResponse> getLessonById(@PathVariable("lessonId") String lessonId, @PathVariable("userId") String userId){
+        return ApiResponse.<DetailsLessonResponse>builder()
                 .result(lessonService.getLessonById(
                         lessonId,
                         ParseUUID.normalizeUID(userId))
@@ -92,7 +93,7 @@ public class LessonController {
     }
 
     @Operation(
-            summary = "Update learning progress of lesson by id, status can be 'completed', 'in-progress', 'not-started'"
+            summary = "Update learning progress of lesson by id, status can be 'completed', 'in-progress', 'not-started' (fe don't need to use, be auto updated when user finish lesson)"
     )
     @PutMapping("/{learningLessonId}/updateLearningProgress")
     ApiResponse<LearningLessonResponse> updateLearningProgress(
@@ -104,6 +105,9 @@ public class LessonController {
                 .build();
     }
 
+    @Operation(
+            summary = "Add exercise to lesson"
+    )
     @PostMapping("/{lessonId}")
     ApiResponse<LessonResponse> addExercise(@PathVariable("lessonId") UUID lessonId, @RequestBody ExerciseCreationRequest request){
 
@@ -112,10 +116,43 @@ public class LessonController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get quiz of lesson"
+    )
     @GetMapping("/{lessonId}/quiz")
     ApiResponse<QuestionResponse> quiz(@PathVariable("lessonId") UUID lessonId){
         return ApiResponse.<QuestionResponse>builder()
                 .result(lessonService.getQuestion(lessonId))
+                .build();
+    }
+
+    @Operation(
+            summary = "Mark theory of lesson as done"
+    )
+    @PutMapping("/{learningLessonId}/doneTheory")
+    ApiResponse<Boolean> doneTheoryOfLesson(
+            @PathVariable("learningLessonId") UUID learningLessonId) {
+
+        return ApiResponse.<Boolean>builder()
+                .result(lessonService.doneTheoryOfLesson(
+                            learningLessonId
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Mark practice of lesson as done"
+    )
+    @PutMapping("/{learningLessonId}/donePractice")
+    ApiResponse<Boolean> donePracticeOfLesson(
+            @PathVariable("learningLessonId") UUID learningLessonId) {
+
+        return ApiResponse.<Boolean>builder()
+                .result(lessonService.donePracticeOfLesson(
+                            learningLessonId
+                        )
+                )
                 .build();
     }
 
