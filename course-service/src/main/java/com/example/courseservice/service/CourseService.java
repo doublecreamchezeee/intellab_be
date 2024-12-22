@@ -44,11 +44,12 @@ public class CourseService {
     LearningLessonRepository learningLessonRepository;
     DetailsCourseRepositoryCustomImpl detailsCourseRepositoryCustom;
 
-    /*public List<CourseCreationResponse> getAllCourses() {
-        return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
-    }*/
+    public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
+        Page<Course> courses = courseRepository.findAll(pageable);
+        return courses.map(courseMapper::toCourseCreationResponse);
+    }
 
-    public Page<CourseCreationResponse> getAllCourses(UUID userId, Pageable pageable) {
+    public Page<CourseCreationResponse> getAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable) {
 
         Page<Course> courses;
         if (userId == null) {
@@ -92,9 +93,10 @@ public class CourseService {
         return courseMapper.toCourseCreationResponse(course);
     }
 
-    public List<CourseCreationResponse> searchCourses(String keyword) {
-        return courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
-                .stream().map(courseMapper::toCourseCreationResponse).toList();
+    public Page<CourseCreationResponse> searchCourses(String keyword, Pageable pageable) {
+
+        Page<Course>  courses = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
+        return courses.map(courseMapper::toCourseCreationResponse);
     }
 
     public DetailCourseResponse getCourseById(UUID courseId, UUID userUid) {

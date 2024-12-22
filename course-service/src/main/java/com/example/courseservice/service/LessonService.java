@@ -25,6 +25,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -108,9 +110,13 @@ public class LessonService {
         return questionMapper.toQuestionResponse(questions.get(randomIndex));
     }
 
-    public List<LessonResponse> getLessonsByCourseId(String courseId) {
-        return lessonRepository.findAllByCourse_CourseIdOrderByLessonOrder(UUID.fromString(courseId)).stream()
-                .map(lessonMapper::toLessonResponse).toList();
+    public Page<LessonResponse> getLessonsByCourseId(String courseId, Pageable pageable) {
+        Page<Lesson> lessons =  lessonRepository.findAllByCourse_CourseIdOrderByLessonOrder(
+                UUID.fromString(courseId),
+                pageable
+            );
+
+        return lessons.map(lessonMapper::toLessonResponse);
     }
 
     public void deleteLesson(String lessonId) {
@@ -212,7 +218,7 @@ public class LessonService {
             // check if existed empty assignment return true, else create new empty assignment
             List<Assignment> existedAssignment = assignmentRepository.findByLearningLesson_LearningId(learningLessonId);
 
-            if (!existedAssignment.isEmpty()) {
+            if (!existedAssignment.isEmpty() && learningLesson.getIsDoneTheory()) {
               return true;
             } else {
               Assignment newAssignment = Assignment.builder()
@@ -252,7 +258,7 @@ public class LessonService {
         Lesson lesson = learningLesson.getLesson();
 
         // case lesson don't have problem
-        if (lesson.getProblemId() == null) {
+        /*if (lesson.getProblemId() == null) {
             learningLesson.setIsDonePractice(true);
             learningLessonRepository.save(learningLesson);
             return true;
@@ -274,7 +280,10 @@ public class LessonService {
             learningLesson.setIsDonePractice(false);
             learningLessonRepository.save(learningLesson);
             return false;
-        }
+        }*/
+        learningLesson.setIsDonePractice(true);
+        learningLessonRepository.save(learningLesson);
+        return true;
     }
 
 }
