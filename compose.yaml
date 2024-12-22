@@ -1,44 +1,51 @@
-version: '3.8'
+version: '3.9'
 
 services:
   api-gateway:
-    image: doublecreamcheze/intellab_ops:api-gateway-latest  # Sửa lại tên image
+    image: doublecreamcheze/intellab_ops:api-gateway-latest
     ports:
       - "8100:8000"
 
   identity-service:
-    image: doublecreamcheze/intellab_ops:identity-service-latest  # Sửa lại tên image
+    image: doublecreamcheze/intellab_ops:identity-service-latest
     ports:
       - "8101:8001"
 
   course-service:
-    image: doublecreamcheze/intellab_ops:course-service-latest  # Sửa lại tên image
+    image: doublecreamcheze/intellab_ops:course-service-latest
     ports:
-      - "8102:8002"  # Expose course service port
+      - "8102:8002"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://course-db:5432/course-service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 123456
     depends_on:
-      - course-db  # Ensure the database is up before course service
-  problem-service:
-    image: doublecreamcheze/intellab_ops:problem-service-latest  # Sửa lại tên image
-    ports:
-      - "8103:8003"  # Expose course service port
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://course-db:5432/course-service
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 123456
-    depends_on:
-      - course-db  # Ensure the database is up before course service
+      - db
 
-  # Database service for course-service
-  course-db:
-    image: postgres:latest  # Official PostgreSQL image
-    container_name: course-db
+  problem-service:
+    image: doublecreamcheze/intellab_ops:problem-service-latest
+    ports:
+      - "8103:8003"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: intellab-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: course-service
+      POSTGRES_DB: intellab-db
     ports:
-      - "5433:5432"  # Expose port for connecting to the database
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
