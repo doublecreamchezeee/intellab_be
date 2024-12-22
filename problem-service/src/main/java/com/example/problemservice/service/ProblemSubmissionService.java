@@ -1,8 +1,10 @@
 package com.example.problemservice.service;
 
 import com.example.problemservice.client.Judge0Client;
+import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import com.example.problemservice.mapper.ProblemSubmissionMapper;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.model.TestCase;
@@ -25,6 +27,7 @@ public class ProblemSubmissionService {
     private final ProblemRepository problemRepository;
     private final TestCaseOutputRepository testCaseOutputRepository;
     private final Judge0Client judge0Client;
+    private final ProblemSubmissionMapper problemSubmissionMapper;
 
     public ProblemSubmission submitProblem(ProblemSubmission submission) {
         // Lấy Problem
@@ -107,6 +110,17 @@ public class ProblemSubmissionService {
                 .orElseThrow(() -> new AppException(
                         ErrorCode.SUBMISSION_NOT_EXIST)
                 );
+    }
+
+    public DetailsProblemSubmissionResponse getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+
+        ProblemSubmission submission = problemSubmissionRepository.findProblemSubmissionByProblemAndUserUid(
+                problem, userUid
+            ).orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
+
+        return problemSubmissionMapper.toDetailsProblemSubmissionResponse(submission);
     }
 }
 

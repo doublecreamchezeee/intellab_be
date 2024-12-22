@@ -17,11 +17,14 @@ import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.LearningLessonRepository;
 import com.example.courseservice.repository.LessonRepository;
 import com.example.courseservice.repository.UserCoursesRepository;
+import com.example.courseservice.repository.impl.DetailsCourseRepositoryCustomImpl;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,9 +42,21 @@ public class CourseService {
     UserCoursesRepository userCoursesRepository;
     LessonRepository lessonRepository;
     LearningLessonRepository learningLessonRepository;
+    DetailsCourseRepositoryCustomImpl detailsCourseRepositoryCustom;
 
-    public List<CourseCreationResponse> getAllCourses() {
+    /*public List<CourseCreationResponse> getAllCourses() {
         return courseRepository.findAll().stream().map(courseMapper::toCourseCreationResponse).toList();
+    }*/
+
+    public Page<CourseCreationResponse> getAllCourses(UUID userId, Pageable pageable) {
+
+        Page<Course> courses;
+        if (userId == null) {
+            courses = courseRepository.findAll(pageable);
+        } else {
+            courses = courseRepository.findAllCoursesExceptEnrolledByUser(userId, pageable);
+        }
+        return courses.map(courseMapper::toCourseCreationResponse);
     }
 
     public void deleteCourseById(UUID id) {
@@ -84,7 +99,7 @@ public class CourseService {
 
     public DetailCourseResponse getCourseById(UUID courseId, UUID userUid) {
         // Check if a userUid is provided
-        if (userUid != null) {
+        /*if (userUid != null) {
             // Find UserCourses by composite key (userUid and courseId)
             UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
                     .orElse(null);
@@ -108,7 +123,14 @@ public class CourseService {
         return courseMapper.toDetailCourseResponse(
                 courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED)),
                 false // User is not enrolled
-        );
+        );*/
+
+        DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
+                .getDetailsCourse(courseId, userUid)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        return detailCourseResponse;
+
+
     }
 
     public UserCourses enrollCourse(UUID userUid, UUID courseId) {
@@ -134,12 +156,14 @@ public class CourseService {
                             .build();
 
                     // create default learning lesson progress for user
-                    lessonRepository.findAllByCourse_CourseId(courseId).forEach(lesson -> {
+                    lessonRepository.findAllByCourse_CourseIdOrderByLessonOrder(courseId).forEach(lesson -> {
                         LearningLesson learningLesson = LearningLesson.builder()
                                 .lesson(lesson)
                                 .userId(userUid)
                                 .status("NEW")
                                 .assignments(new ArrayList<>())
+                                .isDoneTheory(false)
+                                .isDonePractice(false)
                                 .build();
                         learningLessonRepository.save(learningLesson);
                     });
