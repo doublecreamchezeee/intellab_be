@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -14,4 +16,8 @@ dependencies {
     implementation("org.hibernate:hibernate-core:6.2.10.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+}
+
+tasks.withType<BootJar> {
+    enabled = true
 }
