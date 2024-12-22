@@ -29,6 +29,7 @@ public enum ErrorCode {
     LESSON_ORDER_EXISTED(409, "Lesson order existed", HttpStatus.CONFLICT),
     LEARNING_LESSON_EXISTED(409, "Learning lesson existed", HttpStatus.CONFLICT),
     USER_NOT_ENROLLED(404, "User not enrolled", HttpStatus.NOT_FOUND),
+    LEARNING_LESSON_NOT_FOUND(404, "Learning lesson not found", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

@@ -2,6 +2,7 @@ package com.example.courseservice.dto.response.lesson;
 
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.SqlResultSetMapping;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonResponse {
+public class DetailsLessonResponse {
     UUID lessonId;
     String content;
     String description;
@@ -21,5 +22,9 @@ public class LessonResponse {
     String lessonName;
     UUID courseId;
     UUID exerciseId;
-    UUID problemId;
+    UUID learningId;
+    UUID nextLessonId;
+    String nextLessonName;
+    Boolean isDoneTheory;
+    Boolean isDonePractice;
 }
