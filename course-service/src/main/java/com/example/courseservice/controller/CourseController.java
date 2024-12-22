@@ -55,9 +55,14 @@ public class CourseController {
             summary = "Get all lessons of a course (using when user hasn't enrolled in course)"
     )
     @GetMapping("/{courseId}/lessons")
-    ApiResponse<List<LessonResponse>> getLessonsByCourseId(@PathVariable("courseId") String courseId) {
-        return ApiResponse.<List<LessonResponse>>builder()
-                .result(lessonService.getLessonsByCourseId(courseId))
+    ApiResponse<Page<LessonResponse>> getLessonsByCourseId(
+            @PathVariable("courseId") String courseId, Pageable pageable) {
+        return ApiResponse.<Page<LessonResponse>>builder()
+                .result(lessonService.getLessonsByCourseId(
+                            courseId,
+                            pageable
+                        )
+                )
                 .build();
     }
 
@@ -65,7 +70,8 @@ public class CourseController {
             summary = "Get all lessons and progress of learning lessons in a course (using when user has enrolled in course)"
     )
     @GetMapping("/{courseId}/{userUid}/lessons")
-    ApiResponse<List<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(@PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
+    ApiResponse<List<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(
+            @PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
         return ApiResponse.<List<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
@@ -94,10 +100,21 @@ public class CourseController {
             summary = "Get all courses"
     )
     @GetMapping("")
-    ApiResponse<Page<CourseCreationResponse>> getAllCourse(
-            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, Pageable pageable) {
+    ApiResponse<Page<CourseCreationResponse>> getAllCourse(Pageable pageable) {
+
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
+                            pageable
+                        )
+                )
+                .build();
+    }
+
+    @GetMapping("/exceptEnrolled")
+    ApiResponse<Page<CourseCreationResponse>> getAllCourseExceptEnrolledByUser(
+            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, Pageable pageable) {
+        return ApiResponse.<Page<CourseCreationResponse>>builder()
+                .result(courseService.getAllCoursesExceptEnrolledByUser(
                         userUid == null ? null : ParseUUID.normalizeUID(userUid),
                         pageable
                 ))
@@ -129,9 +146,13 @@ public class CourseController {
             summary = "Get all courses that contain keyword in title or description"
     )
     @GetMapping("/search")
-    public ApiResponse<List<CourseCreationResponse>> searchCourses(@RequestParam("keyword") String keyword) {
-        return ApiResponse.<List<CourseCreationResponse>>builder()
-                .result(courseService.searchCourses(keyword))
+    public ApiResponse<Page<CourseCreationResponse>> searchCourses(
+            @RequestParam("keyword") String keyword, Pageable pageable) {
+        return ApiResponse.<Page<CourseCreationResponse>>builder()
+                .result(courseService.searchCourses(
+                            keyword, pageable
+                        )
+                )
                 .build();
     }
 

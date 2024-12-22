@@ -7,7 +7,9 @@ import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.QuestionMapper;
+import com.example.courseservice.model.Exercise;
 import com.example.courseservice.model.Question;
+import com.example.courseservice.repository.ExerciseRepository;
 import com.example.courseservice.repository.LessonRepository;
 import com.example.courseservice.repository.QuestionRepository;
 import lombok.AccessLevel;
@@ -25,6 +27,7 @@ public class QuestionService {
     QuestionRepository questionRepository;
     QuestionMapper questionMapper;
     LessonRepository lessonRepository;
+    ExerciseRepository exerciseRepository;
 
 
     public List<QuestionResponse> getAllQuestions() {
@@ -56,6 +59,14 @@ public class QuestionService {
         questionRepository.deleteById(questionId);
     }
 
+    public List<QuestionResponse> getQuestionsByExerciseId(UUID exerciseId) {
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
+        List<Exercise> exercises = List.of(exercise);
+        //List<Question> questions  //questionMapper.toQuestionResponse(questions);
+        return questionRepository.findAllByExercises(exercises)
+                .stream().map(questionMapper::toQuestionResponse).toList();
 
+    }
 
 }

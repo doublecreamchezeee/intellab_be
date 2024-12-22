@@ -4,12 +4,14 @@ package com.example.courseservice.controller;
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.exercise.ExerciseCreationRequest;
 import com.example.courseservice.dto.request.exercise.ModifyQuesstionListRequest;
+import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.exercise.AddQuestionToExerciseResponse;
 import com.example.courseservice.dto.response.exercise.ExerciseDetailResponse;
 import com.example.courseservice.dto.response.exercise.ExerciseResponse;
 import com.example.courseservice.model.Exercise;
 import com.example.courseservice.service.ExerciseService;
+import com.example.courseservice.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -29,7 +31,7 @@ import java.util.UUID;
 public class ExerciseController {
 
     ExerciseService exerciseService;
-
+    QuestionService questionService;
     @Operation(
             summary = "Get all exercises"
     )
@@ -84,5 +86,15 @@ public class ExerciseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get list questions by exercise id"
+    )
+    @GetMapping("/{exerciseId}/questions")
+    public ApiResponse<List<QuestionResponse>> getQuestionsByExerciseId(
+            @PathVariable UUID exerciseId) {
+        return ApiResponse.<List<QuestionResponse>>builder()
+                .result(questionService.getQuestionsByExerciseId(exerciseId))
+                .build();
+    }
 
 }
