@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -65,7 +66,7 @@ public class ProblemSubmissionController {
             summary = "Get submission details by problem id and user uid"
     )
     @GetMapping("/details/{problemId}/{userId}")
-    public DetailsProblemSubmissionResponse getSubmissionDetailsByProblemIdAndUserUid(
+    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(
             @PathVariable("problemId") UUID problemId,
             @PathVariable("userId") UUID userUid) {
         return problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(

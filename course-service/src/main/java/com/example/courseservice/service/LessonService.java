@@ -79,10 +79,10 @@ public class LessonService {
                 .getDetailsLesson(lesson.getLessonId(), userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
-        DetailsProblemSubmissionResponse detailsProblemSubmissionResponse
+        List<DetailsProblemSubmissionResponse> detailsProblemSubmissionResponse
                 = problemClient.getSubmissionDetailsByProblemIdAndUserUid(lesson.getProblemId(), userId).block();
         System.out.println("detailsProblemSubmissionResponse: " + detailsProblemSubmissionResponse);
-        if (detailsProblemSubmissionResponse != null && detailsProblemSubmissionResponse.getSubmissionId() != null) {
+        if (detailsProblemSubmissionResponse != null) {
             detailsLessonResponse.setIsDonePractice(true);
         }
         return detailsLessonResponse;
@@ -257,7 +257,7 @@ public class LessonService {
             learningLessonRepository.save(learningLesson);
             return true;
         } else {
-            DetailsProblemSubmissionResponse detailsProblemSubmissionResponse =
+            List<DetailsProblemSubmissionResponse> detailsProblemSubmissionResponse =
                     problemClient.getSubmissionDetailsByProblemIdAndUserUid(
                             lesson.getProblemId(),
                             learningLesson.getUserId()
@@ -265,7 +265,7 @@ public class LessonService {
 
             System.out.println("detailsProblemSubmissionResponse: " + detailsProblemSubmissionResponse);
 
-            if (detailsProblemSubmissionResponse != null && detailsProblemSubmissionResponse.getSubmissionId() != null) {
+            if (detailsProblemSubmissionResponse != null) {
                 learningLesson.setIsDonePractice(true);
                 learningLessonRepository.save(learningLesson);
                 return true;
