@@ -21,6 +21,16 @@ services:
       SPRING_DATASOURCE_PASSWORD: 123456
     depends_on:
       - course-db  # Ensure the database is up before course service
+  problem-service:
+    image: doublecreamcheze/intellab_ops:problem-service-latest  # Sửa lại tên image
+    ports:
+      - "8103:8003"  # Expose course service port
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://course-db:5432/course-service
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+    depends_on:
+      - course-db  # Ensure the database is up before course service
 
   # Database service for course-service
   course-db:

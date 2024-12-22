@@ -81,10 +81,10 @@ public class LessonService {
                 .getDetailsLesson(lesson.getLessonId(), userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
-        DetailsProblemSubmissionResponse detailsProblemSubmissionResponse
+        List<DetailsProblemSubmissionResponse> detailsProblemSubmissionResponse
                 = problemClient.getSubmissionDetailsByProblemIdAndUserUid(lesson.getProblemId(), userId).block();
         System.out.println("detailsProblemSubmissionResponse: " + detailsProblemSubmissionResponse);
-        if (detailsProblemSubmissionResponse != null && detailsProblemSubmissionResponse.getSubmissionId() != null) {
+        if (detailsProblemSubmissionResponse != null) {
             detailsLessonResponse.setIsDonePractice(true);
         }
         return detailsLessonResponse;
@@ -258,12 +258,12 @@ public class LessonService {
         Lesson lesson = learningLesson.getLesson();
 
         // case lesson don't have problem
-        /*if (lesson.getProblemId() == null) {
+        if (lesson.getProblemId() == null) {
             learningLesson.setIsDonePractice(true);
             learningLessonRepository.save(learningLesson);
             return true;
         } else {
-            DetailsProblemSubmissionResponse detailsProblemSubmissionResponse =
+            List<DetailsProblemSubmissionResponse> detailsProblemSubmissionResponse =
                     problemClient.getSubmissionDetailsByProblemIdAndUserUid(
                             lesson.getProblemId(),
                             learningLesson.getUserId()
@@ -271,7 +271,7 @@ public class LessonService {
 
             System.out.println("detailsProblemSubmissionResponse: " + detailsProblemSubmissionResponse);
 
-            if (detailsProblemSubmissionResponse != null && detailsProblemSubmissionResponse.getSubmissionId() != null) {
+            if (detailsProblemSubmissionResponse != null) {
                 learningLesson.setIsDonePractice(true);
                 learningLessonRepository.save(learningLesson);
                 return true;
@@ -280,10 +280,10 @@ public class LessonService {
             learningLesson.setIsDonePractice(false);
             learningLessonRepository.save(learningLesson);
             return false;
-        }*/
-        learningLesson.setIsDonePractice(true);
+        }
+        /*learningLesson.setIsDonePractice(true);
         learningLessonRepository.save(learningLesson);
-        return true;
+        return true;*/
     }
 
 }

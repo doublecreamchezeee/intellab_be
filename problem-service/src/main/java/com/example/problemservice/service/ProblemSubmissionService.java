@@ -17,8 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -112,15 +114,25 @@ public class ProblemSubmissionService {
                 );
     }
 
-    public DetailsProblemSubmissionResponse getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {
+    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {
+        // Kiểm tra và lấy Problem từ repository
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
-        ProblemSubmission submission = problemSubmissionRepository.findProblemSubmissionByProblemAndUserUid(
-                problem, userUid
-            ).orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
+        // Tìm kiếm submission
+        List<ProblemSubmission> submissions = problemSubmissionRepository
+                .findProblemSubmissionByProblemAndUserUid(problem, userUid)
+                .orElse(Collections.emptyList()); // Trả về danh sách trống nếu không tìm thấy
 
-        return problemSubmissionMapper.toDetailsProblemSubmissionResponse(submission);
+        // Xử lý danh sách trống
+        if (submissions.isEmpty()) {
+            return Collections.emptyList(); // Trả về danh sách rỗng nếu không có submission nào
+        }
+
+        // Chuyển đổi submissions thành response
+        return submissions.stream()
+                .map(problemSubmissionMapper::toDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
+                .collect(Collectors.toList());
     }
 }
 

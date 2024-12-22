@@ -49,7 +49,7 @@ public class ClientConfiguration {
     }
 
     @Bean
-    ProblemClient identityClient(WebClient webClient){
+    ProblemClient problemClient(WebClient webClient){
         HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
                 .builderFor(
                         WebClientAdapter.create(webClient)
@@ -57,4 +57,5 @@ public class ClientConfiguration {
                 .build();
         return httpServiceProxyFactory.createClient(ProblemClient.class);
     }
+
 }
