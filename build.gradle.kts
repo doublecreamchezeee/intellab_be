@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.0.5.RELEASE"
@@ -66,58 +68,7 @@ docker {
     }
 }
 
-// Task to build Docker image for API Gateway
-task("buildApiGatewayImage") {
-    dependsOn(":api-gateway:build") // Ensure API Gateway is built before Docker image creation
-    group = "docker"
-    description = "Build the Docker image for api-gateway"
-
-    doLast {
-        exec {
-            commandLine = listOf("docker", "build", "-t", "api-gateway-image:latest", "./api-gateway")
-        }
-        println("Built Docker image for api-gateway")
-    }
+tasks.withType<BootJar> {
+    enabled = false
 }
 
-// Task to build Docker image for Identity Service
-task("buildIdentityServiceImage") {
-    dependsOn(":identity-service:build") // Ensure Identity Service is built before Docker image creation
-    group = "docker"
-    description = "Build the Docker image for identity-service"
-
-    doLast {
-        exec {
-            commandLine = listOf("docker", "build", "-t", "identity-service-image:latest", "./identity-service")
-        }
-        println("Built Docker image for identity-service")
-    }
-}
-
-// Task to build Docker image for Course Service
-task("buildCourseServiceImage") {
-    dependsOn(":course-service:build") // Ensure Course Service is built before Docker image creation
-    group = "docker"
-    description = "Build the Docker image for course-service"
-
-    doLast {
-        exec {
-            commandLine = listOf("docker", "build", "-t", "course-service-image:latest", "./course-service")
-        }
-        println("Built Docker image for course-service")
-    }
-}
-
-// Task to bring up all Docker services using Docker Compose
-task("dockerComposeUp") {
-    dependsOn("buildApiGatewayImage", "buildIdentityServiceImage", "buildCourseServiceImage") // Ensure all images are built
-    group = "docker"
-    description = "Start all Docker services using docker-compose"
-
-    doLast {
-        exec {
-            commandLine = listOf("docker-compose", "up", "--build")
-        }
-        println("All Docker containers are up!")
-    }
-}
