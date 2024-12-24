@@ -81,12 +81,13 @@ public class LessonService {
                 .getDetailsLesson(lesson.getLessonId(), userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
-        List<DetailsProblemSubmissionResponse> detailsProblemSubmissionResponse
+        /*List<DetailsProblemSubmissionResponse> detailsProblemSubmissionResponse
+                //check null problemId
                 = problemClient.getSubmissionDetailsByProblemIdAndUserUid(lesson.getProblemId(), userId).block();
         System.out.println("detailsProblemSubmissionResponse: " + detailsProblemSubmissionResponse);
         if (detailsProblemSubmissionResponse != null) {
             detailsLessonResponse.setIsDonePractice(true);
-        }
+        }*/
         return detailsLessonResponse;
         //return lessonMapper.toLessonResponse(lesson);
     }
@@ -195,6 +196,7 @@ public class LessonService {
         );
 
         learningLesson.setStatus(request.getStatus());
+        learningLesson.setLastAccessedDate(new Date().toInstant());
         learningLesson = learningLessonRepository.save(learningLesson);
 
         return learningLessonMapper.toLearningLessonResponse(learningLesson);
@@ -213,12 +215,13 @@ public class LessonService {
 
         Lesson lesson = learningLesson.getLesson();
 
+        //TODO: DONT DELETE THIS COMMENTED CODE
         // case lesson don't have exercise
-       if (lesson.getExercise() == null) {
+       /*if (lesson.getExercise() == null) {
             // check if existed empty assignment return true, else create new empty assignment
             List<Assignment> existedAssignment = assignmentRepository.findByLearningLesson_LearningId(learningLessonId);
 
-            if (!existedAssignment.isEmpty() && learningLesson.getIsDoneTheory()) {
+            if (!existedAssignment.isEmpty() && learningLesson.getIsDoneTheory() != null && learningLesson.getIsDoneTheory()) {
               return true;
             } else {
               Assignment newAssignment = Assignment.builder()
@@ -234,20 +237,22 @@ public class LessonService {
 
               return true;
             }
-       } else {
-            Boolean checkIsDone = learningLessonRepositoryCustom.markTheoryLessonAsDone(
+       }
+       else {
+           Boolean checkIsDone = learningLessonRepositoryCustom.markTheoryLessonAsDone(
                    learningLessonId,
                    lesson.getExercise().getExercise_id()
-            );
-            learningLesson.setIsDoneTheory(checkIsDone);
-            learningLessonRepository.save(learningLesson);
+           );
+           learningLesson.setIsDoneTheory(checkIsDone);
+           learningLessonRepository.save(learningLesson);
 
-            return checkIsDone;
-           //Optional<Assignment> assignment = assignmentRepository.findByLearningLesson_LearningId(learningLessonId);
-       }
-      /*  Lesson lesson = lessonRepository.findById(learningLesson.getLesson().getLessonId())
-                .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
-                return true;*/
+           return checkIsDone;
+       }*/
+
+        learningLesson.setIsDoneTheory(true);
+        learningLessonRepository.save(learningLesson);
+        return  true;
+
 
     }
 
@@ -257,12 +262,14 @@ public class LessonService {
 
         Lesson lesson = learningLesson.getLesson();
 
+        //TODO: DONT DELETE THIS COMMENTED CODE
         // case lesson don't have problem
-        if (lesson.getProblemId() == null) {
+        /*if (lesson.getProblemId() == null) {
             learningLesson.setIsDonePractice(true);
             learningLessonRepository.save(learningLesson);
             return true;
-        } else {
+        }
+        else {
             List<DetailsProblemSubmissionResponse> detailsProblemSubmissionResponse =
                     problemClient.getSubmissionDetailsByProblemIdAndUserUid(
                             lesson.getProblemId(),
@@ -280,33 +287,12 @@ public class LessonService {
             learningLesson.setIsDonePractice(false);
             learningLessonRepository.save(learningLesson);
             return false;
-        }
-        /*learningLesson.setIsDonePractice(true);
+        }*/
+        learningLesson.setIsDonePractice(true);
         learningLessonRepository.save(learningLesson);
-        return true;*/
+        return true;
     }
 
 }
 
 
-    /*public List<LessonUserResponse> getLessonProgress(UUID userUid, UUID courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-
-        List<LessonUserResponse> learningLessons =
-                learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId)
-                        .stream().map(learningLessonMapper::toLessonUserResponse).toList();
-
-        learningLessonRepository.getLessonProgress(userUid, courseId);
-        //learningLessonRepositoryCustom.getLessonProgress(userUid, courseId);
-        //List<LessonProgressResponse> learningLessons2 =
-        return  learningLessons;
-        //List<LessonProgressResponse> learningLessons = learningLessonRepository.getLessonProgress(userUid, courseId);
-        //return learningLessons;
-
-        *//*List<LessonUserResponse> learningLessons =
-                learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId)
-                        .stream().map(learningLessonMapper::toLessonUserResponse).toList();
-*//*
-        //learningLessonRepository.getLessonProgress(userUid, courseId);
-    }*/

@@ -14,14 +14,14 @@ import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
 import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +56,7 @@ public class CourseController {
     )
     @GetMapping("/{courseId}/lessons")
     ApiResponse<Page<LessonResponse>> getLessonsByCourseId(
-            @PathVariable("courseId") String courseId, Pageable pageable) {
+            @PathVariable("courseId") String courseId, @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<LessonResponse>>builder()
                 .result(lessonService.getLessonsByCourseId(
                             courseId,
@@ -82,7 +82,7 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Get a course by id, if userUid is provided, return true if user has enrolled in course"
+            summary = "Get a course by id, if userUid is provided, return isUserEnrolled is true if user has enrolled in course"
     )
     @GetMapping("/{courseId}")
     ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId,
@@ -100,7 +100,7 @@ public class CourseController {
             summary = "Get all courses"
     )
     @GetMapping("")
-    ApiResponse<Page<CourseCreationResponse>> getAllCourse(Pageable pageable) {
+    ApiResponse<Page<CourseCreationResponse>> getAllCourse(@ParameterObject Pageable pageable) {
 
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
@@ -110,9 +110,12 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get all courses except enrolled courses by user"
+    )
     @GetMapping("/exceptEnrolled")
     ApiResponse<Page<CourseCreationResponse>> getAllCourseExceptEnrolledByUser(
-            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, Pageable pageable) {
+            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCoursesExceptEnrolledByUser(
                         userUid == null ? null : ParseUUID.normalizeUID(userUid),
@@ -147,7 +150,7 @@ public class CourseController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<CourseCreationResponse>> searchCourses(
-            @RequestParam("keyword") String keyword, Pageable pageable) {
+            @RequestParam("keyword") String keyword, @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.searchCourses(
                             keyword, pageable
