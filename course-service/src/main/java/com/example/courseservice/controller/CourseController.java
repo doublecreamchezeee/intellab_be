@@ -184,9 +184,16 @@ public class CourseController {
             summary = "Get all courses that a user has enrolled"
     )
     @GetMapping("/{userUid}/enrolledCourses")
-    public ApiResponse<List<UserCourses>> getEnrolledCoursesOfUser(@PathVariable("userUid") String userUid) {
-        return ApiResponse.<List<UserCourses>>builder()
-                .result(courseService.getEnrolledCoursesOfUser(ParseUUID.normalizeUID(userUid)))
+    public ApiResponse<Page<UserCourses>> getEnrolledCoursesOfUser(
+            @PathVariable("userUid") String userUid,
+            @ParameterObject Pageable pageable) {
+
+        return ApiResponse.<Page<UserCourses>>builder()
+                .result(courseService.getEnrolledCoursesOfUser(
+                            ParseUUID.normalizeUID(userUid),
+                            pageable
+                        )
+                )
                 .build();
     }
 

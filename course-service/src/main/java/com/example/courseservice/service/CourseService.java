@@ -203,12 +203,12 @@ public class CourseService {
         return listEnrolledUsersResponse;
     }
 
-    public List<UserCourses> getEnrolledCoursesOfUser(UUID userUid) {
+    public Page<UserCourses> getEnrolledCoursesOfUser(UUID userUid, Pageable pageable) {
         if (userUid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
-        return userCoursesRepository.findAllByEnrollId_UserUid(userUid);
+        return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
     }
 
 
