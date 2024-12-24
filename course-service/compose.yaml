@@ -7,7 +7,7 @@ services:
       - "8102:8002" # Match the exposed port in the Dockerfile
     container_name: course-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/course-service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 123456
     depends_on:
@@ -19,6 +19,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: course-service
+      POSTGRES_DB: intellab-db
     ports:
       - "5433:5432"
