@@ -10,7 +10,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ReviewCreationResponse {
+public class DetailsReviewResponse {
     UUID reviewId;
     int rating;
     String comment;
