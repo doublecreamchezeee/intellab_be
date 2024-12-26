@@ -10,14 +10,17 @@ import com.example.identityservice.exception.InvalidLoginCredentialsException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.auth.UserRecord;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -34,35 +37,38 @@ public class FirebaseAuthClient {
     private final FirebaseAuth firebaseAuth;
     private final FirestoreClient firestoreClient;
 
+    @SneakyThrows
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) throws InvalidLoginCredentialsException {
-        // Step 1: Prepare the request body and send the sign-in request to Firebase
-        final var requestBody = prepareRequestBody(userLoginRequest);
-        final var response = sendSignInRequest(requestBody);
-
-        // Step 2: Verify the ID token obtained from Firebase
-        FirebaseToken firebaseToken;
         try {
-            firebaseToken = firebaseAuth.verifyIdToken(response.getIdToken());
-        } catch (FirebaseAuthException e) {
-            throw new RuntimeException("Failed to verify token", e);
+            // Step 1: Get the user from Firebase Authentication by email
+            UserRecord user = firebaseAuth.getUserByEmail(userLoginRequest.getEmail());
+
+            // Step 2: Retrieve the user's role from Firestore (or another source)
+            String role = firestoreClient.getRole(user.getUid());
+
+            // Step 3: Set custom claims for the user (role)
+            Map<String, Object> customClaims = new HashMap<>();
+            customClaims.put("role", role);
+
+            // Update user's custom claims
+            firebaseAuth.setCustomUserClaims(user.getUid(), customClaims);
+
+            // Step 4: Prepare the login request body and send the sign-in request
+            var requestBody = prepareRequestBody(userLoginRequest);
+        
+            var response = sendSignInRequest(requestBody);
+            // Step 6: Return the response with the access token and refresh token
+            return TokenSuccessResponse.builder()
+                    .accessToken(response.getIdToken())  // The token with updated claims
+                    .refreshToken(response.getRefreshToken())
+                    .build();
+
+        } catch (InvalidLoginCredentialsException e) {
+            // Catch any other unexpected exceptions and throw an appropriate exception
+        throw new InvalidLoginCredentialsException("Invalid login credentials: " + e.getMessage(), e);
         }
-
-        // Step 3: Retrieve the user's role from Firestore based on the UID
-        String role = firestoreClient.getRole(firebaseToken.getUid());  // Assume you have a method to get the role
-
-        // Step 4: Set the custom claim 'role' for the user
-        try {
-            firebaseAuth.setCustomUserClaims(firebaseToken.getUid(), Map.of("role", role));
-        } catch (FirebaseAuthException e) {
-            throw new RuntimeException("Failed to set custom claims", e);
-        }
-
-        // Step 5: Return the response with the access token and refresh token
-        return TokenSuccessResponse.builder()
-                .accessToken(response.getIdToken())  // The token with the updated claims
-                .refreshToken(response.getRefreshToken())
-                .build();
     }
+
     public FirebaseToken verifyToken(@NonNull final String idToken) throws FirebaseAuthException {
         return firebaseAuth.verifyIdToken(idToken);
     }
@@ -80,12 +86,15 @@ public class FirebaseAuthClient {
                     .retrieve()
                     .body(FirebaseSignInResponse.class);
         } catch (HttpClientErrorException exception) {
-            if (exception.getResponseBodyAsString().contains(INVALID_CREDENTIALS_ERROR)) {
-                throw new InvalidLoginCredentialsException("Failed to refresh token.", exception);
+            String errorMessage = exception.getResponseBodyAsString();
+            if (errorMessage.contains(INVALID_CREDENTIALS_ERROR)) {
+                throw new InvalidLoginCredentialsException("Invalid login credentials: " + errorMessage, exception);
             }
-            throw exception;
+            // Log the error message if needed
+            throw new RuntimeException("Failed to sign in. Error details: " + errorMessage, exception);
         }
     }
+
 
     private FirebaseSignInRequest prepareRequestBody(@NonNull final UserLoginRequest userLoginRequest) {
         final var request = new FirebaseSignInRequest();

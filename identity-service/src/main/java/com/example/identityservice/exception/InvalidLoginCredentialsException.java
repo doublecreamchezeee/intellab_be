@@ -16,4 +16,7 @@ public class InvalidLoginCredentialsException extends AppException {
         super(ErrorCode.INVALID_LOGIN_CREDENTIALS);
     }
 
+    public InvalidLoginCredentialsException(String s, InvalidLoginCredentialsException e) {
+        super(ErrorCode.INVALID_LOGIN_CREDENTIALS);
+    }
 }
