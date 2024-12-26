@@ -274,7 +274,10 @@ create table if not exists public.courses
     price       numeric(11, 2),
     unit_price  varchar(10),
     user_uid    uuid,
-    topic_id    uuid
+    topic_id    uuid,
+    average_rating numeric(5, 2),
+    review_count   integer
+
     constraint uk23uffat5pnitvcg67ugi4kvck
     unique
     constraint fklljvfay1x0yv1gm2xmd6s7j9b
@@ -382,7 +385,7 @@ create table if not exists public.reviews
     primary key,
     comment   text,
     rating    integer not null,
-    user_uid  varchar(255),
+    user_uid  uuid,
     course_id uuid    not null
     constraint fkl9h49973yigjg39ov07a9mog6
     references public.courses

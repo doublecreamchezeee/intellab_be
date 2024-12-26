@@ -71,6 +71,9 @@ public class CourseService {
         course.setLessons(new ArrayList<>());
         course.setReviews(new ArrayList<>());
         course.setEnrollCourses(new ArrayList<>());
+        course.setAverageRating(0.0);
+        course.setReviewCount(0);
+
 
         course.setTopic(null);
 
