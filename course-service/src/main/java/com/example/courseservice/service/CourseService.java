@@ -135,6 +135,27 @@ public class CourseService {
 
     }
 
+    public List<DetailCourseResponse> getDetailsOfCourses(List<UUID> courseIds, UUID userUid) {
+        if (courseIds == null || courseIds.isEmpty()) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        // Fetch course details for all provided course IDs
+        List<DetailCourseResponse> courseDetails = new ArrayList<>();
+        for (UUID courseId : courseIds) {
+            try {
+                DetailCourseResponse detailCourse = getCourseById(courseId, userUid);
+                courseDetails.add(detailCourse);
+            } catch (AppException ex) {
+                log.warn("Error fetching details for course ID {}: {}", courseId, ex.getMessage());
+                // Optionally, you can choose to skip or include null responses for invalid IDs.
+            }
+        }
+
+        return courseDetails;
+    }
+
+
     public UserCourses enrollCourse(UUID userUid, UUID courseId) {
         if (userUid == null || courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);

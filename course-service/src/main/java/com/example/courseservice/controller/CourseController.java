@@ -27,7 +27,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/courses")
@@ -107,6 +109,33 @@ public class CourseController {
                             pageable
                         )
                 )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get details of multiple courses by their IDs"
+    )
+    @PostMapping("/details")
+    ApiResponse<List<DetailCourseResponse>> getDetailsOfMultipleCourses(
+            @RequestBody Map<String, List<String>> requestBody,
+            @RequestParam(name = "userUid", required = false) String userUid) {
+
+        UUID userUUID = null;
+        if (userUid != null) {
+            userUUID = ParseUUID.normalizeUID(userUid);
+        }
+
+        // Retrieve the list of course IDs from the map
+        List<String> courseIdsList = requestBody.get("courseIds");
+
+        // Convert the list of course IDs (String) to UUID
+        List<UUID> courseUUIDs = courseIdsList.stream()
+                .map(UUID::fromString)  // Convert each course ID string to UUID
+                .collect(Collectors.toList());
+
+        // Call the service to get the course details
+        return ApiResponse.<List<DetailCourseResponse>>builder()
+                .result(courseService.getDetailsOfCourses(courseUUIDs, userUUID))
                 .build();
     }
 
