@@ -26,6 +26,7 @@ public class UserCreationRequest {
     @Size(max = 50, message = "Display name length must not exceed 50 characters")
     private String displayName;
 
+    private String role;
 //    @Pattern(
 //            regexp = "^\\+[1-9][0-9]{1,14}$",
 //            message = "Phone number must be E.164 compliant (e.g., +84123456789)"

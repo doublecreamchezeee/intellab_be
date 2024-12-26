@@ -1,8 +1,6 @@
 package com.example.identityservice.exception;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.Serial;
 

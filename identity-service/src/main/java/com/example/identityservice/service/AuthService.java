@@ -1,6 +1,7 @@
 package com.example.identityservice.service;
 
 import com.example.identityservice.client.FirebaseAuthClient;
+import com.example.identityservice.client.FirestoreClient;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
@@ -20,6 +21,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ public class AuthService {
 
     private final FirebaseAuth firebaseAuth;
     private final FirebaseAuthClient firebaseAuthClient;
-
+    private final FirestoreClient firestoreClient;
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
         log.info("Creating user with email: {}", userCreationRequest.getEmail());
@@ -44,7 +47,9 @@ public class AuthService {
         }*/
 
         try {
-            firebaseAuth.createUser(request);
+            UserRecord userRecord = firebaseAuth.createUser(request);
+
+            firestoreClient.saveRole(userRecord.getUid(), userCreationRequest.getRole());
             log.info("User successfully created: {}", userCreationRequest.getEmail());
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
@@ -58,7 +63,9 @@ public class AuthService {
     }
 
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) {
+
         return firebaseAuthClient.login(userLoginRequest);
+
     }
 
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
@@ -71,7 +78,17 @@ public class AuthService {
     }
 
     public RefreshTokenSuccessResponse refreshAccessToken(@NonNull final String refreshToken) {
-        return firebaseAuthClient.refreshAccessToken(refreshToken);
+        RefreshTokenSuccessResponse refreshResponse = firebaseAuthClient.refreshAccessToken(refreshToken);
+
+        try {
+            FirebaseToken firebaseToken = firebaseAuth.verifyIdToken(refreshResponse.getId_token());
+            String role = firestoreClient.getRole(firebaseToken.getUid());
+
+            firebaseAuth.setCustomUserClaims(firebaseToken.getUid(), Map.of("role", role));
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException(e);
+        }
+        return refreshResponse;
     }
 
     public void updateByEmail(@NonNull String email, @NonNull UserUpdateRequest userUpdateRequest) {
