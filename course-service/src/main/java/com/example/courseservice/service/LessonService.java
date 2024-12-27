@@ -21,6 +21,7 @@ import com.example.courseservice.model.*;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.repository.custom.DetailsLessonRepositoryCustom;
 import com.example.courseservice.repository.impl.LearningLessonRepositoryCustomImpl;
+import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -189,15 +190,30 @@ public class LessonService {
         return learningLessonMapper.toLearningLessonResponse(learningLesson);
     }
 
-    public LearningLessonResponse updateLearningLesson(String learningLessonId,LearningLessonUpdateRequest request) {
+    public LearningLessonResponse updateLearningLesson(
+            UUID learningLessonId,
+            UUID courseId,
+            String userUid,
+            LearningLessonUpdateRequest request) {
+
         LearningLesson learningLesson = learningLessonRepository.findById(
-                UUID.fromString(learningLessonId)
+                learningLessonId
             ).orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(
+                ParseUUID.normalizeUID(userUid),
+                courseId
+            ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED)
         );
 
         learningLesson.setStatus(request.getStatus());
         learningLesson.setLastAccessedDate(new Date().toInstant());
         learningLesson = learningLessonRepository.save(learningLesson);
+
+        // save latest lesson id
+        userCourses.setLatestLessonId(learningLesson.getLesson().getLessonId());
+        userCoursesRepository.save(userCourses);
 
         return learningLessonMapper.toLearningLessonResponse(learningLesson);
     }

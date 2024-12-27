@@ -93,15 +93,17 @@ public class LessonController {
     }
 
     @Operation(
-            summary = "Update learning progress of lesson by id, status can be 'completed', 'in-progress', 'not-started' (fe don't need to use, be auto updated when user finish lesson)"
+            summary = "Update learning progress of lesson by id, status can be 'new', 'inprogress', 'completed' (call before fetch detail lesson)"
     )
-    @PutMapping("/{learningLessonId}/updateLearningProgress")
+    @PutMapping("/{learningLessonId}/{courseId}/{userUid}/updateLearningProgress")
     ApiResponse<LearningLessonResponse> updateLearningProgress(
-            @PathVariable("learningLessonId") String learningLessonId,
+            @PathVariable("learningLessonId") UUID learningLessonId,
+            @PathVariable("courseId") UUID courseId,
+            @PathVariable("userUid") String userUid,
             @RequestBody LearningLessonUpdateRequest request) {
 
         return ApiResponse.<LearningLessonResponse>builder()
-                .result(lessonService.updateLearningLesson(learningLessonId, request))
+                .result(lessonService.updateLearningLesson(learningLessonId, courseId, userUid, request))
                 .build();
     }
 

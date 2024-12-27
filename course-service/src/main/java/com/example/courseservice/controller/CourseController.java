@@ -10,6 +10,7 @@ import com.example.courseservice.dto.response.learningLesson.LessonProgressRespo
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;

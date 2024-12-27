@@ -274,14 +274,15 @@ create table if not exists public.courses
     price       numeric(11, 2),
     unit_price  varchar(10),
     user_uid    uuid,
-    topic_id    uuid,
-    average_rating numeric(5, 2),
-    review_count   integer
+    topic_id    uuid
 
     constraint uk23uffat5pnitvcg67ugi4kvck
     unique
     constraint fklljvfay1x0yv1gm2xmd6s7j9b
-    references public.topics
+    references public.topics,
+
+    average_rating numeric(5, 2),
+    review_count   integer
     );
 
 alter table public.courses
@@ -400,6 +401,7 @@ create table if not exists public.user_courses
     last_accessed_date timestamp(6) with time zone,
                                         progress_percent   numeric(5, 2),
     status             varchar(10),
+    latest_lesson_id uuid,
     course_id          uuid not null
     constraint fkcve18frw4nbxwrq0qh78dgipc
     references public.courses,

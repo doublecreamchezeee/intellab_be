@@ -182,7 +182,7 @@ public class CourseService {
                             .build();
 
                     // create default learning lesson progress for user
-                    lessonRepository.findAllByCourse_CourseIdOrderByLessonOrder(courseId).forEach(lesson -> {
+                    lessonRepository.findAllByCourse_CourseIdOrderByLessonOrderDesc(courseId).forEach(lesson -> {
                         LearningLesson learningLesson = LearningLesson.builder()
                                 .lesson(lesson)
                                 .userId(userUid)
@@ -193,6 +193,8 @@ public class CourseService {
                                 .build();
                         learningLessonRepository.save(learningLesson);
                     });
+
+
 
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
