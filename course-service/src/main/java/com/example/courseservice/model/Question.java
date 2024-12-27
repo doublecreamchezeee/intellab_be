@@ -58,6 +58,15 @@ public class Question {
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     List<AssignmentDetail> assignmentDetails;
 
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "question_category",
+            joinColumns = @JoinColumn(name = "question_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    List<Category> categories;
+
 }
 
 //CREATE TABLE Questions (

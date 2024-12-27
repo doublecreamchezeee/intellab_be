@@ -97,4 +97,14 @@ public class Course {
     @JsonManagedReference
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<UserCourses> enrollCourses = new ArrayList<>();
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_category",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    List<Category> categories;
+
 }
