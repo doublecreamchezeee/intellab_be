@@ -76,12 +76,15 @@ public class CourseController {
             summary = "Get all lessons and progress of learning lessons in a course (using when user has enrolled in course)"
     )
     @GetMapping("/{courseId}/{userUid}/lessons")
-    ApiResponse<List<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(
-            @PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
-        return ApiResponse.<List<LessonProgressResponse>>builder()
+    ApiResponse<Page<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(
+            @PathVariable("courseId") String courseId,
+            @PathVariable("userUid") String userUid,
+            @ParameterObject Pageable pageable) {
+        return ApiResponse.<Page<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
-                            UUID.fromString(courseId)
+                            UUID.fromString(courseId),
+                            pageable
                         )
                 )
                 .build();
