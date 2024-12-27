@@ -42,6 +42,10 @@ import java.util.UUID;
     )
 )
 @NamedNativeQuery(
+    name = "LearningLesson.getLessonProgressCount",
+    query = "SELECT COUNT(*) FROM get_lessons_and_learning_progress(:userId, :courseId)"
+)
+@NamedNativeQuery(
     name = "LearningLesson.getLessonProgress",
     query = "SELECT * FROM get_lessons_and_learning_progress(:userId, :courseId)",
     resultSetMapping = "LessonProgressMapping"

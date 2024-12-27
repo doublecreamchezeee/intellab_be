@@ -1,6 +1,7 @@
 package com.example.courseservice.service;
 
 import com.example.courseservice.client.ProblemClient;
+import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.exercise.ExerciseCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
@@ -221,10 +222,10 @@ public class LessonService {
         return learningLessonMapper.toLearningLessonResponse(learningLesson);
     }
 
-    public List<LessonProgressResponse> getLessonProgress(UUID userUid, UUID courseId) {
+    public Page<LessonProgressResponse> getLessonProgress(UUID userUid, UUID courseId, Pageable pageable) {
         courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-        return learningLessonRepositoryCustom.getLessonProgress(userUid, courseId);
+        return learningLessonRepositoryCustom.getLessonProgress(userUid, courseId, pageable);
 
     }
 
@@ -276,6 +277,12 @@ public class LessonService {
        }*/
 
         learningLesson.setIsDoneTheory(true);
+
+        if (learningLesson.getIsDonePractice() != null
+                && learningLesson.getIsDonePractice()==true) {
+            learningLesson.setStatus(PredefinedLearningStatus.DONE);
+        }
+
         learningLessonRepository.save(learningLesson);
 
         DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
@@ -331,6 +338,12 @@ public class LessonService {
         }*/
 
         learningLesson.setIsDonePractice(true);
+
+        if (learningLesson.getIsDoneTheory() != null
+                && learningLesson.getIsDoneTheory()==true) {
+            learningLesson.setStatus(PredefinedLearningStatus.DONE);
+        }
+
         learningLessonRepository.save(learningLesson);
 
         DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
