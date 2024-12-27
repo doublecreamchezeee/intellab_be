@@ -4,6 +4,7 @@ import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.model.TestCase;
 import com.example.problemservice.model.TestCase_Output;
 import com.example.problemservice.model.composite.testCaseOutputId;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,10 +70,11 @@ public class Judge0Client {
     // Submit code to Judge0 API and retrieve result
 // Submit code to Judge0 API and retrieve result
     public TestCase_Output submitCode(ProblemSubmission submission, TestCase testCase) {
+        // Extract details from the submission
         String code = submission.getCode();
         String language = submission.getProgramming_language();
 
-        // Map the language name to the corresponding language_id
+        // Map the programming language to the corresponding language_id
         Integer languageId = languageIdMap.get(language);
         if (languageId == null) {
             throw new IllegalArgumentException("Invalid programming language: " + language);
@@ -82,16 +84,27 @@ public class Judge0Client {
         String input = testCase.getInput();
         String expectedOutput = testCase.getOutput();
 
-        // Create the request body for Judge0 using the language_id, input, and expected output
-        String requestBody = String.format(
-                "{\"source_code\":\"%s\",\"language_id\":%d,\"stdin\":\"%s\",\"expected_output\":\"%s\"}",
-                code, languageId, input, expectedOutput
-        );
+        // Create the request body as a Map
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("source_code", code);
+        requestBody.put("language_id", languageId);
+        requestBody.put("stdin", input);
+        requestBody.put("expected_output", expectedOutput);
 
+        // Convert the request body to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequestBody;
+        try {
+            jsonRequestBody = objectMapper.writeValueAsString(requestBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize request body", e);
+        }
+
+        // Set headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        HttpEntity<String> requestEntity = new HttpEntity<>(jsonRequestBody, headers);
 
         // Send POST request to Judge0 for code execution
         ResponseEntity<String> response = restTemplate.exchange(
@@ -107,7 +120,13 @@ public class Judge0Client {
             result.setToken(UUID.fromString(submissionId));
             return result;
         } else {
-            throw new RuntimeException("Failed to submit code to Judge0");
+            // Throw a meaningful error with status code and response body
+            String errorMessage = String.format(
+                    "Failed to submit code to Judge0. Status: %s, Body: %s",
+                    response.getStatusCode(),
+                    response.getBody()
+            );
+            throw new RuntimeException(errorMessage);
         }
     }
 

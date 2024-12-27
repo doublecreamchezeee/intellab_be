@@ -46,7 +46,13 @@ public class CourseService {
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
         Page<Course> courses = courseRepository.findAll(pageable);
-        return courses.map(courseMapper::toCourseCreationResponse);
+
+        return courses.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+            return response;
+        });
     }
 
     public Page<CourseCreationResponse> getAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable) {
@@ -57,7 +63,12 @@ public class CourseService {
         } else {
             courses = courseRepository.findAllCoursesExceptEnrolledByUser(userId, pageable);
         }
-        return courses.map(courseMapper::toCourseCreationResponse);
+        return courses.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+            return response;
+        });
     }
 
     public void deleteCourseById(UUID id) {
