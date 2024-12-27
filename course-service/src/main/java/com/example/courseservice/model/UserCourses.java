@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.UUID;
 
 
 @Data
@@ -38,4 +39,7 @@ public class UserCourses {
     @UpdateTimestamp
     @Column(name = "last_accessed_date")
     Instant lastAccessedDate;
+
+    @Column(name = "latest_lesson_id", nullable = true)
+    UUID latestLessonId;
 }

@@ -44,7 +44,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses",
             "/course/reviews",
             "/course/lessons",
-            "/course/courses/search"
+            "/course/courses/search",
+            "/course/exceptEnrolled",
+            "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/lessons$",
     };
 
     @NonFinal

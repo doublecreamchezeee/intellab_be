@@ -13,7 +13,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-        generate_statistics: true
+#        generate_statistics: true
     show-sql: true
 server:
   port: 8002
@@ -26,10 +26,10 @@ com:
       web-api-key: AIzaSyDsRZMGfdM_zZEUmaaBG1E2BqlIAOem5rM
       private-key: private-key.json
 
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#logging:
+#  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 # Swagger
 springdoc:
   swagger-ui:
