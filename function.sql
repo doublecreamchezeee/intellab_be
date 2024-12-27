@@ -78,22 +78,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_latest_lesson(uuid, uuid);
-CREATE FUNCTION get_latest_lesson (c_id UUID, user_uid UUID)
+CREATE OR REPLACE FUNCTION get_latest_lesson(courseId UUID, userId UUID)
 RETURNS UUID AS $$
 BEGIN
-    
-    RETURN 
-		(select l.lesson_id
-		 FROM
-        	lessons l
-    	 JOIN
-        	learning_lesson ll ON l.lesson_id = ll.lesson_id
-		 WHERE 
-			ll.user_id = user_uid
-			AND l.course_id = c_id
-		 ORDER BY
-			ll.last_accessed_date DESC
-		 LIMIT 1);
+RETURN
+    (SELECT uc.latest_lesson_id
+     FROM user_courses AS uc
+     WHERE uc.user_uid = userId
+       AND uc.course_id = courseId
+    );
 END;
 $$ LANGUAGE plpgsql;
 

@@ -46,7 +46,13 @@ public class CourseService {
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
         Page<Course> courses = courseRepository.findAll(pageable);
-        return courses.map(courseMapper::toCourseCreationResponse);
+
+        return courses.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+            return response;
+        });
     }
 
     public Page<CourseCreationResponse> getAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable) {
@@ -57,7 +63,12 @@ public class CourseService {
         } else {
             courses = courseRepository.findAllCoursesExceptEnrolledByUser(userId, pageable);
         }
-        return courses.map(courseMapper::toCourseCreationResponse);
+        return courses.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+            return response;
+        });
     }
 
     public void deleteCourseById(UUID id) {
@@ -71,6 +82,9 @@ public class CourseService {
         course.setLessons(new ArrayList<>());
         course.setReviews(new ArrayList<>());
         course.setEnrollCourses(new ArrayList<>());
+        course.setAverageRating(0.0);
+        course.setReviewCount(0);
+
 
         course.setTopic(null);
 
@@ -135,6 +149,27 @@ public class CourseService {
 
     }
 
+    public List<DetailCourseResponse> getDetailsOfCourses(List<UUID> courseIds, UUID userUid) {
+        if (courseIds == null || courseIds.isEmpty()) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        // Fetch course details for all provided course IDs
+        List<DetailCourseResponse> courseDetails = new ArrayList<>();
+        for (UUID courseId : courseIds) {
+            try {
+                DetailCourseResponse detailCourse = getCourseById(courseId, userUid);
+                courseDetails.add(detailCourse);
+            } catch (AppException ex) {
+                log.warn("Error fetching details for course ID {}: {}", courseId, ex.getMessage());
+                // Optionally, you can choose to skip or include null responses for invalid IDs.
+            }
+        }
+
+        return courseDetails;
+    }
+
+
     public UserCourses enrollCourse(UUID userUid, UUID courseId) {
         if (userUid == null || courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
@@ -158,7 +193,7 @@ public class CourseService {
                             .build();
 
                     // create default learning lesson progress for user
-                    lessonRepository.findAllByCourse_CourseIdOrderByLessonOrder(courseId).forEach(lesson -> {
+                    lessonRepository.findAllByCourse_CourseIdOrderByLessonOrderDesc(courseId).forEach(lesson -> {
                         LearningLesson learningLesson = LearningLesson.builder()
                                 .lesson(lesson)
                                 .userId(userUid)
@@ -169,6 +204,8 @@ public class CourseService {
                                 .build();
                         learningLessonRepository.save(learningLesson);
                     });
+
+
 
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
@@ -208,7 +245,16 @@ public class CourseService {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
-        return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+        Page<UserCourses> userCourses = userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+
+        return userCourses;
+        /*return userCourses.map(userCourse -> {
+            DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
+                    .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUid)
+                    .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+            userCourse.setProgressPercent(detailCourseResponse.getProgressPercent());
+            return userCourse;
+        });*/
     }
 
 

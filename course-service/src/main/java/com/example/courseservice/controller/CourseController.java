@@ -8,10 +8,13 @@ import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
+import com.example.courseservice.service.ReviewService;
 import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +30,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/courses")
@@ -38,6 +43,7 @@ import java.util.UUID;
 public class CourseController {
     CourseService courseService;
     LessonService lessonService;
+    ReviewService reviewService;
 
     @Operation(
             summary = "Create course"
@@ -107,6 +113,33 @@ public class CourseController {
                             pageable
                         )
                 )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get details of multiple courses by their IDs"
+    )
+    @PostMapping("/details")
+    ApiResponse<List<DetailCourseResponse>> getDetailsOfMultipleCourses(
+            @RequestBody Map<String, List<String>> requestBody,
+            @RequestParam(name = "userUid", required = false) String userUid) {
+
+        UUID userUUID = null;
+        if (userUid != null) {
+            userUUID = ParseUUID.normalizeUID(userUid);
+        }
+
+        // Retrieve the list of course IDs from the map
+        List<String> courseIdsList = requestBody.get("courseIds");
+
+        // Convert the list of course IDs (String) to UUID
+        List<UUID> courseUUIDs = courseIdsList.stream()
+                .map(UUID::fromString)  // Convert each course ID string to UUID
+                .collect(Collectors.toList());
+
+        // Call the service to get the course details
+        return ApiResponse.<List<DetailCourseResponse>>builder()
+                .result(courseService.getDetailsOfCourses(courseUUIDs, userUUID))
                 .build();
     }
 
@@ -197,4 +230,16 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get all review of a course by course id"
+    )
+    @GetMapping("/{courseId}/reviews")
+    public ApiResponse<Page<DetailsReviewResponse>> getReviewsByCourseId(
+            @PathVariable("courseId") UUID courseId,
+            @ParameterObject Pageable pageable) {
+
+        return ApiResponse.<Page<DetailsReviewResponse>>builder()
+                .result(reviewService.getAllReviewsByCourseId(courseId, pageable))
+                .build();
+    }
 }

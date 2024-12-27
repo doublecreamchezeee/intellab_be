@@ -275,10 +275,14 @@ create table if not exists public.courses
     unit_price  varchar(10),
     user_uid    uuid,
     topic_id    uuid
+
     constraint uk23uffat5pnitvcg67ugi4kvck
     unique
     constraint fklljvfay1x0yv1gm2xmd6s7j9b
-    references public.topics
+    references public.topics,
+
+    average_rating numeric(5, 2),
+    review_count   integer
     );
 
 alter table public.courses
@@ -382,7 +386,7 @@ create table if not exists public.reviews
     primary key,
     comment   text,
     rating    integer not null,
-    user_uid  varchar(255),
+    user_uid  uuid,
     course_id uuid    not null
     constraint fkl9h49973yigjg39ov07a9mog6
     references public.courses
@@ -397,6 +401,7 @@ create table if not exists public.user_courses
     last_accessed_date timestamp(6) with time zone,
                                         progress_percent   numeric(5, 2),
     status             varchar(10),
+    latest_lesson_id uuid,
     course_id          uuid not null
     constraint fkcve18frw4nbxwrq0qh78dgipc
     references public.courses,
@@ -920,9 +925,9 @@ Display Operation:
 > * Now start traversing temp till it encounters NULL
 > * Simultaneously print the value of the temp node
 
- 
 
-Below is the implementation of the above operations 
+
+Below is the implementation of the above operations
 
 C++
 ````
@@ -953,14 +958,14 @@ public:
 
     // Function to check if the stack is empty
     bool isEmpty() {
-      
+
         // If head is nullptr, the stack is empty
         return head == nullptr;
     }
 
     // Function to push an element onto the stack
     void push(int new_data) {
-      
+
         // Create a new node with given data
         Node* new_node = new Node(new_data);
 
@@ -1066,14 +1071,14 @@ void initializeStack(Stack* stack) { stack->head = NULL; }
 
 // Function to check if the stack is empty
 int isEmpty(Stack* stack) {
-  
+
     // If head is NULL, the stack is empty
     return stack->head == NULL;
 }
 
 // Function to push an element onto the stack
 void push(Stack* stack, int new_data) {
-  
+
     // Create a new node with given data
     Node* new_node = createNode(new_data);
 
@@ -1092,14 +1097,14 @@ void push(Stack* stack, int new_data) {
 
 // Function to remove the top element from the stack
 void pop(Stack* stack) {
-  
+
     // Check for stack underflow
     if (isEmpty(stack)) {
         printf("\\nStack Underflow\\n");
         return;
     }
     else {
-      
+
         // Assign the current top to a temporary variable
         Node* temp = stack->head;
 
@@ -1113,7 +1118,7 @@ void pop(Stack* stack) {
 
 // Function to return the top element of the stack
 int peek(Stack* stack) {
-  
+
     // If stack is not empty, return the top element
     if (!isEmpty(stack))
         return stack->head->data;
@@ -1125,7 +1130,7 @@ int peek(Stack* stack) {
 
 // Driver program to test the stack implementation
 int main() {
-  
+
     // Creating a stack
     Stack stack;
     initializeStack(&stack);
@@ -1139,7 +1144,7 @@ int main() {
     // Print top element of the stack
     printf("Top element is %d\\n", peek(&stack));
 
-  
+
       // removing two elemements from the top
       printf("Removing two elements...\\n");
     pop(&stack);
@@ -1179,14 +1184,14 @@ class Stack {
 
     // Function to check if the stack is empty
     boolean isEmpty() {
-      
+
         // If head is null, the stack is empty
         return head == null;
     }
 
     // Function to push an element onto the stack
     void push(int new_data) {
-      
+
         // Create a new node with given data
         Node new_node = new Node(new_data);
 
@@ -1206,14 +1211,14 @@ class Stack {
 
     // Function to remove the top element from the stack
     void pop() {
-      
+
         // Check for stack underflow
         if (isEmpty()) {
             System.out.println("\\nStack Underflow");
             return;
         }
         else {
-          
+
             // Assign the current top to a temporary
             // variable
             Node temp = head;
@@ -1228,7 +1233,7 @@ class Stack {
 
     // Function to return the top element of the stack
     int peek() {
-      
+
         // If stack is not empty, return the top element
         if (!isEmpty())
             return head.data;
@@ -1493,14 +1498,14 @@ class Stack {
 
     // Function to check if the stack is empty
     isEmpty() {
-    
+
         // If head is null, the stack is empty
         return this.head === null;
     }
 
     // Function to push an element onto the stack
     push(new_data) {
-    
+
         // Create a new node with given data
         const new_node = new Node(new_data);
 
@@ -1520,13 +1525,13 @@ class Stack {
 
     // Function to remove the top element from the stack
     pop() {
-    
+
         // Check for stack underflow
         if (this.isEmpty()) {
             console.log("\\nStack Underflow");
         }
         else {
-        
+
             // Assign the current top to a temporary
             // variable
             let temp = this.head;
@@ -1541,7 +1546,7 @@ class Stack {
 
     // Function to return the top element of the stack
     peek() {
-    
+
         // If stack is not empty, return the top element
         if (!this.isEmpty())
             return this.head.data;
@@ -1574,7 +1579,7 @@ console.log("Top element is " + st.peek());
 
 ````
 
-  
+
 **Output**
 ```
 
@@ -1586,7 +1591,7 @@ Top element is 22
 ****Time Complexity:****
 O(1), for all push(), pop(), and peek(), as we are not performing any
 kind of traversal over the list. We perform all the operations through
-the current pointer only.  
+the current pointer only.
 ****Auxiliary Space:**** O(N), where N is the size of the stack
 
 
@@ -1718,41 +1723,41 @@ in which the insertion of a new element and removal of an existing
 element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null, null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, course_id, exercise_id, problem_id) VALUES ('bc7282ef-2185-47e3-acbc-5b5597cbbbfc', e'****Examples :****
 
-  
+
 
 
 
 ```
-Input:  1/2 + 3/2  
-Output: 2/1  
-  
-Input:  1/3 + 3/9  
-Output: 2/3  
-  
-Input:  1/5 + 3/15  
+Input:  1/2 + 3/2
+Output: 2/1
+
+Input:  1/3 + 3/9
+Output: 2/3
+
+Input:  1/5 + 3/15
 Output: 2/5
 ```
 
-  
 
 
 
-  
+
+
 
 ****Algorithm to add two fractions****
 
-  
+
 
 
 
 * Find a common denominator by finding the LCM (Least Common Multiple) of the two denominators.
 * Change the
-  
+
   [fractions](https://www.geeksforgeeks.org/fractions/)
   to have the same denominator and add both terms.
 * Reduce the final fraction obtained into its simpler form by dividing both numerator and denominator by their largest common factor.
 
-  
+
 
 
 
@@ -1778,14 +1783,14 @@ void lowest(int &den3, int &num3)
     // Finding gcd of both terms
     int common_factor = gcd(num3,den3);
 
-    // Converting both terms into simpler 
-    // terms by dividing them by common factor 
+    // Converting both terms into simpler
+    // terms by dividing them by common factor
     den3 = den3/common_factor;
     num3 = num3/common_factor;
 }
 
 //Function to add two fractions
-void addFraction(int num1, int den1, int num2, 
+void addFraction(int num1, int den1, int num2,
                  int den2, int &num3, int &den3)
 {
     // Finding gcd of den1 and den2
@@ -1793,7 +1798,7 @@ void addFraction(int num1, int den1, int num2,
 
     // Denominator of final fraction obtained
     // finding LCM of den1 and den2
-    // LCM * GCD = a * b 
+    // LCM * GCD = a * b
     den3 = (den1*den2) / den3;
 
     // Changing the fractions to have same denominator
@@ -1820,59 +1825,59 @@ int main()
 Java
 
 ````
-// Java program to add 2 fractions 
+// Java program to add 2 fractions
 
 class GFG{
-// Function to return gcd of a and b 
-static int gcd(int a, int b) 
-{ 
-    if (a == 0) 
-        return b; 
-    return gcd(b%a, a); 
-} 
+// Function to return gcd of a and b
+static int gcd(int a, int b)
+{
+    if (a == 0)
+        return b;
+    return gcd(b%a, a);
+}
 
-// Function to convert the obtained fraction 
-// into it\'s simplest form 
-static void lowest(int den3, int num3) 
-{ 
-    // Finding gcd of both terms 
-    int common_factor = gcd(num3,den3); 
+// Function to convert the obtained fraction
+// into it\'s simplest form
+static void lowest(int den3, int num3)
+{
+    // Finding gcd of both terms
+    int common_factor = gcd(num3,den3);
 
-    // Converting both terms into simpler 
-    // terms by dividing them by common factor 
-    den3 = den3/common_factor; 
+    // Converting both terms into simpler
+    // terms by dividing them by common factor
+    den3 = den3/common_factor;
     num3 = num3/common_factor;
     System.out.println(num3+"/"+den3);
-} 
+}
 
-//Function to add two fractions 
-static void addFraction(int num1, int den1, 
-                        int num2, int den2) 
-{ 
-    // Finding gcd of den1 and den2 
-    int den3 = gcd(den1,den2); 
+//Function to add two fractions
+static void addFraction(int num1, int den1,
+                        int num2, int den2)
+{
+    // Finding gcd of den1 and den2
+    int den3 = gcd(den1,den2);
 
-    // Denominator of final fraction obtained 
-    // finding LCM of den1 and den2 
-    // LCM * GCD = a * b 
-    den3 = (den1*den2) / den3; 
+    // Denominator of final fraction obtained
+    // finding LCM of den1 and den2
+    // LCM * GCD = a * b
+    den3 = (den1*den2) / den3;
 
-    // Changing the fractions to have same denominator 
-    // Numerator of the final fraction obtained 
-    int num3 = (num1)*(den3/den1) + (num2)*(den3/den2); 
+    // Changing the fractions to have same denominator
+    // Numerator of the final fraction obtained
+    int num3 = (num1)*(den3/den1) + (num2)*(den3/den2);
 
-    // Calling function to convert final fraction 
-    // into it\'s simplest form 
-    lowest(den3,num3); 
-} 
+    // Calling function to convert final fraction
+    // into it\'s simplest form
+    lowest(den3,num3);
+}
 
-// Driver program 
-public static void main(String[] args) 
-{ 
-    int num1=1, den1=500, num2=2, den2=1500; 
+// Driver program
+public static void main(String[] args)
+{
+    int num1=1, den1=500, num2=2, den2=1500;
     System.out.print(num1+"/"+den1+" + "+num2+"/"+den2+" is equal to ");
     addFraction(num1, den1, num2, den2);
-} 
+}
 }
 // This code is contributed by mits
 
@@ -1881,57 +1886,57 @@ public static void main(String[] args)
 Python3
 
 ````
-# Python3 program to add 2 fractions 
+# Python3 program to add 2 fractions
 
-# Function to return gcd of a and b 
+# Function to return gcd of a and b
 def gcd(a, b):
-    if (a == 0): 
-        return b; 
-    return gcd(b % a, a); 
+    if (a == 0):
+        return b;
+    return gcd(b % a, a);
 
-# Function to convert the obtained 
-# fraction into it\'s simplest form 
-def lowest(den3, num3): 
+# Function to convert the obtained
+# fraction into it\'s simplest form
+def lowest(den3, num3):
 
-    # Finding gcd of both terms 
-    common_factor = gcd(num3, den3); 
+    # Finding gcd of both terms
+    common_factor = gcd(num3, den3);
 
-    # Converting both terms 
-    # into simpler terms by 
-    # dividing them by common factor 
-    den3 = int(den3 / common_factor); 
+    # Converting both terms
+    # into simpler terms by
+    # dividing them by common factor
+    den3 = int(den3 / common_factor);
     num3 = int(num3 / common_factor);
     print(num3, "/", den3);
 
-# Function to add two fractions 
-def addFraction(num1, den1, num2, den2): 
+# Function to add two fractions
+def addFraction(num1, den1, num2, den2):
 
-    # Finding gcd of den1 and den2 
-    den3 = gcd(den1, den2); 
+    # Finding gcd of den1 and den2
+    den3 = gcd(den1, den2);
 
-    # Denominator of final 
-    # fraction obtained finding 
-    # LCM of den1 and den2 
-    # LCM * GCD = a * b 
-    den3 = (den1 * den2) / den3; 
+    # Denominator of final
+    # fraction obtained finding
+    # LCM of den1 and den2
+    # LCM * GCD = a * b
+    den3 = (den1 * den2) / den3;
 
-    # Changing the fractions to 
-    # have same denominator Numerator 
-    # of the final fraction obtained 
-    num3 = ((num1) * (den3 / den1) + 
-            (num2) * (den3 / den2)); 
+    # Changing the fractions to
+    # have same denominator Numerator
+    # of the final fraction obtained
+    num3 = ((num1) * (den3 / den1) +
+            (num2) * (den3 / den2));
 
-    # Calling function to convert 
-    # final fraction into it\'s 
-    # simplest form 
-    lowest(den3, num3); 
+    # Calling function to convert
+    # final fraction into it\'s
+    # simplest form
+    lowest(den3, num3);
 
-# Driver Code 
-num1 = 1; den1 = 500; 
-num2 = 2; den2 = 1500; 
+# Driver Code
+num1 = 1; den1 = 500;
+num2 = 2; den2 = 1500;
 
-print(num1, "/", den1, " + ", num2, "/", 
-      den2, " is equal to ", end = ""); 
+print(num1, "/", den1, " + ", num2, "/",
+      den2, " is equal to ", end = "");
 addFraction(num1, den1, num2, den2);
 
 # This code is contributed by mits
@@ -1941,58 +1946,58 @@ addFraction(num1, den1, num2, den2);
 C#
 
 ````
-// C# program to add 2 fractions 
+// C# program to add 2 fractions
 
 class GFG{
-// Function to return gcd of a and b 
-static int gcd(int a, int b) 
-{ 
-    if (a == 0) 
-        return b; 
-    return gcd(b%a, a); 
-} 
+// Function to return gcd of a and b
+static int gcd(int a, int b)
+{
+    if (a == 0)
+        return b;
+    return gcd(b%a, a);
+}
 
-// Function to convert the obtained fraction 
-// into it\'s simplest form 
-static void lowest(int den3, int num3) 
-{ 
-    // Finding gcd of both terms 
-    int common_factor = gcd(num3,den3); 
+// Function to convert the obtained fraction
+// into it\'s simplest form
+static void lowest(int den3, int num3)
+{
+    // Finding gcd of both terms
+    int common_factor = gcd(num3,den3);
 
-    // Converting both terms into simpler 
-    // terms by dividing them by common factor 
-    den3 = den3/common_factor; 
+    // Converting both terms into simpler
+    // terms by dividing them by common factor
+    den3 = den3/common_factor;
     num3 = num3/common_factor;
     System.Console.WriteLine(num3+"/"+den3);
-} 
+}
 
-//Function to add two fractions 
-static void addFraction(int num1, int den1, int num2, int den2) 
-{ 
-    // Finding gcd of den1 and den2 
-    int den3 = gcd(den1,den2); 
+//Function to add two fractions
+static void addFraction(int num1, int den1, int num2, int den2)
+{
+    // Finding gcd of den1 and den2
+    int den3 = gcd(den1,den2);
 
-    // Denominator of final fraction obtained 
-    // finding LCM of den1 and den2 
-    // LCM * GCD = a * b 
-    den3 = (den1*den2) / den3; 
+    // Denominator of final fraction obtained
+    // finding LCM of den1 and den2
+    // LCM * GCD = a * b
+    den3 = (den1*den2) / den3;
 
-    // Changing the fractions to have same denominator 
-    // Numerator of the final fraction obtained 
-    int num3 = (num1)*(den3/den1) + (num2)*(den3/den2); 
+    // Changing the fractions to have same denominator
+    // Numerator of the final fraction obtained
+    int num3 = (num1)*(den3/den1) + (num2)*(den3/den2);
 
-    // Calling function to convert final fraction 
-    // into it\'s simplest form 
-    lowest(den3,num3); 
-} 
+    // Calling function to convert final fraction
+    // into it\'s simplest form
+    lowest(den3,num3);
+}
 
-// Driver program 
-public static void Main() 
-{ 
-    int num1=1, den1=500, num2=2, den2=1500; 
+// Driver program
+public static void Main()
+{
+    int num1=1, den1=500, num2=2, den2=1500;
     System.Console.Write(num1+"/"+den1+" + "+num2+"/"+den2+" is equal to ");
     addFraction(num1, den1, num2, den2);
-} 
+}
 }
 // This code is contributed by mits
 
@@ -2003,68 +2008,68 @@ JavaScript
 ````
 <script>
 
-// Javascript program to add 2 fractions 
-  
-// Function to return gcd of a and b 
+// Javascript program to add 2 fractions
 
-const gcd = (a, b) => { 
-    if (a == 0) 
-        return b; 
-    return gcd(b % a, a); 
-} 
+// Function to return gcd of a and b
 
-// Function to convert the  
-// obtained fraction into  
-// it\'s simplest form 
+const gcd = (a, b) => {
+    if (a == 0)
+        return b;
+    return gcd(b % a, a);
+}
+
+// Function to convert the
+// obtained fraction into
+// it\'s simplest form
 
 const lowest = (den3, num3) => {
-    // Finding gcd of both terms 
-    let common_factor = gcd(num3, den3); 
-  
-    // Converting both terms   
-    // into simpler terms by  
-    // dividing them by common factor  
-      
-    den3 = parseInt(den3 / common_factor); 
-    num3 = parseInt(num3 / common_factor); 
-  
-    document.write(`${num3}/${den3}`) 
-} 
+    // Finding gcd of both terms
+    let common_factor = gcd(num3, den3);
+
+    // Converting both terms
+    // into simpler terms by
+    // dividing them by common factor
+
+    den3 = parseInt(den3 / common_factor);
+    num3 = parseInt(num3 / common_factor);
+
+    document.write(`${num3}/${den3}`)
+}
 
 
-// Function to add two fractions 
-const addFraction = (num1, den1, num2, den2) => { 
-    // Finding gcd of den1 and den2 
-    let den3 = gcd(den1, den2); 
-  
-    // Denominator of final  
-    // fraction obtained finding  
-    // LCM of den1 and den2 
-    // LCM * GCD = a * b  
-    den3 = (den1 * den2) / den3; 
-  
-    // Changing the fractions to  
-    // have same denominator Numerator 
-    // of the final fraction obtained 
-    let num3 = ((num1) * (den3 / den1) + 
-            (num2) * (den3 / den2)); 
-  
-    // Calling function to convert  
-    // final fraction into it\'s  
-    // simplest form 
-    lowest(den3, num3); 
-} 
+// Function to add two fractions
+const addFraction = (num1, den1, num2, den2) => {
+    // Finding gcd of den1 and den2
+    let den3 = gcd(den1, den2);
 
-// Driver Code 
+    // Denominator of final
+    // fraction obtained finding
+    // LCM of den1 and den2
+    // LCM * GCD = a * b
+    den3 = (den1 * den2) / den3;
+
+    // Changing the fractions to
+    // have same denominator Numerator
+    // of the final fraction obtained
+    let num3 = ((num1) * (den3 / den1) +
+            (num2) * (den3 / den2));
+
+    // Calling function to convert
+    // final fraction into it\'s
+    // simplest form
+    lowest(den3, num3);
+}
+
+// Driver Code
 let num1 = 1;
-let den1 = 500;  
-let num2 = 2; 
-let den2 = 1500;  
+let den1 = 500;
+let num2 = 2;
+let den2 = 1500;
 
 document.write(`${num1}/${den1} + ${num2}/${den2} is equal to `);
 
 addFraction(num1, den1, num2, den2);
-              
+
 // This code is contributed by _saurabh_jaiswal
 
 </script>
@@ -2078,7 +2083,7 @@ PHP
 // PHP program to add
 // 2 fractions
 
-// Function to return 
+// Function to return
 // gcd of a and b
 function gcd($a, $b)
 {
@@ -2087,58 +2092,58 @@ function gcd($a, $b)
     return gcd($b % $a, $a);
 }
 
-// Function to convert the 
-// obtained fraction into 
+// Function to convert the
+// obtained fraction into
 // it\'s simplest form
 function lowest(&$den3, &$num3)
 {
     // Finding gcd of both terms
     $common_factor = gcd($num3, $den3);
 
-    // Converting both terms  
-    // into simpler terms by 
-    // dividing them by common factor 
-    
+    // Converting both terms
+    // into simpler terms by
+    // dividing them by common factor
+
     $den3 = (int)$den3 / $common_factor;
     $num3 = (int) $num3 / $common_factor;
 }
 
 // Function to add
 // two fractions
-function addFraction($num1, $den1, $num2, 
+function addFraction($num1, $den1, $num2,
                      $den2, &$num3, &$den3)
 {
     // Finding gcd of den1 and den2
     $den3 = gcd($den1, $den2);
 
-    // Denominator of final 
-    // fraction obtained finding 
+    // Denominator of final
+    // fraction obtained finding
     // LCM of den1 and den2
-    // LCM * GCD = a * b 
+    // LCM * GCD = a * b
     $den3 = ($den1 * $den2) / $den3;
 
-    // Changing the fractions to 
+    // Changing the fractions to
     // have same denominator Numerator
     // of the final fraction obtained
-    $num3 = ($num1) * ($den3 / $den1) + 
+    $num3 = ($num1) * ($den3 / $den1) +
             ($num2) * ($den3 / $den2);
 
-    // Calling function to convert 
-    // final fraction into it\'s 
+    // Calling function to convert
+    // final fraction into it\'s
     // simplest form
     lowest($den3, $num3);
 }
 
 // Driver Code
-$num1 = 1; $den1 = 500; 
-$num2 = 2; $den2 = 1500; 
+$num1 = 1; $den1 = 500;
+$num2 = 2; $den2 = 1500;
 $den3; $num3;
-addFraction($num1, $den1, $num2, 
+addFraction($num1, $den1, $num2,
             $den2, $num3, $den3);
-echo $num1, "/", $den1, " + ", 
-     $num2,"/", $den2, " is equal to ", 
+echo $num1, "/", $den1, " + ",
+     $num2,"/", $den2, " is equal to ",
                $num3, "/", $den3, "\\n";
-            
+
 // This code is contributed by aj_36
 ?>
 
@@ -2182,7 +2187,7 @@ int main() {
 
 **Output**
 ```
-1 4 2 3 5 
+1 4 2 3 5
 ```
 
 Table of Content
@@ -2247,7 +2252,7 @@ given value as default value.
 
 Vector can also be initialized using a list of values enclosed in ****{} braces**** separated by comma.
 
-> ****vector****<T> vec\\_name = { v1, v2, v3….};  
+> ****vector****<T> vec\\_name = { v1, v2, v3….};
 > ****vector****<T> vec\\_name ({ v1, v2, v3….});
 
 Let’s take a look at an example that shows implements the above
@@ -2294,8 +2299,8 @@ int main() {
 **Output**
 ```
 
-1 4 2 3 5 
-9 9 9 9 9 
+1 4 2 3 5
+9 9 9 9 9
 
 ```
 
@@ -2326,7 +2331,7 @@ int main() {
     // Accessing and printing values using indexes
       cout << v[3] << endl;
       cout << v.at(2);
-  
+
     return 0;
 }
 
@@ -2360,10 +2365,10 @@ int main() {
     // Updating values using indexes 3 and 2
       v[3] = \'D\';
       v.at(2) = \'F\';
-      
+
       cout << v[3] << endl;
       cout << v.at(2);
-  
+
     return 0;
 }
 
@@ -2404,8 +2409,8 @@ int main() {
 **Output**
 ```
 
-a c f d z 
-a c f d z 
+a c f d z
+a c f d z
 ```
 
 More ways to traverse vectors are discussed in this article – [How to Iterate Through a Vector in C++?](https://www.geeksforgeeks.org/how-to-iterate-through-a-vector-in-cpp/)
@@ -2426,10 +2431,10 @@ using namespace std;
 
 int main() {
     vector<char> v = {\'a\', \'f\', \'d\'};
-  
+
       // Inserting \'z\' at the back
       v.push_back(\'z\');
-  
+
       // Inserting \'c\' at index 1
       v.insert(v.begin() + 1, \'c\');
 
@@ -2472,7 +2477,7 @@ int main() {
         cout << v[i] << " ";
     }
     cout << endl;
-  
+
       // Deleting element \'f\'
       v.erase(find(v.begin(), v.end(), \'f\'));
       for (int i = 0; i < v.size(); i++) {
@@ -2486,8 +2491,8 @@ int main() {
 **Output**
 ```
 
-a c f d 
-a c d 
+a c f d
+a c d
 ```
 
 To know more about the deletion of an element in the vector, refer to
@@ -2560,7 +2565,7 @@ C++
 struct Node {
     int data;
     Node* next;
-  
+
     Node(int value){
         data = value;
         next = nullptr;
@@ -2582,15 +2587,15 @@ struct Node
 struct Node *createNode(int value){
 
     // Allocate memory
-    struct Node *newNode = 
+    struct Node *newNode =
       (struct Node *)malloc(sizeof(struct Node));
 
     // Set the data
     newNode->data = value;
-  
+
     // Initialize next to NULL
     newNode->next = NULL;
-  
+
     // Return the new node
     return newNode;
 }
@@ -2686,7 +2691,7 @@ last->next = first;
 C
 ````
 // Allocate memory for nodes
-struct Node *first = 
+struct Node *first =
   (struct Node *)malloc(sizeof(struct Node));
 struct Node *second =
   (struct Node *)malloc(sizeof(struct Node));
@@ -2764,7 +2769,7 @@ last.next = first;
 
 
 
-  
+
 In the above code, we have created three nodes ****first, second,**** and ****last**** having values ****2, 3,**** and ****4**** respectively.
 
 * After creating three nodes, we have connected these node in a
@@ -2838,13 +2843,13 @@ struct Node{
 // Function to insert a node into an empty circular singly linked list
 Node *insertInEmptyList(Node *last, int data){
     if (last != nullptr) return last;
-    
+
     // Create a new node
     Node *newNode = new Node(data);
-  
+
     // Point newNode to itself
     newNode->next = newNode;
-  
+
     // Update last to point to the new node
     last = newNode;
     return last;
@@ -2852,7 +2857,7 @@ Node *insertInEmptyList(Node *last, int data){
 
 void printList(Node* last){
     if(last == NULL) return;
-  
+
     // Start from the head node
     Node* head = last->next;
     while (true) {
@@ -3006,10 +3011,10 @@ class Node:
 def insertInEmptyList(last, data):
     if last is not None:
         return last
-    
+
     # Create a new node
     new_node = Node(data)
-    
+
     # Update last to point to the new node
     last = new_node
     return last
@@ -3017,7 +3022,7 @@ def insertInEmptyList(last, data):
 def printList(last):
     if last is None:
         return
-    
+
     # Start from the head node
     head = last.next
     while True:
@@ -3095,11 +3100,11 @@ printList(last);
 
 
 
-  
+
 **Output**
 ```
 
-List after insertion: 1 
+List after insertion: 1
 
 ```
 ### 2. Insertion at the beginning in circular linked list
@@ -3153,7 +3158,7 @@ Node* insertAtBeginning(Node* last, int value){
 
 void printList(Node* last){
   if(last == NULL) return;
-  
+
     // Start from the head node
     Node* head = last->next;
     while (true) {
@@ -3539,8 +3544,8 @@ printList(last);
 **Output**
 ```
 
-Original list: 2 3 4 
-List after inserting 5 at the beginning: 5 2 3 4 
+Original list: 2 3 4
+List after inserting 5 at the beginning: 5 2 3 4
 
 ```
 ### 3. Insertion at the end in circular linked list
@@ -3598,7 +3603,7 @@ Node *insertEnd(Node *tail, int value)
 
 void printList(Node *last){
   if(last == NULL) return;
-  
+
     // Start from the head node
     Node *head = last->next;
     while (true){
@@ -3921,8 +3926,8 @@ printList(last);
 **Output**
 ```
 
-Original list: 2 3 4 
-List after inserting 5 and 6: 2 3 4 5 6 
+Original list: 2 3 4
+List after inserting 5 and 6: 2 3 4 5 6
 
 ```
 ### 4. Insertion at specific position in circular linked list
@@ -3989,7 +3994,7 @@ Node *insertAtPosition(Node *last, int data, int pos){
     // Traverse the list to find the insertion point
     for (int i = 1; i < pos - 1; ++i) {
         curr = curr->next;
-      
+
         // If position is out of bounds
         if (curr == last->next){
             cout << "Invalid position!" << endl;
@@ -4436,8 +4441,8 @@ printList(last);
 **Output**
 ```
 
-Original list: 2 3 4 
-List after insertions: 2 5 3 4 
+Original list: 2 3 4
+List after insertions: 2 5 3 4
 
 ```
 
@@ -4498,7 +4503,7 @@ Node* deleteFirstNode(Node* last) {
 
 void printList(Node* last) {
     if(last == NULL) return ;
- 
+
     Node *head = last->next;
     while (true){
         cout << head->data << " ";
@@ -4787,12 +4792,12 @@ printList(last);
 
 
 
-  
+
 **Output**
 ```
 
-Original list: 2 3 4 
-List after deleting first node: 3 4 
+Original list: 2 3 4
+List after deleting first node: 3 4
 
 ```
 ### 2. Delete a specific node in circular linked list
@@ -5077,7 +5082,7 @@ public class GFG {
             System.out.println("List is Empty");
             return;
         }
-      
+
         Node head = last.next;
         while (true) {
             System.out.print(head.data + " ");
@@ -5274,12 +5279,12 @@ printList(last);
 ````
 
 
-  
+
 **Output**
 ```
 
-Original list: 2 3 4 
-List after deleting node 3: 2 4 
+Original list: 2 3 4
+List after deleting node 3: 2 4
 
 ```
 ### 3. Deletion at the end of Circular linked list
@@ -5748,8 +5753,8 @@ printList(last);
 **Output**
 ```
 
-Original list: 2 3 4 
-List after deleting last node: 2 3 
+Original list: 2 3 4
+List after deleting last node: 2 3
 
 ```
 
@@ -5795,7 +5800,7 @@ bool search(Node* last, int key) {
     while (curr != last) {
         if (curr->data == key) {
           // Key found
-            return true; 
+            return true;
         }
         curr = curr->next;
     }
@@ -5803,15 +5808,15 @@ bool search(Node* last, int key) {
     // Check the last node
     if (last->data == key) {
       // Key found
-        return true; 
+        return true;
     }
     // Key not found
-    return false; 
+    return false;
 }
 
 void printList(Node* last) {
    if(last == NULL) return;
-  
+
     Node *head = last->next;
     while (true){
         cout << head->data << " ";
@@ -6237,11 +6242,11 @@ else {
 
 
 
-  
+
 **Output**
 ```
 
-Original list: 2 3 4 
+Original list: 2 3 4
 Value 3 found in the list.
 
 ```
@@ -6329,7 +6334,7 @@ Here is how a node in a Doubly Linked List is typically
 represented:
 
 [Try it on GfG Practice
-![redirect icon](https://media.geeksforgeeks.org/auth-dashboard-uploads/Group-arrow.svg)](https://www.geeksforgeeks.org/problems/display-doubly-linked-list--154650/1?itm_source=geeksforgeeks&itm_medium=article&itm_campaign=practice_card) 
+![redirect icon](https://media.geeksforgeeks.org/auth-dashboard-uploads/Group-arrow.svg)](https://www.geeksforgeeks.org/problems/display-doubly-linked-list--154650/1?itm_source=geeksforgeeks&itm_medium=article&itm_campaign=practice_card)
 C++
 ````
 struct Node {
@@ -6342,11 +6347,11 @@ struct Node {
 
     // Pointer to point the Next Element
     Node* next;
-  
+
     // Constructor
     Node(int d) {
        data = d;
-       prev = next = nullptr;      
+       prev = next = nullptr;
     }
 };
 
@@ -6387,14 +6392,14 @@ class Node {
 
     // Reference to the Previous Node
     Node prev;
-  
+
     // Reference to the next Node
     Node next;
-  
+
     // Constructor
     Node(int d) {
        data = d;
-       prev = next = null;      
+       prev = next = null;
     }
 };
 
@@ -6403,7 +6408,7 @@ class Node {
 Python
 ````
 class Node:
-  
+
     def __init__(self, data):
         # To store the value or data.
         self.data = data
@@ -6421,19 +6426,19 @@ C#
 class Node
 {
   	// To store the value or data
-    public int Data; 
-  
+    public int Data;
+
   	// Pointer to the next node
-    public Node Next; 
-  
+    public Node Next;
+
   	// Pointer to the previous node
-    public Node Prev; 
+    public Node Prev;
 
     // Constructor
     public Node(int d)
     {
         Data = d;
-        Prev = Next = null;      
+        Prev = Next = null;
     }
 }
 
@@ -6509,26 +6514,26 @@ using namespace std;
 
 // Define the Node structure
 struct Node {
-    int data; 
-    Node* next; 
-    Node* prev; 
-  
+    int data;
+    Node* next;
+    Node* prev;
+
     // Constructor to initialize Node with data
     Node(int data) : data(data), next(nullptr),
   	prev(nullptr) {}
 };
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in forward direction
 void forwardTraversal(Node* head) {
-  
+
     // Start traversal from the head of the list
     Node* curr = head;
 
     // Continue until current node is not null
     // (end of list)
     while (curr != nullptr) {
-      
+
         // Output data of the current node
         cout << curr->data << " ";
 
@@ -6540,17 +6545,17 @@ void forwardTraversal(Node* head) {
     cout << endl;
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in backward direction
 void backwardTraversal(Node* tail) {
-  
+
     // Start traversal from the tail of the list
     Node* curr = tail;
 
-    // Continue until current node is not null 
+    // Continue until current node is not null
     // (end of list)
     while (curr != nullptr) {
-      
+
         // Output data of the current node
         cout << curr->data << " ";
 
@@ -6563,8 +6568,8 @@ void backwardTraversal(Node* tail) {
 }
 
 int main() {
-  
-    // Sample usage of the doubly linked list and 
+
+    // Sample usage of the doubly linked list and
     // traversal functions
     Node* head = new Node(1);
     Node* second = new Node(2);
@@ -6600,7 +6605,7 @@ struct Node {
 
 // Function to create a new node
 struct Node* createNode(int data) {
-    struct Node* newNode = 
+    struct Node* newNode =
       (struct Node*)malloc(sizeof(struct Node));
     newNode->data = data;
     newNode->next = NULL;
@@ -6608,20 +6613,20 @@ struct Node* createNode(int data) {
     return newNode;
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in forward direction
 void forwardTraversal(struct Node* head) {
-  
+
     // Start traversal from the head of the list
     struct Node* curr = head;
 
     // Continue until the current node is not
     // null (end of list)
     while (curr != NULL) {
-      
+
         // Output data of the current node
         printf("%d ", curr->data);
-      
+
         // Move to the next node
         curr = curr->next;
     }
@@ -6630,20 +6635,20 @@ void forwardTraversal(struct Node* head) {
     printf("\\n");
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in backward direction
 void backwardTraversal(struct Node* tail) {
-  
+
     // Start traversal from the tail of the list
     struct Node* curr = tail;
 
-    // Continue until the current node is not 
+    // Continue until the current node is not
     // null (end of list)
     while (curr != NULL) {
-      
+
         // Output data of the current node
         printf("%d ", curr->data);
-      
+
         // Move to the previous node
         curr = curr->prev;
     }
@@ -6653,8 +6658,8 @@ void backwardTraversal(struct Node* tail) {
 }
 
 int main() {
-  
-    // Sample usage of the doubly linked list and 
+
+    // Sample usage of the doubly linked list and
     // traversal functions
     struct Node* head = createNode(1);
     struct Node* second = createNode(2);
@@ -6700,20 +6705,20 @@ class Node {
 // Class to manage the doubly linked list
 class GfG {
 
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
     // in forward direction
     static void forwardTraversal(Node head) {
-      
+
         // Start traversal from the head of the list
         Node curr = head;
 
-        // Continue until the current node is 
+        // Continue until the current node is
         // null (end of the list)
         while (curr != null) {
-          
+
             // Output data of the current node
             System.out.print(curr.data + " ");
-          
+
             // Move to the next node
             curr = curr.next;
         }
@@ -6722,20 +6727,20 @@ class GfG {
         System.out.println();
     }
 
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
   	//in backward direction
     static void backwardTraversal(Node tail) {
-      
+
         // Start traversal from the tail of the list
         Node curr = tail;
 
-        // Continue until the current node is 
+        // Continue until the current node is
         // null (end of the list)
         while (curr != null) {
-          
+
             // Output data of the current node
             System.out.print(curr.data + " ");
-          
+
             // Move to the previous node
             curr = curr.prev;
         }
@@ -6745,7 +6750,7 @@ class GfG {
     }
 
     public static void main(String[] args) {
-      
+
         // Sample usage of the doubly linked
         // list and traversal functions
         Node head = new Node(1);
@@ -6776,50 +6781,50 @@ class Node:
         self.prev = None
         self.next = None
 
-# Function to traverse the doubly linked list 
+# Function to traverse the doubly linked list
 # in forward direction
 def forward_traversal(head):
-  
+
     # Start traversal from the head of the list
     curr = head
-    
-    # Continue until the current node is 
+
+    # Continue until the current node is
     # null (end of the list)
     while curr is not None:
-      
+
         # Output data of the current node
         print(curr.data, end=" ")
-        
+
         # Move to the next node
         curr = curr.next
-        
+
     # Print newline after traversal
     print()
 
-# Function to traverse the doubly linked 
+# Function to traverse the doubly linked
 # list in backward direction
 def backward_traversal(tail):
-  
+
     # Start traversal from the tail of the list
     curr = tail
-    
-    # Continue until the current node 
+
+    # Continue until the current node
     # is null (end of the list)
     while curr is not None:
-      
+
         # Output data of the current node
         print(curr.data, end=" ")
-        
+
         # Move to the previous node
         curr = curr.prev
-        
+
     # Print newline after traversal
     print()
 
-# Sample usage of the doubly linked list 
+# Sample usage of the doubly linked list
 # and traversal functions
 if __name__ == "__main__":
-  
+
     # Create a doubly linked list with 3 nodes
     head = Node(1)
     second = Node(2)
@@ -6861,14 +6866,14 @@ class Node
 // Class to manage the doubly linked list
 class GfG
 {
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
   	//in forward direction
     static void ForwardTraversal(Node head)
     {
         // Start traversal from the head of the list
         Node curr = head;
 
-        // Continue until the current node is null 
+        // Continue until the current node is null
       	//(end of the list)
         while (curr != null)
         {
@@ -6883,14 +6888,14 @@ class GfG
         Console.WriteLine();
     }
 
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
   	//in backward direction
     static void BackwardTraversal(Node tail)
     {
         // Start traversal from the tail of the list
         Node curr = tail;
 
-        // Continue until the current node is null 
+        // Continue until the current node is null
       	//(end of the list)
         while (curr != null)
         {
@@ -6939,46 +6944,46 @@ class Node {
     }
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in forward direction
 function forwardTraversal(head) {
 
     // Start traversal from the head of the list
     let curr = head;
-    
-    // Continue until the current node is null 
+
+    // Continue until the current node is null
     // (end of the list)
     while (curr !== null) {
-    
+
         // Output data of the current node
         console.log(curr.data + " ");
-        
+
         // Move to the next node
         curr = curr.next;
     }
-    
+
     // Print newline after traversal
     console.log();
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in backward direction
 function backwardTraversal(tail) {
 
     // Start traversal from the tail of the list
     let curr = tail;
-    
-    // Continue until the current node is null 
+
+    // Continue until the current node is null
     // (end of the list)
     while (curr !== null) {
-    
+
         // Output data of the current node
         console.log(curr.data + " ");
-        
+
         // Move to the previous node
         curr = curr.prev;
     }
-    
+
     // Print newline after traversal
     console.log();
 }
@@ -7004,14 +7009,14 @@ backwardTraversal(third);
 ````
 
 
-  
+
 **Output**
 ```
 
 Forward Traversal:
-1 2 3 
+1 2 3
 Backward Traversal:
-3 2 1 
+3 2 1
 
 ```
 
@@ -7045,7 +7050,7 @@ struct Node {
     }
 };
 
-// Function to find the length of a doubly 
+// Function to find the length of a doubly
 //linked list
 int findLength(Node * head) {
     int count = 0;
@@ -7087,7 +7092,7 @@ struct Node {
 
 // Constructor function to create a new node
 struct Node* createNode(int val) {
-    struct Node* newNode = 
+    struct Node* newNode =
          (struct Node*)malloc(sizeof(struct Node));
     newNode->data = val;
     newNode->prev = NULL;
@@ -7109,12 +7114,12 @@ int main() {
     struct Node* second = createNode(2);
     struct Node* third = createNode(3);
 
-    head->next = second; 
+    head->next = second;
     second->prev = head;
-    second->next = third; 
+    second->next = third;
     third->prev = second;
 
-    printf("Length of the doubly linked list: %d\\n", 
+    printf("Length of the doubly linked list: %d\\n",
            findLength(head));
 
     return 0;
@@ -7125,21 +7130,21 @@ int main() {
 Java
 ````
 class Node {
-    int data; 
-    Node prev; 
+    int data;
+    Node prev;
     Node next;
 
     // Constructor
-    public Node(int val) { 
-        data = val; 
-        prev = null; 
-        next = null; 
+    public Node(int val) {
+        data = val;
+        prev = null;
+        next = null;
     }
 }
 
 class GfG {
 
-    // Function to find the length of 
+    // Function to find the length of
     // a doubly linked list
     static int FindLength(Node head) {
         int count = 0;
@@ -7150,19 +7155,19 @@ class GfG {
 
     // Driver code
     public static void main(String[] args) {
-      
-        // Create a doubly linked list 
+
+        // Create a doubly linked list
         // with 3 nodes
         Node head = new Node(1);
         Node second = new Node(2);
         Node third = new Node(3);
-        
-        head.next = second; 
+
+        head.next = second;
         second.prev = head;
-        second.next = third; 
+        second.next = third;
         third.prev = second;
 
-        System.out.println("Length of doubly linked list: " 
+        System.out.println("Length of doubly linked list: "
                            + FindLength(head));
     }
 }
@@ -7177,7 +7182,7 @@ class Node:
         self.prev = None
         self.next = None
 
-# Function to find the length of 
+# Function to find the length of
 # a doubly linked list
 def find_length(head):
     count = 0
@@ -7189,8 +7194,8 @@ def find_length(head):
 
 # Driver code
 if __name__ == "__main__":
-  
-    # Create a doubly linked list 
+
+    # Create a doubly linked list
     # with 3 nodes
     head = Node(1)
     second = Node(2)
@@ -7211,21 +7216,21 @@ C#
 using System;
 
 class Node {
-    public int data; 
-    public Node prev; 
+    public int data;
+    public Node prev;
     public Node next;
 
     // Constructor
-    public Node(int val) { 
-        data = val; 
-        prev = null; 
-        next = null; 
+    public Node(int val) {
+        data = val;
+        prev = null;
+        next = null;
     }
 }
 
 public class GfG {
 
-    // Function to find the length of 
+    // Function to find the length of
     // a doubly linked list
     static int FindLength(Node head) {
         int count = 0;
@@ -7236,19 +7241,19 @@ public class GfG {
 
     // Driver code
     public static void Main(string[] args) {
-      
-        // Create a doubly linked list 
+
+        // Create a doubly linked list
         // with 3 nodes
         Node head = new Node(1);
         Node second = new Node(2);
         Node third = new Node(3);
-        
-        head.next = second; 
+
+        head.next = second;
         second.prev = head;
-        second.next = third; 
+        second.next = third;
         third.prev = second;
 
-        Console.WriteLine("Length of doubly linked list: " 
+        Console.WriteLine("Length of doubly linked list: "
                                  + FindLength(head));
     }
 }
@@ -7295,7 +7300,7 @@ console.log("Length of the doubly linked list: " +
 
 
 
-  
+
 **Output**
 ```
 
@@ -7325,7 +7330,7 @@ Below are the implementation of the above approach:
 C++
 ````
 // C++ Program to insert a new node at the
-// beginning of doubly linked list 
+// beginning of doubly linked list
 
 #include <iostream>
 using namespace std;
@@ -7336,26 +7341,26 @@ struct Node {
     Node* prev;
     Node* next;
 
-    Node(int d) { 
-      data = d; 
+    Node(int d) {
+      data = d;
       prev = next = NULL;
     }
 };
 
 // Insert a node at the beginning
 Node* insertBegin(Node* head, int data) {
-    
+
     // Create a new node
     Node* new_node = new Node(data);
-    
+
     // Make next of it as head
     new_node->next = head;
-    
+
     // Set previous of head as new node
     if (head != NULL) {
         head->prev = new_node;
     }
-    
+
     // Return new node as new head
     return new_node;
 }
@@ -7370,7 +7375,7 @@ void printList(Node* head) {
 }
 
 int main() {
-  
+
     // Create a hardcoded linked list:
   	// 2 <-> 3 <-> 4
     Node* head = new Node(2);
@@ -7391,7 +7396,7 @@ int main() {
     // Print the updated list
   	cout << "After inserting Node 1 at the front: ";
     printList(head);
-  	
+
     return 0;
 }
 
@@ -7414,7 +7419,7 @@ struct Node {
 
 // Create a new node
 struct Node* createNode(int data) {
-    struct Node* new_node = 
+    struct Node* new_node =
       (struct Node*)malloc(sizeof(struct Node));
     new_node->data = data;
     new_node->prev = NULL;
@@ -7424,18 +7429,18 @@ struct Node* createNode(int data) {
 
 // Insert a node at the beginning
 struct Node* insertBegin(struct Node* head, int data) {
-    
+
     // Create a new node
     struct Node* new_node = createNode(data);
-    
+
     // Make next of it as head
     new_node->next = head;
-    
+
     // Set previous of head as new node
     if (head != NULL) {
         head->prev = new_node;
     }
-    
+
     // Return new node as new head
     return new_node;
 }
@@ -7451,9 +7456,9 @@ void printList(struct Node* head) {
 }
 
 int main() {
-  
+
     // Create a hardcoded doubly linked list:
-    // 2 <-> 3 <-> 4 
+    // 2 <-> 3 <-> 4
     struct Node *head = createNode(2);
     head->next = createNode(3);
     head->next->prev = head;
@@ -7494,21 +7499,21 @@ class Node {
 }
 
 class GfG {
-    
+
     // Insert a node at the beginning
     static Node insertBegin(Node head, int data) {
-        
+
         // Create a new node
         Node new_node = new Node(data);
-        
+
         // Make next of it as head
         new_node.next = head;
-        
+
         // Set previous of head as new node
         if (head != null) {
             head.prev = new_node;
         }
-        
+
         // Return new node as new head
         return new_node;
     }
@@ -7524,7 +7529,7 @@ class GfG {
     }
 
     public static void main(String[] args) {
-        
+
         // Create a hardcoded doubly linked list:
         // 2 <-> 3 <-> 4
         Node head = new Node(2);
@@ -7551,7 +7556,7 @@ class GfG {
 
 Python
 ````
-# Python Program to insert a node at the beginning 
+# Python Program to insert a node at the beginning
 #of doubly linked list
 
 # Node structure for the doubly linked list
@@ -7563,17 +7568,17 @@ class Node:
 
 # Insert a node at the beginning
 def insertBegin(head, data):
-    
+
     # Create a new node
     new_node = Node(data)
-    
+
     # Make next of it as head
     new_node.next = head
-    
+
     # Set previous of head as new node
     if head is not None:
         head.prev = new_node
-    
+
     # Return new node as new head
     return new_node
 
@@ -7586,7 +7591,7 @@ def printList(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 2 <-> 3 <-> 4
     head = Node(2)
@@ -7629,22 +7634,22 @@ class Node {
 }
 
 class GfG {
-    
+
     // Insert a node at the beginning
     public static
     Node insertBegin(Node head, int data) {
-        
+
         // Create a new node
         Node new_node = new Node(data);
-        
+
         // Make next of it as head
         new_node.next = head;
-        
+
         // Set previous of head as new node
         if (head != null) {
             head.prev = new_node;
         }
-        
+
         // Return new node as new head
         return new_node;
     }
@@ -7660,7 +7665,7 @@ class GfG {
     }
 
     public static void Main(string[] args) {
-        
+
         // Create a hardcoded doubly linked list:
         // 2 <-> 3 <-> 4
         Node head = new Node(2);
@@ -7687,7 +7692,7 @@ class GfG {
 
 JavaScript
 ````
-// JavaScript Program to insert a node at the 
+// JavaScript Program to insert a node at the
 //beginning of doubly linked list
 
 // Node structure for the doubly linked list
@@ -7699,18 +7704,18 @@ function Node(data) {
 
 // Insert a node at the beginning
 function insertBegin(head, data) {
-    
+
     // Create a new node
     const new_node = new Node(data);
-    
+
     // Make next of it as head
     new_node.next = head;
-    
+
     // Set previous of head as new node
     if (head !== null) {
         head.prev = new_node;
     }
-    
+
     // Return new node as new head
     return new_node;
 }
@@ -7753,12 +7758,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 2 3 4 
-After inserting Node 1 at the front: 1 2 3 4 
+Original Linked List: 2 3 4
+After inserting Node 1 at the front: 1 2 3 4
 
 ```
 
@@ -7807,14 +7812,14 @@ struct Node {
     }
 };
 
-// Function to insert a new node at the end of 
+// Function to insert a new node at the end of
 //doubly linked list
 Node *insertEnd(Node *head, int new_data) {
 
     // Create a new node
     Node *new_node = new Node(new_data);
 
-    // If the linked list is empty, set the new 
+    // If the linked list is empty, set the new
   	//node as the head of linked list
     if (head == NULL) {
         head = new_node;
@@ -7874,7 +7879,7 @@ int main() {
 
 C
 ````
-// C Program to insert a node at the end of 
+// C Program to insert a node at the end of
 //doubly linked list
 
 #include <stdio.h>
@@ -7894,7 +7899,7 @@ struct Node *createNode(int new_data) {
     return new_node;
 }
 
-// Function to insert a new node at the end of the 
+// Function to insert a new node at the end of the
 //doubly linked list
 struct Node* insertEnd(struct Node *head, int new_data) {
     struct Node *new_node = createNode(new_data);
@@ -7928,7 +7933,7 @@ void printList(struct Node *head) {
 }
 
 int main() {
-  
+
     // Create a hardcoded doubly linked list:
     // 1 <-> 2 <-> 3
     struct Node *head = createNode(1);
@@ -7955,7 +7960,7 @@ int main() {
 
 Java
 ````
-// Java Program to insert a node at the end of 
+// Java Program to insert a node at the end of
 // doubly linked list
 
 class Node {
@@ -7973,7 +7978,7 @@ class GFG {
     // Function to insert a new node at the end of the
     // doubly linked list
     public static Node insertEnd(Node head, int newData) {
-      
+
         // Create a new node
         Node newNode = new Node(newData);
 
@@ -8009,7 +8014,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -8037,7 +8042,7 @@ class GFG {
 
 Python
 ````
-# Python Program to insert a node at the end of 
+# Python Program to insert a node at the end of
 #doubly linked list
 
 class Node:
@@ -8046,13 +8051,13 @@ class Node:
         self.next = None
         self.prev = None
 
-# Function to insert a new node at the end of the 
+# Function to insert a new node at the end of the
 #doubly linked list
 def insert_end(head, new_data):
-      
+
     # Create a new node
     new_node = Node(new_data)
-    
+
     # If the linked list is empty, set the new node
     #as the head
     if head is None:
@@ -8061,13 +8066,13 @@ def insert_end(head, new_data):
         curr = head
         while curr.next is not None:
             curr = curr.next
-        
+
         # Set the next of the last node to the new node
         curr.next = new_node
-        
+
         # Set the prev of the new node to the last node
         new_node.prev = curr
-    
+
     return head
 
 def print_list(head):
@@ -8078,7 +8083,7 @@ def print_list(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -8103,7 +8108,7 @@ if __name__ == "__main__":
 
 C#
 ````
-// C# Program to insert a node at the end of 
+// C# Program to insert a node at the end of
 //doubly linked list
 
 using System;
@@ -8121,15 +8126,15 @@ class Node {
 }
 
 class GFG {
-  
+
     // Function to insert a new node at the end
   	//of the doubly linked list
     public static Node InsertEnd(Node head, int newData) {
-        
+
           // Create a new node
         Node newNode = new Node(newData);
 
-        // If the linked list is empty, set the 
+        // If the linked list is empty, set the
       	//new node as the head
         if (head == null) {
             head = newNode;
@@ -8140,11 +8145,11 @@ class GFG {
                 curr = curr.Next;
             }
 
-            // Set the next of the last node to 
+            // Set the next of the last node to
           	//the new node
             curr.Next = newNode;
 
-            // Set the prev of the new node to 
+            // Set the prev of the new node to
           	//the last node
             newNode.Prev = curr;
         }
@@ -8163,7 +8168,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -8190,7 +8195,7 @@ class GFG {
 
 JavaScript
 ````
-// Javascript Program to insert a node at the end of 
+// Javascript Program to insert a node at the end of
 //doublylinked list
 
 class Node {
@@ -8207,7 +8212,7 @@ function insertEnd(head, newData) {
     // Create a new node
     const newNode = new Node(newData);
 
-    // If the linked list is empty, set the 
+    // If the linked list is empty, set the
     //new node as the head
     if (head === null) {
         head = newNode;
@@ -8218,11 +8223,11 @@ function insertEnd(head, newData) {
             curr = curr.next;
         }
 
-        // Set the next of the last node to the 
+        // Set the next of the last node to the
         //new node
         curr.next = newNode;
 
-        // Set the prev of the new node to the 
+        // Set the prev of the new node to the
         //last node
         newNode.prev = curr;
     }
@@ -8265,12 +8270,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-Inserting Node with data 4 at the end: 1 2 3 4 
+Original Linked List: 1 2 3
+Inserting Node with data 4 at the end: 1 2 3 4
 
 ```
 
@@ -8441,7 +8446,7 @@ struct Node * insertAtPosition(struct Node * head, int pos, int new_data) {
     if (pos == 1) {
         new_node -> next = head;
 
-        // If the linked list is not empty, set the 
+        // If the linked list is not empty, set the
       //prev of head to new node
         if (head != NULL) {
             head -> prev = new_node;
@@ -8549,7 +8554,7 @@ class GFG {
         if (pos == 1) {
             new_node.next = head;
 
-            // If the linked list is not empty, set 
+            // If the linked list is not empty, set
           	//the prev of head to new node
             if (head != null) {
                 head.prev = new_node;
@@ -8561,8 +8566,8 @@ class GFG {
         }
 
         Node curr = head;
-      
-        // Traverse the list to find the node before 
+
+        // Traverse the list to find the node before
       	//the insertion point
         for (int i = 1; i < pos - 1 && curr != null; ++i) {
             curr = curr.next;
@@ -8583,7 +8588,7 @@ class GFG {
         // Update the next of current node to new node
         curr.next = new_node;
 
-        // If the new node is not the last node, update 
+        // If the new node is not the last node, update
       	//prev of next node to new node
         if (new_node.next != null) {
             new_node.next.prev = new_node;
@@ -8604,7 +8609,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 4
         Node head = new Node(1);
@@ -8641,7 +8646,7 @@ class Node:
         self.prev = None
 
 def insert_at_position(head, pos, new_data):
-  
+
     # Create a new node
     new_node = Node(new_data)
 
@@ -8659,8 +8664,8 @@ def insert_at_position(head, pos, new_data):
         return head
 
     curr = head
-    
-    # Traverse the list to find the node before the 
+
+    # Traverse the list to find the node before the
     #insertion point
     for _ in range(1, pos - 1):
         if curr is None:
@@ -8682,7 +8687,7 @@ def insert_at_position(head, pos, new_data):
     # Update the next of current node to new node
     curr.next = new_node
 
-    # If the new node is not the last node, update 
+    # If the new node is not the last node, update
     #prev of next node to new node
     if new_node.next is not None:
         new_node.next.prev = new_node
@@ -8697,7 +8702,7 @@ def print_list(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 4
     head = Node(1)
@@ -8740,10 +8745,10 @@ class Node {
 }
 
 class GFG {
-  
+
     // Function to insert a new node at a given position
     static Node InsertAtPosition(Node head, int pos, int newData) {
-      
+
         // Create a new node
         Node newNode = new Node(newData);
 
@@ -8757,7 +8762,7 @@ class GFG {
         }
 
         Node curr = head;
-        
+
           // Traverse the list to find the node
       	 //before the insertion point
         for (int i = 1; i < pos - 1 && curr != null; ++i) {
@@ -8779,7 +8784,7 @@ class GFG {
         // Update the next of current node to new node
         curr.Next = newNode;
 
-        // If the new node is not the last node, update 
+        // If the new node is not the last node, update
       	//prev of next node to new node
         if (newNode.Next != null)
             newNode.Next.Prev = newNode;
@@ -8798,7 +8803,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 4
         Node head = new Node(1);
@@ -8851,7 +8856,7 @@ function insertAtPosition(head, pos, newData) {
     }
 
     let curr = head;
-    
+
     // Traverse the list to find the node
     //before the insertion point
     for (let i = 1; i < pos - 1 && curr !== null; ++i) {
@@ -8873,7 +8878,7 @@ function insertAtPosition(head, pos, newData) {
     // Update the next of current node to new node
     curr.next = newNode;
 
-    // If the new node is not the last node, 
+    // If the new node is not the last node,
     // update prev of next node to new node
     if (newNode.next !== null) {
         newNode.next.prev = newNode;
@@ -8916,12 +8921,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 4 
-Inserting Node with data 3 at position 3: 1 2 3 4 
+Original Linked List: 1 2 4
+Inserting Node with data 3 at position 3: 1 2 3 4
 
 ```
 
@@ -8946,7 +8951,7 @@ Below is the implementation of the above approach:
 
 C++
 ````
-// C++ Program to delete a node from the 
+// C++ Program to delete a node from the
 // beginning of Doubly Linked List
 
 #include <bits/stdc++.h>
@@ -9092,7 +9097,7 @@ int main() {
 
 Java
 ````
-// Java Program to delete a node from the 
+// Java Program to delete a node from the
 // beginning of Doubly Linked List
 
 class Node {
@@ -9142,7 +9147,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -9165,7 +9170,7 @@ class GFG {
 
 Python
 ````
-# Python Program to delete a node from the 
+# Python Program to delete a node from the
 # beginning of Doubly Linked List
 
 class Node:
@@ -9177,7 +9182,7 @@ class Node:
 # Function to delete the first node (head) of the list
 # and return the second node as the new head
 def del_head(head):
-  
+
     # If empty, return None
     if head is None:
         return None
@@ -9201,10 +9206,10 @@ def print_list(head):
         print(curr.data, end=" ")
         curr = curr.next
     print()
-    
+
 
 if __name__ == "__main__":
-  
+
 	# Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -9243,11 +9248,11 @@ class Node {
 }
 
 class GFG {
-  	
+
     // Deletes the first node (head) of the list
     // and returns the second node as the new head
     public static Node DelHead(Node head) {
-      
+
         // If empty, return null
         if (head == null)
             return null;
@@ -9273,7 +9278,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -9296,7 +9301,7 @@ class GFG {
 
 JavaScript
 ````
-// JavaScript Program to delete a node from the 
+// JavaScript Program to delete a node from the
 // beginning of Doubly Linked List
 class Node {
     constructor(data) {
@@ -9358,12 +9363,12 @@ printList(head);
 ````
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-After Deletion at the beginning: 2 3 
+Original Linked List: 1 2 3
+After Deletion at the beginning: 2 3
 
 ```
 
@@ -9427,7 +9432,7 @@ Node *delLast(Node *head) {
     curr->prev->next = NULL;
 
   	// Delete the last node
-    delete curr; 
+    delete curr;
 
     // Return the updated head
     return head;
@@ -9443,7 +9448,7 @@ void printList(Node *head) {
 }
 
 int main() {
-  	
+
     // Create a hardcoded doubly linked list:
     // 1 <-> 2 <-> 3
     struct Node *head = new Node(1);
@@ -9467,7 +9472,7 @@ int main() {
 
 C
 ````
-// C Program to delete a node from the end of 
+// C Program to delete a node from the end of
 //Doubly Linked List
 
 #include <stdio.h>
@@ -9478,10 +9483,10 @@ struct Node {
     struct Node* next;
 };
 
-// Function to delete the last node of the 
+// Function to delete the last node of the
 //doubly linked list
 struct Node* delLast(struct Node *head) {
-  
+
     // Corner cases
     if (head == NULL)
         return NULL;
@@ -9526,7 +9531,7 @@ struct Node* createNode(int data) {
 }
 
 int main() {
-  
+
     // Create a hardcoded doubly linked list:
     // 1 <-> 2 <-> 3
     struct Node *head = createNode(1);
@@ -9550,7 +9555,7 @@ int main() {
 
 Java
 ````
-// Java Program to delete a node from the end of 
+// Java Program to delete a node from the end of
 //Doubly Linked List
 
 class Node {
@@ -9566,11 +9571,11 @@ class Node {
 }
 
 class GFG {
-  
-    // Function to delete the last node of the 
+
+    // Function to delete the last node of the
   	//doubly linked list
     public static Node delLast(Node head) {
-      
+
         // Corner cases
         if (head == null) {
             return null;
@@ -9605,7 +9610,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -9628,7 +9633,7 @@ class GFG {
 
 Python
 ````
-# Python Program to delete a node from the end of 
+# Python Program to delete a node from the end of
 #Doubly Linked List
 
 class Node:
@@ -9638,7 +9643,7 @@ class Node:
         self.next = None
 
 def del_last(head):
-  
+
     # Corner cases
     if head is None:
         return None
@@ -9665,7 +9670,7 @@ def print_list(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -9686,7 +9691,7 @@ if __name__ == "__main__":
 
 C#
 ````
-// C# Program to delete a node from the end of 
+// C# Program to delete a node from the end of
 //Doubly Linked List
 
 using System;
@@ -9704,11 +9709,11 @@ class Node {
 }
 
 class GFG {
-  
+
     // Function to delete the last node of the
   	//doubly linked list
     static Node DelLast(Node head) {
-        
+
       	// Corner cases
         if (head == null)
             return null;
@@ -9743,7 +9748,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -9828,12 +9833,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-After Deletion at the end: 1 2 
+Original Linked List: 1 2 3
+After Deletion at the end: 1 2
 
 ```
 
@@ -9880,7 +9885,7 @@ struct Node {
     }
 };
 
-// Function to delete a node at a specific position 
+// Function to delete a node at a specific position
 // in the doubly linked list
 Node * delPos(Node * head, int pos) {
 
@@ -9971,7 +9976,7 @@ struct Node * createNode(int data) {
     return newNode;
 }
 
-// Function to delete a node at a specific 
+// Function to delete a node at a specific
 //position in the doubly linked list
 struct Node * delPos(struct Node * head, int pos) {
 
@@ -10063,7 +10068,7 @@ class Node {
 
 class GFG {
 
-    // Function to delete a node at a 
+    // Function to delete a node at a
   	//specific position in the doubly linked list
     public static Node delPos(Node head, int pos) {
 
@@ -10148,7 +10153,7 @@ class Node:
         self.next = None
 
 
-# Function to delete a node at a specific position 
+# Function to delete a node at a specific position
 #in the doubly linked list
 def del_pos(head, pos):
     # If the list is empty
@@ -10192,7 +10197,7 @@ def print_list(head):
 
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -10342,7 +10347,7 @@ function delPos(head, pos) {
 	}
 
 	// Deallocate memory for the deleted node
-	// In JavaScript, garbage collection handles 
+	// In JavaScript, garbage collection handles
     //this automatically
 
 	return head;
@@ -10378,12 +10383,12 @@ printList(head);
 
 ````
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-After Deletion at the position 2: 1 3 
+Original Linked List: 1 2 3
+After Deletion at the position 2: 1 3
 
 ```
 
@@ -10652,12 +10657,12 @@ Below is the Implementation of the above approach:
 C++
 ```
 void queueEnqueue(int data)
-{  // Check queue is full or not  
-    if (capacity == rear) {  
+{  // Check queue is full or not
+    if (capacity == rear) {
         printf("\\nQueue is full\\n");
-        return;  }    
-    // Insert element at the rear  
-    else {  queue[rear] = data;  rear++;  }  
+        return;  }
+    // Insert element at the rear
+    else {  queue[rear] = data;  rear++;  }
         return;  }
 ```
 
@@ -10668,8 +10673,8 @@ void queueEnqueue(int data)
 
 
 
-**Complexity Analysis:**  
-**Time Complexity:** O(1)  
+**Complexity Analysis:**
+**Time Complexity:** O(1)
 **Space Complexity:** O(N)
 
 ### **Operation 2: dequeue()**
@@ -10696,24 +10701,24 @@ C++
 ```
  void queueDequeue()  {
      // If queue is empty
-     if (front == rear) {  
+     if (front == rear) {
         printf("\\nQueue is empty\\n");
-         return;  } 
-     // Shift all the elements from index 2  
-    // till rear to the left by one  
-    else {  
-        for (int i = 0; i < rear - 1; i++) 
-            {  
-                queue[i] = queue[i + 1];  
-            }   
-        // decrement rear  rear--;  
-    }  
-        return;  
- } 
+         return;  }
+     // Shift all the elements from index 2
+    // till rear to the left by one
+    else {
+        for (int i = 0; i < rear - 1; i++)
+            {
+                queue[i] = queue[i + 1];
+            }
+        // decrement rear  rear--;
+    }
+        return;
+ }
 ```
 
-**Complexity Analysis:**  
-**Time Complexity:** O(1)  
+**Complexity Analysis:**
+**Time Complexity:** O(1)
 **Space Complexity:** O(N)
 
 ### Operation 4 : rear()
@@ -10731,20 +10736,20 @@ Below is the Implementation of the above approach:
 
 C++
 ```
-//Function to get rear of queue  
-int rear(Queue* queue)  {  
-    if (isEmpty(queue))  
-        return INT_MIN;  
-    return queue->arr[queue->rear];  
-    
-} 
+//Function to get rear of queue
+int rear(Queue* queue)  {
+    if (isEmpty(queue))
+        return INT_MIN;
+    return queue->arr[queue->rear];
+
+}
 
 ```
 
 
 
-**Complexity Analysis:**  
-**Time Complexity:** O(1)  
+**Complexity Analysis:**
+**Time Complexity:** O(1)
 **Space Complexity:** O(N)
 
 ### **Operation 5: isEmpty():**
@@ -10776,8 +10781,8 @@ C++
 
 
 
-**Complexity Analysis:**  
-**Time Complexity:** O(1)  
+**Complexity Analysis:**
+**Time Complexity:** O(1)
 **Space Complexity:** O(N)
 
 ### **Operation 6 : isFull()**
@@ -10798,18 +10803,18 @@ Below is the Implementation of the above approach:
 
 C++
 ```
-// This function will check  
-// whether the queue is full or not.  
-bool isFull()  {  
-    if (front == 0 && rear == MAX_SIZE - 1) {  
+// This function will check
+// whether the queue is full or not.
+bool isFull()  {
+    if (front == 0 && rear == MAX_SIZE - 1) {
         return true;
-    }  
-    return false;  
-} 
+    }
+    return false;
+}
 ```
 
-**Complexity Analysis:**  
-**Time Complexity:** O(1)  
+**Complexity Analysis:**
+**Time Complexity:** O(1)
 **Space Complexity:** O(N)
 
 ### Operation 7: size()
@@ -10830,28 +10835,28 @@ Number of elements in the container
 
 C++
 ```
-// CPP program to illustrate  
-// Implementation of size() function  
-#include <iostream>  
-#include <queue>  
-using namespace std;    
-int main()  {  
-    int sum = 0;  
-    queue<int> myqueue;  
-    myqueue.push(1);  
-    myqueue.push(8);  
-    myqueue.push(3);  
-    myqueue.push(6);  
-    myqueue.push(2);    
-    // Queue becomes 1, 8, 3, 6, 2    
-    cout << myqueue.size();    
-    return 0;  
-    
-} 
+// CPP program to illustrate
+// Implementation of size() function
+#include <iostream>
+#include <queue>
+using namespace std;
+int main()  {
+    int sum = 0;
+    queue<int> myqueue;
+    myqueue.push(1);
+    myqueue.push(8);
+    myqueue.push(3);
+    myqueue.push(6);
+    myqueue.push(2);
+    // Queue becomes 1, 8, 3, 6, 2
+    cout << myqueue.size();
+    return 0;
+
+}
 ```
 
-**Complexity Analysis:**  
-**Time Complexity:** O(1)  
+**Complexity Analysis:**
+**Time Complexity:** O(1)
 **Space Complexity:** O(N)
 
 ', '', 'Basic Operations for Queue in Data Structure', 3, 'c94d230e-efca-4c17-afb4-1fda14c95348', null, null);
@@ -10972,7 +10977,7 @@ Next
 
 1 / 6
 
-  
+
 
 
 ### ****Top or Peek Operation in Stack:****
@@ -11011,440 +11016,440 @@ Below is the implementation of the above approach:
 
 C++
 ````
-/* C++ program to implement basic stack 
+/* C++ program to implement basic stack
 operations */
-#include <bits/stdc++.h> 
+#include <bits/stdc++.h>
 
-using namespace std; 
+using namespace std;
 
-#define MAX 1000 
+#define MAX 1000
 
-class Stack { 
-    int top; 
+class Stack {
+    int top;
 
-public: 
-    int a[MAX]; // Maximum size of Stack 
+public:
+    int a[MAX]; // Maximum size of Stack
 
-    Stack() { top = -1; } 
-    bool push(int x); 
-    int pop(); 
-    int peek(); 
-    bool isEmpty(); 
-}; 
+    Stack() { top = -1; }
+    bool push(int x);
+    int pop();
+    int peek();
+    bool isEmpty();
+};
 
-bool Stack::push(int x) 
-{ 
-    if (top >= (MAX - 1)) { 
-        cout << "Stack Overflow"; 
-        return false; 
-    } 
-    else { 
-        a[++top] = x; 
-        cout << x << " pushed into stack\\n"; 
-        return true; 
-    } 
-} 
+bool Stack::push(int x)
+{
+    if (top >= (MAX - 1)) {
+        cout << "Stack Overflow";
+        return false;
+    }
+    else {
+        a[++top] = x;
+        cout << x << " pushed into stack\\n";
+        return true;
+    }
+}
 
-int Stack::pop() 
-{ 
-    if (top < 0) { 
-        cout << "Stack Underflow"; 
-        return 0; 
-    } 
-    else { 
-        int x = a[top--]; 
-        return x; 
-    } 
-} 
-int Stack::peek() 
-{ 
-    if (top < 0) { 
-        cout << "Stack is Empty"; 
-        return 0; 
-    } 
-    else { 
-        int x = a[top]; 
-        return x; 
-    } 
-} 
+int Stack::pop()
+{
+    if (top < 0) {
+        cout << "Stack Underflow";
+        return 0;
+    }
+    else {
+        int x = a[top--];
+        return x;
+    }
+}
+int Stack::peek()
+{
+    if (top < 0) {
+        cout << "Stack is Empty";
+        return 0;
+    }
+    else {
+        int x = a[top];
+        return x;
+    }
+}
 
-bool Stack::isEmpty() 
-{ 
-    return (top < 0); 
-} 
+bool Stack::isEmpty()
+{
+    return (top < 0);
+}
 
-// Driver program to test above functions 
-int main() 
-{ 
-    class Stack s; 
-    s.push(10); 
-    s.push(20); 
-    s.push(30); 
-    cout << s.pop() << " Popped from stack\\n"; 
-    
-    //print top element of stack after popping 
-    cout << "Top element is : " << s.peek() << endl; 
-    
-    //print all elements in stack : 
-    cout <<"Elements present in stack : "; 
-    while(!s.isEmpty()) 
-    { 
-        // print top element in stack 
-        cout << s.peek() <<" "; 
-        // remove top element in stack 
-        s.pop(); 
-    } 
+// Driver program to test above functions
+int main()
+{
+    class Stack s;
+    s.push(10);
+    s.push(20);
+    s.push(30);
+    cout << s.pop() << " Popped from stack\\n";
 
-    return 0; 
+    //print top element of stack after popping
+    cout << "Top element is : " << s.peek() << endl;
+
+    //print all elements in stack :
+    cout <<"Elements present in stack : ";
+    while(!s.isEmpty())
+    {
+        // print top element in stack
+        cout << s.peek() <<" ";
+        // remove top element in stack
+        s.pop();
+    }
+
+    return 0;
 }
 
 ````
 
 C
 ````
-// C program for array implementation of stack 
-#include <limits.h> 
-#include <stdio.h> 
-#include <stdlib.h> 
+// C program for array implementation of stack
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-// A structure to represent a stack 
-struct Stack { 
-    int top; 
-    unsigned capacity; 
-    int* array; 
-}; 
+// A structure to represent a stack
+struct Stack {
+    int top;
+    unsigned capacity;
+    int* array;
+};
 
-// function to create a stack of given capacity. It initializes size of 
-// stack as 0 
-struct Stack* createStack(unsigned capacity) 
-{ 
-    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack)); 
-    stack->capacity = capacity; 
-    stack->top = -1; 
-    stack->array = (int*)malloc(stack->capacity * sizeof(int)); 
-    return stack; 
-} 
+// function to create a stack of given capacity. It initializes size of
+// stack as 0
+struct Stack* createStack(unsigned capacity)
+{
+    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
+    stack->capacity = capacity;
+    stack->top = -1;
+    stack->array = (int*)malloc(stack->capacity * sizeof(int));
+    return stack;
+}
 
-// Stack is full when top is equal to the last index 
-int isFull(struct Stack* stack) 
-{ 
-    return stack->top == stack->capacity - 1; 
-} 
+// Stack is full when top is equal to the last index
+int isFull(struct Stack* stack)
+{
+    return stack->top == stack->capacity - 1;
+}
 
-// Stack is empty when top is equal to -1 
-int isEmpty(struct Stack* stack) 
-{ 
-    return stack->top == -1; 
-} 
+// Stack is empty when top is equal to -1
+int isEmpty(struct Stack* stack)
+{
+    return stack->top == -1;
+}
 
-// Function to add an item to stack. It increases top by 1 
-void push(struct Stack* stack, int item) 
-{ 
-    if (isFull(stack)) 
-        return; 
-    stack->array[++stack->top] = item; 
-    printf("%d pushed to stack\\n", item); 
-} 
+// Function to add an item to stack. It increases top by 1
+void push(struct Stack* stack, int item)
+{
+    if (isFull(stack))
+        return;
+    stack->array[++stack->top] = item;
+    printf("%d pushed to stack\\n", item);
+}
 
-// Function to remove an item from stack. It decreases top by 1 
-int pop(struct Stack* stack) 
-{ 
-    if (isEmpty(stack)) 
-        return INT_MIN; 
-    return stack->array[stack->top--]; 
-} 
+// Function to remove an item from stack. It decreases top by 1
+int pop(struct Stack* stack)
+{
+    if (isEmpty(stack))
+        return INT_MIN;
+    return stack->array[stack->top--];
+}
 
-// Function to return the top from stack without removing it 
-int peek(struct Stack* stack) 
-{ 
-    if (isEmpty(stack)) 
-        return INT_MIN; 
-    return stack->array[stack->top]; 
-} 
+// Function to return the top from stack without removing it
+int peek(struct Stack* stack)
+{
+    if (isEmpty(stack))
+        return INT_MIN;
+    return stack->array[stack->top];
+}
 
-// Driver program to test above functions 
-int main() 
-{ 
-    struct Stack* stack = createStack(100); 
+// Driver program to test above functions
+int main()
+{
+    struct Stack* stack = createStack(100);
 
-    push(stack, 10); 
-    push(stack, 20); 
-    push(stack, 30); 
+    push(stack, 10);
+    push(stack, 20);
+    push(stack, 30);
 
-    printf("%d popped from stack\\n", pop(stack)); 
+    printf("%d popped from stack\\n", pop(stack));
 
-    return 0; 
-} 
+    return 0;
+}
 
 ````
 
 Java
 ````
-/* Java program to implement basic stack 
+/* Java program to implement basic stack
 operations */
-class Stack { 
-    static final int MAX = 1000; 
-    int top; 
-    int a[] = new int[MAX]; // Maximum size of Stack 
+class Stack {
+    static final int MAX = 1000;
+    int top;
+    int a[] = new int[MAX]; // Maximum size of Stack
 
-    boolean isEmpty() 
-    { 
-        return (top < 0); 
-    } 
-    Stack() 
-    { 
-        top = -1; 
-    } 
+    boolean isEmpty()
+    {
+        return (top < 0);
+    }
+    Stack()
+    {
+        top = -1;
+    }
 
-    boolean push(int x) 
-    { 
-        if (top >= (MAX - 1)) { 
-            System.out.println("Stack Overflow"); 
-            return false; 
-        } 
-        else { 
-            a[++top] = x; 
-            System.out.println(x + " pushed into stack"); 
-            return true; 
-        } 
-    } 
+    boolean push(int x)
+    {
+        if (top >= (MAX - 1)) {
+            System.out.println("Stack Overflow");
+            return false;
+        }
+        else {
+            a[++top] = x;
+            System.out.println(x + " pushed into stack");
+            return true;
+        }
+    }
 
-    int pop() 
-    { 
-        if (top < 0) { 
-            System.out.println("Stack Underflow"); 
-            return 0; 
-        } 
-        else { 
-            int x = a[top--]; 
-            return x; 
-        } 
-    } 
+    int pop()
+    {
+        if (top < 0) {
+            System.out.println("Stack Underflow");
+            return 0;
+        }
+        else {
+            int x = a[top--];
+            return x;
+        }
+    }
 
-    int peek() 
-    { 
-        if (top < 0) { 
-            System.out.println("Stack Underflow"); 
-            return 0; 
-        } 
-        else { 
-            int x = a[top]; 
-            return x; 
-        } 
-    } 
-    
-    void print(){ 
-    for(int i = top;i>-1;i--){ 
-    System.out.print(" "+ a[i]); 
-    } 
-} 
-} 
+    int peek()
+    {
+        if (top < 0) {
+            System.out.println("Stack Underflow");
+            return 0;
+        }
+        else {
+            int x = a[top];
+            return x;
+        }
+    }
 
-// Driver code 
-class Main { 
-    public static void main(String args[]) 
-    { 
-        Stack s = new Stack(); 
-        s.push(10); 
-        s.push(20); 
-        s.push(30); 
-        System.out.println(s.pop() + " Popped from stack"); 
-        System.out.println("Top element is :" + s.peek()); 
-        System.out.print("Elements present in stack :"); 
-        s.print(); 
-    } 
-} 
+    void print(){
+    for(int i = top;i>-1;i--){
+    System.out.print(" "+ a[i]);
+    }
+}
+}
+
+// Driver code
+class Main {
+    public static void main(String args[])
+    {
+        Stack s = new Stack();
+        s.push(10);
+        s.push(20);
+        s.push(30);
+        System.out.println(s.pop() + " Popped from stack");
+        System.out.println("Top element is :" + s.peek());
+        System.out.print("Elements present in stack :");
+        s.print();
+    }
+}
 
 ````
 
 Python3
 ````
-# Python program for implementation of stack 
+# Python program for implementation of stack
 
-# import maxsize from sys module 
-# Used to return -infinite when stack is empty 
-from sys import maxsize 
+# import maxsize from sys module
+# Used to return -infinite when stack is empty
+from sys import maxsize
 
-# Function to create a stack. It initializes size of stack as 0 
-def createStack(): 
-    stack = [] 
-    return stack 
+# Function to create a stack. It initializes size of stack as 0
+def createStack():
+    stack = []
+    return stack
 
-# Stack is empty when stack size is 0 
-def isEmpty(stack): 
+# Stack is empty when stack size is 0
+def isEmpty(stack):
     return len(stack) == 0
 
-# Function to add an item to stack. It increases size by 1 
-def push(stack, item): 
-    stack.append(item) 
-    print(item + " pushed to stack ") 
-    
-# Function to remove an item from stack. It decreases size by 1 
-def pop(stack): 
-    if (isEmpty(stack)): 
-        return str(-maxsize -1) # return minus infinite 
-    
-    return stack.pop() 
+# Function to add an item to stack. It increases size by 1
+def push(stack, item):
+    stack.append(item)
+    print(item + " pushed to stack ")
 
-# Function to return the top from stack without removing it 
-def peek(stack): 
-    if (isEmpty(stack)): 
-        return str(-maxsize -1) # return minus infinite 
-    return stack[len(stack) - 1] 
+# Function to remove an item from stack. It decreases size by 1
+def pop(stack):
+    if (isEmpty(stack)):
+        return str(-maxsize -1) # return minus infinite
 
-# Driver program to test above functions     
-stack = createStack() 
-push(stack, str(10)) 
-push(stack, str(20)) 
-push(stack, str(30)) 
-print(pop(stack) + " popped from stack") 
+    return stack.pop()
+
+# Function to return the top from stack without removing it
+def peek(stack):
+    if (isEmpty(stack)):
+        return str(-maxsize -1) # return minus infinite
+    return stack[len(stack) - 1]
+
+# Driver program to test above functions
+stack = createStack()
+push(stack, str(10))
+push(stack, str(20))
+push(stack, str(30))
+print(pop(stack) + " popped from stack")
 
 ````
 
 C#
 ````
-// C# program to implement basic stack 
-// operations 
-using System; 
+// C# program to implement basic stack
+// operations
+using System;
 
-namespace ImplementStack { 
-class Stack { 
-    private int[] ele; 
-    private int top; 
-    private int max; 
-    public Stack(int size) 
-    { 
-        ele = new int[size]; // Maximum size of Stack 
-        top = -1; 
-        max = size; 
-    } 
+namespace ImplementStack {
+class Stack {
+    private int[] ele;
+    private int top;
+    private int max;
+    public Stack(int size)
+    {
+        ele = new int[size]; // Maximum size of Stack
+        top = -1;
+        max = size;
+    }
 
-    public void push(int item) 
-    { 
-        if (top == max - 1) { 
-            Console.WriteLine("Stack Overflow"); 
-            return; 
-        } 
-        else { 
-            ele[++top] = item; 
-        } 
-    } 
+    public void push(int item)
+    {
+        if (top == max - 1) {
+            Console.WriteLine("Stack Overflow");
+            return;
+        }
+        else {
+            ele[++top] = item;
+        }
+    }
 
-    public int pop() 
-    { 
-        if (top == -1) { 
-            Console.WriteLine("Stack is Empty"); 
-            return -1; 
-        } 
-        else { 
-            Console.WriteLine("{0} popped from stack ", ele[top]); 
-            return ele[top--]; 
-        } 
-    } 
+    public int pop()
+    {
+        if (top == -1) {
+            Console.WriteLine("Stack is Empty");
+            return -1;
+        }
+        else {
+            Console.WriteLine("{0} popped from stack ", ele[top]);
+            return ele[top--];
+        }
+    }
 
-    public int peek() 
-    { 
-        if (top == -1) { 
-            Console.WriteLine("Stack is Empty"); 
-            return -1; 
-        } 
-        else { 
-            Console.WriteLine("{0} popped from stack ", ele[top]); 
-            return ele[top]; 
-        } 
-    } 
+    public int peek()
+    {
+        if (top == -1) {
+            Console.WriteLine("Stack is Empty");
+            return -1;
+        }
+        else {
+            Console.WriteLine("{0} popped from stack ", ele[top]);
+            return ele[top];
+        }
+    }
 
-    public void printStack() 
-    { 
-        if (top == -1) { 
-            Console.WriteLine("Stack is Empty"); 
-            return; 
-        } 
-        else { 
-            for (int i = 0; i <= top; i++) { 
-                Console.WriteLine("{0} pushed into stack", ele[i]); 
-            } 
-        } 
-    } 
-} 
+    public void printStack()
+    {
+        if (top == -1) {
+            Console.WriteLine("Stack is Empty");
+            return;
+        }
+        else {
+            for (int i = 0; i <= top; i++) {
+                Console.WriteLine("{0} pushed into stack", ele[i]);
+            }
+        }
+    }
+}
 
-// Driver program to test above functions 
-class Program { 
-    static void Main() 
-    { 
-        Stack p = new Stack(5); 
+// Driver program to test above functions
+class Program {
+    static void Main()
+    {
+        Stack p = new Stack(5);
 
-        p.push(10); 
-        p.push(20); 
-        p.push(30); 
-        p.printStack(); 
-        p.pop(); 
-    } 
-} 
-} 
+        p.push(10);
+        p.push(20);
+        p.push(30);
+        p.printStack();
+        p.pop();
+    }
+}
+}
 
 ````
 
 JavaScript
 ````
-/* javascript program to implement basic stack 
-operations 
+/* javascript program to implement basic stack
+operations
 */
-var t = -1; 
-    var MAX = 1000; 
-    var a = Array(MAX).fill(0); // Maximum size of Stack 
+var t = -1;
+    var MAX = 1000;
+    var a = Array(MAX).fill(0); // Maximum size of Stack
 
-    function isEmpty() { 
-        return (t < 0); 
-    } 
+    function isEmpty() {
+        return (t < 0);
+    }
 
-    function push(x) { 
-        if (t >= (MAX - 1)) { 
-            console.log("Stack Overflow"); 
-            return false; 
-        } else { 
-        t+=1; 
-            a[t] = x; 
-            
-            console.log(x + " pushed into stack<br/>"); 
-            return true; 
-        } 
-    } 
+    function push(x) {
+        if (t >= (MAX - 1)) {
+            console.log("Stack Overflow");
+            return false;
+        } else {
+        t+=1;
+            a[t] = x;
 
-    function pop() { 
-        if (t < 0) { 
-            console.log("Stack Underflow"); 
-            return 0; 
-        } else { 
-            var x = a[t]; 
-            t-=1; 
-            return x; 
-        } 
-    } 
+            console.log(x + " pushed into stack<br/>");
+            return true;
+        }
+    }
 
-    function peek() { 
-        if (t < 0) { 
-            console.log("Stack Underflow"); 
-            return 0; 
-        } else { 
-            var x = a[t]; 
-            return x; 
-        } 
-    } 
+    function pop() {
+        if (t < 0) {
+            console.log("Stack Underflow");
+            return 0;
+        } else {
+            var x = a[t];
+            t-=1;
+            return x;
+        }
+    }
 
-    function print() { 
-        for (i = t; i > -1; i--) { 
-            console.log(" " + a[i]); 
-        } 
-    } 
+    function peek() {
+        if (t < 0) {
+            console.log("Stack Underflow");
+            return 0;
+        } else {
+            var x = a[t];
+            return x;
+        }
+    }
 
-        push(10); 
-        push(20); 
-        push(30); 
-        console.log(pop() + " Popped from stack"); 
-        console.log("<br/>Top element is :" + peek()); 
-        console.log("<br/>Elements present in stack : "); 
-        print(); 
+    function print() {
+        for (i = t; i > -1; i--) {
+            console.log(" " + a[i]);
+        }
+    }
+
+        push(10);
+        push(20);
+        push(30);
+        console.log(pop() + " Popped from stack");
+        console.log("<br/>Top element is :" + peek());
+        console.log("<br/>Elements present in stack : ");
+        print();
 
 ````
 
@@ -11456,7 +11461,7 @@ var t = -1;
 30 pushed into stack
 30 Popped from stack
 Top element is : 20
-Elements present in stack : 20 10 
+Elements present in stack : 20 10
 ```
 ### Complexity Analysis:
 
@@ -11491,15 +11496,15 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 
 ```
-Input: n = 15  
-Output: false  
-Divisors of 15 are 1, 3 and 5. Sum of   
-divisors is 9 which is not equal to 15.  
-Input: n = 6  
-Output: true  
-Divisors of 6 are 1, 2 and 3. Sum of   
-divisors is 6.  
-  
+Input: n = 15
+Output: false
+Divisors of 15 are 1, 3 and 5. Sum of
+divisors is 9 which is not equal to 15.
+Input: n = 6
+Output: true
+Divisors of 6 are 1, 2 and 3. Sum of
+divisors is 6.
+
 
 ```
 
@@ -11519,18 +11524,18 @@ A
 ****Simple Solution****
 is to go through every number from 1 to n-1 and check if it is a divisor. Maintain sum of all divisors. If sum becomes equal to n, then return true, else return false.
 
-  
+
 
 An
 
 ****Efficient Solution****
 is to go through numbers till square root of n. If a number ‘i’ divides n, then add both ‘i’ and n/i to sum.
 
-  
+
 
 Below is the implementation of efficient solution.
 
-  
+
 
 
 
@@ -11538,14 +11543,14 @@ C++
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -11604,14 +11609,14 @@ Java
 ----
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -11674,14 +11679,14 @@ Python3
 -------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -11729,14 +11734,14 @@ C#
 --
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -11799,14 +11804,14 @@ Javascript
 ----------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -11865,14 +11870,14 @@ PHP
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -12063,14 +12068,14 @@ if all adjacent digits in it differ by
 ****‘0’****
 is not considered as 1.
 
-  
+
 
 All single digit numbers are considered as Jumping Numbers. For example 7, 8987 and 4343456 are
 
 ****Jumping numbers****
 but 796 and 89098 are not.
 
-  
+
 
 Given a positive number
 
@@ -12087,15 +12092,15 @@ smaller than or equal to
 ****Example:****
 
 ```
-Input: x = 20  
-Output:  0 1 2 3 4 5 6 7 8 9 10 12  
-  
-Input: x = 105  
-Output:  0 1 2 3 4 5 6 7 8 9 10 12  
-         21 23 32 34 43 45 54 56 65  
-         67 76 78 87 89 98 101  
-  
-Note: Order of output doesn\'t matter,   
+Input: x = 20
+Output:  0 1 2 3 4 5 6 7 8 9 10 12
+
+Input: x = 105
+Output:  0 1 2 3 4 5 6 7 8 9 10 12
+         21 23 32 34 43 45 54 56 65
+         67 76 78 87 89 98 101
+
+Note: Order of output doesn\'t matter,
 i.e. numbers can be printed in any order
 ```
 
@@ -12129,7 +12134,7 @@ void print_sieve(int& x)
 {
     int i,temp,digit;
     bool check;
-    
+
     for(i=0;i<=x;i++)
     {
         if(i<10)
@@ -12181,7 +12186,7 @@ class GFG
   {
     int i, temp, digit;
     int check;
- 
+
     for(i = 0; i <= x; i++)
     {
       if(i < 10)
@@ -12207,7 +12212,7 @@ class GFG
         System.out.print(i + " ");
     }
   }
- 
+
   // Driver Code
   public static void main(String[] args)
   {
@@ -12329,7 +12334,7 @@ function print_sieve(x)
 {
     let i,temp,digit;
     let check;
-    
+
     for(i = 0; i <= x; i++)
     {
         if(i < 10)
@@ -12366,17 +12371,17 @@ print_sieve(x);
 ````
 
 
-  
+
 
 **Output**
 ```
-0 1 2 3 4 5 6 7 8 9 10 12 21 23 32 34 43 45 54 56 65 67 76 78 87 89 98 101 
+0 1 2 3 4 5 6 7 8 9 10 12 21 23 32 34 43 45 54 56 65 67 76 78 87 89 98 101
 ```
 
 *****Time Complexity:*****
 O(x)
 
-  
+
 
 *****Auxiliary Space:*****
 O(1)
@@ -12402,7 +12407,7 @@ or
 [DFS](https://www.geeksforgeeks.org/depth-first-traversal-for-a-graph/)
 .
 
-  
+
 
 Assume that we have a graph where the starting node is
 
@@ -12414,21 +12419,21 @@ With the restrictions given in the graph about the jumping numbers, what do you 
 
 
 ```
-Lets take a example for input x = 90  
-  
-Start node = 0  
-From 0, we can move to 1 2 3 4 5 6 7 8 9   
-[these are not in our range so we don\'t add it]  
-  
-Now from 1, we can move to 12 and 10   
-From 2, 23 and 21  
-From 3, 34 and 32  
-.  
-.  
-.  
-.  
-.  
-.  
+Lets take a example for input x = 90
+
+Start node = 0
+From 0, we can move to 1 2 3 4 5 6 7 8 9
+[these are not in our range so we don\'t add it]
+
+Now from 1, we can move to 12 and 10
+From 2, 23 and 21
+From 3, 34 and 32
+.
+.
+.
+.
+.
+.
 and so on.
 ```
 
@@ -12634,15 +12639,15 @@ printJumping(x)
 C#
 
 ````
-// C# program to finds and prints all jumping 
+// C# program to finds and prints all jumping
 // numbers smaller than or equal to x.
 using System;
 using System.Collections.Generic;
 
-class GFG 
+class GFG
 {
 
-    // Prints all jumping numbers smaller than or 
+    // Prints all jumping numbers smaller than or
     // equal to x starting with \'num\'. It mainly
     // does BFS starting from \'num\'.
     public void bfs(int x, int num)
@@ -12652,30 +12657,30 @@ class GFG
         q.Enqueue(num);
 
         // Do BFS starting from i
-        while (q.Count!=0) 
+        while (q.Count!=0)
         {
             num = q.Peek();
             q.Dequeue();
-            if (num <= x) 
+            if (num <= x)
             {
                 Console.Write(num + " ");
                 int last_digit = num % 10;
 
                 // If last digit is 0, append next digit only
-                if (last_digit == 0) 
+                if (last_digit == 0)
                 {
                     q.Enqueue((num * 10) + (last_digit + 1));
                 }
 
                 // If last digit is 9, append previous digit only
-                else if (last_digit == 9) 
+                else if (last_digit == 9)
                 {
                     q.Enqueue((num * 10) + (last_digit - 1));
                 }
 
                 // If last digit is neither 0 nor 9, append both
                 // previous and next digits
-                else 
+                else
                 {
                     q.Enqueue((num * 10) + (last_digit - 1));
                     q.Enqueue((num * 10) + (last_digit + 1));
@@ -12690,14 +12695,14 @@ class GFG
     {
         Console.Write("0 ");
 
-        for (int i = 1; i <= 9 && i <= x; i++) 
+        for (int i = 1; i <= 9 && i <= x; i++)
         {
             this.bfs(x, i);
         }
     }
 
     // Driver code
-    public static void Main(String[] args) 
+    public static void Main(String[] args)
     {
         int x = 40;
         GFG obj = new GFG();
@@ -12714,45 +12719,45 @@ JavaScript
 ````
 <script>
 
-// Finds and prints all jumping numbers 
+// Finds and prints all jumping numbers
 // smaller than or equal to x.
 
 // Prints all jumping numbers smaller than
-// or equal to x starting with \'num\'. It 
+// or equal to x starting with \'num\'. It
 // mainly does BFS starting from \'num\'.
 function bfs(x, num)
 {
-    
+
     // Create a queue and enqueue \'i\' to it
     let q = [];
     q.push(num);
 
     // Do BFS starting from i
-    while (q.length != 0) 
+    while (q.length != 0)
     {
         num = q.shift();
-        
-        if (num <= x) 
+
+        if (num <= x)
         {
             document.write(num + " ");
             let last_digit = num % 10;
 
             // If last digit is 0, append next digit only
-            if (last_digit == 0) 
+            if (last_digit == 0)
             {
                 q.push((num * 10) + (last_digit + 1));
             }
 
-            // If last digit is 9, append previous 
+            // If last digit is 9, append previous
             // digit only
             else if (last_digit == 9)
             {
                 q.push((num * 10) + (last_digit - 1));
             }
 
-            // If last digit is neither 0 nor 9, 
+            // If last digit is neither 0 nor 9,
             // append both previous and next digits
-            else 
+            else
             {
                 q.push((num * 10) + (last_digit - 1));
                 q.push((num * 10) + (last_digit + 1));
@@ -12761,12 +12766,12 @@ function bfs(x, num)
     }
 }
 
-// Prints all jumping numbers smaller 
+// Prints all jumping numbers smaller
 // than or equal to a positive number x
 function printJumping(x)
 {
     document.write("0 ");
-  
+
     for(let i = 1; i <= 9 && i <= x; i++)
     {
         bfs(x, i);
@@ -12784,11 +12789,11 @@ printJumping(x);
 ````
 
 
-  
+
 
 **Output**
 ```
-0 1 10 12 2 21 23 3 32 34 4 5 6 7 8 9 
+0 1 10 12 2 21 23 3 32 34 4 5 6 7 8 9
 ```
 
 *****Time Complexity:*****
@@ -12798,7 +12803,7 @@ O(k) time where
 is number of Jumping Numbers smaller than or equal to
 
 ****x****
-  
+
 
 *****Auxiliary Space:*****
 O(1)
@@ -12826,13 +12831,13 @@ based approach we start building our numbers from single digits , i.e. from 1 �
 ****Algorithm:****
 
 ```
-1. We will start from every possible single digit, i.e. from 1 to 9  
-2. In the dfs we first write the base case, then  
-3. We print the current number  
-4. We get the last digit of current number and  
-  check the possibilities for the next digit.  
-  The next digit can either be last digit + 1 or last digit - 1   
-5. If the last digit is either 0 or 9 we have only one option for   
+1. We will start from every possible single digit, i.e. from 1 to 9
+2. In the dfs we first write the base case, then
+3. We print the current number
+4. We get the last digit of current number and
+  check the possibilities for the next digit.
+  The next digit can either be last digit + 1 or last digit - 1
+5. If the last digit is either 0 or 9 we have only one option for
   next number, else both the options are possible.
 ```
 
@@ -12993,7 +12998,7 @@ def PrintJumping(X):
 if __name__ == \'__main__\':
     X = 40
     PrintJumping(X)
-    
+
     # This code is contributed by factworx412
 
 ````
@@ -13061,15 +13066,15 @@ JavaScript
     {
         if (cnum > num) // base case
             return;
-    
+
         console.log(cnum+" "); // print the current number
-    
+
         let l_dig = cnum % 10; // get the last digit of current number
-    
+
         // for the next digit we have two options
         let first = cnum * 10 + l_dig + 1;
         let second = cnum * 10 + l_dig - 1;
-    
+
         if (l_dig == 0) // here as second option will give us a
                         // -ve number we will skip it
             dfs(first, num);
@@ -13082,7 +13087,7 @@ JavaScript
             dfs(second, num);
         }
     }
-    
+
     function PrintJumping(X)
     {
         console.log(0+" ");
@@ -13091,20 +13096,20 @@ JavaScript
                     // from i
         }
     }
-    
+
         let X = 40;
         PrintJumping(X);
-        
+
     // This code is contributed by Aman Kumar.
 
 ````
 
 
-  
+
 
 **Output**
 ```
-0 1 12 10 2 23 21 3 34 32 4 5 6 7 8 9 
+0 1 12 10 2 23 21 3 34 32 4 5 6 7 8 9
 ```
 
 ****Time Complexity:****
@@ -13129,27 +13134,27 @@ of two numbers is the smallest number which can be divided by both numbers.
 
 > ****Input****
 > : a = 12, b = 18
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 36
-> 
->   
-> 
+>
+>
+>
 > 36 is the smallest number divisible by both 12 and 18
-> 
-> 
+>
+>
 > ****Input****
 > : a = 5, b = 11
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 55
-> 
->   
-> 
+>
+>
+>
 > 55 is the smallest number divisible by both 5 and 11
 
 
@@ -13173,11 +13178,11 @@ is based on the below formula for LCM of two numbers ‘a’ and ‘b’.
 
 ![relation---------between---------hcf---------and---------lcm_________](https://media.geeksforgeeks.org/wp-content/uploads/20241122160112040184/relation---------between---------hcf---------and---------lcm_________.webp)
 > a x b = LCM(a, b) \\* GCD (a, b)
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > LCM(a, b) = (a x b) / GCD(a, b)
 
 
@@ -13194,11 +13199,11 @@ Below is the implementation of the above idea:
 C++
 
 ````
-// C++ program to find LCM of two numbers 
-#include <iostream> 
+// C++ program to find LCM of two numbers
+#include <iostream>
 using namespace std;
 
-// Recursive function to return gcd of a and b 
+// Recursive function to return gcd of a and b
 long long gcd(long long int a, long long int b)
 {
   if (b == 0)
@@ -13206,50 +13211,50 @@ long long gcd(long long int a, long long int b)
   return gcd(b, a % b);
 }
 
-// Function to return LCM of two numbers 
+// Function to return LCM of two numbers
 long long lcm(int a, int b)
 {
     return (a / gcd(a, b)) * b;
 }
- 
-// Driver program to test above function 
-int main() 
-{ 
-    int a = 15, b = 20; 
+
+// Driver program to test above function
+int main()
+{
+    int a = 15, b = 20;
     cout <<"LCM of " << a << " and "
-         << b << " is " << lcm(a, b); 
-    return 0; 
-} 
+         << b << " is " << lcm(a, b);
+    return 0;
+}
 
 ````
 
 C
 
 ````
-// C program to find LCM of two numbers 
-#include <stdio.h> 
+// C program to find LCM of two numbers
+#include <stdio.h>
 
-// Recursive function to return gcd of a and b 
-int gcd(int a, int b) 
-{ 
+// Recursive function to return gcd of a and b
+int gcd(int a, int b)
+{
     if (a == 0)
-        return b; 
-    return gcd(b % a, a); 
-} 
+        return b;
+    return gcd(b % a, a);
+}
 
-// Function to return LCM of two numbers 
-int lcm(int a, int b) 
-{ 
+// Function to return LCM of two numbers
+int lcm(int a, int b)
+{
     return (a / gcd(a, b)) * b;
-} 
+}
 
-// Driver program to test above function 
-int main() 
-{ 
-    int a = 15, b = 20; 
-    printf("LCM of %d and %d is %d ", a, b, lcm(a, b)); 
-    return 0; 
-} 
+// Driver program to test above function
+int main()
+{
+    int a = 15, b = 20;
+    printf("LCM of %d and %d is %d ", a, b, lcm(a, b));
+    return 0;
+}
 
 ````
 
@@ -13264,22 +13269,22 @@ public class Test
     static int gcd(int a, int b)
     {
         if (a == 0)
-            return b; 
-        return gcd(b % a, a); 
+            return b;
+        return gcd(b % a, a);
     }
-    
+
     // method to return LCM of two numbers
     static int lcm(int a, int b)
     {
         return (a / gcd(a, b)) * b;
     }
-    
+
     // Driver method
-    public static void main(String[] args) 
+    public static void main(String[] args)
     {
         int a = 15, b = 20;
         System.out.println("LCM of " + a +
-                           " and " + b + 
+                           " and " + b +
                       " is " + lcm(a, b));
     }
 }
@@ -13302,7 +13307,7 @@ def lcm(a,b):
     return (a // gcd(a,b))* b
 
 # Driver program to test above function
-a = 15 
+a = 15
 b = 20
 print(\'LCM of\', a, \'and\', b, \'is\', lcm(a, b))
 
@@ -13317,25 +13322,25 @@ C#
 // of two numbers.
 using System;
 class GFG {
-    
-    // Recursive method to 
+
+    // Recursive method to
     // return gcd of a and b
     static int gcd(int a, int b)
     {
         if (a == 0)
-            return b; 
-        return gcd(b % a, a); 
+            return b;
+        return gcd(b % a, a);
     }
-    
-    // method to return 
+
+    // method to return
     // LCM of two numbers
     static int lcm(int a, int b)
     {
         return (a / gcd(a, b)) * b;
     }
-    
+
     // Driver method
-    public static void Main() 
+    public static void Main()
     {
         int a = 15, b = 20;
         Console.WriteLine("LCM of " + a +
@@ -13352,28 +13357,28 @@ JavaScript
 ````
 <script>
 
-// Javascript program to find LCM of two numbers 
+// Javascript program to find LCM of two numbers
 
-// Recursive function to return gcd of a and b 
-function gcd(a, b) 
-{ 
-if (b == 0) 
-    return a; 
-return gcd(b, a % b); 
-} 
+// Recursive function to return gcd of a and b
+function gcd(a, b)
+{
+if (b == 0)
+    return a;
+return gcd(b, a % b);
+}
 
-// Function to return LCM of two numbers 
-function lcm(a, b) 
-{ 
-    return (a / gcd(a, b)) * b; 
-} 
+// Function to return LCM of two numbers
+function lcm(a, b)
+{
+    return (a / gcd(a, b)) * b;
+}
 
-// Driver program to test above function 
- 
-    let a = 15, b = 20; 
+// Driver program to test above function
+
+    let a = 15, b = 20;
     document.write("LCM of " + a + " and "
-    + b + " is " + lcm(a, b)); 
-    
+    + b + " is " + lcm(a, b));
+
 
 // This code is contributed by Mayank Tyagi
 
@@ -13387,7 +13392,7 @@ PHP
 <?php
 // PHP program to find LCM of two numbers
 
-// Recursive function to 
+// Recursive function to
 // return gcd of a and b
 function gcd( $a, $b)
 {
@@ -13404,7 +13409,7 @@ function lcm( $a, $b)
 }
 
     // Driver Code
-    $a = 15; 
+    $a = 15;
     $b = 20;
     echo "LCM of ",$a, " and "
          ,$b, " is ", lcm($a, $b);
@@ -13415,7 +13420,7 @@ function lcm( $a, $b)
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -13425,7 +13430,7 @@ LCM of 15 and 20 is 60
 ****Time Complexity:****
 O(log(min(a,b))
 
-  
+
 
 ****Auxiliary Space:****
 O(log(min(a,b))
@@ -13455,7 +13460,7 @@ int LCM(int a, int b)
 int main()
 {
     int a = 10, b = 5;
-    cout << "LCM of " << a << " and " 
+    cout << "LCM of " << a << " and "
          << b << " is " << LCM(a, b);
     return 0;
 }
@@ -13521,7 +13526,7 @@ C#
 // C# program to find LCM of 2 numbers
 using System;
 
-class LCMProgram 
+class LCMProgram
 {
 
   // Function to return LCM of two numbers
@@ -13570,7 +13575,7 @@ console.log("LCM of", a, "and", b, "is", LCM(a, b));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -13580,7 +13585,7 @@ LCM of 10 and 5 is 10
 ****Time Complexity:****
 O(min(a,b))
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -13604,30 +13609,30 @@ The GCD (Greatest Common Divisor) or HCF (Highest Common Factor) of two numbers 
 
 ![gcd](https://media.geeksforgeeks.org/wp-content/uploads/20240920171939/gcd.webp)
 
-  
+
 
 
 ****Examples:****
 
 > ****Input:****
 > a = 20, b = 28
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 4
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > The factors of 20 are 1, 2, 4, 5, 10 and 20. The factors of 28 are 1, 2, 4, 7, 14 and 28. Among these factors, 1, 2 and 4 are the common factors of both 20 and 28. The greatest among the common factors is 4.
-> 
-> 
+>
+>
 > ****Input:****
 > a = 60, b = 36
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 12
 
@@ -13635,7 +13640,7 @@ Naive Approach for GCD of two numbers:
 --------------------------------------
 
 > The basic idea is to find the minimum of the two numbers and find its highest factor which is also a factor of the other
-> 
+>
 > [number](https://www.geeksforgeeks.org/numbers/)
 > .
 
@@ -13784,7 +13789,7 @@ C#
 
 using System;
 public class GFG {
-    
+
     // Function to return gcd of a and b
     static int gcd(int a, int b)
     {
@@ -13827,7 +13832,7 @@ function gcd(a,b)
         }
         result--;
     }
-    
+
     // Return gcd of a and b
     return result;
 }
@@ -13835,12 +13840,12 @@ function gcd(a,b)
 // Driver program to test above function
 let a = 98;
 let b = 56;
-console.log("GCD of ",a," and ",b," is ",gcd(a, b)); 
+console.log("GCD of ",a," and ",b," is ",gcd(a, b));
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -13850,7 +13855,7 @@ GCD of 98 and 56 is 14
 ****Time Complexity:****
 O(min(a,b))
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -13870,29 +13875,29 @@ The idea of this algorithm is, the GCD of two numbers doesn’t change if the sm
 ****Pseudo-code:****
 
 > gcd(a, b):
-> 
->   
-> 
+>
+>
+>
 > if a = b:
-> 
->   
-> 
+>
+>
+>
 > return a
-> 
->   
-> 
+>
+>
+>
 > if a > b:
-> 
->   
-> 
+>
+>
+>
 > return gcd(a – b, b)
-> 
->   
-> 
+>
+>
+>
 > else:
-> 
->   
-> 
+>
+>
+>
 > return gcd(a, b – a)
 
 
@@ -13904,7 +13909,7 @@ C++
 
 ````
 // C++ program to find GCD of two numbers
-// code is updated by himanshug9119 - linkedin URL - 
+// code is updated by himanshug9119 - linkedin URL -
 // https://www.linkedin.com/in/himanshug9119/
 #include <bits/stdc++.h>
 using namespace std;
@@ -14102,7 +14107,7 @@ JavaScript
 // Recursive function to return gcd of a and b
 function gcd(a, b)
 {
-    // Everything divides 0 
+    // Everything divides 0
     if (a == 0)
     return b;
     if (b == 0)
@@ -14122,7 +14127,7 @@ function gcd(a, b)
 
     let a = 98, b = 56;
     console.log("GCD of "+ a + " and " + b + " is " + gcd(a, b));
-    
+
 // This code is contributed by Mayank Tyagi
 
 ````
@@ -14131,13 +14136,13 @@ PHP
 
 ````
 <?php
-// PHP program to find GCD 
+// PHP program to find GCD
 // of two numbers
 
 // Recursive function to return gcd of a and b
 function gcd($a, $b)
 {
-    // Everything divides 0 
+    // Everything divides 0
     if ($a == 0)
        return $b;
     if ($b == 0)
@@ -14146,7 +14151,7 @@ function gcd($a, $b)
     // Base case
     if($a == $b)
         return $a ;
-    
+
     // a is greater
     if($a > $b)
         return gcd( $a-$b , $b ) ;
@@ -14166,7 +14171,7 @@ echo "GCD of $a and $b is ", gcd($a , $b) ;
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -14176,7 +14181,7 @@ GCD of 98 and 56 is 14
 ****Time Complexity:****
 O(min(a,b))
 
-  
+
 
 ****Auxiliary Space:****
 O(min(a,b)) because it uses internal stack data structure in recursion.
@@ -14198,25 +14203,25 @@ See the below illustration for a better understanding:
 
 
 > Consider a = 98 and b = 56
-> 
-> 
+>
+>
 > ****a = 98, b = 56:****
-> 
+>
 > * a > b so put a = a-b and b remains same. So  a = 98-56 = 42  & b= 56.
-> 
+>
 > ****a = 42, b = 56:****
-> 
+>
 > * Since b > a, we check if b%a=0. Since answer is no, we proceed further.
 > * Now b>a. So b = b-a and a remains same. So b = 56-42 = 14 & a= 42.
-> 
+>
 > ****a = 42, b = 14:****
-> 
+>
 > * Since a>b, we check if a%b=0. Now the answer is yes.
 > * So we print smaller among a and b as H.C.F . i.e. 42 is  3 times of 14.
-> 
-> 
+>
+>
 > So
-> 
+>
 > ****HCF****
 > is 14.
 
@@ -14417,7 +14422,7 @@ console.log(`GCD of ${a} and ${b} is ${gcd(a, b)}`);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -14427,7 +14432,7 @@ GCD of 98 and 56 is 14
 ****Time Complexity:****
 O(min(a, b))
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -14437,10 +14442,10 @@ O(1)
 ------------------------------------
 
 > Instead of the Euclidean algorithm by subtraction, a better approach can be used. We don’t perform subtraction here. we continuously divide the bigger number by the smaller number. More can be learned about this
-> 
+>
 > ****efficient solution****
 > by using the modulo operator in
-> 
+>
 > [Euclidean algorithm](https://www.geeksforgeeks.org/euclidean-algorithms-basic-and-extended)
 > .
 
@@ -14457,9 +14462,9 @@ using namespace std;
 // Recursive function to return gcd of a and b in single line
 int gcd(int a, int b)
 {
-    return b == 0 ? a : gcd(b, a % b);    
+    return b == 0 ? a : gcd(b, a % b);
 }
- 
+
 // Driver program to test above function
 int main()
 {
@@ -14481,7 +14486,7 @@ int gcd(int a, int b)
 {
     if (b == 0)
         return a;
-    return gcd(b, a % b); 
+    return gcd(b, a % b);
 }
 
 // Driver program to test above function
@@ -14507,11 +14512,11 @@ class Test
     {
       if (b == 0)
         return a;
-      return gcd(b, a % b); 
+      return gcd(b, a % b);
     }
-    
+
     // Driver method
-    public static void main(String[] args) 
+    public static void main(String[] args)
     {
         int a = 98, b = 56;
         System.out.println("GCD of " + a +" and " + b + " is " + gcd(a, b));
@@ -14525,8 +14530,8 @@ Python
 ````
 # Recursive function to return gcd of a and b
 def gcd(a,b):
-    
-    # Everything divides 0 
+
+    # Everything divides 0
     if (b == 0):
          return a
     return gcd(b, a%b)
@@ -14551,22 +14556,22 @@ C#
 using System;
 
 class GFG {
-    
+
     // Recursive function to return
     // gcd of a and b
     static int gcd(int a, int b)
-    {      
+    {
        if (b == 0)
           return a;
-       return gcd(b, a % b); 
+       return gcd(b, a % b);
     }
-    
+
     // Driver method
-    public static void Main() 
+    public static void Main()
     {
         int a = 98, b = 56;
-        Console.WriteLine("GCD of " 
-          + a +" and " + b + " is " 
+        Console.WriteLine("GCD of "
+          + a +" and " + b + " is "
                       + gcd(a, b));
     }
 }
@@ -14585,12 +14590,12 @@ JavaScript
 // Recursive function to return gcd of a and b
 
 function gcd(a, b){
-  
+
   // Everything divides 0
   if(b == 0){
     return a;
   }
-  
+
   return gcd(b, a % b);
 }
 
@@ -14610,10 +14615,10 @@ PHP
 
 ````
 <?php
-// PHP program to find GCD 
+// PHP program to find GCD
 // of two numbers
 
-// Recursive function to 
+// Recursive function to
 // return gcd of a and b
 function gcd($a, $b)
 {
@@ -14636,7 +14641,7 @@ echo "GCD of $a and $b is ", gcd($a , $b) ;
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -14652,20 +14657,20 @@ O(log(min(a,b)))
 * The derivation for this is obtained from the analysis of the worst-case scenario.
 * What we do is we ask what are the 2 least numbers that take 1 step, those would be (1,1). If we want to increase the number of steps to 2 while keeping the numbers as low as possible as we can take the numbers to be (1,2). Similarly, for 3 steps, the numbers would be (2,3), 4 would be (3,5), 5 would be (5,8).
 * So we can notice a pattern here, for the nth step the numbers would be (fib(n), fib(n+1)). So the worst-case time complexity would be O(n) where
-  
+
   ****a ? fib(n)****
   and
-  
+
   ****b ? fib(n+1)****
   .
 * Now Fibonacci series is an exponentially growing series where the ratio of n
-  
+
   th
   /(n-1)
-  
+
   th
   term approaches (sqrt(5)+1)/2 which is also called the golden ratio. So we can see that the time complexity of the algorithm increases linearly as the terms grow exponentially hence the time complexity would be
-  
+
   ****log(min(a,b))****
   .
 
@@ -14861,7 +14866,7 @@ JavaScript
 // Recursive function to return gcd of a and b
 
 function gcd(a, b){
-  
+
   // Everything divides 0
       while (a > 0 && b > 0) {
         if (a > b) {
@@ -14888,7 +14893,7 @@ console.log(`GCD of ${a} and ${b} is ${gcd(a, b)}`);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -14898,7 +14903,7 @@ GCD of 98 and 56 is 14
 ****Time Complexity:****
 O(log(min(a,b)))
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -15013,12 +15018,12 @@ const b = 56;
 console.log("The gcd of a and b is " + gcd(a, b));
 
 
-// Contributed By Siddhesh22 
+// Contributed By Siddhesh22
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -15029,7 +15034,7 @@ The gcd of a and b is 14
 ****Time Complexity:****
 O(log(min(a, b)))
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -15055,28 +15060,28 @@ of
 
 > ****Input:****
 > n = 4
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 2
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > The square root of 4 is 2.
-> 
-> 
+>
+>
 > ****Input:****
 > n = 11
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 3
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > The square root of 11 lies in between 3 and 4 so floor of the square root is 3.
 
@@ -15113,22 +15118,22 @@ it will be our answer.
 C++
 
 ````
-// C++ program to find the square root of 
+// C++ program to find the square root of
 // given integer using a loop
 
 #include <iostream>
 using namespace std;
 
 int floorSqrt(int n) {
-    
-    // Start iteration from 1 until the 
+
+    // Start iteration from 1 until the
     // square of a number exceeds n
     int res = 1;
     while(res*res <= n){
         res++;
     }
-    
-    // return the largest integer whose 
+
+    // return the largest integer whose
     // square is less than or equal to n
     return res - 1;
 }
@@ -15144,21 +15149,21 @@ int main() {
 C
 
 ````
-// C program to find the square root of 
+// C program to find the square root of
 // given integer using a loop
 
 #include <stdio.h>
 
 int floorSqrt(int n) {
-    
-    // Start iteration from 1 until the 
+
+    // Start iteration from 1 until the
     // square of a number exceeds n
     int res = 1;
     while (res * res <= n) {
         res++;
     }
-    
-    // return the largest integer whose 
+
+    // return the largest integer whose
     // square is less than or equal to n
     return res - 1;
 }
@@ -15174,21 +15179,21 @@ int main() {
 Java
 
 ````
-// Java program to find the square root of 
+// Java program to find the square root of
 // given integer using a loop
 
 class GfG {
-    
+
     static int floorSqrt(int n) {
-        
-        // Start iteration from 1 until the 
+
+        // Start iteration from 1 until the
         // square of a number exceeds n
         int res = 1;
         while (res * res <= n) {
             res++;
         }
-        
-        // return the largest integer whose 
+
+        // return the largest integer whose
         // square is less than or equal to n
         return res - 1;
     }
@@ -15204,18 +15209,18 @@ class GfG {
 Python
 
 ````
-# Python program to find the square root of 
+# Python program to find the square root of
 # given integer using a loop
 
 def floorSqrt(n):
-    
-    # Start iteration from 1 until the 
+
+    # Start iteration from 1 until the
     # square of a number exceeds n
     res = 1
     while res * res <= n:
         res += 1
-    
-    # return the largest integer whose 
+
+    # return the largest integer whose
     # square is less than or equal to n
     return res - 1
 
@@ -15228,23 +15233,23 @@ if __name__ == "__main__":
 C#
 
 ````
-// C# program to find the square root of 
+// C# program to find the square root of
 // given integer using a loop
 
 using System;
 
 class GfG {
-  
+
     static int floorSqrt(int n) {
-        
-        // Start iteration from 1 until the 
+
+        // Start iteration from 1 until the
         // square of a number exceeds n
         int res = 1;
         while (res * res <= n) {
             res++;
         }
-        
-        // return the largest integer whose 
+
+        // return the largest integer whose
         // square is less than or equal to n
         return res - 1;
     }
@@ -15260,19 +15265,19 @@ class GfG {
 JavaScript
 
 ````
-// JavaScript program to find the square root of 
+// JavaScript program to find the square root of
 // given integer using a loop
 
 function floorSqrt(n) {
-    
-    // Start iteration from 1 until the 
+
+    // Start iteration from 1 until the
     // square of a number exceeds n
     let res = 1;
     while (res * res <= n) {
         res++;
     }
-    
-    // return the largest integer whose 
+
+    // return the largest integer whose
     // square is less than or equal to n
     return res - 1;
 }
@@ -15284,7 +15289,7 @@ console.log(floorSqrt(n));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -15293,38 +15298,38 @@ console.log(floorSqrt(n));
 ### [Expected Approach] Using Binary Search – O(logn) Time and O(1) Space
 
 > The square root of an integer follows a
-> 
+>
 > ****monotonic****
 > pattern, because as we
-> 
+>
 > ****increase****
 > any number, it’s square also
-> 
+>
 > ****increases****
 > . If the square of a number is
-> 
+>
 > ****greater****
 > than given integer, then square root will definitely exist
-> 
+>
 > ****before****
 > this number. Conversely, if the square of a number is
-> 
+>
 > ****less****
 > than or
-> 
+>
 > ****equal****
 > to
-> 
+>
 > ****n****
 > , then either this number is the square root or it lies after this number.
-> 
->   
-> 
+>
+>
+>
 > Therefore, we can use
-> 
+>
 > [binary search](https://www.geeksforgeeks.org/binary-search/)
 > to find the square root of n. I
-> 
+>
 > ****nitial search****
 > space will be 1 to the given integer itself, because square root of any positive integer always exists within this range.
 
@@ -15335,7 +15340,7 @@ console.log(floorSqrt(n));
 
 
 
-  
+
 
 
 
@@ -15349,28 +15354,28 @@ C++
 using namespace std;
 
 int floorSqrt(int n) {
-  
+
     // Initial search space
     int lo = 1, hi = n;
     int res = 1;
-    
+
     while(lo <= hi) {
         int mid = lo + (hi - lo)/2;
-        
-        // If square of mid is less than or equal to n 
+
+        // If square of mid is less than or equal to n
         // update the result and search in upper half
         if(mid*mid <= n) {
             res = mid;
             lo = mid + 1;
         }
-        
-        // If square of mid exceeds n, 
+
+        // If square of mid exceeds n,
           // search in the lower half
         else {
             hi = mid - 1;
         }
     }
-    
+
     return res;
 }
 
@@ -15391,28 +15396,28 @@ C
 #include <stdio.h>
 
 int floorSqrt(int n) {
-  
+
     // Initial search space
     int lo = 1, hi = n;
     int res = 1;
-    
+
     while (lo <= hi) {
         int mid = lo + (hi - lo) / 2;
-        
-        // If square of mid is less than or equal to n 
+
+        // If square of mid is less than or equal to n
         // update the result and search in upper half
         if (mid * mid <= n) {
             res = mid;
             lo = mid + 1;
         }
-        
-        // If square of mid exceeds n, 
+
+        // If square of mid exceeds n,
         // search in the lower half
         else {
             hi = mid - 1;
         }
     }
-    
+
     return res;
 }
 
@@ -15431,30 +15436,30 @@ Java
 // using binary search
 
 class GfG {
-  
+
     static int floorSqrt(int n) {
-  
+
         // Initial search space
         int lo = 1, hi = n;
         int res = 1;
-        
+
         while (lo <= hi) {
             int mid = lo + (hi - lo) / 2;
-            
-            // If square of mid is less than or equal to n 
+
+            // If square of mid is less than or equal to n
             // update the result and search in upper half
             if (mid * mid <= n) {
                 res = mid;
                 lo = mid + 1;
             }
-            
-            // If square of mid exceeds n, 
+
+            // If square of mid exceeds n,
             // search in the lower half
             else {
                 hi = mid - 1;
             }
         }
-        
+
         return res;
     }
 
@@ -15473,26 +15478,26 @@ Python
 # using binary search
 
 def floorSqrt(n):
-  
+
     # Initial search space
     lo = 1
     hi = n
     res = 1
-    
+
     while lo <= hi:
         mid = lo + (hi - lo) // 2
-        
-        # If square of mid is less than or equal to n 
+
+        # If square of mid is less than or equal to n
         # update the result and search in upper half
         if mid * mid <= n:
             res = mid
             lo = mid + 1
-            
-        # If square of mid exceeds n, 
+
+        # If square of mid exceeds n,
         # search in the lower half
         else:
             hi = mid - 1
-    
+
     return res
 
 if __name__ == "__main__":
@@ -15510,30 +15515,30 @@ C#
 using System;
 
 class GfG {
-  
+
     static int floorSqrt(int n) {
-  
+
         // Initial search space
         int lo = 1, hi = n;
         int res = 1;
-        
+
         while (lo <= hi) {
             int mid = lo + (hi - lo) / 2;
-            
-            // If square of mid is less than or equal to n 
+
+            // If square of mid is less than or equal to n
             // update the result and search in upper half
             if (mid * mid <= n) {
                 res = mid;
                 lo = mid + 1;
             }
-            
-            // If square of mid exceeds n, 
+
+            // If square of mid exceeds n,
             // search in the lower half
             else {
                 hi = mid - 1;
             }
         }
-        
+
         return res;
     }
 
@@ -15552,28 +15557,28 @@ JavaScript
 // using binary search
 
 function floorSqrt(n) {
-  
+
     // Initial search space
     let lo = 1, hi = n;
     let res = 1;
-    
+
     while (lo <= hi) {
         let mid = lo + Math.floor((hi - lo) / 2);
-        
-        // If square of mid is less than or equal to n 
+
+        // If square of mid is less than or equal to n
         // update the result and search in upper half
         if (mid * mid <= n) {
             res = mid;
             lo = mid + 1;
         }
-        
-        // If square of mid exceeds n, 
+
+        // If square of mid exceeds n,
         // search in the lower half
         else {
             hi = mid - 1;
         }
     }
-    
+
     return res;
 }
 
@@ -15583,7 +15588,7 @@ console.log(floorSqrt(n));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -15606,7 +15611,7 @@ C++
 using namespace std;
 
 int floorSqrt(int n) {
-      
+
       // Square root using sqrt function, it returns
       // the double value, which is casted to integer
       int res = sqrt(n);
@@ -15631,7 +15636,7 @@ C
 #include <math.h>
 
 int floorSqrt(int n) {
-  
+
     // Square root using sqrt function, it returns
     // the double value, which is casted to integer
     int res = sqrt(n);
@@ -15653,9 +15658,9 @@ Java
 // integer using built in square root function
 
 class GfG {
-  
+
     static int floorSqrt(int n) {
-  
+
         // Square root using sqrt function, it returns
         // the double value, which is casted to integer
         int res = (int)Math.sqrt(n);
@@ -15679,7 +15684,7 @@ Python
 import math
 
 def floorSqrt(n):
-  
+
     # Square root using sqrt function, it returns
     # the double value, which is casted to integer
     res = int(math.sqrt(n))
@@ -15700,9 +15705,9 @@ C#
 using System;
 
 class GfG {
-  
+
     static int floorSqrt(int n) {
-  
+
         // Square root using sqrt function, it returns
         // the double value, which is casted to integer
         int res = (int)Math.Sqrt(n);
@@ -15724,7 +15729,7 @@ JavaScript
 // integer using built in square root function
 
 function floorSqrt(n) {
-  
+
     // Square root using sqrt function, it returns
     // the double value, which is casted to integer
     let res = Math.floor(Math.sqrt(n));
@@ -15737,7 +15742,7 @@ console.log(floorSqrt(n));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -15754,58 +15759,58 @@ to compute the square root of an integer n. Below is mathematical proof of this 
 
 
 > Let’s say square root of n is x:
-> 
->   
-> 
+>
+>
+>
 > ****x = √n****
->   
-> 
+>
+>
 > Squaring both the sides:
-> 
->   
-> 
+>
+>
+>
 > x
-> 
+>
 > 2 =
 > n
-> 
->   
-> 
+>
+>
+>
 > Taking log on both the sides:
-> 
->   
-> 
+>
+>
+>
 > => ln(x
-> 
+>
 > 2
 > ) = ln(n)
-> 
->   
-> 
+>
+>
+>
 > => 2\\*ln(x) = ln(n)
-> 
->   
-> 
+>
+>
+>
 > => ln(x) = 1/2 \\* ln(n)
-> 
->   
-> 
+>
+>
+>
 > To isolate x, exponentiate both sides with base e:
-> 
->   
-> 
+>
+>
+>
 > => x = e
-> 
+>
 > 1/2 \\* ln(n)
->   
-> 
+>
+>
 > x is the square root of n:
-> 
->   
-> 
+>
+>
+>
 > ****√n****
 > = e
-> 
+>
 > 1/2 \\* ln(n)
 
 
@@ -15819,23 +15824,23 @@ C++
 
 ````
 // C++ program to find the square root of given integer
-// using mathematical formula 
+// using mathematical formula
 
 #include <iostream>
 #include <cmath>
 using namespace std;
 
 int floorSqrt(int n) {
-      
-      // Calculating square root using mathematical formula    
+
+      // Calculating square root using mathematical formula
     int res = exp(0.5 * log(n));
-    
+
     // If square of  res + 1 is less than or equal to n
       // then, it will be our answer
     if ((res + 1) * (res + 1) <= n) {
         res++;
     }
-    
+
     return res;
 }
 
@@ -15851,22 +15856,22 @@ C
 
 ````
 // C program to find the square root of given integer
-// using mathematical formula 
+// using mathematical formula
 
 #include <stdio.h>
 #include <math.h>
 
 int floorSqrt(int n) {
-  
-    // Calculating square root using mathematical formula    
+
+    // Calculating square root using mathematical formula
     int res = exp(0.5 * log(n));
-    
+
     // If square of res + 1 is less than or equal to n
     // then, it will be our answer
     if ((res + 1) * (res + 1) <= n) {
         res++;
     }
-    
+
     return res;
 }
 
@@ -15882,21 +15887,21 @@ Java
 
 ````
 // Java program to find the square root of given integer
-// using mathematical formula 
+// using mathematical formula
 
 class GfG {
-  
+
     static int floorSqrt(int n) {
-  
-        // Calculating square root using mathematical formula    
+
+        // Calculating square root using mathematical formula
         int res = (int)Math.exp(0.5 * Math.log(n));
-        
+
         // If square of res + 1 is less than or equal to n
         // then, it will be our answer
         if ((res + 1) * (res + 1) <= n) {
             res++;
         }
-        
+
         return res;
     }
 
@@ -15912,20 +15917,20 @@ Python
 
 ````
 # Python program to find the square root of given integer
-# using mathematical formula 
+# using mathematical formula
 
 import math
 
 def floorSqrt(n):
-  
-    # Calculating square root using mathematical formula    
+
+    # Calculating square root using mathematical formula
     res = int(math.exp(0.5 * math.log(n)))
-    
+
     # If square of res + 1 is less than or equal to n
     # then, it will be our answer
     if (res + 1) ** 2 <= n:
         res += 1
-    
+
     return res
 
 if __name__ == "__main__":
@@ -15938,23 +15943,23 @@ C#
 
 ````
 // C# program to find the square root of given integer
-// using mathematical formula 
+// using mathematical formula
 
 using System;
 
 class GfG {
-  
+
     static int floorSqrt(int n) {
-  
-        // Calculating square root using mathematical formula    
+
+        // Calculating square root using mathematical formula
         int res = (int)Math.Exp(0.5 * Math.Log(n));
-        
+
         // If square of res + 1 is less than or equal to n
         // then, it will be our answer
         if ((long)(res + 1) * (res + 1) <= n) {
             res++;
         }
-        
+
         return res;
     }
 
@@ -15970,19 +15975,19 @@ JavaScript
 
 ````
 // JavaScript program to find the square root of given integer
-// using mathematical formula 
+// using mathematical formula
 
 function floorSqrt(n) {
-  
-    // Calculating square root using mathematical formula    
+
+    // Calculating square root using mathematical formula
     let res = Math.floor(Math.exp(0.5 * Math.log(n)));
-    
+
     // If square of res + 1 is less than or equal to n
     // then, it will be our answer
     if ((res + 1) * (res + 1) <= n) {
         res++;
     }
-    
+
     return res;
 }
 
@@ -15992,7 +15997,7 @@ console.log(floorSqrt(n));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -16012,46 +16017,46 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 > ****Input****
 > : n = 5
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 120
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : 5! = 5 \\* 4 \\* 3 \\* 2 \\* 1 = 120
-> 
-> 
+>
+>
 > ****Input****
 > : n = 4
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 24
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : 4! = 4 \\* 3 \\* 2 \\* 1 = 24
-> 
-> 
+>
+>
 > ****Input****
 > : n = 0
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 1
-> 
-> 
+>
+>
 > ****Input****
 > : n = 1
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 1
 
@@ -16063,24 +16068,24 @@ The idea is simple, we initialize result as 1. Then run a loop from 1 to n and m
 
 
 > ****Illustration for n = 4****
->   
-> 
+>
+>
 > Initialize res = 1
-> 
->   
-> 
+>
+>
+>
 > Run a loop for i = 2 to 4
-> 
->   
-> 
+>
+>
+>
 > i = 2 : res = res \\* 2 = 2
-> 
->   
-> 
+>
+>
+>
 > i = 3 : res = res \\* 3 = 6
-> 
->   
-> 
+>
+>
+>
 > i = 4 : res = res \\* 4 = 24
 
 C++
@@ -16250,7 +16255,7 @@ echo "Factorial of $num is " . factorial($num) . "\\n";
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -16261,7 +16266,7 @@ Factorial of 5 is 120
 ****Time Complexity:****
 O(n), since we are running a loop from 1 to n.
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -16277,50 +16282,50 @@ Let us first see how we can break factorial(n) into smaller problem and then def
 >   = n \\* (n – 1) \\* (n – 2) …. 2 \\* 1
 > * ****(n – 1)!****
 >   = (n – 1) \\* (n – 2) … 2 \\* 1
-> 
-> 
+>
+>
 > From the above two equations, we can say that n
-> 
+>
 > ****! = n \\* (n – 1)!****
->   
-> 
->   
-> 
+>
+>
+>
+>
 > Since the problem can be broken down into The idea is to define a recursive function, say
-> 
+>
 > ****factorial(n)****
 > to calculate the
-> 
+>
 > [factorial](https://www.geeksforgeeks.org/factorial/)
 > of number
-> 
+>
 > ****n****
 > . According to the value of n, we can have two cases:
-> 
-> 
+>
+>
 > ****if****
 > n
-> 
+>
 > ****= 0 or n = 1 :****
->   
-> 
-> 
+>
+>
+>
 > factorial(n) = 1
-> 
->   
-> 
+>
+>
+>
 > ****Else****
 > :
-> 
->   
-> 
+>
+>
+>
 > factorial(n) = n \\* factorial(n – 1).
 
 ****Illustration:****
 
 ![factorial](https://media.geeksforgeeks.org/wp-content/uploads/20240924132748/factorial.webp)
 
-  
+
 
 
 Below is the implementation of the above approach:
@@ -16496,7 +16501,7 @@ function factorial($n)
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -16507,53 +16512,53 @@ Factorial of 5 is 120
 ****Time Complexity:****
 O(n), since the function is being called n times
 
-  
+
 
 ****Auxiliary Space:****
 O(n), In the worst case, the recursion stack space would be full with all the function calls waiting to get completed and that would make it an O(n) recursion stack space.
 
 
 ****Which approach is better – iterative or recursive?****
-  
+
 
 Iterative approach is better as the recursive approach requires extra space for recursion call stack and overhead of recursion calls. However writing a recursive code is always a fun exercise.
 
 
 ****How do we handle large numbers?****
-  
+
 
 One simple improvement that we can do is use long long in C/C++ and long in Java/C#, but that does not help much as factorials are really large numbers and causes overflow for small values. Please refer
 ', '', 'Factorial of a Number', 8, '598d78e5-c34f-437f-88fb-31557168c07b', null, null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, course_id, exercise_id, problem_id) VALUES ('770b0b45-edf6-4bc7-9880-e2727206798f', e'
 Given two positive numbers x and y, check if y is a power of x or not.
-  
+
 
 **Examples :**
 
 > **Input:**
 > x = 10, y = 1
->   
-> 
+>
+>
 > **Output:**
 > True
->   
-> 
+>
+>
 > x^0 = 1
-> 
+>
 > **Input:**
 > x = 10, y = 1000
->   
-> 
+>
+>
 > **Output:**
 > True
->   
-> 
+>
+>
 > x^3 = 1
-> 
+>
 > **Input:**
 > x = 10, y = 1001
->   
-> 
+>
+>
 > **Output:**
 > False
 
@@ -16571,14 +16576,14 @@ C++
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -16627,14 +16632,14 @@ Java
 ----
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -16683,14 +16688,14 @@ Python3
 -------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -16756,14 +16761,14 @@ C#
 --
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -16818,14 +16823,14 @@ PHP
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -16872,14 +16877,14 @@ Javascript
 ----------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -16939,16 +16944,16 @@ document.write((isPower(2, 30) ? 1 : 0) + "<br/>" );
 O(Log
 x
 y)
-  
+
 
 **Auxiliary space:**
 O(1)
 
 **Optimization:**
-  
+
 
 We can optimize above solution to work in O(Log Log y). The idea is to do squaring of power instead of multiplying it with x, i.e., compare y with x^2, x^4, x^8, …etc. If x becomes equal to y, return true. If x becomes more than y, then we do binary search for power of x between previous power and current power, i.e., between x^i and x^(i/2).
-  
+
 
 Following are detailed step.
 
@@ -16956,20 +16961,20 @@ Following are detailed step.
 1) Initialize pow = x, i = 1
 2) while (pow < y)
    {
-      pow = pow*pow 
+      pow = pow*pow
       i *= 2
-   }    
+   }
 3) If pow == y
      return true;
 4) Else construct an array of powers
    from x^i to x^(i/2)
 5) Binary Search for y in array constructed
-   in step 4. If not found, return false. 
+   in step 4. If not found, return false.
    Else return true.
 ```
 
 **Alternate Solution :**
-  
+
 
 The idea is to take log of y in base x. If it turns out to be an integer, we return true. Else false.
 
@@ -16977,14 +16982,14 @@ C++
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -17023,14 +17028,14 @@ Java
 ----
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -17077,14 +17082,14 @@ Python3
 -------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -17118,14 +17123,14 @@ C#
 --
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -17177,14 +17182,14 @@ PHP
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -17225,14 +17230,14 @@ Javascript
 ----------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -17270,7 +17275,7 @@ console.log(isPower(2, 128));
 
 **Time complexity**
 : O(log Y)
-  
+
 
 **Auxiliary space**
 : O(1)', '', 'Check if a number is a power of another number', 9, '598d78e5-c34f-437f-88fb-31557168c07b', null, null);
@@ -17286,28 +17291,28 @@ Given a number
 
 > ****Input:****
 > N = 16
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 4 9
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : 4 and 9 have exactly three divisors.
-> 
-> 
+>
+>
 > ****Input:****
 > N = 49
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 4 9 25 49
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > 4, 9, 25 and 49 have exactly three divisors.
 
@@ -17328,22 +17333,22 @@ To solve the problem follow the below idea:
 
 > ****Idea:****
 > After having a close look at the examples mentioned above, you have noticed that all the required numbers are perfect squares and that too of only prime numbers.
-> 
-> 
+>
+>
 > ****Proof:****
 > Suppose the number is N, and it is a perfect square with square root X such that X is prime.
-> 
-> 
+>
+>
 > Now if we find the factors of N, it will always have following combinations:
-> 
-> 
+>
+>
 > * 1\\*N
 > * X\\*X
-> 
-> 
+>
+>
 > Therefore the required numbers will have only three numbers as their divisors:
-> 
-> 
+>
+>
 > * 1,
 > * that number itself, and
 > * just a single divisor in between 1 and the number.
@@ -17360,7 +17365,7 @@ Follow the below steps to solve the problem:
 
 * Generate the prime numbers from 1 to N using any sieve method efficiently
 * Print all the prime numbers(X) between 1 to N, such as X
-  
+
   2
   is less than or equal to N
 
@@ -17573,7 +17578,7 @@ JavaScript
     // three-primes smaller than
     // or equal to n using Sieve
     // of Eratosthenes
-    
+
     // Generates all primes upto n and
     // prints their squares
     function numbersWith3Divisors(n)
@@ -17604,7 +17609,7 @@ JavaScript
     // sieve();
     let n = 96;
     numbersWith3Divisors(n);
-    
+
      // This code is contributed by mukesh07.
 
 ````
@@ -17614,40 +17619,40 @@ PHP
 ````
 <?php
 // PHP program to print all three-primes
-// smaller than or equal to n using Sieve 
-// of Eratosthenes 
+// smaller than or equal to n using Sieve
+// of Eratosthenes
 
-// Generates all primes upto n and 
-// prints their squares 
-function numbersWith3Divisors($N) 
-{ 
-    $prime = array_fill(0, $N + 1, true); 
-    $prime[0] = $prime[1] = false; 
+// Generates all primes upto n and
+// prints their squares
+function numbersWith3Divisors($N)
+{
+    $prime = array_fill(0, $N + 1, true);
+    $prime[0] = $prime[1] = false;
 
-    for ($p = 2; $p * $p <= $N; $p++) 
-    { 
-        // If prime[p] is not changed, 
-        // then it is a prime 
-        if ($prime[$p] == true) 
-        { 
-        // Update all multiples of p 
-        for ($i = $p * 2; $i <= $N; $i += $p) 
-            $prime[$i] = false; 
-        } 
-    } 
+    for ($p = 2; $p * $p <= $N; $p++)
+    {
+        // If prime[p] is not changed,
+        // then it is a prime
+        if ($prime[$p] == true)
+        {
+        // Update all multiples of p
+        for ($i = $p * 2; $i <= $N; $i += $p)
+            $prime[$i] = false;
+        }
+    }
 
-    // print squares of primes upto n. 
-    echo "Numbers with 3 divisors :\\n"; 
-    for ($i = 0; $i * $i <= $N ; $i++) 
-        if ($prime[$i]) 
-        echo $i * $i . " "; 
-} 
+    // print squares of primes upto n.
+    echo "Numbers with 3 divisors :\\n";
+    for ($i = 0; $i * $i <= $N ; $i++)
+        if ($prime[$i])
+        echo $i * $i . " ";
+}
 
 // Driver Code
-$N = 96; 
+$N = 96;
 
 // Function call
-numbersWith3Divisors($N); 
+numbersWith3Divisors($N);
 
 // This code is contributed by mits
 ?>
@@ -17655,18 +17660,18 @@ numbersWith3Divisors($N);
 ````
 
 
-  
+
 
 **Output**
 ```
 Numbers with 3 divisors :
-4 9 25 49 
+4 9 25 49
 ```
 
 ****Time Complexity:****
 O(N\\*log(log(N)))
 
-  
+
 
 ****Auxiliary Space:****
 O(N)
@@ -17682,28 +17687,28 @@ Follow the below steps to solve the problem:
 
 
 * Start a loop for integer
-  
+
   ****i****
   from
-  
+
   ****2****
   to
-  
+
   ****N.****
 * Check if
-  
+
   ****i****
   is prime or not, which can be done easily using the
-  
+
   [****isPrime(n)****](https://www.geeksforgeeks.org/prime-numbers)
-  
+
   method.
 * If
-  
+
   ****i****
   is prime, check if its square is less than or equal to the given number. This will be reviewed only for squares of prime numbers, therefore reducing the number of checks.
 * If the above condition is satisfied, the number will be printed and the loop will continue till
-  
+
   ****i <= n.****
 
 
@@ -17942,7 +17947,7 @@ JavaScript
     // three-primes smaller than
     // or equal to n without using
     // extra space
-    
+
       // 3 divisor logic implementation
     // check if a number is prime or
     // not if it is a prime then check
@@ -17978,9 +17983,9 @@ JavaScript
         }
         return true;
     }
-    
+
     let n = 122;
-     
+
     numbersWith3Divisors(n);
 
 // This code is contributed by suresh07.
@@ -17988,12 +17993,12 @@ JavaScript
 ````
 
 
-  
+
 
 **Output**
 ```
-Numbers with 3 divisors : 
-4 9 25 49 121 
+Numbers with 3 divisors :
+4 9 25 49 121
 ```
 
 ****Time Complexity:****
@@ -18002,7 +18007,7 @@ O(sqrt N
 2
 )
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -18024,52 +18029,52 @@ and
 
 > ****Input****
 > : n = 10
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : False
-> 
->   
-> 
+>
+>
+>
 > 10 is divisible by 2 and 5
-> 
-> 
+>
+>
 > ****Input****
 > : n = 11
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : True
-> 
->   
-> 
+>
+>
+>
 > 11 is divisible by 1 and 11 only
-> 
-> 
+>
+>
 > ****Input****
 > : n = 1
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : False
-> 
->   
-> 
+>
+>
+>
 > [1 is neither composite nor prime](https://www.geeksforgeeks.org/is-1-a-prime-number-or-a-composite-number/)
-> 
+>
 > ****Input****
 > : n = 0
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : False
-> 
->   
-> 
+>
+>
+>
 > [0 is neither composite nor prime](https://www.geeksforgeeks.org/is-0-a-prime-number/)
 
 Table of Content
@@ -18095,16 +18100,16 @@ To check if a number is prime, we can use the key property of prime numbers that
 ### [Naive Approach] Basic Trial Division Method – O(n) time and O(1) space
 
 > The simplest method to check if a number
-> 
+>
 > ****n****
 > is prime by checking every number from
-> 
+>
 > ****2****
 > to
-> 
+>
 > ****n-1.****
 > If the number
-> 
+>
 > ****n****
 > is divisible by any of these, it’s not prime.
 
@@ -18113,27 +18118,27 @@ Step-by-step approach:
 
 
 * If
-  
+
   ****n****
   is less than 2, return
-  
+
   ****false****
   (0 and 1 are not prime).
 * Loop through numbers from
-  
+
   ****2****
   to
-  
+
   ****n-1.****
   + If
-    
+
     ****n****
     is divisible by any of these numbers, return
-    
+
     ****false****
     .
 * If no divisors are found, return
-  
+
   ****true****
   .
 
@@ -18290,7 +18295,7 @@ console.log(isPrime(n));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -18300,7 +18305,7 @@ console.log(isPrime(n));
 ****Time Complexity:****
 O(n)
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -18309,46 +18314,46 @@ O(1)
 ### [Efficient Approach – 1] Trial Division Method – O(√n) time and O(1) space
 
 > There is an observation that if we take any number
-> 
+>
 > ****n****
 > and find its divisors then divisors would appear in pairs. For example, if
-> 
+>
 > ****4****
 > is a divisor of
-> 
+>
 > ****28****
 > , then
-> 
+>
 > ****28/4=7****
 > is also a divisor. So we have the pair (4,7).
-> 
-> 
+>
+>
 > This means that for any divisor
-> 
+>
 > ****d****
 > of
-> 
+>
 > ****n****
 > , there is a corresponding divisor
-> 
+>
 > ****n/d****
 > . If
-> 
+>
 > ****d****
 > is less than or equal to the
-> 
+>
 > ****√n****
 > , then
-> 
+>
 > ****n/d****
 > will be greater than or equal to the
-> 
+>
 > ****√n****
 > . Therefore, we only need to check for divisors up to the
-> 
+>
 > ****√n****
 > . If
-> 
+>
 > ****n****
 > has a divisor larger than its square root, the paired divisor must be smaller than the square root, which we would have already checked.
 
@@ -18387,7 +18392,7 @@ bool isPrime(int n) {
 
     // Check divisibility from 2 to the square root of n
     for (int i = 2; i <= sqrt(n); i++)
-        if (n % i == 0)  
+        if (n % i == 0)
             return false;
 
     // If no divisors were found, n is prime
@@ -18395,8 +18400,8 @@ bool isPrime(int n) {
 }
 
 int main() {
-    int n = 11;  
-    cout << isPrime(n); 
+    int n = 11;
+    cout << isPrime(n);
     return 0;
 }
 
@@ -18417,7 +18422,7 @@ bool isPrime(int n) {
 
     // Check divisibility from 2 to the square root of n
     for (int i = 2; i <= sqrt(n); i++)
-        if (n % i == 0)  
+        if (n % i == 0)
             return false;
 
     // If no divisors were found, n is prime
@@ -18425,8 +18430,8 @@ bool isPrime(int n) {
 }
 
 int main() {
-    int n = 11; 
-    printf("%d", isPrime(n));  
+    int n = 11;
+    printf("%d", isPrime(n));
     return 0;
 }
 
@@ -18446,7 +18451,7 @@ class Main {
 
         // Check divisibility from 2 to the square root of n
         for (int i = 2; i <= Math.sqrt(n); i++)
-            if (n % i == 0) 
+            if (n % i == 0)
                 return false;
 
         // If no divisors were found, n is prime
@@ -18455,7 +18460,7 @@ class Main {
 
     public static void main(String[] args) {
         int n = 11;
-        System.out.println(isPrime(n));  
+        System.out.println(isPrime(n));
     }
 }
 
@@ -18475,13 +18480,13 @@ def is_prime(n):
 
     # Check divisibility from 2 to the square root of n
     for i in range(2, int(math.sqrt(n)) + 1):
-        if n % i == 0:  
+        if n % i == 0:
             return False
 
     # If no divisors were found, n is prime
     return True
 
-n = 11 
+n = 11
 print(is_prime(n))
 
 ````
@@ -18501,7 +18506,7 @@ class GfG {
 
         // Check divisibility from 2 to the square root of n
         for (int i = 2; i <= Math.Sqrt(n); i++)
-            if (n % i == 0)  
+            if (n % i == 0)
                 return false;
 
         // If no divisors were found, n is prime
@@ -18528,20 +18533,20 @@ function isPrime(n) {
 
     // Check divisibility from 2 to the square root of n
     for (let i = 2; i <= Math.sqrt(n); i++)
-        if (n % i === 0) 
+        if (n % i === 0)
             return false;
 
     // If no divisors were found, n is prime
     return true;
 }
 
-let n = 11; 
-console.log(isPrime(n));  
+let n = 11;
+console.log(isPrime(n));
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -18551,7 +18556,7 @@ console.log(isPrime(n));
 ****Time Complexity:****
 O(sqrt(n))
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -18560,49 +18565,49 @@ O(1)
 ### [Expected Approach – 2] Optimized Trial Division Method – O(√n) time and O(1) space
 
 > We know that any integer number can be written in the form of
-> 
+>
 > ****6k+i,****
 > where
-> 
+>
 > ****k****
 > is a nonnegative integer (like 0, 1, 2, 3,…) and
-> 
+>
 > ****i****
 > is a number between 0 and 5 (so i can be 0, 1, 2, 3, 4, or 5). If we look closely, we’ll notice that when
-> 
+>
 > ****i****
 > is 0, 2, 3, or 4, the numbers
-> 
+>
 > ****6k, 6k+2, 6k+3,****
 > and
-> 
+>
 > ****6k+4****
 > are all divisible by either 2 or 3. But prime numbers greater than
-> 
+>
 > ****3****
 > can’t be divisible by
-> 
+>
 > ****2****
 > or
-> 
+>
 > ****3****
 > . Therefore, the only forms left that a prime number can have are
-> 
+>
 > ****6k+1****
 > or
-> 
+>
 > ****6k+5****
 > (since these forms are not divisible by 2 or 3).
-> 
-> 
+>
+>
 > Instead of checking every number up to the √n to see if it divides
-> 
+>
 > ****n****
 > , we only check numbers of the form
-> 
+>
 > ****6k+1****
 > and
-> 
+>
 > ****6k+5.****
 > This reduces the number of checks needed.
 
@@ -18611,69 +18616,69 @@ Step-by-step approach:
 
 
 * Check if
-  
+
   ****n == 1****
   or
-  
+
   ****n == 0****
   then return
-  
+
   ****false****
   .
 * Check if
-  
+
   ****n****
   is
-  
+
   ****2****
   or
-  
+
   ****3****
   and return
-  
+
   ****true****
   .
 * Check if
-  
+
   ****n****
   is divisible by
-  
+
   ****2****
   or
-  
+
   ****3****
   and return
-  
+
   ****false****
   .
 * Loop from
-  
+
   ****5****
   to
-  
+
   ****√n****
   ​, incrementing by
-  
+
   ****6****
   .
   + Checks if
-    
+
     ****n****
     is divisible by
-    
+
     ****i****
     (which corresponds to
-    
+
     ****6k+1****
     ) or by
-    
+
     ****i+2****
     (which corresponds to
-    
+
     ****6k+5****
     ).
 * If no divisors are found, return
-  
+
   ****true****
   .
 
@@ -18701,7 +18706,7 @@ bool isPrime(int n) {
     // Check whether n is divisible by 2 or 3
     if (n % 2 == 0 || n % 3 == 0)
         return false;
-    
+
     // Check from 5 to square root of n
     // Iterate i by (i+6)
     for (int i = 5; i <= sqrt(n); i = i + 6)
@@ -18712,8 +18717,8 @@ bool isPrime(int n) {
 }
 
 int main() {
-    int n = 11;  
-    cout << isPrime(n); 
+    int n = 11;
+    cout << isPrime(n);
     return 0;
 }
 
@@ -18739,7 +18744,7 @@ bool isPrime(int n) {
     // Check whether n is divisible by 2 or 3
     if (n % 2 == 0 || n % 3 == 0)
         return false;
-    
+
     // Check from 5 to square root of n
     // Iterate i by (i+6)
     for (int i = 5; i <= sqrt(n); i = i + 6)
@@ -18750,8 +18755,8 @@ bool isPrime(int n) {
 }
 
 int main() {
-    int n = 11;  
-    printf("%d", isPrime(n)); 
+    int n = 11;
+    printf("%d", isPrime(n));
     return 0;
 }
 
@@ -18775,7 +18780,7 @@ class GfG {
         // Check whether n is divisible by 2 or 3
         if (n % 2 == 0 || n % 3 == 0)
             return false;
-        
+
         // Check from 5 to square root of n
         // Iterate i by (i+6)
         for (int i = 5; i <= Math.sqrt(n); i = i + 6)
@@ -18786,8 +18791,8 @@ class GfG {
     }
 
     public static void main(String[] args) {
-        int n = 11; 
-        System.out.println(isPrime(n)); 
+        int n = 11;
+        System.out.println(isPrime(n));
     }
 }
 
@@ -18811,7 +18816,7 @@ def is_prime(n):
     # Check whether n is divisible by 2 or 3
     if n % 2 == 0 or n % 3 == 0:
         return False
-    
+
     # Check from 5 to square root of n
     # Iterate i by (i+6)
     i = 5
@@ -18822,8 +18827,8 @@ def is_prime(n):
 
     return True
 
-n = 11 
-print(is_prime(n)) 
+n = 11
+print(is_prime(n))
 
 ````
 
@@ -18846,7 +18851,7 @@ class Program {
         // Check whether n is divisible by 2 or 3
         if (n % 2 == 0 || n % 3 == 0)
             return false;
-        
+
         // Check from 5 to square root of n
         // Iterate i by (i+6)
         for (int i = 5; i <= Math.Sqrt(n); i += 6)
@@ -18857,7 +18862,7 @@ class Program {
     }
 
     static void Main(string[] args) {
-        int n = 11;  
+        int n = 11;
         Console.WriteLine(IsPrime(n));
     }
 }
@@ -18880,7 +18885,7 @@ function isPrime(n) {
     // Check whether n is divisible by 2 or 3
     if (n % 2 === 0 || n % 3 === 0)
         return false;
-    
+
     // Check from 5 to square root of n
     // Iterate i by (i+6)
     for (let i = 5; i <= Math.sqrt(n); i += 6)
@@ -18891,12 +18896,12 @@ function isPrime(n) {
 }
 
 let n = 11;
-console.log(isPrime(n)); 
+console.log(isPrime(n));
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -18906,7 +18911,7 @@ console.log(isPrime(n));
 ****Time Complexity:****
 O(sqrt(n))
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -18941,13 +18946,13 @@ For more related article on Sieve algorithms , please refer to
 
 * [Find two distinct prime numbers with](https://www.geeksforgeeks.org/find-two-distinct-prime-numbers-with-given-product/)
   a
-  
+
   [given product](https://www.geeksforgeeks.org/find-two-distinct-prime-numbers-with-given-product/)
 * [Print all prime numbers less than or equal to N](https://www.geeksforgeeks.org/print-all-prime-numbers-less-than-or-equal-to-n/)
 * [Recursive program for prime number](https://www.geeksforgeeks.org/recursive-program-prime-number/)
 * [Find two prime numbers with](https://www.geeksforgeeks.org/find-two-prime-numbers-with-given-sum/)
   a
-  
+
   [given sum](https://www.geeksforgeeks.org/find-two-prime-numbers-with-given-sum/)
 * [Find the highest occurring digit in prime numbers in a range](https://www.geeksforgeeks.org/find-highest-occurring-digit-prime-numbers-range/)
 * [Prime Factorization using Sieve O(log n) for multiple queries](https://www.geeksforgeeks.org/prime-factorization-using-sieve-olog-n-multiple-queries/)
@@ -18975,27 +18980,27 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 > ****Input:****
 > n = 687
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 21
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > **The sum of its digits are: 6 + 8 + 7 = 21**
-> 
+>
 > ****Input:****
 > n = 12
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 3
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > **The sum of its digits are: 1 + 2 = 3**
 
@@ -19080,11 +19085,11 @@ Python
 
 ````
 def sumDigits(no):
-  
+
     return 0 if no == 0 else int(no % 10) + sumDigits(int(no/10))
 
 if __name__ == "__main__":
-  
+
     print(sumDigits(687))
 
 ````
@@ -19095,7 +19100,7 @@ C#
 using System;
 
  class GfG {
-  
+
     static int sumDigits(int n) {
         return n == 0 ? 0 : n % 10 + sumDigits(n / 10);
     }
@@ -19110,7 +19115,7 @@ using System;
 JavaScript
 
 ````
-         
+
   function sumDigits(no) {
        if(no == 0){
          return 0 ;
@@ -19118,15 +19123,15 @@ JavaScript
 
       return (no % 10) + sumDigits(parseInt(no/10)) ;
   }
-      
+
 // Driver code
       console.log(sumDigits(687));
-    
+
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -19136,7 +19141,7 @@ JavaScript
 ****Time Complexity:****
 O(log n)
 
-  
+
 
 ****Auxiliary Space:****
 O(log n)
@@ -19235,7 +19240,7 @@ def sumOfDigit(n, val):
 
     return sumOfDigit(n // 10, (n % 10) + val)
 
-  
+
 if __name__ == "__main__":
     num = 12345
 
@@ -19278,25 +19283,25 @@ JavaScript
 
 function sumOfDigit(n, val)
 {
-    if (n < 10) 
+    if (n < 10)
     {
         val = val + n;
         return val;
     }
-    return sumOfDigit(parseInt(n / 10), 
+    return sumOfDigit(parseInt(n / 10),
     (n % 10) + val);
 }
 
 // Driver code
     let num = 12345;
     let result = sumOfDigit(num, 0);
-    
+
     console.log( result);
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -19306,7 +19311,7 @@ function sumOfDigit(n, val)
 ****Time Complexity:****
 O(log n)
 
-  
+
 
 ****Auxiliary Space:****
 O(log n)
@@ -19315,7 +19320,7 @@ O(log n)
 ### ****[Alternate Approach]**** Converting Number to String
 
 > When the number of digits of that number exceeds 10
-> 
+>
 > 19
 > , we can’t take that number as an integer since the range of long long int doesn’t satisfy the given number. So take input as a string, run a loop from start to the length of the string and increase the sum with that character(in this case it is numeric)
 
@@ -19368,7 +19373,7 @@ class GfG {
 
     public static void main(String[] args)  {
         String s = "123456789123456789123422";
-      
+
         System.out.print(getSum(s));
     }
 }
@@ -19381,10 +19386,10 @@ Python
 # Python3 implementation of the above approach
 def getSum(n):
     sum = 0
-    
+
     # Traversing through string
     for i in n:
-      
+
         # Converting char to int
         sum = sum + int(i)
 
@@ -19433,10 +19438,10 @@ function getSum(s)
     let sum = 0;
 
     // Traversing through the string
-    for (let i = 0; i < s.length; i++) 
+    for (let i = 0; i < s.length; i++)
     {
-    
-        // Since ascii value of  numbers starts from 
+
+        // Since ascii value of  numbers starts from
         //48 so we subtract it from sum
         sum = sum + parseInt(s[i]);
     }
@@ -19450,7 +19455,7 @@ console.log(getSum(st));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -19460,7 +19465,7 @@ console.log(getSum(st));
 ****Time Complexity:****
 O(n)
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -19472,17 +19477,17 @@ Given the radius of a circle, find the area of that circle.
 
 ![Area-of-circle](https://media.geeksforgeeks.org/wp-content/cdn-uploads/Area-of-circle-300x283.png)
 > The area of a circle can simply be evaluated using the following formula.
-> 
-> 
+>
+>
 > [Tex]Area = \\pi r^2[/Tex]
-> 
-> 
+>
+>
 > where r is radius of circle and it maybe in float because value of pie is 3.14
 
 ****Approach****
 : Using the given radius, find the area using the above formula: (pi \\* r \\* r) and print the result in float.
 
-  
+
 
 
 
@@ -19542,18 +19547,18 @@ Java
 ````
 // Java program to find area
 // of circle
-    
+
 class Test
 {
     static final double PI = Math.PI;
-         
+
     static double findArea(int r)
     {
        return PI * Math.pow(r, 2);
     }
-         
+
     // Driver method
-    public static void main(String[] args) 
+    public static void main(String[] args)
     {
         System.out.println("Area is " +  findArea(5));
     }
@@ -19586,14 +19591,14 @@ using System;
 class GFG
 {
     static double PI = Math.PI;
-        
+
     static double findArea(int r)
     {
     return PI * Math.Pow(r, 2);
     }
-        
+
     // Driver method
-    static void Main() 
+    static void Main()
     {
         Console.Write("Area is " + findArea(5));
     }
@@ -19608,27 +19613,27 @@ JavaScript
 ````
 <script>
 
-// Javascript program to find area 
-// of circle 
+// Javascript program to find area
+// of circle
 
-let pi = 3.14159265358979323846;  
+let pi = 3.14159265358979323846;
 
-// function to calculate the area of circle 
-function findArea(r) 
-{ 
-    return (pi * r * r); 
-} 
+// function to calculate the area of circle
+function findArea(r)
+{
+    return (pi * r * r);
+}
 
-// Driver code 
-    let r, Area; 
-    r = 5; 
+// Driver code
+    let r, Area;
+    r = 5;
 
-    // function calling 
-    Area = findArea(r); 
-    
-    // displaying the area 
-    document.write("Area of Circle is :" + Area); 
-    
+    // function calling
+    Area = findArea(r);
+
+    // displaying the area
+    document.write("Area of Circle is :" + Area);
+
 // This code is contributed by Mayank Tyagi
 
 </script>
@@ -19641,13 +19646,13 @@ PHP
 <?php
 // PHP program to find area
 // of circle
-     
+
 function findArea( $r)
 {
     $PI =3.142;
     return $PI * pow($r, 2);
 }
- 
+
 // Driver Code
 echo("Area is ");
 echo(findArea(5));
@@ -19659,7 +19664,7 @@ return 0;
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -19669,7 +19674,7 @@ Area of Circle is :78.5398
 ****Time Complexity:****
 O(1)
 
-  
+
 
 ****Auxiliary Space:****
 O(1), since no extra space has been taken.
@@ -19690,23 +19695,23 @@ the task is to calculate Simple Interest.
 
 > ****Input****
 > : p = 10000, r = 5, t = 5
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > :2500
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : We need to find simple interest on Rs. 10,000 at the rate of 5% for 5 units of time.
-> 
-> 
+>
+>
 > ****Input****
 > : p = 3000, r = 7, t = 1
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > :210
 
@@ -19824,7 +19829,7 @@ console.log(simpleInterest(p, r, t));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -19834,7 +19839,7 @@ console.log(simpleInterest(p, r, t));
 ****Time complexity****
 : O(1)
 
-  
+
 
 ****Auxiliary Space****
 : O(1)
@@ -19856,23 +19861,23 @@ faces. All the individual faces have a number printed on them. The numbers are i
 
 > ****Input:****
 > n = 2
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 5
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > For dice facing number 5 opposite face will have the number 2.
-> 
-> 
+>
+>
 > ****Input:****
 > 6 = 6
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 1
 
@@ -19892,7 +19897,7 @@ C++
 using namespace std;
 
 int oppositeFaceOfDice(int n) {
-  
+
   if(n==1){
     cout<<6;
   }else if(n==2){
@@ -19909,7 +19914,7 @@ int oppositeFaceOfDice(int n) {
 }
 
 int main() {
-  
+
     int n = 2;
     oppositeFaceOfDice(n);
 
@@ -20030,7 +20035,7 @@ oppositeFaceOfDice(n);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -20039,13 +20044,13 @@ oppositeFaceOfDice(n);
 ### [Expected Approach] Using Sum of two sides – O(1) Time and O(1) Space
 
 > The idea is based on the observation that the sum of two opposite sides of a cubical dice is equal to
-> 
+>
 > ****7****
 > . So, just subtract the given
-> 
+>
 > ****n****
 > from
-> 
+>
 > ****7****
 > and print the answer.
 
@@ -20057,7 +20062,7 @@ C++
 using namespace std;
 
 int oppositeFaceOfDice(int n) {
-  
+
     // Stores number on opposite face
     // of dice
     int ans = 7 - n;
@@ -20065,7 +20070,7 @@ int oppositeFaceOfDice(int n) {
 }
 
 int main() {
-  
+
     int n = 2;
     oppositeFaceOfDice(n);
 
@@ -20081,9 +20086,9 @@ Java
 import java.io.*;
 
 class GfG {
-  
+
     static void oppositeFaceOfDice(int n)  {
-      
+
         // Stores number on opposite face
         // of dice
         int ans = 7 - n;
@@ -20104,7 +20109,7 @@ Python
 ````
 # Python3 program for the above approach
 def oppositeFaceOfDice(n):
-    
+
     # Stores number on opposite face
     # of dice
     ans = 7 - n
@@ -20126,7 +20131,7 @@ using System.Collections.Generic;
 class GfG{
 
 static void oppositeFaceOfDice(int n) {
-  
+
     // Stores number on opposite face
     // of dice
     int ans = 7 - n;
@@ -20161,7 +20166,7 @@ oppositeFaceOfDice(n);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -20170,7 +20175,7 @@ oppositeFaceOfDice(n);
 
 *****Time Complexity:*****
 **O(1)**
-  
+
 
 *****Auxiliary Space:*****
 **O(1)**
@@ -20195,24 +20200,24 @@ and divisible by
 
 
 > Input: n = 13, m = 4
-> 
->   
-> 
+>
+>
+>
 > Output: 12
-> 
->   
-> 
+>
+>
+>
 > Explanation: 12 is the closest to 13, divisible by 4.
-> 
-> 
+>
+>
 > Input: n = -15, m = 6
-> 
->   
-> 
+>
+>
+>
 > Output: -18
-> 
->   
-> 
+>
+>
+>
 > Explanation: Both -12 and -18 are closest to -15, but-18 has the maximum absolute value.
 
 Table of Content
@@ -20241,7 +20246,7 @@ int closestNumber(int n, int m) {
         if (i % m == 0) {
             int difference = abs(n - i);
 
-            if (difference < minDifference || 
+            if (difference < minDifference ||
                (difference == minDifference && abs(i) > abs(closest))) {
                 closest = i;
                 minDifference = difference;
@@ -20254,9 +20259,9 @@ int closestNumber(int n, int m) {
 int main() {
     int n = 13, m = 4;
     cout << closestNumber(n, m) << endl;
-    
+
     return 0;
-} 
+}
 
 ````
 
@@ -20277,7 +20282,7 @@ int closestNumber(int n, int m) {
         if (i % m == 0) {
             int difference = abs(n - i);
 
-            if (difference < minDifference || 
+            if (difference < minDifference ||
                (difference == minDifference && abs(i) > abs(closest))) {
                 closest = i;
                 minDifference = difference;
@@ -20290,7 +20295,7 @@ int closestNumber(int n, int m) {
 int main() {
     int n = 13, m = 4;
     printf("%d\\n", closestNumber(n, m));
-    
+
     return 0;
 }
 
@@ -20312,7 +20317,7 @@ class Main {
             if (i % m == 0) {
                 int difference = Math.abs(n - i);
 
-                if (difference < minDifference || 
+                if (difference < minDifference ||
                    (difference == minDifference && Math.abs(i) > Math.abs(closest))) {
                     closest = i;
                     minDifference = difference;
@@ -20351,7 +20356,7 @@ def closest_number(n, m):
                 min_difference = difference
     return closest
 
-  
+
 if __name__ == "__main__":
   n = 13
   m = 4
@@ -20368,7 +20373,7 @@ using System;
 
 class GfG {
     static int ClosestNumber(int n, int m) {
-      
+
         // find the quotient
         int closest = 0;
         int minDifference = int.MaxValue;
@@ -20378,7 +20383,7 @@ class GfG {
             if (i % m == 0) {
                 int difference = Math.Abs(n - i);
 
-                if (difference < minDifference || 
+                if (difference < minDifference ||
                    (difference == minDifference && Math.Abs(i) > Math.Abs(closest))) {
                     closest = i;
                     minDifference = difference;
@@ -20412,7 +20417,7 @@ function closestNumber(n, m) {
         if (i % m === 0) {
             let difference = Math.abs(n - i);
 
-            if (difference < minDifference || 
+            if (difference < minDifference ||
                (difference === minDifference && Math.abs(i) > Math.abs(closest))) {
                 closest = i;
                 minDifference = difference;
@@ -20429,7 +20434,7 @@ console.log(closestNumber(n, m));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -20451,27 +20456,27 @@ using namespace std;
 int closestNumber(int n, int m) {
     // find the quotient
     int q = n / m;
-    
+
     // 1st possible closest number
     int n1 = m * q;
-    
+
     // 2nd possible closest number
     int n2 = (n * m) > 0 ? (m * (q + 1)) : (m * (q - 1));
-    
+
     // if true, then n1 is the required closest number
     if (abs(n - n1) < abs(n - n2))
         return n1;
-    
-    // else n2 is the required closest number    
-    return n2;    
+
+    // else n2 is the required closest number
+    return n2;
 }
 
 int main() {
     int n = 13, m = 4;
     cout << closestNumber(n, m) << endl;
-    
+
     return 0;
-} 
+}
 
 ````
 
@@ -20484,25 +20489,25 @@ C
 int closestNumber(int n, int m) {
     // find the quotient
     int q = n / m;
-    
+
     // 1st possible closest number
     int n1 = m * q;
-    
+
     // 2nd possible closest number
     int n2 = (n * m) > 0 ? (m * (q + 1)) : (m * (q - 1));
-    
+
     // if true, then n1 is the required closest number
     if (abs(n - n1) < abs(n - n2))
         return n1;
-    
-    // else n2 is the required closest number    
-    return n2;    
+
+    // else n2 is the required closest number
+    return n2;
 }
 
 int main() {
     int n = 13, m = 4;
     printf("%d\\n", closestNumber(n, m));
-    
+
     return 0;
 }
 
@@ -20514,30 +20519,30 @@ Java
 // Java implementation to find the number closest to n
 // and divisible by m
 class GfG {
-    
+
     static int closestNumber(int n, int m)  {
         // find the quotient
         int q = n / m;
-         
+
         // 1st possible closest number
         int n1 = m * q;
-         
+
         // 2nd possible closest number
         int n2 = (n * m) > 0 ? (m * (q + 1)) : (m * (q - 1));
-         
+
         // if true, then n1 is the required closest number
         if (Math.abs(n - n1) < Math.abs(n - n2))
             return n1;
-         
-        // else n2 is the required closest number    
-        return n2;    
+
+        // else n2 is the required closest number
+        return n2;
     }
-     
+
     public static void main(String args[]) {
         int n = 13, m = 4;
         System.out.println(closestNumber(n, m));
 
-    } 
+    }
 }
 
 ````
@@ -20551,24 +20556,24 @@ Python
 def closestNumber(n, m) :
     # Find the quotient
     q = int(n / m)
-    
+
     # 1st possible closest number
     n1 = m * q
-    
+
     # 2nd possible closest number
     if((n * m) > 0) :
-        n2 = (m * (q + 1)) 
+        n2 = (m * (q + 1))
     else :
         n2 = (m * (q - 1))
-    
+
     # if true, then n1 is the required closest number
     if (abs(n - n1) < abs(n - n2)) :
         return n1
-    
-    # else n2 is the required closest number 
+
+    # else n2 is the required closest number
     return n2
-    
-    
+
+
 if __name__ == "__main__":
   n = 13; m = 4
   print(closestNumber(n, m))
@@ -20622,19 +20627,19 @@ function closestNumber(n, m) {
 
     // find the quotient
     let q = parseInt(n / m);
-    
+
     // 1st possible closest number
     let n1 = m * q;
-    
+
     // 2nd possible closest number
     let n2 = (n * m) > 0 ?
         (m * (q + 1)) : (m * (q - 1));
-    
+
     // if true, then n1 is the
     // required closest number
     if (Math.abs(n - n1) < Math.abs(n - n2))
         return n1;
-    
+
     // else n2 is the required
     // closest number
     return n2;
@@ -20648,7 +20653,7 @@ console.log(closestNumber(n, m));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -20659,7 +20664,7 @@ console.log(closestNumber(n, m));
 ****Time Complexity:****
 O(1)
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -20673,7 +20678,7 @@ Given two variables, x, and y, swap two variables without using a third variable
 
 ![](https://www.geeksforgeeks.org/wp-content/uploads/CommonArticleDesign16.png)
 
-  
+
 
 ****Method 1 (Using Addition and subtraction)****
 
@@ -20814,13 +20819,13 @@ let x = 10, y = 5;
 // Code to swap \'x\' and \'y\'
 
 // x now becomes 15
-x = x + y; 
+x = x + y;
 
 // y becomes 10
-y = x - y; 
+y = x - y;
 
 // x becomes 5
-x = x - y; 
+x = x - y;
 
 document.write("After Swapping: x =" + x + ", y=" + y);
 
@@ -20834,8 +20839,8 @@ PHP
 
 ````
 <?php
-// PHP Program to swap two 
-// numbers without using 
+// PHP Program to swap two
+// numbers without using
 // temporary variable
 $x = 10; $y = 5;
 
@@ -20844,7 +20849,7 @@ $x = $x + $y; // x now becomes 15
 $y = $x - $y; // y becomes 10
 $x = $x - $y; // x becomes 5
 
-echo "After Swapping: x = ", 
+echo "After Swapping: x = ",
        $x, ", ", "y = ", $y;
 
 // This code is contributed by m_kit
@@ -20853,7 +20858,7 @@ echo "After Swapping: x = ",
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -20864,7 +20869,7 @@ After Swapping: x =5, y=10
 ****Time Complexity:****
 O(1).
 
-  
+
 
 ****Auxiliary Space:****
 O(1).
@@ -20973,7 +20978,7 @@ class GFG {
             y = x / y; // y becomes 10
             x = x / y; // x becomes 5
         }
-       
+
         System.out.println("After swapping:"
                            + " x = " + x + ", y = " + y);
     }
@@ -21065,8 +21070,8 @@ var x = 10;
 var y = 5;
 
 // Code to swap \'x\' and \'y\'
-if (y == 0) 
-{ y = x; x = 0; } 
+if (y == 0)
+{ y = x; x = 0; }
 else if (x == 0) { x = y; y = 0; }
     // Code to swap \'x\' and \'y\'
   else
@@ -21075,17 +21080,17 @@ else if (x == 0) { x = y; y = 0; }
     x = x / y; // x becomes 5
     }
 
-document.write("After swapping:" + " x = " + 
+document.write("After swapping:" + " x = " +
                x + ", y = " + y);
 
-// This code is contributed by shikhasingrajput 
+// This code is contributed by shikhasingrajput
 
 </script>
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -21096,7 +21101,7 @@ After Swapping: x =5, y=10
 ****Time Complexity:****
 O(1).
 
-  
+
 
 ****Auxiliary Space:****
 O(1).
@@ -21104,7 +21109,7 @@ O(1).
 
 ****Method 3: (Using Bitwise XOR)****
 
-  
+
 
 The bitwise XOR operator can be used to swap two variables. The XOR of two numbers x and y returns a number that has all the bits as 1 wherever bits of x and y differ. For example, XOR of 10 (In Binary 1010) and 5 (In Binary 0101) is 1111, and XOR of 7 (0111) and 5 (0101) is (0010).
 
@@ -21246,11 +21251,11 @@ x = x ^ y; // x now becomes 15 (1111)
 y = x ^ y; // y becomes 10 (1010)
 x = x ^ y; // x becomes 5 (0101)
 
-document.write("After Swapping: x =" + 
+document.write("After Swapping: x =" +
                x + ", y=" + y);
 
 // This code is contributed by Mayank Tyagi
-    
+
 </script>
 
 ````
@@ -21260,23 +21265,23 @@ PHP
 ````
 <?php
 
-// Driver Code 
+// Driver Code
 $x = 10;
 $y = 5;
 
-// Code to swap \'x\' (1010) 
+// Code to swap \'x\' (1010)
 // and \'y\' (0101)
 
 // x now becomes 15 (1111)
-$x = $x ^ $y; 
+$x = $x ^ $y;
 
 // y becomes 10 (1010)
-$y = $x ^ $y; 
+$y = $x ^ $y;
 
 // x becomes 5 (0101)
-$x = $x ^ $y; 
+$x = $x ^ $y;
 
-echo "After Swapping: x = ", $x, 
+echo "After Swapping: x = ", $x,
                 ", ", "y = ", $y;
 
 // This code is contributed by aj_36
@@ -21285,7 +21290,7 @@ echo "After Swapping: x = ", $x,
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -21296,7 +21301,7 @@ After Swapping: x =5, y=10
 ****Time Complexity:****
 O(1).
 
-  
+
 
 ****Auxiliary Space:****
 O(1).
@@ -21304,17 +21309,17 @@ O(1).
 
 ****Problems with the above methods****
 
-  
+
 
 ****1)****
 The multiplication and division-based approach doesn’t work if one of the numbers is 0 as the product becomes 0 irrespective of the other number.
 
-  
+
 
 ****2)****
 Both Arithmetic solutions may cause an arithmetic overflow. If x and y are too large, addition and multiplication may go out of the integer range.
 
-  
+
 
 ****3)****
 When we use pointers to variable and make a function swap, all the above methods fail when both pointers point to the same variable. Let’s take a look at what will happen in this case if both are pointing to the same variable.
@@ -21322,31 +21327,31 @@ When we use pointers to variable and make a function swap, all the above methods
 
 // Bitwise XOR based method
 
-  
+
 
 x = x ^ x; // x becomes 0
 
-  
+
 
 x = x ^ x; // x remains 0
 
-  
+
 
 x = x ^ x; // x remains 0
 
-  
+
 
 // Arithmetic based method
 
-  
+
 
 x = x + x; // x becomes 2x
 
-  
+
 
 x = x – x; // x becomes 0
 
-  
+
 
 x = x – x; // x remains 0
 
@@ -21477,24 +21482,24 @@ JavaScript
 
 ````
 <script>
-    
+
     function swap(xp,yp)
     {
         xp[0] = xp[0] ^ yp[0];
         yp[0] = xp[0] ^ yp[0];
         xp[0] = xp[0] ^ yp[0];
     }
-    
+
     // Driver code
-    
+
     let x=[10];
     swap(x, x);
     document.write("After swap(&x, &x): x = "
                            + x[0]);
-    
-    
+
+
     // This code is contributed by unknown2108
-    
+
 </script>
 
 ````
@@ -21522,7 +21527,7 @@ print("After swap(&x, &x): x = " . $x);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -21533,7 +21538,7 @@ After swap(&x, &x): x = 0
 ****Time Complexity:****
 O(1).
 
-  
+
 
 ****Auxiliary Space:****
 O(1).
@@ -21679,7 +21684,7 @@ JavaScript
 <script>
    function swap(xp, yp)
 {
- 
+
     // Check if the two addresses are same
     if (xp == yp)
         return;
@@ -21687,7 +21692,7 @@ JavaScript
     yp[0] = xp[0] - yp[0];
     xp[0]= xp[0] - yp[0];
 }
- 
+
 // Driver Code
      x = 10;
     swap(x, x);
@@ -21703,9 +21708,9 @@ PHP
 <?php
 function swap($xp, $yp)
 {
-    // Check if the two addresses 
+    // Check if the two addresses
     // are same
-    if ($xp == $yp) 
+    if ($xp == $yp)
         return;
     $xp = $xp + $yp;
     $yp = $xp - $yp;
@@ -21718,13 +21723,13 @@ swap($x, $x);
 echo("After swap(&x, &x): x = " . $x);
 return 0;
 
-// This code is contributed 
+// This code is contributed
 // by Code_Mech.
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -21735,7 +21740,7 @@ After swap(&x, &x): x = 10
 ****Time Complexity:****
 O(1).
 
-  
+
 
 ****Auxiliary Space:****
 O(1).
@@ -21743,7 +21748,7 @@ O(1).
 
 ****Method 4 (A mixture of bitwise operators and arithmetic operators)****
 
-  
+
 
 The idea is the same as discussed in
 
@@ -21919,26 +21924,26 @@ JavaScript
 ````
 <script>
     // Javascript program to swap two numbers
-    
+
     function swap(a, b)
     {
         // same as a = a + b
         a = (a & b) + (a | b);
- 
+
         // same as b = a - b
         b = a + (~b) + 1;
- 
+
         // same as a = a - b
         a = a + (~b) + 1;
- 
+
         document.write("After swapping: a = " + a + ", b = " + b);
     }
-    
+
     let a = 5, b = 10;
- 
+
     // Function Call
     swap(a, b);
-    
+
     // This code is contributed by suresh07.
 </script>
 
@@ -21957,10 +21962,10 @@ $b = 10;
 echo("Before swap(a and b) " . $a . "and". $b."<br>");
 // same as a = a + b
     $a = ($a & $b) + ($a | $b);
- 
+
     // same as b = a - b
     $b = $a + (~$b) + 1;
- 
+
     // same as a = a - b
     $a = $a + (~$b) + 1;
 
@@ -21972,7 +21977,7 @@ return 0;
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -21983,7 +21988,7 @@ After swapping: a = 10, b = 5
 ****Time Complexity:****
 O(1)
 
-  
+
 
 ****Auxiliary Space:****
 O(1), since no extra space has been taken.
@@ -22005,7 +22010,7 @@ C++
 ````
 #include <iostream>
 using namespace std;
- 
+
 int main(){
     int x = 10, y = 5;
     x = (x * y) / (y = x);
@@ -22059,18 +22064,18 @@ Python
 ````
 # Python3 program to swap two numbers
 
-# Function to swap the numbers 
+# Function to swap the numbers
 def swap(x, y):
-  x , y = y, x 
+  x , y = y, x
   print("After Swapping: x = ", x, ", y = ", y)
-  
+
 # Driver code
 x = 10
 y = 5
- 
+
 # Function call
 swap(x, y)
- 
+
 # This code is contributed by kothavvsaakash
 
 ````
@@ -22120,7 +22125,7 @@ document.write("After Swapping: x =" + x + ", y=" + y);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -22131,7 +22136,7 @@ document.write("After Swapping: x =" + x + ", y=" + y);
 ****Time Complexity:****
 O(1)
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -22145,31 +22150,31 @@ Given a number n, find the sum of the first natural numbers.
 
 > ****Input:****
 > n = 3
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 6
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : Note that 1 + 2 + 3 = 6
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > ****Input****
 > : 5
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 15
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : Note that 1 + 2 + 3 + 4 + 5 = 15
 
@@ -22244,7 +22249,7 @@ class GfG{
     static int findSum(int n)
     {
         int sum = 0;
-        for (int x = 1; x <= n; x++) 
+        for (int x = 1; x <= n; x++)
             sum = sum + x;
         return sum;
     }
@@ -22254,7 +22259,7 @@ class GfG{
     {
         int n = 5;
         System.out.println(findSum(n));
-    } 
+    }
 }
 
 // This code is contributed by Nikita Tiwari.
@@ -22294,7 +22299,7 @@ class GfG{
     static int findSum(int n)
     {
         int sum = 0;
-        for (int x = 1; x <= n; x++) 
+        for (int x = 1; x <= n; x++)
             sum = sum + x;
         return sum;
     }
@@ -22304,7 +22309,7 @@ class GfG{
     {
         int n = 5;
         Console.Write(findSum(n));
-    } 
+    }
 }
 
 ````
@@ -22317,7 +22322,7 @@ JavaScript
 function findSum(n)
 {
    let sum = 0;
-   for (let x = 1; x <= n; x++) 
+   for (let x = 1; x <= n; x++)
      sum = sum + x;
    return sum;
 }
@@ -22337,7 +22342,7 @@ PHP
 function findSum($n)
 {
 $sum = 0;
-for ($x = 1; $x <= $n; $x++) 
+for ($x = 1; $x <= $n; $x++)
     $sum = $sum + $x;
 return $sum;
 }
@@ -22351,7 +22356,7 @@ echo findSum($n);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -22367,74 +22372,74 @@ is to use the below formula.
 
 
 > ****Sum of first n natural numbers = (n \\* (n+1)) / 2****
-> 
-> 
+>
+>
 > For example: n = 5
-> 
->   
-> 
+>
+>
+>
 > Sum = (5 \\* (5 + 1)) / 2 = (5 \\* 6) / 2 = 30 / 2 = 15
 
 ****How does this work?****
 
 > ****We can prove this formula using induction.****
->   
-> 
->   
-> 
+>
+>
+>
+>
 > It is true for n = 1 and n = 2
-> 
->   
-> 
+>
+>
+>
 > For n = 1, sum = 1 \\* (1 + 1)/2 = 1
-> 
->   
-> 
+>
+>
+>
 > For n = 2, sum = 2 \\* (2 + 1)/2 = 3
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > Let it be true for k = n-1.
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > Sum of k numbers = (k \\* (k+1))/2
-> 
->   
-> 
+>
+>
+>
 > Putting k = n-1, we get
-> 
->   
-> 
+>
+>
+>
 > Sum of k numbers = ((n-1) \\* (n-1+1))/2
-> 
->   
-> 
+>
+>
+>
 > = (n – 1) \\* n / 2
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > If we add n, we get,
-> 
->   
-> 
+>
+>
+>
 > Sum of n numbers = n + (n – 1) \\* n / 2
-> 
->   
-> 
+>
+>
+>
 > = (2n + n
-> 
+>
 > 2
 > – n)/2
-> 
->   
-> 
+>
+>
+>
 > = n \\* (n + 1)/2
 
 C++
@@ -22456,14 +22461,14 @@ int main()
   int n = 5;
   cout << findSum(n);
   return 0;
-} 
+}
 
 ````
 
 C
 
 ````
-// Efficient C program to find 
+// Efficient C program to find
 // sum of first n natural numbers.
 #include<stdio.h>
 
@@ -22478,14 +22483,14 @@ int main()
   int n = 5;
   printf("%d", findSum(n));
   return 0;
-} 
+}
 
 ````
 
 Java
 
 ````
-// Efficient JAVA program to find sum 
+// Efficient JAVA program to find sum
 // of first n natural numbers.
 import java.io.*;
 
@@ -22509,12 +22514,12 @@ class GfG{
 Python
 
 ````
-# Efficient CPP program to find sum 
+# Efficient CPP program to find sum
 # of first n natural numbers.
 
 def findSum(n) :
     return n * (n + 1) / 2
-    
+
 # Driver code
 n = 5
 print findSum(n)
@@ -22524,7 +22529,7 @@ print findSum(n)
 C#
 
 ````
-// Efficient C# program to find sum 
+// Efficient C# program to find sum
 // of first n natural numbers.
 using System;
 
@@ -22564,7 +22569,7 @@ php
 
 ````
 <?php
-// Efficient PHP program to find sum 
+// Efficient PHP program to find sum
 // of first n natural numbers.
 
 function findSum($n)
@@ -22581,7 +22586,7 @@ echo findSum($n);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -22611,25 +22616,25 @@ C++
 // result is going to be within limits.
 #include<iostream>
 using namespace std;
- 
+
 int findSum(int n)
 {
    if (n % 2 == 0)
-      
-      // Here multiplying by 1LL help to 
-      // perform calculations in long long, 
+
+      // Here multiplying by 1LL help to
+      // perform calculations in long long,
       // so that answer should not be overflowed
-      return (n / 2) * 1LL * (n + 1); 
- 
+      return (n / 2) * 1LL * (n + 1);
+
    // If n is odd, (n+1) must be even
    else
-     
-      // Here multiplying by 1LL help to 
-      // perform calculations in long long, 
+
+      // Here multiplying by 1LL help to
+      // perform calculations in long long,
       // so that answer should not be overflowed
-      return  ((n + 1) / 2) * 1LL * n; 
+      return  ((n + 1) / 2) * 1LL * n;
 }
- 
+
 // Driver code
 int main()
 {
@@ -22643,30 +22648,30 @@ int main()
 C
 
 ````
-// Efficient C program to find 
-// sum of first n natural numbers 
-// that avoids overflow if result 
+// Efficient C program to find
+// sum of first n natural numbers
+// that avoids overflow if result
 // is going to be within limits.
 #include<stdio.h>
- 
+
 int findSum(int n)
 {
    if (n % 2 == 0)
-     
-      // Here multiplying by 1LL help to 
-      // perform calculations in long long, 
+
+      // Here multiplying by 1LL help to
+      // perform calculations in long long,
       // so that answer should not be overflowed
-      return (n / 2) * 1LL * (n + 1); 
- 
+      return (n / 2) * 1LL * (n + 1);
+
    // If n is odd, (n+1) must be even
    else
-     
-      // Here multiplying by 1LL help to 
-      // perform calculations in long long, 
+
+      // Here multiplying by 1LL help to
+      // perform calculations in long long,
       // so that answer should not be overflowed
-      return  ((n + 1) / 2) * 1LL * n; 
+      return  ((n + 1) / 2) * 1LL * n;
 }
- 
+
 // Driver code
 int main()
 {
@@ -22777,9 +22782,9 @@ function findSum(n)
         return (n / 2) * (n + 1)
 
 // If n is odd, (n+1) must be even
-    else 
+    else
     return ((n + 1) / 2) * n
-        
+
 }
 var n = 5;
 console.log(findSum(n));
@@ -22797,9 +22802,9 @@ PHP
 function findSum($n)
 {
     if ($n % 2 == 0)
-        return ($n / 2) * 
+        return ($n / 2) *
                ($n + 1);
-    
+
     // If n is odd, (n+1) must be even
     else
         return (($n + 1) / 2) * $n;
@@ -22813,7 +22818,7 @@ echo findSum($n);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -22831,50 +22836,50 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 > ****Input****
 > : 5
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > :
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 1 = 5
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 2 = 10
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 3 = 15
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 4 = 20
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 5 = 25
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 6 = 30
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 7 = 35
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 8 = 40
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 9 = 45
-> 
->   
-> 
+>
+>
+>
 > 5 \\* 10 = 50
 
 Table of Content
@@ -22890,9 +22895,9 @@ C++
 #include <iostream>
 using namespace std;
 
-void printTable(int n) { 
-  for (int i = 1; i <= 10; ++i) 
-        cout << n << " * " << i << " = "  
+void printTable(int n) {
+  for (int i = 1; i <= 10; ++i)
+        cout << n << " * " << i << " = "
              << n * i << endl;
 }
 
@@ -22907,20 +22912,20 @@ int main() {
 Java
 
 ````
-// Java program to print table of a number 
+// Java program to print table of a number
 import java.io.*;
 
 class GfG {
 
     public static void printTable(int n)  {
-              
-        for (int i = 1; i <= 10; ++i) 
+
+        for (int i = 1; i <= 10; ++i)
             System.out.println(n + " * " + i +
                                " = " + n * i);
     }
-  
-    public static void main(String arg[]){   
-        int n = 5; 
+
+    public static void main(String arg[]){
+        int n = 5;
         printTable(n);
     }
 }
@@ -22934,8 +22939,8 @@ Python
 
 def printTable(n):
 
-    for i in range (1, 11): 
-        
+    for i in range (1, 11):
+
         # multiples from 1 to 10
         print "%d * %d = %d" % (n, i, n * i)
 
@@ -22949,20 +22954,20 @@ if __name__ == "__main__":
 C#
 
 ````
-// C# program to print table of a number 
+// C# program to print table of a number
 using System;
 
 class GfG {
     public static void printTable(int n) {
-        
-        for (int i = 1; i <= 10; ++i) 
+
+        for (int i = 1; i <= 10; ++i)
             Console.Write(n + " * " + i +
-                              " = " + n * 
+                              " = " + n *
                                i + "\\n");
     }
-  
-    public static void Main()   { 
-      int n = 5; 
+
+    public static void Main()   {
+      int n = 5;
       printTable(n);
 
     }
@@ -22976,7 +22981,7 @@ JavaScript
 // Javascript program to print
 // table of a number
 
-function printTable(n) { 
+function printTable(n) {
 for (let i = 1; i <= 10; ++i)
     console.log( n + " * " +i +
             " = " + n *
@@ -22984,7 +22989,7 @@ for (let i = 1; i <= 10; ++i)
 }
 
 // Driver Code
-let n = 5; 
+let n = 5;
 printTable(n);
 
 ````
@@ -22993,15 +22998,15 @@ printTable(n);
 
 
 ```
-5 * 1 = 5  
-5 * 2 = 10  
-5 * 3 = 15  
-5 * 4 = 20  
-5 * 5 = 25  
-5 * 6 = 30  
-5 * 7 = 35  
-5 * 8 = 40  
-5 * 9 = 45  
+5 * 1 = 5
+5 * 2 = 10
+5 * 3 = 15
+5 * 4 = 20
+5 * 5 = 25
+5 * 6 = 30
+5 * 7 = 35
+5 * 8 = 40
+5 * 9 = 45
 5 * 10 = 50
 ```
 ### ****Recursive Approach – O(1) Time and O(1) Space****
@@ -23035,9 +23040,9 @@ Java
 
 ````
 import java.util.*;
- 
+
 class GfG {
- 
+
     // printTable() prints table of number and takes
     // 1 required value that is number of whose teble to be
     // printed and an optional input i whose default value is 1
@@ -23051,13 +23056,13 @@ class GfG {
         i++; // increment i
         printTable(n, i);
     }
- 
+
     public static void main(String[] args) {
         int n = 5;
         printTable(n);
     }
 }
- 
+
 
 ````
 
@@ -23099,7 +23104,7 @@ class GfG {
     i++; // increment i
     printTable(n, i);
   }
-  
+
   public static void Main(string[] args) {
     int n = 5;
     printTable(n);
@@ -23130,7 +23135,7 @@ printTable(n);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -23149,7 +23154,7 @@ printTable(n);
 ****Time Complexity:****
 O(1)
 
-  
+
 
 ****Auxiliary Space:****
 O(1), since the recursion stack will only go up to 10.
@@ -23172,18 +23177,18 @@ for odd.
 
 > ****Input****
 > : 2
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : true
-> 
-> 
+>
+>
 > ****Input****
 > : 5
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : false
 
@@ -23205,15 +23210,15 @@ C++
 #include <iostream>
 using namespace std;
 
-bool isEven(int n) { 
-  return (n % 2 == 0); 
+bool isEven(int n) {
+  return (n % 2 == 0);
 }
 
 int main() {
     int n = 101;
     if(isEven(n))
          cout << "true";
-      else 
+      else
         cout << "false";
 
     return 0;
@@ -23287,8 +23292,8 @@ JavaScript
 // A simple Javascript program to
 // check for even or odd
 
-function isEven(n) { 
-    return (n % 2 == 0); 
+function isEven(n) {
+    return (n % 2 == 0);
 }
 
 // Driver code
@@ -23303,7 +23308,7 @@ function isEven(n) {
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -23312,20 +23317,20 @@ false
 ### Using Bitwise AND Operator – O(1) Time and O(1) Space
 
 > The last bit of all odd numbers is always 1, while for even numbers it’s 0. So, when performing bitwise AND operation with 1, odd numbers give 1, and even numbers give 0.
-> 
-> 
+>
+>
 > Ex: 5 (101) -> 101
-> 
->   
-> 
+>
+>
+>
 > & 001
-> 
->   
-> 
+>
+>
+>
 > —-
-> 
->   
-> 
+>
+>
+>
 > 001 , so this we can say it is an odd number.
 
 C++
@@ -23344,10 +23349,10 @@ bool isEven(int n) {
 
 int main() {
     int n = 101;
-     if (isEven(n) == true) 
-        cout<<"true"; 
+     if (isEven(n) == true)
+        cout<<"true";
        else
-        cout<<"false"; 
+        cout<<"false";
 
     return 0;
 }
@@ -23439,7 +23444,7 @@ class GfG {
         else
             return false;
     }
-  
+
     public static void Main() {
         int n = 101;
         if (isEven(n) == true)
@@ -23458,7 +23463,7 @@ JavaScript
 // check for even or odd
 
 function isEven(n) {
-    
+
  // n & 1 is 1, then odd, else even
  if ((n & 1) === 0) {
         return true;
@@ -23478,7 +23483,7 @@ if (isEven(n)) {
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -23486,7 +23491,7 @@ false
 ```
 
 ****Time Complexity: O(1)****
-  
+
 
 ****Auxiliary Space: O(1)****
 
@@ -23509,12 +23514,12 @@ bool isEven(int n) {
 }
 
 int main() {
-  
+
   int n = 4;
-  if (isEven(n) == true) 
-        cout<<"true"; 
+  if (isEven(n) == true)
+        cout<<"true";
    else
-        cout<<"false"; 
+        cout<<"false";
 
     return 0;
 }
@@ -23528,9 +23533,9 @@ Java
 // check for even or odd
 class GfG {
     public static boolean isEven(int n){
-       if (n == (n >> 1) << 1) 
+       if (n == (n >> 1) << 1)
             return true;
-        else 
+        else
             return false;
     }
 
@@ -23574,12 +23579,12 @@ using System;
 
 class GfG {
     public static bool isEven(int n)   {
-        if (n == (n >> 1) << 1) 
+        if (n == (n >> 1) << 1)
             return true;
         else
             return false;
     }
-  
+
     public static void Main() {
         int n = 4;
         if (isEven(n) == true)
@@ -23598,10 +23603,10 @@ JavaScript
 // check for even or odd
 
 function isEven(n) {
-   
-    if (n == (n >> 1) << 1) 
+
+    if (n == (n >> 1) << 1)
        return true;
-    else 
+    else
        return false;
 }
 
@@ -23616,7 +23621,7 @@ if (isEven(n)) {
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -23647,12 +23652,12 @@ Factorial of a number n is denoted as
 
 > ****0!****
 > = 1
-> 
-> 
+>
+>
 > ****1!****
 > = 1
-> 
-> 
+>
+>
 > ****3!****
 > = 3 x 2 x 1 = 6
 
@@ -23681,8 +23686,8 @@ Here is a list of problems based on Factorial.
 * [Ways to arrange K different objects](https://www.geeksforgeeks.org/number-of-ways-to-arrange-k-different-objects-taking-n-objects-at-a-time/)
 
 > Recommended Links
-> 
-> 
+>
+>
 > * [Factorial Formula](https://www.geeksforgeeks.org/factorial-formula/)
 > * [Interesting Facts about Factorial](https://www.geeksforgeeks.org/interesting-facts-about-factorial/)
 ', '', 'Factorial Coding Problems', 21, '598d78e5-c34f-437f-88fb-31557168c07b', null, null);
@@ -23719,12 +23724,12 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 * [Geometric Progression](https://www.geeksforgeeks.org/what-is-geometric-progression/)
 * [GCD](https://www.geeksforgeeks.org/greatest-common-divisor-gcd/)
   and
-  
+
   [LCM](https://www.geeksforgeeks.org/lcm-least-common-multiple/)
 * [Factorial](https://www.geeksforgeeks.org/factorial/)
 * [Permutation](https://www.geeksforgeeks.org/permutation/)
   and
-  
+
   [Combination](https://www.geeksforgeeks.org/combinations/)
 * [Catalan Number](https://www.geeksforgeeks.org/catalan-numbers/)
 * [Modular Arithmetic](https://www.geeksforgeeks.org/modular-arithmetic/)
@@ -23817,12 +23822,12 @@ Given a fraction, find a recurring sequence of digits if it exists, otherwise, p
 
 ```
 Input  : Numerator = 8, Denominator = 3
-Output : Recurring sequence is 6 
-Explanation : 8/3 = 2.66666666.......  
+Output : Recurring sequence is 6
+Explanation : 8/3 = 2.66666666.......
 
 Input : Numerator = 50, Denominator = 22
 Output : Recurring sequence is 27
-Explanation : 50/22 = 2.272727272..... 
+Explanation : 50/22 = 2.272727272.....
 
 Input : Numerator = 11, Denominator = 2
 Output : No recurring sequence
@@ -23833,7 +23838,7 @@ Explanation : 11/2 = 5.5
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **When does the fractional part repeat?**
-  
+
 
 Let us simulate the process of converting fractions to decimals. Let us look at the part where we have already figured out the integer part, which is floor(numerator/denominator). Now we are left with ( remainder = numerator%denominator ) / denominator.
 
@@ -23844,15 +23849,15 @@ If you remember the process of converting to decimal, at each step we do the fol
 3. Remainder = remainder % denominator.
 
 At any moment, if the remainder becomes 0, we are done.
-  
+
 
 However, when there is a recurring sequence, the remainder never becomes 0. For example, if you look at 1/3, the remainder never becomes 0.
 
 Below is one important observation :
-  
+
 
 If we start with the remainder ‘rem’ and if the remainder repeats at any point in time, the digits between the two occurrences of ‘rem’ keep repeating.
-  
+
 
 So the idea is to store seen remainders in a map. Whenever a remainder repeats, we return the sequence before the next occurrence.
 
@@ -23862,14 +23867,14 @@ C++
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -23948,14 +23953,14 @@ Java
 ----
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -24043,14 +24048,14 @@ Python3
 -------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -24127,14 +24132,14 @@ C#
 --
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -24225,14 +24230,14 @@ Javascript
 ----------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -24579,7 +24584,7 @@ The following are some standard algorithms that follow Divide and Conquer algori
   is the most common algorithm for FFT. It is a divide and conquer algorithm which works in O(N log N) time.
 * [****Karatsuba algorithm for fast multiplication****](https://www.geeksforgeeks.org/karatsuba-algorithm-for-fast-multiplication-using-divide-and-conquer-algorithm/)
   does the multiplication of two binary strings in O(n
-  
+
   1.59
   ) where n is the length of binary string.
 
@@ -24617,16 +24622,16 @@ Frequently Asked Questions (FAQs) on Divide and Conquer Algorithm:
 ### ****2. What are the key steps involved in the Divide and Conquer algorithm?****
 
 > The main steps are:
-> 
-> 
+>
+>
 > ****Divide****
 > : Break the problem into smaller subproblems.
-> 
-> 
+>
+>
 > ****Conquer****
 > : Solve the subproblems recursively.
-> 
-> 
+>
+>
 > ****Combine****
 > : Merge or combine the solutions of the subproblems to obtain the solution to the original problem.
 
@@ -24661,8 +24666,8 @@ Frequently Asked Questions (FAQs) on Divide and Conquer Algorithm:
 ### ****10. What are some common advantages of Divide and Conquer Algorithm?****
 
 > Divide and Conquer Algorithm has numerous advantages. Some of them include:
-> 
-> 
+>
+>
 > * Solving difficult problems
 > * Algorithm efficiency
 > * Parallelism
@@ -24757,10 +24762,10 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
   The Head of a linked list is a pointer to the first node or reference of the first node of linked list. This pointer marks the beginning of the linked list.
 * ****Node:****
   Linked List consists of a series of nodes where each node has two parts:
-  
+
   ****data****
   and
-  
+
   ****next pointer****
   .
 * ****Data:****
@@ -24811,7 +24816,7 @@ The following are some basic operations performed on a Single Linked List:
   ****:****
   This process displays the elements of a Single-linked list.
 * [****Search:****](https://www.geeksforgeeks.org/search-an-element-in-a-linked-list-iterative-and-recursive/)
-  
+
   It is a process of determining and retrieving a specific node either from the front, the end or anywhere in the list.
 
 ### ****Operations on Doubly Linked List:****
@@ -24891,8 +24896,8 @@ Frequently Asked Questions (FAQs) about Linked List:
 ### 5. What is the difference between array and linked list?
 
 > There are some following differences between them:
-> 
-> 
+>
+>
 > * Arrays are data structures containing similar data elements, whereas linked lists are non-primitive data structures containing unordered linked elements.
 > * In an array, elements are indexed, but in a linked list nodes are not indexed.
 > * Accessing an element array is fast if we know the position of an element in the array, while in the Linked list it takes linear time so, the Linked list is quite bit slower.
@@ -24902,8 +24907,8 @@ Frequently Asked Questions (FAQs) about Linked List:
 ### 6. Why is a linked list preferred over an array?
 
 > Following are the reason that linked lists are preferred over array
-> 
-> 
+>
+>
 > * Nodes in a linked array, insertions, and deletions can be done at any point in the list at a constant time.
 > * Arrays are of fixed size and their size is static but Linked lists are dynamic and flexible and can expand and shrink their size.
 > * Linked lists provide an efficient way of storing related data and performing basic operations such as insertion, deletion, and updating of information at the cost of extra space required for storing the address.
@@ -24912,22 +24917,22 @@ Frequently Asked Questions (FAQs) about Linked List:
 ### 7. Which is the best array or linked list?
 
 > There are some advantages and disadvantages to both arrays and linked lists when it comes to storing linear data of similar types.
-> 
-> 
+>
+>
 > #### Advantages of linked list over arrays:
-> 
+>
 > * ****Dynamic size:****
 >   Linked lists are dynamic and flexible and can expand and shrink their size
 > * ****Ease of Insertion/Deletion:****
 >   Insertion and deletion operations in linked list are faster as compared to the array
-> 
+>
 > #### ****Disadvantages of linked list over arrays:****
-> 
+>
 > * If the array is sorted we can apply binary search to search any element which takes
->   
+>
 >   ****O(log(n))****
 >   time. But even if the linked list is sorted we cannot apply binary search and the complexity of searching elements in the linked list is
->   
+>
 >   ****O(n)****
 >   .
 > * A linked list takes more memory as compared to the array because extra memory space is required for the pointer with each element in the linked list.
@@ -24935,13 +24940,13 @@ Frequently Asked Questions (FAQs) about Linked List:
 ### 8. What are the limitations of linked list?
 
 > Following are some limitations of the linked list:
-> 
-> 
+>
+>
 > * The use of pointers is more in linked lists hence, complex and requires more memory.
 > * Random access is not possible due to dynamic memory allocation.
 > * Traversing is more time-consuming and reverse traversing is not possible in singly linked lists.
 > * Searching for an element is costly and requires
->   
+>
 >   ****O(n)****
 >   time complexity.
 
@@ -24978,13 +24983,13 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 * The minimum or maximum element is always at the root of the heap, allowing constant-time access.
 * The relationship between a parent node at index
-  
+
   ****‘i’****
   and its children is given by the formulas: left child at index
-  
+
   ****2i+1****
   and right child at index
-  
+
   ****2i+2****
   for 0-based indexing of node numbers.
 * As the tree is complete binary, all levels are filled except possibly the last level. And the last level is filled from left to right.
@@ -25012,14 +25017,14 @@ time.
 
 
 * For
-  
+
   ****max-heap,****
   it
-  
-  
+
+
   makes sure the maximum element is the root of that binary tree and all descendants also follow the same property.
 * For
-  
+
   ****min-heap,****
   it balances in such a way that the minimum element is the root and all descendants also follow the same property.
 
@@ -25034,73 +25039,73 @@ time.
 ****Examples:****
 
 > Assume initially heap(taking
-> 
+>
 > ****max-heap****
 > ) is as follows
-> 
-> 
+>
+>
 > 8
-> 
->   
-> 
+>
+>
+>
 > /   \\
-> 
->   
-> 
+>
+>
+>
 > 4     5
-> 
->   
-> 
+>
+>
+>
 > / \\
-> 
->   
-> 
+>
+>
+>
 > 1   2
-> 
-> 
+>
+>
 > Now if we insert 10 into the heap
-> 
->   
-> 
+>
+>
+>
 > 8
-> 
->   
-> 
+>
+>
+>
 > /      \\
-> 
->   
-> 
+>
+>
+>
 > 4       5
-> 
->   
-> 
+>
+>
+>
 > /  \\      /
-> 
->   
-> 
+>
+>
+>
 > 1     2  10
-> 
-> 
+>
+>
 > After repeatedly comparing with the parent nodes and swapping if required, the final heap will be look like this
-> 
->   
-> 
+>
+>
+>
 > 10
-> 
->   
-> 
+>
+>
+>
 > /    \\
-> 
->   
-> 
+>
+>
+>
 > 4      8
-> 
->   
-> 
+>
+>
+>
 > /  \\     /
-> 
->   
-> 
+>
+>
+>
 > 1     2 5
 
 ### Deletion:
@@ -25118,71 +25123,71 @@ time.
 ****Example:****
 
 > Assume initially heap(taking max-heap) is as follows
-> 
->   
-> 
+>
+>
+>
 > 15
-> 
->   
-> 
+>
+>
+>
 > /   \\
-> 
->   
-> 
+>
+>
+>
 > 5     7
-> 
->   
-> 
+>
+>
+>
 > /  \\
-> 
->   
-> 
+>
+>
+>
 > 2     3
-> 
-> 
+>
+>
 > Now if we delete 15 into the heap it will be replaced by leaf node of the tree for temporary.
-> 
->   
-> 
+>
+>
+>
 > 3
-> 
->   
-> 
+>
+>
+>
 > /   \\
-> 
->   
-> 
+>
+>
+>
 > 5     7
-> 
->   
-> 
+>
+>
+>
 > /
-> 
->   
-> 
+>
+>
+>
 > 2
-> 
-> 
+>
+>
 > After heapify operation final heap will be look like this
-> 
->   
-> 
+>
+>
+>
 > 7
-> 
->   
-> 
+>
+>
+>
 > /   \\
-> 
->   
-> 
+>
+>
+>
 > 5     3
-> 
->   
-> 
+>
+>
+>
 > /
-> 
->   
-> 
+>
+>
+>
 > 2
 
 ### getMax (For max-heap) or getMin (For min-heap):
@@ -25230,34 +25235,34 @@ is the function responsible for restoring the property of the Max Heap. It arran
 
 
 1. Suppose we are given an array,
-   
+
    ****arr[]****
    representing the complete binary tree. The left and the right child of
-   
+
    ****i****
    ****th****
    node are in indices
-   
+
    ****2\\*i+1****
    and
-   
+
    ****2\\*i+2****
    .
 2. We set the index of the current element,
-   
+
    ****i****
    , as the ‘MAXIMUM’.
 3. If
-   
+
    ****arr[2 \\* i + 1] > arr[i]****
    , i.e., the left child is larger than the current value, it is set as ‘MAXIMUM’.
 4. Similarly if
-   
+
    ****arr[2 \\* i + 2] > arr[i]****
    , i.e., the right child is larger than the current value, it is set as ‘MAXIMUM’.
 5. Swap the ‘MAXIMUM’ with the current element.
 6. Repeat steps
-   
+
    ****2 to 5****
    till the property of the heap is restored.
 
@@ -26050,11 +26055,11 @@ console.log(
 ````
 
 
-  
+
 
 **Output**
 ```
-Entered 6 keys:- 3, 10, 12, 8, 2, 14 
+Entered 6 keys:- 3, 10, 12, 8, 2, 14
 The current size of the heap is 6
 The current maximum element is 14
 The current size of the heap is 5
@@ -26254,11 +26259,11 @@ function search(pat, txt)
 {
     let M = pat.length;
     let N = txt.length;
-    
+
     /* A loop to slide pat[] one by one */
     for (let i = 0; i <= N - M; i++) {
         let j = 0;
-        
+
         /* For current index i, check for pattern match */
         for (j = 0; j < M; j++)
             if (txt[i + j] != pat[j])
@@ -26271,16 +26276,16 @@ function search(pat, txt)
 // Driver\'s Code
     let txt = "AABAACAADAABAAABAA";
     let pat = "AABA";
-    
+
     // Function call
     search(pat, txt);
-    
+
     // This code is contributed by ishankhandelwals.
 
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -26292,7 +26297,7 @@ Pattern found at index 13
 ****Time Complexity:****
 O(N\\*M)
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -26310,11 +26315,11 @@ KMP algorithm is used to find a “Pattern” in a “Text”. This algorithm co
 
 We use the LPS table to decide how many characters are to be skipped for comparison when a mismatch has occurred.
 
-  
+
 
 When a mismatch occurs, check the LPS value of the previous character of the mismatched character in the pattern. If it is ‘0’ then start comparing the first character of the pattern with the next character to the mismatched character in the text. If it is not ‘0’ then start comparing the character which is at an index value equal to the LPS value of the previous character to the mismatched character in pattern with the mismatched character in the Text.
 
-  
+
 
 
 
@@ -26501,86 +26506,86 @@ int main()
 Java
 
 ````
-// Java program for implementation of KMP pattern searching 
+// Java program for implementation of KMP pattern searching
 // algorithm
-public class KMP_String_Matching { 
-    void KMPSearch(String pat, String txt) 
-    { 
-        int M = pat.length(); 
-        int N = txt.length(); 
+public class KMP_String_Matching {
+    void KMPSearch(String pat, String txt)
+    {
+        int M = pat.length();
+        int N = txt.length();
 
-        // create lps[] that will hold the longest prefix suffix 
-        // values for pattern 
-        int lps[] = new int[M]; 
-        int j = 0; // index for pat[] 
+        // create lps[] that will hold the longest prefix suffix
+        // values for pattern
+        int lps[] = new int[M];
+        int j = 0; // index for pat[]
 
-        // Preprocess the pattern (calculate lps[] array) 
-        computeLPSArray(pat, M, lps); 
+        // Preprocess the pattern (calculate lps[] array)
+        computeLPSArray(pat, M, lps);
 
-        int i = 0; // index for txt[] 
-        while (i < N) { 
-            if (pat.charAt(j) == txt.charAt(i)) { 
-                j++; 
-                i++; 
-            } 
-            if (j == M) { 
-                System.out.println("Found pattern " + "at index " + (i - j)); 
-                j = lps[j - 1]; 
-            } 
+        int i = 0; // index for txt[]
+        while (i < N) {
+            if (pat.charAt(j) == txt.charAt(i)) {
+                j++;
+                i++;
+            }
+            if (j == M) {
+                System.out.println("Found pattern " + "at index " + (i - j));
+                j = lps[j - 1];
+            }
 
-            // mismatch after j matches 
-            else if (i < N && pat.charAt(j) != txt.charAt(i)) { 
-                // Do not match lps[0..lps[j-1]] characters, 
-                // they will match anyway 
-                if (j != 0) 
-                    j = lps[j - 1]; 
+            // mismatch after j matches
+            else if (i < N && pat.charAt(j) != txt.charAt(i)) {
+                // Do not match lps[0..lps[j-1]] characters,
+                // they will match anyway
+                if (j != 0)
+                    j = lps[j - 1];
                 else
-                    i = i + 1; 
-            } 
-        } 
-    } 
+                    i = i + 1;
+            }
+        }
+    }
 
-    void computeLPSArray(String pat, int M, int lps[]) 
-    { 
-        // length of the previous longest prefix suffix 
-        int len = 0; 
-        int i = 1; 
-        lps[0] = 0; // lps[0] is always 0 
+    void computeLPSArray(String pat, int M, int lps[])
+    {
+        // length of the previous longest prefix suffix
+        int len = 0;
+        int i = 1;
+        lps[0] = 0; // lps[0] is always 0
 
-        // the loop calculates lps[i] for i = 1 to M-1 
-        while (i < M) { 
-            if (pat.charAt(i) == pat.charAt(len)) { 
-                len++; 
-                lps[i] = len; 
-                i++; 
-            } 
-            else // (pat[i] != pat[len]) 
-            { 
-                // This is tricky. Consider the example. 
-                // AAACAAAA and i = 7. The idea is similar 
-                // to search step. 
-                if (len != 0) { 
-                    len = lps[len - 1]; 
+        // the loop calculates lps[i] for i = 1 to M-1
+        while (i < M) {
+            if (pat.charAt(i) == pat.charAt(len)) {
+                len++;
+                lps[i] = len;
+                i++;
+            }
+            else // (pat[i] != pat[len])
+            {
+                // This is tricky. Consider the example.
+                // AAACAAAA and i = 7. The idea is similar
+                // to search step.
+                if (len != 0) {
+                    len = lps[len - 1];
 
-                    // Also, note that we do not increment 
-                    // i here 
-                } 
-                else // if (len == 0) 
-                { 
-                    lps[i] = len; 
-                    i++; 
-                } 
-            } 
-        } 
-    } 
+                    // Also, note that we do not increment
+                    // i here
+                }
+                else // if (len == 0)
+                {
+                    lps[i] = len;
+                    i++;
+                }
+            }
+        }
+    }
 
-    // Driver program to test above function 
-    public static void main(String[] args) 
-    { 
-        String txt = "ABABDABACDABABCABAB"; 
-        String pat = "ABABCABAB"; 
-        new KMP_String_Matching().KMPSearch(pat, txt); 
-    } 
+    // Driver program to test above function
+    public static void main(String[] args)
+    {
+        String txt = "ABABDABACDABABCABAB";
+        String pat = "ABABCABAB";
+        new KMP_String_Matching().KMPSearch(pat, txt);
+    }
 }
 
 ````
@@ -26773,13 +26778,13 @@ function computeLPSArray(pat, M, lps)
         }
         else // (pat[i] != pat[len])
         {
-        
+
             // This is tricky. Consider the example.
             // AAACAAAA and i = 7. The idea is similar
             // to search step.
             if (len != 0) {
                 len = lps[len - 1];
-                
+
                 // Also, note that we do not increment
                 // i here
             }
@@ -26794,11 +26799,11 @@ function computeLPSArray(pat, M, lps)
 function KMPSearch(pat, txt) {
     let M = pat.length;
     let N = txt.length
-    
+
     // create lps[] that will hold the longest prefix suffix
     // values for pattern
     let lps = [];
-    
+
     // Preprocess the pattern (calculate lps[] array)
     computeLPSArray(pat, M, lps);
     let i = 0; // index for txt[]
@@ -26812,11 +26817,11 @@ function KMPSearch(pat, txt) {
             console.log("Found pattern at index:", i - j);
             j = lps[j - 1];
         }
-        
+
         // mismatch after j matches
         else if (i < N && pat[j] != txt[i])
         {
-        
+
             // Do not match lps[0..lps[j-1]] characters,
             // they will match anyway
             if (j != 0)
@@ -26838,17 +26843,17 @@ KMPSearch(pat, txt);
 ````
 
 
-  
+
 
 **Output**
 ```
-Found pattern at index 10 
+Found pattern at index 10
 ```
 
 ****Time complexity:****
 O(n + m)
 
-  
+
 
 ****Auxiliary Space:****
 O(M)
@@ -27071,7 +27076,7 @@ d = 256
 txt -> text
 q -> A prime number \'\'\'
 def search(pat, txt, q):
-    
+
     M = len(pat)
     N = len(txt)
     p = 0 # hash value for pattern
@@ -27290,7 +27295,7 @@ search(pat, txt, q);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -27326,13 +27331,13 @@ For a string str[0..n-1], Z array is of same length as string. An element Z[i] o
 ****Example:****
 
 > Index            0   1   2   3   4   5   6   7   8   9  10  11
-> 
->   
-> 
+>
+>
+>
 > Text             a   a   b   c   a   a   b   x   a   a   a   z
-> 
->   
-> 
+>
+>
+>
 > Z values         X   1   0   0   3   1   0   0   2   2   1   0
 
 ### How to construct Z array?
@@ -27343,7 +27348,7 @@ A Simple Solution is to run two nested loops, the outer loop goes to every index
 
 We can construct Z array in linear time. The idea is to maintain an interval [L, R] which is the interval with max R
 
-  
+
 
 such that [L, R] is prefix substring (substring which is also a prefix.
 
@@ -27351,53 +27356,53 @@ such that [L, R] is prefix substring (substring which is also a prefix.
 ****Steps for maintaining this interval are as follows –****
 
 > 1. If
->    
+>
 >    ****i > R****
 >    then there is no prefix substring that starts before i and ends after i, so we reset L and R and compute new [L, R] by comparing
->    
+>
 >    ****str[0..]****
 >    to
->    
+>
 >    ****str[i..]****
 >    and get
->    
+>
 >    ****Z[i] (= R-L+1)****
 >    .
 > 2. If
->    
+>
 >    ****i <= R****
 >    then let
->    
+>
 >    ****K = i-L****
 >    ,  now
->    
+>
 >    ****Z[i] >= min(Z[K], R-i+1)****
 >    because str[i..] matches with
->    
+>
 >    ****str[K..]****
 >    for atleast
->    
+>
 >    ****R-i+1****
 >    characters (they are in[L, R] interval which we know is a prefix substring).
->    
->      
->    
+>
+>
+>
 >    Now two sub cases arise:
 >    * If
->      
+>
 >      ****Z[K] < R-i+1****
 >      then there is no prefix substring starting at str[i] (otherwise
->      
+>
 >      ****Z[K]****
 >      would be larger)  so  Z[i] = Z[K]and interval [L, R] remains same.
 >    * If
->      
+>
 >      ****Z[K] >= R-i+1****
 >      then it is possible to extend the [L, R] interval thus we will set L as i and start matching from
->      
+>
 >      ****str[R]****
 >      onwards  and get new R then we will update interval [L, R] and calculate
->      
+>
 >      ****Z[i] (=R-L+1)****
 >      .
 
@@ -27508,7 +27513,7 @@ Java
 // searching
 import java.io.*;
 
-class GFG 
+class GFG
 {
 
   // prints all occurrences of pattern in text using Z
@@ -27612,18 +27617,18 @@ Python
 # Fills Z array for given string str[]
 def getZarr(string, Z):
     n = len(string)
-    
+
     # [L, R] make a window which matches with prefix of s
     L, R, k = 0, 0, 0
     Z[0] = n
 
     for i in range(1, n):
-      
+
       # if i>R nothing matches so we will calculate.
         # Z[i] using naive way.
         if i > R:
             L, R = i, i
-            
+
             # R-L = 0 in starting, so it will start
             # checking from 0\'th index. For example,
             # for "ababab" and i = 1, the value of R
@@ -27634,32 +27639,32 @@ def getZarr(string, Z):
             Z[i] = R - L
             R -= 1
         else:
-          
+
           # k = i-L so k corresponds to number which
             # matches in [L, R] interval.
             k = i - L
-            
+
             # if Z[k] is less than remaining interval
             # then Z[i] will be equal to Z[k].
             # For example, str = "ababab", i = 3, R = 5
             # and L = 2
             if Z[k] < R - i + 1:
                 Z[i] = Z[k]
-                
+
             # For example str = "aaaaaa" and i = 2, R is 5,
             # L is 0
             else:
-              
+
               # else start from R and check manually
                 L = i
                 while R < n and string[R - L] == string[R]:
                     R += 1
                 Z[i] = R - L
                 R -= 1
-                
+
 # prints all occurrences of pattern in text using Z algo
 def search(text, pattern):
-  
+
   # Create concatenated string "P$T"
     concat = pattern + "$" + text
     l = len(concat)
@@ -27670,7 +27675,7 @@ def search(text, pattern):
 
     # now looping through Z array for matching condition
     for i in range(l):
-      
+
       # if Z[i] (matched region) is equal to pattern
         # length we got the pattern
         if Z[i] == len(pattern):
@@ -27681,7 +27686,7 @@ if __name__ == "__main__":
     text = "GEEKS FOR GEEKS"
     pattern = "GEEK"
     search(text, pattern)
-    
+
 # This code is contributed by akashish__
 
 ````
@@ -27867,7 +27872,7 @@ search(text, pattern);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -27878,7 +27883,7 @@ Pattern found at index 10
 ****Time Complexity:****
 O(m+n), where m is length of pattern and n is length of text.
 
-  
+
 
 ****Auxiliary Space:****
 O(m+n)
@@ -27901,31 +27906,31 @@ Build an automaton of all words in arr[] The automaton has mainly three function
 
 > ****Go To:****
 > This function simply follows edges of Trie of all words in arr[].
-> 
->   
-> 
+>
+>
+>
 > It is represented as 2D array g[][] where we store next state for current state and character.
-> 
-> 
+>
+>
 > ****Failure:****
 > This function stores all edges that are followed when current character doesn’t have edge in Trie.
-> 
->   
-> 
+>
+>
+>
 > It is represented as1D array f[] where we store next state for current state.
-> 
-> 
+>
+>
 > ****Output:****
 > Stores indexes of all words that end at current state.
-> 
->   
-> 
+>
+>
+>
 > It is represented as 1D  array o[] where we store indices of all matching words as a bitmap for current state.
 
 ****Matching:****
 Traverse the given text over built automaton to find all matching words.
 
-  
+
 
 Preprocessing:
 
@@ -27952,12 +27957,12 @@ Fills entries in goto g[][] and output o[]
 ****Go to:****
 We build Trie. And for all characters which don’t have an edge at the root, we add an edge back to root.
 
-  
+
 
 ****Failure:****
 For a state s, we find the longest proper suffix which is a proper prefix of some pattern. This is done using Breadth First Traversal of Trie.
 
-  
+
 
 ****Output:****
 For a state s, indexes of all words ending at s are stored. These indexes are stored as bitwise map (by doing bitwise OR of values). This is also computing using Breadth First Traversal with Failure.
@@ -28691,7 +28696,7 @@ searchWords(arr, k, text);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -28704,7 +28709,7 @@ Word hers appears from 4 to 7
 ****Time Complexity:****
 O(n + l + z), where ‘n’ is the length of the text, ‘l’ is the length of keywords, and ‘z’ is the number of matches.
 
-  
+
 
 ****Auxiliary Space:****
 O(l \\* q), where ‘q’ is the length of the alphabet since that is the maximum number of children a node can have.', 'We use certain algorithms to do the search process. The complexity of pattern searching varies from algorithm to algorithm. They are very useful when performing a search in a database. The Pattern Searching algorithm is useful for finding patterns in substrings of larger strings. This process can be accomplished using a variety of algorithms that we are going to discuss in this blog.', 'Introduction to Pattern Searching – Data Structure and Algorithm Tutorial', 6, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null, null);
@@ -28783,44 +28788,44 @@ How does Backtracking works?
 ----------------------------
 
 > As we know backtracking algorithm explores each and every possible path in order to find a valid solution, this exploration of path can be easily understood via given images:
-> 
-> 
+>
+>
 > ![backtracking](https://media.geeksforgeeks.org/wp-content/uploads/20231010124142/backtracking.png)
-> 
-> 
+>
+>
 > As shown in the image, “
-> 
+>
 > ****IS”****
 > represents the
-> 
+>
 > ****Initial State****
 > where the recursion call starts to find a valid solution.
-> 
->   
-> 
+>
+>
+>
 > ****C :****
 > it represents different
-> 
+>
 > ****Checkpoints****
 > for recursive calls
-> 
-> 
+>
+>
 > ****TN****
 > : it represents the
-> 
+>
 > ****Terminal Nodes****
 > where no further recursive calls can be made, these nodes act as base case of recursion and we determine whether the current solution is valid or not at this state.
-> 
-> 
+>
+>
 > At each Checkpoint, our program makes some decisions and move to other checkpoints untill it reaches a terminal Node, after determining whether a solution is valid or not, the program starts to revert back to the checkpoints and try to explore other paths. For example in the above image
-> 
+>
 > ****TN1…TN5****
 > are the terminal node where the solution is not acceptable, while
-> 
+>
 > ****TN6****
 > is the state where we found a valid solution.
-> 
-> 
+>
+>
 > The back arrows in the images shows backtracking in actions, where we revert the changes made by some checkpoint.
 
 Determining Backtracking Problems:
@@ -28840,46 +28845,46 @@ in logarithmic or polynomial time complexity which is far better than exponentia
 
 
 > To understand whether a problem is Backtracking based or not, let us take a simple problem:
-> 
->   
-> 
+>
+>
+>
 > ****Problem:****
-> 
+>
 > Imagine you have 3 closed boxes, among which 2 are empty and 1 has a gold coin. Your task is to get the gold coin.
-> 
-> 
+>
+>
 > ****Why dynamic programming fails to solve this question:****
-> 
+>
 > ****D****
 > oes opening or closing one box has any effect on the other box? Turns out NO, each and every box is independent of each other and opening/closing state of one box can not determine the transition for other boxes. Hence DP fails.
-> 
-> 
+>
+>
 > ****Why greedy fails to solve this question:****
-> 
-> 
+>
+>
 > Greedy algorithm chooses a local maxima in order to get global maxima, but in this problem each and every box has equal probability of having a gold coin i.e 1/3 hence there is no criteria to make a greedy choice.
-> 
-> 
+>
+>
 > ****Why Backtracking works:****
-> 
+>
 > As discussed already, backtracking algorithm is simply brute forcing each and every choice, hence we can one by one choose every box to find the gold coin, If a box is found empty we can close it back which acts as a Backtracking step.
-> 
-> 
+>
+>
 > Technically, for backtracking problems:
-> 
-> 
+>
+>
 > * The algorithm builds a solution by exploring all possible paths created by the choices in the problem, this solution begins with an empty set
->   
+>
 >   ****S={}****
 > * Each choice creates a new sub-tree ‘
->   
+>
 >   ****s’****
 >   which we add into are set.
 > * Now there exist two cases:
 >   + ****S+s is valid set****
 >   + ****S+s is not valid set****
 > * In case the set is valid then we further make choices and repeat the process until a solution is found, otherwise we backtrack our decision of including ‘
->   
+>
 >   ****s’****
 >   and explore other paths until a solution is found or all the possible paths are exhausted.
 
@@ -28891,55 +28896,55 @@ The best way to implement backtracking is through recursion, and all backtrackin
 
 
 > void
-> 
+>
 > ****FIND\\_SOLUTIONS****
 > ( parameters):
-> 
-> 
+>
+>
 > if (valid
-> 
+>
 > ****solution****
 > ):
-> 
-> 
+>
+>
 > store the
-> 
+>
 > ****solution****
-> 
-> 
+>
+>
 > Return
-> 
-> 
+>
+>
 > for (all
-> 
+>
 > ****choice****
 > ):
-> 
-> 
+>
+>
 > if (valid
-> 
+>
 > ****choice****
 > ):
-> 
-> 
+>
+>
 > ****APPLY****
 > (
-> 
+>
 > ****choice****
 > )
-> 
-> 
+>
+>
 > ****FIND\\_SOLUTIONS****
 > (parameters)
-> 
-> 
+>
+>
 > ****BACKTRACK****
 > (remove
-> 
+>
 > ****choice****
 > )
-> 
-> 
+>
+>
 > Return
 
 Complexity Analysis of Backtracking
@@ -29006,7 +29011,7 @@ Here is how a node in a Doubly Linked List is typically
 represented:
 
 [Try it on GfG Practice
-![redirect icon](https://media.geeksforgeeks.org/auth-dashboard-uploads/Group-arrow.svg)](https://www.geeksforgeeks.org/problems/display-doubly-linked-list--154650/1?itm_source=geeksforgeeks&itm_medium=article&itm_campaign=practice_card) 
+![redirect icon](https://media.geeksforgeeks.org/auth-dashboard-uploads/Group-arrow.svg)](https://www.geeksforgeeks.org/problems/display-doubly-linked-list--154650/1?itm_source=geeksforgeeks&itm_medium=article&itm_campaign=practice_card)
 C++
 ````
 struct Node {
@@ -29019,11 +29024,11 @@ struct Node {
 
     // Pointer to point the Next Element
     Node* next;
-  
+
     // Constructor
     Node(int d) {
        data = d;
-       prev = next = nullptr;      
+       prev = next = nullptr;
     }
 };
 
@@ -29064,14 +29069,14 @@ class Node {
 
     // Reference to the Previous Node
     Node prev;
-  
+
     // Reference to the next Node
     Node next;
-  
+
     // Constructor
     Node(int d) {
        data = d;
-       prev = next = null;      
+       prev = next = null;
     }
 };
 
@@ -29080,7 +29085,7 @@ class Node {
 Python
 ````
 class Node:
-  
+
     def __init__(self, data):
         # To store the value or data.
         self.data = data
@@ -29098,19 +29103,19 @@ C#
 class Node
 {
   	// To store the value or data
-    public int Data; 
-  
+    public int Data;
+
   	// Pointer to the next node
-    public Node Next; 
-  
+    public Node Next;
+
   	// Pointer to the previous node
-    public Node Prev; 
+    public Node Prev;
 
     // Constructor
     public Node(int d)
     {
         Data = d;
-        Prev = Next = null;      
+        Prev = Next = null;
     }
 }
 
@@ -29186,26 +29191,26 @@ using namespace std;
 
 // Define the Node structure
 struct Node {
-    int data; 
-    Node* next; 
-    Node* prev; 
-  
+    int data;
+    Node* next;
+    Node* prev;
+
     // Constructor to initialize Node with data
     Node(int data) : data(data), next(nullptr),
   	prev(nullptr) {}
 };
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in forward direction
 void forwardTraversal(Node* head) {
-  
+
     // Start traversal from the head of the list
     Node* curr = head;
 
     // Continue until current node is not null
     // (end of list)
     while (curr != nullptr) {
-      
+
         // Output data of the current node
         cout << curr->data << " ";
 
@@ -29217,17 +29222,17 @@ void forwardTraversal(Node* head) {
     cout << endl;
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in backward direction
 void backwardTraversal(Node* tail) {
-  
+
     // Start traversal from the tail of the list
     Node* curr = tail;
 
-    // Continue until current node is not null 
+    // Continue until current node is not null
     // (end of list)
     while (curr != nullptr) {
-      
+
         // Output data of the current node
         cout << curr->data << " ";
 
@@ -29240,8 +29245,8 @@ void backwardTraversal(Node* tail) {
 }
 
 int main() {
-  
-    // Sample usage of the doubly linked list and 
+
+    // Sample usage of the doubly linked list and
     // traversal functions
     Node* head = new Node(1);
     Node* second = new Node(2);
@@ -29277,7 +29282,7 @@ struct Node {
 
 // Function to create a new node
 struct Node* createNode(int data) {
-    struct Node* newNode = 
+    struct Node* newNode =
       (struct Node*)malloc(sizeof(struct Node));
     newNode->data = data;
     newNode->next = NULL;
@@ -29285,20 +29290,20 @@ struct Node* createNode(int data) {
     return newNode;
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in forward direction
 void forwardTraversal(struct Node* head) {
-  
+
     // Start traversal from the head of the list
     struct Node* curr = head;
 
     // Continue until the current node is not
     // null (end of list)
     while (curr != NULL) {
-      
+
         // Output data of the current node
         printf("%d ", curr->data);
-      
+
         // Move to the next node
         curr = curr->next;
     }
@@ -29307,20 +29312,20 @@ void forwardTraversal(struct Node* head) {
     printf("\\n");
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in backward direction
 void backwardTraversal(struct Node* tail) {
-  
+
     // Start traversal from the tail of the list
     struct Node* curr = tail;
 
-    // Continue until the current node is not 
+    // Continue until the current node is not
     // null (end of list)
     while (curr != NULL) {
-      
+
         // Output data of the current node
         printf("%d ", curr->data);
-      
+
         // Move to the previous node
         curr = curr->prev;
     }
@@ -29330,8 +29335,8 @@ void backwardTraversal(struct Node* tail) {
 }
 
 int main() {
-  
-    // Sample usage of the doubly linked list and 
+
+    // Sample usage of the doubly linked list and
     // traversal functions
     struct Node* head = createNode(1);
     struct Node* second = createNode(2);
@@ -29377,20 +29382,20 @@ class Node {
 // Class to manage the doubly linked list
 class GfG {
 
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
     // in forward direction
     static void forwardTraversal(Node head) {
-      
+
         // Start traversal from the head of the list
         Node curr = head;
 
-        // Continue until the current node is 
+        // Continue until the current node is
         // null (end of the list)
         while (curr != null) {
-          
+
             // Output data of the current node
             System.out.print(curr.data + " ");
-          
+
             // Move to the next node
             curr = curr.next;
         }
@@ -29399,20 +29404,20 @@ class GfG {
         System.out.println();
     }
 
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
   	//in backward direction
     static void backwardTraversal(Node tail) {
-      
+
         // Start traversal from the tail of the list
         Node curr = tail;
 
-        // Continue until the current node is 
+        // Continue until the current node is
         // null (end of the list)
         while (curr != null) {
-          
+
             // Output data of the current node
             System.out.print(curr.data + " ");
-          
+
             // Move to the previous node
             curr = curr.prev;
         }
@@ -29422,7 +29427,7 @@ class GfG {
     }
 
     public static void main(String[] args) {
-      
+
         // Sample usage of the doubly linked
         // list and traversal functions
         Node head = new Node(1);
@@ -29453,50 +29458,50 @@ class Node:
         self.prev = None
         self.next = None
 
-# Function to traverse the doubly linked list 
+# Function to traverse the doubly linked list
 # in forward direction
 def forward_traversal(head):
-  
+
     # Start traversal from the head of the list
     curr = head
-    
-    # Continue until the current node is 
+
+    # Continue until the current node is
     # null (end of the list)
     while curr is not None:
-      
+
         # Output data of the current node
         print(curr.data, end=" ")
-        
+
         # Move to the next node
         curr = curr.next
-        
+
     # Print newline after traversal
     print()
 
-# Function to traverse the doubly linked 
+# Function to traverse the doubly linked
 # list in backward direction
 def backward_traversal(tail):
-  
+
     # Start traversal from the tail of the list
     curr = tail
-    
-    # Continue until the current node 
+
+    # Continue until the current node
     # is null (end of the list)
     while curr is not None:
-      
+
         # Output data of the current node
         print(curr.data, end=" ")
-        
+
         # Move to the previous node
         curr = curr.prev
-        
+
     # Print newline after traversal
     print()
 
-# Sample usage of the doubly linked list 
+# Sample usage of the doubly linked list
 # and traversal functions
 if __name__ == "__main__":
-  
+
     # Create a doubly linked list with 3 nodes
     head = Node(1)
     second = Node(2)
@@ -29538,14 +29543,14 @@ class Node
 // Class to manage the doubly linked list
 class GfG
 {
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
   	//in forward direction
     static void ForwardTraversal(Node head)
     {
         // Start traversal from the head of the list
         Node curr = head;
 
-        // Continue until the current node is null 
+        // Continue until the current node is null
       	//(end of the list)
         while (curr != null)
         {
@@ -29560,14 +29565,14 @@ class GfG
         Console.WriteLine();
     }
 
-    // Function to traverse the doubly linked list 
+    // Function to traverse the doubly linked list
   	//in backward direction
     static void BackwardTraversal(Node tail)
     {
         // Start traversal from the tail of the list
         Node curr = tail;
 
-        // Continue until the current node is null 
+        // Continue until the current node is null
       	//(end of the list)
         while (curr != null)
         {
@@ -29616,46 +29621,46 @@ class Node {
     }
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in forward direction
 function forwardTraversal(head) {
 
     // Start traversal from the head of the list
     let curr = head;
-    
-    // Continue until the current node is null 
+
+    // Continue until the current node is null
     // (end of the list)
     while (curr !== null) {
-    
+
         // Output data of the current node
         console.log(curr.data + " ");
-        
+
         // Move to the next node
         curr = curr.next;
     }
-    
+
     // Print newline after traversal
     console.log();
 }
 
-// Function to traverse the doubly linked list 
+// Function to traverse the doubly linked list
 // in backward direction
 function backwardTraversal(tail) {
 
     // Start traversal from the tail of the list
     let curr = tail;
-    
-    // Continue until the current node is null 
+
+    // Continue until the current node is null
     // (end of the list)
     while (curr !== null) {
-    
+
         // Output data of the current node
         console.log(curr.data + " ");
-        
+
         // Move to the previous node
         curr = curr.prev;
     }
-    
+
     // Print newline after traversal
     console.log();
 }
@@ -29681,14 +29686,14 @@ backwardTraversal(third);
 ````
 
 
-  
+
 **Output**
 ```
 
 Forward Traversal:
-1 2 3 
+1 2 3
 Backward Traversal:
-3 2 1 
+3 2 1
 
 ```
 
@@ -29722,7 +29727,7 @@ struct Node {
     }
 };
 
-// Function to find the length of a doubly 
+// Function to find the length of a doubly
 //linked list
 int findLength(Node * head) {
     int count = 0;
@@ -29764,7 +29769,7 @@ struct Node {
 
 // Constructor function to create a new node
 struct Node* createNode(int val) {
-    struct Node* newNode = 
+    struct Node* newNode =
          (struct Node*)malloc(sizeof(struct Node));
     newNode->data = val;
     newNode->prev = NULL;
@@ -29786,12 +29791,12 @@ int main() {
     struct Node* second = createNode(2);
     struct Node* third = createNode(3);
 
-    head->next = second; 
+    head->next = second;
     second->prev = head;
-    second->next = third; 
+    second->next = third;
     third->prev = second;
 
-    printf("Length of the doubly linked list: %d\\n", 
+    printf("Length of the doubly linked list: %d\\n",
            findLength(head));
 
     return 0;
@@ -29802,21 +29807,21 @@ int main() {
 Java
 ````
 class Node {
-    int data; 
-    Node prev; 
+    int data;
+    Node prev;
     Node next;
 
     // Constructor
-    public Node(int val) { 
-        data = val; 
-        prev = null; 
-        next = null; 
+    public Node(int val) {
+        data = val;
+        prev = null;
+        next = null;
     }
 }
 
 class GfG {
 
-    // Function to find the length of 
+    // Function to find the length of
     // a doubly linked list
     static int FindLength(Node head) {
         int count = 0;
@@ -29827,19 +29832,19 @@ class GfG {
 
     // Driver code
     public static void main(String[] args) {
-      
-        // Create a doubly linked list 
+
+        // Create a doubly linked list
         // with 3 nodes
         Node head = new Node(1);
         Node second = new Node(2);
         Node third = new Node(3);
-        
-        head.next = second; 
+
+        head.next = second;
         second.prev = head;
-        second.next = third; 
+        second.next = third;
         third.prev = second;
 
-        System.out.println("Length of doubly linked list: " 
+        System.out.println("Length of doubly linked list: "
                            + FindLength(head));
     }
 }
@@ -29854,7 +29859,7 @@ class Node:
         self.prev = None
         self.next = None
 
-# Function to find the length of 
+# Function to find the length of
 # a doubly linked list
 def find_length(head):
     count = 0
@@ -29866,8 +29871,8 @@ def find_length(head):
 
 # Driver code
 if __name__ == "__main__":
-  
-    # Create a doubly linked list 
+
+    # Create a doubly linked list
     # with 3 nodes
     head = Node(1)
     second = Node(2)
@@ -29888,21 +29893,21 @@ C#
 using System;
 
 class Node {
-    public int data; 
-    public Node prev; 
+    public int data;
+    public Node prev;
     public Node next;
 
     // Constructor
-    public Node(int val) { 
-        data = val; 
-        prev = null; 
-        next = null; 
+    public Node(int val) {
+        data = val;
+        prev = null;
+        next = null;
     }
 }
 
 public class GfG {
 
-    // Function to find the length of 
+    // Function to find the length of
     // a doubly linked list
     static int FindLength(Node head) {
         int count = 0;
@@ -29913,19 +29918,19 @@ public class GfG {
 
     // Driver code
     public static void Main(string[] args) {
-      
-        // Create a doubly linked list 
+
+        // Create a doubly linked list
         // with 3 nodes
         Node head = new Node(1);
         Node second = new Node(2);
         Node third = new Node(3);
-        
-        head.next = second; 
+
+        head.next = second;
         second.prev = head;
-        second.next = third; 
+        second.next = third;
         third.prev = second;
 
-        Console.WriteLine("Length of doubly linked list: " 
+        Console.WriteLine("Length of doubly linked list: "
                                  + FindLength(head));
     }
 }
@@ -29972,7 +29977,7 @@ console.log("Length of the doubly linked list: " +
 
 
 
-  
+
 **Output**
 ```
 
@@ -30002,7 +30007,7 @@ Below are the implementation of the above approach:
 C++
 ````
 // C++ Program to insert a new node at the
-// beginning of doubly linked list 
+// beginning of doubly linked list
 
 #include <iostream>
 using namespace std;
@@ -30013,26 +30018,26 @@ struct Node {
     Node* prev;
     Node* next;
 
-    Node(int d) { 
-      data = d; 
+    Node(int d) {
+      data = d;
       prev = next = NULL;
     }
 };
 
 // Insert a node at the beginning
 Node* insertBegin(Node* head, int data) {
-    
+
     // Create a new node
     Node* new_node = new Node(data);
-    
+
     // Make next of it as head
     new_node->next = head;
-    
+
     // Set previous of head as new node
     if (head != NULL) {
         head->prev = new_node;
     }
-    
+
     // Return new node as new head
     return new_node;
 }
@@ -30047,7 +30052,7 @@ void printList(Node* head) {
 }
 
 int main() {
-  
+
     // Create a hardcoded linked list:
   	// 2 <-> 3 <-> 4
     Node* head = new Node(2);
@@ -30068,7 +30073,7 @@ int main() {
     // Print the updated list
   	cout << "After inserting Node 1 at the front: ";
     printList(head);
-  	
+
     return 0;
 }
 
@@ -30091,7 +30096,7 @@ struct Node {
 
 // Create a new node
 struct Node* createNode(int data) {
-    struct Node* new_node = 
+    struct Node* new_node =
       (struct Node*)malloc(sizeof(struct Node));
     new_node->data = data;
     new_node->prev = NULL;
@@ -30101,18 +30106,18 @@ struct Node* createNode(int data) {
 
 // Insert a node at the beginning
 struct Node* insertBegin(struct Node* head, int data) {
-    
+
     // Create a new node
     struct Node* new_node = createNode(data);
-    
+
     // Make next of it as head
     new_node->next = head;
-    
+
     // Set previous of head as new node
     if (head != NULL) {
         head->prev = new_node;
     }
-    
+
     // Return new node as new head
     return new_node;
 }
@@ -30128,9 +30133,9 @@ void printList(struct Node* head) {
 }
 
 int main() {
-  
+
     // Create a hardcoded doubly linked list:
-    // 2 <-> 3 <-> 4 
+    // 2 <-> 3 <-> 4
     struct Node *head = createNode(2);
     head->next = createNode(3);
     head->next->prev = head;
@@ -30171,21 +30176,21 @@ class Node {
 }
 
 class GfG {
-    
+
     // Insert a node at the beginning
     static Node insertBegin(Node head, int data) {
-        
+
         // Create a new node
         Node new_node = new Node(data);
-        
+
         // Make next of it as head
         new_node.next = head;
-        
+
         // Set previous of head as new node
         if (head != null) {
             head.prev = new_node;
         }
-        
+
         // Return new node as new head
         return new_node;
     }
@@ -30201,7 +30206,7 @@ class GfG {
     }
 
     public static void main(String[] args) {
-        
+
         // Create a hardcoded doubly linked list:
         // 2 <-> 3 <-> 4
         Node head = new Node(2);
@@ -30228,7 +30233,7 @@ class GfG {
 
 Python
 ````
-# Python Program to insert a node at the beginning 
+# Python Program to insert a node at the beginning
 #of doubly linked list
 
 # Node structure for the doubly linked list
@@ -30240,17 +30245,17 @@ class Node:
 
 # Insert a node at the beginning
 def insertBegin(head, data):
-    
+
     # Create a new node
     new_node = Node(data)
-    
+
     # Make next of it as head
     new_node.next = head
-    
+
     # Set previous of head as new node
     if head is not None:
         head.prev = new_node
-    
+
     # Return new node as new head
     return new_node
 
@@ -30263,7 +30268,7 @@ def printList(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 2 <-> 3 <-> 4
     head = Node(2)
@@ -30306,22 +30311,22 @@ class Node {
 }
 
 class GfG {
-    
+
     // Insert a node at the beginning
     public static
     Node insertBegin(Node head, int data) {
-        
+
         // Create a new node
         Node new_node = new Node(data);
-        
+
         // Make next of it as head
         new_node.next = head;
-        
+
         // Set previous of head as new node
         if (head != null) {
             head.prev = new_node;
         }
-        
+
         // Return new node as new head
         return new_node;
     }
@@ -30337,7 +30342,7 @@ class GfG {
     }
 
     public static void Main(string[] args) {
-        
+
         // Create a hardcoded doubly linked list:
         // 2 <-> 3 <-> 4
         Node head = new Node(2);
@@ -30364,7 +30369,7 @@ class GfG {
 
 JavaScript
 ````
-// JavaScript Program to insert a node at the 
+// JavaScript Program to insert a node at the
 //beginning of doubly linked list
 
 // Node structure for the doubly linked list
@@ -30376,18 +30381,18 @@ function Node(data) {
 
 // Insert a node at the beginning
 function insertBegin(head, data) {
-    
+
     // Create a new node
     const new_node = new Node(data);
-    
+
     // Make next of it as head
     new_node.next = head;
-    
+
     // Set previous of head as new node
     if (head !== null) {
         head.prev = new_node;
     }
-    
+
     // Return new node as new head
     return new_node;
 }
@@ -30430,12 +30435,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 2 3 4 
-After inserting Node 1 at the front: 1 2 3 4 
+Original Linked List: 2 3 4
+After inserting Node 1 at the front: 1 2 3 4
 
 ```
 
@@ -30484,14 +30489,14 @@ struct Node {
     }
 };
 
-// Function to insert a new node at the end of 
+// Function to insert a new node at the end of
 //doubly linked list
 Node *insertEnd(Node *head, int new_data) {
 
     // Create a new node
     Node *new_node = new Node(new_data);
 
-    // If the linked list is empty, set the new 
+    // If the linked list is empty, set the new
   	//node as the head of linked list
     if (head == NULL) {
         head = new_node;
@@ -30551,7 +30556,7 @@ int main() {
 
 C
 ````
-// C Program to insert a node at the end of 
+// C Program to insert a node at the end of
 //doubly linked list
 
 #include <stdio.h>
@@ -30571,7 +30576,7 @@ struct Node *createNode(int new_data) {
     return new_node;
 }
 
-// Function to insert a new node at the end of the 
+// Function to insert a new node at the end of the
 //doubly linked list
 struct Node* insertEnd(struct Node *head, int new_data) {
     struct Node *new_node = createNode(new_data);
@@ -30605,7 +30610,7 @@ void printList(struct Node *head) {
 }
 
 int main() {
-  
+
     // Create a hardcoded doubly linked list:
     // 1 <-> 2 <-> 3
     struct Node *head = createNode(1);
@@ -30632,7 +30637,7 @@ int main() {
 
 Java
 ````
-// Java Program to insert a node at the end of 
+// Java Program to insert a node at the end of
 // doubly linked list
 
 class Node {
@@ -30650,7 +30655,7 @@ class GFG {
     // Function to insert a new node at the end of the
     // doubly linked list
     public static Node insertEnd(Node head, int newData) {
-      
+
         // Create a new node
         Node newNode = new Node(newData);
 
@@ -30686,7 +30691,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -30714,7 +30719,7 @@ class GFG {
 
 Python
 ````
-# Python Program to insert a node at the end of 
+# Python Program to insert a node at the end of
 #doubly linked list
 
 class Node:
@@ -30723,13 +30728,13 @@ class Node:
         self.next = None
         self.prev = None
 
-# Function to insert a new node at the end of the 
+# Function to insert a new node at the end of the
 #doubly linked list
 def insert_end(head, new_data):
-      
+
     # Create a new node
     new_node = Node(new_data)
-    
+
     # If the linked list is empty, set the new node
     #as the head
     if head is None:
@@ -30738,13 +30743,13 @@ def insert_end(head, new_data):
         curr = head
         while curr.next is not None:
             curr = curr.next
-        
+
         # Set the next of the last node to the new node
         curr.next = new_node
-        
+
         # Set the prev of the new node to the last node
         new_node.prev = curr
-    
+
     return head
 
 def print_list(head):
@@ -30755,7 +30760,7 @@ def print_list(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -30780,7 +30785,7 @@ if __name__ == "__main__":
 
 C#
 ````
-// C# Program to insert a node at the end of 
+// C# Program to insert a node at the end of
 //doubly linked list
 
 using System;
@@ -30798,15 +30803,15 @@ class Node {
 }
 
 class GFG {
-  
+
     // Function to insert a new node at the end
   	//of the doubly linked list
     public static Node InsertEnd(Node head, int newData) {
-        
+
           // Create a new node
         Node newNode = new Node(newData);
 
-        // If the linked list is empty, set the 
+        // If the linked list is empty, set the
       	//new node as the head
         if (head == null) {
             head = newNode;
@@ -30817,11 +30822,11 @@ class GFG {
                 curr = curr.Next;
             }
 
-            // Set the next of the last node to 
+            // Set the next of the last node to
           	//the new node
             curr.Next = newNode;
 
-            // Set the prev of the new node to 
+            // Set the prev of the new node to
           	//the last node
             newNode.Prev = curr;
         }
@@ -30840,7 +30845,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -30867,7 +30872,7 @@ class GFG {
 
 JavaScript
 ````
-// Javascript Program to insert a node at the end of 
+// Javascript Program to insert a node at the end of
 //doublylinked list
 
 class Node {
@@ -30884,7 +30889,7 @@ function insertEnd(head, newData) {
     // Create a new node
     const newNode = new Node(newData);
 
-    // If the linked list is empty, set the 
+    // If the linked list is empty, set the
     //new node as the head
     if (head === null) {
         head = newNode;
@@ -30895,11 +30900,11 @@ function insertEnd(head, newData) {
             curr = curr.next;
         }
 
-        // Set the next of the last node to the 
+        // Set the next of the last node to the
         //new node
         curr.next = newNode;
 
-        // Set the prev of the new node to the 
+        // Set the prev of the new node to the
         //last node
         newNode.prev = curr;
     }
@@ -30942,12 +30947,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-Inserting Node with data 4 at the end: 1 2 3 4 
+Original Linked List: 1 2 3
+Inserting Node with data 4 at the end: 1 2 3 4
 
 ```
 
@@ -31118,7 +31123,7 @@ struct Node * insertAtPosition(struct Node * head, int pos, int new_data) {
     if (pos == 1) {
         new_node -> next = head;
 
-        // If the linked list is not empty, set the 
+        // If the linked list is not empty, set the
       //prev of head to new node
         if (head != NULL) {
             head -> prev = new_node;
@@ -31226,7 +31231,7 @@ class GFG {
         if (pos == 1) {
             new_node.next = head;
 
-            // If the linked list is not empty, set 
+            // If the linked list is not empty, set
           	//the prev of head to new node
             if (head != null) {
                 head.prev = new_node;
@@ -31238,8 +31243,8 @@ class GFG {
         }
 
         Node curr = head;
-      
-        // Traverse the list to find the node before 
+
+        // Traverse the list to find the node before
       	//the insertion point
         for (int i = 1; i < pos - 1 && curr != null; ++i) {
             curr = curr.next;
@@ -31260,7 +31265,7 @@ class GFG {
         // Update the next of current node to new node
         curr.next = new_node;
 
-        // If the new node is not the last node, update 
+        // If the new node is not the last node, update
       	//prev of next node to new node
         if (new_node.next != null) {
             new_node.next.prev = new_node;
@@ -31281,7 +31286,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 4
         Node head = new Node(1);
@@ -31318,7 +31323,7 @@ class Node:
         self.prev = None
 
 def insert_at_position(head, pos, new_data):
-  
+
     # Create a new node
     new_node = Node(new_data)
 
@@ -31336,8 +31341,8 @@ def insert_at_position(head, pos, new_data):
         return head
 
     curr = head
-    
-    # Traverse the list to find the node before the 
+
+    # Traverse the list to find the node before the
     #insertion point
     for _ in range(1, pos - 1):
         if curr is None:
@@ -31359,7 +31364,7 @@ def insert_at_position(head, pos, new_data):
     # Update the next of current node to new node
     curr.next = new_node
 
-    # If the new node is not the last node, update 
+    # If the new node is not the last node, update
     #prev of next node to new node
     if new_node.next is not None:
         new_node.next.prev = new_node
@@ -31374,7 +31379,7 @@ def print_list(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 4
     head = Node(1)
@@ -31417,10 +31422,10 @@ class Node {
 }
 
 class GFG {
-  
+
     // Function to insert a new node at a given position
     static Node InsertAtPosition(Node head, int pos, int newData) {
-      
+
         // Create a new node
         Node newNode = new Node(newData);
 
@@ -31434,7 +31439,7 @@ class GFG {
         }
 
         Node curr = head;
-        
+
           // Traverse the list to find the node
       	 //before the insertion point
         for (int i = 1; i < pos - 1 && curr != null; ++i) {
@@ -31456,7 +31461,7 @@ class GFG {
         // Update the next of current node to new node
         curr.Next = newNode;
 
-        // If the new node is not the last node, update 
+        // If the new node is not the last node, update
       	//prev of next node to new node
         if (newNode.Next != null)
             newNode.Next.Prev = newNode;
@@ -31475,7 +31480,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 4
         Node head = new Node(1);
@@ -31528,7 +31533,7 @@ function insertAtPosition(head, pos, newData) {
     }
 
     let curr = head;
-    
+
     // Traverse the list to find the node
     //before the insertion point
     for (let i = 1; i < pos - 1 && curr !== null; ++i) {
@@ -31550,7 +31555,7 @@ function insertAtPosition(head, pos, newData) {
     // Update the next of current node to new node
     curr.next = newNode;
 
-    // If the new node is not the last node, 
+    // If the new node is not the last node,
     // update prev of next node to new node
     if (newNode.next !== null) {
         newNode.next.prev = newNode;
@@ -31593,12 +31598,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 4 
-Inserting Node with data 3 at position 3: 1 2 3 4 
+Original Linked List: 1 2 4
+Inserting Node with data 3 at position 3: 1 2 3 4
 
 ```
 
@@ -31623,7 +31628,7 @@ Below is the implementation of the above approach:
 
 C++
 ````
-// C++ Program to delete a node from the 
+// C++ Program to delete a node from the
 // beginning of Doubly Linked List
 
 #include <bits/stdc++.h>
@@ -31769,7 +31774,7 @@ int main() {
 
 Java
 ````
-// Java Program to delete a node from the 
+// Java Program to delete a node from the
 // beginning of Doubly Linked List
 
 class Node {
@@ -31819,7 +31824,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -31842,7 +31847,7 @@ class GFG {
 
 Python
 ````
-# Python Program to delete a node from the 
+# Python Program to delete a node from the
 # beginning of Doubly Linked List
 
 class Node:
@@ -31854,7 +31859,7 @@ class Node:
 # Function to delete the first node (head) of the list
 # and return the second node as the new head
 def del_head(head):
-  
+
     # If empty, return None
     if head is None:
         return None
@@ -31878,10 +31883,10 @@ def print_list(head):
         print(curr.data, end=" ")
         curr = curr.next
     print()
-    
+
 
 if __name__ == "__main__":
-  
+
 	# Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -31920,11 +31925,11 @@ class Node {
 }
 
 class GFG {
-  	
+
     // Deletes the first node (head) of the list
     // and returns the second node as the new head
     public static Node DelHead(Node head) {
-      
+
         // If empty, return null
         if (head == null)
             return null;
@@ -31950,7 +31955,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -31973,7 +31978,7 @@ class GFG {
 
 JavaScript
 ````
-// JavaScript Program to delete a node from the 
+// JavaScript Program to delete a node from the
 // beginning of Doubly Linked List
 class Node {
     constructor(data) {
@@ -32035,12 +32040,12 @@ printList(head);
 ````
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-After Deletion at the beginning: 2 3 
+Original Linked List: 1 2 3
+After Deletion at the beginning: 2 3
 
 ```
 
@@ -32104,7 +32109,7 @@ Node *delLast(Node *head) {
     curr->prev->next = NULL;
 
   	// Delete the last node
-    delete curr; 
+    delete curr;
 
     // Return the updated head
     return head;
@@ -32120,7 +32125,7 @@ void printList(Node *head) {
 }
 
 int main() {
-  	
+
     // Create a hardcoded doubly linked list:
     // 1 <-> 2 <-> 3
     struct Node *head = new Node(1);
@@ -32144,7 +32149,7 @@ int main() {
 
 C
 ````
-// C Program to delete a node from the end of 
+// C Program to delete a node from the end of
 //Doubly Linked List
 
 #include <stdio.h>
@@ -32155,10 +32160,10 @@ struct Node {
     struct Node* next;
 };
 
-// Function to delete the last node of the 
+// Function to delete the last node of the
 //doubly linked list
 struct Node* delLast(struct Node *head) {
-  
+
     // Corner cases
     if (head == NULL)
         return NULL;
@@ -32203,7 +32208,7 @@ struct Node* createNode(int data) {
 }
 
 int main() {
-  
+
     // Create a hardcoded doubly linked list:
     // 1 <-> 2 <-> 3
     struct Node *head = createNode(1);
@@ -32227,7 +32232,7 @@ int main() {
 
 Java
 ````
-// Java Program to delete a node from the end of 
+// Java Program to delete a node from the end of
 //Doubly Linked List
 
 class Node {
@@ -32243,11 +32248,11 @@ class Node {
 }
 
 class GFG {
-  
-    // Function to delete the last node of the 
+
+    // Function to delete the last node of the
   	//doubly linked list
     public static Node delLast(Node head) {
-      
+
         // Corner cases
         if (head == null) {
             return null;
@@ -32282,7 +32287,7 @@ class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -32305,7 +32310,7 @@ class GFG {
 
 Python
 ````
-# Python Program to delete a node from the end of 
+# Python Program to delete a node from the end of
 #Doubly Linked List
 
 class Node:
@@ -32315,7 +32320,7 @@ class Node:
         self.next = None
 
 def del_last(head):
-  
+
     # Corner cases
     if head is None:
         return None
@@ -32342,7 +32347,7 @@ def print_list(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -32363,7 +32368,7 @@ if __name__ == "__main__":
 
 C#
 ````
-// C# Program to delete a node from the end of 
+// C# Program to delete a node from the end of
 //Doubly Linked List
 
 using System;
@@ -32381,11 +32386,11 @@ class Node {
 }
 
 class GFG {
-  
+
     // Function to delete the last node of the
   	//doubly linked list
     static Node DelLast(Node head) {
-        
+
       	// Corner cases
         if (head == null)
             return null;
@@ -32420,7 +32425,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hardcoded doubly linked list:
         // 1 <-> 2 <-> 3
         Node head = new Node(1);
@@ -32505,12 +32510,12 @@ printList(head);
 
 
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-After Deletion at the end: 1 2 
+Original Linked List: 1 2 3
+After Deletion at the end: 1 2
 
 ```
 
@@ -32557,7 +32562,7 @@ struct Node {
     }
 };
 
-// Function to delete a node at a specific position 
+// Function to delete a node at a specific position
 // in the doubly linked list
 Node * delPos(Node * head, int pos) {
 
@@ -32648,7 +32653,7 @@ struct Node * createNode(int data) {
     return newNode;
 }
 
-// Function to delete a node at a specific 
+// Function to delete a node at a specific
 //position in the doubly linked list
 struct Node * delPos(struct Node * head, int pos) {
 
@@ -32740,7 +32745,7 @@ class Node {
 
 class GFG {
 
-    // Function to delete a node at a 
+    // Function to delete a node at a
   	//specific position in the doubly linked list
     public static Node delPos(Node head, int pos) {
 
@@ -32825,7 +32830,7 @@ class Node:
         self.next = None
 
 
-# Function to delete a node at a specific position 
+# Function to delete a node at a specific position
 #in the doubly linked list
 def del_pos(head, pos):
     # If the list is empty
@@ -32869,7 +32874,7 @@ def print_list(head):
 
 
 if __name__ == "__main__":
-  
+
     # Create a hardcoded doubly linked list:
     # 1 <-> 2 <-> 3
     head = Node(1)
@@ -33019,7 +33024,7 @@ function delPos(head, pos) {
 	}
 
 	// Deallocate memory for the deleted node
-	// In JavaScript, garbage collection handles 
+	// In JavaScript, garbage collection handles
     //this automatically
 
 	return head;
@@ -33055,12 +33060,12 @@ printList(head);
 
 ````
 
-  
+
 **Output**
 ```
 
-Original Linked List: 1 2 3 
-After Deletion at the position 2: 1 3 
+Original Linked List: 1 2 3
+After Deletion at the position 2: 1 3
 
 ```
 
@@ -33177,25 +33182,25 @@ Adds an item to the stack. If the stack is full, then it is said to be an
 
 
 * Before pushing the element to the stack, we check if the stack is
-  
+
   ****full****
   .
 * If the stack is full
-  
+
   ****(top == capacity-1)****
   , then
-  
+
   ****Stack Overflows****
   and we cannot insert the element to the stack.
 * Otherwise, we increment the value of top by 1
-  
+
   ****(top = top + 1)****
   and the new value is inserted at
-  
+
   ****top position****
   .
 * The elements can be pushed into the stack till we reach the
-  
+
   ****capacity****
   of the stack.
 
@@ -33210,15 +33215,15 @@ Removes an item from the stack. The items are popped in the reversed order in wh
 ****Algorithm for Pop Operation:****
 
 * Before popping the element from the stack, we check if the stack is
-  
+
   ****empty****
   .
 * If the stack is empty (top == -1), then
-  
+
   ****Stack Underflows****
   and we cannot remove any element from the stack.
 * Otherwise, we store the value at top, decrement the value of top by 1
-  
+
   ****(top = top – 1)****
   and return the stored top value.
 
@@ -33234,7 +33239,7 @@ Returns the top element of the stack.
 * Before returning the top element from the stack, we check if the stack is empty.
 * If the stack is empty (top == -1), we simply print “Stack is empty”.
 * Otherwise, we return the element stored at
-  
+
   ****index = top****
   .
 
@@ -33250,21 +33255,21 @@ Returns true if the stack is empty, else false.
 
 
 * Check for the value of
-  
+
   ****top****
   in stack.
 * If
-  
+
   ****(top == -1)****
   , then the stack is
-  
+
   ****empty****
   so return
-  
+
   ****true****
   .
 * Otherwise, the stack is not empty so return
-  
+
   ****false****
   .
 
@@ -33278,21 +33283,21 @@ Returns true if the stack is full, else false.
 ****Algorithm for isFull Operation:****
 
 * Check for the value of
-  
+
   ****top****
   in stack.
 * If
-  
+
   ****(top == capacity-1),****
   then the stack is
-  
+
   ****full****
   so return
-  
+
   ****true****
   .
 * Otherwise, the stack is not full so return
-  
+
   ****false****
   .
 
@@ -33323,73 +33328,73 @@ Table of Content
   Get the last item from the queue.
 * ****enqueue(value):****
   To
-  
+
   ****insert****
   an element into the circular queue. In a circular queue, the new element is always inserted at the rear position.
 * ****dequeue()****
   : To
-  
+
   ****delete****
   an element from the circular queue. In a circular queue, the element is always deleted from the front position.
 
 ### Implement Circular Queue using Array
 
 1. Initialize an
-   
+
    ****array****
    of
-   
+
    ****size n****
    , where
-   
+
    ****n is the maximum number of element****
    s that the queue can hold.
 2. Initialize
-   
+
    ****three variables (size, capacity, and front.)****
 3. ****Enqueue:****
    To enqueue an
-   
+
    ****element x****
    into the queue, do the following:
    1. Check if
-      
+
       ****size == capacity****
       (queue is full), display
-      
+
       ****“Queue is full”.****
    2. If not full: calculate
-      
+
       ****rear = (front + size) % capacity****
       and
-      
+
       ****Insert****
       value at the rear index.
-      
+
       ****Increment****
       size by 1.
 4. ****Dequeue:****
    To dequeue an element from the queue, do the following:
    1. Check if
-      
+
       ****size == 0 (****
       queue is empty), display
-      
+
       ****“Queue is empty”.****
    2. If not empty:
-      
+
       ****retrieve****
       the element at the
-      
+
       ****front index****
       and
-      
+
       ****move front = (front + 1) % capacity****
       . Also,
-      
+
       ****decrement****
       size by 1 and
-      
+
       ****return the removed element.****
 
 ****Illustration of Circular Queue****
@@ -33400,7 +33405,7 @@ Table of Content
 
 
 
-  
+
 
 
 ****Below is the implementation of above approach:****
@@ -33415,12 +33420,12 @@ using namespace std;
 
 class MyQueue {
 private:
-    int *arr;        
-    int front, size; 
-    int capacity;    
+    int *arr;
+    int front, size;
+    int capacity;
 
 public:
-  
+
     // Constructor to initialize the queue
     MyQueue(int c) {
         arr = new int[c];
@@ -33431,29 +33436,29 @@ public:
 
     // Get the front element
     int getFront() {
-      
+
         // Queue is empty
-        if (size == 0) 
-            return -1; 
+        if (size == 0)
+            return -1;
         return arr[front];
     }
 
     // Get the rear element
     int getRear() {
-      
+
         // Queue is empty
-        if (size == 0) 
-            return -1; 
+        if (size == 0)
+            return -1;
         int rear = (front + size - 1) % capacity;
         return arr[rear];
     }
 
     // Insert an element at the rear
     void enqueue(int x) {
-      
+
         // Queue is full
-        if (size == capacity) 
-            return; 
+        if (size == capacity)
+            return;
         int rear = (front + size) % capacity;
         arr[rear] = x;
         size++;
@@ -33461,9 +33466,9 @@ public:
 
     // Remove an element from the front
     int dequeue() {
-      
+
         // Queue is empty
-        if (size == 0) 
+        if (size == 0)
             return -1;
         int res = arr[front];
         front = (front + 1) % capacity;
@@ -33499,10 +33504,10 @@ Java
 // Java program for insertion and
 // deletion in Circular Queue
 class MyQueue {
-    private int[] arr;   
-    private int front;   
-    private int size;    
-    private int capacity; 
+    private int[] arr;
+    private int front;
+    private int size;
+    private int capacity;
 
     // Constructor to initialize the queue
     public MyQueue(int c) {
@@ -33514,29 +33519,29 @@ class MyQueue {
 
     // Get the front element
     public int getFront() {
-      
+
         // Queue is empty
-        if (size == 0) 
+        if (size == 0)
             return -1;
         return arr[front];
     }
 
     // Get the rear element
     public int getRear() {
-      
+
         // Queue is empty
-        if (size == 0) 
-            return -1; 
+        if (size == 0)
+            return -1;
         int rear = (front + size - 1) % capacity;
         return arr[rear];
     }
 
     // Insert an element at the rear
     public void enqueue(int x) {
-      
-        // Queue is full   
-        if (size == capacity) 
-            return; 
+
+        // Queue is full
+        if (size == capacity)
+            return;
         int rear = (front + size) % capacity;
         arr[rear] = x;
         size++;
@@ -33544,10 +33549,10 @@ class MyQueue {
 
     // Remove an element from the front
     public int dequeue() {
-      
+
         // Queue is empty
-        if (size == 0) 
-            return -1; 
+        if (size == 0)
+            return -1;
         int res = arr[front];
         front = (front + 1) % capacity;
         size--;
@@ -33556,7 +33561,7 @@ class MyQueue {
 }
 
 class GfG {
-  
+
     public static void main(String[] args) {
         MyQueue q = new MyQueue(4);
         q.enqueue(10);
@@ -33586,49 +33591,49 @@ Python
 class MyQueue:
     def __init__(self, c):
         self.l = [None] * c
-        self.cap = c  
-        self.size = 0  
-        self.front = 0  
+        self.cap = c
+        self.size = 0
+        self.front = 0
 
     def getFront(self):
-      
+
         # Check if queue is empty
         if self.size == 0:
             return None
-        return self.l[self.front]  
+        return self.l[self.front]
 
     def getRear(self):
-      
+
         # Check if queue is empty
         if self.size == 0:
             return None
-          
+
         # Calculate rear index
-        rear = (self.front + self.size - 1) % self.cap  
-        return self.l[rear]  
+        rear = (self.front + self.size - 1) % self.cap
+        return self.l[rear]
 
     def enqueue(self, x):
-      
+
         # Check if queue is full
         if self.size == self.cap:
             return
-          
+
         # Calculate rear index
-        rear = (self.front + self.size) % self.cap  
-        self.l[rear] = x 
-        self.size += 1 
+        rear = (self.front + self.size) % self.cap
+        self.l[rear] = x
+        self.size += 1
 
     def dequeue(self):
-      
+
         # Check if queue is empty
         if self.size == 0:
             return None
-        res = self.l[self.front]  
-        
+        res = self.l[self.front]
+
         # Move front index circularly
-        self.front = (self.front + 1) % self.cap 
-        self.size -= 1  
-        return res  
+        self.front = (self.front + 1) % self.cap
+        self.size -= 1
+        return res
 
 q = MyQueue(4)
 q.enqueue(10)
@@ -33656,10 +33661,10 @@ C#
 using System;
 
 class MyQueue {
-    private int[] arr;  
-    private int front;  
-    private int size;   
-    private int capacity; 
+    private int[] arr;
+    private int front;
+    private int size;
+    private int capacity;
 
     // Constructor to initialize the queue
     public MyQueue(int c) {
@@ -33671,18 +33676,18 @@ class MyQueue {
 
     // Get the front element
     public int getFront() {
-      
+
         // Queue is empty
-        if (size == 0) 
+        if (size == 0)
           return -1;
         return arr[front];
     }
 
     // Get the rear element
     public int getRear() {
-      
+
         // Queue is empty
-        if (size == 0) 
+        if (size == 0)
           return -1;
         int rear = (front + size - 1) % capacity;
         return arr[rear];
@@ -33690,9 +33695,9 @@ class MyQueue {
 
     // Insert an element at the rear
     public void enqueue(int x) {
-      
+
         // Queue is full
-        if (size == capacity) return; 
+        if (size == capacity) return;
         int rear = (front + size) % capacity;
         arr[rear] = x;
         size++;
@@ -33700,9 +33705,9 @@ class MyQueue {
 
     // Remove an element from the front
     public int dequeue() {
-      
+
         // Queue is empty
-        if (size == 0) return -1; 
+        if (size == 0) return -1;
         int res = arr[front];
         front = (front + 1) % capacity;
         size--;
@@ -33710,7 +33715,7 @@ class MyQueue {
     }
 }
 class GfG {
-  
+
         static void Main(string[] args) {
         MyQueue q = new MyQueue(4);
         q.enqueue(10);
@@ -33740,14 +33745,14 @@ JavaScript
 class MyQueue {
     constructor(c) {
         this.arr = new Array(c).fill(null);
-        this.capacity = c; 
-        this.size = 0; 
+        this.capacity = c;
+        this.size = 0;
         this.front = 0;
     }
 
     // Get the front element
     getFront() {
-    
+
         // Queue is empty
         if (this.size === 0) return null;
         return this.arr[this.front];
@@ -33755,18 +33760,18 @@ class MyQueue {
 
     // Get the rear element
     getRear() {
-    
+
         // Queue is empty
-        if (this.size === 0) return null; 
+        if (this.size === 0) return null;
         let rear = (this.front + this.size - 1) % this.capacity;
         return this.arr[rear];
     }
 
     // Insert an element at the rear
     enqueue(x) {
-    
+
         // Queue is full
-        if (this.size === this.capacity) return; 
+        if (this.size === this.capacity) return;
         let rear = (this.front + this.size) % this.capacity;
         this.arr[rear] = x;
         this.size++;
@@ -33774,9 +33779,9 @@ class MyQueue {
 
     // Remove an element from the front
     dequeue() {
-    
+
         // Queue is empty
-        if (this.size === 0) return null; 
+        if (this.size === 0) return null;
         let res = this.arr[this.front];
         this.front = (this.front + 1) % this.capacity;
         this.size--;
@@ -33803,7 +33808,7 @@ console.log(q.getFront(), q.getRear());
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -33927,17 +33932,17 @@ A simple implementation is to use an array of the following structure.
 
 
 > struct item {
-> 
->   
-> 
+>
+>
+>
 > int item;
-> 
->   
-> 
+>
+>
+>
 > int priority;
-> 
->   
-> 
+>
+>
+>
 > }
 
 * ****enqueue():****
@@ -34192,37 +34197,37 @@ class item :
     value = 0
     priority = 0
 class GFG :
-  
+
     # Store the element of a priority queue
     pr = [None] * (100000)
-    
+
     # Pointer to the last index
     size = -1
-    
+
     # Function to insert a new element
     # into priority queue
     @staticmethod
     def enqueue( value,  priority) :
-      
+
         # Increase the size
         GFG.size += 1
-        
+
         # Insert the element
         GFG.pr[GFG.size] = item()
         GFG.pr[GFG.size].value = value
         GFG.pr[GFG.size].priority = priority
-        
+
     # Function to check the top element
     @staticmethod
     def  peek() :
         highestPriority = -sys.maxsize
         ind = -1
-        
+
         # Check for the element with
         # highest priority
         i = 0
         while (i <= GFG.size) :
-          
+
             # If priority is same choose
             # the element with the
             # highest value
@@ -34233,19 +34238,19 @@ class GFG :
                 highestPriority = GFG.pr[i].priority
                 ind = i
             i += 1
-            
+
         # Return position of the element
         return ind
-      
+
     # Function to remove the element with
     # the highest priority
     @staticmethod
     def dequeue() :
-      
+
         # Find the position of the element
         # with highest priority
         ind = GFG.peek()
-        
+
         # Shift the element one index before
         # from the position of the element
         # with highest priority is found
@@ -34253,42 +34258,42 @@ class GFG :
         while (i < GFG.size) :
             GFG.pr[i] = GFG.pr[i + 1]
             i += 1
-            
+
         # Decrease the size of the
         # priority queue by one
         GFG.size -= 1
     @staticmethod
     def main( args) :
-      
+
         # Function Call to insert elements
         # as per the priority
         GFG.enqueue(10, 2)
         GFG.enqueue(14, 4)
         GFG.enqueue(16, 4)
         GFG.enqueue(12, 3)
-        
+
         # Stores the top element
         # at the moment
         ind = GFG.peek()
         print(GFG.pr[ind].value)
-        
+
         # Dequeue the top element
         GFG.dequeue()
-        
+
         # Check the top element
         ind = GFG.peek()
         print(GFG.pr[ind].value)
-        
+
         # Dequeue the top element
         GFG.dequeue()
-        
+
         # Check the top element
         ind = GFG.peek()
         print(GFG.pr[ind].value)
-    
+
 if __name__=="__main__":
     GFG.main([])
-    
+
     # This code is contributed by aadityaburujwale.
 
 ````
@@ -34311,7 +34316,7 @@ public class item {
 
 public class GFG
 {
-    
+
     // Store the element of a priority queue
     static item[] pr = new item[100000];
 
@@ -34323,23 +34328,23 @@ public class GFG
     {
         // Increase the size
         size++;
-    
+
         // Insert the element
         pr[size] = new item();
         pr[size].value = value;
         pr[size].priority = priority;
     }
-    
+
     // Function to check the top element
     static int peek()
     {
         int highestPriority =  int.MinValue;
         int ind = -1;
-    
+
         // Check for the element with
         // highest priority
         for (int i = 0; i <= size; i++) {
-    
+
             // If priority is same choose
             // the element with the
             // highest value
@@ -34353,11 +34358,11 @@ public class GFG
                 ind = i;
             }
         }
-    
+
         // Return position of the element
         return ind;
     }
-    
+
     // Function to remove the element with
     // the highest priority
     static void dequeue()
@@ -34365,14 +34370,14 @@ public class GFG
         // Find the position of the element
         // with highest priority
         int ind = peek();
-    
+
         // Shift the element one index before
         // from the position of the element
         // with highest priority is found
         for (int i = ind; i < size; i++) {
             pr[i] = pr[i + 1];
         }
-    
+
         // Decrease the size of the
         // priority queue by one
         size--;
@@ -34386,23 +34391,23 @@ public class GFG
         enqueue(14, 4);
         enqueue(16, 4);
         enqueue(12, 3);
-    
+
         // Stores the top element
         // at the moment
         int ind = peek();
-    
+
         Console.WriteLine(pr[ind].value);
-    
+
         // Dequeue the top element
         dequeue();
-    
+
         // Check the top element
         ind = peek();
         Console.WriteLine(pr[ind].value);
-    
+
         // Dequeue the top element
         dequeue();
-    
+
         // Check the top element
         ind = peek();
         Console.WriteLine(pr[ind].value);
@@ -34530,7 +34535,7 @@ console.log(pr[ind].value);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -34540,9 +34545,9 @@ console.log(pr[ind].value);
 ```
 > ****Note:****
 > Read
-> 
+>
 > [****this article****](https://www.geeksforgeeks.org/priority-queue-using-array-in-c/)
-> 
+>
 > for more details.
 
 ### ****2) Implement Priority Queue Using Linked List:****
@@ -34678,15 +34683,15 @@ class Solution
 // Node
 static class Node {
     int data;
-    
+
     // Lower values indicate higher priority
     int priority;
     Node next;
-    
+
 }
 
 static Node node = new Node();
-    
+
 // Function to Create A New Node
 static Node newNode(int d, int p)
 {
@@ -34694,16 +34699,16 @@ static Node newNode(int d, int p)
     temp.data = d;
     temp.priority = p;
     temp.next = null;
-    
+
     return temp;
 }
-    
+
 // Return the value at head
 static int peek(Node head)
 {
     return (head).data;
 }
-    
+
 // Removes the element with the
 // highest priority from the list
 static Node pop(Node head)
@@ -34712,33 +34717,33 @@ static Node pop(Node head)
     (head) = (head).next;
     return head;
 }
-    
+
 // Function to push according to priority
 static Node push(Node head, int d, int p)
 {
     Node start = (head);
-    
+
     // Create new Node
     Node temp = newNode(d, p);
-    
+
     // Special Case: The head of list has lesser
     // priority than new node. So insert new
     // node before head node and change head node.
     if ((head).priority < p) {
-    
+
         // Insert New Node before head
         temp.next = head;
         (head) = temp;
     }
     else {
-    
+
         // Traverse the list and find a
         // position to insert new node
         while (start.next != null &&
             start.next.priority > p) {
             start = start.next;
         }
-    
+
         // Either at the ends of the list
         // or at required position
         temp.next = start.next;
@@ -34746,13 +34751,13 @@ static Node push(Node head, int d, int p)
     }
     return head;
 }
-    
+
 // Function to check is list is empty
 static int isEmpty(Node head)
 {
     return ((head) == null)?1:0;
 }
-    
+
 // Driver code
 public static void main(String args[])
 {
@@ -34762,12 +34767,12 @@ public static void main(String args[])
     pq =push(pq, 5, 2);
     pq =push(pq, 6, 3);
     pq =push(pq, 7, 0);
-    
+
     while (isEmpty(pq)==0) {
         System.out.printf("%d ", peek(pq));
         pq=pop(pq);
     }
-    
+
 }
 }
 
@@ -34932,113 +34937,113 @@ if _name_ == "_main_":
 C#
 
 ````
-// C# code to implement Priority Queue 
-// using Linked List 
-using System; 
+// C# code to implement Priority Queue
+// using Linked List
+using System;
 
-class GFG 
-{ 
-  // Node 
-  public class Node 
-  { 
-    public int data; 
+class GFG
+{
+  // Node
+  public class Node
+  {
+    public int data;
 
-    // Lower values indicate 
-    // higher priority 
-    public int priority; 
+    // Lower values indicate
+    // higher priority
+    public int priority;
 
-    public Node next; 
-  } 
+    public Node next;
+  }
 
-  public static Node node = new Node(); 
+  public static Node node = new Node();
 
-  // Function to Create A New Node 
-  public static Node newNode(int d, int p) 
-  { 
-    Node temp = new Node(); 
-    temp.data = d; 
-    temp.priority = p; 
-    temp.next = null; 
+  // Function to Create A New Node
+  public static Node newNode(int d, int p)
+  {
+    Node temp = new Node();
+    temp.data = d;
+    temp.priority = p;
+    temp.next = null;
 
-    return temp; 
-  } 
+    return temp;
+  }
 
-  // Return the value at head 
-  public static int peek(Node head) 
-  { 
-    return (head).data; 
-  } 
+  // Return the value at head
+  public static int peek(Node head)
+  {
+    return (head).data;
+  }
 
-  // Removes the element with the 
-  // highest priority from the list 
-  public static Node pop(Node head) 
-  { 
-    Node temp = head; 
-    (head) = (head).next; 
-    return head; 
-  } 
+  // Removes the element with the
+  // highest priority from the list
+  public static Node pop(Node head)
+  {
+    Node temp = head;
+    (head) = (head).next;
+    return head;
+  }
 
-  // Function to push according to priority 
-  public static Node push(Node head, 
-                          int d, int p) 
-  { 
-    Node start = (head); 
+  // Function to push according to priority
+  public static Node push(Node head,
+                          int d, int p)
+  {
+    Node start = (head);
 
-    // Create new Node 
-    Node temp = newNode(d, p); 
+    // Create new Node
+    Node temp = newNode(d, p);
 
-    // Special Case: The head of list 
-    // has lesser priority than new node. 
-    // So insert new node before head node 
-    // and change head node. 
-    if ((head).priority < p) 
-    { 
+    // Special Case: The head of list
+    // has lesser priority than new node.
+    // So insert new node before head node
+    // and change head node.
+    if ((head).priority < p)
+    {
 
-      // Insert New Node before head 
-      temp.next = head; 
-      (head) = temp; 
-    } 
+      // Insert New Node before head
+      temp.next = head;
+      (head) = temp;
+    }
     else
-    { 
+    {
 
-      // Traverse the list and find a 
-      // position to insert new node 
-      while (start.next != null && 
-             start.next.priority > p) 
-      { 
-        start = start.next; 
-      } 
+      // Traverse the list and find a
+      // position to insert new node
+      while (start.next != null &&
+             start.next.priority > p)
+      {
+        start = start.next;
+      }
 
-      // Either at the ends of the list 
-      // or at required position 
-      temp.next = start.next; 
-      start.next = temp; 
-    } 
-    return head; 
-  } 
+      // Either at the ends of the list
+      // or at required position
+      temp.next = start.next;
+      start.next = temp;
+    }
+    return head;
+  }
 
-  // Function to check is list is empty 
-  public static int isEmpty(Node head) 
-  { 
-    return ((head) == null) ? 1 : 0; 
-  } 
+  // Function to check is list is empty
+  public static int isEmpty(Node head)
+  {
+    return ((head) == null) ? 1 : 0;
+  }
 
-  // Driver code 
-  public static void Main(string[] args) 
-  { 
-    // Create a Priority Queue 
-    // 7.4.5.6 
-    Node pq = newNode(4, 1); 
-    pq = push(pq, 5, 2); 
-    pq = push(pq, 6, 3); 
-    pq = push(pq, 7, 0); 
+  // Driver code
+  public static void Main(string[] args)
+  {
+    // Create a Priority Queue
+    // 7.4.5.6
+    Node pq = newNode(4, 1);
+    pq = push(pq, 5, 2);
+    pq = push(pq, 6, 3);
+    pq = push(pq, 7, 0);
 
-    while (isEmpty(pq) == 0) 
-    { 
-      Console.Write("{0:D} ", peek(pq)); 
-      pq = pop(pq); 
-    } 
-  } 
+    while (isEmpty(pq) == 0)
+    {
+      Console.Write("{0:D} ", peek(pq));
+      pq = pop(pq);
+    }
+  }
 }
 
 // This code is contributed by ishankhandelwals.
@@ -35143,7 +35148,7 @@ while (isEmpty(pq) == 0) {
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -35159,11 +35164,11 @@ for more details.
 
 > ****Note:****
 > We can also use Linked List, time complexity of all operations with linked list remains same as array. The advantage with linked list is
-> 
-> 
+>
+>
 > deleteHighestPriority()
-> 
-> 
+>
+>
 > can be more efficient as we don’t have to move items.
 
 ### ****3) Implement Priority Queue Using Heaps:****
@@ -35182,12 +35187,12 @@ Binary Heap is generally preferred for priority queue implementation because hea
   Returns an element with maximum priority.
 * ****changePriority(i, p):****
   Changes the priority of an element pointed by
-  
+
   ****i to p****
   .
 
 > Refer to
-> 
+>
 > [this article](https://www.geeksforgeeks.org/priority-queue-using-binary-heap/)
 > for code implementation.
 
@@ -35202,14 +35207,14 @@ A Self-Balancing Binary Search Tree like AVL Tree, Red-Black Tree, etc. can also
 
 * CPU Scheduling
 * Graph algorithms like
-  
+
   [Dijkstra’s shortest path algorithm](https://www.geeksforgeeks.org/greedy-algorithms-set-7-dijkstras-algorithm-for-adjacency-list-representation/)
   ,
-  
+
   [Prim’s Minimum Spanning Tree](https://www.geeksforgeeks.org/greedy-algorithms-set-5-prims-mst-for-adjacency-list-representation/)
   , etc.
 * All
-  
+
   [queue applications](https://www.geeksforgeeks.org/applications-of-queue-data-structure/)
   where priority is involved.
 * Data compression in Huffman code
@@ -35456,7 +35461,7 @@ main();
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -35466,7 +35471,7 @@ Factorial of 4 is:24
 ****Time Complexity:****
 O(n)
 
-  
+
 
 ****Auxiliary Space:****
 O(n)
@@ -35545,21 +35550,21 @@ The division method involves dividing the key by a prime number and using the re
 
 > **h**
 > (
-> 
+>
 > **k**
 > )=
-> 
+>
 > **k**
 > mod
-> 
+>
 > **m**
-> 
-> 
+>
+>
 > Where
-> 
+>
 > **k**
 > is the key and 𝑚
-> 
+>
 > **m**
 > is a prime number.
 
@@ -35569,7 +35574,7 @@ The division method involves dividing the key by a prime number and using the re
 
 * Simple to implement.
 * Works well when 𝑚
-  
+
   **m**
   is a prime number.
 
@@ -35578,7 +35583,7 @@ The division method involves dividing the key by a prime number and using the re
 
 
 * Poor distribution if 𝑚
-  
+
   **m**
   is not chosen wisely.
 
@@ -35597,17 +35602,17 @@ to get the hash value.
 
 > **h**
 > (
-> 
+>
 > **k**
 > )=⌊
-> 
+>
 > **m**
 > (
-> 
+>
 > **kA**
 > mod1)⌋
-> 
-> 
+>
+>
 > Where ⌊ ⌋ denotes the floor function.
 
 ****Advantages****
@@ -35615,7 +35620,7 @@ to get the hash value.
 
 
 * Less sensitive to the choice of 𝑚
-  
+
   **m**
   .
 
@@ -35668,7 +35673,7 @@ The folding method involves dividing the key into equal parts, summing the parts
 1. Divide the key into parts.
 2. Sum the parts.
 3. Take the modulo 𝑚
-   
+
    **m**
    of the sum.
 
@@ -35720,39 +35725,39 @@ Universal hashing uses a family of hash functions to minimize the chance of coll
 
 > **h**
 > (
-> 
+>
 > **k**
 > )=((
-> 
+>
 > **a**
 > ⋅
-> 
+>
 > **k**
 > +
-> 
+>
 > **b**
 > )mod
-> 
+>
 > **p**
 > )mod
-> 
+>
 > **m**
-> 
-> 
+>
+>
 > Where
-> 
+>
 > **a**
 > and
-> 
+>
 > **b**
 > are randomly chosen constants,
-> 
+>
 > **p**
 > is a prime number greater than
-> 
+>
 > **m**
 > , and
-> 
+>
 > **k**
 > is the key.
 
@@ -35830,13 +35835,13 @@ A Function that translates keys to array indices is known as a hash function. Th
 
 
 * ****Integer universe assumption:****
-  
+
   The keys are assumed to be integers within a certain range according to the integer universe assumption. This enables the use of basic hashing operations like division or multiplication hashing.
 * ****Hashing by division:****
-  
+
   This straightforward hashing technique uses the key’s remaining value after dividing it by the array’s size as the index. When an array size is a prime number and the keys are evenly spaced out, it performs well.
 * ****Hashing by multiplication:****
-  
+
   This straightforward hashing operation multiplies the key by a constant between 0 and 1 before taking the fractional portion of the outcome. After that, the index is determined by multiplying the fractional component by the array’s size. Also, it functions effectively when the keys are scattered equally.
 
 ### [Choosing a hash function](https://www.geeksforgeeks.org/what-are-hash-functions-and-how-to-choose-a-good-hash-function/) :
@@ -35861,7 +35866,7 @@ Collisions happen when two or more keys point to the same array index. Chaining,
 
 ![collision-in-hashing](https://media.geeksforgeeks.org/wp-content/uploads/20240514124239/collision-in-hashing.webp)
 
-  
+
 
 
 * [****Open addressing****](https://www.geeksforgeeks.org/open-addressing-collision-handling-technique-in-hashing/)
@@ -35887,12 +35892,12 @@ Python, Java, C++, and Ruby are just a few of the programming languages that sup
 
 
 ****Example: hashIndex = key % noOfBuckets****
-  
+
 
 ****Insert****
 : Move to the bucket corresponding to the above-calculated hash index and insert the new node at the end of the list.
 
-  
+
 
 ****Delete****
 : To delete a node from hash table, calculate the hash index for the key, move to the bucket corresponding to the calculated hash index, and search the list in the current bucket to find and remove the node with the given key (if found).
@@ -35971,7 +35976,7 @@ int main() {
     vector<int> a = {15, 11, 27, 8, 12};
 
     // Insert the keys into the hash table
-    Hash h(7); // 7 is the number of buckets 
+    Hash h(7); // 7 is the number of buckets
     for (int key : a)
         h.insertItem(key);
 
@@ -36258,7 +36263,7 @@ class Hash {
     }
 }
 
-// Driver program 
+// Driver program
 const a = [15, 11, 27, 8, 12];
 const n = a.length;
 
@@ -36277,7 +36282,7 @@ h.displayHash();
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -36308,41 +36313,41 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 
 > ****Input:****
->   
-> 
+>
+>
 > {{1, 2, 3}
-> 
->   
-> 
+>
+>
+>
 > {4, 5, 6}
-> 
->   
-> 
+>
+>
+>
 > {7, 8, 9}}
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 1 2 4 7 5 3 6 8 9
-> 
-> 
+>
+>
 > ****Input :****
 > [[1, 2, 3, 4],
-> 
->   
-> 
+>
+>
+>
 > [5, 6, 7, 8],
-> 
->   
-> 
+>
+>
+>
 > [9, 10, 11, 12],
-> 
->   
-> 
+>
+>
+>
 > [13, 14, 15, 16]]
-> 
->   
-> 
+>
+>
+>
 > ****Output::****
 > 1 2 5 9 6 3 4 7 10 13 14 11 8 12 15 16
 
@@ -36380,7 +36385,7 @@ void zigZagMatrix(vector<vector<int>>& mat) {
 
             if (i + 1 == len) break;
 
-            // If row_inc is true, increment row 
+            // If row_inc is true, increment row
             // and decrement col;
             // otherwise, decrement row and increment col.
             if (row_inc) ++row, --col;
@@ -36449,7 +36454,7 @@ Java
 
 ````
 public class ZigZagMatrix {
-    
+
     // Utility function to print matrix in zig-zag form
     public static void zigZagMatrix(int[][] mat) {
         int n = mat.length;
@@ -36573,7 +36578,7 @@ def zig_zag_matrix(mat):
             if i + 1 == length:
                 break
 
-            # If row_inc is true, increment row 
+            # If row_inc is true, increment row
             # and decrement col;
             # otherwise, decrement row and increment col.
             if row_inc:
@@ -36681,7 +36686,7 @@ class Program
                 if (i + 1 == length)
                     break;
 
-                // If rowInc is true, increment row 
+                // If rowInc is true, increment row
                 // and decrement col;
                 // otherwise, decrement row and increment col.
                 if (rowInc)
@@ -36812,7 +36817,7 @@ function zigZagMatrix(mat) {
 
             if (i + 1 === length) break;
 
-            // If rowInc is true, increment row 
+            // If rowInc is true, increment row
             // and decrement col;
             // otherwise, decrement row and increment col.
             if (rowInc) {
@@ -36891,17 +36896,17 @@ zigZagMatrix(mat);
 ````
 
 
-  
+
 
 **Output**
 ```
-1 2 4 7 5 3 6 8 9 
+1 2 4 7 5 3 6 8 9
 ```
 
 ****Time complexity:****
 O(n\\*m)
 
-  
+
 
 ****Auxiliary space:****
 O(1), since no extra space has been taken.
@@ -36909,37 +36914,37 @@ O(1), since no extra space has been taken.
 ', 'Given a matrix of 2D array of n rows and m columns. Print this matrix in ZIG-ZAG fashion as shown in figure.', 'Print matrix in zig-zag fashion', 2, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null, null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, course_id, exercise_id, problem_id) VALUES ('630b6281-246f-490e-bb03-77b0b5ea16f1', e'Two common ways of traversing a matrix are row-major-order and column-major-order
 
-  
+
 
 ****Row Major Order:****
 When matrix is accessed row by row.
 
-  
+
 
 ****Column Major Order:****
 When matrix is accessed column by column.
 
-  
+
 
 ****Examples:****
 
 > ****Input :****
 > mat[][] = {{1, 2, 3},
-> 
->   
-> 
+>
+>
+>
 > {4, 5, 6},
-> 
->   
-> 
+>
+>
+>
 > {7, 8, 9}}
-> 
-> 
+>
+>
 > ****Output :****
 > Row-wise: 1 2 3 4 5 6 7 8 9
-> 
->   
-> 
+>
+>
+>
 > Col-wise : 1 4 7 2 5 8 3 6 9
 
 
@@ -37147,7 +37152,7 @@ def col_major(arr):
             arr[i][j] += 1
 
 if __name__ == \'__main__\':
-  
+
     n = 1000  # Size of the matrix (n x n)
     arr = [[0] * n for _ in range(n)]
 
@@ -37265,7 +37270,7 @@ console.log(`Column major access time: ${end - start} ms`);
 ****Time Complexity:****
 O(MAX\\*MAX)
 
-  
+
 
 ****Auxiliary Space:****
 O(MAX\\*MAX)', '', 'Row-wise vs column-wise traversal of matrix', 3, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null, null);
@@ -37282,47 +37287,47 @@ and an element
 
 > ****Input****
 > : mat[][] = { {10, 51, 9},
-> 
->   
-> 
+>
+>
+>
 > {14, 20, 21},
-> 
->   
-> 
+>
+>
+>
 > {30, 24, 43} }
-> 
->   
-> 
+>
+>
+>
 > ****target****
 > = 14
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : Found
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > ****Input****
 > : mat[][] = {{31, 5, 9, 11},
-> 
->   
-> 
+>
+>
+>
 > {14, 7, 21, 26},
-> 
->   
-> 
+>
+>
+>
 > {30, 4, 43, 50} }
-> 
->   
-> 
+>
+>
+>
 > ****target****
 > = 42
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : Not Found
 
@@ -37392,13 +37397,13 @@ int main()
                           { 14, 20, 21, 26 },
                           { 30, 34, 43, 50 } };
     // Number of rows
-  	int n = 3; 
-  	
+  	int n = 3;
+
     // Number of columns
-    int m = 4; 
-  	
+    int m = 4;
+
     // Element to search
-    int x = 14; 
+    int x = 14;
 
     if (matrixSearch(mat, n, m, x)) {
         printf("Found\\n");
@@ -37548,7 +37553,7 @@ else
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -37556,12 +37561,12 @@ Found
 
 ```
 
-  
+
 
 ****Time Complexity :****
 O(n \\* m), where n and m are the rows and column of matrix.
 
-  
+
 
 ****Auxiliary Space :****
 O(1)', '', 'Search in a Matrix or 2D Array', 4, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null, null);
@@ -37596,11 +37601,11 @@ Follow the below steps to Implement the idea:
 
 * Initialize a resultant matrix res[N][M].
 * Run a for loop for counter
-  
+
   ****i****
   as each row and in each iteration:
   + Run a for loop for counter
-    
+
     ****j****
     as each column and in each iteration:
     - Add values of the two matrices for index i, j and store in res[i][j].
@@ -37617,7 +37622,7 @@ C++
 #include <vector>
 using namespace std;
 
-void add(vector<vector<int>>& A, vector<vector<int>>& B, 
+void add(vector<vector<int>>& A, vector<vector<int>>& B,
                                  vector<vector<int>>& C) {
     int n = A.size();
     int m = A[0].size();
@@ -37642,7 +37647,7 @@ int main() {
     int n = A.size();
     int m = A[0].size();
     vector<vector<int>> C(n, vector<int>(m));
-  
+
     add(A, B, C);
 
     cout << "Result matrix is:" << endl;
@@ -37803,21 +37808,21 @@ foreach ($C as $row) {
 ````
 
 
-  
+
 
 **Output**
 ```
-Result matrix is 
-2 2 2 2 
-4 4 4 4 
-6 6 6 6 
-8 8 8 8 
+Result matrix is
+2 2 2 2
+4 4 4 4
+6 6 6 6
+8 8 8 8
 ```
 
 ****Time complexity:****
 O(n x m).
 
-  
+
 
 ****Auxiliary space:****
 O(n x m).  since n
@@ -37839,35 +37844,35 @@ Given two
 
 
 > ****(Square Matrix Multiplication)****
-> 
+>
 > ****Input:****
 > m1[m][n] = { {1, 1}, {2, 2} }
-> 
->   
-> 
+>
+>
+>
 > m2[n][p] = { {1, 1}, {2, 2} }
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > res[m][p] = { {3, 3}, {6, 6} }
-> 
-> 
+>
+>
 > ****(Rectangular Matrix Multiplication)****
-> 
+>
 > ****Input:****
 > m1[3][2] = { {1, 1}, {2, 2}, {3, 3} }
-> 
->   
-> 
+>
+>
+>
 > m2[2][3] = { {1, 1, 1}, {2, 2, 2} }
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > res[3][3] = { {3, 3, 3}, {6, 6, 6}, {9, 9, 9} }
-> 
-> 
+>
+>
 > ![](https://media.geeksforgeeks.org/wp-content/uploads/20210902010632/MatrixMultiply1001jpeg001.jpeg)
 
 ****Multiplication of two Square or Rectangular Matrices****
@@ -37893,7 +37898,7 @@ C++
 #include <vector>
 using namespace std;
 
-void mulMat(vector<vector<int>>& m1, vector<vector<int>>& m2, 
+void mulMat(vector<vector<int>>& m1, vector<vector<int>>& m2,
             vector<vector<int>>& res) {
     int r1 = m1.size();
     int c1 = m1[0].size();
@@ -37906,8 +37911,8 @@ void mulMat(vector<vector<int>>& m1, vector<vector<int>>& m2,
     }
 
     // Resize result matrix to fit the result dimensions
-    res.resize(r1, vector<int>(c2, 0)); 
-  
+    res.resize(r1, vector<int>(c2, 0));
+
     for (int i = 0; i < r1; i++) {
         for (int j = 0; j < c2; j++) {
             for (int k = 0; k < c1; k++) {
@@ -37953,14 +37958,14 @@ void mulMat(int m1[][C1], int m2[][C2], int rslt[][C2]) {
     if (C1 != R2) {
        printf("Invalid Input");
        return;
-    }  
-  
+    }
+
     for (int i = 0; i < R1; i++) {
         for (int j = 0; j < C2; j++) {
             rslt[i][j] = 0;
 
             // Changed R2 to C1 for correct multiplication
-            for (int k = 0; k < C1; k++) { 
+            for (int k = 0; k < C1; k++) {
                 rslt[i][j] += m1[i][k] * m2[k][j];
             }
         }
@@ -37975,7 +37980,7 @@ int main() {
                        { 2, 2 } };
 
     int rslt[R1][C2]; // Result matrix
-  
+
     // Function call to multiply matrices
     mulMat(m1, m2, rslt);
 
@@ -38207,19 +38212,19 @@ if (result) {
 ````
 
 
-  
+
 
 **Output**
 ```
 Multiplication of given two matrices is:
-3    3    
-6    6    
+3    3
+6    6
 ```
 
 ****Time complexity:****
 O(R1 \\* C2 \\* R2) for given matrices mat1[R1][C1] and mat2[R2][C2]
 
-  
+
 
 ****Auxiliary space:****
 O(R1 \\* C2)
@@ -38257,8 +38262,8 @@ void mulMat(int (*m1)[C1], int (*m2)[C2], int (*rslt)[C2]) {
     if (C1 != R2) {
         printf("Invalid Input");
         return;
-    }  
-      
+    }
+
     for (int i = 0; i < R1; i++) {
         for (int j = 0; j < C2; j++) {
             rslt[i][j] = 0; // Initialize result matrix element
@@ -38297,12 +38302,12 @@ int main() {
 ````
 
 
-  
+
 
 **Output**
 ```
-3 3 
-6 6 
+3 3
+6 6
 ```
 
   ', '', 'Program to multiply two matrices', 6, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null, null);
@@ -38351,34 +38356,34 @@ of
 
 > ****Input:****
 > x = 14, mat[][] = [[ 1, 5, 9],
-> 
->   
-> 
+>
+>
+>
 > [14, 20, 21],
-> 
->   
-> 
+>
+>
+>
 > [30, 34, 43]]
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > true
-> 
-> 
+>
+>
 > ****Input:****
 > x = 42, mat[][] = [[ 1, 5, 9, 11],
-> 
->   
-> 
+>
+>
+>
 > [14, 20, 21, 26],
-> 
->   
-> 
+>
+>
+>
 > [30, 34, 43, 50]]
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > false
 
@@ -38425,60 +38430,60 @@ might be by using
 
 
 > To find the correct row, we perform
-> 
+>
 > ****binary search****
 > on the
-> 
+>
 > ****first****
 > elements of the middle row.
-> 
->   
-> 
+>
+>
+>
 > Start with l
-> 
+>
 > ****ow = 0****
 > and
-> 
+>
 > ****high = n – 1.****
-> 
+>
 > 1. If
->    
+>
 >    ****x is smaller****
 >    than the
->    
+>
 >    ****first element****
 >    of the middle row
->    
+>
 >    ****(a[mid][0]),****
 >    then x will be smaller than all elements in rows >= mid, so update
->    
+>
 >    ****high = mid – 1.****
 > 2. If
->    
+>
 >    ****x is greater****
 >    than the
->    
+>
 >    ****first element****
 >    of the middle row
->    
+>
 >    ****(a[mid][0])****
 >    , then x will be greater than all elements in rows < mid, so store the current mid row and update
->    
+>
 >    ****low = mid + 1****
 >    .
-> 
-> 
+>
+>
 > Once we have found the
-> 
+>
 > ****correct row,****
 > we can apply
-> 
+>
 > ****binary search****
 > within that row to search for the
-> 
+>
 > ****target****
 > element
-> 
+>
 > ****x****
 > .
 
@@ -38521,20 +38526,20 @@ bool searchMatrix(vector<vector<int>> &mat, int x) {
         // return true
         if (x == mat[mid][0])
             return true;
-      
+
         // If x is greater than first element of mid row,
         // store the mid row and search in lower half
         if (x > mat[mid][0]) {
             row = mid;
             lo = mid + 1;
         }
-      
+
         // If x is smaller than first element of mid row,
         // search in upper half
         else
             hi = mid - 1;
     }
-   
+
     // If x is smaller than all elements of mat[][]
     if (row == -1)
         return false;
@@ -38563,7 +38568,7 @@ Java
 // Binary Search two times
 
 class GfG {
-    
+
     // Function to binary search for x in arr[]
     static boolean search(int[] arr, int x) {
         int lo = 0, hi = arr.length - 1;
@@ -38705,7 +38710,7 @@ C#
 using System;
 
 class GfG {
-  
+
     // Function to binary search for x in arr[]
     static bool Search(int[] arr, int x) {
         int lo = 0, hi = arr.Length - 1;
@@ -38845,7 +38850,7 @@ else
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -38854,59 +38859,59 @@ true
 ### ****[Expected Approach] Using Binary Search Once –**** O(log(n\\*m)) and O(1) Space
 
 > The idea is to
-> 
+>
 > ****consider the given matrix as 1D array****
 > and
-> 
+>
 > ****apply****
 > only one
-> 
+>
 > ****binary search.****
 > For example, for a matrix of size
-> 
+>
 > ****n x m a****
 > nd we can consider it as a
-> 
+>
 > ****1D array****
 > of size n\\*m
-> 
+>
 > ****,****
 > then the
-> 
+>
 > ****first index****
 > would be
-> 
+>
 > ****0****
 > and
-> 
+>
 > ****last index****
 > would
-> 
+>
 > ****n\\*m-1.****
 > So
-> 
+>
 > ****,****
 > we need to do binary search from low = 0 to high = (n\\*m-1)
-> 
+>
 > ****.****
-> 
+>
 > ****How to find the element in 2D matrix corresponding to index = mid?****
-> 
-> 
+>
+>
 > Since each row of mat[][] will have
-> 
+>
 > ****m****
 > elements, so we can find the row of the element as
-> 
+>
 > ****(mid / m)****
 > and the column of the element as
-> 
+>
 > ****(mid % m)****
 > . Then, we can compare
-> 
+>
 > ****x****
 > with
-> 
+>
 > ****arr[mid/m][mid%m]****
 > for each mid and complete our binary search.
 
@@ -38918,7 +38923,7 @@ true
 
 
 
-  
+
 
 
 C++
@@ -38937,23 +38942,23 @@ bool searchMatrix(vector<vector<int>>& mat, int x) {
     int lo = 0, hi = n * m - 1;
     while (lo <= hi) {
         int mid = (lo + hi) / 2;
-      
+
         // Find row and column of element at mid index
         int row = mid / m;
         int col = mid % m;
-      
+
         // If x is found, return true
-        if (mat[row][col] == x) 
+        if (mat[row][col] == x)
             return true;
-      
+
         // If x is greater than mat[row][col], search in
         // right half
-        if (mat[row][col] < x) 
+        if (mat[row][col] < x)
             lo = mid + 1;
-        
-        // If x is less than mat[row][col], search in 
+
+        // If x is less than mat[row][col], search in
         // left half
-        else 
+        else
             hi = mid - 1;
     }
     return false;
@@ -39078,7 +39083,7 @@ C#
 using System;
 
 class GfG {
-    
+
     // Function to search for x in the matrix using binary search
     static bool searchMatrix(int[,] mat, int x) {
         int n = mat.GetLength(0), m = mat.GetLength(1);
@@ -39168,7 +39173,7 @@ else
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -39179,54 +39184,54 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 > ****Input:****
 > m1 = {{1, 2},
-> 
->   
-> 
+>
+>
+>
 > {3, 4}},
-> 
->   
-> 
+>
+>
+>
 > m2 = {{4, 3},
-> 
->   
-> 
+>
+>
+>
 > {2, 1}}
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > {{-3, -1},
-> 
->   
-> 
+>
+>
+>
 > {1, 3}}
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > ****Input:****
 > m1 = {{3, 3, 3},
-> 
->   
-> 
+>
+>
+>
 > {3, 3, 3}},
-> 
->   
-> 
+>
+>
+>
 > m1 = {{2, 2, 2},
-> 
->   
-> 
+>
+>
+>
 > {1, 1, 1}},
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > {{1, 1, 1},
-> 
->   
-> 
+>
+>
+>
 > {2, 2, 2}},
 
 
@@ -39242,27 +39247,27 @@ using namespace std;
 
 // This function subtracts m2 from m1 and
 // stores the result in res
-void subtract(vector<vector<int>>& m1, 
-              vector<vector<int>>& m2, 
-              vector<vector<int>>& res) 
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
 {
     int rows = m1.size();
     int cols = m1[0].size();
-    
+
     for (int i = 0; i < rows; i++)
         for (int j = 0; j < cols; j++)
             res[i][j] = m1[i][j] - m2[i][j];
 }
 
 // Driver code
-int main() 
+int main()
 {
     // Define two rectangular matrices
-    vector<vector<int>> m1 = { {1, 2, 3}, 
+    vector<vector<int>> m1 = { {1, 2, 3},
                                 {4, 5, 6} };
-    vector<vector<int>> m2 = { {1, 1, 1}, 
+    vector<vector<int>> m2 = { {1, 1, 1},
                                 {1, 1, 1} };
-    
+
     // Result matrix with the same dimensions
     vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
 
@@ -39271,9 +39276,9 @@ int main()
 
     // Print the result matrix
     cout << "Result matrix is:" << endl;
-    for (auto& row : res) 
+    for (auto& row : res)
     {
-        for (int val : row) 
+        for (int val : row)
             cout << val << " ";
         cout << endl;
     }
@@ -39302,13 +39307,13 @@ void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
 
 // Driver code
 int main() {
-  
+
     // Define two rectangular matrices
-    int m1[R][C] = { {1, 2, 3}, 
+    int m1[R][C] = { {1, 2, 3},
                      {4, 5, 6} };
-    int m2[R][C] = { {1, 1, 1}, 
+    int m2[R][C] = { {1, 1, 1},
                      {1, 1, 1} };
-    
+
     // Result matrix with the same dimensions
     int res[R][C];
 
@@ -39356,7 +39361,7 @@ public class MatrixSubtraction {
         // Print the result matrix
         System.out.println("Result matrix is:");
         for (int[] row : res) {
-            for (int val : row) 
+            for (int val : row)
                 System.out.print(val + " ");
             System.out.println();
         }
@@ -39381,7 +39386,7 @@ def subtract(m1, m2):
 
 # Driver code
 if __name__ == \'__main__\':
-  
+
     # Define two rectangular matrices
     m1 = [[1, 2, 3], [4, 5, 6]]
     m2 = [[1, 1, 1], [1, 1, 1]]
@@ -39408,7 +39413,7 @@ class Program {
     static void Subtract(int[,] m1, int[,] m2, int[,] res) {
         int rows = m1.GetLength(0);
         int cols = m1.GetLength(1);
-        
+
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
                 res[i, j] = m1[i, j] - m2[i, j];
@@ -39417,11 +39422,11 @@ class Program {
     // Driver code
     static void Main() {
         // Define two rectangular matrices
-        int[,] m1 = { {1, 2, 3}, 
+        int[,] m1 = { {1, 2, 3},
                        {4, 5, 6} };
-        int[,] m2 = { {1, 1, 1}, 
+        int[,] m2 = { {1, 1, 1},
                        {1, 1, 1} };
-        
+
         // Result matrix with the same dimensions
         int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
 
@@ -39481,7 +39486,7 @@ function subtract($m1, $m2) {
     $rows = count($m1);
     $cols = count($m1[0]);
     $res = array();
-    
+
     for ($i = 0; $i < $rows; $i++) {
         for ($j = 0; $j < $cols; $j++) {
             $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
@@ -39491,9 +39496,9 @@ function subtract($m1, $m2) {
 }
 
 // Driver code
-$m1 = array(array(1, 2, 3), 
+$m1 = array(array(1, 2, 3),
             array(4, 5, 6));
-$m2 = array(array(1, 1, 1), 
+$m2 = array(array(1, 1, 1),
             array(1, 1, 1));
 
 // Perform the subtraction
@@ -39509,13 +39514,13 @@ foreach ($res as $row) {
 ````
 
 
-  
+
 
 **Output**
 ```
 Result matrix is:
-0 1 2 
-3 4 5 
+0 1 2
+3 4 5
 
 ```
 
@@ -39549,9 +39554,9 @@ is to make each cell of the hash table point to a linked list of records that ha
 
 
 > Hash function = key % 5,
-> 
->   
-> 
+>
+>
+>
 > Elements = 12, 15, 22, 25 and 37.
 
 
@@ -39630,14 +39635,14 @@ Hash tables. Double hashing make use of two hash function,
 
 
 * The first hash function is
-  
+
   ****h1(k)****
   which takes the key and gives out a location on the hash table. But if the new location is not occupied or empty then we can easily place our key.
 * But in case the location is occupied (collision) we will use secondary hash-function
-  
+
   ****h2(k)****
   in combination with the first hash-function
-  
+
   ****h1(k)****
   to find the new location on the hash table.
 
@@ -39681,44 +39686,44 @@ of size
 [using recursion](https://www.geeksforgeeks.org/recursion/)
 .
 
-  
+
 
 ****Examples:****
 
 
 > ****Input:****
 > mat[][] = [[1, 2, 3],
-> 
->   
-> 
+>
+>
+>
 > [4, 5, 6],
-> 
->   
-> 
+>
+>
+>
 > [7, 8, 9]]
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 1 2 3 4 5 6 7 8 9
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > ****Input:****
 > mat[][] = [[11, 12, 13],
-> 
->   
-> 
+>
+>
+>
 > [14, 15, 16],
-> 
->   
-> 
+>
+>
+>
 > [17, 18, 19]]
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 11 12 13 14 15 16 17 18 19
 
@@ -39749,8 +39754,8 @@ using namespace std;
 
 // Recursive function to traverse the matrix
 void traverse(vector<vector<int>>& mat, int i, int j) {
-  
-    // If the current position is the bottom-right 
+
+    // If the current position is the bottom-right
       // corner of the matrix
     if (i == mat.size() - 1 && j == mat[0].size() - 1) {
         cout << mat[i][j] << endl;
@@ -39760,17 +39765,17 @@ void traverse(vector<vector<int>>& mat, int i, int j) {
     // Print the value at the current position
     cout << mat[i][j] << " ";
 
-    // If the end of the current row has 
+    // If the end of the current row has
       // not been reached
     if (j < mat[0].size() - 1) {
-      
+
         // Move right
         traverse(mat, i, j + 1);
     }
-  
+
     // If the end of the current column has been reached
     else if (i < mat.size() - 1) {
-      
+
         // Move down to the next row
         traverse(mat, i + 1, 0);
     }
@@ -39794,8 +39799,8 @@ class GfG {
 
     // Recursive function to traverse the matrix
     static void traverse(int[][] mat, int i, int j) {
-      
-        // If the current position is the bottom-right 
+
+        // If the current position is the bottom-right
         // corner of the matrix
         if (i == mat.length - 1 && j == mat[0].length - 1) {
             System.out.println(mat[i][j]);
@@ -39808,14 +39813,14 @@ class GfG {
         // If the end of the current row has not
           // been reached
         if (j < mat[0].length - 1) {
-          
+
             // Move right
             traverse(mat, i, j + 1);
         }
-      
+
         // If the end of the current column has been reached
         else if (i < mat.length - 1) {
-          
+
             // Move down to the next row
             traverse(mat, i + 1, 0);
         }
@@ -39834,7 +39839,7 @@ Python
 ````
 #Python program to traverse the matrix using recursion
 def traverse(mat, i, j):
-  
+
     # If the current position is the bottom-
     # right corner of the matrix
     if i == len(mat) - 1 and j == len(mat[0]) - 1:
@@ -39847,14 +39852,14 @@ def traverse(mat, i, j):
     # If the end of the current row has not
     # been reached
     if j < len(mat[0]) - 1:
-      
+
         # Move right
         traverse(mat, i, j + 1)
-        
-    # If the end of the current column 
+
+    # If the end of the current column
     # has been reached
     elif i < len(mat) - 1:
-      
+
         # Move down to the next row
         traverse(mat, i + 1, 0)
 
@@ -39870,7 +39875,7 @@ C#
 using System;
 
 class GfG {
-  
+
     // Recursive function to traverse the matrix
     static void Traverse(int[,] mat, int i, int j) {
         int rows = mat.GetLength(0);
@@ -39886,25 +39891,25 @@ class GfG {
         // Print the value at the current position
         Console.Write(mat[i, j] + " ");
 
-        // If the end of the current row has 
+        // If the end of the current row has
           // not been reached
         if (j < cols - 1) {
-          
+
             // Move right
             Traverse(mat, i, j + 1);
         }
-      
+
         // If the end of the current column
           // has been reached
         else if (i < rows - 1) {
-          
+
             // Move down to the next row
             Traverse(mat, i + 1, 0);
         }
     }
 
     static void Main() {
-      
+
         int[,] mat = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
         Traverse(mat, 0, 0);
     }
@@ -39932,13 +39937,13 @@ function traverse(mat, i, j) {
 
     // If the end of the current row has not been reached
     if (j < cols - 1) {
-    
+
         // Move right
         traverse(mat, i, j + 1);
     }
     // If the end of the current column has been reached
     else if (i < rows - 1) {
-    
+
         // Move down to the next row
         traverse(mat, i + 1, 0);
     }
@@ -39954,7 +39959,7 @@ traverse(mat, 0, 0);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -39965,7 +39970,7 @@ traverse(mat, 0, 0);
 ****Time Complexity:****
 O(N \\* M)
 
-  
+
 
 ****Auxiliary Space:****
 O(M), because of recursive calling
@@ -40002,8 +40007,8 @@ using namespace std;
 
 // Function to store the transpose of mat in res
 void transpose(vector<vector<int>>& mat, vector<vector<int>>& res) {
-    int rows = mat.size();      
-    int cols = mat[0].size();   
+    int rows = mat.size();
+    int cols = mat[0].size();
 
     // Resize res to have dimensions swapped
     res.resize(cols, vector<int>(rows));
@@ -40011,7 +40016,7 @@ void transpose(vector<vector<int>>& mat, vector<vector<int>>& res) {
     // Fill res with transposed values of mat
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            res[j][i] = mat[i][j]; 
+            res[j][i] = mat[i][j];
         }
     }
 }
@@ -40024,8 +40029,8 @@ int main() {
     };
 
     // Create a result matrix for the transpose
-    vector<vector<int>> res; 
-  
+    vector<vector<int>> res;
+
     // Function call to calculate the transpose
     transpose(mat, res);
 
@@ -40035,7 +40040,7 @@ int main() {
         for (auto& elem : row) {
             cout << " " << elem;
         }
-        cout << "\\n"; 
+        cout << "\\n";
     }
 
     return 0;
@@ -40055,11 +40060,11 @@ C
 
 // Function to store the transpose of mat in res
 void transpose(int mat[M][N], int res[N][M]) {
-  
+
     // Fill res with transposed values of mat
     for (int i = 0; i < M; i++) {
         for (int j = 0; j < N; j++) {
-            res[j][i] = mat[i][j]; 
+            res[j][i] = mat[i][j];
         }
     }
 }
@@ -40083,7 +40088,7 @@ int main() {
         for (int j = 0; j < M; j++) {
             printf("%d ", res[i][j]);
         }
-        printf("\\n"); 
+        printf("\\n");
     }
     return 0;
 }
@@ -40098,7 +40103,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class TransposeMatrix {
-  
+
     // Function to store the transpose of mat in res
     public static void transpose(int[][] mat, int[][] res) {
         int rows = mat.length;
@@ -40140,7 +40145,7 @@ Python
 ````
 # Function to store the transpose of mat in res
 def transpose(mat):
-  
+
     # Fill res with transposed values of mat
     return [[mat[j][i] for j in range(len(mat))] for i in range(len(mat[0]))]
 
@@ -40246,11 +40251,11 @@ for (let row of res) {
 ````
 
 
-  
+
 
 **Output**
 ```
-Result matrix is 
+Result matrix is
  1 2 3 4
  1 2 3 4
  1 2 3 4
@@ -40261,7 +40266,7 @@ Result matrix is
 ****Time complexity:****
 O(m x n).
 
-  
+
 
 ****Auxiliary Space:****
 O(m x n)
@@ -40291,10 +40296,10 @@ using namespace std;
 
 // Function to convert mat to its transpose
 void transpose(vector<vector<int>>& mat) {
-    int n = mat.size(); 
+    int n = mat.size();
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
-            swap(mat[i][j], mat[j][i]); 
+            swap(mat[i][j], mat[j][i]);
         }
     }
 }
@@ -40313,9 +40318,9 @@ int main() {
     cout << "Modified matrix is:" << endl;
     for (const auto& row : mat) {
         for (int elem : row) {
-            cout << elem << " "; 
+            cout << elem << " ";
         }
-        cout << endl; 
+        cout << endl;
     }
 
     return 0;
@@ -40435,7 +40440,7 @@ C#
 using System;
 
 class Program {
-  
+
     // Function to convert mat to its transpose
     static void Transpose(int[,] mat) {
         int n = mat.GetLength(0);
@@ -40502,15 +40507,15 @@ mat.forEach(row => {
 ````
 
 
-  
+
 
 **Output**
 ```
-Modified matrix is 
-1 2 3 4 
-1 2 3 4 
-1 2 3 4 
-1 2 3 4 
+Modified matrix is
+1 2 3 4
+1 2 3 4
+1 2 3 4
+1 2 3 4
 
 ```
 
@@ -40520,7 +40525,7 @@ O(n
 2
 ).
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -40567,43 +40572,43 @@ using namespace std;
 
 // Function for finding the determinant of a matrix.
 int getDet(vector<vector<int>>& mat, int n) {
-  
+
     // Base case: if the matrix is 1x1
     if (n == 1) {
         return mat[0][0];
     }
-    
+
     // Base case for 2x2 matrix
     if (n == 2) {
-        return mat[0][0] * mat[1][1] - 
+        return mat[0][0] * mat[1][1] -
                mat[0][1] * mat[1][0];
     }
-    
+
     // Recursive case for larger matrices
     int res = 0;
     for (int col = 0; col < n; ++col) {
-      
-        // Create a submatrix by removing the first 
+
+        // Create a submatrix by removing the first
         // row and the current column
         vector<vector<int>> sub(n - 1, vector<int>(n - 1));
         for (int i = 1; i < n; ++i) {
             int subcol = 0;
             for (int j = 0; j < n; ++j) {
-              
+
                 // Skip the current column
-                if (j == col) continue; 
-              
+                if (j == col) continue;
+
                 // Fill the submatrix
-                sub[i - 1][subcol++] = mat[i][j]; 
+                sub[i - 1][subcol++] = mat[i][j];
             }
         }
-      
+
         // Cofactor expansion
-        int sign = (col % 2 == 0) ? 1 : -1; 
+        int sign = (col % 2 == 0) ? 1 : -1;
         res += sign * mat[0][col] * getDet(sub, n - 1);
     }
-    
-    return res; 
+
+    return res;
 }
 
 // Driver program to test the above function
@@ -40624,47 +40629,47 @@ C
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 4 
+#define N 4
 
 // Function for finding the determinant of a matrix.
 int getDet(int mat[N][N], int n) {
-  
+
     // Base case: if the matrix is 1x1
     if (n == 1) {
         return mat[0][0];
     }
-    
+
     // Base case for 2x2 matrix
     if (n == 2) {
-        return mat[0][0] * mat[1][1] - 
+        return mat[0][0] * mat[1][1] -
                mat[0][1] * mat[1][0];
     }
-    
+
     // Recursive case for larger matrices
     int res = 0;
     for (int col = 0; col < n; ++col) {
-      
-        // Create a submatrix by removing the 
+
+        // Create a submatrix by removing the
         // first row and the current column
         int sub[N][N]; // Submatrix
         for (int i = 1; i < n; ++i) {
             int subcol = 0;
             for (int j = 0; j < n; ++j) {
-              
+
                 // Skip the current column
-                if (j == col) continue; 
-              
+                if (j == col) continue;
+
                 // Fill the submatrix
-                sub[i - 1][subcol++] = mat[i][j]; 
+                sub[i - 1][subcol++] = mat[i][j];
             }
         }
-      
+
         // Cofactor expansion
-        int sign = (col % 2 == 0) ? 1 : -1; 
+        int sign = (col % 2 == 0) ? 1 : -1;
         res += sign * mat[0][col] * getDet(sub, n - 1);
     }
-    
-    return res; 
+
+    return res;
 }
 
 // Driver program to test the above function
@@ -40685,43 +40690,43 @@ Java
 // Function for finding the determinant of a matrix.
 public class GfG {
     public static int getDet(int[][] mat, int n) {
-      
+
         // Base case: if the matrix is 1x1
         if (n == 1) {
             return mat[0][0];
         }
-        
+
         // Base case for 2x2 matrix
         if (n == 2) {
-            return mat[0][0] * mat[1][1] - 
+            return mat[0][0] * mat[1][1] -
                    mat[0][1] * mat[1][0];
         }
-        
+
         // Recursive case for larger matrices
         int res = 0;
         for (int col = 0; col < n; ++col) {
-          
-            // Create a submatrix by removing the first 
+
+            // Create a submatrix by removing the first
             // row and the current column
             int[][] sub = new int[n - 1][n - 1];
             for (int i = 1; i < n; ++i) {
                 int subcol = 0;
                 for (int j = 0; j < n; ++j) {
-                  
+
                     // Skip the current column
-                    if (j == col) continue; 
-                    
+                    if (j == col) continue;
+
                     // Fill the submatrix
-                    sub[i - 1][subcol++] = mat[i][j]; 
+                    sub[i - 1][subcol++] = mat[i][j];
                 }
             }
-            
+
             // Cofactor expansion
-            int sign = (col % 2 == 0) ? 1 : -1; 
+            int sign = (col % 2 == 0) ? 1 : -1;
             res += sign * mat[0][col] * getDet(sub, n - 1);
         }
-        
-        return res; 
+
+        return res;
     }
 
     // Driver program to test the above function
@@ -40741,39 +40746,39 @@ Python
 ````
 # Function for finding the determinant of a matrix.
 def getDet(mat, n):
-  
+
     # Base case: if the matrix is 1x1
     if n == 1:
         return mat[0][0]
-    
+
     # Base case for 2x2 matrix
     if n == 2:
         return mat[0][0] * mat[1][1] - \\
                mat[0][1] * mat[1][0]
-    
+
     # Recursive case for larger matrices
     res = 0
     for col in range(n):
-      
-        # Create a submatrix by removing the first 
+
+        # Create a submatrix by removing the first
         # row and the current column
         sub = [[0] * (n - 1) for _ in range(n - 1)]
         for i in range(1, n):
             subcol = 0
             for j in range(n):
-              
+
                 # Skip the current column
                 if j == col:
                     continue
-                
+
                 # Fill the submatrix
                 sub[i - 1][subcol] = mat[i][j]
                 subcol += 1
-        
+
         # Cofactor expansion
         sign = 1 if col % 2 == 0 else -1
         res += sign * mat[0][col] * getDet(sub, n - 1)
-    
+
     return res
 
 # Driver program to test the above function
@@ -40794,42 +40799,42 @@ using System.Linq;
 
 class Determinant {
     public static int GetDet(int[,] mat, int n) {
-      
+
         // Base case: if the matrix is 1x1
         if (n == 1) {
             return mat[0, 0];
         }
-        
+
         // Base case for 2x2 matrix
         if (n == 2) {
-            return mat[0, 0] * mat[1, 1] - 
+            return mat[0, 0] * mat[1, 1] -
                    mat[0, 1] * mat[1, 0];
         }
-        
+
         // Recursive case for larger matrices
         int res = 0;
         for (int col = 0; col < n; col++) {
-          
-            // Create a submatrix by removing the first 
+
+            // Create a submatrix by removing the first
             // row and the current column
             int[,] sub = new int[n - 1, n - 1];
             for (int i = 1; i < n; i++) {
                 int subcol = 0;
                 for (int j = 0; j < n; j++) {
-                  
+
                     // Skip the current column
                     if (j == col) continue;
-                    
+
                     // Fill the submatrix
                     sub[i - 1, subcol++] = mat[i, j];
                 }
             }
-            
+
             // Cofactor expansion
             int sign = (col % 2 == 0) ? 1 : -1;
             res += sign * mat[0, col] * GetDet(sub, n - 1);
         }
-        
+
         return res;
     }
 
@@ -40855,37 +40860,37 @@ function getDet(mat, n) {
     if (n === 1) {
         return mat[0][0];
     }
-    
+
     // Base case for 2x2 matrix
     if (n === 2) {
-        return mat[0][0] * mat[1][1] - 
+        return mat[0][0] * mat[1][1] -
                mat[0][1] * mat[1][0];
     }
-    
+
     // Recursive case for larger matrices
     let res = 0;
     for (let col = 0; col < n; col++) {
-    
-        // Create a submatrix by removing the first 
+
+        // Create a submatrix by removing the first
         // row and the current column
         let sub = Array.from({ length: n - 1 }, () => new Array(n - 1));
         for (let i = 1; i < n; i++) {
             let subcol = 0;
             for (let j = 0; j < n; j++) {
-            
+
                 // Skip the current column
                 if (j === col) continue;
-                
+
                 // Fill the submatrix
                 sub[i - 1][subcol++] = mat[i][j];
             }
         }
-        
+
         // Cofactor expansion
         let sign = (col % 2 === 0) ? 1 : -1;
         res += sign * mat[0][col] * getDet(sub, n - 1);
     }
-    
+
     return res;
 }
 
@@ -40898,10 +40903,10 @@ console.log(getDet(mat, mat.length));
 
 ````
 
-  
 
 
-  
+
+
 
 **Output**
 ```
@@ -40914,7 +40919,7 @@ O(n
 4
 )
 
-  
+
 
 ****Space Complexity:****
 O(n
@@ -40939,7 +40944,7 @@ matrix using Gaussian elimination and a series of transformations that reduce th
 
 
 > * Converting the given matrix into an
->   
+>
 >   ****upper triangular matrix****
 >   using determinant properties
 > * The determinant of the upper triangular matrix is the product of all diagonal elements.
@@ -40958,7 +40963,7 @@ There exist two cases:
     If the index is with a respective diagonal row element. Using the determinant properties make all the column elements down to it zero
   + ****Case B:****
     Swap the row with respect to the diagonal element column and continue the
-    
+
     ****Case A****
     operation.
 
@@ -40976,34 +40981,34 @@ using namespace std;
 
 // Function to get determinant of a matrix
 int getDet(vector<vector<int>>& mat) {
-  
+
     int n = mat.size();
-  
-    int num1, num2, det = 1, index, total = 1; 
-  
+
+    int num1, num2, det = 1, index, total = 1;
+
     // Temporary array for storing row
-    vector<int> temp(n + 1); 
+    vector<int> temp(n + 1);
 
     // Loop for traversing the diagonal elements
     for (int i = 0; i < n; i++) {
-        index = i; 
+        index = i;
 
         // Finding the index which has non-zero value
         while (index < n && mat[index][i] == 0) {
             index++;
         }
-      
+
         if (index == n) // If there is no non-zero element
         {
             continue; // The determinant of the matrix is zero
         }
         if (index != i) {
-          
+
             // Loop for swapping the diagonal element row and index row
             for (int j = 0; j < n; j++) {
                 swap(mat[index][j], mat[i][j]);
             }
-          
+
             // Determinant sign changes when we shift rows
             det *= pow(-1, index - i);
         }
@@ -41012,7 +41017,7 @@ int getDet(vector<vector<int>>& mat) {
         for (int j = 0; j < n; j++) {
             temp[j] = mat[i][j];
         }
-      
+
         // Traversing every row below the diagonal element
         for (int j = i + 1; j < n; j++) {
             num1 = temp[i]; // Value of diagonal element
@@ -41021,11 +41026,11 @@ int getDet(vector<vector<int>>& mat) {
             // Traversing every column of row and
             // multiplying to every row
             for (int k = 0; k < n; k++) {
-              
+
                 // Making the diagonal element and next row element equal
                 mat[j][k] = (num1 * mat[j][k]) - (num2 * temp[k]);
             }
-            total *= num1; 
+            total *= num1;
         }
     }
 
@@ -41033,7 +41038,7 @@ int getDet(vector<vector<int>>& mat) {
     for (int i = 0; i < n; i++) {
         det *= mat[i][i];
     }
-  
+
     return (det / total); // Det(kA)/k = Det(A);
 }
 
@@ -41062,8 +41067,8 @@ public class GfG {
     static int getDet(int[][] mat) {
         int n = mat.length;
 
-        int num1, num2, det = 1, index, total = 1; 
-      
+        int num1, num2, det = 1, index, total = 1;
+
         // Temporary array for storing row
         int[] temp = new int[n + 1];
 
@@ -41079,7 +41084,7 @@ public class GfG {
                 continue; // The determinant of the matrix is zero
             }
             if (index != i) {
-              
+
                 // Loop for swapping the diagonal element
                 // row and index row
                 for (int j = 0; j < n; j++) {
@@ -41103,12 +41108,12 @@ public class GfG {
                 // Traversing every column of row and multiplying
                 // to every row
                 for (int k = 0; k < n; k++) {
-                  
-                    // Making the diagonal element and next row 
+
+                    // Making the diagonal element and next row
                     // element equal
                     mat[j][k] = (num1 * mat[j][k]) - (num2 * temp[k]);
                 }
-                total *= num1; 
+                total *= num1;
             }
         }
 
@@ -41158,8 +41163,8 @@ def getDet(mat):
             continue
 
         if(index != i):
-          
-            # loop for swapping the diagonal element 
+
+            # loop for swapping the diagonal element
             # row and index row
             for j in range(0, n):
                 mat[index][j], mat[i][j] = mat[i][j], mat[index][j]
@@ -41180,7 +41185,7 @@ def getDet(mat):
             # traversing every column of row
             # and multiplying to every row
             for k in range(0, n):
-              
+
                 # multiplying to make the diagonal
                 # element and next row element equal
                 mat[j][k] = (num1*mat[j][k]) - (num2*temp[k])
@@ -41199,7 +41204,7 @@ if __name__ == "__main__":
     # mat=[[6 1 1][4 -2 5][2 8 7]]
 
     mat = [[1, 0, 2, -1], [3, 0, 0, 5], [2, 1, 4, -3], [1, 0, 5, 0]]
-   
+
     print(getDet(mat))
 
 ````
@@ -41217,7 +41222,7 @@ class MatrixDeterminant
         int n = mat.GetLength(0);
 
         int num1, num2, det = 1, index, total = 1;
-      
+
         // Temporary array for storing row
         int[] temp = new int[n + 1];
 
@@ -41231,12 +41236,12 @@ class MatrixDeterminant
             {
                 index++;
             }
-          
+
              // If there is no non-zero element
             if (index == n)
             {
                 // The determinant of the matrix is zero
-                continue; 
+                continue;
             }
             if (index != i)
             {
@@ -41248,7 +41253,7 @@ class MatrixDeterminant
                     mat[index, j] = mat[i, j];
                     mat[i, j] = tempSwap;
                 }
-              
+
                 // Determinant sign changes when we shift rows
                 det *= (int)Math.Pow(-1, index - i);
             }
@@ -41258,14 +41263,14 @@ class MatrixDeterminant
             {
                 temp[j] = mat[i, j];
             }
-          
+
             // Traversing every row below the diagonal element
             for (int j = i + 1; j < n; j++)
             {
                 num1 = temp[i]; // Value of diagonal element
                 num2 = mat[j, i]; // Value of next row element
 
-                // Traversing every column of row and multiplying 
+                // Traversing every column of row and multiplying
                 // to every row
                 for (int k = 0; k < n; k++)
                 {
@@ -41325,12 +41330,12 @@ function determinantOfMatrix(mat) {
             continue; // The determinant of the matrix is zero
         }
         if (index !== i) {
-        
+
             // Swapping the diagonal element row and index row
             for (let j = 0; j < n; j++) {
                 [mat[index][j], mat[i][j]] = [mat[i][j], mat[index][j]];
             }
-            
+
             // Determinant sign changes when we shift rows
             det *= Math.pow(-1, index - i);
         }
@@ -41345,15 +41350,15 @@ function determinantOfMatrix(mat) {
             const num1 = temp[i]; // Value of diagonal element
             const num2 = mat[j][i]; // Value of next row element
 
-            // Traversing every column of row and multiplying 
+            // Traversing every column of row and multiplying
             // to every row
             for (let k = 0; k < n; k++) {
-            
-                // Making the diagonal element and next row 
+
+                // Making the diagonal element and next row
                 // element equal
                 mat[j][k] = (num1 * mat[j][k]) - (num2 * temp[k]);
             }
-            total *= num1; 
+            total *= num1;
         }
     }
 
@@ -41377,7 +41382,7 @@ console.log(determinantOfMatrix(mat));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -41390,12 +41395,12 @@ O(n
 3
 )
 
-  
+
 
 ****Auxiliary Space:****
 O(n), Space used for storing row.
 
-  
+
 
 
 
@@ -41423,7 +41428,7 @@ Python
 import numpy as np
 
 def determinant(mat):
-    
+
     # calling the det() method
     det = np.linalg.det(mat)
     return round(det)
@@ -41456,7 +41461,7 @@ O(n
 3
 ) for an n x n order matrix.
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -41486,7 +41491,7 @@ For instance, the cofactor of the top left corner \'5\' is
  + |0   0   3|
 ...|1   5   0| = 3(1 * -9 - (-1) * 5) = -12.
 ...|-1 -9   4|
-(The minor matrix is formed by deleting the row 
+(The minor matrix is formed by deleting the row
  and column of the given entry.)
 As another sample, the cofactor of the top row corner \'-2\' is
   -|1   0  3|
@@ -41502,7 +41507,7 @@ matrix\'s transpose:
 [-12   76 -60  -36]
 [-56  208 -82  -58]
 [4     4   -2  -10]
-[4     4   20   12] 
+[4     4   20   12]
 ```
 
 ****Important properties:****
@@ -41510,15 +41515,15 @@ matrix\'s transpose:
 
 Product of a square matrix A with its adjoint yields a diagonal matrix, where each diagonal entry is equal to determinant of A.
 
-  
+
 
 i.e.
 
 
 ```
-A.adj(A) = det(A).I 
+A.adj(A) = det(A).I
 I  => Identity matrix of same order as of A.
-det(A) => Determinant value of A 
+det(A) => Determinant value of A
 ```
 
 
@@ -41536,28 +41541,28 @@ i.e.,  B = A-1
 
 * adj(AB) = (adj B).(adj A)
 * adj( k A) = k
-  
+
   n-1
   adj(A)
 * A
-  
+
   -1
   = (adj A) / |A|
 * (A
-  
+
   -1
   )
-  
+
   -1
   = A
 * (AB)
-  
+
   -1
   = B
-  
+
   -1
   A
-  
+
   -1
 
 ****How to find Adjoint?****
@@ -41583,7 +41588,7 @@ Let A[N][N] be input matrix.
 
 Inverse of a matrix exists only if the matrix is non-singular i.e., determinant should not be 0.
 
-  
+
 
 Using determinant and adjoint, we can easily find the inverse of a square matrix using the below formula,
 
@@ -41592,7 +41597,7 @@ Using determinant and adjoint, we can easily find the inverse of a square matrix
   If det(A) != 0
     A-1 = adj(A)/det(A)
   Else
-    "Inverse doesn\'t exist"  
+    "Inverse doesn\'t exist"
 ```
 
 
@@ -41611,7 +41616,7 @@ using namespace std;
 
 // Function to get cofactor of mat[p][q] in cof[][]. n is
 // current dimension of mat[][]
-void getCof(vector<vector<int>>& mat, vector<vector<int>>& cof, 
+void getCof(vector<vector<int>>& mat, vector<vector<int>>& cof,
                                         int p, int q, int n) {
     int i = 0, j = 0;
     for (int row = 0; row < n; row++) {
@@ -41627,16 +41632,16 @@ void getCof(vector<vector<int>>& mat, vector<vector<int>>& cof,
     }
 }
 
-// Recursive function for finding determinant 
+// Recursive function for finding determinant
 // of matrix mat of dimension n
 int getDet(vector<vector<int>>& mat, int n) {
     if (n == 1) return mat[0][0];
-    
+
     int det = 0;
-  
+
     // To store cofactors
     vector<vector<int>> cof(mat.size(), vector<int>(mat.size()));
-  
+
     int sign = 1;
     for (int f = 0; f < n; f++) {
         getCof(mat, cof, 0, f, n);
@@ -41653,7 +41658,7 @@ void adjoint(vector<vector<int>>& mat, vector<vector<int>>& adj) {
         adj[0][0] = 1;
         return;
     }
-    
+
     int sign = 1;
     vector<vector<int>> cof(n, vector<int>(n));
     for (int i = 0; i < n; i++) {
@@ -41665,7 +41670,7 @@ void adjoint(vector<vector<int>>& mat, vector<vector<int>>& adj) {
     }
 }
 
-// Function to calculate and store inverse, returns 
+// Function to calculate and store inverse, returns
 // false if matrix is singular
 bool inverse(vector<vector<int>>& mat, vector<vector<float>>& inv) {
     int n = mat.size();
@@ -41752,7 +41757,7 @@ void getCof(int mat[N][N], int cof[N][N], int p, int q, int n) {
 int getDet(int mat[N][N], int n) {
     if (n == 1) return mat[0][0];
     int det = 0;
-    
+
     int cof[N][N];
     int sign = 1;
     for (int f = 0; f < n; f++) {
@@ -41769,7 +41774,7 @@ void adjoint(int mat[N][N], double adj[N][N]) {
         adj[0][0] = 1;
         return;
     }
-    
+
     int sign = 1;
     int cof[N][N];
     for (int i = 0; i < N; i++) {
@@ -41850,7 +41855,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class GfG {
-  
+
     // Function to get cofactor of mat[p][q] in cof[][]
     static void getCof(int[][] mat, int[][] cof, int p, int q, int n) {
         int i = 0, j = 0;
@@ -41900,7 +41905,7 @@ public class GfG {
         }
     }
 
-    // Function to calculate and store inverse, returns 
+    // Function to calculate and store inverse, returns
     // false if matrix is singular
     static boolean inverse(int[][] mat, float[][] inv) {
         int n = mat.length;
@@ -41918,7 +41923,7 @@ public class GfG {
     }
 
     public static void main(String[] args) {
-        int[][] mat = { { 5, -2, 2, 7 }, { 1, 0, 0, 3 }, 
+        int[][] mat = { { 5, -2, 2, 7 }, { 1, 0, 0, 3 },
                         { -3, 1, 5, 0 }, { 3, -1, -9, 4 } };
         int n = mat.length;
         int[][] adj = new int[n][n]; // To store adjoint
@@ -41993,7 +41998,7 @@ def adjoint(mat, adj):
             sign = 1 if (i + j) % 2 == 0 else -1
             adj[j][i] = sign * get_det(cof, n - 1)
 
-# Function to calculate and store inverse, returns 
+# Function to calculate and store inverse, returns
 # false if matrix is singular
 def inverse(mat):
     n = len(mat)
@@ -42037,7 +42042,7 @@ C#
 using System;
 
 class MatrixOperations {
-  
+
     // Function to get cofactor of mat[p][q] in cof[][]. n is
     // current dimension of mat[][]
     static void GetCof(int[,] mat, int[,] cof, int p, int q, int n) {
@@ -42173,15 +42178,15 @@ function getCof(mat, cof, p, q, n) {
     }
 }
 
-// Recursive function for finding determinant 
+// Recursive function for finding determinant
 // of matrix mat of dimension n
 function getDet(mat, n) {
     if (n === 1) return mat[0][0];
     let det = 0;
-    
+
     // To store cofactors
     let cof = Array.from({ length: mat.length }, () => Array(mat.length).fill(0));
-    
+
     let sign = 1;
     for (let f = 0; f < n; f++) {
         getCof(mat, cof, 0, f, n);
@@ -42198,7 +42203,7 @@ function adjoint(mat, adj) {
         adj[0][0] = 1;
         return;
     }
-    
+
     let sign = 1;
     let cof = Array.from({ length: n }, () => Array(n).fill(0));
     for (let i = 0; i < n; i++) {
@@ -42210,7 +42215,7 @@ function adjoint(mat, adj) {
     }
 }
 
-// Function to calculate and store inverse, returns 
+// Function to calculate and store inverse, returns
 // false if matrix is singular
 function inverse(mat, inv) {
     let n = mat.length;
@@ -42263,47 +42268,47 @@ if (inverse(mat, inv)) {
 ````
 
 
-  
+
 
 **Output**
 ```
 Input matrix is:
-5 -2 2 7 
-1 0 0 3 
--3 1 5 0 
-3 -1 -9 4 
+5 -2 2 7
+1 0 0 3
+-3 1 5 0
+3 -1 -9 4
 
 The Adjoint is:
--12 76 -60 -36 
--56 208 -82 -58 
-4 4 -2 -10 
-4 4 20 12 
+-12 76 -60 -36
+-56 208 -82 -58
+4 4 -2 -10
+4 4 20 12
 
 The Inverse is:
--0.136364 0.863636 -0.681818 -0.409091 
--0.636364 2.36364 -0.931818 -0.659091 
-0.0454545 0.0454545 -0.0227273 -0.113636 
-0.0454545 0.0454545 0.227273 0.136364 
+-0.136364 0.863636 -0.681818 -0.409091
+-0.636364 2.36364 -0.931818 -0.659091
+0.0454545 0.0454545 -0.0227273 -0.113636
+0.0454545 0.0454545 0.227273 0.136364
 
 ```
 ', '', 'Adjoint and Inverse of a Matrix', 11, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null, null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, course_id, exercise_id, problem_id) VALUES ('610cd734-a640-4ad0-9ed2-9360a01d068a', e'****Examples:****
 
 ```
-Input: board[] =  {\'X\', \'X\', \'O\',   
-                   \'O\', \'O\', \'X\',  
-                   \'X\', \'O\', \'X\'};  
-Output: Valid  
-Input: board[] =  {\'O\', \'X\', \'X\',   
-                   \'O\', \'X\', \'X\',  
-                   \'O\', \'O\', \'X\'};  
-Output: Invalid  
-(Both X and O cannot win)  
-Input: board[] =  {\'O\', \'X\', \' \',   
-                   \' \', \' \', \' \',  
-                   \' \', \' \', \' \'};  
-Output: Valid  
-(Valid board with only two moves played)  
+Input: board[] =  {\'X\', \'X\', \'O\',
+                   \'O\', \'O\', \'X\',
+                   \'X\', \'O\', \'X\'};
+Output: Valid
+Input: board[] =  {\'O\', \'X\', \'X\',
+                   \'O\', \'X\', \'X\',
+                   \'O\', \'O\', \'X\'};
+Output: Invalid
+(Both X and O cannot win)
+Input: board[] =  {\'O\', \'X\', \' \',
+                   \' \', \' \', \' \',
+                   \' \', \' \', \' \'};
+Output: Valid
+(Valid board with only two moves played)
 
 ```
 Recommended Practice
@@ -42329,12 +42334,12 @@ Basically, to find the validity of an input grid, we can think of the conditions
    * Armed with above conditions i.e. a), b), c) and d), we can now easily formulate an algorithm/program to check the validity of a given Tic-Tac-Toe board position.
 
 ```
-1)  countX == countO or countX == countO + 1  
-2)  If O is in win condition then check   
-     a)     If X also wins, not valid  
-     b)     If xbox != obox , not valid  
-3)  If X is in win condition then check if xCount is  
-     one more than oCount or not    
+1)  countX == countO or countX == countO + 1
+2)  If O is in win condition then check
+     a)     If X also wins, not valid
+     b)     If xbox != obox , not valid
+3)  If X is in win condition then check if xCount is
+     one more than oCount or not
 
 ```
 
@@ -42346,14 +42351,14 @@ C++
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -42448,14 +42453,14 @@ Java
 ----
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -42555,14 +42560,14 @@ Python3
 -------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -42638,14 +42643,14 @@ C#
 --
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -42778,14 +42783,14 @@ Javascript
 ----------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -42890,14 +42895,14 @@ PHP
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -43016,7 +43021,7 @@ Given board is valid
 ****Time complexity:****
 O(1)
 
-  
+
 
 ****Auxiliary Space:****
 O(1), since no extra space has been taken.
@@ -43046,14 +43051,14 @@ C++
 ---
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -43134,14 +43139,14 @@ Java
 ----
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -43222,14 +43227,14 @@ Python3
 -------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -43304,14 +43309,14 @@ C#
 --
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -43392,14 +43397,14 @@ Javascript
 ----------
 
 
-  
 
 
 
-  
 
 
-  
+
+
+
 
 
 
@@ -43485,7 +43490,7 @@ Given board is valid
 ```
 
 ****Time complexity: O(N^2)****
-  
+
 
 ****Auxiliary Space: O(N)****
 ', e'A Tic-Tac-Toe board is given after some moves are played. Find out if the given board is valid, i.e., is it possible to reach this board position after some moves or not.
@@ -43608,7 +43613,7 @@ C++
 struct Node {
     int data;
     Node* next;
-  
+
     Node(int value){
         data = value;
         next = nullptr;
@@ -43631,15 +43636,15 @@ struct Node
 struct Node *createNode(int value){
 
     // Allocate memory
-    struct Node *newNode = 
+    struct Node *newNode =
       (struct Node *)malloc(sizeof(struct Node));
 
     // Set the data
     newNode->data = value;
-  
+
     // Initialize next to NULL
     newNode->next = NULL;
-  
+
     // Return the new node
     return newNode;
 }
@@ -43743,7 +43748,7 @@ C
 
 ````
 // Allocate memory for nodes
-struct Node *first = 
+struct Node *first =
   (struct Node *)malloc(sizeof(struct Node));
 struct Node *second =
   (struct Node *)malloc(sizeof(struct Node));
@@ -43822,7 +43827,7 @@ last.next = first;
 
 ````
 
-  
+
 
 In the above code, we have created three nodes
 
@@ -43841,50 +43846,50 @@ respectively.
 
 * After creating three nodes, we have connected these node in a series.
 * Connect the first node “
-  
+
   ****first”****
   to “
-  
+
   ****second”****
   node by
-  
+
   ****s****
   toring the address of “
-  
+
   ****second”****
   node
-  
-  
+
+
   into
-  
+
   ****first’s****
   next
 * Connect the second node “
-  
+
   ****second”****
   to “
-  
+
   ****second”****
   node by
-  
+
   ****s****
   toring the address of “
-  
+
   ****third****
   ” node into
-  
+
   ****second’s****
   next
 * After connecting all the nodes, we reach the key characteristic of a circular linked list:
-  
+
   linking the last node back to the first node
-  
-  
+
+
   . Therefore, we store the address of the “
-  
+
   ****first****
   ” node in the “
-  
+
   ****last****
   ” node.
 
@@ -43926,13 +43931,13 @@ Insertion is a fundamental operation in linked lists that involves adding a new 
 ### 1. Insertion in an empty List in the circular linked list
 
 > To insert a node in empty circular linked list, creates a
-> 
+>
 > ****new node****
 > with the given data, sets its next pointer to point to itself, and updates the
-> 
+>
 > ****last****
 > pointer to reference this
-> 
+>
 > ****new node****
 > .
 
@@ -43959,13 +43964,13 @@ struct Node{
 // Function to insert a node into an empty circular singly linked list
 Node *insertInEmptyList(Node *last, int data){
     if (last != nullptr) return last;
-    
+
     // Create a new node
     Node *newNode = new Node(data);
-  
+
     // Point newNode to itself
     newNode->next = newNode;
-  
+
     // Update last to point to the new node
     last = newNode;
     return last;
@@ -43973,7 +43978,7 @@ Node *insertInEmptyList(Node *last, int data){
 
 void printList(Node* last){
     if(last == NULL) return;
-  
+
     // Start from the head node
     Node* head = last->next;
     while (true) {
@@ -44130,10 +44135,10 @@ class Node:
 def insertInEmptyList(last, data):
     if last is not None:
         return last
-    
+
     # Create a new node
     new_node = Node(data)
-    
+
     # Update last to point to the new node
     last = new_node
     return last
@@ -44141,7 +44146,7 @@ def insertInEmptyList(last, data):
 def printList(last):
     if last is None:
         return
-    
+
     # Start from the head node
     head = last.next
     while True:
@@ -44219,35 +44224,35 @@ printList(last);
 ````
 
 
-  
+
 
 **Output**
 ```
-List after insertion: 1 
+List after insertion: 1
 
 ```
 ### 2. Insertion at the beginning in circular linked list
 
 > To insert a new node at the beginning of a circular linked list, we first create the
-> 
+>
 > ****new node****
 > and allocate memory for it. If the list is empty (indicated by the last pointer being
-> 
+>
 > ****NULL****
 > ), we make the
-> 
+>
 > ****new node****
 > point to itself. If the list already contains nodes then we set the
-> 
+>
 > ****new node’s****
 > next pointer to point to the
-> 
+>
 > ****current head****
 > of the list (which is
-> 
+>
 > ****last->next****
 > ), and then update the last node’s next pointer to point to the
-> 
+>
 > ****new node****
 > . This maintains the circular structure of the list.
 
@@ -44295,7 +44300,7 @@ Node* insertAtBeginning(Node* last, int value){
 
 void printList(Node* last){
   if(last == NULL) return;
-  
+
     // Start from the head node
     Node* head = last->next;
     while (true) {
@@ -44680,54 +44685,54 @@ printList(last);
 ````
 
 
-  
+
 
 **Output**
 ```
-Original list: 2 3 4 
-List after inserting 5 at the beginning: 5 2 3 4 
+Original list: 2 3 4
+List after inserting 5 at the beginning: 5 2 3 4
 
 ```
 ### 3. Insertion at the end in circular linked list
 
 > To insert a new node at the end of a circular linked list, we first create the new node and allocate memory for it. If the list is empty (mean,
-> 
+>
 > ****last****
 > or
-> 
+>
 > ****tail****
 > pointer being
-> 
+>
 > ****NULL****
 > ), we initialize the list with the
-> 
+>
 > ****new node****
 > and making it point to itself to form a circular structure. If the list already contains nodes then we set the
-> 
+>
 > ****new node’s****
 > next pointer to point to the
-> 
+>
 > ****current head****
 > (which is
-> 
+>
 > ****tail->next****
 > ), then update the
-> 
+>
 > ****current tail’s****
 > next pointer to point to the
-> 
+>
 > ****new node****
 > . Finally, we update the
-> 
+>
 > ****tail pointer****
 > to the
-> 
+>
 > ****new node.****
 > This will ensure that the
-> 
+>
 > ****new node****
 > is now the
-> 
+>
 > ****last node****
 > in the list while maintaining the circular linkage.
 
@@ -44780,7 +44785,7 @@ Node *insertEnd(Node *tail, int value)
 
 void printList(Node *last){
   if(last == NULL) return;
-  
+
     // Start from the head node
     Node *head = last->next;
     while (true){
@@ -45105,48 +45110,48 @@ printList(last);
 ````
 
 
-  
+
 
 **Output**
 ```
-Original list: 2 3 4 
-List after inserting 5 and 6: 2 3 4 5 6 
+Original list: 2 3 4
+List after inserting 5 and 6: 2 3 4 5 6
 
 ```
 ### 4. Insertion at specific position in circular linked list
 
 > To insert a new node at a specific position in a circular linked list, we first check if the list is empty. If it is and the
-> 
+>
 > ****position****
 > is not
-> 
+>
 > ****1****
 > then we print an error message because the position doesn’t exist in the list. If the
-> 
+>
 > ****position****
 > is
-> 
+>
 > ****1****
 > then we create the
-> 
+>
 > ****new node****
 > and make it point to itself. If the list is not empty, we create the
-> 
+>
 > ****new node****
 > and traverse the list to find the correct insertion point. If the
-> 
+>
 > ****position****
 > is
-> 
+>
 > ****1****
 > , we insert the
-> 
+>
 > ****new node****
 > at the beginning by adjusting the pointers accordingly. For other positions, we traverse through the list until we reach the desired position and inserting the
-> 
+>
 > ****new node****
 > by updating the pointers. If the new node is inserted at the end, we also update the
-> 
+>
 > ****last****
 > pointer to reference the new node, maintaining the circular structure of the list.
 
@@ -45201,7 +45206,7 @@ Node *insertAtPosition(Node *last, int data, int pos){
     // Traverse the list to find the insertion point
     for (int i = 1; i < pos - 1; ++i) {
         curr = curr->next;
-      
+
         // If position is out of bounds
         if (curr == last->next){
             cout << "Invalid position!" << endl;
@@ -45649,12 +45654,12 @@ printList(last);
 ````
 
 
-  
+
 
 **Output**
 ```
-Original list: 2 3 4 
-List after insertions: 2 5 3 4 
+Original list: 2 3 4
+List after insertions: 2 5 3 4
 
 ```
 
@@ -45668,34 +45673,34 @@ Deletion involves removing a node from the linked list. The main difference is t
 ### 1. Delete the first node in circular linked list
 
 > To delete the first node of a circular linked list, we first check if the list is empty. If it is then we print a message and return
-> 
+>
 > ****NULL****
 > . If the list contains only one node (the
-> 
+>
 > ****head****
 > is the same as the
-> 
+>
 > ****last****
 > ) then we delete that node and set the
-> 
+>
 > ****last****
 > pointer to
-> 
+>
 > ****NULL****
 > . If there are multiple nodes then we update the
-> 
+>
 > ****last->next****
 > pointer to skip the
-> 
+>
 > ****head****
 > node and effectively removing it from the list. We then delete the
-> 
+>
 > ****head****
 > node to free the allocated memory. Finally, we return the updated
-> 
+>
 > ****last****
 > pointer, which still points to the
-> 
+>
 > ****last****
 > node in the list.
 
@@ -45744,7 +45749,7 @@ Node* deleteFirstNode(Node* last) {
 
 void printList(Node* last) {
     if(last == NULL) return ;
- 
+
     Node *head = last->next;
     while (true){
         cout << head->data << " ";
@@ -46036,63 +46041,63 @@ printList(last);
 ````
 
 
-  
+
 
 **Output**
 ```
-Original list: 2 3 4 
-List after deleting first node: 3 4 
+Original list: 2 3 4
+List after deleting first node: 3 4
 
 ```
 ### 2. Delete a specific node in circular linked list
 
 > To delete a specific node from a circular linked list, we first check if the list is empty. If it is then we print a message and return
-> 
+>
 > ****nullptr****
 > . If the list contains only one node and it matches the
-> 
+>
 > ****key****
 > then we delete that node and set
-> 
+>
 > ****last****
 > to
-> 
+>
 > ****nullptr****
 > . If the node to be deleted is the first node then we update the
-> 
+>
 > ****next****
 > pointer of the
-> 
+>
 > ****last****
 > node to skip the
-> 
+>
 > ****head****
 > node and delete the
-> 
+>
 > ****head****
 > . For other nodes, we traverse the list using two pointers:
-> 
+>
 > ****curr****
 > (to find the node) and
-> 
+>
 > ****prev****
 > (to keep track of the previous node). If we find the node with the matching key then we update the next pointer of
-> 
+>
 > ****prev****
 > to skip the
-> 
+>
 > ****curr****
 > node and delete it. If the node is found and it is the last node, we update the
-> 
+>
 > ****last****
 > pointer accordingly. If the node is not found then do nothing and
-> 
+>
 > ****tail****
 > or
-> 
+>
 > ****last****
 > as it is. Finally, we return the updated
-> 
+>
 > ****last****
 > pointer.
 
@@ -46370,7 +46375,7 @@ public class GFG {
             System.out.println("List is Empty");
             return;
         }
-      
+
         Node head = last.next;
         while (true) {
             System.out.print(head.data + " ");
@@ -46569,48 +46574,48 @@ printList(last);
 ````
 
 
-  
+
 
 **Output**
 ```
-Original list: 2 3 4 
-List after deleting node 3: 2 4 
+Original list: 2 3 4
+List after deleting node 3: 2 4
 
 ```
 ### 3. Deletion at the end of Circular linked list
 
 > To delete the last node in a circular linked list, we first check if the list is empty. If it is, we print a message and return
-> 
+>
 > ****nullptr****
 > . If the list contains only one node (where the
-> 
+>
 > ****head****
 > is the same as the
-> 
+>
 > ****last****
 > ), we delete that node and set
-> 
+>
 > ****last****
 > to
-> 
+>
 > ****nullptr****
 > . For lists with multiple nodes, we need to traverse the list to find the
-> 
+>
 > ****second last node****
 > . We do this by starting from the
-> 
+>
 > ****head****
 > and moving through the list until we reach the node whose next pointer points to
-> 
+>
 > ****last****
 > . Once we find the
-> 
+>
 > ****second last****
 > node then we update its next pointer to point back to the
-> 
+>
 > ****head,****
 > this effectively removing the last node from the list. We then delete the last node to free up memory and return the updated
-> 
+>
 > ****last****
 > pointer, which now points to the last node.
 
@@ -47075,12 +47080,12 @@ printList(last);
 ````
 
 
-  
+
 
 **Output**
 ```
-Original list: 2 3 4 
-List after deleting last node: 2 3 
+Original list: 2 3 4
+List after deleting last node: 2 3
 
 ```
 
@@ -47092,34 +47097,34 @@ Searching in a circular linked list is similar to searching in a regular linked 
 
 
 > To search for a specific value in a circular linked list, we first check if the list is empty. If it is then we return
-> 
+>
 > ****false****
 > . If the list contains nodes then we start from the
-> 
+>
 > ****head****
 > node (which is the
-> 
+>
 > ****last->next****
 > ) and traverse the list. We use a pointer
-> 
+>
 > ****curr****
 > to iterate through the nodes until we reach back to the
-> 
+>
 > ****head****
 > . During traversal, if we find a node whose
-> 
+>
 > ****data****
 > matches the given
-> 
+>
 > ****key****
 > then we return
-> 
+>
 > ****true****
 > to indicating that the value was found. After the loop, we also check the last node to ensure we don’t miss it. If the
-> 
+>
 > ****key****
 > is not found after traversing the entire list then we return
-> 
+>
 > ****false****
 > .
 
@@ -47153,7 +47158,7 @@ bool search(Node* last, int key) {
     while (curr != last) {
         if (curr->data == key) {
           // Key found
-            return true; 
+            return true;
         }
         curr = curr->next;
     }
@@ -47161,15 +47166,15 @@ bool search(Node* last, int key) {
     // Check the last node
     if (last->data == key) {
       // Key found
-        return true; 
+        return true;
     }
     // Key not found
-    return false; 
+    return false;
 }
 
 void printList(Node* last) {
    if(last == NULL) return;
-  
+
     Node *head = last->next;
     while (true){
         cout << head->data << " ";
@@ -47599,11 +47604,11 @@ else {
 ````
 
 
-  
+
 
 **Output**
 ```
-Original list: 2 3 4 
+Original list: 2 3 4
 Value 3 found in the list.
 
 ```
@@ -47627,7 +47632,7 @@ Applications of Circular Linked Lists
 -------------------------------------
 
 * It is used for time-sharing among different users, typically through a
-  
+
   ****Round-Robin scheduling mechanism.****
 * In multiplayer games, a circular linked list can be used to switch between players. After the last player’s turn, the list cycles back to the first player.
 * Circular linked lists are often used in buffering applications, such as streaming data, where data is continuously produced and consumed.
@@ -47640,17 +47645,17 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 * Linked Lists are mostly used because of their effective insertion and deletion.  We only need to change few pointers (or references) to insert (or delete) an item in the middle
 * [Insertion and deletion](https://www.geeksforgeeks.org/insertion-deletion-stl-set-c/)
   at any point in a linked list take O(1) time. Whereas in an
-  
+
   [array](https://www.geeksforgeeks.org/array-data-structure/)
   data structure, insertion / deletion in the middle takes O(n) time.
 * This data structure is simple and can be also used to implement
-  
+
   [a stack](https://www.geeksforgeeks.org/stack-data-structure/)
   ,
-  
+
   [queues,](https://www.geeksforgeeks.org/queue-data-structure/)
   and other
-  
+
   [abstract data structures](https://www.geeksforgeeks.org/abstract-data-types/)
   .
 * Implementation of Queue and Deque data structures : Simple array implementation is not efficient at all. We must use circular array to efficiently implement which is complex. But with linked list, it is easy and straightforward. That is why most of the language libraries use Linked List internally to implement these data structures..
@@ -47660,7 +47665,7 @@ Applications of Linked Lists:
 -----------------------------
 
 * Linked Lists can be used to implement stacks, queue, deque,
-  
+
   [sparse matrices](https://www.geeksforgeeks.org/sparse-matrix-representation/)
   and adjacency list representation of graphs.
 * [Dynamic memory allocation](https://www.geeksforgeeks.org/what-is-dynamic-memory-allocation/)
@@ -47707,18 +47712,18 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 > ****Input:****
 > LinkedList = 1->3->1->2->1
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 5
-> 
-> 
+>
+>
 > ****Input:****
 > LinkedList = 2->4->1->9->5->3->6
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 7
 
@@ -47726,11 +47731,11 @@ Iterative Approach to Find the Length of a Linked List:
 -------------------------------------------------------
 
 > The idea is similar to
-> 
+>
 > [traversal of Linked List](https://www.geeksforgeeks.org/traversal-of-singly-linked-list/)
 > with an additional variable
-> 
-> 
+>
+>
 > to count the number of nodes in the Linked List.
 
 
@@ -47772,7 +47777,7 @@ public:
 
 // Counts number of nodes in linked list
 int countNodes(Node* head) {
-      
+
     // Initialize count with 0
     int count = 0;
 
@@ -47781,21 +47786,21 @@ int countNodes(Node* head) {
 
     // Traverse till we reach nullptr
     while (curr != nullptr) {
-        
+
           // Increment count by 1
         count++;
-        
+
           // Move pointer to next node
         curr = curr->next;
     }
-      
+
       // Return the count of nodes
     return count;
 }
 
 // Driver code
 int main() {
-      
+
     // Create a hard-coded linked list:
     // 1 -> 3 -> 1 -> 2 -> 1
     Node* head = new Node(1);
@@ -47828,7 +47833,7 @@ struct Node {
 
 // Function to create a new node
 struct Node* createNode(int new_data) {
-    struct Node* new_node = 
+    struct Node* new_node =
        (struct Node*)malloc(sizeof(struct Node));
     new_node->data = new_data;
     new_node->next = NULL;
@@ -47845,21 +47850,21 @@ int countNodes(struct Node* head) {
 
     // Traverse till we reach NULL
     while (curr != NULL) {
-      
+
         // Increment count by 1
         count++;
-        
+
           // Move pointer to next node
         curr = curr->next;
     }
-    
+
     // Return the count of nodes
     return count;
 }
 
 // Driver code
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 3 -> 1 -> 2 -> 1
     struct Node* head = createNode(1);
@@ -48010,10 +48015,10 @@ class Node {
 }
 
 class GFG {
-  
+
     // Counts number of nodes in linked list
     static int CountNodes(Node head) {
-        
+
           // Initialize count with 0
         int count = 0;
 
@@ -48106,7 +48111,7 @@ console.log("Count of nodes is " + countNodes(head));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -48119,7 +48124,7 @@ O(N), Where
 ****N****
 is the size of the linked list
 
-  
+
 
 ****Auxiliary Space:****
 O(1), As constant extra space is used.
@@ -48129,13 +48134,13 @@ Recursive Approach to Find the Length of a Linked List:
 -------------------------------------------------------
 
 > The idea is to use
-> 
+>
 > [recursion](https://www.geeksforgeeks.org/introduction-to-recursion-data-structure-and-algorithm-tutorials/)
 > by maintaining a function, say
-> 
+>
 > ****countNodes(node)****
 > which takes a node as an argument and calls itself with the next node until we reach the end of the Linked List. Each of the recursive call returns
-> 
+>
 > ****1 + count of remaining nodes****
 > .
 
@@ -48179,7 +48184,7 @@ int countNodes(Node* head) {
 
 // Driver code
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 3 -> 1 -> 2 -> 1
     Node* head = new Node(1);
@@ -48220,7 +48225,7 @@ struct Node* createNode(int new_data) {
 
 // Recursively count number of nodes in linked list
 int countNodes(struct Node* head) {
-      
+
     // Base Case
     if (head == NULL) {
         return 0;
@@ -48232,7 +48237,7 @@ int countNodes(struct Node* head) {
 
 // Driver code
 int main() {
-      
+
     // Create a hard-coded linked list:
     // 1 -> 3 -> 1 -> 2 -> 1
     struct Node* head = createNode(1);
@@ -48269,7 +48274,7 @@ class Node {
 // Recursively count number of nodes in linked list
 public class GFG {
     public static int countNodes(Node head) {
-          
+
         // Base Case
         if (head == null) {
             return 0;
@@ -48280,7 +48285,7 @@ public class GFG {
     }
 
     public static void main(String[] args) {
-          
+
         // Create a hard-coded linked list:
         // 1 -> 3 -> 1 -> 2 -> 1
         Node head = new Node(1);
@@ -48321,7 +48326,7 @@ def count_nodes(head):
 
 # Driver code
 if __name__ == "__main__":
-      
+
     # Create a hard-coded linked list:
     # 1 -> 3 -> 1 -> 2 -> 1
     head = Node(1)
@@ -48358,7 +48363,7 @@ public class Node {
 // Recursively count number of nodes in linked list
 public class GFG {
     public static int CountNodes(Node head) {
-      
+
         // Base Case
         if (head == null) {
             return 0;
@@ -48370,7 +48375,7 @@ public class GFG {
 
     // Driver code
     public static void Main() {
-      
+
         // Create a hard-coded linked list:
         // 1 -> 3 -> 1 -> 2 -> 1
         Node head = new Node(1);
@@ -48427,7 +48432,7 @@ console.log("Count of nodes is " + countNodes(head));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -48440,7 +48445,7 @@ O(N), where
 ****N****
 is the length of Linked List.
 
-  
+
 
 ****Auxiliary Space:****
 O(N), Extra space is used in the recursion call stack.', '', 'Find Length of a Linked List (Iterative and Recursive)', 5, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null, null);
@@ -48451,28 +48456,28 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 > ****Input:****
 > 1->2->3->4->5->null
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 1 2 3 4 5
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > Every element of each node from head node to last node is printed.
-> 
-> 
+>
+>
 > ****Input:****
 > 10->20->30->40->50->null
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 10 20 30 40 50
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > Every element of each node from head node to last node is printed.
 
@@ -48539,7 +48544,7 @@ void printList(Node* head) {
 //Driver Code Starts{
 
 int main() {
-  
+
     // Create a linked list: 10 -> 20 -> 30 -> 40
     Node* head = new Node(10);
     head->next = new Node(20);
@@ -48773,7 +48778,7 @@ function printList(head) {
         // Moving to the next node
         head = head.next;
     }
-    
+
     console.log(result.trim());
 }
 
@@ -48794,11 +48799,11 @@ printList(head);
 ````
 
 
-  
+
 
 **Output**
 ```
-10 20 30 40 
+10 20 30 40
 
 ```
 
@@ -48808,7 +48813,7 @@ O(n), where
 ****n****
 is the number of nodes in the linked list.
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -48867,7 +48872,7 @@ void printList(Node* head) {
 }
 
 int main() {
-  
+
     // Create a linked list: 10 -> 20 -> 30 -> 40
     Node* head = new Node(10);
     head->next = new Node(20);
@@ -48904,7 +48909,7 @@ struct Node* createNode(int new_data) {
 
 // Function to print the singly linked list
 void printList(struct Node* head) {
-  
+
     // Base condition is when the head is nullptr
     if (head == NULL) {
         return;
@@ -48918,7 +48923,7 @@ void printList(struct Node* head) {
 }
 
 int main() {
-  
+
     // Create a linked list: 10 -> 20 -> 30 -> 40
     struct Node* head = createNode(10);
     head->next = createNode(20);
@@ -48965,7 +48970,7 @@ class GfG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a linked list: 10 -> 20 -> 30 -> 40
         Node head = new Node(10);
         head.next = new Node(20);
@@ -48984,26 +48989,26 @@ Python
 # A linked list node
 class Node:
     def __init__(self, data):
-      
+
         # Constructor to initialize a new node with data
         self.data = data
         self.next = None
 
 # Function to print the singly linked list
 def printList(head):
-  
+
     # Base condition is when the head is nullptr
     if head is None:
         return
-      
+
     # Printing the current node data
     print(head.data, end=" ")
-    
+
     # Moving to the next node
     printList(head.next)
 
 if __name__ == "__main__":
-  
+
     # Create a linked list: 10 -> 20 -> 30 -> 40
     head = Node(10)
     head.next = Node(20)
@@ -49035,7 +49040,7 @@ class GfG {
 
     // Function to print the singly linked list
     static void printList(Node head) {
-      
+
         // Base condition is when the head is nullptr
         if (head == null) {
             return;
@@ -49049,7 +49054,7 @@ class GfG {
     }
 
     static void Main() {
-      
+
         // Create a linked list: 10 -> 20 -> 30 -> 40
         Node head = new Node(10);
         head.Next = new Node(20);
@@ -49063,11 +49068,11 @@ class GfG {
 ````
 
 
-  
+
 
 **Output**
 ```
-10 20 30 40 
+10 20 30 40
 
 ```
 
@@ -49077,7 +49082,7 @@ O(n), where
 ****n****
 is number of nodes in the linked list.
 
-  
+
 
 ****Space complexity:****
 O(n) because of recursive stack space.', '', 'Print Linked List', 6, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null, null);
@@ -49094,28 +49099,28 @@ is present in the linked list or not.
 
 > ****Input:****
 > 14 -> 21 -> 11 -> 30 -> 10, key = 14
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > Yes
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > 14 is present in the linked list.
-> 
-> 
+>
+>
 > ****Input:****
 > 6 -> 21 -> 17 -> 30 -> 10 -> 8, key = 13
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > No
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > No node in the linked list has value = 13.
 
@@ -49128,10 +49133,10 @@ Search an element in a Linked List (Iterative Approach) – O(N) Time and O(1) S
 -----------------------------------------------------------------------------------
 
 > The idea is to traverse all the nodes of the linked list, starting from the
-> 
+>
 > ****head****
 > . While traversing, if we find a node whose value is equal to
-> 
+>
 > ****key****
 > then print “Yes”, otherwise print “No”.
 
@@ -49141,16 +49146,16 @@ Follow the below steps to solve the problem:
 
 
 * Initialize a node pointer,
-  
+
   ****curr = head****
   .
 * Do following while current is not NULL
   + If the current value (i.e.,
-    
+
     ****curr->key****
     ) is equal to the key being searched return true.
   + Otherwise, move to the next node (
-    
+
     ****curr = curr->next****
     ).
 * If the key is not found, return false
@@ -49218,7 +49223,7 @@ int main() {
 
       // Key to search in the linked list
       int key = 14;
-  
+
     if (searchKey(head, key))
         cout << "Yes";
     else
@@ -49246,7 +49251,7 @@ struct Node {
 
 // Function to create a new node
 struct Node* createNode(int new_data) {
-    struct Node* new_node = 
+    struct Node* new_node =
        (struct Node*)malloc(sizeof(struct Node));
     new_node->data = new_data;
     new_node->next = NULL;
@@ -49277,7 +49282,7 @@ bool searchKey(struct Node* head, int key) {
 
 // Driver code
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 14 -> 21 -> 13 -> 30 -> 10
     struct Node* head = createNode(14);
@@ -49288,7 +49293,7 @@ int main() {
 
       // Key to search in the linked list
       int key = 14;
-  
+
     if (searchKey(head, key))
         printf("Yes");
     else
@@ -49341,7 +49346,7 @@ public class GFG {
         // false
         return false;
     }
-    
+
       // Driver code
     public static void main(String[] args) {
 
@@ -49373,7 +49378,7 @@ Python
 
 # A Linked List Node
 class Node:
-  
+
       # Constructor to intialize a node with data
     def __init__(self, new_data):
         self.data = new_data
@@ -49381,7 +49386,7 @@ class Node:
 
 # Checks whether key is present in linked list
 def search_key(head, key):
-  
+
     # Initialize curr with the head of linked list
     curr = head
 
@@ -49547,7 +49552,7 @@ console.log("No");
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -49560,7 +49565,7 @@ O(N), Where
 ****N****
 is the number of nodes in the Linked List.
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -49570,16 +49575,16 @@ Search an element in a Linked List (Recursive Approach) – O(N) Time and O(N) S
 -----------------------------------------------------------------------------------
 
 > The idea is to recursively traverse all the nodes starting from the
-> 
+>
 > ****head****
 > of linked list. For any node, if the value is equal to
-> 
+>
 > ****key****
 > , then return true. Otherwise, recursively search the next node. If at any point the head reaches
-> 
+>
 > ****NULL****
 > , it means that we have reached the end of linked list so return
-> 
+>
 > ****false****
 > .
 
@@ -49589,7 +49594,7 @@ Follow the below steps to solve the problem:
 
 * If the head is NULL, return false.
 * If the head’s key is the same as
-  
+
   ****X****
   , return true;
 * Else recursively search in the next node.
@@ -49611,7 +49616,7 @@ using namespace std;
 struct Node {
     int data;
     Node* next;
-  
+
       // Constructor to initialize a new node with data
     Node(int new_data) {
         data = new_data;
@@ -49621,7 +49626,7 @@ struct Node {
 
 // Checks whether the key is present in linked list
 bool searchKey(struct Node* head, int key) {
-  
+
     // Base case
     if (head == NULL)
         return false;
@@ -49636,7 +49641,7 @@ bool searchKey(struct Node* head, int key) {
 
 // Driver code
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 14 -> 21 -> 13 -> 30 -> 10
     struct Node* head = new Node(14);
@@ -49647,7 +49652,7 @@ int main() {
 
       // Key to search in the linked list
       int key = 14;
-  
+
     if (searchKey(head, key))
         printf("Yes");
     else
@@ -49675,7 +49680,7 @@ struct Node {
 
 // Function to create a new node
 struct Node* createNode(int new_data) {
-    struct Node* new_node = 
+    struct Node* new_node =
        (struct Node*)malloc(sizeof(struct Node));
     new_node->data = new_data;
     new_node->next = NULL;
@@ -49684,7 +49689,7 @@ struct Node* createNode(int new_data) {
 
 // Checks whether the key is present in linked list
 bool searchKey(struct Node* head, int key) {
-      
+
     // Base case
     if (head == NULL)
         return 0;
@@ -49699,7 +49704,7 @@ bool searchKey(struct Node* head, int key) {
 
 // Driver code
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 14 -> 21 -> 13 -> 30 -> 10
     struct Node* head = createNode(14);
@@ -49710,7 +49715,7 @@ int main() {
 
       // Key to search in the linked list
       int key = 14;
-  
+
     if (searchKey(head, key))
         printf("Yes");
     else
@@ -49787,7 +49792,7 @@ Python
 
 # A Linked List Node
 class Node:
-  
+
       # Constructor to initialize a new node with data
     def __init__(self, new_data):
         self.data = new_data
@@ -49795,7 +49800,7 @@ class Node:
 
 # Checks whether the key is present in linked list
 def searchKey(head, key):
-  
+
     # Base case
     if head is None:
         return False
@@ -49809,7 +49814,7 @@ def searchKey(head, key):
 
 # Driver code
 if __name__ == "__main__":
-  
+
     # Create a hard-coded linked list:
     # 14 -> 21 -> 13 -> 30 -> 10
     head = Node(14)
@@ -49840,7 +49845,7 @@ using System;
 class Node {
     public int data;
     public Node next;
-  
+
     // Constructor to initialize a new node with data
     public Node(int new_data) {
         data = new_data;
@@ -49850,10 +49855,10 @@ class Node {
 
 // Checks whether the key is present in linked list
 class GFG {
-      
+
       // Checks whether the key is present in linked list
     static bool SearchKey(Node head, int key) {
-      
+
         // Base case
         if (head == null)
             return false;
@@ -49867,7 +49872,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hard-coded linked list:
         // 14 -> 21 -> 13 -> 30 -> 10
         Node head = new Node(14);
@@ -49878,7 +49883,7 @@ class GFG {
 
         // Key to search in the linked list
         int key = 14;
-  
+
         if (SearchKey(head, key))
             Console.WriteLine("Yes");
         else
@@ -49909,11 +49914,11 @@ class Node {
 function searchKey(head, key) {
 
     // Base case
-    if (head === null) 
+    if (head === null)
         return false;
 
     // If key is present in current node, return true
-    if (head.data === key) 
+    if (head.data === key)
         return true;
 
     // Recur for remaining list
@@ -49939,7 +49944,7 @@ console.log("No");
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -49952,7 +49957,7 @@ O(N), where
 ****N****
 is the number of nodes in the linked list.
 
-  
+
 
 ****Auxiliary Space:****
 O(N), Stack space used by recursive calls', '', 'Search an element in a Linked List (Iterative and Recursive)', 7, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null, null);
@@ -49968,18 +49973,18 @@ Position will be valid (i.e, 1 <= position <= linked list length)
 
 > ****Input:****
 > position = 2, Linked List = 8->2->3->1->7
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > Linked List =  8->3->1->7
-> 
-> 
+>
+>
 > ****Input:****
 > position = 1, Linked List = 8->2->3->1->7
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > Linked List = 2->3->1->7
 
@@ -49990,16 +49995,16 @@ Deletion at a specified position in a linked list involves removing a node from 
 
 
 > To perform the deletion, If the position is 1, we update the
-> 
+>
 > ****head****
 > to point to the
-> 
+>
 > ****next node****
 > and delete the current head. For other positions, we traverse the list to reach the node just before the specified
-> 
+>
 > ****position****
 > . If the target node exists, we adjust the next of this previous node to point to next of
-> 
+>
 > ****next nodes****
 > , which will result in skipping the target node.
 
@@ -50012,51 +50017,51 @@ Step-by-step approach:
 
 
 * If list is empty (
-  
+
   ****head****
   ==
-  
+
   ****NULL)****
   , returns the
-  
+
   ****head****
   .
 * If the
-  
+
   ****position****
   to delete is
-  
+
   ****1****
   (the head node):
   + Update
-    
+
     ****head = temp->next****
 * Traverse the list until reaching the desired position:
   + Initialize
-    
+
     ****prev****
     to keep track of the previous node.
   + Move
-    
+
     ****temp****
     through the list until the position is reached.
 * Check for Valid Position:
   + If
-    
+
     ****temp****
     becomes
-    
+
     ****NULL****
     , it means the position exceeds the number of nodes in the list. Print a message and return the
-    
+
     ****head****
     .
 * If the node to delete is found:
   + Set
-    
+
     ****prev->next****
     to
-    
+
     ****temp->next****
     , effectively skipping over the node to be deleted.
 
@@ -50507,7 +50512,7 @@ printList(head);
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -50519,7 +50524,7 @@ List after deletion : 1 -> 3 -> 4 -> 5 -> nullptr
 ****Time Complexity****
 : O(n), where n is the number of nodes in the list
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -50537,31 +50542,31 @@ the linked list completely.
 
 > ****Input:****
 > head: 1 -> 2 -> 3 -> 4 -> 5 -> NULL
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > NULL
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > Linked List is Deleted.
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > ****Input:****
 > head: 1 -> 12 -> 1 -> 4 -> 1 -> NULL
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > NULL
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > Linked List is Deleted.
 
@@ -50572,16 +50577,16 @@ Table of Content
 ### [Expected Approach – 1] Using Recursion – O(n) Time and O(n) Space:
 
 > The idea is to use
-> 
+>
 > [****recursion****](https://www.geeksforgeeks.org/introduction-to-recursion-2/)
 > to delete the entire linked list. Traverse from the
-> 
+>
 > ****head****
 > to the
-> 
+>
 > ****end****
 > of the list recursively. While backtracking, delete the
-> 
+>
 > ****currrent****
 > node. This ensures that each node is processed after its subsequent nodes.
 
@@ -50592,7 +50597,7 @@ Below is the implementation of the above approach:
 C++
 
 ````
-// C++ program to delete a linked list 
+// C++ program to delete a linked list
 // using recursion
 #include <iostream>
 using namespace std;
@@ -50634,7 +50639,7 @@ int main() {
     head->next->next->next = new Node(4);
     head->next->next->next->next = new Node(5);
 
-    deleteList(head); 
+    deleteList(head);
     cout << "NULL";
 
     return 0;
@@ -50645,7 +50650,7 @@ int main() {
 C
 
 ````
-// C program to delete a linked list 
+// C program to delete a linked list
 // using recursion
 #include <stdio.h>
 #include <stdlib.h>
@@ -50672,7 +50677,7 @@ void deleteList(struct Node* curr) {
 }
 
 struct Node* createNode(int new_data) {
-    struct Node* new_node = 
+    struct Node* new_node =
         (struct Node*)malloc(sizeof(struct Node));
     new_node->data = new_data;
     new_node->next = NULL;
@@ -50713,7 +50718,7 @@ class Node {
 
 
 public class GfG {
-  
+
     public static void main(String[] args) {
 
         // Create a hard-coded linked list:
@@ -50723,7 +50728,7 @@ public class GfG {
         head.next.next = new Node(3);
         head.next.next.next = new Node(4);
         head.next.next.next.next = new Node(5);
-         
+
            // Set head to null to remove the reference to the linked list.
         // This allows Java\'s garbage collector to automatically clean up
         // the memory used by the nodes, as there are no more references
@@ -50731,7 +50736,7 @@ public class GfG {
           head = null;
           System.out.print("NULL");
     }
-  
+
 }
 
 ````
@@ -50739,7 +50744,7 @@ public class GfG {
 Python
 
 ````
-# Python program to delete a linked list 
+# Python program to delete a linked list
 
 class Node:
     def __init__(self, x):
@@ -50756,12 +50761,12 @@ if __name__ == "__main__":
     head.next.next = Node(3)
     head.next.next.next = Node(4)
     head.next.next.next.next = Node(5)
-    
+
     # Set head to None to remove the reference to the linked list.
     # This allows Python\'s garbage collector to automatically reclaim
     # the memory used by the nodes, as there are no more references
     # to the nodes in the linked list.
-    head = None 
+    head = None
     print("NULL")
 
 ````
@@ -50786,7 +50791,7 @@ class Node {
 class GfG {
 
     static void Main() {
-         
+
         // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5
         Node head = new Node(1);
@@ -50794,7 +50799,7 @@ class GfG {
         head.next.next = new Node(3);
         head.next.next.next = new Node(4);
         head.next.next.next.next = new Node(5);
-      
+
            // Set head to null to remove the reference to the linked list.
         // This allows C#\'s garbage collector to automatically reclaim
         // the memory used by the nodes, as there are no more references
@@ -50836,7 +50841,7 @@ console.log("NULL");
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -50849,7 +50854,7 @@ O(n), where
 ****n****
 is the number of nodes in the given linked list.
 
-  
+
 
 ****Auxiliary Space:****
 O(n)
@@ -50858,25 +50863,25 @@ O(n)
 ### [Expected Approach – 2] Using Iteration – O(n) Time and O(1) Space:
 
 > The idea is to
-> 
+>
 > ****iteratively****
 > delete the list by starting from the
-> 
+>
 > ****head****
 > and moving towards the
-> 
+>
 > ****end****
 > . At each step, the function stores a
-> 
+>
 > ****reference****
 > to the
-> 
+>
 > ****next****
 > node, deletes the
-> 
+>
 > ****current****
 > node, and
-> 
+>
 > ****moves****
 > to the next node. This continues until all nodes are deleted.
 
@@ -50887,7 +50892,7 @@ Below is the implementation of the above approach:
 C++
 
 ````
-// C++ program to delete a linked list 
+// C++ program to delete a linked list
 // using iteration
 #include <iostream>
 using namespace std;
@@ -50932,8 +50937,8 @@ int main() {
     head->next->next->next->next = new Node(5);
 
     deleteList(head);
-    head = nullptr; 
- 
+    head = nullptr;
+
     cout << "NULL";
 
     return 0;
@@ -50944,7 +50949,7 @@ int main() {
 C
 
 ````
-// C program to delete a linked list 
+// C program to delete a linked list
 // using iteration
 #include <stdio.h>
 #include <stdlib.h>
@@ -50973,7 +50978,7 @@ void deleteList(struct Node* curr) {
 }
 
 struct Node* createNode(int new_data) {
-    struct Node* new_node = 
+    struct Node* new_node =
         (struct Node*)malloc(sizeof(struct Node));
 
     new_node->data = new_data;
@@ -50994,7 +50999,7 @@ int main() {
 
     deleteList(head);
     head = NULL;
-  
+
     printf("NULL");
 
     return 0;
@@ -51027,7 +51032,7 @@ public class GfG {
         head.next.next = new Node(3);
         head.next.next.next = new Node(4);
         head.next.next.next.next = new Node(5);
-         
+
            // Set head to null to remove the reference to the linked list.
         // This allows Java\'s garbage collector to automatically clean up
         // the memory used by the nodes, as there are no more references
@@ -51035,7 +51040,7 @@ public class GfG {
           head = null;
           System.out.print("NULL");
     }
-  
+
 }
 
 ````
@@ -51043,7 +51048,7 @@ public class GfG {
 Python
 
 ````
-# Python program to delete a linked list 
+# Python program to delete a linked list
 
 class Node:
     def __init__(self, x):
@@ -51060,12 +51065,12 @@ if __name__ == "__main__":
     head.next.next = Node(3)
     head.next.next.next = Node(4)
     head.next.next.next.next = Node(5)
-    
+
     # Set head to None to remove the reference to the linked list.
     # This allows Python\'s garbage collector to automatically reclaim
     # the memory used by the nodes, as there are no more references
     # to the nodes in the linked list.
-    head = None 
+    head = None
     print("NULL")
 
 ````
@@ -51091,7 +51096,7 @@ class Node {
 class GfG {
 
     static void Main() {
-         
+
         // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5
         Node head = new Node(1);
@@ -51099,7 +51104,7 @@ class GfG {
         head.next.next = new Node(3);
         head.next.next.next = new Node(4);
         head.next.next.next.next = new Node(5);
-      
+
            // Set head to null to remove the reference to the linked list.
         // This allows C#\'s garbage collector to automatically reclaim
         // the memory used by the nodes, as there are no more references
@@ -51141,7 +51146,7 @@ console.log("NULL");
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -51154,7 +51159,7 @@ O(n), where
 ****n****
 is the number of nodes in the given linked list.
 
-  
+
 
 ****Auxiliary Space:****
 O(1)', '', 'Write a function to delete a Linked List', 9, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null, null);
@@ -51182,32 +51187,32 @@ then
 
 > ****Input****
 > : 1->10->30->14, index = 2
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : 10
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : The node value at index 2 is 10
-> 
-> 
+>
+>
 > ![Maximum-of-all-subarrays-of-size-K](https://media.geeksforgeeks.org/wp-content/uploads/20240822110836/Maximum-of-all-subarrays-of-size-K.webp)
-> 
->   
-> 
+>
+>
+>
 > ****Input****
 > : 1->32->12->10->30->14->100, index = 8
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : -1
-> 
->   
-> 
+>
+>
+>
 > ****Explanation****
 > : No such node exists at index = 8.
 
@@ -51218,32 +51223,32 @@ Table of Content
 ### ****[Naive Approach] Recursive Method – O(n) Time and O(n) Space****
 
 > The idea is to use the
-> 
+>
 > [****recursive****](https://www.geeksforgeeks.org/introduction-to-recursion-2/)
 > ****method****
 > to find the value of
-> 
+>
 > ****index****
 > node
-> 
+>
 > ****(1- based)****
 > . Call the function
-> 
+>
 > ****GetNth(head,index)****
 > recusively, where
-> 
+>
 > ****head****
 > will represent the
-> 
+>
 > ****current head****
 > node . Decrement the index
-> 
+>
 > ****value by 1****
 > on every recursion call. When the
-> 
+>
 > ****n reaches 1****
 > ,we will return the
-> 
+>
 > ****data****
 > of current node.
 
@@ -51271,7 +51276,7 @@ struct Node {
 // Takes head pointer of the linked list and index
 // as arguments and returns data at index.
 int GetNth(Node* head, int index) {
-  
+
     // If the list is empty or index is out of bounds
     if (head == NULL)
         return -1;
@@ -51286,7 +51291,7 @@ int GetNth(Node* head, int index) {
 
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 2 -> 3 -> 4 -> 5
     Node* head = new Node(1);
@@ -51317,7 +51322,7 @@ struct Node {
 // Takes head pointer of the linked list and index
 // as arguments and returns data at index.
 int GetNth(struct Node *head, int index) {
-  
+
     // If the list is empty or index is out of bounds
     if (head == NULL)
         return -1;
@@ -51339,7 +51344,7 @@ struct Node *createNode(int new_data) {
 }
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 2 -> 3 -> 4 -> 5
     struct Node *head = createNode(1);
@@ -51375,8 +51380,8 @@ class GfG {
 
     // Takes head pointer of the linked list and index
     // as arguments and return data at index*/
-    static int GetNth(Node head, int index) { 
-      
+    static int GetNth(Node head, int index) {
+
         if (head == null)
             return -1;
 
@@ -51388,9 +51393,9 @@ class GfG {
         // head to next pointer
         return GetNth(head.next, index - 1);
     }
-  
+
     public static void main(String args[]) {
-      
+
         // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5
         Node head = new Node(1);
@@ -51431,7 +51436,7 @@ def get_nth_node(head, index):
             get_nth_node(head.next, index-1)
 
 if __name__ == "__main__":
-  
+
     # Create a linked list: 1 -> 2 -> 3 -> 4 -> 5
     head = Node(1)
     head.next = Node(2)
@@ -51464,9 +51469,9 @@ class Node {
 class GfG {
 
     // Takes head pointer of the linked list and index
-    // as arguments and returns data at index 
+    // as arguments and returns data at index
     static int GetNth(Node head, int index) {
-      
+
         // Base Condition
         if (head == null)
             return -1;
@@ -51480,7 +51485,7 @@ class GfG {
     }
 
     public static void Main() {
-      
+
         // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5
         Node head = new Node(1);
@@ -51538,7 +51543,7 @@ console.log("Element at index 3 is", GetNth(head, 3));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -51552,7 +51557,7 @@ O(n)
 ****,****
 where n is the nth node of linked list.
 
-  
+
 
 ****Auxiliary Space:****
 O(n), for recursive call stack
@@ -51561,43 +51566,43 @@ O(n), for recursive call stack
 ### ****[Expected Approach-2] Iterative Method – O(n) Time and O(1) Space****
 
 > The idea is similar to recursive
-> 
+>
 > ****approach to find****
 > the value at
-> 
+>
 > ****index****
 > node
-> 
+>
 > ****(1- based)****
 > .We will use a variable say,
-> 
+>
 > ****count = 1****
 > to track the node
-> 
+>
 > ****s.****
 > Traverse the list until
-> 
+>
 > ****curr != NULL****
 > . Increment the
-> 
-> 
+>
+>
 > count
-> 
-> 
+>
+>
 > if count is
-> 
+>
 > ****not equal****
 > to
-> 
+>
 > ****index****
 > node
-> 
+>
 > ****(1- based) ,****
 > else if count equals to the
-> 
+>
 > ****index****
 > node, return data at
-> 
+>
 > ****current****
 > node.
 
@@ -51640,7 +51645,7 @@ int GetNth(Node *head, int index) {
 }
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 2 -> 3 -> 4 -> 5
     Node *head = new Node(1);
@@ -51692,7 +51697,7 @@ struct Node *createNode(int new_data) {
 }
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 2 -> 3 -> 4 -> 5
     struct Node *head = createNode(1);
@@ -51721,7 +51726,7 @@ class Node {
 }
 
 class GfG {
-  
+
     // Function to find the nth node in the list iteratively
     static int getNthNodeIterative(Node head, int index) {
         Node current = head;
@@ -51742,7 +51747,7 @@ class GfG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5
         Node head = new Node(1);
@@ -51791,9 +51796,9 @@ def get_nth_node_iterative(head, n):
 
     # Return -1 if the index is out of bounds
     return -1
-  
+
 if __name__ == "__main__":
-  
+
     # Create a hard-coded linked list:
     # 1 -> 2 -> 3 -> 4 -> 5
     head = Node(1)
@@ -51813,7 +51818,7 @@ if __name__ == "__main__":
 C#
 
 ````
-// Iterative C# program to find the nth node in 
+// Iterative C# program to find the nth node in
 // a linked list
 
 using System;
@@ -51828,7 +51833,7 @@ class Node {
 }
 
 class GfG {
-  
+
     // Given the head of a list and index, find the nth node
     // and return its data
     static int GetNthNode(Node head, int n) {
@@ -51850,7 +51855,7 @@ class GfG {
     }
 
    public static void Main() {
-      
+
         // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5
         Node head = new Node(1);
@@ -51893,7 +51898,7 @@ function getNth(head, index) {
     // Traverse the linked list
     while (current !== null) {
         if (count === index) {
-            // Return data at the current 
+            // Return data at the current
             // node if index matches
             return current.data;
         }
@@ -51924,7 +51929,7 @@ else {
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -51938,7 +51943,7 @@ O(n)
 ****,****
 where n is the nth node of linked list.
 
-  
+
 
 ****Auxiliary Space:****
 O(1)', '', 'Write a function to get Nth node in a Linked List', 10, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null, null);
@@ -51955,28 +51960,28 @@ nodes and a number
 
 > ****Input:****
 > 1 -> 2 -> 3 -> 4, N = 3
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 2
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > Node 2 is the third node from the end of the linked list.
-> 
-> 
+>
+>
 > ****Input:****
 > 35 -> 15 -> 4 -> 20, N = 4
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 35
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > Node 35 is the fourth node from the end of the linked list.
 
@@ -51987,10 +51992,10 @@ Table of Content
 ### ****[Naive Approach]**** Finding the length of list – Two Pass – O(M) Time and O(1) Space
 
 > The idea is to count the number of nodes in linked list in the first pass, say
-> 
+>
 > ****len****
 > . In the second pass, return the
-> 
+>
 > ****(len – n + 1)th****
 > nodes from beginning of the Linked List.
 
@@ -52006,7 +52011,7 @@ using namespace std;
 struct Node {
     int data;
     Node* next;
-    
+
       // Constructor to initialize a new node with data
     Node(int new_data) {
         data = new_data;
@@ -52017,7 +52022,7 @@ struct Node {
 // Function to find the Nth node from the last of a linked list
 int findNthFromLast(Node* head, int N) {
     int len = 0, i;
-  
+
       // Pointer to store the copy of head
     Node* temp = head;
 
@@ -52042,7 +52047,7 @@ int findNthFromLast(Node* head, int N) {
 }
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 35 -> 15 -> 4 -> 20
     Node* head = new Node(35);
@@ -52073,7 +52078,7 @@ struct Node {
 // Function to find the Nth node from the last of a linked list
 int findNthFromLast(struct Node* head, int N) {
     int len = 0, i;
-  
+
     // Pointer to store the copy of head
     struct Node* temp = head;
 
@@ -52098,7 +52103,7 @@ int findNthFromLast(struct Node* head, int N) {
 
 // Function to create a new node
 struct Node* createNode(int new_data) {
-    struct Node* new_node = 
+    struct Node* new_node =
        (struct Node*)malloc(sizeof(struct Node));
     new_node->data = new_data;
     new_node->next = NULL;
@@ -52106,14 +52111,14 @@ struct Node* createNode(int new_data) {
 }
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 35 -> 15 -> 4 -> 20
     struct Node* head = createNode(35);
     head->next = createNode(15);
     head->next->next = createNode(4);
     head->next->next->next = createNode(20);
-  
+
     // Function Call to find the 4th node from end
     printf("%d\\n", findNthFromLast(head, 4));
 
@@ -52132,7 +52137,7 @@ Java
 class Node {
     int data;
     Node next;
-    
+
     // Constructor to initialize a new node with data
     Node(int new_data) {
         data = new_data;
@@ -52144,7 +52149,7 @@ public class GFG {
       // Function to find the Nth node from the last of a linked list
     static int findNthFromLast(Node head, int N) {
         int len = 0, i;
-      
+
         // Pointer to store the copy of head
         Node temp = head;
 
@@ -52168,7 +52173,7 @@ public class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hard-coded linked list:
         // 35 -> 15 -> 4 -> 20
         Node head = new Node(35);
@@ -52190,7 +52195,7 @@ Python
 
 # Link list node
 class Node:
-  
+
    # Constructor to initialize a new node with data
     def __init__(self, new_data):
         self.data = new_data
@@ -52219,7 +52224,7 @@ def findNthFromLast(head, N):
     return temp.data
 
 if __name__ == "__main__":
-  
+
     # Create a hard-coded linked list:
     # 35 -> 15 -> 4 -> 20
     head = Node(35)
@@ -52242,7 +52247,7 @@ using System;
 class Node {
     public int data;
     public Node next;
-    
+
     // Constructor to initialize a new node with data
     public Node(int new_data) {
         data = new_data;
@@ -52276,7 +52281,7 @@ class GFG {
     }
 
     static void Main() {
-      
+
         // Create a hard-coded linked list:
         // 35 -> 15 -> 4 -> 20
         Node head = new Node(35);
@@ -52298,7 +52303,7 @@ JavaScript
 
 // Link list node
 class Node {
-    
+
     // Constructor to initialize a new node with data
     constructor(new_data) {
         this.data = new_data;
@@ -52345,7 +52350,7 @@ console.log(findNthFromLast(head, 4));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -52358,7 +52363,7 @@ O(M) where
 ****M****
 is the size of the linked list
 
-  
+
 
 ****Auxiliary Space:****
 O(1)
@@ -52367,22 +52372,22 @@ O(1)
 ### [Expected Approach] Using Two Pointers – One Pass – O(M) Time and O(1) Space
 
 > The idea is to maintain two pointers, say
-> 
+>
 > ****main\\_ptr****
 > and
-> 
+>
 > ****ref\\_ptr****
 > point to the head of Linked List and move
-> 
+>
 > ****ref\\_ptr****
 > to the Nth node from the head to ensure that the distance between main\\_ptr and ref\\_ptr is
-> 
+>
 > ****(N – 1)****
 > . Now, move both the pointers simultaneously until ref\\_ptr reaches the last node. Since the distance between main\\_ptr and ref\\_ptr is (N – 1), so when ref\\_ptr will reach the
-> 
+>
 > ****last node****
 > , main\\_ptr will reach
-> 
+>
 > ****Nth****
 > node from the end of Linked List. Return the value of node pointed by main\\_ptr.
 
@@ -52393,17 +52398,17 @@ Below image is a dry run of the above approach:
 
 
 
-  
+
 
 
 Follow the given steps to solve the problem:
 
 
 * Maintain two pointers
-  
+
   ****main\\_ptr****
   and
-  
+
   ****ref\\_ptr****
 * Move ref\\_ptr to the Nth node from the start
 * Now move both main\\_ptr and ref\\_ptr, until the ref\\_ptr reaches the last node
@@ -52431,7 +52436,7 @@ struct Node {
 
 // function to find Nth node from the end of linked list
 int nthFromEnd(Node *head, int N) {
-  
+
     // create two pointers main_ptr and ref_ptr
     // initially pointing to head.
     Node* main_ptr = head;
@@ -52440,8 +52445,8 @@ int nthFromEnd(Node *head, int N) {
     // move ref_ptr to the n-th node from beginning.
     for (int i = 1; i < N; i++) {
         ref_ptr = ref_ptr->next;
-          
-          // If the ref_ptr reaches NULL, then it means 
+
+          // If the ref_ptr reaches NULL, then it means
           // N > length of linked list
         if (ref_ptr == NULL) {
             return -1;
@@ -52564,7 +52569,7 @@ public class GFG {
 
     // Function to find Nth node from the end of linked list
     static int nthFromEnd(Node head, int N) {
-      
+
         // Create two pointers main_ptr and ref_ptr
         // initially pointing to head.
         Node main_ptr = head;
@@ -52574,7 +52579,7 @@ public class GFG {
         for (int i = 1; i < N; i++) {
             ref_ptr = ref_ptr.next;
 
-            // If the ref_ptr reaches NULL, then it means 
+            // If the ref_ptr reaches NULL, then it means
             // N > length of linked list
             if (ref_ptr == null) {
                 return -1;
@@ -52592,7 +52597,7 @@ public class GFG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hard-coded linked list:
         // 35 -> 15 -> 4 -> 20
         Node head = new Node(35);
@@ -52614,7 +52619,7 @@ Python
 
 # Link list node
 class Node:
-  
+
       # Constructor to initialize a new node with data
     def __init__(self, new_data):
         self.data = new_data
@@ -52623,7 +52628,7 @@ class Node:
 # Function to find Nth node from the end of linked list
 def nth_from_end(head, N):
 
-    # Create two pointers main_ptr and ref_ptr 
+    # Create two pointers main_ptr and ref_ptr
     # initially pointing to head.
     main_ptr = head
     ref_ptr = head
@@ -52646,7 +52651,7 @@ def nth_from_end(head, N):
     return main_ptr.data
 
 if __name__ == "__main__":
-      
+
     # Create a hard-coded linked list:
     # 35 -> 15 -> 4 -> 20
     head = Node(35)
@@ -52707,7 +52712,7 @@ class GFG {
     }
 
     static void Main() {
-          
+
         // Create a hard-coded linked list:
         // 35 -> 15 -> 4 -> 20
         Node head = new Node(35);
@@ -52730,7 +52735,7 @@ JavaScript
 
 // Linked List Node
 class Node {
-    
+
     // Constructor to initialize a new node with data
     constructor(data) {
         this.data = data;
@@ -52746,9 +52751,9 @@ function nthFromEnd(head, N) {
     // Move refPtr to the N-th node from the beginning
     for (let i = 1; i < N; i++) {
         refPtr = refPtr.next;
-        
+
         if (refPtr === null) {
-        
+
             // If N is greater than the length of the linked list
             return -1;
         }
@@ -52776,7 +52781,7 @@ console.log(nthFromEnd(head, 4));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -52790,7 +52795,7 @@ O(M) where
 ****M****
 is the length of the linked list
 
-  
+
 
 ****Auxiliary Space:****
 O(1)', '', 'Program for Nth node from the end of a Linked List', 11, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null, null);
@@ -52808,28 +52813,28 @@ Example:
 
 > ****Input****
 > : 1<->2<->3<->4
-> 
->   
-> 
+>
+>
+>
 > ****output****
 > : 4
-> 
-> 
+>
+>
 > ****Input****
 > : 1<->2
-> 
->   
-> 
+>
+>
+>
 > ****output****
 > : 2
 
 ### By Traversing the Doubly linked list – O(n) Time and O(1) Space
 
 > The idea is to traverse the doubly linked list starting from the
-> 
+>
 > ****head****
 > node. Increment the
-> 
+>
 > ****size****
 > variable until we reaches end.
 
@@ -52838,23 +52843,23 @@ Algorithm :
 
 
 * Initialize a variable
-  
+
   ****size****
   to 0
 * Initialize a
-  
+
   ****curr****
   node to
-  
+
   ****head****
 * Do the following while the
-  
+
   ****curr node****
   is not NULL
   + ****curr = curr -> next****
   + ****size++;****
 * Return
-  
+
   ****size****
   .
 
@@ -52893,7 +52898,7 @@ int findSize(Node *curr) {
 }
 
 int main() {
-  
+
     // Create a hard-coded doubly linked list:
     // 1 <-> 2 <-> 3 <-> 4
     Node *head = new Node(1);
@@ -52932,8 +52937,8 @@ int findSize(struct Node* curr) {
   return size;
 }
 
-struct Node *createNode(int new_data) { 
-    struct Node *new_node = 
+struct Node *createNode(int new_data) {
+    struct Node *new_node =
       (struct Node *)malloc(sizeof(struct Node));
     new_node->data = new_data;
     new_node->next = NULL;
@@ -52942,7 +52947,7 @@ struct Node *createNode(int new_data) {
 }
 
 int main() {
-  
+
     // Create a hard-coded doubly linked list:
     // 1 <-> 2 <-> 3 <-> 4
     struct Node *head = createNode(1);
@@ -52968,7 +52973,7 @@ class Node {
     int data;
     Node next;
     Node prev;
-    
+
     Node(int val) {
         data = val;
         next = null;
@@ -52977,8 +52982,8 @@ class Node {
 }
 
 public class GfG {
-    
-    // This function returns the size of 
+
+    // This function returns the size of
       // the linked list
     static int findSize(Node curr) {
         int size = 0;
@@ -52990,7 +52995,7 @@ public class GfG {
     }
 
     public static void main(String[] args) {
-      
+
         // Create a hard-coded doubly linked list:
         // 1 <-> 2 <-> 3 <-> 4
         Node head = new Node(1);
@@ -53001,7 +53006,7 @@ public class GfG {
         head.next.next.next = new Node(4);
         head.next.next.next.prev = head.next.next;
 
-        System.out.println(findSize(head)); 
+        System.out.println(findSize(head));
     }
 }
 
@@ -53029,7 +53034,7 @@ def find_size(curr):
     return size
 
 if __name__ == "__main__":
-  
+
     # Create a hard-coded doubly linked list:
     # 1 <-> 2 <-> 3 <-> 4
     head = Node(1)
@@ -53055,7 +53060,7 @@ class Node {
     public int data;
     public Node next;
     public Node prev;
-   
+
     public Node(int val) {
         data = val;
         next = null;
@@ -53064,8 +53069,8 @@ class Node {
 }
 
 class GfG {
-    
-    // This function returns the size of 
+
+    // This function returns the size of
       // the linked list
     static int FindSize(Node curr) {
         int size = 0;
@@ -53077,7 +53082,7 @@ class GfG {
     }
 
     static void Main() {
-      
+
         // Create a hard-coded doubly linked list:
         // 1 <-> 2 <-> 3 <-> 4
         Node head = new Node(1);
@@ -53134,7 +53139,7 @@ console.log(findSize(head));
 ````
 
 
-  
+
 
 **Output**
 ```
@@ -53144,7 +53149,7 @@ console.log(findSize(head));
 ****Time Complexity: O(n),****
 where n is the number of nodes in the linked list.
 
-  
+
 
 ****Auxiliary Space:****
 
@@ -53163,58 +53168,58 @@ node of the linked list. Assume that k is always less than or equal to the lengt
 
 > ****Input:****
 > LinkedList: 1 -> 2 -> 3 -> 4 -> 5 -> 6, k = 2
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 1 -> 3 -> 5
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > After removing every 2nd node of the linked list, the resultant linked list will be: 1 -> 3 -> 5 .
-> 
-> 
+>
+>
 > ****Input:****
 > LinkedList: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10, k = 3
-> 
->   
-> 
+>
+>
+>
 > ****Output:****
 > 1 -> 2 -> 4 -> 5 -> 7 -> 8 -> 10
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > After removing every 3rd node of the linked list, the resultant linked list will be: 1 -> 2 -> 4 -> 5 -> 7 -> 8 -> 10.
 
 ### [Expected Approach – 1] Iterative Approach – O(n) Time and O(1) Space
 
 > The idea is to traverse the linked list while maintaining a
-> 
+>
 > ****counter****
 > to track node positions. Every time the counter reaches
-> 
+>
 > ****k,****
 > update the next pointer of the
-> 
+>
 > ****previous****
 > node to
-> 
+>
 > ****skip****
 > the current k
-> 
+>
 > th
 > node, effectively removing it from the list. Continue this process until reaching the
-> 
+>
 > ****end****
 > of the list. This method ensures that the
-> 
+>
 > ****k****
 > ****th****
-> 
+>
 > nodes are removed as required while
-> 
+>
 > ****preserving****
 > the rest of the list structure.
 
@@ -53243,14 +53248,14 @@ public:
 
 // Function to remove every kth node in the linked list
 Node* deleteK(Node* head, int k) {
-  
+
     // If list is empty or k is 0, return the head
-    if (head == nullptr || k <= 0) 
+    if (head == nullptr || k <= 0)
         return head;
 
     Node* curr = head;
     Node* prev = nullptr;
-    
+
     // Initialize counter to track node positions
     int count = 0;
 
@@ -53260,30 +53265,30 @@ Node* deleteK(Node* head, int k) {
 
         // If count is a multiple of k, remove current node
         if (count % k == 0) {
-          
+
             // skip the current node
             if (prev != nullptr) {
                 prev->next = curr->next;
-            } 
+            }
             else {
-              
+
                 head = curr->next;
             }
-        } 
+        }
         else {
-          
+
             // Update previous node pointer only if
             // we do not remove the node
             prev = curr;
         }
         curr = curr->next;
     }
-  
+
     return head;
 }
 
 void printList(Node* head) {
-  
+
     Node* curr = head;
     while (curr != nullptr) {
         cout << curr->data << " ";
@@ -53292,7 +53297,7 @@ void printList(Node* head) {
 }
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 2 -> 3 -> 4 -> 5 -> 6
     Node* head = new Node(1);
@@ -53325,11 +53330,11 @@ struct Node {
 
 // Function to remove every kth node in the linked list
 struct Node* deleteK(struct Node* head, int k) {
-  
+
     // If list is empty or k is 0, return the head
-    if (head == NULL || k <= 0) 
+    if (head == NULL || k <= 0)
         return head;
-  
+
     struct Node* curr = head;
     struct Node* prev = NULL;
 
@@ -53338,23 +53343,23 @@ struct Node* deleteK(struct Node* head, int k) {
     while (curr != NULL) {
         count++;
 
-        // If count is a multiple of k, remove 
+        // If count is a multiple of k, remove
         // current node
         if (count % k == 0) {
-          
+
             // skip the current node
             if (prev != NULL) {
                 prev->next = curr->next;
-            } 
+            }
             else {
-         
+
                 head = curr->next;
             }
             free(curr);
             curr = prev != NULL ? prev->next : head;
-        } 
+        }
         else {
-          
+
             // Update previous node pointer only if
             // we do not remove the node
             prev = curr;
@@ -53374,7 +53379,7 @@ void printList(struct Node* node) {
 }
 
 struct Node* createNode(int new_data) {
-    struct Node* new_node = 
+    struct Node* new_node =
         (struct Node*)malloc(sizeof(struct Node));
     new_node->data = new_data;
     new_node->next = NULL;
@@ -53383,7 +53388,7 @@ struct Node* createNode(int new_data) {
 
 
 int main() {
-  
+
     // Create a hard-coded linked list:
     // 1 -> 2 -> 3 -> 4 -> 5 -> 6
     struct Node* head = createNode(1);
@@ -53419,43 +53424,43 @@ class Node {
 }
 
 public class GfG {
-  
+
     // Function to remove every kth node in the
     // linked list
     static Node deleteK(Node head, int k) {
-      
+
         // If list is empty or k is 0, return the head
         if (head == null || k <= 0)
             return head;
 
         Node curr = head;
-   
+
         Node prev = null;
-      
+
         int count = 0;
 
         // Traverse the linked list
         while (curr != null) {
-          
+
             // Increment the counter for each node
             count++;
 
-            // If count is a multiple of k, remove 
+            // If count is a multiple of k, remove
             // current node
             if (count % k == 0) {
-              
+
                 // skip the current node
                 if (prev != null) {
                     prev.next = curr.next;
-                } 
+                }
                else {
-                 
+
                     // If removing the head node
                     head = curr.next;
                 }
-            } 
+            }
            else {
-             
+
                 // Update previous node pointer only if
                 // we do not remove the node
                 prev = curr;
@@ -53467,7 +53472,7 @@ public class GfG {
     }
 
     static void printList(Node head) {
- 
+
         Node curr = head;
         while (curr != null) {
             System.out.print(curr.data + " ");
@@ -53477,8 +53482,8 @@ public class GfG {
     }
 
     public static void main(String[] args) {
-      
-        // Create a hard-coded linked list: 
+
+        // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5 -> 6
         Node head = new Node(1);
         head.next = new Node(2);
@@ -53508,7 +53513,7 @@ class Node:
 
 # Function to remove every kth node in the linked list
 def delete_k(head, k):
-  
+
     # If list is empty or k is 0, return the head
     if head is None or k <= 0:
         return head
@@ -53523,16 +53528,16 @@ def delete_k(head, k):
 
         # If count is a multiple of k, remove current node
         if count % k == 0:
-          
+
             # Bypass the current node
             if prev is not None:
                 prev.next = curr.next
             else:
-              
+
                 # If removing the head node
                 head = curr.next
         else:
-          
+
             # Update previous node pointer only if
             # we do not remove the node
             prev = curr
@@ -53549,7 +53554,7 @@ def print_list(head):
     print()
 
 if __name__ == "__main__":
-  
+
     # Create a hard-coded linked list:
     # 1 -> 2 -> 3 -> 4 -> 5 -> 6
     head = Node(1)
@@ -53582,12 +53587,12 @@ class Node {
 }
 
 class GfG {
-  
+
     // Function to remove every kth node in the linked list
     static Node DeleteK(Node head, int k) {
-      
+
         // If list is empty or k is 0, return the head
-        if (head == null || k <= 0) 
+        if (head == null || k <= 0)
             return head;
 
         Node curr = head;
@@ -53598,22 +53603,22 @@ class GfG {
         while (curr != null) {
             count++;
 
-            // If count is a multiple of k, remove 
+            // If count is a multiple of k, remove
             // current node
             if (count % k == 0) {
-              
+
                 // Bypass the current node
                 if (prev != null) {
                     prev.next = curr.next;
-                } 
+                }
                 else {
-                  
+
                     // If removing the head node
                     head = curr.next;
                 }
-            } 
+            }
             else {
-              
+
                 // Update previous node pointer only if
                 // we do not remove the node
                 prev = curr;
@@ -53632,7 +53637,7 @@ class GfG {
     }
 
     static void Main() {
-      
+
         // Create a hard-coded linked list:
         // 1 -> 2 -> 3 -> 4 -> 5 -> 6
         Node head = new Node(1);
@@ -53679,22 +53684,22 @@ function deleteK(head, k) {
     while (curr !== null) {
         count++;
 
-        // If count is a multiple of k, remove 
+        // If count is a multiple of k, remove
         // current node
         if (count % k === 0) {
-        
+
             // skip the current node
             if (prev !== null) {
                 prev.next = curr.next;
-            } 
+            }
             else {
-            
+
                 // If removing the head node
                 head = curr.next;
             }
-        } 
+        }
         else {
-        
+
             // Update previous node pointer only if
             // we do not remove the node
             prev = curr;
@@ -53713,7 +53718,7 @@ function printList(curr) {
     console.log(output.trim());
 }
 
-// Create a hard-coded linked list: 
+// Create a hard-coded linked list:
 // 1 -> 2 -> 3 -> 4 -> 5 -> 6
 let head = new Node(1);
 head.next = new Node(2);
@@ -53730,11 +53735,11 @@ printList(head);
 ````
 
 
-  
+
 
 **Output**
 ```
-1 3 5 
+1 3 5
 ```
 
 ****Time Complexity :****
@@ -53746,7 +53751,7 @@ where
 ****n****
 is the number of nodes.
 
-  
+
 
 ****Auxiliary Space :****
 O(1)', '', 'Remove every k-th node of the linked list', 13, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null, null);
@@ -53771,7 +53776,7 @@ Operations on Queue
 
 ### ****1. Enqueue:****
 
-Enqueue operation ****adds (or stores) an element to the end of the queue****. 
+Enqueue operation ****adds (or stores) an element to the end of the queue****.
 
 ****Steps:****
 
@@ -53968,13 +53973,13 @@ is pushed last is popped first.
 ****Types of Stack:****
 -----------------------
 
-* ****Fixed Size Stack**** 
+* ****Fixed Size Stack****
   : As the name suggests, a fixed size stack has a fixed size and cannot
   grow or shrink dynamically. If the stack is full and an attempt is
   made to add an element to it, an overflow error occurs. If the stack
   is empty and an attempt is made to remove an element from it, an
   underflow error occurs.
-* ****Dynamic Size Stack**** 
+* ****Dynamic Size Stack****
   : A dynamic size stack can grow or shrink dynamically. When the stack
   is full, it automatically increases its size to accommodate the new
   element, and when the stack is empty, it decreases its size. This type
@@ -54000,9 +54005,9 @@ item.
 ### ****Push Operation on Stack****
 
 Adds an item to the stack. If the stack is full, then it is said to be
-an  ****Overflow condition.**** 
+an  ****Overflow condition.****
 
- ****Algorithm for Push Operation:**** 
+ ****Algorithm for Push Operation:****
 
 * Before pushing the element to the stack, we check if the stack is  ****full****  .
 * If the stack is full  ****(top == capacity-1)****  , then  ****Stack Overflows****  and we cannot insert the element to the stack.
@@ -54014,9 +54019,9 @@ an  ****Overflow condition.****
 
 Removes an item from the stack. The items are popped in the reversed
 order in which they are pushed. If the stack is empty, then it is said
-to be an  ****Underflow condition.**** 
+to be an  ****Underflow condition.****
 
-****Algorithm for Pop Operation:**** 
+****Algorithm for Pop Operation:****
 
 * Before popping the element from the stack, we check if the stack is  ****empty****  .
 * If the stack is empty (top == -1), then  ****Stack Underflows****  and we cannot remove any element from the stack.
@@ -54025,9 +54030,9 @@ to be an  ****Underflow condition.****
 ![Pop-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180943/Pop-Operation-in-Stack-(1).webp)
 ### ****Top or Peek Operation on Stack****
 
-Returns the top element of the stack. 
+Returns the top element of the stack.
 
-****Algorithm for Top Operation:**** 
+****Algorithm for Top Operation:****
 
 * Before returning the top element from the stack, we check if the
   stack is empty.
@@ -54037,9 +54042,9 @@ Returns the top element of the stack.
 ![Top-or-Peek-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181023/Top-or-Peek-Operation-in-Stack-(1).webp)
 ### ****isEmpty Operation in Stack Data Structure:****
 
-Returns true if the stack is empty, else false. 
+Returns true if the stack is empty, else false.
 
-****Algorithm for isEmpty Operation****: 
+****Algorithm for isEmpty Operation****:
 
 * Check for the value of  ****top****  in stack.
 * If  ****(top == -1)****, then the stack is  ****empty****  so return  ****true****  .
@@ -54048,9 +54053,9 @@ Returns true if the stack is empty, else false.
 ![isEmpty-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181101/isEmpty-Operation-in-Stack-(1).webp)
 ### isFull ****Operation in Stack**** ****Data Structure****:
 
-Returns true if the stack is full, else false. 
+Returns true if the stack is full, else false.
 
-****Algorithm for isFull Operation:**** 
+****Algorithm for isFull Operation:****
 
 * Check for the value of  ****top****  in stack.
 * If  ****(top == capacity-1),****  then the stack is  ****full****  so return  ****true****.
@@ -54112,39 +54117,39 @@ declarations:
 C++
 ````
 // This array will store integer type element
-int arr[5];      
+int arr[5];
 
 // This array will store char type element
-char arr[10];   
+char arr[10];
 
 // This array will store float type element
-float arr[20];  
+float arr[20];
 
 ````
 
 C
 ````
 // This array will store integer type element
-int arr[5];      
+int arr[5];
 
 // This array will store char type element
-char arr[10];   
+char arr[10];
 
 // This array will store float type element
-float arr[20];  
+float arr[20];
 
 ````
 
 Java
 ````
 // This array will store integer type element
-int arr[];     
+int arr[];
 
 // This array will store char type element
-char arr[];   
+char arr[];
 
 // This array will store float type element
-float arr[];  
+float arr[];
 
 ````
 
@@ -54265,7 +54270,7 @@ Arrays can be classified in two ways:
 ![Types-of-Arrays](https://media.geeksforgeeks.org/wp-content/uploads/20240731124259/Types-of-Arrays.webp)
 ### Types of Arrays on the basis of Size:
 
-****1. Fixed Sized Arrays:**** 
+****1. Fixed Sized Arrays:****
 
 We cannot alter or update the size of this array. Here only a fixed
 size (i,e. the size that is mentioned in square brackets ****[]****) of memory will be allocated for storage. In case, we don’t know the
@@ -54278,21 +54283,21 @@ not preferred.
 
 C++
 ````
-// Method 1 to create a fixed sized array. 
+// Method 1 to create a fixed sized array.
 // Here the memory is allocated at compile time.
-int arr[5]; 
+int arr[5];
 // Another way (creation and initialization both)
-int arr2[5] = {1, 2, 3, 4, 5}; 
+int arr2[5] = {1, 2, 3, 4, 5};
 
 // Method 2 to create a fixed sized array
 // Here memory is allocated at run time (Also
 // known as dynamically allocated arrays)
-int *arr = new int[5]; 
-// Method 1 to create a fixed sized array. 
+int *arr = new int[5];
+// Method 1 to create a fixed sized array.
 // Here the memory is allocated at compile time.
-int arr[5]; 
+int arr[5];
 // Another way (creation and initialization both)
-int arr2[5] = {1, 2, 3, 4, 5}; 
+int arr2[5] = {1, 2, 3, 4, 5};
 // Method 2 to create a fixed sized array
 // Here memory is allocated at run time (Also
 // known as dynamically allocated arrays)
@@ -54309,11 +54314,11 @@ int *arr = new int[5];
 
 C
 ````
-// Method 1 to create a fixed sized array. 
+// Method 1 to create a fixed sized array.
 // Here the memory is allocated at compile time.
 int arr1[5];
 // Another way (creation and initialization both)
-int arr2[5] = {1, 2, 3, 4, 5}; 
+int arr2[5] = {1, 2, 3, 4, 5};
 
 
 // Method 2 to create a fixed sized array
@@ -54328,7 +54333,7 @@ Java
 // Fixed sized array examples
 int[] arr1 = new int [5];
 
-// Another way (Array creation and 
+// Another way (Array creation and
 // initialization both)
 int[] arr2 = {1, 2, 3, 4, 5};
 
@@ -54336,7 +54341,7 @@ int[] arr2 = {1, 2, 3, 4, 5};
 
 Python
 ````
-# Create a fixed-size list of length 5, 
+# Create a fixed-size list of length 5,
 # initialized with zeros
 arr = [0] * 5
 
@@ -54350,13 +54355,13 @@ C#
 // Fixed sized array examples
 int[] arr1 = new int [5];
 
-// Another way (Array creation and 
+// Another way (Array creation and
 // initialization both)
 int[] arr2 = {1, 2, 3, 4, 5};
 
 ````
 
-  
+
 
 
 ****2. Dynamic Sized Arrays:****
@@ -54399,14 +54404,14 @@ arr = []
 C#
 ````
 // Similar to Java
-ArrayList myList = new ArrayList(); 
+ArrayList myList = new ArrayList();
 
 ````
 
 JavaScript
 ````
 // Dynamic Sized Array
-let arr = new Array();  
+let arr = new Array();
 
 ````
 
@@ -54520,7 +54525,7 @@ void insertElement(int arr[], int n, int x, int pos)
     // which are on the right side of pos
     for (int i = n - 1; i >= pos; i--)
         arr[i + 1] = arr[i];
- 
+
     arr[pos] = x;
 }
 
@@ -54648,29 +54653,29 @@ C
 // C program to implement delete operation in a
 // unsorted array
 #include <stdio.h>
- 
+
 // To search a key to be deleted
 int findElement(int arr[], int n, int key);
- 
+
 // Function to delete an element
 int deleteElement(int arr[], int n, int key)
 {
     // Find position of element to be deleted
     int pos = findElement(arr, n, key);
- 
+
     if (pos == -1) {
         printf("Element not found");
         return n;
     }
- 
+
     // Deleting element
     int i;
     for (i = pos; i < n - 1; i++)
         arr[i] = arr[i + 1];
- 
+
     return n - 1;
 }
- 
+
 // Function to implement search operation
 int findElement(int arr[], int n, int key)
 {
@@ -54697,24 +54702,24 @@ Java
          // Return -1 if key is not found
         return -1;
     }
- 
+
     // Function to delete an element
     static int deleteElement(int arr[], int n, int key)
     {
         // Find position of element to be
         // deleted
         int pos = findElement(arr, n, key);
- 
+
         if (pos == -1) {
             System.out.println("Element not found");
             return n;
         }
- 
+
         // Deleting element
         int i;
         for (i = pos; i < n - 1; i++)
             arr[i] = arr[i + 1];
- 
+
         return n - 1;
     }
 
@@ -54785,14 +54790,14 @@ function findElement(arr,n,key)
         if (arr[i] == key)
             return i;
     return -1;
-} 
-     
+}
+
 // Function to delete an element
 function deleteElement(arr,n,key)
 {
     // Find position of element to be deleted
     let pos = findElement(arr, n, key);
-      
+
     if (pos == -1)
     {
         document.write("Element not found");
@@ -54827,7 +54832,7 @@ int findElement(int arr[], int n, int key)
     for (i = 0; i < n; i++)
         if (arr[i] == key)
             return i;
- 
+
     // If the key is not found
     return -1;
 }
@@ -54843,7 +54848,7 @@ int findElement(int arr[], int n, int key)
     for (i = 0; i < n; i++)
         if (arr[i] == key)
             return i;
- 
+
     // If the key is not found
     return -1;
 }
@@ -54894,14 +54899,14 @@ int findElement(int[] arr, int n, int key)
 
 JavaScript
 ````
-// Function to implement search operation 
+// Function to implement search operation
 function findElement( arr, n, key)
 {
     let i;
     for (i = 0; i < n; i++)
         if (arr[i] == key)
             return i;
- 
+
     return -1;
 }
 
@@ -54949,7 +54954,7 @@ C++
 ````
 // Definition of a Node in a singly linked list
 struct Node {
-  
+
     // Data part of the node
     int data;
 
@@ -54970,13 +54975,13 @@ C
 ````
 // Definition of a Node in a singly linked list
 struct Node {
-    int data;          
+    int data;
     struct Node* next;
 };
 
 // Function to create a new Node
 struct Node* newNode(int data) {
-    struct Node* temp = 
+    struct Node* temp =
       (struct Node*)malloc(sizeof(struct Node));
     temp->data = data;
     temp->next = NULL;
@@ -55008,8 +55013,8 @@ Python
 class Node:
     def __init__(self, data):
        # Data part of the node
-        self.data = data   
-        self.next = None    
+        self.data = data
+        self.next = None
 
 ````
 
@@ -55019,8 +55024,8 @@ JavaScript
 class Node {
     constructor(data) {
     // Data part of the node
-        this.data = data;   
-        this.next = null;   
+        this.data = data;
+        this.next = null;
     }
 }
 
@@ -55077,7 +55082,7 @@ void traverseLinkedList(Node* head)
     // Traverse the linked list until reaching the end
     // (nullptr)
     while (current != nullptr) {
-      
+
         // Print the data of the current node
         cout << current->data << " ";
 
@@ -55092,7 +55097,7 @@ void traverseLinkedList(Node* head)
 
 C
 ````
-// Function to traverse and print the elements 
+// Function to traverse and print the elements
 // of the linked list
 void traverseLinkedList(struct Node* head)
 {
@@ -55171,7 +55176,7 @@ function traverseLinkedList(head) {
     // Traverse the linked list until reaching the
     // end (null)
     while (current !== null) {
-    
+
         // Print the data of the current node
         console.log(current.data + " ");
 
@@ -55187,7 +55192,7 @@ function traverseLinkedList(head) {
 **Output**
 ```
 
-1 2 3 
+1 2 3
 
 ```
 
@@ -55306,16 +55311,16 @@ function searchLinkedList(head, target) {
 
     // Traverse the Linked List
     while (head !== null) {
-    
+
         // Check if the current node\'s data matches the target value
         if (head.data === target) {
             return true;  // Value found
         }
-        
+
         // Move to the next node
         head = head.next;
     }
-    
+
     return false;  // Value not found
 }
 
@@ -55401,7 +55406,7 @@ Java
 ````
 // Java function to find the length of the linked list
 public int findLength(Node head) {
-  
+
     // Initialize a counter for the length
     int length = 0;
 
@@ -55425,7 +55430,7 @@ Python
 ````
 # Python function to find the length of the linked list
 def find_length(head):
-  
+
     # Initialize a counter for the length
     length = 0
 
@@ -55564,7 +55569,7 @@ Python
 # Python function to insert a new node at the beginning of the
 # linked list
 def insert_at_beginning(head, value):
-  
+
     # Create a new node with the given value
     new_node = Node(value)
 
@@ -55636,7 +55641,7 @@ Node* insertAtEnd(Node* head, int value)
     Node* newNode = new Node(value);
 
     // If the list is empty, make the new node the head
-    if (head == nullptr) 
+    if (head == nullptr)
         return newNode;
 
     // Traverse the list until the last node is reached
@@ -55709,7 +55714,7 @@ Python
 # Python function to insert a node at the end of the linked
 # list
 def insert_at_end(head, value):
-  
+
     # Create a new node with the given value
     new_node = Node(value)
 
@@ -55791,7 +55796,7 @@ Node* insertPos(Node* head, int pos, int data)
     }
 
     // Special case for inserting at the head
-    if (pos == 1) {        
+    if (pos == 1) {
         Node* temp = new Node(data);
         temp->next = head;
         return temp;
@@ -55838,7 +55843,7 @@ struct Node* insertPos(struct Node* head, int pos, int data) {
         return temp;
     }
 
-    // Traverse the list to find the node 
+    // Traverse the list to find the node
     // before the insertion point
     struct Node* prev = head;
     int count = 1;
@@ -55918,7 +55923,7 @@ def insertPos(head, pos, data):
         new_node.next = head
         return new_node
 
-    # Traverse the list to find the node before 
+    # Traverse the list to find the node before
     # the insertion point
     prev = head
     count = 1
@@ -56138,23 +56143,23 @@ Node* removeLastNode(Node* head)
 {
     if (head == nullptr)
         return nullptr;
- 
+
     if (head->next == nullptr) {
         delete head;
         return nullptr;
     }
- 
+
     // Find the second last node
     Node* second_last = head;
     while (second_last->next->next != nullptr)
         second_last = second_last->next;
- 
+
     // Delete last node
     delete (second_last->next);
- 
+
     // Change next of second last
     second_last->next = nullptr;
- 
+
     return head;
 }
 
@@ -56267,7 +56272,7 @@ function removeLastNode(head) {
 
     // Remove the last node
     second_last.next = null;
-    
+
     // Return the modified list
     return head;
 }
@@ -56342,7 +56347,7 @@ Node* deleteAtPosition(Node* head, int position)
 
     // Delete the node
     delete temp;
-  
+
     return head;
 }
 
@@ -56385,7 +56390,7 @@ struct Node* deleteAtPosition(struct Node* head, int position)
 
     // Delete the node
     free(temp);
-  
+
     return head;
 }
 
@@ -56533,7 +56538,7 @@ C++
 ````
 // Definition of a Node in a singly linked list
 struct Node {
-  
+
     // Data part of the node
     int data;
 
@@ -56554,13 +56559,13 @@ C
 ````
 // Definition of a Node in a singly linked list
 struct Node {
-    int data;          
+    int data;
     struct Node* next;
 };
 
 // Function to create a new Node
 struct Node* newNode(int data) {
-    struct Node* temp = 
+    struct Node* temp =
       (struct Node*)malloc(sizeof(struct Node));
     temp->data = data;
     temp->next = NULL;
@@ -56592,8 +56597,8 @@ Python
 class Node:
     def __init__(self, data):
        # Data part of the node
-        self.data = data   
-        self.next = None    
+        self.data = data
+        self.next = None
 
 ````
 
@@ -56603,8 +56608,8 @@ JavaScript
 class Node {
     constructor(data) {
     // Data part of the node
-        this.data = data;   
-        this.next = null;   
+        this.data = data;
+        this.next = null;
     }
 }
 
@@ -56661,7 +56666,7 @@ void traverseLinkedList(Node* head)
     // Traverse the linked list until reaching the end
     // (nullptr)
     while (current != nullptr) {
-      
+
         // Print the data of the current node
         cout << current->data << " ";
 
@@ -56676,7 +56681,7 @@ void traverseLinkedList(Node* head)
 
 C
 ````
-// Function to traverse and print the elements 
+// Function to traverse and print the elements
 // of the linked list
 void traverseLinkedList(struct Node* head)
 {
@@ -56755,7 +56760,7 @@ function traverseLinkedList(head) {
     // Traverse the linked list until reaching the
     // end (null)
     while (current !== null) {
-    
+
         // Print the data of the current node
         console.log(current.data + " ");
 
@@ -56771,7 +56776,7 @@ function traverseLinkedList(head) {
 **Output**
 ```
 
-1 2 3 
+1 2 3
 
 ```
 
@@ -56890,16 +56895,16 @@ function searchLinkedList(head, target) {
 
     // Traverse the Linked List
     while (head !== null) {
-    
+
         // Check if the current node\'s data matches the target value
         if (head.data === target) {
             return true;  // Value found
         }
-        
+
         // Move to the next node
         head = head.next;
     }
-    
+
     return false;  // Value not found
 }
 
@@ -56985,7 +56990,7 @@ Java
 ````
 // Java function to find the length of the linked list
 public int findLength(Node head) {
-  
+
     // Initialize a counter for the length
     int length = 0;
 
@@ -57009,7 +57014,7 @@ Python
 ````
 # Python function to find the length of the linked list
 def find_length(head):
-  
+
     # Initialize a counter for the length
     length = 0
 
@@ -57148,7 +57153,7 @@ Python
 # Python function to insert a new node at the beginning of the
 # linked list
 def insert_at_beginning(head, value):
-  
+
     # Create a new node with the given value
     new_node = Node(value)
 
@@ -57220,7 +57225,7 @@ Node* insertAtEnd(Node* head, int value)
     Node* newNode = new Node(value);
 
     // If the list is empty, make the new node the head
-    if (head == nullptr) 
+    if (head == nullptr)
         return newNode;
 
     // Traverse the list until the last node is reached
@@ -57293,7 +57298,7 @@ Python
 # Python function to insert a node at the end of the linked
 # list
 def insert_at_end(head, value):
-  
+
     # Create a new node with the given value
     new_node = Node(value)
 
@@ -57375,7 +57380,7 @@ Node* insertPos(Node* head, int pos, int data)
     }
 
     // Special case for inserting at the head
-    if (pos == 1) {        
+    if (pos == 1) {
         Node* temp = new Node(data);
         temp->next = head;
         return temp;
@@ -57422,7 +57427,7 @@ struct Node* insertPos(struct Node* head, int pos, int data) {
         return temp;
     }
 
-    // Traverse the list to find the node 
+    // Traverse the list to find the node
     // before the insertion point
     struct Node* prev = head;
     int count = 1;
@@ -57502,7 +57507,7 @@ def insertPos(head, pos, data):
         new_node.next = head
         return new_node
 
-    # Traverse the list to find the node before 
+    # Traverse the list to find the node before
     # the insertion point
     prev = head
     count = 1
@@ -57722,23 +57727,23 @@ Node* removeLastNode(Node* head)
 {
     if (head == nullptr)
         return nullptr;
- 
+
     if (head->next == nullptr) {
         delete head;
         return nullptr;
     }
- 
+
     // Find the second last node
     Node* second_last = head;
     while (second_last->next->next != nullptr)
         second_last = second_last->next;
- 
+
     // Delete last node
     delete (second_last->next);
- 
+
     // Change next of second last
     second_last->next = nullptr;
- 
+
     return head;
 }
 
@@ -57851,7 +57856,7 @@ function removeLastNode(head) {
 
     // Remove the last node
     second_last.next = null;
-    
+
     // Return the modified list
     return head;
 }
@@ -57926,7 +57931,7 @@ Node* deleteAtPosition(Node* head, int position)
 
     // Delete the node
     delete temp;
-  
+
     return head;
 }
 
@@ -57969,7 +57974,7 @@ struct Node* deleteAtPosition(struct Node* head, int position)
 
     // Delete the node
     free(temp);
-  
+
     return head;
 }
 
@@ -58103,31 +58108,31 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 > ****Input****
 > : a = 1, b = 2
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : “0.5”
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > 1/2 = 0.5 with no repeating part.
-> 
->   
-> 
->   
-> 
+>
+>
+>
+>
+>
 > ****Input****
 > : a = 50, b = 22
-> 
->   
-> 
+>
+>
+>
 > ****Output****
 > : “2.(27)”
-> 
->   
-> 
+>
+>
+>
 > ****Explanation:****
 > 50/22 = 2.27272727… Since fractional part (27) is repeating, it is enclosed in parentheses.
 
@@ -58136,7 +58141,7 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 
 
 > The idea is to first calculate the integral quotient (absolute part before decimal point) and then calculate the fractional part. To check if the fractional part is repeating, insert the remainder (a % b) in a
-> 
+>
 > [hash map](https://www.geeksforgeeks.org/hashing-data-structure/)
 > with key as remainder and value as the index position at which this remainder occurs. If at any point of time, the remainder becomes zero, then there doesn’t exist a repeating fraction otherwise if the remainder is already found in the map, then there exists a repeating fraction.
 
@@ -58150,7 +58155,7 @@ C++
 using namespace std;
 
 string calculateFraction(int a, int b) {
-  
+
     // If the numerator is zero, answer is 0
     if (a == 0)
         return "0";
@@ -58166,14 +58171,14 @@ string calculateFraction(int a, int b) {
     res += to_string(a / b);
 
     int rem = a % b;
-  
+
     // If completely divisible, return res
     if (rem == 0)
         return res;
 
     res.append(".");
     unordered_map<int, int> mp;
-  
+
     while (rem > 0) {
 
         // If this remainder is already seen,
@@ -58184,7 +58189,7 @@ string calculateFraction(int a, int b) {
             res.append(")");
             break;
         }
-        
+
         // If the remainder is seen for the first time,
         // store its index
         mp[rem] = res.size();
@@ -58217,7 +58222,7 @@ import java.util.HashMap;
 
 class GfG {
     static String calculateFraction(int a, int b) {
-        
+
         // If the numerator is zero, answer is "0"
         if (a == 0)
             return "0";
@@ -58242,7 +58247,7 @@ class GfG {
         HashMap<Integer, Integer> mp = new HashMap<>();
 
         while (rem > 0) {
-            
+
             // If this remainder is already seen,
             // then there exists a repeating fraction.
             if (mp.containsKey(rem)) {
@@ -58279,7 +58284,7 @@ Python
 # Python Program to convert fraction to string
 
 def calculateFraction(a, b):
-  
+
     # If the numerator is zero, answer is "0"
     if a == 0:
         return "0"
@@ -58304,13 +58309,13 @@ def calculateFraction(a, b):
     mp = {}
 
     while rem > 0:
-      
+
         # If this remainder is already seen,
         # then there exists a repeating fraction.
         if rem in mp:
             res = res[:mp[rem]] + "(" + res[mp[rem]:] + ")"
             break
-        
+
         # If the remainder is seen for the first time,
         # store its index
         mp[rem] = len(res)
@@ -58341,7 +58346,7 @@ using System.Collections.Generic;
 
 class GfG {
     static string calculateFraction(int a, int b) {
-      
+
         // If the numerator is zero, answer is "0"
         if (a == 0)
             return "0";
@@ -58366,7 +58371,7 @@ class GfG {
         Dictionary<int, int> mp = new Dictionary<int, int>();
 
         while (rem > 0) {
-          
+
             // If this remainder is already seen,
             // then there exists a repeating fraction.
             if (mp.ContainsKey(rem)) {
@@ -58404,7 +58409,7 @@ JavaScript
 // JavaScript Program to convert fraction to string
 
 function calculateFraction(a, b) {
-    
+
     // If the numerator is zero, answer is "0"
     if (a === 0) {
         return "0";
@@ -58435,7 +58440,7 @@ function calculateFraction(a, b) {
         // then there exists a repeating fraction.
         if (mp.has(rem)) {
             let repeatIndex = mp.get(rem);
-            res = res.substring(0, repeatIndex) + "(" 
+            res = res.substring(0, repeatIndex) + "("
                         + res.substring(repeatIndex) + ")";
             break;
         }

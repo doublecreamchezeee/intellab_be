@@ -19,4 +19,7 @@ public class CourseCreationResponse {
     String unitPrice;
     String courseLogo;
     UUID userUid;
+    Integer reviewCount;
+    Double averageRating;
+    int lessonCount;
 }

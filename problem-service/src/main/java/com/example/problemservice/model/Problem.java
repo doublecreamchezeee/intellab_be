@@ -1,5 +1,7 @@
 package com.example.problemservice.model;
 
+import com.example.problemservice.model.course.Lesson;
+import com.example.problemservice.model.course.Topic;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,13 +37,10 @@ public class Problem {
     @Column(columnDefinition = "DECIMAL(5,2)")
     Float acceptance_rate;
 
-//    @OneToMany(mappedBy = "problem")
 //    List<Lesson> lessons;
-
-//    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
-//    @JoinColumn(name = "topic_id")
+//
 //    Topic topic;
-
+//
 //    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
 //    List<Hint> hints;
 

@@ -78,6 +78,12 @@ public class Course {
     @Column(name = "course_logo", columnDefinition = "TEXT")
     String courseLogo;
 
+    @Column(name = "average_rating")
+    Double averageRating;
+
+    @Column(name = "review_count")
+    Integer reviewCount;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     List<Lesson> lessons = new ArrayList<>();
