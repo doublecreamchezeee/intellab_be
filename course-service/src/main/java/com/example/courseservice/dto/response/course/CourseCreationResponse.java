@@ -21,4 +21,5 @@ public class CourseCreationResponse {
     UUID userUid;
     Integer reviewCount;
     Double averageRating;
+    int lessonCount;
 }

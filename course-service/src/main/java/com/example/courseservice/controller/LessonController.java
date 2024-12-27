@@ -131,13 +131,17 @@ public class LessonController {
     @Operation(
             summary = "Mark theory of lesson as done"
     )
-    @PutMapping("/{learningLessonId}/doneTheory")
+    @PutMapping("/{learningLessonId}/{courseId}/{userUid}/doneTheory")
     ApiResponse<Boolean> doneTheoryOfLesson(
-            @PathVariable("learningLessonId") UUID learningLessonId) {
+            @PathVariable("learningLessonId") UUID learningLessonId,
+            @PathVariable("courseId") UUID courseId,
+            @PathVariable("userUid") String userUid) {
 
         return ApiResponse.<Boolean>builder()
                 .result(lessonService.doneTheoryOfLesson(
-                            learningLessonId
+                            learningLessonId,
+                            courseId,
+                            ParseUUID.normalizeUID(userUid)
                         )
                 )
                 .build();
@@ -146,13 +150,17 @@ public class LessonController {
     @Operation(
             summary = "Mark practice of lesson as done"
     )
-    @PutMapping("/{learningLessonId}/donePractice")
+    @PutMapping("/{learningLessonId}/{courseId}/{userUid}/donePractice")
     ApiResponse<Boolean> donePracticeOfLesson(
-            @PathVariable("learningLessonId") UUID learningLessonId) {
+            @PathVariable("learningLessonId") UUID learningLessonId,
+            @PathVariable("courseId") UUID courseId,
+            @PathVariable("userUid") String userUid) {
 
         return ApiResponse.<Boolean>builder()
                 .result(lessonService.donePracticeOfLesson(
-                            learningLessonId
+                            learningLessonId,
+                            courseId,
+                            ParseUUID.normalizeUID(userUid)
                         )
                 )
                 .build();

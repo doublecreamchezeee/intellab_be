@@ -7,6 +7,7 @@ import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdate
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
+import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.lesson.DetailsLessonResponse;
@@ -20,6 +21,7 @@ import com.example.courseservice.mapper.QuestionMapper;
 import com.example.courseservice.model.*;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.repository.custom.DetailsLessonRepositoryCustom;
+import com.example.courseservice.repository.impl.DetailsCourseRepositoryCustomImpl;
 import com.example.courseservice.repository.impl.LearningLessonRepositoryCustomImpl;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
@@ -52,6 +54,7 @@ public class LessonService {
     private final QuestionMapper questionMapper;
     ProblemClient problemClient;
     AssignmentRepository assignmentRepository;
+    DetailsCourseRepositoryCustomImpl detailsCourseRepositoryCustom;
 
     public LessonResponse createLesson(LessonCreationRequest request) {
         if (!courseRepository.existsById(request.getCourseId())) {
@@ -225,9 +228,16 @@ public class LessonService {
 
     }
 
-    public Boolean doneTheoryOfLesson(UUID learningLessonId) {
+    public Boolean doneTheoryOfLesson(UUID learningLessonId,
+                                      UUID courseId,
+                                      UUID userUid) {
         LearningLesson learningLesson = learningLessonRepository.findById(learningLessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LEARNING_LESSON_NOT_FOUND));
+
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(
+                userUid,
+                courseId
+        ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
         Lesson lesson = learningLesson.getLesson();
 
@@ -267,14 +277,29 @@ public class LessonService {
 
         learningLesson.setIsDoneTheory(true);
         learningLessonRepository.save(learningLesson);
+
+        DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
+                .getDetailsCourse(courseId, userUid)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
+        userCoursesRepository.save(userCourses);
+
         return  true;
 
 
     }
 
-    public Boolean donePracticeOfLesson(UUID learningLessonId) {
+    public Boolean donePracticeOfLesson(UUID learningLessonId,
+                                        UUID courseId,
+                                        UUID userUid) {
         LearningLesson learningLesson = learningLessonRepository.findById(learningLessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LEARNING_LESSON_NOT_FOUND));
+
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(
+                userUid,
+                courseId
+        ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
         Lesson lesson = learningLesson.getLesson();
 
@@ -304,8 +329,17 @@ public class LessonService {
             learningLessonRepository.save(learningLesson);
             return false;
         }*/
+
         learningLesson.setIsDonePractice(true);
         learningLessonRepository.save(learningLesson);
+
+        DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
+                .getDetailsCourse(courseId, userUid)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
+        userCoursesRepository.save(userCourses);
+
         return true;
     }
 

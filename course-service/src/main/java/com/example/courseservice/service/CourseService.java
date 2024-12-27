@@ -46,7 +46,13 @@ public class CourseService {
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
         Page<Course> courses = courseRepository.findAll(pageable);
-        return courses.map(courseMapper::toCourseCreationResponse);
+
+        return courses.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+            return response;
+        });
     }
 
     public Page<CourseCreationResponse> getAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable) {
@@ -57,7 +63,12 @@ public class CourseService {
         } else {
             courses = courseRepository.findAllCoursesExceptEnrolledByUser(userId, pageable);
         }
-        return courses.map(courseMapper::toCourseCreationResponse);
+        return courses.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+            return response;
+        });
     }
 
     public void deleteCourseById(UUID id) {
@@ -234,7 +245,16 @@ public class CourseService {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
-        return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+        Page<UserCourses> userCourses = userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+
+        return userCourses;
+        /*return userCourses.map(userCourse -> {
+            DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
+                    .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUid)
+                    .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+            userCourse.setProgressPercent(detailCourseResponse.getProgressPercent());
+            return userCourse;
+        });*/
     }
 
 
