@@ -35,7 +35,9 @@ import java.util.UUID;
             @ColumnResult(name = "exercise_id", type = UUID.class),
             @ColumnResult(name = "status", type = String.class),
             @ColumnResult(name = "last_accessed_date", type = Instant.class),
-            @ColumnResult(name = "learning_id", type = UUID.class)
+            @ColumnResult(name = "learning_id", type = UUID.class),
+            @ColumnResult(name = "is_done_theory", type = Boolean.class),
+            @ColumnResult(name = "is_done_practice", type = Boolean.class)
         }
     )
 )
