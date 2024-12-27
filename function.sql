@@ -15,40 +15,40 @@ RETURNS TABLE(
     problem_id UUID,
     exercise_id UUID,
     status VARCHAR,
-    last_accessed_date TIMESTAMP WITH TIME ZONE
-) 
+    last_accessed_date TIMESTAMP WITH TIME ZONE,
+	is_done_theory BOOLEAN,
+	is_done_practice BOOLEAN
+)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    RETURN QUERY
-    SELECT
-		ll.learning_id,
-        l.lesson_id,
-        l.Course_ID,
-        l.Lesson_Order,
-        l.Lesson_Name,
-        l.Description,
-        l.Content,
-        l.Problem_ID,
-        l.Exercise_ID,
-        ll.Status,
-        ll.Last_accessed_date
-    FROM 
-        Lessons l
-    JOIN 
-        Learning_Lesson ll
-    ON 
+RETURN QUERY
+SELECT
+    ll.learning_id,
+    l.lesson_id,
+    l.Course_ID,
+    l.Lesson_Order,
+    l.Lesson_Name,
+    l.Description,
+    l.Content,
+    l.Problem_ID,
+    l.Exercise_ID,
+    ll.Status,
+    ll.Last_accessed_date,
+    ll.is_done_theory,
+    ll.is_done_practice
+FROM
+    Lessons l
+        JOIN
+    Learning_Lesson ll
+    ON
         l.lesson_id = ll.lesson_id
-    WHERE
-        ll.user_id = student_id
-        AND l.course_id = course2_id
-	ORDER BY l.lesson_order;
+WHERE
+    ll.user_id = student_id
+  AND l.course_id = course2_id
+ORDER BY l.lesson_order;
 END;
 $$;
--- SELECT * FROM get_lessons_and_learning_progress(
---     'cabb0e34-1cdb-7818-5ab4-4018b7c81fe4',
---     'b15d3666-a77b-4098-89f1-225327c74f67'
--- );
 
 DROP FUNCTION IF EXISTS caculate_lesson_count(uuid);
 CREATE FUNCTION caculate_lesson_count (c_id UUID)
