@@ -25,6 +25,8 @@ public class LessonProgressResponse {
     String status;
     Instant lastAccessedDate;
     UUID learningId;
+    Boolean isDoneTheory;
+    Boolean isDonePractice;
     /*UUID lesson_id;
     UUID course_id;
     Integer lesson_order;
