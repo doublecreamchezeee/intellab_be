@@ -14,6 +14,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,9 +35,9 @@ public class QuestionController {
             summary = "Get all questions"
     )
     @GetMapping
-    public ApiResponse<List<QuestionResponse>> getAllQuestions() {
-        return ApiResponse.<List<QuestionResponse>>builder()
-                .result(questionService.getAllQuestions())
+    public ApiResponse<Page<QuestionResponse>> getAllQuestions(@ParameterObject Pageable pageable) {
+        return ApiResponse.<Page<QuestionResponse>>builder()
+                .result(questionService.getAllQuestions(pageable))
                 .build();
     }
 

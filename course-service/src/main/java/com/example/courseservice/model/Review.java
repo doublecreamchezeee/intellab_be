@@ -16,7 +16,8 @@ import java.util.UUID;
 public class Review {
     @Id
     @GeneratedValue
-    UUID review_id;
+    @Column(name = "review_id")
+    UUID reviewId;
 
     int rating;
 
@@ -24,7 +25,7 @@ public class Review {
     String comment;
 
     @JoinColumn(name = "user_id", nullable = false)
-    String userUid;
+    UUID userUid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)

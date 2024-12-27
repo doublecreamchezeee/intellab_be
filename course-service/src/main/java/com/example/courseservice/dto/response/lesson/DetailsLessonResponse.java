@@ -22,6 +22,7 @@ public class DetailsLessonResponse {
     String lessonName;
     UUID courseId;
     UUID exerciseId;
+    UUID problemId;
     UUID learningId;
     UUID nextLessonId;
     String nextLessonName;

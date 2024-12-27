@@ -15,6 +15,8 @@ import com.example.courseservice.repository.QuestionRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,8 +32,9 @@ public class QuestionService {
     ExerciseRepository exerciseRepository;
 
 
-    public List<QuestionResponse> getAllQuestions() {
-        return questionRepository.findAll().stream().map(questionMapper::toQuestionResponse).toList();
+    public Page<QuestionResponse> getAllQuestions(Pageable pageable) {
+        Page<Question> questions = questionRepository.findAll(pageable);
+        return questions.map(questionMapper::toQuestionResponse);
     }
 
     public QuestionResponse getQuestionById(UUID id) {

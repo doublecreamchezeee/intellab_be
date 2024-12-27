@@ -8,26 +8,31 @@ import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
+import com.example.courseservice.service.ReviewService;
 import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/courses")
@@ -38,6 +43,7 @@ import java.util.UUID;
 public class CourseController {
     CourseService courseService;
     LessonService lessonService;
+    ReviewService reviewService;
 
     @Operation(
             summary = "Create course"
@@ -56,7 +62,7 @@ public class CourseController {
     )
     @GetMapping("/{courseId}/lessons")
     ApiResponse<Page<LessonResponse>> getLessonsByCourseId(
-            @PathVariable("courseId") String courseId, Pageable pageable) {
+            @PathVariable("courseId") String courseId, @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<LessonResponse>>builder()
                 .result(lessonService.getLessonsByCourseId(
                             courseId,
@@ -82,7 +88,7 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Get a course by id, if userUid is provided, return true if user has enrolled in course"
+            summary = "Get a course by id, if userUid is provided, return isUserEnrolled is true if user has enrolled in course"
     )
     @GetMapping("/{courseId}")
     ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId,
@@ -100,7 +106,7 @@ public class CourseController {
             summary = "Get all courses"
     )
     @GetMapping("")
-    ApiResponse<Page<CourseCreationResponse>> getAllCourse(Pageable pageable) {
+    ApiResponse<Page<CourseCreationResponse>> getAllCourse(@ParameterObject Pageable pageable) {
 
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
@@ -110,9 +116,39 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get details of multiple courses by their IDs"
+    )
+    @PostMapping("/details")
+    ApiResponse<List<DetailCourseResponse>> getDetailsOfMultipleCourses(
+            @RequestBody Map<String, List<String>> requestBody,
+            @RequestParam(name = "userUid", required = false) String userUid) {
+
+        UUID userUUID = null;
+        if (userUid != null) {
+            userUUID = ParseUUID.normalizeUID(userUid);
+        }
+
+        // Retrieve the list of course IDs from the map
+        List<String> courseIdsList = requestBody.get("courseIds");
+
+        // Convert the list of course IDs (String) to UUID
+        List<UUID> courseUUIDs = courseIdsList.stream()
+                .map(UUID::fromString)  // Convert each course ID string to UUID
+                .collect(Collectors.toList());
+
+        // Call the service to get the course details
+        return ApiResponse.<List<DetailCourseResponse>>builder()
+                .result(courseService.getDetailsOfCourses(courseUUIDs, userUUID))
+                .build();
+    }
+
+    @Operation(
+            summary = "Get all courses except enrolled courses by user"
+    )
     @GetMapping("/exceptEnrolled")
     ApiResponse<Page<CourseCreationResponse>> getAllCourseExceptEnrolledByUser(
-            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, Pageable pageable) {
+            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCoursesExceptEnrolledByUser(
                         userUid == null ? null : ParseUUID.normalizeUID(userUid),
@@ -147,7 +183,7 @@ public class CourseController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<CourseCreationResponse>> searchCourses(
-            @RequestParam("keyword") String keyword, Pageable pageable) {
+            @RequestParam("keyword") String keyword, @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.searchCourses(
                             keyword, pageable
@@ -181,10 +217,29 @@ public class CourseController {
             summary = "Get all courses that a user has enrolled"
     )
     @GetMapping("/{userUid}/enrolledCourses")
-    public ApiResponse<List<UserCourses>> getEnrolledCoursesOfUser(@PathVariable("userUid") String userUid) {
-        return ApiResponse.<List<UserCourses>>builder()
-                .result(courseService.getEnrolledCoursesOfUser(ParseUUID.normalizeUID(userUid)))
+    public ApiResponse<Page<UserCourses>> getEnrolledCoursesOfUser(
+            @PathVariable("userUid") String userUid,
+            @ParameterObject Pageable pageable) {
+
+        return ApiResponse.<Page<UserCourses>>builder()
+                .result(courseService.getEnrolledCoursesOfUser(
+                            ParseUUID.normalizeUID(userUid),
+                            pageable
+                        )
+                )
                 .build();
     }
 
+    @Operation(
+            summary = "Get all review of a course by course id"
+    )
+    @GetMapping("/{courseId}/reviews")
+    public ApiResponse<Page<DetailsReviewResponse>> getReviewsByCourseId(
+            @PathVariable("courseId") UUID courseId,
+            @ParameterObject Pageable pageable) {
+
+        return ApiResponse.<Page<DetailsReviewResponse>>builder()
+                .result(reviewService.getAllReviewsByCourseId(courseId, pageable))
+                .build();
+    }
 }
