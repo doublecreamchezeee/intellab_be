@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = CategoryMapper.class)
 public interface CourseMapper {
     @Mapping(target = "courseId", ignore = true)
     @Mapping(target = "courseName", source = "courseName")
@@ -39,6 +39,7 @@ public interface CourseMapper {
     @Mapping(target = "userUid", ignore = true)
     void updateCourse(@MappingTarget Course course, CourseUpdateRequest request);
 
+    @Mapping(target = "categories",source = "categories")
     CourseCreationResponse toCourseCreationResponse(Course course);
 
     DetailCourseResponse toDetailCourseResponse(Course course, boolean isUserEnrolled);
