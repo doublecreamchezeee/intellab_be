@@ -6,6 +6,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +19,32 @@ import com.example.courseservice.repository.custom.LearningLessonRepositoryCusto
 public class LearningLessonRepositoryCustomImpl implements LearningLessonRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Override
+    public Page<LessonProgressResponse> getLessonProgress(UUID userId, UUID courseId, Pageable pageable) {
+        Query query = entityManager.createNamedQuery(
+                "LearningLesson.getLessonProgress",
+                LessonProgressResponse.class
+        );
+        query.setParameter(String.valueOf("userId"), userId);
+        query.setParameter(String.valueOf("courseId"), courseId);
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        // Execute the query and get the results
+        List<LessonProgressResponse> results = query.getResultList();
+
+        // Create a count query to get the total number of results
+        Query countQuery = entityManager.createNamedQuery(
+                "LearningLesson.getLessonProgressCount"
+        );
+        countQuery.setParameter(String.valueOf("userId"), userId);
+        countQuery.setParameter(String.valueOf("courseId"), courseId);
+        Long total = (Long) countQuery.getSingleResult();
+
+        // Create and return the Page object
+        return new PageImpl<>(results, pageable, total);
+    }
 
     @Override
     public List<LessonProgressResponse> getLessonProgress(UUID userId, UUID courseId) {
