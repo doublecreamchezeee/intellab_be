@@ -58545,7 +58545,192 @@ INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e
 
 
 
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, e'## Merge Sorted Array
 
+You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
+
+**Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
+
+The final sorted array should not be returned by the function, but instead be _stored_ inside the array `nums1`. To accommodate this, `nums1` has a length of `m + n`, where the first `m` elements denote the elements that should be merged, and the last `n` elements are set to `0` and should be ignored. `nums2` has a length of `n`.
+
+#### Example 1:
+
+```
+Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+Output: [1,2,2,3,5,6]
+```
+
+#### Example 2:
+
+```
+Input: nums1 = [1], m = 1, nums2 = [], n = 0
+Output: [1]
+```
+
+#### Example 3:
+
+```
+Input: nums1 = [0], m = 0, nums2 = [1], n = 1
+Output: [1]
+```', 'easy', 'Merge sorted array', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, e'## Plus One
+
+You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
+
+Increment the large integer by one and return the resulting array of digits.
+
+#### Example 1:
+
+```
+Input: digits = [1,2,3]
+Output: [1,2,4]
+```
+
+#### Example 2:
+
+```
+Input: digits = [4,3,2,1]
+Output: [4,3,2,2]
+```
+
+#### Example 3:
+
+```
+Input: digits = [9]
+Output: [1,0]
+```', 'easy', 'Plus one', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, e'## Search Insert Position
+
+Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+
+You must write an algorithm with `O(log n)` runtime complexity.
+
+#### Example 1:
+
+```
+Input: nums = [1,3,5,6], target = 5
+Output: 2
+```
+
+#### Example 2:
+
+```
+Input: nums = [1,3,5,6], target = 2
+Output: 1
+```
+
+#### Example 3:
+
+```
+Input: nums = [1,3,5,6], target = 7
+Output: 4
+```', 'easy', 'Search Insert Position', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, e'## Single Number
+
+Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
+
+You must implement a solution with a linear runtime complexity and use only constant extra space.
+
+#### Example 1:
+
+```
+Input: nums = [2,2,1]
+Output: 1
+```
+
+#### Example 2:
+
+```
+Input: nums = [4,1,2,1,2]
+Output: 4
+```
+
+#### Example 3:
+
+```
+Input: nums = [1]
+Output: 1
+```', 'easy', 'Single Number', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, e'## Two Sum
+
+Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.
+
+#### Example 1:
+
+```
+Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+```
+
+#### Example 2:
+
+```
+Input: nums = [3,2,4], target = 6
+Output: [1,2]
+```
+
+#### Example 3:
+
+```
+Input: nums = [3,3], target = 6
+Output: [0,1]
+```', 'easy', 'Two sum', 2, false, false);
+
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
+1
+
+0', '1', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('eb1f21cf-b8fa-41cc-aea8-7224a85998c6', e'1 3 5 0 0 0 0
+3
+2 4 6 7
+4', '1 2 3 4 5 6 7', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('607a6878-899a-4f10-a3ff-106e36f6db7b', e'4 5 6 0 0 0
+3
+1 2 3
+3', '1 2 3 4 5 6', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('285e81b0-b13c-4a30-b861-228edd8fa05a', e'0
+0
+1
+1', '1', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('7d1d2398-47fd-480a-a662-b8bb892656a4', e'1 2 3 0 0 0
+3
+2 5 6
+3', '1 2 2 3 5 6', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('0ccce6f3-b6f1-4184-b13d-0aec69dfc148', '9', '1 0', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('00222cc2-be0a-4b78-8e49-8a7572418dad', '4 3 2 1', '4 3 2 2', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('6fbb0344-0bc8-4df2-a64d-785fb373a9a7', '9 9 9', '1 0 0 0', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('8a85700f-ffb4-438b-8183-8f3aa1999c24', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 6', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 7', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('d725244d-31f7-4ddc-b494-dc54cab67964', '1 2 3', '1 2 4', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4a9c10f0-eb2a-4b19-8e19-9edf117e76d8', '1 0 0 0', '1 0 0 1', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 6);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('21a234fc-adc3-4012-9802-63ab716fb8c4', e'1 3 5 6
+5', '2', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4703bfe2-5040-49f7-b728-bdea2b6c97e4', e'1 3 5 6
+7', '4', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('e8698f62-9051-49e0-8610-56c27a7dcb96', e'1 3 5 6
+4', '2', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('da031658-0ac7-4aae-99e5-6c01e2862b29', e'1 3 5 6
+0', '0', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('2becdcf8-1773-4d3a-b759-63fea450106c', e'1 3 5 6
+2', '1', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('93cfd193-1620-4e60-8c84-983041d205f0', '0 1 0', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('fad6d724-b8ce-4b6b-a1fb-f5a1e8b7e003', '1', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('f8e22dda-b2cf-473e-b10f-ca1069fd5630', '4 1 2 1 2', '4', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4343cfa0-4508-4157-b986-23e04fc60069', '3 3 7 8 8', '7', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('e15bef99-a6dd-46a1-bbb0-af5ed9d06e09', '2 2 1', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('abf531db-e157-49e9-8310-beb37cffe58a', e'3 3
+6', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('78dd79f1-3691-42da-9fcf-37e7c96c439f', e'1 0 0 7
+8', '0 3', null, '591b3457-2157-4d61-b03d-d53f8666342c', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('5aedba91-125d-4cdc-99f3-43fc3d431bad', e'3 2 4
+6', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('d915b2ea-eb2a-450b-aa28-e506bf55a856', e'2 7 11 15
+9', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4 6 10 2
+12', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 5);
 
 
 
