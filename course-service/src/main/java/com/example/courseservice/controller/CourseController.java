@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
@@ -75,9 +76,14 @@ public class CourseController {
     @Operation(
             summary = "Get all lessons and progress of learning lessons in a course (using when user has enrolled in course)"
     )
-    @GetMapping("/{courseId}/{userUid}/lessons")
+    @GetMapping("/{courseId}/lessons/me")
     ApiResponse<List<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(
-            @PathVariable("courseId") String courseId, @PathVariable("userUid") String userUid) {
+            @PathVariable("courseId") String courseId,
+            @RequestHeader("X-UserId") String userUid
+//            @PathVariable("userUid") String userUid
+
+    ) {
+        userUid = userUid.split(",")[0];
         return ApiResponse.<List<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
@@ -106,8 +112,8 @@ public class CourseController {
             summary = "Get all courses"
     )
     @GetMapping("")
-    ApiResponse<Page<CourseCreationResponse>> getAllCourse(@ParameterObject Pageable pageable) {
-
+    ApiResponse<Page<CourseCreationResponse>> getAllCourse(
+            @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
                             pageable
@@ -183,7 +189,9 @@ public class CourseController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<CourseCreationResponse>> searchCourses(
+            @RequestHeader("X-UserID") String userUid,
             @RequestParam("keyword") String keyword, @ParameterObject Pageable pageable) {
+        System.out.println(userUid);
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.searchCourses(
                             keyword, pageable

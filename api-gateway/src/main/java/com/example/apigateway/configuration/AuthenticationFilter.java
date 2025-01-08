@@ -77,8 +77,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         return identityService.validateToken(token).flatMap(response -> {
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
+                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                        .header("X-UserId", response.getBody().getUserId())
+                        .build();
 
-                return chain.filter(exchange);
+                return chain.filter(exchange.mutate().request(modifiedRequest).build());
             } else
                 return unauthenticated(exchange.getResponse());
         }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));

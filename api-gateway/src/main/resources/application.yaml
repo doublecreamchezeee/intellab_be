@@ -34,3 +34,4 @@ spring:
             - Path=${app.api-prefix}/course/**
           filters:
             - StripPrefix=1
+            - AddRequestHeader=X-UserId, myUserId
