@@ -20,7 +20,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DetailCourseResponse {
     UUID courseId;
-    String courseLogo;
     String courseName;
     String description;
     String level;

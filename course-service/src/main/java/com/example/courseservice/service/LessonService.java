@@ -16,6 +16,7 @@ import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
+import com.example.courseservice.mapper.AssignmentDetailMapper;
 import com.example.courseservice.mapper.LearningLessonMapper;
 import com.example.courseservice.mapper.LessonMapper;
 import com.example.courseservice.mapper.QuestionMapper;
@@ -34,6 +35,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,9 @@ public class LessonService {
 
     CourseRepository courseRepository;
     UserCoursesRepository userCoursesRepository;
+
+    AssignmentDetailMapper assignmentDetailMapper;
+
 
     //@Qualifier("learningLessonRepositoryCustomImpl")
     LearningLessonRepositoryCustomImpl learningLessonRepositoryCustom;
@@ -97,7 +102,51 @@ public class LessonService {
         //return lessonMapper.toLessonResponse(lesson);
     }
 
-    public QuestionResponse getQuestion(UUID lessonId)
+
+    //Quy trình flow làm bài tập: Get quiz -> làm bài
+    // subflow1-làm chưa xong rồi thoát ra: Post Assignment với score là null(chưa làm xong), các câu chưa làm thì
+    //có answer của assignmentDetail là null.
+    // subflow2-làm xong rồi nộp: Post Assignment với score là kết quả làm được và list<assignmentDetail> là các câu
+    // trong bài làm.
+    //Hàm getQuesstion: Trả về list QuestionResponse
+    // trường hợp đã làm trước đó:
+    // - Trả về bài làm đạt đủ điểm
+    // - Trả về bài làm gần đây nhất nếu chưa có bài nào đạt đủ điểm.
+    // trường hoợp chưa làm: trả về danh sách câu hỏi
+    public List<QuestionResponse> getLastAssignment(UUID lessonId, UUID userId) {
+        LearningLesson learningLesson = learningLessonRepository.findByLesson_LessonIdAndUserId(lessonId,userId)
+                .orElseThrow(() -> new AppException(ErrorCode.LEARNING_LESSON_NOT_FOUND));
+
+        List<Assignment> assignments = learningLesson.getAssignments();
+        // nếu chưa có bài làm nào thì bỏ qua
+        if(assignments.isEmpty()){
+            throw new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND);
+        }
+
+        Assignment lastEdited = null;
+
+        for( Assignment assignment:assignments)
+        {
+            if (lastEdited == null)
+                lastEdited = assignment;
+            else if (lastEdited.getScore() >= 8)
+            {
+                if(assignment.getScore()>=lastEdited.getScore())
+                    lastEdited = assignment;
+            }
+            else if (lastEdited.getScore() < 8)
+                lastEdited = assignment;
+        }
+
+        List<AssignmentDetail> assignmentDetails = lastEdited.getAssignment_details();
+        return assignmentDetails.stream()
+                .map(assignmentDetailMapper::toQuestionResponse)
+                .collect(Collectors.toList());
+
+    }
+
+
+    public List<QuestionResponse> getQuestion(UUID lessonId, Integer numberOfQuestions)
     {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
@@ -106,14 +155,20 @@ public class LessonService {
             return null;
         List<Question> questions = exercise.getQuestionList();
 
-        if(questions.isEmpty()||questions==null)
+        if(questions == null || questions.isEmpty())
             return null;
 
+        if(numberOfQuestions >= questions.size())
+            return questions.stream()
+                    .map(questionMapper::toQuestionResponse)
+                    .collect(Collectors.toList());
 
-        Random random = new Random();
-        int randomIndex = random.nextInt(questions.size());
+        Collections.shuffle(questions);
 
-        return questionMapper.toQuestionResponse(questions.get(randomIndex));
+        return questions.subList(0,numberOfQuestions)
+                .stream().map(questionMapper::toQuestionResponse)
+                .collect(Collectors.toList());
+
     }
 
     public Page<LessonResponse> getLessonsByCourseId(String courseId, Pageable pageable) {

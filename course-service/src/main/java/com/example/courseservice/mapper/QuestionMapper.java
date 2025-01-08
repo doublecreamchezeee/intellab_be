@@ -14,6 +14,9 @@ import java.util.UUID;
 @Mapper(componentModel = "spring", uses = OptionMapper.class)
 public interface QuestionMapper {
 
+    @Mapping(target = "order",ignore = true)
+    @Mapping(target = "answer", ignore = true)
+    @Mapping(target = "unitScore", ignore = true)
     @Mapping(source = "question_id", target = "questionId")
     @Mapping(source = "questionContent", target = "questionContent")
     @Mapping(source = "correct_answer", target = "correctAnswer")

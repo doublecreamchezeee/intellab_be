@@ -14,6 +14,5 @@ public class CourseUpdateRequest {
     String level;
     float price;
     String unitPrice;
-    String courseLogo;
     String userUid;
 }

@@ -30,12 +30,19 @@ public class Problem {
     @Column(columnDefinition = "VARCHAR(20)")
     String problem_level;
 
-    @Column(columnDefinition = "VARCHAR(50)")
-    String category;
+//    @Column(columnDefinition = "VARCHAR(50)")
+//    String category;
+
     Integer score;
 
     @Column(columnDefinition = "DECIMAL(5,2)")
     Float acceptance_rate;
+
+    @Column(name = "is_available")
+    Boolean isAvailable;
+
+    @Column(name = "is_published")
+    Boolean isPublished;
 
 //    List<Lesson> lessons;
 //

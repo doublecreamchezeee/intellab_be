@@ -3,6 +3,7 @@ package com.example.courseservice.service;
 
 import com.example.courseservice.dto.request.Assignment.AssignmentCreationRequest;
 import com.example.courseservice.dto.request.Assignment.AssignmentDetailRequest;
+import com.example.courseservice.dto.request.Assignment.SubmitAssignmentRequest;
 import com.example.courseservice.dto.response.Assignment.AssignmentDetailResponse;
 import com.example.courseservice.dto.response.Assignment.AssignmentResponse;
 import com.example.courseservice.exception.AppException;
@@ -35,45 +36,95 @@ public class AssignmentService {
     QuestionRepository questionRepository;
     LearningLessonRepository learningLessonRepository;
 
-    public AssignmentResponse getAssignmentById(UUID assignmentId) {
-        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
-        return assignmentMapper.toResponse(assignment);
-    }
+//    public AssignmentResponse getAssignmentById(UUID assignmentId) {
+//        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
+//        return assignmentMapper.toResponse(assignment);
+//    }
+//
+//    public AssignmentResponse addAssignment(AssignmentCreationRequest request) {
+//        Assignment assignment = assignmentMapper.toAssignment(request);
+//        Exercise exercise = exerciseRepository.findById(request.getExerciseId()
+//        ).orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
+//        assignment.setExercise(exercise);
+//        LearningLesson learning = learningLessonRepository.findById(request.getLearningId()).orElseThrow(()->new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
+//        assignment.setLearningLesson(learning);
+//
+//        assignmentRepository.save(assignment);
+//        return assignmentMapper.toResponse(assignment);
+//    }
 
-    public AssignmentResponse addAssignment(AssignmentCreationRequest request) {
+    public Float submitAssignment(UUID lessonID, UUID userId, SubmitAssignmentRequest request) {
+        LearningLesson learningLesson = learningLessonRepository.findByLesson_LessonIdAndUserId(lessonID, userId)
+                .orElseThrow(() -> new AppException(ErrorCode.LEARNING_LESSON_NOT_FOUND));
+
         Assignment assignment = assignmentMapper.toAssignment(request);
-        Exercise exercise = exerciseRepository.findById(request.getExerciseId()
-        ).orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
+
+        assignment.setLearningLesson(learningLesson);
+
+        Exercise exercise = exerciseRepository.findById(request.getExerciseId())
+                .orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
         assignment.setExercise(exercise);
-        LearningLesson learning = learningLessonRepository.findById(request.getLearningId()).orElseThrow(()->new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
-        assignment.setLearningLesson(learning);
 
-        assignmentRepository.save(assignment);
-        return assignmentMapper.toResponse(assignment);
-    }
+        List<AssignmentDetail> assignmentDetails = assignment.getAssignment_details();
 
-    public AssignmentResponse addDetail(UUID assignmentId,List<AssignmentDetailRequest> detailRequests) {
-        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 
-        detailRequests.forEach(detailRequest -> {
-            //parse float fail unit score
-            AssignmentDetail assignmentDetail = assignmentDetailMapper.toAssignmentDetail(detailRequest);
+
+        for (int i = 0; i < assignmentDetails.size(); i++) {
+            System.out.println(assignmentDetails.get(i));
+
+            System.out.println(request.getAssignmentDetailRequests());
+            UUID questionID = request.getAssignmentDetailRequests().get(i).getQuestionId();
+
+            Question question = questionRepository.findById(questionID)
+                    .orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
+
+            assignmentDetails.get(i).setQuestion(question);
+
             assignmentDetailID id = new assignmentDetailID();
-            id.setAssignment_id(assignmentId);
-            id.setSubmit_order(detailRequests.indexOf(detailRequest)+1);
-            //id.setSubmit_order(null);
-            assignmentDetail.setAssignmentDetail_id(id);
+            id.setAssignment_id(assignment.getAssignment_id());
 
-            Question question = questionRepository.findById(detailRequest.getQuestionId()).orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
-            assignmentDetail.setQuestion(question);
-            assignmentDetail.setAssignment(assignment);
-            assignmentDetailRepository.saveAndFlush(assignmentDetail);
+            assignmentDetails.get(i).setAssignmentDetail_id(id);
 
-        });
+            assignmentDetailRepository.save(assignmentDetails.get(i));
+        }
 
         assignmentRepository.save(assignment);
-        return assignmentMapper.toResponse(assignment);
+
+        if(request.getScore() != null) {
+            if(request.getScore() >= 8) {
+                learningLesson.setIsDoneTheory(true);
+            } else if (request.getScore() < 8) {
+                learningLesson.setIsDoneTheory(false);
+            }
+            learningLessonRepository.save(learningLesson);
+        }
+
+
+        return assignment.getScore();
     }
+
+//    public AssignmentResponse addDetail(UUID assignmentId,List<AssignmentDetailRequest> detailRequests) {
+//        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
+//
+//        detailRequests.forEach(detailRequest -> {
+//            //parse float fail unit score
+//            AssignmentDetail assignmentDetail = assignmentDetailMapper.toAssignmentDetail(detailRequest);
+//            assignmentDetailID id = new assignmentDetailID();
+//            id.setAssignment_id(assignmentId);
+//            id.setSubmit_order(detailRequests.indexOf(detailRequest)+1);
+//            //id.setSubmit_order(null);
+//            assignmentDetail.setAssignmentDetail_id(id);
+//
+//            Question question = questionRepository.findById(detailRequest.getQuestionId()).orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
+//            assignmentDetail.setQuestion(question);
+//            assignmentDetail.setAssignment(assignment);
+//            assignmentDetailRepository.saveAndFlush(assignmentDetail);
+//
+//        });
+//
+//        assignmentRepository.save(assignment);
+//        return assignmentMapper.toResponse(assignment);
+//    }
     public List<AssignmentDetailResponse> getAssignmentDetail(UUID assignmentId) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 

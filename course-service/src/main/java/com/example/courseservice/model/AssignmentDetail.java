@@ -4,6 +4,7 @@ package com.example.courseservice.model;
 
 import com.example.courseservice.model.compositeKey.assignmentDetailID;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,7 +29,7 @@ public class AssignmentDetail {
     @Column(columnDefinition = "VARCHAR(20)")
     String answer;
 
-    @JsonManagedReference
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id",nullable = false)
     Question question;

@@ -65,11 +65,12 @@ public class Lesson {
     @Column(name = "lesson_order")
     int lessonOrder;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
-    @JsonBackReference
     Course course;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id")
     Exercise exercise;
@@ -81,7 +82,7 @@ public class Lesson {
 //    @JoinColumn(name = "problem_id")
 //    Problem problem;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY)
-    @JsonBackReference
     List<LearningLesson> learningLessons;
 }

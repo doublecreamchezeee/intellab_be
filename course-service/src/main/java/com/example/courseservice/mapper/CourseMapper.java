@@ -18,7 +18,6 @@ public interface CourseMapper {
     @Mapping(target = "level", source = "level")
     @Mapping(target = "price", source = "price")
     @Mapping(target = "unitPrice", source = "unitPrice")
-    @Mapping(target = "courseLogo", source = "courseLogo")
     @Mapping(target = "userUid", ignore = true)//source = "userUid"
     Course toCourse(CourseCreationRequest request);
 
@@ -28,7 +27,6 @@ public interface CourseMapper {
     @Mapping(target = "level", source = "level")
     @Mapping(target = "price", source = "price")
     @Mapping(target = "unitPrice", source = "unitPrice")
-    @Mapping(target = "courseLogo", source = "courseLogo")
     @Mapping(target = "userUid", ignore = true)//source = "userUid"
     Course toCourse(CourseUpdateRequest request);
 

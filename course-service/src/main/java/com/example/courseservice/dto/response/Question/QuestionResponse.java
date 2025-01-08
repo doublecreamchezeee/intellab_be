@@ -20,10 +20,15 @@ public class QuestionResponse {
     String status;
     String correctAnswer;
     Character questionType;
-    //Instant createdAt;
-    //Instant updatedAt;
+
 
     List<OptionResponse> options;
+
+    Integer order;
+    //Các cột trong trường hợp của bài đã làm rồi
+    String answer;
+    Integer unitScore;
+
 }
 
 //UUID question_id;

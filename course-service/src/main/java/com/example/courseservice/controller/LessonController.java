@@ -1,6 +1,8 @@
 package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.Assignment.AssignmentCreationRequest;
+import com.example.courseservice.dto.request.Assignment.SubmitAssignmentRequest;
 import com.example.courseservice.dto.request.exercise.ExerciseCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
@@ -10,6 +12,7 @@ import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
 import com.example.courseservice.dto.response.lesson.DetailsLessonResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.service.AssignmentService;
 import com.example.courseservice.service.ExerciseService;
 import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.service.LessonService;
@@ -23,6 +26,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -33,6 +38,7 @@ import java.util.UUID;
 @Tag(name = "Lesson")
 public class LessonController {
     LessonService lessonService;
+    AssignmentService assignmentService;
 
     @Operation(
             summary = "Create lesson"
@@ -118,15 +124,41 @@ public class LessonController {
                 .build();
     }
 
+    @PostMapping("{lessonId}/submitquiz")
+    ApiResponse<Float> submitQuiz(@PathVariable("lessonId") UUID lessonId,
+                                  @RequestBody SubmitAssignmentRequest request,
+                                  @RequestHeader("X-UserId") String UserUid)
+    {
+        UserUid = UserUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(UserUid);
+        return ApiResponse.<Float>builder()
+                .result(assignmentService.submitAssignment(lessonId,userId,request)).build();
+    }
+
+
     @Operation(
             summary = "Get quiz of lesson"
     )
     @GetMapping("/{lessonId}/quiz")
-    ApiResponse<QuestionResponse> quiz(@PathVariable("lessonId") UUID lessonId){
-        return ApiResponse.<QuestionResponse>builder()
-                .result(lessonService.getQuestion(lessonId))
+    ApiResponse<List<QuestionResponse>> quiz(@PathVariable("lessonId") UUID lessonId,
+                                             @RequestParam Integer numberOfQuestions,
+                                             @RequestParam Boolean isGetAssignment,
+                                             @RequestHeader ("X-UserId") String UserUid){
+
+        if (isGetAssignment) {
+            UserUid = UserUid.split(",")[0];
+            UUID userid = ParseUUID.normalizeUID(UserUid);
+
+            return ApiResponse.<List<QuestionResponse>>builder()
+                    .result(lessonService.getLastAssignment(lessonId,userid))
+                    .build();
+        }
+        return ApiResponse.<List<QuestionResponse>>builder()
+                .result(lessonService.getQuestion(lessonId, numberOfQuestions))
                 .build();
     }
+
+
 
     @Operation(
             summary = "Mark theory of lesson as done"

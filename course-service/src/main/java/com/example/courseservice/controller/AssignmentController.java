@@ -25,35 +25,35 @@ import java.util.UUID;
 public class AssignmentController {
     AssignmentService assignmentService;
 
-    @Operation(
-            summary = "Get one assignments by id"
-    )
-    @GetMapping("/{assignmentId}")
-    ApiResponse<AssignmentResponse> getAssignment(@PathVariable UUID assignmentId) {
-        return ApiResponse.<AssignmentResponse>builder()
-                .result(assignmentService.getAssignmentById(assignmentId))
-                .build();
-    }
+//    @Operation(
+//            summary = "Get one assignments by id"
+//    )
+//    @GetMapping("/{assignmentId}")
+//    ApiResponse<AssignmentResponse> getAssignment(@PathVariable UUID assignmentId) {
+//        return ApiResponse.<AssignmentResponse>builder()
+//                .result(assignmentService.getAssignmentById(assignmentId))
+//                .build();
+//    }
+//
+//    @Operation(
+//            summary = "Create assignment"
+//    )
+//    @PostMapping
+//    ApiResponse<AssignmentResponse> createAssignment(@RequestBody AssignmentCreationRequest request) {
+//        return ApiResponse.<AssignmentResponse>builder()
+//                .result(assignmentService.addAssignment(request))
+//                .build();
+//    }
 
-    @Operation(
-            summary = "Create assignment"
-    )
-    @PostMapping
-    ApiResponse<AssignmentResponse> createAssignment(@RequestBody AssignmentCreationRequest request) {
-        return ApiResponse.<AssignmentResponse>builder()
-                .result(assignmentService.addAssignment(request))
-                .build();
-    }
-
-    @Operation(
-            summary = "Add details information (answer, unit score) to assignment by id"
-    )
-    @PostMapping("/{assignmentId}")
-    ApiResponse<AssignmentResponse> addDetails(@PathVariable UUID assignmentId,@RequestBody List<AssignmentDetailRequest> requests) {
-        return ApiResponse.<AssignmentResponse>builder()
-                .result(assignmentService.addDetail(assignmentId,requests))
-                .build();
-    }
+//    @Operation(
+//            summary = "Add details information (answer, unit score) to assignment by id"
+//    )
+//    @PostMapping("/{assignmentId}")
+//    ApiResponse<AssignmentResponse> addDetails(@PathVariable UUID assignmentId,@RequestBody List<AssignmentDetailRequest> requests) {
+//        return ApiResponse.<AssignmentResponse>builder()
+//                .result(assignmentService.addDetail(assignmentId,requests))
+//                .build();
+//    }
 
     @Operation(
             summary = "Get details information of assignment by id"

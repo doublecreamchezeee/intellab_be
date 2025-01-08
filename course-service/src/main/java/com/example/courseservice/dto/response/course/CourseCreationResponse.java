@@ -17,7 +17,6 @@ public class CourseCreationResponse {
     String level;
     float price;
     String unitPrice;
-    String courseLogo;
     UUID userUid;
     Integer reviewCount;
     Double averageRating;

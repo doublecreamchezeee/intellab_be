@@ -50,11 +50,11 @@ public class Question {
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Option> options;
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToMany(mappedBy = "questionList", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Exercise> exercises;
 
-    @JsonBackReference
+    @JsonIgnore
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     List<AssignmentDetail> assignmentDetails;
 

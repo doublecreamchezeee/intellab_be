@@ -28,10 +28,15 @@ public class TestCase {
     @Column(columnDefinition = "TEXT")
     String output;
 
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     @JsonBackReference("problem-testcase")
     Problem problem;
+
+    @Column(name = "testcase_order")
+    Integer order;
 
     @JoinColumn(name = "source_id")
     UUID user_id;

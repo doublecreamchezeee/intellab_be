@@ -3,6 +3,7 @@ package com.example.courseservice.model;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,11 +28,11 @@ public class Exercise {
     @Column(columnDefinition = "TEXT")
     String description;
 
-    @JsonBackReference
+    @JsonIgnore
     @OneToOne(mappedBy = "exercise", fetch = FetchType.LAZY)
     Lesson lesson;
 
-    @JsonManagedReference
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "question_list",
@@ -40,6 +41,7 @@ public class Exercise {
     )
     List<Question> questionList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY)
     List<Assignment> assignments;
 
