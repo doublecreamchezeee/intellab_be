@@ -64,4 +64,8 @@ public class Problem {
     @JsonManagedReference("problem-solution")
     List<Solution> solutions;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    List<ProblemCategory> categories;
+
 }
