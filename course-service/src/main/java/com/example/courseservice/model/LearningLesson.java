@@ -80,6 +80,7 @@ public class LearningLesson {
     @JoinColumn(name = "lessonId")
     Lesson lesson;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "learningLesson", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Assignment> assignments;
 
