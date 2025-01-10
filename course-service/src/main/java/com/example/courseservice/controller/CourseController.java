@@ -191,6 +191,7 @@ public class CourseController {
             @RequestHeader("X-UserID") String userUid,
             @RequestParam("keyword") String keyword, @ParameterObject Pageable pageable) {
         System.out.println(userUid);
+
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.searchCourses(
                             keyword, pageable
