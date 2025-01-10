@@ -112,7 +112,19 @@ public class CourseController {
     )
     @GetMapping("")
     ApiResponse<Page<CourseCreationResponse>> getAllCourse(
-            @ParameterObject Pageable pageable) {
+            @ParameterObject Pageable pageable,
+            @RequestParam(required = false) String category) {
+        if (category != null)
+        {
+            return ApiResponse.<Page<CourseCreationResponse>>builder()
+                    .result(courseService.getAllByCategory(
+                            category,
+                            pageable
+                            )
+                    )
+                    .build();
+        }
+
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
                             pageable
@@ -188,9 +200,21 @@ public class CourseController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<CourseCreationResponse>> searchCourses(
-            @RequestHeader("X-UserID") String userUid,
-            @RequestParam("keyword") String keyword, @ParameterObject Pageable pageable) {
+            @RequestHeader(value = "X-UserID", required = false) String userUid,
+            @RequestParam("keyword") String keyword,
+            @RequestParam(required = false) Float ratings,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) Boolean price,
+            @RequestParam(required = false) List<String> categories,
+            @ParameterObject Pageable pageable) {
         System.out.println(userUid);
+        if (ratings != null || level != null || price != null || categories != null) {
+            return ApiResponse.<Page<CourseCreationResponse>>builder()
+                    .result(courseService.searchCoursesWithFilter(
+                            keyword,ratings,level,price,categories, pageable
+                            )
+                    ).build();
+        }
 
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.searchCourses(
