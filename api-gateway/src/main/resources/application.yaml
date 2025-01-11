@@ -35,3 +35,10 @@ spring:
           filters:
             - StripPrefix=1
             - AddRequestHeader=X-UserId, myUserId
+        - id: problem-service
+          uri: http://${HOST_NAME}:${PROBLEM_PORT}
+          predicates:
+            - Path=${app.api-prefix}/problem/**
+          filters:
+            - StripPrefix=1
+            - AddRequestHeader=X-UserId, myUserId
