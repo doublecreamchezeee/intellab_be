@@ -20,23 +20,25 @@ import java.util.UUID;
 public class Problem {
     @Id
     @GeneratedValue
-    UUID problem_id;
+    @Column(name = "problem_id")
+    UUID problemId;
 
-    String problem_name;
+    @Column(name = "problem_name")
+    String problemName;
 
     @Column(columnDefinition = "TEXT")
     String description;
 
-    @Column(columnDefinition = "VARCHAR(20)")
-    String problem_level;
+    @Column(name = "problem_level", columnDefinition = "VARCHAR(20)")
+    String problemLevel;
 
 //    @Column(columnDefinition = "VARCHAR(50)")
 //    String category;
 
     Integer score;
 
-    @Column(columnDefinition = "DECIMAL(5,2)")
-    Float acceptance_rate;
+    @Column(name = "acceptance_rate", columnDefinition = "DECIMAL(5,2)")
+    Float acceptanceRate;
 
     @Column(name = "is_available")
     Boolean isAvailable;
@@ -67,5 +69,9 @@ public class Problem {
     @JsonIgnore
     @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
     List<ProblemCategory> categories;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    List<Hint> hints;
 
 }

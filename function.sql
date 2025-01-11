@@ -159,7 +159,6 @@ CREATE OR REPLACE FUNCTION get_details_course(
 )
 RETURNS TABLE(
 	course_id UUID,
-    course_logo TEXT,
     course_name VARCHAR(255),
     description TEXT,
     level VARCHAR(20),
@@ -179,7 +178,6 @@ BEGIN
     RETURN QUERY
     SELECT
 		c.course_id,
-		c.course_logo,
 		c.course_name,
 		c.description,
 		c.level,

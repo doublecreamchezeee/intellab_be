@@ -31,6 +31,7 @@ public enum ErrorCode {
     USER_NOT_ENROLLED(404, "User not enrolled", HttpStatus.NOT_FOUND),
     LEARNING_LESSON_NOT_FOUND(404, "Learning lesson not found", HttpStatus.NOT_FOUND),
     REVIEW_NOT_FOUND(404, "Review not found", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_FOUND(404, "Category not found", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

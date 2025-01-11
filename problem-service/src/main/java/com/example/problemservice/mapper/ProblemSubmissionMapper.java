@@ -12,7 +12,7 @@ public interface ProblemSubmissionMapper {
     @Mapping(target = "code", source = "code")
     @Mapping(target = "programmingLanguage", source = "programming_language")
     @Mapping(target = "scoreAchieved", source = "score_achieved")
-    @Mapping(target = "problemId", source = "problem.problem_id")
+    @Mapping(target = "problemId", source = "problem.problemId")
     @Mapping(target = "userUid", source = "userUid")
     DetailsProblemSubmissionResponse toDetailsProblemSubmissionResponse(ProblemSubmission problemSubmission);
 }

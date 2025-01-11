@@ -18,5 +18,4 @@ public class Course {
     String level;
     Float price;
     String unitPrice;
-    String courseLogo;
 }

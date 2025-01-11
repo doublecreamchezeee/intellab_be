@@ -16,7 +16,6 @@ public class UserCoursesResponse {
     String level;
     float price;
     String unitPrice;
-    String courseLogo;
     float progressPercent;
     String status;
     Instant lastAccessedDate;

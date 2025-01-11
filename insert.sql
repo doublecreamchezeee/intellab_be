@@ -58903,7 +58903,6 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, 
 -- )
 -- RETURNS TABLE(
 -- 	course_id UUID,
---     course_logo TEXT,
 --     course_name VARCHAR(255),
 --     description TEXT,
 --     level VARCHAR(20),
@@ -58923,7 +58922,6 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, 
 -- RETURN QUERY
 -- SELECT
 --     c.course_id,
---     c.course_logo,
 --     c.course_name,
 --     c.description,
 --     c.level,
