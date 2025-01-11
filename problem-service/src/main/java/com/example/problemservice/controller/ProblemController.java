@@ -57,7 +57,7 @@ public class ProblemController {
             summary = "Get problem page"
     )
     @GetMapping("/search")
-    public ApiResponse<Page<ProblemRowResponse>> getProblems(@RequestParam String category,
+    public ApiResponse<Page<ProblemRowResponse>> getProblems(@RequestParam(required = false) String category,
                                                              @ParameterObject Pageable pageable,
                                                              @RequestParam(required = false) String keyword) {
         if(keyword != null) {

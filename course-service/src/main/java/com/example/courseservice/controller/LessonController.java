@@ -141,7 +141,7 @@ public class LessonController {
     )
     @GetMapping("/{lessonId}/quiz")
     ApiResponse<List<QuestionResponse>> quiz(@PathVariable("lessonId") UUID lessonId,
-                                             @RequestParam Integer numberOfQuestions,
+                                             @RequestParam (required = false, defaultValue = "10") Integer numberOfQuestions,
                                              @RequestParam Boolean isGetAssignment,
                                              @RequestHeader ("X-UserId") String UserUid){
 
