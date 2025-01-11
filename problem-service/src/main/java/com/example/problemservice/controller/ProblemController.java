@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,6 +37,19 @@ public class ProblemController {
         try {
             Problem problem = problemService.getProblem(problemId);
             return ResponseEntity.ok(problem); // Return the problem if found
+        } catch (AppException e) {
+            if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if problem not found
+            }
+            throw e;
+        }
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<Problem>> getAllProblem() {
+        try {
+            List<Problem> response = problemService.getAllProblems();
+            return ResponseEntity.ok(response);
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if problem not found

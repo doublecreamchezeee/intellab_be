@@ -7,6 +7,7 @@ import com.example.problemservice.repository.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,9 @@ public class ProblemService {
         return problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
+    }
+    public List<Problem> getAllProblems() {
+        return problemRepository.findAll();
     }
 
     public void deleteProblem(UUID problemId) {

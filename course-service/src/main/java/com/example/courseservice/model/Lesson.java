@@ -76,7 +76,6 @@ public class Lesson {
     Exercise exercise;
 
     @Column(name = "problem_id", nullable = true)
-    @JsonBackReference
     UUID problemId;
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "problem_id")
