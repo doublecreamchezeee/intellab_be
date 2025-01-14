@@ -21,7 +21,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
+/*import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;*/
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -61,6 +63,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+
         if (isPublicEndpoint(exchange.getRequest())) {
             return chain.filter(exchange);
         }
@@ -69,6 +73,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
+        // Get Authorization header
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
         if (CollectionUtils.isEmpty(authHeader))
             return unauthenticated(exchange.getResponse());
@@ -77,7 +82,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         return identityService.validateToken(token).flatMap(response -> {
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
-
+                // Set authentication in the security context
+                /*String userUid = response.getBody().getUserUid();
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userUid, null, null);
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(exchange));
+                SecurityContextHolder.getContext().setAuthentication(authentication);*/
                 return chain.filter(exchange);
             } else
                 return unauthenticated(exchange.getResponse());

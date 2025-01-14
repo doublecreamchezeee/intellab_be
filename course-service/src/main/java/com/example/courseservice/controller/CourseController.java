@@ -10,7 +10,6 @@ import com.example.courseservice.dto.response.learningLesson.LessonProgressRespo
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
-import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
@@ -23,7 +22,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
+/*import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;*/
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,6 +80,12 @@ public class CourseController {
             @PathVariable("courseId") String courseId,
             @PathVariable("userUid") String userUid,
             @ParameterObject Pageable pageable) {
+        
+        // Retrieve the authenticated user's details
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String userUid =  (String) authentication.getPrincipal(); // Assuming the userUid is stored in the username field
+
+
         return ApiResponse.<Page<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
