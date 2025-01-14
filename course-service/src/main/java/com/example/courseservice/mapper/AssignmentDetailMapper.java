@@ -25,6 +25,17 @@ public interface AssignmentDetailMapper {
     AssignmentDetailResponse toResponse(AssignmentDetail assignmentDetail);
 
 
+    @Mapping(target = "order",source = "assignmentDetail_id.submit_order")
+    @Mapping(target = "answer", source = "answer")
+    @Mapping(target = "unitScore", source = "unit_score")
+    @Mapping(source = "question.question_id", target = "questionId")
+    @Mapping(source = "question.questionContent", target = "questionContent")
+    @Mapping(source = "question.correct_answer", target = "correctAnswer")
+    @Mapping(source = "question.status", target = "status")
+    @Mapping(source = "question.question_type", target = "questionType")
+    @Mapping(source = "question.options", target = "options")
+    QuestionResponse toQuestionResponse(AssignmentDetail assignmentDetail);
+
     @Mapping(target = "answer", source = "answer")
     @Mapping(target = "unit_score", source = "unitScore")
     AssignmentDetail toAssignmentDetail(AssignmentDetailRequest assignmentDetailRequest);

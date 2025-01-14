@@ -10,5 +10,5 @@ import lombok.Setter;
 public class ValidatedTokenResponse {
     boolean isValidated;
     String message;
-    private String userUid;
+    String userId;
 }

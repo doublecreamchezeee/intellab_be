@@ -33,7 +33,7 @@ public class ProblemSubmissionService {
 
     public ProblemSubmission submitProblem(ProblemSubmission submission) {
         // Lấy Problem
-        Problem problem = problemRepository.findById(submission.getProblem().getProblem_id()).orElseThrow(
+        Problem problem = problemRepository.findById(submission.getProblem().getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
         submission.setProblem(problem);

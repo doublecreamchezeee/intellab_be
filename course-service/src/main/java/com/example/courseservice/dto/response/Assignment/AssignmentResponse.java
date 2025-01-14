@@ -15,11 +15,8 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AssignmentResponse {
     UUID assignmentId;
-
     UUID learningLessonId;
-    ExerciseResponse exercise;
     Float score;
-
     Integer submitOrder;
     Instant submitDate;
 

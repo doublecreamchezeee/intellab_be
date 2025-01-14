@@ -29,7 +29,7 @@ import java.util.UUID;
                 targetClass = DetailCourseResponse.class,
                 columns = {
                         @ColumnResult(name = "course_id", type = UUID.class),
-                        @ColumnResult(name = "course_logo", type = String.class),
+
                         @ColumnResult(name = "course_name", type = String.class),
                         @ColumnResult(name = "description", type = String.class),
                         @ColumnResult(name = "level", type = String.class),
@@ -74,9 +74,7 @@ public class Course {
     @Column(name = "unit_price", columnDefinition = "VARCHAR(10)")
     String unitPrice;
 
-//    @Lob
-    @Column(name = "course_logo", columnDefinition = "TEXT")
-    String courseLogo;
+
 
     @Column(name = "average_rating")
     Double averageRating;
@@ -95,9 +93,9 @@ public class Course {
     UUID userUid;
 
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
     @JoinColumn(name = "topic_id", nullable = true)
-    @JsonManagedReference
     Topic topic;
 
     @JsonManagedReference

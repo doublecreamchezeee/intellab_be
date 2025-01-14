@@ -1,5 +1,6 @@
 package com.example.courseservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -74,11 +75,12 @@ public class LearningLesson {
     @JoinColumn(name = "student_id", nullable = false)
     UUID userId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lessonId")
-    @JsonManagedReference
     Lesson lesson;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "learningLesson", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Assignment> assignments;
 

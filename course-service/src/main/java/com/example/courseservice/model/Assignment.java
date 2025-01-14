@@ -3,6 +3,7 @@ package com.example.courseservice.model;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,12 +34,12 @@ public class Assignment {
     @CreationTimestamp
     Instant submit_date;
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "exercise_id", nullable = true)
     Exercise exercise;
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "learning_id",nullable = false)
     LearningLesson learningLesson;

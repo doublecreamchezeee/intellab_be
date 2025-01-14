@@ -15,9 +15,20 @@ import java.util.UUID;
 public interface CourseRepository extends JpaRepository<Course, UUID>, DetailsCourseRepositoryCustom {
     Page<Course> findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description, Pageable pageable);
 
+    Page<Course> findAllByCategories_Name(String name, Pageable pageable);
+
+    List<Course> findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
+
+    List<Course> findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndLevel(String courseName, String description, String level);
+
+    List<Course> findAllByDescriptionContainingIgnoreCaseAndCategories_Name(String description,
+                                                                            String categoryName);
+
+    List<Course> findAllByCourseNameContainingIgnoreCaseAndCategories_Name(String name,
+                                                                           String categoryName);
+
+
     @Query("SELECT c FROM Course c WHERE c.courseId NOT IN (SELECT uc.enrollId.courseId FROM UserCourses uc WHERE uc.enrollId.userUid = :userId)")
     Page<Course> findAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable);
-
-
 
 }

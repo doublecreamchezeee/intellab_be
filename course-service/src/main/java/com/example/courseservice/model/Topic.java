@@ -2,6 +2,7 @@ package com.example.courseservice.model;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,15 +44,17 @@ public class Topic {
     String userUid = null;
 
     @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY, optional = true)
-    @JsonBackReference
+    @JsonIgnore
     Course course;
 
 //    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
 //    Problem problem;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "topic", fetch = FetchType.LAZY)
     List<Comment> comments;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
     List<OtherObjectReport> otherObjectReports;
 }

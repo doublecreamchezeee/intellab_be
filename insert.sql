@@ -2,12 +2,13 @@ create table if not exists public.problems
 (
     problem_id      uuid not null
     primary key,
-    acceptance_rate numeric(5, 2),
-    category        varchar(50),
+    acceptance_rate numeric(5, 2)  default 0,
     description     text,
     problem_level   varchar(20),
     problem_name    varchar(255),
-    score           integer
+    score           integer,
+    is_available     boolean       default false,
+    is_published    boolean       default false
     );
 
 alter table public.problems
@@ -267,7 +268,6 @@ create table if not exists public.courses
 (
     course_id   uuid not null
     primary key,
-    course_logo text,
     course_name varchar(255),
     description text,
     level       varchar(20),
@@ -458,6 +458,20 @@ create table question_category
 alter table question_category
     owner to postgres;
 
+
+create table problem_category
+(
+    category_id uuid not null,
+    problem_id  uuid not null
+        constraint fk2rg82j2evmwbfrglcpvhwpxfa
+            references problems,
+    primary key (category_id, problem_id)
+);
+
+alter table problem_category
+    owner to postgres;
+
+
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('dbfea360-dda9-46a5-9487-ea624080bb60', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('b7363130-16bc-4dc8-b442-f4cbc74451fa', 'Introduction to Queue Data Structure', null, null, 'Queue', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('3ad9aab6-bd17-4351-8e84-f7e080e5d536', 'The Linked List lesson series explores this versatile data structure, where elements (nodes) are dynamically linked using pointers. You’ll understand the differences between Singly, Doubly, and Circular Linked Lists, and learn how to perform operations like insertion, deletion, traversal, and searching. These lessons also highlight the advantages of Linked Lists over arrays, such as dynamic memory allocation. By the end, you''ll be ready to tackle real-world scenarios like memory management and graph representation.', null, null, 'Linked List', null);
@@ -478,21 +492,23 @@ INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('0a489a2f-a622-4ba9-a94d-70d5624e1309', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', null, null, 'Dynamic Programming Guide', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('95795791-8e54-4cce-8272-c06c15df68fc', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', null, null, 'Bitwise Algorithms Guide', null);
 
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null, 'Stack', 'The Stack lesson series offers a comprehensive introduction to one of the fundamental data structures in programming. You''ll explore how a Stack operates based on the LIFO (Last In, First Out) principle, perform core operations such as push, pop, and peek, and apply these concepts to real-world problems like validating parentheses, converting expressions, or building a browser''s backtracking system. This series is ideal for beginners and those looking to strengthen their understanding of data structures.', 'Beginner', 0.00, 'VND', null, 'dbfea360-dda9-46a5-9487-ea624080bb60');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('c94d230e-efca-4c17-afb4-1fda14c95348', null, 'Queue', 'The Queue lesson series dives into the mechanics of this fundamental data structure, which follows the FIFO (First In, First Out) principle. You’ll learn how to perform operations such as enqueue, dequeue, and peek, while also exploring its variations like Circular Queues and Priority Queues. Practical applications, including task scheduling, buffering, and breadth-first search algorithms, will help solidify your understanding. This series is perfect for beginners and anyone looking to master essential programming concepts.', 'Beginner', 0.00, 'VND', null, 'b7363130-16bc-4dc8-b442-f4cbc74451fa');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('ae72c88c-0355-423b-9023-c2ad25695ed0', null, 'Linked List', 'The Linked List lesson series explores this versatile data structure, where elements (nodes) are dynamically linked using pointers. You’ll understand the differences between Singly, Doubly, and Circular Linked Lists, and learn how to perform operations like insertion, deletion, traversal, and searching. These lessons also highlight the advantages of Linked Lists over arrays, such as dynamic memory allocation. By the end, you''ll be ready to tackle real-world scenarios like memory management and graph representation.', 'Intermediate', 0.00, 'VND', null, '3ad9aab6-bd17-4351-8e84-f7e080e5d536');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('bfa4a4ab-400d-4916-8002-a97c7e0bf088', null, 'Array', e'The Array lesson series introduces you to this foundational data structure, where elements are stored in a contiguous block of memory. You’ll learn about fixed and dynamic arrays, how to access elements efficiently, and perform operations like sorting, searching, and resizing. With real-world applications such as managing datasets, implementing algorithms, and representing matrices, this series is essential for anyone building a strong foundation in programming.
-', 'Intermediate', 0.00, 'VND', null, '1d356f60-3b9e-464b-887f-bb15047870f9');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', null, 'The Logic Building Problems', 'Logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', 'Beginner', 0.00, 'VND', null, '5fe612b4-3998-44c7-85b2-2e4e973a38a7');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', null, 'Introduction to DSA', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null, 'Matrix Data Structure Guide', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', 'Beginner', 0.00, 'VND', null, 'ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', null, 'Linked List Data Structure Guide', 'An in-depth guide to understanding and implementing linked lists. Explore concepts like singly, doubly, and circular linked lists, along with common operations such as insertion, deletion, traversal, and reversal. Ideal for mastering dynamic data organization and memory-efficient problem-solving.', 'Beginner', 0.00, 'VND', null, '067b8270-f488-41b8-a741-9d118e9dc6c4');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', null, 'Heap Data Structure Guide', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', 'Beginner', 0.00, 'VND', null, '5df3554d-160e-45b9-989a-ebd58ee65235');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', null, 'Guide on Recursive Algorithms', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', 'Beginner', 0.00, 'VND', null, 'f16f21af-1f53-4b7d-be4f-368c17574f02');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', null, 'Guide on Graph Algorithms', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', 'Intermediate', 0.00, 'VND', null, 'dd29f271-a9df-4fcc-a742-127dd269f84b');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', null, 'Guide on Greedy Algorithms', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', 'Beginner', 0.00, 'VND', null, 'a926fe6d-ded3-4127-9558-599fa430e1f6');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', null, 'Dynamic Programming Guide', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', 'Advanced', 0.00, 'VND', null, '0a489a2f-a622-4ba9-a94d-70d5624e1309');
-INSERT INTO public.courses (course_id, course_logo, course_name, description, level, price, unit_price, user_uid, topic_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', null, 'Bitwise Algorithms Guide', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', 'Beginner', 0.00, 'VND', null, '95795791-8e54-4cce-8272-c06c15df68fc');
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'Stack', 'The Stack lesson series offers a comprehensive introduction to one of the fundamental data structures in programming. You''ll explore how a Stack operates based on the LIFO (Last In, First Out) principle, perform core operations such as push, pop, and peek, and apply these concepts to real-world problems like validating parentheses, converting expressions, or building a browser''s backtracking system. This series is ideal for beginners and those looking to strengthen their understanding of data structures.', 'Beginner', 0.00, 'VND', null, 'dbfea360-dda9-46a5-9487-ea624080bb60', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('c94d230e-efca-4c17-afb4-1fda14c95348', 'Queue', 'The Queue lesson series dives into the mechanics of this fundamental data structure, which follows the FIFO (First In, First Out) principle. You’ll learn how to perform operations such as enqueue, dequeue, and peek, while also exploring its variations like Circular Queues and Priority Queues. Practical applications, including task scheduling, buffering, and breadth-first search algorithms, will help solidify your understanding. This series is perfect for beginners and anyone looking to master essential programming concepts.', 'Beginner', 0.00, 'VND', null, 'b7363130-16bc-4dc8-b442-f4cbc74451fa', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('ae72c88c-0355-423b-9023-c2ad25695ed0', 'Linked List', 'The Linked List lesson series explores this versatile data structure, where elements (nodes) are dynamically linked using pointers. You’ll understand the differences between Singly, Doubly, and Circular Linked Lists, and learn how to perform operations like insertion, deletion, traversal, and searching. These lessons also highlight the advantages of Linked Lists over arrays, such as dynamic memory allocation. By the end, you''ll be ready to tackle real-world scenarios like memory management and graph representation.', 'Intermediate', 0.00, 'VND', null, '3ad9aab6-bd17-4351-8e84-f7e080e5d536', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('bfa4a4ab-400d-4916-8002-a97c7e0bf088', 'Array', e'The Array lesson series introduces you to this foundational data structure, where elements are stored in a contiguous block of memory. You’ll learn about fixed and dynamic arrays, how to access elements efficiently, and perform operations like sorting, searching, and resizing. With real-world applications such as managing datasets, implementing algorithms, and representing matrices, this series is essential for anyone building a strong foundation in programming.
+', 'Intermediate', 0.00, 'VND', null, '1d356f60-3b9e-464b-887f-bb15047870f9', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'The Logic Building Problems', 'Logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', 'Beginner', 0.00, 'VND', null, '5fe612b4-3998-44c7-85b2-2e4e973a38a7', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'Introduction to DSA', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'Matrix Data Structure Guide', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', 'Beginner', 0.00, 'VND', null, 'ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'Linked List Data Structure Guide', 'An in-depth guide to understanding and implementing linked lists. Explore concepts like singly, doubly, and circular linked lists, along with common operations such as insertion, deletion, traversal, and reversal. Ideal for mastering dynamic data organization and memory-efficient problem-solving.', 'Beginner', 0.00, 'VND', null, '067b8270-f488-41b8-a741-9d118e9dc6c4', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'Heap Data Structure Guide', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', 'Beginner', 0.00, 'VND', null, '5df3554d-160e-45b9-989a-ebd58ee65235', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'Guide on Recursive Algorithms', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', 'Beginner', 0.00, 'VND', null, 'f16f21af-1f53-4b7d-be4f-368c17574f02', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'Guide on Graph Algorithms', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', 'Intermediate', 0.00, 'VND', null, 'dd29f271-a9df-4fcc-a742-127dd269f84b', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'Guide on Greedy Algorithms', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', 'Beginner', 0.00, 'VND', null, 'a926fe6d-ded3-4127-9558-599fa430e1f6', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'Dynamic Programming Guide', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', 'Advanced', 0.00, 'VND', null, '0a489a2f-a622-4ba9-a94d-70d5624e1309', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'Bitwise Algorithms Guide', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', 'Beginner', 0.00, 'VND', null, '95795791-8e54-4cce-8272-c06c15df68fc', null, null);
+
+
 
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '', 'Stack');
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '', 'Queue');
@@ -58529,7 +58545,192 @@ INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e
 
 
 
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, e'## Merge Sorted Array
 
+You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
+
+**Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
+
+The final sorted array should not be returned by the function, but instead be _stored_ inside the array `nums1`. To accommodate this, `nums1` has a length of `m + n`, where the first `m` elements denote the elements that should be merged, and the last `n` elements are set to `0` and should be ignored. `nums2` has a length of `n`.
+
+#### Example 1:
+
+```
+Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+Output: [1,2,2,3,5,6]
+```
+
+#### Example 2:
+
+```
+Input: nums1 = [1], m = 1, nums2 = [], n = 0
+Output: [1]
+```
+
+#### Example 3:
+
+```
+Input: nums1 = [0], m = 0, nums2 = [1], n = 1
+Output: [1]
+```', 'easy', 'Merge sorted array', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, e'## Plus One
+
+You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
+
+Increment the large integer by one and return the resulting array of digits.
+
+#### Example 1:
+
+```
+Input: digits = [1,2,3]
+Output: [1,2,4]
+```
+
+#### Example 2:
+
+```
+Input: digits = [4,3,2,1]
+Output: [4,3,2,2]
+```
+
+#### Example 3:
+
+```
+Input: digits = [9]
+Output: [1,0]
+```', 'easy', 'Plus one', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, e'## Search Insert Position
+
+Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+
+You must write an algorithm with `O(log n)` runtime complexity.
+
+#### Example 1:
+
+```
+Input: nums = [1,3,5,6], target = 5
+Output: 2
+```
+
+#### Example 2:
+
+```
+Input: nums = [1,3,5,6], target = 2
+Output: 1
+```
+
+#### Example 3:
+
+```
+Input: nums = [1,3,5,6], target = 7
+Output: 4
+```', 'easy', 'Search Insert Position', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, e'## Single Number
+
+Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
+
+You must implement a solution with a linear runtime complexity and use only constant extra space.
+
+#### Example 1:
+
+```
+Input: nums = [2,2,1]
+Output: 1
+```
+
+#### Example 2:
+
+```
+Input: nums = [4,1,2,1,2]
+Output: 4
+```
+
+#### Example 3:
+
+```
+Input: nums = [1]
+Output: 1
+```', 'easy', 'Single Number', 2, false, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_published, is_available) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, e'## Two Sum
+
+Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.
+
+#### Example 1:
+
+```
+Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+```
+
+#### Example 2:
+
+```
+Input: nums = [3,2,4], target = 6
+Output: [1,2]
+```
+
+#### Example 3:
+
+```
+Input: nums = [3,3], target = 6
+Output: [0,1]
+```', 'easy', 'Two sum', 2, false, false);
+
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
+1
+
+0', '1', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('eb1f21cf-b8fa-41cc-aea8-7224a85998c6', e'1 3 5 0 0 0 0
+3
+2 4 6 7
+4', '1 2 3 4 5 6 7', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('607a6878-899a-4f10-a3ff-106e36f6db7b', e'4 5 6 0 0 0
+3
+1 2 3
+3', '1 2 3 4 5 6', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('285e81b0-b13c-4a30-b861-228edd8fa05a', e'0
+0
+1
+1', '1', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('7d1d2398-47fd-480a-a662-b8bb892656a4', e'1 2 3 0 0 0
+3
+2 5 6
+3', '1 2 2 3 5 6', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('0ccce6f3-b6f1-4184-b13d-0aec69dfc148', '9', '1 0', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('00222cc2-be0a-4b78-8e49-8a7572418dad', '4 3 2 1', '4 3 2 2', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('6fbb0344-0bc8-4df2-a64d-785fb373a9a7', '9 9 9', '1 0 0 0', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('8a85700f-ffb4-438b-8183-8f3aa1999c24', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 6', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 7', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('d725244d-31f7-4ddc-b494-dc54cab67964', '1 2 3', '1 2 4', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4a9c10f0-eb2a-4b19-8e19-9edf117e76d8', '1 0 0 0', '1 0 0 1', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 6);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('21a234fc-adc3-4012-9802-63ab716fb8c4', e'1 3 5 6
+5', '2', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4703bfe2-5040-49f7-b728-bdea2b6c97e4', e'1 3 5 6
+7', '4', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('e8698f62-9051-49e0-8610-56c27a7dcb96', e'1 3 5 6
+4', '2', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('da031658-0ac7-4aae-99e5-6c01e2862b29', e'1 3 5 6
+0', '0', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('2becdcf8-1773-4d3a-b759-63fea450106c', e'1 3 5 6
+2', '1', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('93cfd193-1620-4e60-8c84-983041d205f0', '0 1 0', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('fad6d724-b8ce-4b6b-a1fb-f5a1e8b7e003', '1', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('f8e22dda-b2cf-473e-b10f-ca1069fd5630', '4 1 2 1 2', '4', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4343cfa0-4508-4157-b986-23e04fc60069', '3 3 7 8 8', '7', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('e15bef99-a6dd-46a1-bbb0-af5ed9d06e09', '2 2 1', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 5);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('abf531db-e157-49e9-8310-beb37cffe58a', e'3 3
+6', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 1);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('78dd79f1-3691-42da-9fcf-37e7c96c439f', e'1 0 0 7
+8', '0 3', null, '591b3457-2157-4d61-b03d-d53f8666342c', 2);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('5aedba91-125d-4cdc-99f3-43fc3d431bad', e'3 2 4
+6', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 3);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('d915b2ea-eb2a-450b-aa28-e506bf55a856', e'2 7 11 15
+9', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 4);
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4 6 10 2
+12', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 5);
 
 
 
@@ -58702,7 +58903,6 @@ INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e
 -- )
 -- RETURNS TABLE(
 -- 	course_id UUID,
---     course_logo TEXT,
 --     course_name VARCHAR(255),
 --     description TEXT,
 --     level VARCHAR(20),
@@ -58722,7 +58922,6 @@ INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e
 -- RETURN QUERY
 -- SELECT
 --     c.course_id,
---     c.course_logo,
 --     c.course_name,
 --     c.description,
 --     c.level,

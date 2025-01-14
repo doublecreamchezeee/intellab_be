@@ -16,8 +16,6 @@ public class AssignmentDetailResponse {
     Integer order;
     String answer;
     Integer unitScore;
-
-
     QuestionResponse question;
 
 }

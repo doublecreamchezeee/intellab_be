@@ -10,6 +10,7 @@ import com.example.courseservice.dto.response.learningLesson.LessonProgressRespo
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
@@ -22,8 +23,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-/*import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;*/
+
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
@@ -75,17 +76,14 @@ public class CourseController {
     @Operation(
             summary = "Get all lessons and progress of learning lessons in a course (using when user has enrolled in course)"
     )
-    @GetMapping("/{courseId}/{userUid}/lessons")
+    @GetMapping("/{courseId}/lessons/me") ///{userUid}
     ApiResponse<Page<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(
             @PathVariable("courseId") String courseId,
-            @PathVariable("userUid") String userUid,
+            //@PathVariable("userUid") String userUid,
+            @RequestHeader("X-UserId") String userUid,
             @ParameterObject Pageable pageable) {
-        
-        // Retrieve the authenticated user's details
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String userUid =  (String) authentication.getPrincipal(); // Assuming the userUid is stored in the username field
-
-
+       // userUid = userUid.split(",")[0];
+        log.info("UserUid: " + ParseUUID.normalizeUID(userUid));
         return ApiResponse.<Page<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
@@ -115,7 +113,19 @@ public class CourseController {
             summary = "Get all courses"
     )
     @GetMapping("")
-    ApiResponse<Page<CourseCreationResponse>> getAllCourse(@ParameterObject Pageable pageable) {
+    ApiResponse<Page<CourseCreationResponse>> getAllCourse(
+            @ParameterObject Pageable pageable,
+            @RequestParam(required = false) String category) {
+        if (category != null)
+        {
+            return ApiResponse.<Page<CourseCreationResponse>>builder()
+                    .result(courseService.getAllByCategory(
+                            category,
+                            pageable
+                            )
+                    )
+                    .build();
+        }
 
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
@@ -192,7 +202,22 @@ public class CourseController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<CourseCreationResponse>> searchCourses(
-            @RequestParam("keyword") String keyword, @ParameterObject Pageable pageable) {
+            @RequestHeader(value = "X-UserID", required = false) String userUid,
+            @RequestParam("keyword") String keyword,
+            @RequestParam(required = false) Float ratings,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) Boolean price,
+            @RequestParam(required = false) List<String> categories,
+            @ParameterObject Pageable pageable) {
+        System.out.println(userUid);
+        if (ratings != null || level != null || price != null || categories != null) {
+            return ApiResponse.<Page<CourseCreationResponse>>builder()
+                    .result(courseService.searchCoursesWithFilter(
+                            keyword,ratings,level,price,categories, pageable
+                            )
+                    ).build();
+        }
+
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.searchCourses(
                             keyword, pageable

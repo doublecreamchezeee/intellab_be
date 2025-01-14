@@ -9,14 +9,12 @@ import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CourseMapper;
+import com.example.courseservice.model.Category;
 import com.example.courseservice.model.Course;
 import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
-import com.example.courseservice.repository.CourseRepository;
-import com.example.courseservice.repository.LearningLessonRepository;
-import com.example.courseservice.repository.LessonRepository;
-import com.example.courseservice.repository.UserCoursesRepository;
+import com.example.courseservice.repository.*;
 import com.example.courseservice.repository.impl.DetailsCourseRepositoryCustomImpl;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
@@ -24,13 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +39,7 @@ public class CourseService {
     LessonRepository lessonRepository;
     LearningLessonRepository learningLessonRepository;
     DetailsCourseRepositoryCustomImpl detailsCourseRepositoryCustom;
+    CategoryRepository categoryRepository;
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
         Page<Course> courses = courseRepository.findAll(pageable);
@@ -53,6 +50,35 @@ public class CourseService {
             response.setLessonCount(lessonCount);
             return response;
         });
+    }
+
+    private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), list.size());
+        List<T> subList = list.subList(start, end);
+        return new PageImpl<>(subList, pageable, list.size());
+    }
+
+    public Page<CourseCreationResponse> getAllByCategory(String categoryName, Pageable pageable)
+    {
+        Boolean isFeature = true;
+        List<Category> categories = categoryRepository.findAllByNameAndIsFeatured(categoryName,isFeature);
+
+        if (categories.isEmpty())
+        {
+            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        Page<Course> result = courseRepository.findAllByCategories_Name(categoryName, pageable);
+
+        return result.map(
+                course -> {
+                    int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+                    CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+                    response.setLessonCount(lessonCount);
+                    return response;
+                }
+        );
     }
 
     public Page<CourseCreationResponse> getAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable) {
@@ -105,6 +131,82 @@ public class CourseService {
 
         course = courseRepository.save(course);
         return courseMapper.toCourseCreationResponse(course);
+    }
+
+    public Page<CourseCreationResponse> searchCoursesWithFilter(String keyword,
+                                                                Float rating,
+                                                                String level,
+                                                                Boolean price,
+                                                                List<String> categories,
+                                                                Pageable pageable) {
+
+        List<Course> coursesByKey = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword,keyword);
+
+        if(level != null) {
+            List<Course> coursesByKeyAndLevel = courseRepository
+                    .findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndLevel(keyword, keyword, level);
+            coursesByKey.retainAll(coursesByKeyAndLevel);
+        }
+
+        if(price != null) {
+            if (price)
+            {
+                Iterator<Course> courseIterator = coursesByKey.iterator();
+                while (courseIterator.hasNext()) {
+                    Course course = courseIterator.next();
+                    if(course.getPrice() == 0){
+                        courseIterator.remove();
+                    }
+                }
+            }
+            else
+            {
+                Iterator<Course> courseIterator = coursesByKey.iterator();
+                while (courseIterator.hasNext()) {
+                    Course course = courseIterator.next();
+                    if(course.getPrice() > 0){
+                        courseIterator.remove();
+                    }
+                }
+            }
+
+        }
+
+        if (rating != null)
+        {
+            Iterator<Course> courseIterator = coursesByKey.iterator();
+            while (courseIterator.hasNext()) {
+                Course course = courseIterator.next();
+                if(course.getAverageRating() < rating){
+                    courseIterator.remove();
+                }
+            }
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            for (String category : categories) {
+                List<Course> coursesByNameAndCategory = courseRepository.findAllByCourseNameContainingIgnoreCaseAndCategories_Name(keyword, category);
+
+                List<Course> coursesByDescriptionAndCategory = courseRepository.findAllByDescriptionContainingIgnoreCaseAndCategories_Name(keyword,category);
+
+
+                // union 2 list lại
+                List<Course> coursesByKeyAndCategory = new ArrayList<>(coursesByNameAndCategory);
+                coursesByKeyAndCategory.addAll(coursesByDescriptionAndCategory);
+
+
+                coursesByKey.retainAll(coursesByKeyAndCategory);
+            }
+        }
+        Page<Course> result = convertListToPage(coursesByKey, pageable);
+
+
+        return result.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+            return response;
+        });
     }
 
     public Page<CourseCreationResponse> searchCourses(String keyword, Pageable pageable) {
