@@ -56,7 +56,7 @@ public class ProblemSubmissionService {
             // Khởi tạo composite ID
             testCaseOutputId outputId = new testCaseOutputId();
             outputId.setSubmission_id(submission.getSubmission_id());
-            outputId.setTestcase_id(testCase.getTestcase_id());
+            outputId.setTestcase_id(testCase.getTestcaseId());
 
             // Gán composite ID và liên kết với ProblemSubmission
             output.setTestCaseOutputID(outputId);

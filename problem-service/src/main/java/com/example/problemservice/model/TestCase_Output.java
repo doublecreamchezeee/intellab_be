@@ -57,6 +57,6 @@ public class TestCase_Output {
         if (this.testCaseOutputID == null) {
             this.testCaseOutputID = new testCaseOutputId();
         }
-        this.testCaseOutputID.setTestcase_id(testcase.getTestcase_id());
+        this.testCaseOutputID.setTestcase_id(testcase.getTestcaseId());
     }
 }
