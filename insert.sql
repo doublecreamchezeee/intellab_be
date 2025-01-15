@@ -52,7 +52,8 @@ create table if not exists public.test_cases
     input       text,
     output      text,
     user_id     uuid,
-    problem_id  uuid not null
+    problem_id  uuid not null,
+    testcase_order integer,
     constraint fkk0300c33ccc0im12utqoxu0m6
     references public.problems
 );
