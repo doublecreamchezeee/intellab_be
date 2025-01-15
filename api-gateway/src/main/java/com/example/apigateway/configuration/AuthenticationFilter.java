@@ -50,6 +50,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/lessons$",
             "/problem/problems/search",
             "/problem/problems",
+            "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     };
 
     @NonFinal
