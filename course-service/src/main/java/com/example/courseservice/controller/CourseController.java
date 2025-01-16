@@ -76,11 +76,11 @@ public class CourseController {
     @Operation(
             summary = "Get all lessons and progress of learning lessons in a course (using when user has enrolled in course)"
     )
-    @GetMapping("/{courseId}/lessons/me") ///{userUid}
+    @GetMapping("/{courseId}/lessons/me/{userUid}") ///{userUid}
     ApiResponse<Page<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(
             @PathVariable("courseId") String courseId,
-            //@PathVariable("userUid") String userUid,
-            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("userUid") String userUid,
+            //@RequestHeader("X-UserId") String userUid,
             @ParameterObject Pageable pageable) {
        // userUid = userUid.split(",")[0];
         log.info("UserUid: " + ParseUUID.normalizeUID(userUid));

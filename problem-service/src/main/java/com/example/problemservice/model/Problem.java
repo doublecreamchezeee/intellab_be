@@ -46,6 +46,9 @@ public class Problem {
     @Column(name = "is_published")
     Boolean isPublished;
 
+    @Column(name = "solution_structure", columnDefinition = "TEXT", nullable = true)
+    String solutionStructure;
+
 //    List<Lesson> lessons;
 //
 //    Topic topic;

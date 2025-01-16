@@ -1,6 +1,8 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
+import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.service.ProblemService;
@@ -32,7 +34,7 @@ public class ProblemController {
             summary = "Create problem"
     )
     @PostMapping
-    public ResponseEntity<Problem> createProblem(@RequestBody Problem problem) {
+    public ResponseEntity<ProblemCreationResponse> createProblem(@RequestBody ProblemCreationRequest problem) {
         return ResponseEntity.ok(problemService.createProblem(problem));
     }
 
@@ -88,6 +90,14 @@ public class ProblemController {
     public ResponseEntity<Void> deleteProblem(@PathVariable UUID problemId) {
         problemService.deleteProblem(problemId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Update problem"
+    )
+    @PutMapping("/{problemId}")
+    public ResponseEntity<ProblemCreationResponse> updateProblem(@PathVariable UUID problemId, @RequestBody ProblemCreationRequest request) {
+        return ResponseEntity.ok(problemService.updateProblem(problemId, request));
     }
 
 }
