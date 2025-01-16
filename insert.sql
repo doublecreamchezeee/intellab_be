@@ -58677,7 +58677,6 @@ INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8d
 INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', '0d7730de-3172-4629-a872-5ddb65094458');
 
 
-
 INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
 
 **Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
@@ -58802,7 +58801,6 @@ Output: [1,2]
 Input: nums = [3,3], target = 6
 Output: [0,1]
 ```', 'easy', 'Two sum', 2, false, false);
-
 
 
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
