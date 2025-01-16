@@ -20,7 +20,8 @@ import java.util.UUID;
 public class TestCase {
     @Id
     @GeneratedValue
-    UUID testcase_id;
+    @Column(name = "testcase_id")
+    UUID testcaseId;
 
     @Column(columnDefinition = "TEXT")
     String input;
@@ -39,10 +40,10 @@ public class TestCase {
     Integer order;
 
     @JoinColumn(name = "source_id")
-    UUID user_id;
+    UUID userId;
 
     @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY)
     @JsonManagedReference("testcase-output")
-    List<TestCase_Output> submit_outputs;
+    List<TestCase_Output> submitOutputs;
 
 }

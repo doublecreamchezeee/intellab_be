@@ -27,7 +27,7 @@ public class TestCaseService {
                 .problem(problem)
                 .input(request.getInput())
                 .output(request.getOutput())
-                .user_id(request.getUserId())
+                .userId(request.getUserId())
                 .build();
 
         if (problem.getTestCases() != null){
