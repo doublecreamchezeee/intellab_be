@@ -3,6 +3,7 @@ create table if not exists public.problems
     problem_id      uuid not null
     primary key,
     acceptance_rate numeric(5, 2)  default 0,
+    avarage_rating numeric(5,2) default 0,
     description     text,
     problem_level   varchar(20),
     problem_name    varchar(255),
