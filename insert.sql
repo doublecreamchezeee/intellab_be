@@ -869,844 +869,6 @@ INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '720aea7e-824a-46cd-acae-627157c68c16');
 
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('39944df7-8db0-4d3d-a12d-e09eebfacaaa', e'****Stack Operations:****
--------------------------
-
-* [****push()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
-  Insert a new element into the stack i.e just insert a new element at
-  the beginning of the linked list.
-* [****pop()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
-  Return the top element of the Stack i.e simply delete the first
-  element from the linked list.
-* [****peek()****](https://www.geeksforgeeks.org/stack-peek-method-in-java/)****:**** Return the top element.
-* ****display():**** Print all elements in Stack.
-
-Push Operation:
----------------
-
-> * Initialise a node
-> * Update the value of that node by data i.e. ****node->data = data****
-> * Now link this node to the top of the linked list
-> * And update top pointer to the current node
-
-Pop Operation:
---------------
-
-> * First Check whether there is any node present in the linked list or
->   not, if not then return
-> * Otherwise make pointer let say ****temp**** to the top node and move forward the top node by 1 step
-> * Now free this temp node
-
-Peek Operation:
----------------
-
-> * Check if there is any node present or not, if not then
->   return.
-> * Otherwise return the value of top node of the linked list
-
-Display Operation:
-------------------
-
-> * Take a ****temp**** node and initialize it with top pointer
-> * Now start traversing temp till it encounters NULL
-> * Simultaneously print the value of the temp node
-
-
-
-Below is the implementation of the above operations
-
-C++
-````
-// C++ program to implement a stack using singly linked list
-#include <bits/stdc++.h>
-using namespace std;
-
-// Class representing a node in the linked list
-class Node {
-public:
-    int data;
-    Node* next;
-    Node(int new_data) {
-        this->data = new_data;
-        this->next = nullptr;
-    }
-};
-
-// Class to implement stack using a singly linked list
-class Stack {
-
-    // head of the linked list
-    Node* head;
-
-public:
-    // Constructor to initialize the stack
-    Stack() { this->head = nullptr; }
-
-    // Function to check if the stack is empty
-    bool isEmpty() {
-
-        // If head is nullptr, the stack is empty
-        return head == nullptr;
-    }
-
-    // Function to push an element onto the stack
-    void push(int new_data) {
-
-        // Create a new node with given data
-        Node* new_node = new Node(new_data);
-
-        // Check if memory allocation for the new node
-        // failed
-        if (!new_node) {
-            cout << "\\nStack Overflow";
-        }
-
-        // Link the new node to the current top node
-        new_node->next = head;
-
-        // Update the top to the new node
-        head = new_node;
-    }
-
-    // Function to remove the top element from the stack
-    void pop() {
-
-        // Check for stack underflow
-        if (this->isEmpty()) {
-            cout << "\\nStack Underflow" << endl;
-        }
-        else {
-            // Assign the current top to a temporary
-            // variable
-            Node* temp = head;
-
-            // Update the top to the next node
-            head = head->next;
-
-            // Deallocate the memory of the old top node
-            delete temp;
-        }
-    }
-
-    // Function to return the top element of the stack
-    int peek() {
-
-        // If stack is not empty, return the top element
-        if (!isEmpty())
-            return head->data;
-        else {
-            cout << "\\nStack is empty";
-            return INT_MIN;
-        }
-    }
-};
-
-// Driver program to test the stack implementation
-int main() {
-    // Creating a stack
-    Stack st;
-
-    // Push elements onto the stack
-    st.push(11);
-    st.push(22);
-    st.push(33);
-    st.push(44);
-
-    // Print top element of the stack
-    cout << "Top element is " << st.peek() << endl;
-
-    // removing two elemements from the top
-      cout << "Removing two elements..." << endl;
-    st.pop();
-    st.pop();
-
-    // Print top element of the stack
-    cout << "Top element is " << st.peek() << endl;
-
-    return 0;
-}
-
-````
-
-C
-````
-// C program to implement a stack using singly linked list
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-// Struct representing a node in the linked list
-typedef struct Node {
-    int data;
-    struct Node* next;
-} Node;
-Node* createNode(int new_data) {
-    Node* new_node = (Node*)malloc(sizeof(Node));
-    new_node->data = new_data;
-    new_node->next = NULL;
-    return new_node;
-}
-
-// Struct to implement stack using a singly linked list
-typedef struct Stack {
-    Node* head;
-} Stack;
-
-// Constructor to initialize the stack
-void initializeStack(Stack* stack) { stack->head = NULL; }
-
-// Function to check if the stack is empty
-int isEmpty(Stack* stack) {
-
-    // If head is NULL, the stack is empty
-    return stack->head == NULL;
-}
-
-// Function to push an element onto the stack
-void push(Stack* stack, int new_data) {
-
-    // Create a new node with given data
-    Node* new_node = createNode(new_data);
-
-    // Check if memory allocation for the new node failed
-    if (!new_node) {
-        printf("\\nStack Overflow");
-        return;
-    }
-
-    // Link the new node to the current top node
-    new_node->next = stack->head;
-
-    // Update the top to the new node
-    stack->head = new_node;
-}
-
-// Function to remove the top element from the stack
-void pop(Stack* stack) {
-
-    // Check for stack underflow
-    if (isEmpty(stack)) {
-        printf("\\nStack Underflow\\n");
-        return;
-    }
-    else {
-
-        // Assign the current top to a temporary variable
-        Node* temp = stack->head;
-
-        // Update the top to the next node
-        stack->head = stack->head->next;
-
-        // Deallocate the memory of the old top node
-        free(temp);
-    }
-}
-
-// Function to return the top element of the stack
-int peek(Stack* stack) {
-
-    // If stack is not empty, return the top element
-    if (!isEmpty(stack))
-        return stack->head->data;
-    else {
-        printf("\\nStack is empty");
-        return INT_MIN;
-    }
-}
-
-// Driver program to test the stack implementation
-int main() {
-
-    // Creating a stack
-    Stack stack;
-    initializeStack(&stack);
-
-    // Push elements onto the stack
-    push(&stack, 11);
-    push(&stack, 22);
-    push(&stack, 33);
-    push(&stack, 44);
-
-    // Print top element of the stack
-    printf("Top element is %d\\n", peek(&stack));
-
-
-      // removing two elemements from the top
-      printf("Removing two elements...\\n");
-    pop(&stack);
-    pop(&stack);
-
-    // Print top element of the stack
-    printf("Top element is %d\\n", peek(&stack));
-
-    return 0;
-}
-
-````
-
-Java
-````
-// Java program to implement a stack using singly linked
-// list
-
-// Class representing a node in the linked list
-class Node {
-    int data;
-    Node next;
-    Node(int new_data) {
-        this.data = new_data;
-        this.next = null;
-    }
-}
-
-// Class to implement stack using a singly linked list
-class Stack {
-
-    // Head of the linked list
-    Node head;
-
-    // Constructor to initialize the stack
-    Stack() { this.head = null; }
-
-    // Function to check if the stack is empty
-    boolean isEmpty() {
-
-        // If head is null, the stack is empty
-        return head == null;
-    }
-
-    // Function to push an element onto the stack
-    void push(int new_data) {
-
-        // Create a new node with given data
-        Node new_node = new Node(new_data);
-
-        // Check if memory allocation for the new node
-        // failed
-        if (new_node == null) {
-            System.out.println("\\nStack Overflow");
-            return;
-        }
-
-        // Link the new node to the current top node
-        new_node.next = head;
-
-        // Update the top to the new node
-        head = new_node;
-    }
-
-    // Function to remove the top element from the stack
-    void pop() {
-
-        // Check for stack underflow
-        if (isEmpty()) {
-            System.out.println("\\nStack Underflow");
-            return;
-        }
-        else {
-
-            // Assign the current top to a temporary
-            // variable
-            Node temp = head;
-
-            // Update the top to the next node
-            head = head.next;
-
-            // Deallocate the memory of the old top node
-            temp = null;
-        }
-    }
-
-    // Function to return the top element of the stack
-    int peek() {
-
-        // If stack is not empty, return the top element
-        if (!isEmpty())
-            return head.data;
-        else {
-            System.out.println("\\nStack is empty");
-            return Integer.MIN_VALUE;
-        }
-    }
-}
-
-// Driver code
-public class Main {
-    public static void main(String[] args)
-    {
-        // Creating a stack
-        Stack st = new Stack();
-
-        // Push elements onto the stack
-        st.push(11);
-        st.push(22);
-        st.push(33);
-        st.push(44);
-
-        // Print top element of the stack
-        System.out.println("Top element is " + st.peek());
-
-        // removing two elemements from the top
-          System.out.println("Removing two elements...");
-        st.pop();
-        st.pop();
-
-        // Print top element of the stack
-        System.out.println("Top element is " + st.peek());
-    }
-}
-
-````
-
-Python
-````
-# Java program to implement a stack using singly linked
-# list
-
-# Class representing a node in the linked list
-class Node:
-    def __init__(self, new_data):
-        self.data = new_data
-        self.next = None
-
-# Class to implement stack using a singly linked list
-class Stack:
-    def __init__(self):
-
-        # head of the linked list
-        self.head = None
-
-    # Function to check if the stack is empty
-    def is_empty(self):
-
-        # If head is None, the stack is empty
-        return self.head is None
-
-    # Function to push an element onto the stack
-    def push(self, new_data):
-
-        # Create a new node with given data
-        new_node = Node(new_data)
-
-        # Check if memory allocation for the new node failed
-        if not new_node:
-            print("\\nStack Overflow")
-            return
-
-        # Link the new node to the current top node
-        new_node.next = self.head
-
-        # Update the top to the new node
-        self.head = new_node
-
-    # Function to remove the top element from the stack
-    def pop(self):
-
-        # Check for stack underflow
-        if self.is_empty():
-            print("\\nStack Underflow")
-        else:
-
-            # Assign the current top to a temporary variable
-            temp = self.head
-
-            # Update the top to the next node
-            self.head = self.head.next
-
-            # Deallocate the memory of the old top node
-            del temp
-
-    # Function to return the top element of the stack
-    def peek(self):
-
-        # If stack is not empty, return the top element
-        if not self.is_empty():
-            return self.head.data
-        else:
-            print("\\nStack is empty")
-            return float(\'-inf\')
-
-
-# Creating a stack
-st = Stack()
-
-# Push elements onto the stack
-st.push(11)
-st.push(22)
-st.push(33)
-st.push(44)
-
-# Print top element of the stack
-print("Top element is", st.peek())
-
-# removing two elemements from the top
-print("Removing two elements...");
-st.pop()
-st.pop()
-
-# Print top element of the stack
-print("Top element is", st.peek())
-
-````
-
-C#
-````
-// C# program to implement a stack using singly linked list
-using System;
-
-// Class representing a node in the linked list
-class Node {
-    public int data;
-    public Node next;
-    public Node(int new_data)
-    {
-        this.data = new_data;
-        this.next = null;
-    }
-}
-
-// Class to implement stack using a singly linked list
-class Stack {
-
-    // head of the linked list
-    private Node head;
-
-    // Constructor to initialize the stack
-    public Stack() { this.head = null; }
-
-    // Function to check if the stack is empty
-    public bool isEmpty()
-    {
-
-        // If head is null, the stack is empty
-        return head == null;
-    }
-
-    // Function to push an element onto the stack
-    public void push(int new_data)
-    {
-
-        // Create a new node with given data
-        Node new_node = new Node(new_data);
-
-        // Check if memory allocation for the new node
-        // failed
-        if (new_node == null) {
-            Console.WriteLine("\\nStack Overflow");
-            return;
-        }
-
-        // Link the new node to the current top node
-        new_node.next = head;
-
-        // Update the top to the new node
-        head = new_node;
-    }
-
-    // Function to remove the top element from the stack
-    public void pop()
-    {
-
-        // Check for stack underflow
-        if (this.isEmpty()) {
-            Console.WriteLine("\\nStack Underflow");
-        }
-        else {
-
-            // Update the top to the next node
-            head = head.next;
-            /* No need to manually free the memory of the
-             * old head in C# */
-        }
-    }
-
-    // Function to return the top element of the stack
-    public int peek()
-    {
-
-        // If stack is not empty, return the top element
-        if (!isEmpty())
-            return head.data;
-        else {
-            Console.WriteLine("\\nStack is empty");
-            return int.MinValue;
-        }
-    }
-}
-
-// Driver program to test the stack implementation
-class GfG {
-    static void Main(string[] args)
-    {
-
-        // Creating a stack
-        Stack st = new Stack();
-
-        // Push elements onto the stack
-        st.push(11);
-        st.push(22);
-        st.push(33);
-        st.push(44);
-
-        // Print top element of the stack
-        Console.WriteLine("Top element is " + st.peek());
-
-        // removing two elemements from the top
-          Console.WriteLine("Removing two elements...");
-        st.pop();
-        st.pop();
-
-        // Print top element of the stack
-        Console.WriteLine("Top element is " + st.peek());
-    }
-}
-
-````
-
-JavaScript
-````
-// Javascript program to implement a stack using singly
-// linked list
-
-// Class representing a node in the linked list
-class Node {
-    constructor(new_data) {
-        this.data = new_data;
-        this.next = null;
-    }
-}
-
-// Class to implement stack using a singly linked list
-class Stack {
-
-    // Constructor to initialize the stack
-    constructor() { this.head = null; }
-
-    // Function to check if the stack is empty
-    isEmpty() {
-
-        // If head is null, the stack is empty
-        return this.head === null;
-    }
-
-    // Function to push an element onto the stack
-    push(new_data) {
-
-        // Create a new node with given data
-        const new_node = new Node(new_data);
-
-        // Check if memory allocation for the new node
-        // failed
-        if (!new_node) {
-            console.log("\\nStack Overflow");
-            return;
-        }
-
-        // Link the new node to the current top node
-        new_node.next = this.head;
-
-        // Update the top to the new node
-        this.head = new_node;
-    }
-
-    // Function to remove the top element from the stack
-    pop() {
-
-        // Check for stack underflow
-        if (this.isEmpty()) {
-            console.log("\\nStack Underflow");
-        }
-        else {
-
-            // Assign the current top to a temporary
-            // variable
-            let temp = this.head;
-
-            // Update the top to the next node
-            this.head = this.head.next;
-
-            // Deallocate the memory of the old top node
-            temp = null;
-        }
-    }
-
-    // Function to return the top element of the stack
-    peek() {
-
-        // If stack is not empty, return the top element
-        if (!this.isEmpty())
-            return this.head.data;
-        else {
-            console.log("\\nStack is empty");
-            return Number.MIN_VALUE;
-        }
-    }
-}
-
-// Driver program to test the stack implementation
-const st = new Stack();
-
-// Push elements onto the stack
-st.push(11);
-st.push(22);
-st.push(33);
-st.push(44);
-
-// Print top element of the stack
-console.log("Top element is " + st.peek());
-
-// removing two elemements from the top
-console.log("Removing two elements...");
-st.pop();
-st.pop();
-
-// Print top element of the stack
-console.log("Top element is " + st.peek());
-
-````
-
-
-**Output**
-```
-
-Top element is 44
-Top element is 22
-
-```
-
-****Time Complexity:****
-O(1), for all push(), pop(), and peek(), as we are not performing any
-kind of traversal over the list. We perform all the operations through
-the current pointer only.
-****Auxiliary Space:**** O(N), where N is the size of the stack
-
-
-In this implementation, we define a Node class that represents a node
-in the linked list, and a Stack class that uses this node class to
-implement the stack. The head attribute of the Stack class points to the
-top of the stack (i.e., the first node in the linked list).
-
-To push an item onto the stack, we create a new node with the given
-item and set its next pointer to the current head of the stack. We then
-set the head of the stack to the new node, effectively making it the new
-top of the stack.
-
-To pop an item from the stack, we simply remove the first node from the
-linked list by setting the head of the stack to the next node in the
-list (i.e., the node pointed to by the next pointer of the current
-head). We return the data stored in the original head node, which is the
-item that was removed from the top of the stack.
-
-### Benefits of implementing a stack using a singly linked list include:
-
-****Dynamic memory allocation****: The size of the stack can be increased or decreased dynamically by
-adding or removing nodes from the linked list, without the need to
-allocate a fixed amount of memory for the stack upfront.
-
-****Efficient memory usage:**** Since nodes in a singly linked list only have a next pointer and not a
-prev pointer, they use less memory than nodes in a doubly linked
-list.
-
-****Easy implementation****: Implementing a stack using a singly linked list is straightforward
-and can be done using just a few lines of code.
-
-****Versatile****: Singly linked lists can be used to implement other data structures
-such as queues, linked lists, and trees.
-
-In summary, implementing a stack using a singly linked list is a simple
-and efficient way to create a dynamic stack data structure in
-Python.
-
-### Real time examples of stack:
-
-Stacks are used in various real-world scenarios where a last-in,
-first-out (LIFO) data structure is required. Here are some examples of
-real-time applications of stacks:
-
-****Function call stack****: When a function is called in a program, the return address and all
-the function parameters are pushed onto the function call stack. The
-stack allows the function to execute and return to the caller function
-in the reverse order in which they were called.
-
-****Undo/Redo operations:****
-In many applications, such as text editors, image editors, or web
-browsers, the undo and redo functionalities are implemented using a
-stack. Every time an action is performed, it is pushed onto the stack.
-When the user wants to undo the last action, the top element of the
-stack is popped and the action is reversed.
-
-****Browser history:**** Web browsers use stacks to keep track of the pages visited by the user.
-Every time a new page is visited, its URL is pushed onto the stack. When
-the user clicks the “Back” button, the last visited URL is popped from
-the stack and the user is directed to the previous page.
-
-****Expression evaluation****: Stacks are used in compilers and interpreters to evaluate
-expressions. When an expression is parsed, it is converted into postfix
-notation and pushed onto a stack. The postfix expression is then
-evaluated using the stack.
-
-****Call stack in recursion:****
-When a recursive function is called, its call is pushed onto the stack.
-The function executes and calls itself, and each subsequent call is
-pushed onto the stack. When the recursion ends, the stack is popped, and
-the program returns to the previous function call.
-
-In summary, stacks are widely used in many applications where LIFO
-functionality is required, such as function calls, undo/redo operations,
-browser history, expression evaluation, and recursive function
-calls.
-', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 3, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('b41b7e34-c749-4217-b0f3-6b496b632261', e'Applications of Stacks:
------------------------
-
-* ****Function calls:****
-  Stacks are used to keep track of the return addresses of function
-  calls, allowing the program to return to the correct location after a
-  function has finished executing.
-* ****Recursion:**** Stacks are used to store the local variables and return addresses of
-  recursive function calls, allowing the program to keep track of the
-  current state of the recursion.
-* ****Expression evaluation:**** Stacks are used to evaluate expressions in postfix notation (Reverse
-  Polish Notation).
-* ****Syntax parsing:**** Stacks are used to check the validity of syntax in programming
-  languages and other formal languages.
-* ****Memory management:**** Stacks are used to allocate and manage memory in some operating
-  systems and programming languages.
-* Used to solve popular problems like [Next Greater](https://www.geeksforgeeks.org/next-greater-element/), [Previous Greater](https://www.geeksforgeeks.org/previous-greater-element/), [Next Smaller](https://www.geeksforgeeks.org/next-smaller-element/), [Previous Smaller](https://www.geeksforgeeks.org/find-the-nearest-smaller-numbers-on-left-side-in-an-array/), [Largest Area in a Histogram](https://www.geeksforgeeks.org/largest-rectangular-area-in-a-histogram-using-stack/) and [Stock Span Problems](https://www.geeksforgeeks.org/the-stock-span-problem/).
-
-Advantages of Stacks:
----------------------
-
-* ****Simplicity:**** Stacks are a simple and easy-to-understand data structure, making
-  them suitable for a wide range of applications.
-* ****Efficiency:**** Push and pop operations on a stack can be performed in constant time ****(O(1))****, providing efficient access to data.
-* ****Last-in, First-out (LIFO):****
-  Stacks follow the LIFO principle, ensuring that the last element added
-  to the stack is the first one removed. This behavior is useful in many
-  scenarios, such as function calls and expression evaluation.
-* ****Limited memory usage:**** Stacks only need to store the elements that have been pushed onto
-  them, making them memory-efficient compared to other data
-  structures.
-
-Disadvantages of Stacks:
-------------------------
-
-* ****Limited access:****
-  Elements in a stack can only be accessed from the top, making it
-  difficult to retrieve or modify elements in the middle of the
-  stack.
-* ****Potential for overflow:**** If more elements are pushed onto a stack than it can hold, an
-  overflow error will occur, resulting in a loss of data.
-* ****Not suitable for random access:**** Stacks do not allow for random access to elements, making them
-  unsuitable for applications where elements need to be accessed in a
-  specific order.
-* ****Limited capacity:****
-  Stacks have a fixed capacity, which can be a limitation if the number
-  of elements that need to be stored is unknown or highly
-  variable.
-', e'A stack is a linear data structure
-in which the insertion of a new element and removal of an existing
-element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('bc7282ef-2185-47e3-acbc-5b5597cbbbfc', e'****Examples :****
 
 
@@ -2149,637 +1311,6 @@ O(log(min(a, b)), where a and b are two integers.
 ****Auxiliary Space:****
 O(1), no extra space required so it is a constant.
 ', 'Add two fraction a/b and c/d and print answer in simplest form.', 'Program to add two fractions', 2, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2b55a666-302b-4c46-8d3a-3fdaefcca1e7', e'Implement Stack using Array:
-----------------------------
-
-> To implement a stack using an array, initialize an array and treat
-> its end as the stack’s top. Implement ****push**** (add to end), ****pop**** (remove from end), and ****peek**** (check end) operations, handling cases for an ****empty**** or f****ull stack****.
-
-****Step-by-step approach:****
-
-1. ****Initialize an array**** to represent the stack.
-2. Use the ****end of the array**** to represent the ****top of the stack****.
-3. Implement ****push**** (add to end), ****pop**** (remove from the end), and ****peek**** (check end) operations, ensuring to handle empty and full stack
-   conditions.
-
-Implement Stack Operations using Array:
----------------------------------------
-
-
-Here are the following operations of implement stack using array:
-
-### ****Push Operation in Stack:****
-
-Adds an item to the stack. If the stack is full, then it is said to be
-an ****Overflow condition.****
-
-****Algorithm for Push Operation:****
-
-> * Before pushing the element to the stack, we check if the stack
->   is ****full****.
-> * If the stack is full ****(top == capacity-1)**** , then ****Stack Overflows****and we cannot insert the element to the stack.
-> * Otherwise, we increment the value of top by 1 ****(top = top + 1)**** and the new value is inserted at ****top position****.
-> * The elements can be pushed into the stack till we reach
->   the ****capacity**** of the stack.
-
-![push-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114219/push-operation-in-stack-1.webp)![push-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114219/push-operation-in-stack-1.webp)
-
-
-![push-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114220/push-operation-in-stack-2.webp)![push-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114220/push-operation-in-stack-2.webp)
-
-
-![push-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114221/push-operation-in-stack-3.webp)![push-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114221/push-operation-in-stack-3.webp)
-
-
-![push-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-4.webp)![push-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-4.webp)
-
-
-![push-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-5.webp)![push-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-5.webp)
-
-
-![push-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114223/push-operation-in-stack-6.webp)![push-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114223/push-operation-in-stack-6.webp)
-
-
-
-Previous
-
-
-
-
-
-Pause
-
-Next
-
-
-
-
-
-5 / 6
-
-### ****Pop Operation in Stack:****
-
-Removes an item from the stack. The items are popped in the reversed
-order in which they are pushed. If the stack is empty, then it is said
-to be an ****Underflow condition.****
-
-****Algorithm for Pop Operation:****
-
-> * Before popping the element from the stack, we check if the stack
->   is ****empty****.
-> * If the stack is empty (top == -1), then ****Stack Underflows**** and we cannot remove any element from the stack.
-> * Otherwise, we store the value at top, decrement the value of top by
->   1 ****(top = top – 1)**** and return the stored top value.
-
-![pop-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
-
-
-![pop-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
-
-
-![pop-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
-
-
-![pop-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
-
-
-![pop-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
-
-
-![pop-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
-
-
-
-Previous
-
-
-
-
-
-Play
-
-Next
-
-
-
-
-
-1 / 6
-
-
-
-
-### ****Top or Peek Operation in Stack:****
-
-Returns the top element of the stack.
-
-****Algorithm for Top Operation:****
-
-> * Before returning the top element from the stack, we check if the
->   stack is empty.
-> * If the stack is empty (top == -1), we simply print “Stack is
->   empty”.
-> * Otherwise, we return the element stored at ****index = top****.
-
-### ****isEmpty Operation in Stack:****
-
-Returns true if the stack is empty, else false.
-
-****Algorithm for isEmpty Operation****:
-
-> * Check for the value of ****top**** in stack.
-> * If ****(top == -1)**** , then the stack is ****empty****so return ****true****.
-> * Otherwise, the stack is not empty so return ****false****.
-
-### isFull ****Operation in Stack****:
-
-Returns true if the stack is full, else false.
-
-****Algorithm for isFull Operation:****
-
-> * Check for the value of ****top**** in stack.
-> * If ****(top == capacity-1),**** then the stack is ****full**** so return ****true****.
-> * Otherwise, the stack is not full so return ****false.****
-
-Below is the implementation of the above approach:
-
-C++
-````
-/* C++ program to implement basic stack
-operations */
-#include <bits/stdc++.h>
-
-using namespace std;
-
-#define MAX 1000
-
-class Stack {
-    int top;
-
-public:
-    int a[MAX]; // Maximum size of Stack
-
-    Stack() { top = -1; }
-    bool push(int x);
-    int pop();
-    int peek();
-    bool isEmpty();
-};
-
-bool Stack::push(int x)
-{
-    if (top >= (MAX - 1)) {
-        cout << "Stack Overflow";
-        return false;
-    }
-    else {
-        a[++top] = x;
-        cout << x << " pushed into stack\\n";
-        return true;
-    }
-}
-
-int Stack::pop()
-{
-    if (top < 0) {
-        cout << "Stack Underflow";
-        return 0;
-    }
-    else {
-        int x = a[top--];
-        return x;
-    }
-}
-int Stack::peek()
-{
-    if (top < 0) {
-        cout << "Stack is Empty";
-        return 0;
-    }
-    else {
-        int x = a[top];
-        return x;
-    }
-}
-
-bool Stack::isEmpty()
-{
-    return (top < 0);
-}
-
-// Driver program to test above functions
-int main()
-{
-    class Stack s;
-    s.push(10);
-    s.push(20);
-    s.push(30);
-    cout << s.pop() << " Popped from stack\\n";
-
-    //print top element of stack after popping
-    cout << "Top element is : " << s.peek() << endl;
-
-    //print all elements in stack :
-    cout <<"Elements present in stack : ";
-    while(!s.isEmpty())
-    {
-        // print top element in stack
-        cout << s.peek() <<" ";
-        // remove top element in stack
-        s.pop();
-    }
-
-    return 0;
-}
-
-````
-
-C
-````
-// C program for array implementation of stack
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-// A structure to represent a stack
-struct Stack {
-    int top;
-    unsigned capacity;
-    int* array;
-};
-
-// function to create a stack of given capacity. It initializes size of
-// stack as 0
-struct Stack* createStack(unsigned capacity)
-{
-    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
-    stack->capacity = capacity;
-    stack->top = -1;
-    stack->array = (int*)malloc(stack->capacity * sizeof(int));
-    return stack;
-}
-
-// Stack is full when top is equal to the last index
-int isFull(struct Stack* stack)
-{
-    return stack->top == stack->capacity - 1;
-}
-
-// Stack is empty when top is equal to -1
-int isEmpty(struct Stack* stack)
-{
-    return stack->top == -1;
-}
-
-// Function to add an item to stack. It increases top by 1
-void push(struct Stack* stack, int item)
-{
-    if (isFull(stack))
-        return;
-    stack->array[++stack->top] = item;
-    printf("%d pushed to stack\\n", item);
-}
-
-// Function to remove an item from stack. It decreases top by 1
-int pop(struct Stack* stack)
-{
-    if (isEmpty(stack))
-        return INT_MIN;
-    return stack->array[stack->top--];
-}
-
-// Function to return the top from stack without removing it
-int peek(struct Stack* stack)
-{
-    if (isEmpty(stack))
-        return INT_MIN;
-    return stack->array[stack->top];
-}
-
-// Driver program to test above functions
-int main()
-{
-    struct Stack* stack = createStack(100);
-
-    push(stack, 10);
-    push(stack, 20);
-    push(stack, 30);
-
-    printf("%d popped from stack\\n", pop(stack));
-
-    return 0;
-}
-
-````
-
-Java
-````
-/* Java program to implement basic stack
-operations */
-class Stack {
-    static final int MAX = 1000;
-    int top;
-    int a[] = new int[MAX]; // Maximum size of Stack
-
-    boolean isEmpty()
-    {
-        return (top < 0);
-    }
-    Stack()
-    {
-        top = -1;
-    }
-
-    boolean push(int x)
-    {
-        if (top >= (MAX - 1)) {
-            System.out.println("Stack Overflow");
-            return false;
-        }
-        else {
-            a[++top] = x;
-            System.out.println(x + " pushed into stack");
-            return true;
-        }
-    }
-
-    int pop()
-    {
-        if (top < 0) {
-            System.out.println("Stack Underflow");
-            return 0;
-        }
-        else {
-            int x = a[top--];
-            return x;
-        }
-    }
-
-    int peek()
-    {
-        if (top < 0) {
-            System.out.println("Stack Underflow");
-            return 0;
-        }
-        else {
-            int x = a[top];
-            return x;
-        }
-    }
-
-    void print(){
-    for(int i = top;i>-1;i--){
-    System.out.print(" "+ a[i]);
-    }
-}
-}
-
-// Driver code
-class Main {
-    public static void main(String args[])
-    {
-        Stack s = new Stack();
-        s.push(10);
-        s.push(20);
-        s.push(30);
-        System.out.println(s.pop() + " Popped from stack");
-        System.out.println("Top element is :" + s.peek());
-        System.out.print("Elements present in stack :");
-        s.print();
-    }
-}
-
-````
-
-Python3
-````
-# Python program for implementation of stack
-
-# import maxsize from sys module
-# Used to return -infinite when stack is empty
-from sys import maxsize
-
-# Function to create a stack. It initializes size of stack as 0
-def createStack():
-    stack = []
-    return stack
-
-# Stack is empty when stack size is 0
-def isEmpty(stack):
-    return len(stack) == 0
-
-# Function to add an item to stack. It increases size by 1
-def push(stack, item):
-    stack.append(item)
-    print(item + " pushed to stack ")
-
-# Function to remove an item from stack. It decreases size by 1
-def pop(stack):
-    if (isEmpty(stack)):
-        return str(-maxsize -1) # return minus infinite
-
-    return stack.pop()
-
-# Function to return the top from stack without removing it
-def peek(stack):
-    if (isEmpty(stack)):
-        return str(-maxsize -1) # return minus infinite
-    return stack[len(stack) - 1]
-
-# Driver program to test above functions
-stack = createStack()
-push(stack, str(10))
-push(stack, str(20))
-push(stack, str(30))
-print(pop(stack) + " popped from stack")
-
-````
-
-C#
-````
-// C# program to implement basic stack
-// operations
-using System;
-
-namespace ImplementStack {
-class Stack {
-    private int[] ele;
-    private int top;
-    private int max;
-    public Stack(int size)
-    {
-        ele = new int[size]; // Maximum size of Stack
-        top = -1;
-        max = size;
-    }
-
-    public void push(int item)
-    {
-        if (top == max - 1) {
-            Console.WriteLine("Stack Overflow");
-            return;
-        }
-        else {
-            ele[++top] = item;
-        }
-    }
-
-    public int pop()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return -1;
-        }
-        else {
-            Console.WriteLine("{0} popped from stack ", ele[top]);
-            return ele[top--];
-        }
-    }
-
-    public int peek()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return -1;
-        }
-        else {
-            Console.WriteLine("{0} popped from stack ", ele[top]);
-            return ele[top];
-        }
-    }
-
-    public void printStack()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return;
-        }
-        else {
-            for (int i = 0; i <= top; i++) {
-                Console.WriteLine("{0} pushed into stack", ele[i]);
-            }
-        }
-    }
-}
-
-// Driver program to test above functions
-class Program {
-    static void Main()
-    {
-        Stack p = new Stack(5);
-
-        p.push(10);
-        p.push(20);
-        p.push(30);
-        p.printStack();
-        p.pop();
-    }
-}
-}
-
-````
-
-JavaScript
-````
-/* javascript program to implement basic stack
-operations
-*/
-var t = -1;
-    var MAX = 1000;
-    var a = Array(MAX).fill(0); // Maximum size of Stack
-
-    function isEmpty() {
-        return (t < 0);
-    }
-
-    function push(x) {
-        if (t >= (MAX - 1)) {
-            console.log("Stack Overflow");
-            return false;
-        } else {
-        t+=1;
-            a[t] = x;
-
-            console.log(x + " pushed into stack<br/>");
-            return true;
-        }
-    }
-
-    function pop() {
-        if (t < 0) {
-            console.log("Stack Underflow");
-            return 0;
-        } else {
-            var x = a[t];
-            t-=1;
-            return x;
-        }
-    }
-
-    function peek() {
-        if (t < 0) {
-            console.log("Stack Underflow");
-            return 0;
-        } else {
-            var x = a[t];
-            return x;
-        }
-    }
-
-    function print() {
-        for (i = t; i > -1; i--) {
-            console.log(" " + a[i]);
-        }
-    }
-
-        push(10);
-        push(20);
-        push(30);
-        console.log(pop() + " Popped from stack");
-        console.log("<br/>Top element is :" + peek());
-        console.log("<br/>Elements present in stack : ");
-        print();
-
-````
-
-**Output**
-```
-
-10 pushed into stack
-20 pushed into stack
-30 pushed into stack
-30 Popped from stack
-Top element is : 20
-Elements present in stack : 20 10
-```
-### Complexity Analysis:
-
-* ****Time Complexity****:
-  + `push`: O(1)
-  + `pop`: O(1)
-  + `peek`: O(1)
-  + `is_empty`: O(1)
-  + is\\_full: O(1)
-* ****Auxiliary Space****: O(n), where n is the number of items in the stack.
-
-Advantages of Array Implementation:
------------------------------------
-
-* Easy to implement.
-* Memory is saved as pointers are not involved.
-
-Disadvantages of Array Implementation:
---------------------------------------
-
-* It is not dynamic i.e., it doesn’t grow and shrink depending on needs
-  at runtime. [But in case of dynamic sized arrays like vector in C++,
-  list in Python, ArrayList in Java, stacks can grow and shrink with
-  array implementation as well].
-* The total size of the stack must be defined beforehand.
-', e'Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
-Arrays. In Array-based approach, all stack-related operations are
-executed using arrays. Let’s see how we can implement each operation on
-the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 2, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('aad6df64-c3f4-40e1-961b-817fa187f81f', e'
 ****Examples:****
 
@@ -11093,6 +9624,1312 @@ console.log(simpleInterest(p, r, t));
 ****Auxiliary Space****
 : O(1)
 ', '', 'Program to find simple interest', 14, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('1c9888f0-5d92-4cf6-b41a-deff87b117b1', e'
+Table of Content
+
+* [Operations on Circular Queue](#operations-on-circular-queue)
+* [Implement Circular Queue using Array](#implement-circular-queue-using-array)
+* [Complexity Analysis of Circular Queue Operations](#complexity-analysis-of-circular-queue-operations)
+### Operations on Circular Queue
+
+* ****getFront:****
+  Get the front item from the queue.
+* ****getRear:****
+  Get the last item from the queue.
+* ****enqueue(value):****
+  To
+
+  ****insert****
+  an element into the circular queue. In a circular queue, the new element is always inserted at the rear position.
+* ****dequeue()****
+  : To
+
+  ****delete****
+  an element from the circular queue. In a circular queue, the element is always deleted from the front position.
+
+### Implement Circular Queue using Array
+
+1. Initialize an
+
+   ****array****
+   of
+
+   ****size n****
+   , where
+
+   ****n is the maximum number of element****
+   s that the queue can hold.
+2. Initialize
+
+   ****three variables (size, capacity, and front.)****
+3. ****Enqueue:****
+   To enqueue an
+
+   ****element x****
+   into the queue, do the following:
+   1. Check if
+
+      ****size == capacity****
+      (queue is full), display
+
+      ****“Queue is full”.****
+   2. If not full: calculate
+
+      ****rear = (front + size) % capacity****
+      and
+
+      ****Insert****
+      value at the rear index.
+
+      ****Increment****
+      size by 1.
+4. ****Dequeue:****
+   To dequeue an element from the queue, do the following:
+   1. Check if
+
+      ****size == 0 (****
+      queue is empty), display
+
+      ****“Queue is empty”.****
+   2. If not empty:
+
+      ****retrieve****
+      the element at the
+
+      ****front index****
+      and
+
+      ****move front = (front + 1) % capacity****
+      . Also,
+
+      ****decrement****
+      size by 1 and
+
+      ****return the removed element.****
+
+****Illustration of Circular Queue****
+:
+
+
+
+
+
+
+
+
+
+****Below is the implementation of above approach:****
+
+C++
+
+````
+// C++ program for insertion and
+// deletion in Circular Queue
+#include <iostream>
+using namespace std;
+
+class MyQueue {
+private:
+    int *arr;
+    int front, size;
+    int capacity;
+
+public:
+
+    // Constructor to initialize the queue
+    MyQueue(int c) {
+        arr = new int[c];
+        capacity = c;
+        size = 0;
+        front = 0;
+    }
+
+    // Get the front element
+    int getFront() {
+
+        // Queue is empty
+        if (size == 0)
+            return -1;
+        return arr[front];
+    }
+
+    // Get the rear element
+    int getRear() {
+
+        // Queue is empty
+        if (size == 0)
+            return -1;
+        int rear = (front + size - 1) % capacity;
+        return arr[rear];
+    }
+
+    // Insert an element at the rear
+    void enqueue(int x) {
+
+        // Queue is full
+        if (size == capacity)
+            return;
+        int rear = (front + size) % capacity;
+        arr[rear] = x;
+        size++;
+    }
+
+    // Remove an element from the front
+    int dequeue() {
+
+        // Queue is empty
+        if (size == 0)
+            return -1;
+        int res = arr[front];
+        front = (front + 1) % capacity;
+        size--;
+        return res;
+    }
+};
+
+int main() {
+    MyQueue q(4);
+    q.enqueue(10);
+    cout << q.getFront() << " " << q.getRear() << endl;
+    q.enqueue(20);
+    cout << q.getFront() << " " << q.getRear() << endl;
+    q.enqueue(30);
+    cout << q.getFront() << " " << q.getRear() << endl;
+    q.enqueue(40);
+    cout << q.getFront() << " " << q.getRear() << endl;
+    q.dequeue();
+    cout << q.getFront() << " " << q.getRear() << endl;
+    q.dequeue();
+    cout << q.getFront() << " " << q.getRear() << endl;
+    q.enqueue(50);
+    cout << q.getFront() << " " << q.getRear() << endl;
+    return 0;
+}
+
+````
+
+Java
+
+````
+// Java program for insertion and
+// deletion in Circular Queue
+class MyQueue {
+    private int[] arr;
+    private int front;
+    private int size;
+    private int capacity;
+
+    // Constructor to initialize the queue
+    public MyQueue(int c) {
+        arr = new int[c];
+        capacity = c;
+        size = 0;
+        front = 0;
+    }
+
+    // Get the front element
+    public int getFront() {
+
+        // Queue is empty
+        if (size == 0)
+            return -1;
+        return arr[front];
+    }
+
+    // Get the rear element
+    public int getRear() {
+
+        // Queue is empty
+        if (size == 0)
+            return -1;
+        int rear = (front + size - 1) % capacity;
+        return arr[rear];
+    }
+
+    // Insert an element at the rear
+    public void enqueue(int x) {
+
+        // Queue is full
+        if (size == capacity)
+            return;
+        int rear = (front + size) % capacity;
+        arr[rear] = x;
+        size++;
+    }
+
+    // Remove an element from the front
+    public int dequeue() {
+
+        // Queue is empty
+        if (size == 0)
+            return -1;
+        int res = arr[front];
+        front = (front + 1) % capacity;
+        size--;
+        return res;
+    }
+}
+
+class GfG {
+
+    public static void main(String[] args) {
+        MyQueue q = new MyQueue(4);
+        q.enqueue(10);
+        System.out.println(q.getFront() + " " + q.getRear());
+        q.enqueue(20);
+        System.out.println(q.getFront() + " " + q.getRear());
+        q.enqueue(30);
+        System.out.println(q.getFront() + " " + q.getRear());
+        q.enqueue(40);
+        System.out.println(q.getFront() + " " + q.getRear());
+        q.dequeue();
+        System.out.println(q.getFront() + " " + q.getRear());
+        q.dequeue();
+        System.out.println(q.getFront() + " " + q.getRear());
+        q.enqueue(50);
+        System.out.println(q.getFront() + " " + q.getRear());
+    }
+}
+
+````
+
+Python
+
+````
+# python3 program for insertion and
+# deletion in Circular Queue
+class MyQueue:
+    def __init__(self, c):
+        self.l = [None] * c
+        self.cap = c
+        self.size = 0
+        self.front = 0
+
+    def getFront(self):
+
+        # Check if queue is empty
+        if self.size == 0:
+            return None
+        return self.l[self.front]
+
+    def getRear(self):
+
+        # Check if queue is empty
+        if self.size == 0:
+            return None
+
+        # Calculate rear index
+        rear = (self.front + self.size - 1) % self.cap
+        return self.l[rear]
+
+    def enqueue(self, x):
+
+        # Check if queue is full
+        if self.size == self.cap:
+            return
+
+        # Calculate rear index
+        rear = (self.front + self.size) % self.cap
+        self.l[rear] = x
+        self.size += 1
+
+    def dequeue(self):
+
+        # Check if queue is empty
+        if self.size == 0:
+            return None
+        res = self.l[self.front]
+
+        # Move front index circularly
+        self.front = (self.front + 1) % self.cap
+        self.size -= 1
+        return res
+
+q = MyQueue(4)
+q.enqueue(10)
+print(q.getFront(), q.getRear())
+q.enqueue(20)
+print(q.getFront(), q.getRear())
+q.enqueue(30)
+print(q.getFront(), q.getRear())
+q.enqueue(40)
+print(q.getFront(), q.getRear())
+q.dequeue()
+print(q.getFront(), q.getRear())
+q.dequeue()
+print(q.getFront(), q.getRear())
+q.enqueue(50)
+print(q.getFront(), q.getRear())
+
+````
+
+C#
+
+````
+// C# program for insertion and
+// deletion in Circular Queue
+using System;
+
+class MyQueue {
+    private int[] arr;
+    private int front;
+    private int size;
+    private int capacity;
+
+    // Constructor to initialize the queue
+    public MyQueue(int c) {
+        arr = new int[c];
+        capacity = c;
+        size = 0;
+        front = 0;
+    }
+
+    // Get the front element
+    public int getFront() {
+
+        // Queue is empty
+        if (size == 0)
+          return -1;
+        return arr[front];
+    }
+
+    // Get the rear element
+    public int getRear() {
+
+        // Queue is empty
+        if (size == 0)
+          return -1;
+        int rear = (front + size - 1) % capacity;
+        return arr[rear];
+    }
+
+    // Insert an element at the rear
+    public void enqueue(int x) {
+
+        // Queue is full
+        if (size == capacity) return;
+        int rear = (front + size) % capacity;
+        arr[rear] = x;
+        size++;
+    }
+
+    // Remove an element from the front
+    public int dequeue() {
+
+        // Queue is empty
+        if (size == 0) return -1;
+        int res = arr[front];
+        front = (front + 1) % capacity;
+        size--;
+        return res;
+    }
+}
+class GfG {
+
+        static void Main(string[] args) {
+        MyQueue q = new MyQueue(4);
+        q.enqueue(10);
+        Console.WriteLine(q.getFront() + " " + q.getRear());
+        q.enqueue(20);
+        Console.WriteLine(q.getFront() + " " + q.getRear());
+        q.enqueue(30);
+        Console.WriteLine(q.getFront() + " " + q.getRear());
+        q.enqueue(40);
+        Console.WriteLine(q.getFront() + " " + q.getRear());
+        q.dequeue();
+        Console.WriteLine(q.getFront() + " " + q.getRear());
+        q.dequeue();
+        Console.WriteLine(q.getFront() + " " + q.getRear());
+        q.enqueue(50);
+        Console.WriteLine(q.getFront() + " " + q.getRear());
+    }
+}
+
+````
+
+JavaScript
+
+````
+// JS program for insertion and
+// deletion in Circular Queue
+class MyQueue {
+    constructor(c) {
+        this.arr = new Array(c).fill(null);
+        this.capacity = c;
+        this.size = 0;
+        this.front = 0;
+    }
+
+    // Get the front element
+    getFront() {
+
+        // Queue is empty
+        if (this.size === 0) return null;
+        return this.arr[this.front];
+    }
+
+    // Get the rear element
+    getRear() {
+
+        // Queue is empty
+        if (this.size === 0) return null;
+        let rear = (this.front + this.size - 1) % this.capacity;
+        return this.arr[rear];
+    }
+
+    // Insert an element at the rear
+    enqueue(x) {
+
+        // Queue is full
+        if (this.size === this.capacity) return;
+        let rear = (this.front + this.size) % this.capacity;
+        this.arr[rear] = x;
+        this.size++;
+    }
+
+    // Remove an element from the front
+    dequeue() {
+
+        // Queue is empty
+        if (this.size === 0) return null;
+        let res = this.arr[this.front];
+        this.front = (this.front + 1) % this.capacity;
+        this.size--;
+        return res;
+    }
+}
+
+const q = new MyQueue(4);
+q.enqueue(10);
+console.log(q.getFront(), q.getRear());
+q.enqueue(20);
+console.log(q.getFront(), q.getRear());
+q.enqueue(30);
+console.log(q.getFront(), q.getRear());
+q.enqueue(40);
+console.log(q.getFront(), q.getRear());
+q.dequeue();
+console.log(q.getFront(), q.getRear());
+q.dequeue();
+console.log(q.getFront(), q.getRear());
+q.enqueue(50);
+console.log(q.getFront(), q.getRear());
+
+````
+
+
+
+
+**Output**
+```
+10 10
+10 20
+10 30
+10 40
+20 40
+30 40
+30 50
+
+```
+### Complexity Analysis of Circular Queue Operations
+
+****Time Complexity:****
+
+****Auxiliary Space:****
+O(size), where
+
+****size****
+is the number of elements in the circular queue.
+', e'A Circular Queue is another way of implementing a normal queue
+where the last element of the queue is connected
+to the first element of the queue forming a circle.', 'Introduction to Circular Queue', 9, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('39944df7-8db0-4d3d-a12d-e09eebfacaaa', e'****Stack Operations:****
+-------------------------
+
+* [****push()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
+  Insert a new element into the stack i.e just insert a new element at
+  the beginning of the linked list.
+* [****pop()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
+  Return the top element of the Stack i.e simply delete the first
+  element from the linked list.
+* [****peek()****](https://www.geeksforgeeks.org/stack-peek-method-in-java/)****:**** Return the top element.
+* ****display():**** Print all elements in Stack.
+
+Push Operation:
+---------------
+
+> * Initialise a node
+> * Update the value of that node by data i.e. ****node->data = data****
+> * Now link this node to the top of the linked list
+> * And update top pointer to the current node
+
+Pop Operation:
+--------------
+
+> * First Check whether there is any node present in the linked list or
+>   not, if not then return
+> * Otherwise make pointer let say ****temp**** to the top node and move forward the top node by 1 step
+> * Now free this temp node
+
+Peek Operation:
+---------------
+
+> * Check if there is any node present or not, if not then
+>   return.
+> * Otherwise return the value of top node of the linked list
+
+Display Operation:
+------------------
+
+> * Take a ****temp**** node and initialize it with top pointer
+> * Now start traversing temp till it encounters NULL
+> * Simultaneously print the value of the temp node
+
+
+
+Below is the implementation of the above operations
+
+C++
+````
+// C++ program to implement a stack using singly linked list
+#include <bits/stdc++.h>
+using namespace std;
+
+// Class representing a node in the linked list
+class Node {
+public:
+    int data;
+    Node* next;
+    Node(int new_data) {
+        this->data = new_data;
+        this->next = nullptr;
+    }
+};
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // head of the linked list
+    Node* head;
+
+public:
+    // Constructor to initialize the stack
+    Stack() { this->head = nullptr; }
+
+    // Function to check if the stack is empty
+    bool isEmpty() {
+
+        // If head is nullptr, the stack is empty
+        return head == nullptr;
+    }
+
+    // Function to push an element onto the stack
+    void push(int new_data) {
+
+        // Create a new node with given data
+        Node* new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (!new_node) {
+            cout << "\\nStack Overflow";
+        }
+
+        // Link the new node to the current top node
+        new_node->next = head;
+
+        // Update the top to the new node
+        head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    void pop() {
+
+        // Check for stack underflow
+        if (this->isEmpty()) {
+            cout << "\\nStack Underflow" << endl;
+        }
+        else {
+            // Assign the current top to a temporary
+            // variable
+            Node* temp = head;
+
+            // Update the top to the next node
+            head = head->next;
+
+            // Deallocate the memory of the old top node
+            delete temp;
+        }
+    }
+
+    // Function to return the top element of the stack
+    int peek() {
+
+        // If stack is not empty, return the top element
+        if (!isEmpty())
+            return head->data;
+        else {
+            cout << "\\nStack is empty";
+            return INT_MIN;
+        }
+    }
+};
+
+// Driver program to test the stack implementation
+int main() {
+    // Creating a stack
+    Stack st;
+
+    // Push elements onto the stack
+    st.push(11);
+    st.push(22);
+    st.push(33);
+    st.push(44);
+
+    // Print top element of the stack
+    cout << "Top element is " << st.peek() << endl;
+
+    // removing two elemements from the top
+      cout << "Removing two elements..." << endl;
+    st.pop();
+    st.pop();
+
+    // Print top element of the stack
+    cout << "Top element is " << st.peek() << endl;
+
+    return 0;
+}
+
+````
+
+C
+````
+// C program to implement a stack using singly linked list
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+// Struct representing a node in the linked list
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+Node* createNode(int new_data) {
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    new_node->data = new_data;
+    new_node->next = NULL;
+    return new_node;
+}
+
+// Struct to implement stack using a singly linked list
+typedef struct Stack {
+    Node* head;
+} Stack;
+
+// Constructor to initialize the stack
+void initializeStack(Stack* stack) { stack->head = NULL; }
+
+// Function to check if the stack is empty
+int isEmpty(Stack* stack) {
+
+    // If head is NULL, the stack is empty
+    return stack->head == NULL;
+}
+
+// Function to push an element onto the stack
+void push(Stack* stack, int new_data) {
+
+    // Create a new node with given data
+    Node* new_node = createNode(new_data);
+
+    // Check if memory allocation for the new node failed
+    if (!new_node) {
+        printf("\\nStack Overflow");
+        return;
+    }
+
+    // Link the new node to the current top node
+    new_node->next = stack->head;
+
+    // Update the top to the new node
+    stack->head = new_node;
+}
+
+// Function to remove the top element from the stack
+void pop(Stack* stack) {
+
+    // Check for stack underflow
+    if (isEmpty(stack)) {
+        printf("\\nStack Underflow\\n");
+        return;
+    }
+    else {
+
+        // Assign the current top to a temporary variable
+        Node* temp = stack->head;
+
+        // Update the top to the next node
+        stack->head = stack->head->next;
+
+        // Deallocate the memory of the old top node
+        free(temp);
+    }
+}
+
+// Function to return the top element of the stack
+int peek(Stack* stack) {
+
+    // If stack is not empty, return the top element
+    if (!isEmpty(stack))
+        return stack->head->data;
+    else {
+        printf("\\nStack is empty");
+        return INT_MIN;
+    }
+}
+
+// Driver program to test the stack implementation
+int main() {
+
+    // Creating a stack
+    Stack stack;
+    initializeStack(&stack);
+
+    // Push elements onto the stack
+    push(&stack, 11);
+    push(&stack, 22);
+    push(&stack, 33);
+    push(&stack, 44);
+
+    // Print top element of the stack
+    printf("Top element is %d\\n", peek(&stack));
+
+
+      // removing two elemements from the top
+      printf("Removing two elements...\\n");
+    pop(&stack);
+    pop(&stack);
+
+    // Print top element of the stack
+    printf("Top element is %d\\n", peek(&stack));
+
+    return 0;
+}
+
+````
+
+Java
+````
+// Java program to implement a stack using singly linked
+// list
+
+// Class representing a node in the linked list
+class Node {
+    int data;
+    Node next;
+    Node(int new_data) {
+        this.data = new_data;
+        this.next = null;
+    }
+}
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // Head of the linked list
+    Node head;
+
+    // Constructor to initialize the stack
+    Stack() { this.head = null; }
+
+    // Function to check if the stack is empty
+    boolean isEmpty() {
+
+        // If head is null, the stack is empty
+        return head == null;
+    }
+
+    // Function to push an element onto the stack
+    void push(int new_data) {
+
+        // Create a new node with given data
+        Node new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (new_node == null) {
+            System.out.println("\\nStack Overflow");
+            return;
+        }
+
+        // Link the new node to the current top node
+        new_node.next = head;
+
+        // Update the top to the new node
+        head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    void pop() {
+
+        // Check for stack underflow
+        if (isEmpty()) {
+            System.out.println("\\nStack Underflow");
+            return;
+        }
+        else {
+
+            // Assign the current top to a temporary
+            // variable
+            Node temp = head;
+
+            // Update the top to the next node
+            head = head.next;
+
+            // Deallocate the memory of the old top node
+            temp = null;
+        }
+    }
+
+    // Function to return the top element of the stack
+    int peek() {
+
+        // If stack is not empty, return the top element
+        if (!isEmpty())
+            return head.data;
+        else {
+            System.out.println("\\nStack is empty");
+            return Integer.MIN_VALUE;
+        }
+    }
+}
+
+// Driver code
+public class Main {
+    public static void main(String[] args)
+    {
+        // Creating a stack
+        Stack st = new Stack();
+
+        // Push elements onto the stack
+        st.push(11);
+        st.push(22);
+        st.push(33);
+        st.push(44);
+
+        // Print top element of the stack
+        System.out.println("Top element is " + st.peek());
+
+        // removing two elemements from the top
+          System.out.println("Removing two elements...");
+        st.pop();
+        st.pop();
+
+        // Print top element of the stack
+        System.out.println("Top element is " + st.peek());
+    }
+}
+
+````
+
+Python
+````
+# Java program to implement a stack using singly linked
+# list
+
+# Class representing a node in the linked list
+class Node:
+    def __init__(self, new_data):
+        self.data = new_data
+        self.next = None
+
+# Class to implement stack using a singly linked list
+class Stack:
+    def __init__(self):
+
+        # head of the linked list
+        self.head = None
+
+    # Function to check if the stack is empty
+    def is_empty(self):
+
+        # If head is None, the stack is empty
+        return self.head is None
+
+    # Function to push an element onto the stack
+    def push(self, new_data):
+
+        # Create a new node with given data
+        new_node = Node(new_data)
+
+        # Check if memory allocation for the new node failed
+        if not new_node:
+            print("\\nStack Overflow")
+            return
+
+        # Link the new node to the current top node
+        new_node.next = self.head
+
+        # Update the top to the new node
+        self.head = new_node
+
+    # Function to remove the top element from the stack
+    def pop(self):
+
+        # Check for stack underflow
+        if self.is_empty():
+            print("\\nStack Underflow")
+        else:
+
+            # Assign the current top to a temporary variable
+            temp = self.head
+
+            # Update the top to the next node
+            self.head = self.head.next
+
+            # Deallocate the memory of the old top node
+            del temp
+
+    # Function to return the top element of the stack
+    def peek(self):
+
+        # If stack is not empty, return the top element
+        if not self.is_empty():
+            return self.head.data
+        else:
+            print("\\nStack is empty")
+            return float(\'-inf\')
+
+
+# Creating a stack
+st = Stack()
+
+# Push elements onto the stack
+st.push(11)
+st.push(22)
+st.push(33)
+st.push(44)
+
+# Print top element of the stack
+print("Top element is", st.peek())
+
+# removing two elemements from the top
+print("Removing two elements...");
+st.pop()
+st.pop()
+
+# Print top element of the stack
+print("Top element is", st.peek())
+
+````
+
+C#
+````
+// C# program to implement a stack using singly linked list
+using System;
+
+// Class representing a node in the linked list
+class Node {
+    public int data;
+    public Node next;
+    public Node(int new_data)
+    {
+        this.data = new_data;
+        this.next = null;
+    }
+}
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // head of the linked list
+    private Node head;
+
+    // Constructor to initialize the stack
+    public Stack() { this.head = null; }
+
+    // Function to check if the stack is empty
+    public bool isEmpty()
+    {
+
+        // If head is null, the stack is empty
+        return head == null;
+    }
+
+    // Function to push an element onto the stack
+    public void push(int new_data)
+    {
+
+        // Create a new node with given data
+        Node new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (new_node == null) {
+            Console.WriteLine("\\nStack Overflow");
+            return;
+        }
+
+        // Link the new node to the current top node
+        new_node.next = head;
+
+        // Update the top to the new node
+        head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    public void pop()
+    {
+
+        // Check for stack underflow
+        if (this.isEmpty()) {
+            Console.WriteLine("\\nStack Underflow");
+        }
+        else {
+
+            // Update the top to the next node
+            head = head.next;
+            /* No need to manually free the memory of the
+             * old head in C# */
+        }
+    }
+
+    // Function to return the top element of the stack
+    public int peek()
+    {
+
+        // If stack is not empty, return the top element
+        if (!isEmpty())
+            return head.data;
+        else {
+            Console.WriteLine("\\nStack is empty");
+            return int.MinValue;
+        }
+    }
+}
+
+// Driver program to test the stack implementation
+class GfG {
+    static void Main(string[] args)
+    {
+
+        // Creating a stack
+        Stack st = new Stack();
+
+        // Push elements onto the stack
+        st.push(11);
+        st.push(22);
+        st.push(33);
+        st.push(44);
+
+        // Print top element of the stack
+        Console.WriteLine("Top element is " + st.peek());
+
+        // removing two elemements from the top
+          Console.WriteLine("Removing two elements...");
+        st.pop();
+        st.pop();
+
+        // Print top element of the stack
+        Console.WriteLine("Top element is " + st.peek());
+    }
+}
+
+````
+
+JavaScript
+````
+// Javascript program to implement a stack using singly
+// linked list
+
+// Class representing a node in the linked list
+class Node {
+    constructor(new_data) {
+        this.data = new_data;
+        this.next = null;
+    }
+}
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // Constructor to initialize the stack
+    constructor() { this.head = null; }
+
+    // Function to check if the stack is empty
+    isEmpty() {
+
+        // If head is null, the stack is empty
+        return this.head === null;
+    }
+
+    // Function to push an element onto the stack
+    push(new_data) {
+
+        // Create a new node with given data
+        const new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (!new_node) {
+            console.log("\\nStack Overflow");
+            return;
+        }
+
+        // Link the new node to the current top node
+        new_node.next = this.head;
+
+        // Update the top to the new node
+        this.head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    pop() {
+
+        // Check for stack underflow
+        if (this.isEmpty()) {
+            console.log("\\nStack Underflow");
+        }
+        else {
+
+            // Assign the current top to a temporary
+            // variable
+            let temp = this.head;
+
+            // Update the top to the next node
+            this.head = this.head.next;
+
+            // Deallocate the memory of the old top node
+            temp = null;
+        }
+    }
+
+    // Function to return the top element of the stack
+    peek() {
+
+        // If stack is not empty, return the top element
+        if (!this.isEmpty())
+            return this.head.data;
+        else {
+            console.log("\\nStack is empty");
+            return Number.MIN_VALUE;
+        }
+    }
+}
+
+// Driver program to test the stack implementation
+const st = new Stack();
+
+// Push elements onto the stack
+st.push(11);
+st.push(22);
+st.push(33);
+st.push(44);
+
+// Print top element of the stack
+console.log("Top element is " + st.peek());
+
+// removing two elemements from the top
+console.log("Removing two elements...");
+st.pop();
+st.pop();
+
+// Print top element of the stack
+console.log("Top element is " + st.peek());
+
+````
+
+
+**Output**
+```
+
+Top element is 44
+Top element is 22
+
+```
+
+****Time Complexity:****
+O(1), for all push(), pop(), and peek(), as we are not performing any
+kind of traversal over the list. We perform all the operations through
+the current pointer only.
+****Auxiliary Space:**** O(N), where N is the size of the stack
+
+
+In this implementation, we define a Node class that represents a node
+in the linked list, and a Stack class that uses this node class to
+implement the stack. The head attribute of the Stack class points to the
+top of the stack (i.e., the first node in the linked list).
+
+To push an item onto the stack, we create a new node with the given
+item and set its next pointer to the current head of the stack. We then
+set the head of the stack to the new node, effectively making it the new
+top of the stack.
+
+To pop an item from the stack, we simply remove the first node from the
+linked list by setting the head of the stack to the next node in the
+list (i.e., the node pointed to by the next pointer of the current
+head). We return the data stored in the original head node, which is the
+item that was removed from the top of the stack.
+
+### Benefits of implementing a stack using a singly linked list include:
+
+****Dynamic memory allocation****: The size of the stack can be increased or decreased dynamically by
+adding or removing nodes from the linked list, without the need to
+allocate a fixed amount of memory for the stack upfront.
+
+****Efficient memory usage:**** Since nodes in a singly linked list only have a next pointer and not a
+prev pointer, they use less memory than nodes in a doubly linked
+list.
+
+****Easy implementation****: Implementing a stack using a singly linked list is straightforward
+and can be done using just a few lines of code.
+
+****Versatile****: Singly linked lists can be used to implement other data structures
+such as queues, linked lists, and trees.
+
+In summary, implementing a stack using a singly linked list is a simple
+and efficient way to create a dynamic stack data structure in
+Python.
+
+### Real time examples of stack:
+
+Stacks are used in various real-world scenarios where a last-in,
+first-out (LIFO) data structure is required. Here are some examples of
+real-time applications of stacks:
+
+****Function call stack****: When a function is called in a program, the return address and all
+the function parameters are pushed onto the function call stack. The
+stack allows the function to execute and return to the caller function
+in the reverse order in which they were called.
+
+****Undo/Redo operations:****
+In many applications, such as text editors, image editors, or web
+browsers, the undo and redo functionalities are implemented using a
+stack. Every time an action is performed, it is pushed onto the stack.
+When the user wants to undo the last action, the top element of the
+stack is popped and the action is reversed.
+
+****Browser history:**** Web browsers use stacks to keep track of the pages visited by the user.
+Every time a new page is visited, its URL is pushed onto the stack. When
+the user clicks the “Back” button, the last visited URL is popped from
+the stack and the user is directed to the previous page.
+
+****Expression evaluation****: Stacks are used in compilers and interpreters to evaluate
+expressions. When an expression is parsed, it is converted into postfix
+notation and pushed onto a stack. The postfix expression is then
+evaluated using the stack.
+
+****Call stack in recursion:****
+When a recursive function is called, its call is pushed onto the stack.
+The function executes and calls itself, and each subsequent call is
+pushed onto the stack. When the recursion ends, the stack is popped, and
+the program returns to the previous function call.
+
+In summary, stacks are widely used in many applications where LIFO
+functionality is required, such as function calls, undo/redo operations,
+browser history, expression evaluation, and recursive function
+calls.
+', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 10, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('82a0d245-a665-4ec2-a2fe-145f7e841ef1', e'
 You are given a
 
@@ -14409,7917 +14246,6 @@ O(1)
 O(1), since the recursion stack will only go up to 10.
 
 ', '', 'Program to print multiplication table of a number', 19, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2220549e-2da8-4f0c-9d38-2495ce6b234e', e'What is a Circular Linked List?
--------------------------------
-
-A ****circular linked list****
-is a special type of linked list where all the nodes are connected to
-form a circle. Unlike a regular linked list, which ends with a node
-pointing to ****NULL****, the last node in a circular linked list points back to the first
-node. This means that you can keep traversing the list without ever
-reaching a ****NULL**** value.
-
-Types of Circular Linked Lists
-------------------------------
-
-We can create a circular linked list from both [singly linked lists](https://www.geeksforgeeks.org/introduction-to-singly-linked-list/) and [doubly linked lists](https://www.geeksforgeeks.org/doubly-linked-list-tutorial-2/). So, circular linked list are basically of two types:
-
-### 1. Circular Singly Linked List
-
-In ****Circular Singly Linked List****, each node has just one pointer called the “****next****” pointer. The next pointer of ****last node**** points back to the ****first node**** and this results in forming a circle. In this type of Linked list we
-can only move through the list in one direction.
-
-![Representation-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806130914/Representation-of-circular-linked-list.webp)
-
-Representation of Circular Singly Linked List
-
-### 2. Circular Doubly Linked List:
-
-In ****circular doubly linked**** ****list,**** each node has two pointers ****prev**** and ****next,**** similar to doubly linked list. The ****prev**** pointer points to the previous node and the ****next**** points to the next node. Here, in addition to the ****last**** node storing the address of the first node, the ****first node**** will also store the address of the ****last node****.
-
-![Representation-of-circular-doubly-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806145223/Representation-of-circular-doubly-linked-list.webp)
-
-Representation of Circular Doubly Linked List
-
-****Note:**** In this article, we will use the circular singly linked list to explain
-the working of circular linked lists.
-
-Representation of a Circular Singly Linked List
------------------------------------------------
-
-Let’s take a look on the structure of a circular linked list.
-
-
-
-![Node-structure-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806145414/Node-structure-of-circular-linked-list.webp)
-
-Representation of a Circular Singly Linked List
-
-### Create/Declare a Node of Circular Linked List
-
-Syntax to Declare a Circular Linked List in Different Languages:
-
-
-C++
-````
-// Node structure
-struct Node {
-    int data;
-    Node* next;
-
-    Node(int value){
-        data = value;
-        next = nullptr;
-    }
-};
-
-````
-
-C
-````
-// Node structure
-struct Node
-{
-    int data;
-    struct Node *next;
-};
-
-// Function to create a new node
-struct Node *createNode(int value){
-
-    // Allocate memory
-    struct Node *newNode =
-      (struct Node *)malloc(sizeof(struct Node));
-
-    // Set the data
-    newNode->data = value;
-
-    // Initialize next to NULL
-    newNode->next = NULL;
-
-    // Return the new node
-    return newNode;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-
-    Node(int data)
-    {
-        this.data = data;
-        this.next = null;
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-
-````
-
-C#
-````
-public class Node {
-    public int data;
-    public Node next;
-
-    public Node(int data){
-        this.data = data;
-        this.next = null;
-    }
-}
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(data)
-    {
-        this.data = data;
-        this.next = null;
-    }
-}
-
-````
-
-
-
-
-
-
-
-In the code above, each node has ****data**** and a ****pointer**** to the next node. When we create multiple nodes for a circular linked
-list, we only need to connect the last node back to the first one.
-
-Example of Creating a Circular Linked List
-------------------------------------------
-
-Here’s an example of creating a circular linked list with three nodes
-(2, 3, 4):
-
-![Circular-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240806111438/Circular-Linked-List.png)
-
-Created a circular linked list with 3 nodes
-
-
-C++
-````
-// Initilize and allocate memory for nodes
-first = new Node(2);
-second = new Node(3);
-last = new Node(4);
-
-// Connect nodes
-first->next = second;
-second->next = last;
-
-// Connect last node to first node
-last->next = first;
-
-````
-
-C
-````
-// Allocate memory for nodes
-struct Node *first =
-  (struct Node *)malloc(sizeof(struct Node));
-struct Node *second =
-  (struct Node *)malloc(sizeof(struct Node));
-struct Node *last =
-  (struct Node *)malloc(sizeof(struct Node));
-
-// Initilize nodes
-first->data = 2;
-second->data = 3;
-last->data = 4;
-
-// Connect nodes
-first->next = second;
-second->next = last;
-last->next = first;
-
-````
-
-Java
-````
-// Initilize and allocate memory for nodes
-Node first = new Node(2);
-Node second = new Node(3);
-Node last = new Node(4);
-
-// Connect nodes
-first.next = second;
-second.next = last;
-last.next = first;
-
-````
-
-Python
-````
-# Initilize and allocate memory for nodes
-first = Node(2)
-second = Node(3)
-last = Node(4)
-
-# Connect nodes
-first.next = second
-second.next = last
-last.next = first
-
-````
-
-C#
-````
-// Initilize and allocate memory for nodes
-Node first = new Node(2);
-Node second = new Node(3);
-Node last = new Node(4);
-
-// Connect nodes
-first.next = second;
-second.next = last;
-last.next = first;
-
-````
-
-JavaScript
-````
-// Initilize and allocate memory for nodes
-let first = new Node(2);
-let second = new Node(3);
-let last = new Node(4);
-
-// Connect nodes
-first.next = second;
-second.next = last;
-last.next = first;
-
-````
-
-
-
-
-
-In the above code, we have created three nodes ****first, second,**** and ****last**** having values ****2, 3,**** and ****4**** respectively.
-
-* After creating three nodes, we have connected these node in a
-  series.
-* Connect the first node “****first”**** to “****second”**** node by ****s****toring the address of “****second”**** nodeinto ****first’s**** next
-* Connect the second node “****second”**** to “****second”**** node by ****s****toring the address of “****third****” node into ****second’s**** next
-* After connecting all the nodes, we reach the key characteristic of a
-  circular linked list: linking the last node back to the first node. Therefore, we store the address of the “****first****” node in the “****last****” node.
-
-### Why have we taken a pointer that points to the last node instead of the first node?
-
-For the insertion of a node at the beginning, we need to traverse the
-whole list. Also, for insertion at the end, the whole list has to be
-traversed. If instead of the start pointer, we take a pointer to the
-last node, then in both cases there won’t be any need to traverse the
-whole list. So insertion at the beginning or at the end takes constant
-time, irrespective of the length of the list.
-
-Operations on the Circular Linked list:
----------------------------------------
-
-We can do some operations on the circular linked list similar to the
-singly and doubly linked list which are:
-
-* ****Insertion****
-  + Insertion at the empty list
-  + Insertion at the beginning
-  + Insertion at the end
-  + Insertion at the given position
-* ****Deletion****
-  + Delete the first node
-  + Delete the last node
-  + Delete the node from any position
-* ****Searching****
-
-****Note:**** We will be using the circular singly linked list to represent the
-working of the circular linked list.
-
-[Insertion in the circular linked list:](https://www.geeksforgeeks.org/circular-singly-linked-list-insertion/)
---------------------------------------------------------------------------------------------------------------
-
-Insertion is a fundamental operation in linked lists that involves
-adding a new node to the list. The only extra step is connecting the
-last node to the first one. In the circular linked list mentioned below,
-we can insert nodes in four ways:
-
-### 1. Insertion in an empty List in the circular linked list
-
-> To insert a node in empty circular linked list, creates a ****new node**** with the given data, sets its next pointer to point to itself, and
-> updates the ****last**** pointer to reference this ****new node****.
-
-![Insertion-in-an-empty-list-in-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806193408/Insertion-in-an-empty-list-in-circular-linked-list.webp)
-
-Insertion in an empty List
-
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node{
-    int data;
-    Node *next;
-    Node(int value){
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to insert a node into an empty circular singly linked list
-Node *insertInEmptyList(Node *last, int data){
-    if (last != nullptr) return last;
-
-    // Create a new node
-    Node *newNode = new Node(data);
-
-    // Point newNode to itself
-    newNode->next = newNode;
-
-    // Update last to point to the new node
-    last = newNode;
-    return last;
-}
-
-void printList(Node* last){
-    if(last == NULL) return;
-
-    // Start from the head node
-    Node* head = last->next;
-    while (true) {
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next) break;
-    }
-    cout << endl;
-}
-
-int main(){
-    Node *last = nullptr;
-
-    // Insert a node into the empty list
-    last = insertInEmptyList(last, 1);
-
-    // Print the list
-    cout << "List after insertion: ";
-    printList(last);
-
-    return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the Node structure
-struct Node {
-    int data;
-    struct Node* next;
-};
-
-struct Node* createNode(int value);
-
-// Function to insert a node into an empty
-// circular singly linked list
-struct Node* insertInEmptyList(struct Node* last, int data) {
-    if (last != NULL) return last;
-
-    // Create a new node
-    struct Node* newNode = createNode(data);
-
-    // Update last to point to the new node
-    last = newNode;
-    return last;
-}
-
-void printList(struct Node* last) {
-    if (last == NULL) return;
-
-    // Start from the head node
-    struct Node* head = last->next;
-    while (1) {
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next) break;
-    }
-    printf("\\n");
-}
-
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = value;
-    newNode->next = newNode;
-    return newNode;
-}
-
-int main() {
-    struct Node* last = NULL;
-
-    // Insert a node into the empty list
-    last = insertInEmptyList(last, 1);
-
-    // Print the list
-    printf("List after insertion: ");
-    printList(last);
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-
-    Node(int value) {
-        data = value;
-        next = null;
-    }
-}
-
-public class Main {
-    // Function to insert a node into an empty
-    // circular singly linked list
-    static Node insertInEmptyList(Node last, int data) {
-        if (last != null) return last;
-
-        // Create a new node
-        Node newNode = new Node(data);
-
-        // Point newNode to itself
-        newNode.next = newNode;
-
-        // Update last to point to the new node
-        last = newNode;
-        return last;
-    }
-
-    // Function to print the list
-    static void printList(Node last) {
-        if (last == null) return;
-
-        // Start from the head node
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next) break;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args) {
-        Node last = null;
-
-        // Insert a node into the empty list
-        last = insertInEmptyList(last, 1);
-
-        // Print the list
-        System.out.print("List after insertion: ");
-        printList(last);
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, value):
-        self.data = value
-        self.next = self  # Point to itself
-
-def insertInEmptyList(last, data):
-    if last is not None:
-        return last
-
-    # Create a new node
-    new_node = Node(data)
-
-    # Update last to point to the new node
-    last = new_node
-    return last
-
-def printList(last):
-    if last is None:
-        return
-
-    # Start from the head node
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-if __name__ == "__main__":
-    last = None
-
-    # Insert a node into the empty list
-    last = insertInEmptyList(last, 1)
-
-    # Print the list
-    print("List after insertion: ", end="")
-    printList(last)
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(value)
-    {
-        this.data = value;
-        this.next = null;
-    }
-}
-
-function insertInEmptyList(last, data)
-{
-    if (last !== null)
-        return last;
-
-    // Create a new node
-    let newNode = new Node(data);
-
-    // Point newNode to itself
-    newNode.next = newNode;
-
-    // Update last to point to the new node
-    last = newNode;
-    return last;
-}
-
-function printList(last)
-{
-    if (last === null)
-        return;
-
-    // Start from the head node
-    let head = last.next;
-    while (true) {
-        console.log(head.data);
-        head = head.next;
-        if (head === last.next)
-            break;
-    }
-}
-
-// Main function
-
-let last = null;
-
-// Insert a node into the empty list
-last = insertInEmptyList(last, 1);
-
-// Print the list
-console.log("List after insertion:");
-printList(last);
-
-````
-
-
-
-
-**Output**
-```
-
-List after insertion: 1
-
-```
-### 2. Insertion at the beginning in circular linked list
-
-> To insert a new node at the beginning of a circular linked list, we
-> first create the ****new node****
-> and allocate memory for it. If the list is empty (indicated by the
-> last pointer being ****NULL****), we make the ****new node****
-> point to itself. If the list already contains nodes then we set the ****new node’s**** next pointer to point to the ****current head**** of the list (which is ****last->next****), and then update the last node’s next pointer to point to the ****new node****. This maintains the circular structure of the list.
-
-![Insertion-at-the-beginning-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150314/Insertion-at-the-beginning-of-circular-linked-list.webp)
-
-Insertion at the beginning in circular linked list
-
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node {
-    int data;
-    Node* next;
-
-    Node(int value)
-    {
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to insert a node at the beginning of the
-// circular linked list
-Node* insertAtBeginning(Node* last, int value){
-    // Allocate memory for the new node and set its data
-    Node* newNode = new Node(value);
-
-    // If the list is empty, make the new node point to
-    // itself and set it as last
-    if (last == nullptr) {
-        newNode->next = newNode;
-        return newNode;
-    }
-
-    // Insert the new node at the beginning
-    newNode->next = last->next;
-    last->next = newNode;
-
-    return last;
-}
-
-void printList(Node* last){
-  if(last == NULL) return;
-
-    // Start from the head node
-    Node* head = last->next;
-    while (true) {
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next)
-            break;
-    }
-    cout << endl;
-}
-
-int main(){
-
-    // Create circular linked list: 2, 3, 4
-    Node* first = new Node(2);
-    first->next = new Node(3);
-    first->next->next = new Node(4);
-
-    Node* last = first->next->next;
-    last->next = first;
-
-    cout << "Original list: ";
-    printList(last);
-
-    // Insert 5 at the beginning
-    last = insertAtBeginning(last, 5);
-
-    cout << "List after inserting 5 at the beginning: ";
-    printList(last);
-
-    return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the Node structure
-struct Node
-{
-    int data;
-    struct Node *next;
-};
-
-// Function to create a new node
-struct Node *createNode(int value)
-{
-    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
-}
-
-// Function to insert a node at the beginning
-// of the circular linked list
-struct Node *insertAtBeginning(struct Node *last, int value)
-{
-    struct Node *newNode = createNode(value);
-
-    // If the list is empty, make the new node point to itself
-    // and set it as last
-    if (last == NULL)
-    {
-        newNode->next = newNode;
-        return newNode;
-    }
-
-    // Insert the new node at the beginning
-    newNode->next = last->next;
-    last->next = newNode;
-
-    return last;
-}
-
-void printList(struct Node *last)
-{
-    if (last == NULL) return;
-
-    struct Node *head = last->next;
-    while (1){
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next)
-            break;
-    }
-    printf("\\n");
-}
-
-int main()
-{
-    // Create circular linked list: 2, 3, 4
-    struct Node *first = createNode(2);
-    first->next = createNode(3);
-    first->next->next = createNode(4);
-    struct Node *last = first->next->next;
-    last->next = first;
-
-    printf("Original list: ");
-    printList(last);
-
-    // Insert 5 at the beginning
-    last = insertAtBeginning(last, 5);
-
-    printf("List after inserting 5 at the beginning: ");
-    printList(last);
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-
-    Node(int value){
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-
-    // Function to insert a node at the beginning of the
-    // circular linked list
-    public static Node insertAtBeginning(Node last,
-                                         int value){
-        Node newNode = new Node(value);
-
-        // If the list is empty, make the new node point to
-        // itself and set it as last
-        if (last == null) {
-            newNode.next = newNode;
-            return newNode;
-        }
-
-        // Insert the new node at the beginning
-        newNode.next = last.next;
-        last.next = newNode;
-
-        return last;
-    }
-
-    // Function to print the circular linked list
-    public static void printList(Node last){
-        if (last == null)
-            return;
-
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next) break;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args){
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-        Node last = first.next.next;
-        last.next = first;
-
-        System.out.print("Original list: ");
-        printList(last);
-
-        // Insert 5 at the beginning
-        last = insertAtBeginning(last, 5);
-
-        System.out.print(
-            "List after inserting 5 at the beginning: ");
-        printList(last);
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-
-# Function to insert a node at the beginning of the circular linked list
-def insert_at_beginning(last, value):
-    new_node = Node(value)
-
-    # If the list is empty, make the new node point to itself and set it as last
-    if last is None:
-        new_node.next = new_node
-        return new_node
-
-    # Insert the new node at the beginning
-    new_node.next = last.next
-    last.next = new_node
-
-    return last
-
-# Function to print the circular linked list
-def print_list(last):
-    if last is None:
-        return
-
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-# Create circular linked list: 2, 3, 4
-first = Node(2)
-first.next = Node(3)
-first.next.next = Node(4)
-last = first.next.next
-last.next = first
-
-print("Original list: ", end="")
-print_list(last)
-
-# Insert 5 at the beginning
-last = insert_at_beginning(last, 5)
-
-print("List after inserting 5 at the beginning: ", end="")
-print_list(last)
-
-````
-
-C#
-````
-using System;
-
-public class Node
-{
-    public int data;
-    public Node next;
-
-    public Node(int value)
-    {
-        data = value;
-        next = null;
-    }
-}
-
-public class CircularLinkedList
-{
-    // Function to insert a node at the beginning of the circular linked list
-    public static Node InsertAtBeginning(Node last, int value)
-    {
-        Node newNode = new Node(value);
-
-        // If the list is empty, make the new node point to itself and set it as last
-        if (last == null)
-        {
-            newNode.next = newNode;
-            return newNode;
-        }
-
-        // Insert the new node at the beginning
-        newNode.next = last.next;
-        last.next = newNode;
-
-        return last;
-    }
-
-    // Function to print the circular linked list
-    public static void PrintList(Node last)
-    {
-        if (last == null)
-            return;
-
-        Node head = last.next;
-        while (true)
-        {
-            Console.Write(head.data + " ");
-            head = head.next;
-            if (head == last.next)
-                break;
-        }
-        Console.WriteLine();
-    }
-
-    public static void Main(string[] args)
-    {
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-        Node last = first.next.next;
-        last.next = first;
-
-        Console.Write("Original list: ");
-        PrintList(last);
-
-        // Insert 5 at the beginning
-        last = InsertAtBeginning(last, 5);
-
-        Console.Write("List after inserting 5 at the beginning: ");
-        PrintList(last);
-    }
-}
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(data)
-    {
-        this.data = data;
-        this.next = null;
-    }
-}
-
-// Function to insert a node at the beginning of the
-// circular linked list
-function insertAtBeginning(last, value)
-{
-    const newNode = new Node(value);
-
-    // If the list is empty, make the new node point to
-    // itself and set it as last
-    if (last === null) {
-        newNode.next = newNode;
-        return newNode;
-    }
-
-    // Insert the new node at the beginning
-    newNode.next = last.next;
-    last.next = newNode;
-
-    return last;
-}
-
-// Function to print the circular linked list
-function printList(last)
-{
-    if (last === null)
-        return;
-
-    let head = last.next;
-    while (true) {
-        console.log(head.data + " ");
-        head = head.next;
-        if (head === last.next)
-            break;
-    }
-    console.log();
-}
-
-// Create circular linked list: 2, 3, 4
-const first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-let last
-    = first.next.next; // Using let to allow reassignment
-last.next = first;
-
-console.log("Original list: ");
-printList(last);
-
-// Insert 5 at the beginning
-last = insertAtBeginning(last, 5);
-
-console.log("List after inserting 5 at the beginning: ");
-printList(last);
-
-````
-
-
-
-
-
-**Output**
-```
-
-Original list: 2 3 4
-List after inserting 5 at the beginning: 5 2 3 4
-
-```
-### 3. Insertion at the end in circular linked list
-
-> To insert a new node at the end of a circular linked list, we first
-> create the new node and allocate memory for it. If the list is empty
-> (mean, ****last**** or ****tail**** pointer being ****NULL****), we initialize the list with the ****new node**** and making it point to itself to form a circular structure. If the
-> list already contains nodes then we set the ****new node’s**** next pointer to point to the ****current head**** (which is ****tail->next****), then update the ****current tail’s**** next pointer to point to the ****new node****. Finally, we update the ****tail pointer**** to the ****new node.**** This will ensure that the ****new node**** is now the ****last node**** in the list while maintaining the circular linkage.
-
-![Insertion-at-the-end-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150353/Insertion-at-the-end-of-circular-linked-list.webp)
-
-Insertion at the end in circular linked list
-
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node{
-    int data;
-    Node *next;
-    Node(int value)
-    {
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to insert a node at the end of a circular linked list
-Node *insertEnd(Node *tail, int value)
-{
-    Node *newNode = new Node(value);
-    if (tail == nullptr){
-        // If the list is empty, initialize it with the new node
-        tail = newNode;
-
-        // Point to itself to form a circular structure
-        newNode->next = newNode;
-    }
-    else{
-        // Insert new node after the current tail
-        // and update the tail pointer.
-        // New node points to the head node
-        newNode->next = tail->next;
-
-        // Tail node points to the new node
-        tail->next = newNode;
-
-        // Update tail to be the new node
-        tail = newNode;
-    }
-    return tail;
-}
-
-void printList(Node *last){
-  if(last == NULL) return;
-
-    // Start from the head node
-    Node *head = last->next;
-    while (true){
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next)
-            break;
-    }
-    cout << endl;
-}
-
-int main(){
-    // Create circular linked list: 2, 3, 4
-    Node *first = new Node(2);
-    first->next = new Node(3);
-    first->next->next = new Node(4);
-
-    Node *last = first->next->next;
-    last->next = first;
-
-    cout << "Original list: ";
-    printList(last);
-
-    // Insert elements at the end of the circular linked list
-    last = insertEnd(last, 5);
-    last = insertEnd(last, 6);
-
-    cout << "List after inserting 5 and 6: ";
-    printList(last);
-
-    return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the Node structure
-struct Node
-{
-    int data;
-    struct Node *next;
-};
-
-// Function to create a new node
-struct Node *createNode(int value);
-
-// Function to insert a node at the end of a circular linked list
-struct Node *insertEnd(struct Node *tail, int value)
-{
-    struct Node *newNode = createNode(value);
-    if (tail == NULL)
-    {
-        // If the list is empty, initialize it with the new node
-        tail = newNode;
-        newNode->next = newNode;
-    }
-    else
-    {
-        // Insert new node after the current tail and update the tail pointer
-        newNode->next = tail->next;
-        tail->next = newNode;
-        tail = newNode;
-    }
-    return tail;
-}
-
-// Function to print the circular linked list
-void printList(struct Node *last)
-{
-    if (last == NULL)
-        return;
-
-    struct Node *head = last->next;
-    while (1)
-    {
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next)
-            break;
-    }
-    printf("\\n");
-}
-
-struct Node *createNode(int value)
-{
-    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
-}
-
-int main()
-{
-    // Create circular linked list: 2, 3, 4
-    struct Node *first = createNode(2);
-    first->next = createNode(3);
-    first->next->next = createNode(4);
-
-    struct Node *last = first->next->next;
-    last->next = first;
-
-    printf("Original list: ");
-    printList(last);
-
-    // Insert elements at the end of the circular linked list
-    last = insertEnd(last, 5);
-    last = insertEnd(last, 6);
-
-    printf("List after inserting 5 and 6: ");
-    printList(last);
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-
-    Node(int value){
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-
-    // Function to insert a node at the end of a circular
-    // linked list
-    static Node insertEnd(Node tail, int value){
-        Node newNode = new Node(value);
-        if (tail == null) {
-            // If the list is empty, initialize it with the
-            // new node
-            tail = newNode;
-            newNode.next = newNode;
-        }
-        else {
-            // Insert new node after the current tail and
-            // update the tail pointer
-            newNode.next = tail.next;
-            tail.next = newNode;
-            tail = newNode;
-        }
-        return tail;
-    }
-
-    // Function to print the circular linked list
-    static void printList(Node last){
-        if (last == null) return;
-
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next) break;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args){
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-
-        Node last = first.next.next;
-        last.next = first;
-
-        System.out.print("Original list: ");
-        printList(last);
-
-        // Insert elements at the end of the circular linked
-        // list
-        last = insertEnd(last, 5);
-        last = insertEnd(last, 6);
-
-        System.out.print("List after inserting 5 and 6: ");
-        printList(last);
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, value):
-        self.data = value
-        self.next = None
-
-# Function to insert a node at the end of a circular linked list
-
-
-def insert_end(tail, value):
-    new_node = Node(value)
-    if tail is None:
-        # If the list is empty, initialize
-        # it with the new node
-        tail = new_node
-        new_node.next = new_node
-    else:
-        # Insert new node after the current tail
-        # and update the tail pointer
-        new_node.next = tail.next
-        tail.next = new_node
-        tail = new_node
-    return tail
-
-# Function to print the circular linked list
-
-
-def print_list(last):
-    if last is None:
-        return
-
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-
-if __name__ == "__main__":
-    # Create circular linked list: 2, 3, 4
-    first = Node(2)
-    first.next = Node(3)
-    first.next.next = Node(4)
-
-    last = first.next.next
-    last.next = first
-
-    print("Original list: ", end="")
-    print_list(last)
-
-    # Insert elements at the end of the circular linked list
-    last = insert_end(last, 5)
-    last = insert_end(last, 6)
-
-    print("List after inserting 5 and 6: ", end="")
-    print_list(last)
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(value){
-        this.data = value;
-        this.next = null;
-    }
-}
-
-// Function to insert a node at the end of a circular linked
-// list
-function insertEnd(tail, value){
-    let newNode = new Node(value);
-    if (tail === null) {
-        // If the list is empty, initialize it with the new
-        // node
-        tail = newNode;
-        newNode.next = newNode;
-    }
-    else {
-        // Insert new node after the current tail and update
-        // the tail pointer
-        newNode.next = tail.next;
-        tail.next = newNode;
-        tail = newNode;
-    }
-    return tail;
-}
-
-// Function to print the circular linked list
-function printList(last)
-{
-    if (last === null)
-        return;
-
-    let head = last.next;
-    while (true) {
-        console.log(head.data + " ");
-        head = head.next;
-        if (head === last.next)
-            break;
-    }
-    console.log();
-}
-
-// Create circular linked list: 2, 3, 4
-let first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-let last = first.next.next;
-last.next = first;
-
-console.log("Original list: ");
-printList(last);
-
-// Insert elements at the end of the circular linked
-// list
-last = insertEnd(last, 5);
-last = insertEnd(last, 6);
-
-console.log("List after inserting 5 and 6: ");
-printList(last);
-
-````
-
-**Output**
-```
-
-Original list: 2 3 4
-List after inserting 5 and 6: 2 3 4 5 6
-
-```
-### 4. Insertion at specific position in circular linked list
-
-> To insert a new node at a specific position in a circular linked
-> list, we first check if the list is empty. If it is and the ****position**** is not ****1****
-> then we print an error message because the position doesn’t exist in
-> the list. If the ****position**** is ****1**** then we create the ****new node**** and make it point to itself. If the list is not empty, we create the ****new node**** and traverse the list to find the correct insertion point. If the ****position**** is ****1****, we insert the ****new node****
-> at the beginning by adjusting the pointers accordingly. For other
-> positions, we traverse through the list until we reach the desired
-> position and inserting the ****new node****
-> by updating the pointers. If the new node is inserted at the end, we
-> also update the ****last****
-> pointer to reference the new node, maintaining the circular structure
-> of the list.
-
-![Insertion-at-specific-position-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150431/Insertion-at-specific-position-of-circular-linked-list.webp)
-
-Insertion at specific position in circular linked list
-
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node{
-    int data;
-    Node *next;
-    Node(int value){
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to insert a node at a specific position in a circular linked list
-Node *insertAtPosition(Node *last, int data, int pos){
-    if (last == nullptr){
-        // If the list is empty
-        if (pos != 1){
-            cout << "Invalid position!" << endl;
-            return last;
-        }
-        // Create a new node and make it point to itself
-        Node *newNode = new Node(data);
-        last = newNode;
-        last->next = last;
-        return last;
-    }
-
-    // Create a new node with the given data
-    Node *newNode = new Node(data);
-
-    // curr will point to head initially
-    Node *curr = last->next;
-
-    if (pos == 1){
-        // Insert at the beginning
-        newNode->next = curr;
-        last->next = newNode;
-        return last;
-    }
-
-    // Traverse the list to find the insertion point
-    for (int i = 1; i < pos - 1; ++i) {
-        curr = curr->next;
-
-        // If position is out of bounds
-        if (curr == last->next){
-            cout << "Invalid position!" << endl;
-            return last;
-        }
-    }
-    // Insert the new node at the desired position
-    newNode->next = curr->next;
-    curr->next = newNode;
-
-    // Update last if the new node is inserted at the end
-    if (curr == last) last = newNode;
-
-    return last;
-}
-
-void printList(Node *last){
-    if (last == NULL) return;
-
-    Node *head = last->next;
-    while (true){
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next) break;
-    }
-    cout << endl;
-}
-
-int main(){
-    // Create circular linked list: 2, 3, 4
-    Node *first = new Node(2);
-    first->next = new Node(3);
-    first->next->next = new Node(4);
-
-    Node *last = first->next->next;
-    last->next = first;
-
-    cout << "Original list: ";
-    printList(last);
-
-    // Insert elements at specific positions
-    int data = 5, pos = 2;
-    last = insertAtPosition(last, data, pos);
-    cout << "List after insertions: ";
-    printList(last);
-
-    return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the Node structure
-struct Node {
-    int data;
-    struct Node *next;
-};
-
-struct Node* createNode(int value);
-
-// Function to insert a node at a specific position in a circular linked list
-struct Node* insertAtPosition(struct Node *last, int data, int pos) {
-    if (last == NULL) {
-        // If the list is empty
-        if (pos != 1) {
-            printf("Invalid position!\\n");
-            return last;
-        }
-        // Create a new node and make it point to itself
-        struct Node *newNode = createNode(data);
-        last = newNode;
-        last->next = last;
-        return last;
-    }
-
-    // Create a new node with the given data
-    struct Node *newNode = createNode(data);
-
-    // curr will point to head initially
-    struct Node *curr = last->next;
-
-    if (pos == 1) {
-        // Insert at the beginning
-        newNode->next = curr;
-        last->next = newNode;
-        return last;
-    }
-
-    // Traverse the list to find the insertion point
-    for (int i = 1; i < pos - 1; ++i) {
-        curr = curr->next;
-
-        // If position is out of bounds
-        if (curr == last->next) {
-            printf("Invalid position!\\n");
-            return last;
-        }
-    }
-
-    // Insert the new node at the desired position
-    newNode->next = curr->next;
-    curr->next = newNode;
-
-    // Update last if the new node is inserted at the end
-    if (curr == last) last = newNode;
-
-    return last;
-}
-
-// Function to print the circular linked list
-void printList(struct Node *last) {
-    if (last == NULL) return;
-
-    struct Node *head = last->next;
-    while (1) {
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next) break;
-    }
-    printf("\\n");
-}
-
-// Function to create a new node
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
-}
-
-int main() {
-    // Create circular linked list: 2, 3, 4
-    struct Node *first = createNode(2);
-    first->next = createNode(3);
-    first->next->next = createNode(4);
-
-    struct Node *last = first->next->next;
-    last->next = first;
-
-    printf("Original list: ");
-    printList(last);
-
-    // Insert elements at specific positions
-    int data = 5, pos = 2;
-    last = insertAtPosition(last, data, pos);
-    printf("List after insertions: ");
-    printList(last);
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-
-    Node(int value){
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-
-    // Function to insert a node at a specific position in a
-    // circular linked list
-    static Node insertAtPosition(Node last, int data,
-                                 int pos){
-        if (last == null) {
-            // If the list is empty
-            if (pos != 1) {
-                System.out.println("Invalid position!");
-                return last;
-            }
-            // Create a new node and make it point to itself
-            Node newNode = new Node(data);
-            last = newNode;
-            last.next = last;
-            return last;
-        }
-
-        // Create a new node with the given data
-        Node newNode = new Node(data);
-
-        // curr will point to head initially
-        Node curr = last.next;
-
-        if (pos == 1) {
-            // Insert at the beginning
-            newNode.next = curr;
-            last.next = newNode;
-            return last;
-        }
-
-        // Traverse the list to find the insertion point
-        for (int i = 1; i < pos - 1; ++i) {
-            curr = curr.next;
-
-            // If position is out of bounds
-            if (curr == last.next) {
-                System.out.println("Invalid position!");
-                return last;
-            }
-        }
-
-        // Insert the new node at the desired position
-        newNode.next = curr.next;
-        curr.next = newNode;
-
-        // Update last if the new node is inserted at the
-        // end
-        if (curr == last)
-            last = newNode;
-
-        return last;
-    }
-
-    static void printList(Node last){
-        if (last == null)
-            return;
-
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next)
-                break;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args)
-    {
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-
-        Node last = first.next.next;
-        last.next = first;
-
-        System.out.print("Original list: ");
-        printList(last);
-
-        // Insert elements at specific positions
-        int data = 5, pos = 2;
-        last = insertAtPosition(last, data, pos);
-        System.out.print("List after insertions: ");
-        printList(last);
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, value):
-        self.data = value
-        self.next = None
-
-# Function to insert a node at a specific position in a circular linked list
-def insertAtPosition(last, data, pos):
-    if last is None:
-        # If the list is empty
-        if pos != 1:
-            print("Invalid position!")
-            return last
-        # Create a new node and make it point to itself
-        new_node = Node(data)
-        last = new_node
-        last.next = last
-        return last
-
-    # Create a new node with the given data
-    new_node = Node(data)
-
-    # curr will point to head initially
-    curr = last.next
-
-    if pos == 1:
-        # Insert at the beginning
-        new_node.next = curr
-        last.next = new_node
-        return last
-
-    # Traverse the list to find the insertion point
-    for i in range(1, pos - 1):
-        curr = curr.next
-
-        # If position is out of bounds
-        if curr == last.next:
-            print("Invalid position!")
-            return last
-
-    # Insert the new node at the desired position
-    new_node.next = curr.next
-    curr.next = new_node
-
-    # Update last if the new node is inserted at the end
-    if curr == last:
-        last = new_node
-
-    return last
-
-# Function to print the circular linked list
-def print_list(last):
-    if last is None:
-        return
-
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-if __name__ == "__main__":
-    # Create circular linked list: 2, 3, 4
-    first = Node(2)
-    first.next = Node(3)
-    first.next.next = Node(4)
-
-    last = first.next.next
-    last.next = first
-
-    print("Original list: ", end="")
-    print_list(last)
-
-    # Insert elements at specific positions
-    data = 5
-    pos = 2
-    last = insertAtPosition(last, data, pos)
-    print("List after insertions: ", end="")
-    print_list(last)
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(value){
-        this.data = value;
-        this.next = null;
-    }
-}
-
-// Function to insert a node at a specific position in a
-// circular linked list
-function insertAtPosition(last, data, pos)
-{
-    if (last === null) {
-        // If the list is empty
-        if (pos !== 1) {
-            console.log("Invalid position!");
-            return last;
-        }
-        // Create a new node and make it point to itself
-        let newNode = new Node(data);
-        last = newNode;
-        last.next = last;
-        return last;
-    }
-
-    // Create a new node with the given data
-    let newNode = new Node(data);
-
-    // curr will point to head initially
-    let curr = last.next;
-
-    if (pos === 1) {
-        // Insert at the beginning
-        newNode.next = curr;
-        last.next = newNode;
-        return last;
-    }
-
-    // Traverse the list to find the insertion point
-    for (let i = 1; i < pos - 1; ++i) {
-        curr = curr.next;
-
-        // If position is out of bounds
-        if (curr === last.next) {
-            console.log("Invalid position!");
-            return last;
-        }
-    }
-
-    // Insert the new node at the desired position
-    newNode.next = curr.next;
-    curr.next = newNode;
-
-    // Update last if the new node is inserted at the end
-    if (curr === last)
-        last = newNode;
-
-    return last;
-}
-
-// Function to print the circular linked list
-function printList(last){
-    if (last === null)
-        return;
-
-    let head = last.next;
-    while (true) {
-        console.log(head.data + " ");
-        head = head.next;
-        if (head === last.next)
-            break;
-    }
-    console.log();
-}
-
-// Create circular linked list: 2, 3, 4
-let first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-let last = first.next.next;
-last.next = first;
-
-console.log("Original list: ");
-printList(last);
-
-// Insert elements at specific positions
-let data = 5;
-let pos = 2;
-last = insertAtPosition(last, data, pos);
-console.log("List after insertions: ");
-printList(last);
-
-````
-
-
-**Output**
-```
-
-Original list: 2 3 4
-List after insertions: 2 5 3 4
-
-```
-
-[Deletion from a Circular Linked List](https://www.geeksforgeeks.org/deletion-circular-linked-list/?ref=ml_lbp)
----------------------------------------------------------------------------------------------------------------
-
-Deletion involves removing a node from the linked list. The main
-difference is that we need to ensure the list remains circular after the
-deletion. We can delete a node in a circular linked list in three
-ways:
-
-### 1. Delete the first node in circular linked list
-
-> To delete the first node of a circular linked list, we first check if
-> the list is empty. If it is then we print a message and return ****NULL****. If the list contains only one node (the ****head**** is the same as the ****last****) then we delete that node and set the ****last**** pointer to ****NULL****. If there are multiple nodes then we update the ****last->next**** pointer to skip the ****head**** node and effectively removing it from the list. We then delete the ****head**** node to free the allocated memory. Finally, we return the updated ****last**** pointer, which still points to the ****last**** node in the list.
-
-![Deletion-from-the-beginning-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150500/Deletion-from-the-beginning-of-circular-linked-list.webp)
-
-Delete the first node in circular linked list
-
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node {
-    int data;
-    Node* next;
-    Node(int value) {
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to delete the first node of the circular linked list
-Node* deleteFirstNode(Node* last) {
-    if (last == nullptr) {
-        // If the list is empty
-        cout << "List is empty" << endl;
-        return nullptr;
-    }
-
-    Node* head = last->next;
-
-    if (head == last) {
-        // If there is only one node in the list
-        delete head;
-        last = nullptr;
-    } else {
-        // More than one node in the list
-        last->next = head->next;
-        delete head;
-    }
-
-    return last;
-}
-
-void printList(Node* last) {
-    if(last == NULL) return ;
-
-    Node *head = last->next;
-    while (true){
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next) break;
-    }
-    cout << endl;
-}
-
-int main() {
-    // Create circular linked list: 2, 3, 4
-    Node* first = new Node(2);
-    first->next = new Node(3);
-    first->next->next = new Node(4);
-
-    Node* last = first->next->next;
-    last->next = first;
-
-    cout << "Original list: ";
-    printList(last);
-
-    // Delete the first node
-    last = deleteFirstNode(last);
-
-    cout << "List after deleting first node: ";
-    printList(last);
-
-    return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-struct Node {
-    int data;
-    struct Node* next;
-};
-
-struct Node* deleteFirstNode(struct Node* last) {
-    if (last == NULL) {
-        // If the list is empty
-        printf("List is empty\\n");
-        return NULL;
-    }
-
-    struct Node* head = last->next;
-
-    if (head == last) {
-        // If there is only one node in the list
-        free(head);
-        last = NULL;
-    } else {
-        // More than one node in the list
-        last->next = head->next;
-        free(head);
-    }
-
-    return last;
-}
-
-void printList(struct Node* last) {
-    if (last == NULL) return;
-
-    struct Node* head = last->next;
-    while (1) {
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next) break;
-    }
-    printf("\\n");
-}
-
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
-}
-
-int main() {
-    struct Node* first = createNode(2);
-    first->next = createNode(3);
-    first->next->next = createNode(4);
-
-    struct Node* last = first->next->next;
-    last->next = first;
-
-    printf("Original list: ");
-    printList(last);
-
-    last = deleteFirstNode(last);
-
-    printf("List after deleting first node: ");
-    printList(last);
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-
-    Node(int value) {
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-    public static Node deleteFirstNode(Node last) {
-        if (last == null) {
-            // If the list is empty
-            System.out.println("List is empty");
-            return null;
-        }
-
-        Node head = last.next;
-
-        if (head == last) {
-            // If there is only one node in the list
-            last = null;
-        } else {
-            // More than one node in the list
-            last.next = head.next;
-        }
-
-        return last;
-    }
-
-    public static void printList(Node last) {
-        if (last == null) return;
-
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next) break;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args) {
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-
-        Node last = first.next.next;
-        last.next = first;
-
-        System.out.print("Original list: ");
-        printList(last);
-
-        // Delete the first node
-        last = deleteFirstNode(last);
-
-        System.out.print("List after deleting first node: ");
-        printList(last);
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-
-def deleteFirstNode(last):
-    if last is None:
-        # If the list is empty
-        print("List is empty")
-        return None
-
-    head = last.next
-
-    if head == last:
-        # If there is only one node in the list
-        last = None
-    else:
-        # More than one node in the list
-        last.next = head.next
-
-    return last
-
-def print_list(last):
-    if last is None:
-        return
-
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-# Create circular linked list: 2, 3, 4
-first = Node(2)
-first.next = Node(3)
-first.next.next = Node(4)
-
-last = first.next.next
-last.next = first
-
-print("Original list: ", end="")
-print_list(last)
-
-# Delete the first node
-last = deleteFirstNode(last)
-
-print("List after deleting first node: ", end="")
-print_list(last)
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(data) {
-        this.data = data;
-        this.next = null;
-    }
-}
-
-function deleteFirstNode(last) {
-    if (last === null) {
-        // If the list is empty
-        console.log("List is empty");
-        return null;
-    }
-
-    let head = last.next;
-
-    if (head === last) {
-        // If there is only one node in the list
-        last = null;
-    } else {
-        // More than one node in the list
-        last.next = head.next;
-    }
-
-    return last;
-}
-
-function printList(last) {
-    if (last === null) return;
-
-    let head = last.next;
-    while (true) {
-        console.log(head.data + " ");
-        head = head.next;
-        if (head === last.next) break;
-    }
-    console.log();
-}
-
-// Create circular linked list: 2, 3, 4
-let first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-let last = first.next.next;
-last.next = first;
-
-console.log("Original list: ");
-printList(last);
-
-// Delete the first node
-last = deleteFirstNode(last);
-
-console.log("List after deleting first node: ");
-printList(last);
-
-````
-
-
-
-
-**Output**
-```
-
-Original list: 2 3 4
-List after deleting first node: 3 4
-
-```
-### 2. Delete a specific node in circular linked list
-
-> To delete a specific node from a circular linked list, we first check
-> if the list is empty. If it is then we print a message and return ****nullptr****. If the list contains only one node and it matches the ****key**** then we delete that node and set ****last**** to ****nullptr****. If the node to be deleted is the first node then we update
-> the ****next**** pointer of the ****last**** node to skip the ****head**** node and delete the ****head****. For other nodes, we traverse the list using two pointers: ****curr**** (to find the node) and ****prev****
-> (to keep track of the previous node). If we find the node with the
-> matching key then we update the next pointer of ****prev**** to skip the ****curr****
-> node and delete it. If the node is found and it is the last node, we
-> update the ****last****
-> pointer accordingly. If the node is not found then do nothing and ****tail**** or ****last**** as it is. Finally, we return the updated ****last**** pointer.
-
-![Delete-a-specific-node-in-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150531/Delete-a-specific-node-in-circular-linked-list.webp)
-
-Delete a specific node in circular linked list
-
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node {
-    int data;
-    Node* next;
-    Node(int value) {
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to delete a specific node in the circular linked list
-Node* deleteSpecificNode(Node* last, int key) {
-    if (last == nullptr) {
-        // If the list is empty
-        cout << "List is empty, nothing to delete." << endl;
-        return nullptr;
-    }
-
-    Node* curr = last->next;
-    Node* prev = last;
-
-    // If the node to be deleted is the only node in the list
-    if (curr == last && curr->data == key) {
-        delete curr;
-        last = nullptr;
-        return last;
-    }
-
-    // If the node to be deleted is the first node
-    if (curr->data == key) {
-        last->next = curr->next;
-        delete curr;
-        return last;
-    }
-
-    // Traverse the list to find the node to be deleted
-    while (curr != last && curr->data != key) {
-        prev = curr;
-        curr = curr->next;
-    }
-
-    // If the node to be deleted is found
-    if (curr->data == key) {
-        prev->next = curr->next;
-        if (curr == last) {
-            last = prev;
-        }
-        delete curr;
-    } else {
-        // If the node to be deleted is not found
-        cout << "Node with data " << key
-          << " not found." << endl;
-    }
-
-    return last;
-}
-
-// Function to print the circular linked list
-void printList(Node* last) {
-     if (last == NULL){
-        cout << "List is Empty";
-        return;
-    }
-
-    Node *head = last->next;
-    while (true){
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next) break;
-    }
-    cout << endl;
-}
-
-int main() {
-    // Create circular linked list: 2, 3, 4
-    Node* first = new Node(2);
-    first->next = new Node(3);
-    first->next->next = new Node(4);
-
-    Node* last = first->next->next;
-    last->next = first;
-
-    cout << "Original list: ";
-    printList(last);
-
-    // Delete a specific node
-    int key = 3;
-    last = deleteSpecificNode(last, key);
-
-    cout << "List after deleting node " << key << ": ";
-    printList(last);
-
-    return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the structure for a node in the circular linked list
-struct Node {
-    int data;
-    struct Node* next;
-};
-
-// Function to delete a specific node in the circular linked list
-struct Node* deleteSpecificNode(struct Node* last, int key) {
-    if (last == NULL) {
-        // If the list is empty
-        printf("List is empty, nothing to delete.\\n");
-        return NULL;
-    }
-
-    struct Node* curr = last->next;
-    struct Node* prev = last;
-
-    // If the node to be deleted is the only node in the list
-    if (curr == last && curr->data == key) {
-        free(curr);
-        last = NULL;
-        return last;
-    }
-
-    // If the node to be deleted is the first node
-    if (curr->data == key) {
-        last->next = curr->next;
-        free(curr);
-        return last;
-    }
-
-    // Traverse the list to find the node to be deleted
-    while (curr != last && curr->data != key) {
-        prev = curr;
-        curr = curr->next;
-    }
-
-    // If the node to be deleted is found
-    if (curr->data == key) {
-        prev->next = curr->next;
-        if (curr == last) {
-            last = prev;
-        }
-        free(curr);
-    } else {
-        // If the node to be deleted is not found
-        printf("Node with data %d not found.\\n", key);
-    }
-
-    return last;
-}
-
-void printList(struct Node* last) {
-    if (last == NULL) {
-        printf("List is Empty");
-        return;
-    }
-
-    struct Node* head = last->next;
-    while (1) {
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next) break;
-    }
-    printf("\\n");
-}
-
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
-}
-
-int main() {
-    // Create circular linked list: 2, 3, 4
-    struct Node* first = createNode(2);
-    first->next = createNode(3);
-    first->next->next = createNode(4);
-
-    struct Node* last = first->next->next;
-    last->next = first;
-
-    printf("Original list: ");
-    printList(last);
-
-    // Delete a specific node
-    int key = 3;
-    last = deleteSpecificNode(last, key);
-
-    printf("List after deleting node %d: ", key);
-    printList(last);
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-    Node(int value){
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-    public static Node deleteSpecificNode(Node last,
-                                          int key){
-        if (last == null) {
-            // If the list is empty
-            System.out.println(
-                "List is empty, nothing to delete.");
-            return null;
-        }
-        Node curr = last.next;
-        Node prev = last;
-
-        // If the node to be deleted is the only node in the
-        // list
-        if (curr == last && curr.data == key) {
-            last = null;
-            return last;
-        }
-
-        // If the node to be deleted is the first node
-        if (curr.data == key) {
-            last.next = curr.next;
-            return last;
-        }
-
-        // Traverse the list to find the node to be deleted
-        while (curr != last && curr.data != key) {
-            prev = curr;
-            curr = curr.next;
-        }
-
-        // If the node to be deleted is found
-        if (curr.data == key) {
-            prev.next = curr.next;
-            if (curr == last) {
-                last = prev;
-            }
-        }
-        else {
-            // If the node to be deleted is not found
-            System.out.println("Node with data " + key
-                               + " not found.");
-        }
-        return last;
-    }
-
-    public static void printList(Node last){
-        if (last == null) {
-            System.out.println("List is Empty");
-            return;
-        }
-
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next)
-                break;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args){
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-
-        Node last = first.next.next;
-        last.next = first;
-
-        System.out.print("Original list: ");
-        printList(last);
-
-        // Delete a specific node
-        int key = 3;
-        last = deleteSpecificNode(last, key);
-
-        System.out.print("List after deleting node " + key
-                         + ": ");
-        printList(last);
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-
-def deleteSpecificNode(last, key):
-    if last is None:
-        # If the list is empty
-        print("List is empty, nothing to delete.")
-        return None
-
-    curr = last.next
-    prev = last
-
-    # If the node to be deleted is the only node in the list
-    if curr == last and curr.data == key:
-        last = None
-        return last
-
-    # If the node to be deleted is the first node
-    if curr.data == key:
-        last.next = curr.next
-        return last
-
-    # Traverse the list to find the node to be deleted
-    while curr != last and curr.data != key:
-        prev = curr
-        curr = curr.next
-
-    # If the node to be deleted is found
-    if curr.data == key:
-        prev.next = curr.next
-        if curr == last:
-            last = prev
-    else:
-        # If the node to be deleted is not found
-        print(f"Node with data {key} not found.")
-
-    return last
-
-def printList(last):
-    if last is None:
-        print("List is Empty")
-        return
-
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-# Create circular linked list: 2, 3, 4
-first = Node(2)
-first.next = Node(3)
-first.next.next = Node(4)
-
-last = first.next.next
-last.next = first
-
-print("Original list: ", end="")
-printList(last)
-
-# Delete a specific node
-key = 3
-last = deleteSpecificNode(last, key)
-
-print(f"List after deleting node {key}: ", end="")
-printList(last)
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(data) {
-        this.data = data;
-        this.next = null;
-    }
-}
-
-function deleteSpecificNode(last, key) {
-    if (last === null) {
-        // If the list is empty
-        console.log("List is empty, nothing to delete.");
-        return null;
-    }
-
-    let curr = last.next;
-    let prev = last;
-
-    // If the node to be deleted is the only node in the list
-    if (curr === last && curr.data === key) {
-        last = null;
-        return last;
-    }
-
-    // If the node to be deleted is the first node
-    if (curr.data === key) {
-        last.next = curr.next;
-        return last;
-    }
-
-    // Traverse the list to find the node to be deleted
-    while (curr !== last && curr.data !== key) {
-        prev = curr;
-        curr = curr.next;
-    }
-
-    // If the node to be deleted is found
-    if (curr.data === key) {
-        prev.next = curr.next;
-        if (curr === last) {
-            last = prev;
-        }
-    } else {
-        // If the node to be deleted is not found
-        console.log("Node with data " + key + " not found.");
-    }
-
-    return last;
-}
-
-function printList(last) {
-    if (last === null) {
-        console.log("List is Empty");
-        return;
-    }
-
-    let head = last.next;
-    while (true) {
-        console.log(head.data + " ");
-        head = head.next;
-        if (head === last.next) break;
-    }
-    console.log();
-}
-
-// Create circular linked list: 2, 3, 4
-let first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-let last = first.next.next;
-last.next = first;
-
-console.log("Original list: ");
-printList(last);
-
-// Delete a specific node
-let key = 3;
-last = deleteSpecificNode(last, key);
-
-console.log("List after deleting node " + key + ": ");
-printList(last);
-
-````
-
-
-
-**Output**
-```
-
-Original list: 2 3 4
-List after deleting node 3: 2 4
-
-```
-### 3. Deletion at the end of Circular linked list
-
-> To delete the last node in a circular linked list, we first check if
-> the list is empty. If it is, we print a message and return ****nullptr****. If the list contains only one node (where the ****head**** is the same as the ****last****), we delete that node and set ****last**** to ****nullptr****. For lists with multiple nodes, we need to traverse the list to find
-> the ****second last node****. We do this by starting from the ****head**** and moving through the list until we reach the node whose next
-> pointer points to ****last****. Once we find the ****second last**** node then we update its next pointer to point back to the ****head,****
-> this effectively removing the last node from the list. We then delete
-> the last node to free up memory and return the updated ****last**** pointer, which now points to the last node.
-
-![Deletion-at-the-end-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150601/Deletion-at-the-end-of-circular-linked-list.webp)
-
-Deletion at the end of Circular linked list
-
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node {
-    int data;
-    Node* next;
-    Node(int value) {
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to delete the last node in the circular linked list
-Node* deleteLastNode(Node* last) {
-    if (last == nullptr) {
-        // If the list is empty
-        cout << "List is empty, nothing to delete." << endl;
-        return nullptr;
-    }
-    Node* head = last->next;
-
-    // If there is only one node in the list
-    if (head == last) {
-        delete last;
-        last = nullptr;
-        return last;
-    }
-    // Traverse the list to find the second last node
-    Node* curr = head;
-    while (curr->next != last) {
-        curr = curr->next;
-    }
-    // Update the second last node\'s next pointer
-    // to point to head
-    curr->next = head;
-delete last;
-last = curr;
-
-    return last;
-}
-
-void printList(Node* last) {
-   if(last == NULL) return;
-
-    Node *head = last->next;
-    while (true){
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next) break;
-}
-    cout << endl;
-}
-
-int main() {
-    // Create circular linked list: 2, 3, 4
-    Node* first = new Node(2);
-first->next = new Node(3);
-first->next->next = new Node(4);
-
-    Node* last = first->next->next;
-last->next = first;
-
-    cout << "Original list: ";
-    printList(last);
-
-// Delete the last node
-    last = deleteLastNode(last);
-
-    cout << "List after deleting last node: ";
-    printList(last);
-
-return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the structure for a node in the circular linked list
-struct Node {
-    int data;
-    struct Node* next;
-};
-
-// Function to delete the last node in the circular linked list
-struct Node* deleteLastNode(struct Node* last) {
-    if (last == NULL) {
-        // If the list is empty
-        printf("List is empty, nothing to delete.\\n");
-return NULL;
-}
-    struct Node* head = last->next;
-
-// If there is only one node in the list
-    if (head == last) {
-        free(last);
-last = NULL;
-        return last;
-}
-    // Traverse the list to find the second last node
-    struct Node* curr = head;
-    while (curr->next != last) {
-        curr = curr->next;
-}
-    // Update the second last node\'s next pointer to point to head
-    curr->next = head;
-    free(last);
-    last = curr;
-
-    return last;
-}
-
-void printList(struct Node* last) {
-    if (last == NULL) return;
-
-    struct Node* head = last->next;
-    while (1) {
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next) break;
-    }
-    printf("\\n");
-}
-
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
-}
-
-int main() {
-    // Create circular linked list: 2, 3, 4
-    struct Node* first = createNode(2);
-    first->next = createNode(3);
-    first->next->next = createNode(4);
-
-    struct Node* last = first->next->next;
-    last->next = first;
-
-    printf("Original list: ");
-    printList(last);
-
-    // Delete the last node
-    last = deleteLastNode(last);
-
-    printf("List after deleting last node: ");
-    printList(last);
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-
-    Node(int value){
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-    public static Node deleteLastNode(Node last){
-        if (last == null) {
-            // If the list is empty
-            System.out.println(
-                "List is empty, nothing to delete.");
-            return null;
-        }
-        Node head = last.next;
-
-        // If there is only one node in the list
-        if (head == last) {
-            last = null;
-            return last;
-        }
-        // Traverse the list to find the second last node
-        Node curr = head;
-        while (curr.next != last) {
-            curr = curr.next;
-        }
-        // Update the second last node\'s next pointer to
-           // point to head
-           curr.next = head;
-last = curr;
-
-        return last;
-}
-
-    public static void printList(Node last){
-        if (last == null)
-            return;
-
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next)
-                break;
-}
-        System.out.println();
-}
-
-    public static void main(String[] args){
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-        Node last = first.next.next;
-last.next = first;
-
-        System.out.print("Original list: ");
-        printList(last);
-
-// Delete the last node
-        last = deleteLastNode(last);
-
-        System.out.print("List after deleting last node: ");
-        printList(last);
-}
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-
-def deleteLastNode(last):
-    if last is None:
-        # If the list is empty
-        print("List is empty, nothing to delete.")
-        return None
-
-    head = last.next
-
-    # If there is only one node in the list
-    if head == last:
-        last = None
-        return last
-
-    # Traverse the list to find the second last node
-    curr = head
-    while curr.next != last:
-        curr = curr.next
-
-    # Update the second last node\'s next pointer to point to head
-    curr.next = head
-    last = curr
-
-    return last
-
-def printList(last):
-    if last is None:
-        return
-
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-# Create circular linked list: 2, 3, 4
-first = Node(2)
-first.next = Node(3)
-first.next.next = Node(4)
-
-last = first.next.next
-last.next = first
-
-print("Original list: ", end="")
-printList(last)
-
-# Delete the last node
-last = deleteLastNode(last)
-
-print("List after deleting last node: ", end="")
-printList(last)
-
-````
-
-C#
-````
-using System;
-
-public class Node {
-    public int data;
-    public Node next;
-
-    public Node(int value)
-    {
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-    // Function to delete the last node in the circular
-    // linked list
-    public static Node deleteLastNode(Node last)
-    {
-        if (last == null) {
-            // If the list is empty
-            Console.WriteLine(
-                "List is empty, nothing to delete.");
-            return null;
-        }
-        Node head = last.next;
-
-        // If there is only one node in the list
-        if (head == last) {
-            last = null;
-            return last;
-        }
-        // Traverse the list to find the second last node
-        Node curr = head;
-        while (curr.next != last) {
-            curr = curr.next;
-        }
-        // Update the second last node\'s next pointer
-          // to point to head
-          curr.next = head;
-last = curr;
-
-        return last;
-}
-
-    // Function to print the circular linked list
-    public static void printList(Node last)
-    {
-        if (last == null) {
-            Console.WriteLine("List is Empty");
-            return;
-}
-
-        Node head = last.next;
-        while (true) {
-            Console.Write(head.data + " ");
-            head = head.next;
-            if (head == last.next)
-                break;
-}
-        Console.WriteLine();
-}
-
-    public static void Main(string[] args)
-    {
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-        Node last = first.next.next;
-last.next = first;
-
-        Console.Write("Original list: ");
-        printList(last);
-
-// Delete the last node
-        last = deleteLastNode(last);
-
-        Console.Write("List after deleting last node: ");
-        printList(last);
-}
-}
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(data) {
-        this.data = data;
-        this.next = null;
-}
-}
-
-function deleteLastNode(last) {
-    if (last === null) {
-        // If the list is empty
-        console.log("List is empty, nothing to delete.");
-return null;
-}
-    let head = last.next;
-
-// If there is only one node in the list
-    if (head === last) {
-        last = null;
-        return last;
-}
-    // Traverse the list to find the second last node
-    let curr = head;
-    while (curr.next !== last) {
-        curr = curr.next;
-}
-    // Update the second last node\'s next pointer to point to head
-    curr.next = head;
-    last = curr;
-
-    return last;
-}
-
-function printList(last) {
-    if (last === null) return;
-
-    let head = last.next;
-    while (true) {
-        process.stdout.write(head.data + " ");
-        head = head.next;
-        if (head === last.next) break;
-    }
-    console.log();
-}
-
-// Create circular linked list: 2, 3, 4
-let first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-let last = first.next.next;
-last.next = first;
-
-console.log("Original list: ");
-printList(last);
-
-// Delete the last node
-last = deleteLastNode(last);
-
-console.log("List after deleting last node: ");
-printList(last);
-
-````
-
-**Output**
-```
-
-Original list: 2 3 4
-List after deleting last node: 2 3
-
-```
-
-[Searching in Circular Linked list](https://www.geeksforgeeks.org/searching-in-circular-linked-list/?ref=ml_lbp)
-----------------------------------------------------------------------------------------------------------------
-
-Searching in a circular linked list is similar to searching in a
-regular linked list. We start at a given node and traverse the list
-until you either find the target value or return to the starting node.
-Since the list is circular, make sure to keep track of where you started
-to avoid an infinite loop.
-
-> To search for a specific value in a circular linked list, we first
-> check if the list is empty. If it is then we return ****false****. If the list contains nodes then we start from the ****head**** node (which is the ****last->next****) and traverse the list. We use a pointer ****curr**** to iterate through the nodes until we reach back to the ****head****. During traversal, if we find a node whose ****data**** matches the given ****key**** then we return ****true**** to indicating that the value was found. After the loop, we also check
-> the last node to ensure we don’t miss it. If the ****key**** is not found after traversing the entire list then we return ****false****.
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-struct Node {
-    int data;
-    Node* next;
-    Node(int value) {
-        data = value;
-        next = nullptr;
-    }
-};
-
-// Function to search for a specific value in the
-// circular linked list
-bool search(Node* last, int key) {
-    if (last == nullptr) {
-        // If the list is empty
-        return false;
-    }
-
-    Node* head = last->next;
-    Node* curr = head;
-
-    // Traverse the list to find the key
-    while (curr != last) {
-        if (curr->data == key) {
-          // Key found
-            return true;
-        }
-        curr = curr->next;
-    }
-
-    // Check the last node
-    if (last->data == key) {
-      // Key found
-        return true;
-    }
-    // Key not found
-    return false;
-}
-
-void printList(Node* last) {
-   if(last == NULL) return;
-
-    Node *head = last->next;
-    while (true){
-        cout << head->data << " ";
-        head = head->next;
-        if (head == last->next) break;
-    }
-    cout << endl;
-}
-
-int main() {
-    // Create circular linked list: 2, 3, 4
-    Node* first = new Node(2);
-    first->next = new Node(3);
-    first->next->next = new Node(4);
-
-    Node* last = first->next->next;
-    last->next = first;
-
-    cout << "Original list: ";
-    printList(last);
-
-    // Search for a specific value
-    int key = 3;
-    bool found = search(last, key);
-    if (found) {
-        cout << "Value " << key << " found in the list." << endl;
-    } else {
-        cout << "Value " << key << " not found in the list." << endl;
-    }
-
-    return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Definition of the Node structure
-struct Node{
-    int data;
-    struct Node *next;
-};
-
-// Function to search for a specific value in the circular linked list
-int search(struct Node *last, int key){
-    if (last == NULL){
-        // If the list is empty
-        return 0;
-    }
-
-    struct Node *head = last->next;
-    struct Node *curr = head;
-
-    // Traverse the list to find the key
-    while (curr != last){
-        if (curr->data == key){
-            // Key found
-            return 1;
-        }
-        curr = curr->next;
-    }
-
-    // Check the last node
-    if (last->data == key){
-        // Key found
-        return 1;
-    }
-    // Key not found
-    return 0;
-}
-
-// Function to print the circular linked list
-void printList(struct Node *last){
-    if (last == NULL) return;
-
-    struct Node *head = last->next;
-    while (1){
-        printf("%d ", head->data);
-        head = head->next;
-        if (head == last->next)
-            break;
-    }
-    printf("\\n");
-}
-// Function to create a new node
-struct Node *createNode(int value){
-    struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
-    temp->data = value;
-    temp->next = NULL;
-    return temp;
-}
-
-int main(){
-    // Create circular linked list: 2, 3, 4
-    struct Node *first = createNode(2);
-    first->next = createNode(3);
-    first->next->next = createNode(4);
-
-    struct Node *last = first->next->next;
-    last->next = first;
-
-    printf("Original list: ");
-    printList(last);
-
-    // Search for a specific value
-    int key = 3;
-    int found = search(last, key);
-    if (found){
-        printf("Value %d found in the list.\\n", key);
-    }
-    else{
-        printf("Value %d not found in the list.\\n", key);
-    }
-
-    return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node next;
-    Node(int value) {
-        data = value;
-        next = null;
-    }
-}
-
-public class CircularLinkedList {
-    // Function to search for a specific value
-    // in the circular linked list
-    static boolean search(Node last, int key) {
-        if (last == null) {
-            // If the list is empty
-            return false;
-        }
-
-        Node head = last.next;
-        Node curr = head;
-
-        // Traverse the list to find the key
-        while (curr != last) {
-            if (curr.data == key) {
-                // Key found
-                return true;
-            }
-            curr = curr.next;
-        }
-
-        // Check the last node
-        if (last.data == key) {
-            // Key found
-            return true;
-        }
-        // Key not found
-        return false;
-    }
-
-    static void printList(Node last) {
-        if (last == null) return;
-
-        Node head = last.next;
-        while (true) {
-            System.out.print(head.data + " ");
-            head = head.next;
-            if (head == last.next) break;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args) {
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-
-        Node last = first.next.next;
-        last.next = first;
-
-        System.out.print("Original list: ");
-        printList(last);
-
-        // Search for a specific value
-        int key = 3;
-        boolean found = search(last, key);
-        if (found) {
-            System.out.println("Value " + key
-                               + " found in the list.");
-        } else {
-            System.out.println("Value " + key +
-                               " not found in the list.");
-        }
-    }
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, value):
-        self.data = value
-        self.next = None
-
-def search(last, key):
-    if last is None:
-        # If the list is empty
-        return False
-
-    head = last.next
-    curr = head
-
-    # Traverse the list to find the key
-    while curr != last:
-        if curr.data == key:
-            # Key found
-            return True
-        curr = curr.next
-
-    # Check the last node
-    if last.data == key:
-        # Key found
-        return True
-    # Key not found
-    return False
-
-def print_list(last):
-    if last is None:
-        return
-
-    head = last.next
-    while True:
-        print(head.data, end=" ")
-        head = head.next
-        if head == last.next:
-            break
-    print()
-
-if __name__ == "__main__":
-    # Create circular linked list: 2, 3, 4
-    first = Node(2)
-    first.next = Node(3)
-    first.next.next = Node(4)
-
-    last = first.next.next
-    last.next = first
-
-    print("Original list:", end=" ")
-    print_list(last)
-
-    # Search for a specific value
-    key = 3
-    found = search(last, key)
-    if found:
-        print(f"Value {key} found in the list.")
-    else:
-        print(f"Value {key} not found in the list.")
-
-````
-
-C#
-````
-using System;
-
-public class Node {
-    public int data;
-    public Node next;
-    public Node(int value){
-        data = value;
-        next = null;
-    }
-}
-
-public class GFG {
-    // Function to search for a specific value in the
-    // circular linked list
-    public static bool Search(Node last, int key){
-        if (last == null) {
-            // If the list is empty
-            return false;
-        }
-
-        Node head = last.next;
-        Node curr = head;
-
-        // Traverse the list to find the key
-        while (curr != last) {
-            if (curr.data == key) {
-                // Key found
-                return true;
-            }
-            curr = curr.next;
-        }
-
-        // Check the last node
-        if (last.data == key) {
-            // Key found
-            return true;
-        }
-        // Key not found
-        return false;
-    }
-
-    public static void PrintList(Node last){
-        if (last == null)
-            return;
-
-        Node head = last.next;
-        while (true) {
-            Console.Write(head.data + " ");
-            head = head.next;
-            if (head == last.next)
-                break;
-        }
-        Console.WriteLine();
-    }
-
-    public static void Main(string[] args){
-        // Create circular linked list: 2, 3, 4
-        Node first = new Node(2);
-        first.next = new Node(3);
-        first.next.next = new Node(4);
-
-        Node last = first.next.next;
-        last.next = first;
-
-        Console.Write("Original list: ");
-        PrintList(last);
-
-        // Search for a specific value
-        int key = 3;
-        bool found = Search(last, key);
-        if (found) {
-            Console.WriteLine("Value " + key
-                              + " found in the list.");
-        }
-        else {
-            Console.WriteLine("Value " + key
-                              + " not found in the list.");
-        }
-    }
-}
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(value){
-        this.data = value;
-        this.next = null;
-    }
-}
-
-function search(last, key){
-    if (last === null) {
-        // If the list is empty
-        return false;
-    }
-
-    let head = last.next;
-    let curr = head;
-
-    // Traverse the list to find the key
-    while (curr !== last) {
-        if (curr.data === key) {
-            // Key found
-            return true;
-        }
-        curr = curr.next;
-    }
-
-    // Check the last node
-    if (last.data === key) {
-        // Key found
-        return true;
-    }
-    // Key not found
-    return false;
-}
-
-function printList(last){
-    if (last === null)
-        return;
-
-    let head = last.next;
-    while (true) {
-        process.stdout.write(head.data + " ");
-        head = head.next;
-        if (head === last.next)
-            break;
-    }
-    console.log();
-}
-
-// Create circular linked list: 2, 3, 4
-let first = new Node(2);
-first.next = new Node(3);
-first.next.next = new Node(4);
-
-let last = first.next.next;
-last.next = first;
-
-console.log("Original list:");
-printList(last);
-
-// Search for a specific value
-let key = 3;
-let found = search(last, key);
-if (found) {
-    console.log(`Value ${key} found in the list.`);
-}
-else {
-    console.log(`Value ${key} not found in the list.`);
-}
-
-````
-
-
-
-
-**Output**
-```
-
-Original list: 2 3 4
-Value 3 found in the list.
-
-```
-
-Advantages of Circular Linked Lists
------------------------------------
-
-* In circular linked list, the last node points to the first node.
-  There are no null references, making traversal easier and reducing the
-  chances of encountering null pointer exceptions.
-* We can traverse the list from any node and return to it without
-  needing to restart from the head, which is useful in applications
-  requiring a circular iteration.
-* Circular linked lists can easily implement circular queues, where the
-  last element connects back to the first, allowing for efficient
-  resource management.
-* In a circular linked list, each node has a reference to the next node
-  in the sequence. Although it doesn’t have a direct reference to the
-  previous node like a doubly linked list, we can still find the
-  previous node by traversing the list.
-
-Disadvantages of Circular Linked Lists
---------------------------------------
-
-* Circular linked lists are more complex to implement than singly
-  linked lists.
-* Traversing a circular linked list without a clear stopping condition
-  can lead to infinite loops if not handled carefully.
-* Debugging can be more challenging due to the circular nature, as
-  traditional methods of traversing linked lists may not apply.
-
-Applications of Circular Linked Lists
--------------------------------------
-
-* It is used for time-sharing among different users, typically through
-  a ****Round-Robin scheduling mechanism.****
-* In multiplayer games, a circular linked list can be used to switch
-  between players. After the last player’s turn, the list cycles back to
-  the first player.
-* Circular linked lists are often used in buffering applications, such
-  as streaming data, where data is continuously produced and
-  consumed.
-* In media players, circular linked lists can manage playlists, this
-  allowing users to loop through songs continuously.
-* Browsers use circular linked lists to manage the cache. This allows
-  you to navigate back through your browsing history efficiently by
-  pressing the BACK button.', e'A circular linked list is a data structure where the last node connects back to the first,
-forming a loop. This structure allows for continuous traversal without
-any interruptions. Circular linked lists are especially helpful for
-tasks like scheduling and managing playlists, this allowing for smooth navigation. In this tutorial, we’ll cover the
-basics of circular linked lists, how to work with them, their advantages
-and disadvantages, and their applications.', 'Introduction to Circular Linked List', 3, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('9a7d3527-1c48-4e9d-8aac-990f873ca15d', e'What is a Doubly Linked List?
------------------------------
-
-A ****doubly linked list****
-is a data structure that consists of a set of nodes, each of which
-contains a ****value**** and ****two pointers****, one pointing to the ****previous node**** in the list and one pointing to the ****next node****
-in the list. This allows for efficient traversal of the list in ****both directions****, making it suitable for applications where frequent ****insertions**** and ****deletions**** are required.
-
-![Insertion-at-the-End-in-Doubly-Linked-List-copy](https://media.geeksforgeeks.org/wp-content/uploads/20240809123741/Insertion-at-the-End-in-Doubly-Linked-List-copy.webp)
-
-Doubly Linked List
-
-
-Representation of Doubly Linked List in Data Structure
-------------------------------------------------------
-
-In a data structure, a doubly linked list is represented using nodes
-that have three fields:
-
-1. Data
-2. A pointer to the next node (****next****)
-3. A pointer to the previous node (****prev****)
-
-![Node-Structure-of-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124907/Node-Structure-of-Doubly-Linked-List.webp)
-
-Node Structure of Doubly Linked List
-
-
-Node Definition
----------------
-
-Here is how a node in a Doubly Linked List is typically
-represented:
-
-[Try it on GfG Practice
-![redirect icon](https://media.geeksforgeeks.org/auth-dashboard-uploads/Group-arrow.svg)](https://www.geeksforgeeks.org/problems/display-doubly-linked-list--154650/1?itm_source=geeksforgeeks&itm_medium=article&itm_campaign=practice_card)
-C++
-````
-struct Node {
-
-    // To store the Value or data.
-    int data;
-
-    // Pointer to point the Previous Element
-    Node* prev;
-
-    // Pointer to point the Next Element
-    Node* next;
-
-    // Constructor
-    Node(int d) {
-       data = d;
-       prev = next = nullptr;
-    }
-};
-
-````
-
-C
-````
-struct Node {
-
-    // To store the Value or data.
-    int data;
-
-    // Pointer to point the Previous Element
-    Node* prev;
-
-    // Pointer to point the Next Element
-    Node* next;
-};
-
-// Function to create a new node
-struct Node *createNode(int new_data) {
-    struct Node *new_node = (struct Node *)
-    malloc(sizeof(struct Node));
-    new_node->data = new_data;
-    new_node->next = NULL;
-    new_node->prev = NULL;
-    return new_node;
-}
-
-````
-
-Java
-````
-class Node {
-
-    // To store the Value or data.
-    int data;
-
-    // Reference to the Previous Node
-    Node prev;
-
-    // Reference to the next Node
-    Node next;
-
-    // Constructor
-    Node(int d) {
-       data = d;
-       prev = next = null;
-    }
-};
-
-````
-
-Python
-````
-class Node:
-
-    def __init__(self, data):
-        # To store the value or data.
-        self.data = data
-
-        # Reference to the previous node
-        self.prev = None
-
-        # Reference to the next node
-        self.next = None
-
-````
-
-C#
-````
-class Node
-{
-  	// To store the value or data
-    public int Data;
-
-  	// Pointer to the next node
-    public Node Next;
-
-  	// Pointer to the previous node
-    public Node Prev;
-
-    // Constructor
-    public Node(int d)
-    {
-        Data = d;
-        Prev = Next = null;
-    }
-}
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(data)
-    {
-        // To store the value or data.
-        this.data = data;
-
-        // Reference to the previous node
-        this.prev = null;
-
-        // Reference to the next node
-        this.next = null;
-    }
-}
-
-````
-
-Each node in a ****Doubly Linked List**** contains the ****data**** it holds, a pointer to the ****next**** node in the list, and a pointer to the ****previous****
-node in the list. By linking these nodes together through the ****next**** and ****prev****
-pointers, we can traverse the list in both directions (forward and
-backward), which is a key feature of a Doubly Linked List.
-
-[Operations on Doubly Linked List](https://www.geeksforgeeks.org/doubly-linked-list-tutorial)
----------------------------------------------------------------------------------------------
-
-* ****Traversal in Doubly Linked List****
-* ****Searching in Doubly Linked List****
-* ****Finding Length of Doubly Linked List****
-* [****Insertion in Doubly Linked List****:](https://www.geeksforgeeks.org/introduction-and-insertion-in-a-doubly-linked-list)
-  + Insertion at the beginning of Doubly Linked List
-  + Insertion at the end of the Doubly Linked List
-  + Insertion at a specific position in Doubly Linked List
-* [****Deletion in Doubly Linked List****:](https://www.geeksforgeeks.org/delete-a-node-in-a-doubly-linked-list)
-  + Deletion of a node at the beginning of Doubly Linked List
-  + Deletion of a node at the end of Doubly Linked List
-  + Deletion of a node at a specific position in Doubly Linked
-    List
-
-Let\'s go through each of the operations mentioned above, one by
-one.
-
-[Traversal in Doubly Linked List](https://www.geeksforgeeks.org/traversal-in-doubly-linked-list/)
--------------------------------------------------------------------------------------------------
-
-To Traverse the doubly list, we can use the following steps:
-
-****a. Forward Traversal:****
-
-* Initialize a pointer to the head of the linked list.
-* While the pointer is not null:
-  + Visit the data at the current node.
-  + Move the pointer to the next node.
-
-****b. Backward Traversal:****
-
-* Initialize a pointer to the tail of the linked list.
-* While the pointer is not null:
-  + Visit the data at the current node.
-  + Move the pointer to the previous node.
-
-Below are the implementation of the above approach:
-
-C++
-````
-#include <iostream>
-using namespace std;
-
-// Define the Node structure
-struct Node {
-    int data;
-    Node* next;
-    Node* prev;
-
-// Constructor to initialize Node with data
-    Node(int data) : data(data), next(nullptr),
-  	prev(nullptr) {}
-};
-
-// Function to traverse the doubly linked list
-// in forward direction
-void forwardTraversal(Node* head) {
-
-    // Start traversal from the head of the list
-    Node* curr = head;
-
-// Continue until current node is not null
-    // (end of list)
-    while (curr != nullptr) {
-
-        // Output data of the current node
-        cout << curr->data << " ";
-
-// Move to the next node
-        curr = curr->next;
-}
-
-    // Print newline after traversal
-    cout << endl;
-}
-
-// Function to traverse the doubly linked list
-// in backward direction
-void backwardTraversal(Node* tail) {
-
-    // Start traversal from the tail of the list
-    Node* curr = tail;
-
-// Continue until current node is not null
-    // (end of list)
-    while (curr != nullptr) {
-
-        // Output data of the current node
-        cout << curr->data << " ";
-
-// Move to the previous node
-        curr = curr->prev;
-}
-
-    // Print newline after traversal
-    cout << endl;
-}
-
-int main() {
-
-    // Sample usage of the doubly linked list and
-    // traversal functions
-    Node* head = new Node(1);
-    Node* second = new Node(2);
-    Node* third = new Node(3);
-
-    head->next = second;
-second->prev = head;
-second->next = third;
-    third->prev = second;
-
-    cout << "Forward Traversal:" << endl;
-    forwardTraversal(head);
-
-    cout << "Backward Traversal:" << endl;
-    backwardTraversal(third);
-
-return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the Node structure
-struct Node {
-    int data; // Data stored in the node
-    struct Node* next; // Pointer to the next node
-    struct Node* prev; // Pointer to the previous node
-};
-
-// Function to create a new node
-struct Node* createNode(int data) {
-    struct Node* newNode =
-      (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = data;
-    newNode->next = NULL;
-    newNode->prev = NULL;
-return newNode;
-}
-
-// Function to traverse the doubly linked list
-// in forward direction
-void forwardTraversal(struct Node* head) {
-
-    // Start traversal from the head of the list
-    struct Node* curr = head;
-
-// Continue until the current node is not
-    // null (end of list)
-    while (curr != NULL) {
-
-        // Output data of the current node
-        printf("%d ", curr->data);
-
-// Move to the next node
-        curr = curr->next;
-}
-
-    // Print newline after traversal
-    printf("\\n");
-}
-
-// Function to traverse the doubly linked list
-// in backward direction
-void backwardTraversal(struct Node* tail) {
-
-    // Start traversal from the tail of the list
-    struct Node* curr = tail;
-
-// Continue until the current node is not
-    // null (end of list)
-    while (curr != NULL) {
-
-        // Output data of the current node
-        printf("%d ", curr->data);
-
-// Move to the previous node
-        curr = curr->prev;
-}
-
-    // Print newline after traversal
-    printf("\\n");
-}
-
-int main() {
-
-    // Sample usage of the doubly linked list and
-    // traversal functions
-    struct Node* head = createNode(1);
-    struct Node* second = createNode(2);
-    struct Node* third = createNode(3);
-
-    head->next = second;
-second->prev = head;
-second->next = third;
-    third->prev = second;
-
-    printf("Forward Traversal:\\n");
-    forwardTraversal(head);
-
-    printf("Backward Traversal:\\n");
-    backwardTraversal(third);
-
-// Free memory allocated for nodes
-    free(head);
-    free(second);
-    free(third);
-
-return 0;
-}
-
-````
-
-Java
-````
-// Define the Node class
-class Node {
-    int data; // Data stored in the node
-    Node next; // Pointer to the next node
-    Node prev; // Pointer to the previous node
-
-    // Constructor to initialize the node with data
-    public Node(int data) {
-        this.data = data;
-        this.next = null;
-        this.prev = null;
-}
-}
-
-// Class to manage the doubly linked list
-class GfG {
-
-    // Function to traverse the doubly linked list
-    // in forward direction
-    static void forwardTraversal(Node head) {
-
-        // Start traversal from the head of the list
-        Node curr = head;
-
-// Continue until the current node is
-        // null (end of the list)
-        while (curr != null) {
-
-            // Output data of the current node
-            System.out.print(curr.data + " ");
-
-// Move to the next node
-            curr = curr.next;
-}
-
-        // Print newline after traversal
-        System.out.println();
-}
-
-    // Function to traverse the doubly linked list
-  	//in backward direction
-    static void backwardTraversal(Node tail) {
-
-        // Start traversal from the tail of the list
-        Node curr = tail;
-
-// Continue until the current node is
-        // null (end of the list)
-        while (curr != null) {
-
-            // Output data of the current node
-            System.out.print(curr.data + " ");
-
-// Move to the previous node
-            curr = curr.prev;
-}
-
-        // Print newline after traversal
-        System.out.println();
-}
-
-    public static void main(String[] args) {
-
-        // Sample usage of the doubly linked
-        // list and traversal functions
-        Node head = new Node(1);
-        Node second = new Node(2);
-        Node third = new Node(3);
-
-        head.next = second;
-second.prev = head;
-second.next = third;
-        third.prev = second;
-
-        System.out.println("Forward Traversal:");
-        forwardTraversal(head);
-
-        System.out.println("Backward Traversal:");
-        backwardTraversal(third);
-}
-}
-
-````
-
-Python
-````
-# Define the Node class
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.prev = None
-        self.next = None
-
-# Function to traverse the doubly linked list
-# in forward direction
-def forward_traversal(head):
-
-    # Start traversal from the head of the list
-    curr = head
-
-    # Continue until the current node is
-    # null (end of the list)
-    while curr is not None:
-
-        # Output data of the current node
-        print(curr.data, end=" ")
-
-        # Move to the next node
-        curr = curr.next
-
-    # Print newline after traversal
-    print()
-
-# Function to traverse the doubly linked
-# list in backward direction
-def backward_traversal(tail):
-
-    # Start traversal from the tail of the list
-    curr = tail
-
-    # Continue until the current node
-    # is null (end of the list)
-    while curr is not None:
-
-        # Output data of the current node
-        print(curr.data, end=" ")
-
-        # Move to the previous node
-        curr = curr.prev
-
-    # Print newline after traversal
-    print()
-
-# Sample usage of the doubly linked list
-# and traversal functions
-if __name__ == "__main__":
-
-    # Create a doubly linked list with 3 nodes
-    head = Node(1)
-    second = Node(2)
-    third = Node(3)
-
-    head.next = second
-    second.prev = head
-    second.next = third
-    third.prev = second
-
-    print("Forward Traversal:")
-    forward_traversal(head)
-
-    print("Backward Traversal:")
-    backward_traversal(third)
-
-````
-
-C#
-````
-using System;
-
-// Define the Node class
-class Node
-{
-    public int Data; // Data stored in the node
-    public Node Next; // Pointer to the next node
-    public Node Prev; // Pointer to the previous node
-
-    // Constructor to initialize the node with data
-    public Node(int data)
-    {
-        Data = data;
-Next = null;
-        Prev = null;
-}
-}
-
-// Class to manage the doubly linked list
-class GfG
-{
-    // Function to traverse the doubly linked list
-  	//in forward direction
-    static void ForwardTraversal(Node head)
-    {
-        // Start traversal from the head of the list
-        Node curr = head;
-
-// Continue until the current node is null
-      	//(end of the list)
-        while (curr != null)
-        {
-            // Output data of the current node
-            Console.Write(curr.Data + " ");
-
-// Move to the next node
-            curr = curr.Next;
-}
-
-        // Print newline after traversal
-        Console.WriteLine();
-}
-
-    // Function to traverse the doubly linked list
-  	//in backward direction
-    static void BackwardTraversal(Node tail)
-    {
-        // Start traversal from the tail of the list
-        Node curr = tail;
-
-// Continue until the current node is null
-      	//(end of the list)
-        while (curr != null)
-        {
-            // Output data of the current node
-            Console.Write(curr.Data + " ");
-
-// Move to the previous node
-            curr = curr.Prev;
-}
-
-        // Print newline after traversal
-        Console.WriteLine();
-}
-
-    public static void Main()
-    {
-        // Sample usage of the doubly linked list
-      	//and traversal functions
-        Node head = new Node(1);
-        Node second = new Node(2);
-        Node third = new Node(3);
-
-        head.Next = second;
-second.Prev = head;
-second.Next = third;
-        third.Prev = second;
-
-        Console.WriteLine("Forward Traversal:");
-        ForwardTraversal(head);
-
-        Console.WriteLine("Backward Traversal:");
-        BackwardTraversal(third);
-}
-}
-
-````
-
-JavaScript
-````
-// Define the Node class
-class Node {
-    constructor(data) {
-        this.data = data;
-        this.prev = null;
-        this.next = null;
-}
-}
-
-// Function to traverse the doubly linked list
-// in forward direction
-function forwardTraversal(head) {
-
-    // Start traversal from the head of the list
-    let curr = head;
-
-// Continue until the current node is null
-    // (end of the list)
-    while (curr !== null) {
-
-        // Output data of the current node
-        console.log(curr.data + " ");
-
-// Move to the next node
-        curr = curr.next;
-}
-
-    // Print newline after traversal
-    console.log();
-}
-
-// Function to traverse the doubly linked list
-// in backward direction
-function backwardTraversal(tail) {
-
-    // Start traversal from the tail of the list
-    let curr = tail;
-
-// Continue until the current node is null
-    // (end of the list)
-    while (curr !== null) {
-
-        // Output data of the current node
-        console.log(curr.data + " ");
-
-// Move to the previous node
-        curr = curr.prev;
-}
-
-    // Print newline after traversal
-    console.log();
-}
-
-// Sample usage of the doubly linked list
-//and traversal functions
-// Create a doubly linked list with 3 nodes
-const head = new Node(1);
-const second = new Node(2);
-const third = new Node(3);
-
-head.next = second;
-second.prev = head;
-second.next = third;
-third.prev = second;
-
-console.log("Forward Traversal:");
-forwardTraversal(head);
-
-console.log("Backward Traversal:");
-backwardTraversal(third);
-
-````
-
-
-
-**Output**
-```
-
-Forward Traversal:
-1 2 3
-Backward Traversal:
-3 2 1
-
-```
-
-[Finding Length of Doubly Linked List](https://www.geeksforgeeks.org/program-find-size-doubly-linked-list/)
------------------------------------------------------------------------------------------------------------
-
-To find the length of doubly list, we can use the following
-steps:
-
-* Start at the head of the list.
-* Traverse through the list, counting each node visited.
-* Return the total count of nodes as the length of the list.
-
-Below are the implementation of the above approach:
-
-C++
-````
-#include <iostream>
-
-using namespace std;
-
-// Node structure for doubly linked list
-struct Node {
-    int data;
-    Node * prev;
-    Node * next;
-
-    Node(int val) {
-        data = val;
-        prev = next = nullptr;
-}
-};
-
-// Function to find the length of a doubly
-//linked list
-int findLength(Node * head) {
-    int count = 0;
-for (Node * cur = head; cur != nullptr; cur = cur -> next)
-        count++;
-return count;
-}
-
-int main() {
-
-    // Create a DLL with 3 nodes
-    Node * head = new Node(1);
-    Node * second = new Node(2);
-    Node * third = new Node(3);
-    head -> next = second;
-second -> prev = head;
-second -> next = third;
-    third -> prev = second;
-
-    cout << "Length of the doubly linked list: " <<
-        findLength(head) << endl;
-
-return 0;
-}
-
-````
-
-C
-````
-#include <stdio.h>
-#include <stdlib.h>
-
-// Node structure for doubly linked list
-struct Node {
-    int data; // Data stored in the node
-    struct Node* prev; // Pointer to the previous node
-    struct Node* next; // Pointer to the next node
-};
-
-// Constructor function to create a new node
-struct Node* createNode(int val) {
-    struct Node* newNode =
-         (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = val;
-    newNode->prev = NULL;
-    newNode->next = NULL;
-return newNode;
-}
-
-// Function to find the length of a doubly linked list
-int findLength(struct Node* head) {
-    int count = 0;
-for (struct Node* cur = head; cur != NULL; cur = cur->next)
-        count++;
-return count;
-}
-
-int main() {
-    // Create a DLL with 3 nodes
-    struct Node* head = createNode(1);
-    struct Node* second = createNode(2);
-    struct Node* third = createNode(3);
-
-    head->next = second;
-second->prev = head;
-second->next = third;
-    third->prev = second;
-
-    printf("Length of the doubly linked list: %d\\n",
-           findLength(head));
-
-return 0;
-}
-
-````
-
-Java
-````
-class Node {
-    int data;
-    Node prev;
-    Node next;
-
-// Constructor
-    public Node(int val) {
-        data = val;
-        prev = null;
-next = null;
-}
-}
-
-class GfG {
-
-    // Function to find the length of
-    // a doubly linked list
-    static int FindLength(Node head) {
-        int count = 0;
-for (Node cur = head; cur != null; cur = cur.next)
-            count++;
-return count;
-}
-
-    // Driver code
-    public static void main(String[] args) {
-
-        // Create a doubly linked list
-        // with 3 nodes
-        Node head = new Node(1);
-        Node second = new Node(2);
-        Node third = new Node(3);
-
-        head.next = second;
-second.prev = head;
-second.next = third;
-        third.prev = second;
-
-        System.out.println("Length of doubly linked list: "
-                           + FindLength(head));
-}
-}
-
-````
-
-Python
-````
-class Node:
-    def __init__(self, val):
-        self.data = val
-        self.prev = None
-        self.next = None
-
-# Function to find the length of
-# a doubly linked list
-def find_length(head):
-    count = 0
-    cur = head
-    while cur is not None:
-        count += 1
-        cur = cur.next
-    return count
-
-# Driver code
-if __name__ == "__main__":
-
-    # Create a doubly linked list
-    # with 3 nodes
-    head = Node(1)
-    second = Node(2)
-    third = Node(3)
-
-    head.next = second
-    second.prev = head
-    second.next = third
-    third.prev = second
-
-    print("Length of the doubly linked list: " +
-          str(find_length(head)))
-
-````
-
-C#
-````
-using System;
-
-class Node {
-    public int data;
-public Node prev;
-public Node next;
-
-// Constructor
-    public Node(int val) {
-        data = val;
-        prev = null;
-next = null;
-}
-}
-
-public class GfG {
-
-    // Function to find the length of
-    // a doubly linked list
-    static int FindLength(Node head) {
-        int count = 0;
-for (Node cur = head; cur != null; cur = cur.next)
-            count++;
-return count;
-}
-
-    // Driver code
-    public static void Main(string[] args) {
-
-        // Create a doubly linked list
-        // with 3 nodes
-        Node head = new Node(1);
-        Node second = new Node(2);
-        Node third = new Node(3);
-
-        head.next = second;
-second.prev = head;
-second.next = third;
-        third.prev = second;
-
-        Console.WriteLine("Length of doubly linked list: "
-                                 + FindLength(head));
-}
-}
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(val) {
-        this.data = val;
-        this.prev = null;
-        this.next = null;
-}
-}
-
-// Function to find the length of
-// a doubly linked list
-function findLength(head) {
-    let count = 0;
-    let cur = head;
-    while (cur !== null) {
-        count++;
-        cur = cur.next;
-}
-    return count;
-}
-
-// Create a doubly linked list with 3 nodes
-const head = new Node(1);
-const second = new Node(2);
-const third = new Node(3);
-
-head.next = second;
-second.prev = head;
-second.next = third;
-third.prev = second;
-
-console.log("Length of the doubly linked list: " +
-            findLength(head));
-
-````
-
-
-
-
-
-**Output**
-```
-
-Length of the doubly linked list: 3
-
-```
-
-[Insertion at the Beginning in Doubly Linked List](https://www.geeksforgeeks.org/insert-a-node-at-frontbeginning-of-doubly-linked-list/)
-----------------------------------------------------------------------------------------------------------------------------------------
-
-![Insertion-at-the-Beginning-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809123903/Insertion-at-the-Beginning-in-Doubly-Linked-List.webp)
-
-Insertion at the Beginning in Doubly Linked List
-
-
-To insert a new node at the beginning of the doubly list, we can use
-the following steps:
-
-* Create a new node, say ****new\\_node****with the given data and set its previous pointer to null, ****new\\_node->prev =**** ****NULL****.
-* Set the next pointer of new\\_node to current head, ****new\\_node->next = head.****
-* If the linked list is not empty, update the previous pointer of the
-                                                                                                                                                                                                                current head to new\\_node, ****head->prev = new\\_node****.
-                                                                                                                                                                                                                * Return new\\_node as the head of the updated linked list.
-
-                                                                                                                                                                                                                Below are the implementation of the above approach:
-
-                                                                                                                                                                                                                C++
-                                                                                                                                                                                                                ````
-                                                                                                                                                                                                                // C++ Program to insert a new node at the
-                                   // beginning of doubly linked list
-
-                                   #include <iostream>
-                                   using namespace std;
-
-// Node structure for the doubly linked list
-struct Node {
-    int data;
-    Node* prev;
-    Node* next;
-
-    Node(int d) {
-      data = d;
-      prev = next = NULL;
-}
-};
-
-// Insert a node at the beginning
-Node* insertBegin(Node* head, int data) {
-
-    // Create a new node
-    Node* new_node = new Node(data);
-
-// Make next of it as head
-    new_node->next = head;
-
-// Set previous of head as new node
-    if (head != NULL) {
-        head->prev = new_node;
-}
-
-    // Return new node as new head
-    return new_node;
-}
-
-void printList(Node* head) {
-    Node* curr = head;
-    while (curr != NULL) {
-        cout << curr->data << " ";
-        curr = curr->next;
-}
-  	cout << "\\n";
-}
-
-int main() {
-
-    // Create a hardcoded linked list:
-  	// 2 <-> 3 <-> 4
-    Node* head = new Node(2);
-    Node* temp1 = new Node(3);
-    Node* temp2 = new Node(4);
-    head->next = temp1;
-    temp1->prev = head;
-    temp1->next = temp2;
-    temp2->prev = temp1;
-
-// Print the original list
-    cout << "Original Linked List: ";
-    printList(head);
-
-// Insert a new node at the front of the list
-    head = insertBegin(head, 1);
-
-// Print the updated list
-  	cout << "After inserting Node 1 at the front: ";
-    printList(head);
-
-return 0;
-}
-
-````
-
-C
-````
-// C Program to insert a node at the beginning
-//of doubly linked list
-
-
-#include <stdio.h>
-
-// Node structure for the doubly linked list
-struct Node {
-    int data;
-    struct Node* prev;
-    struct Node* next;
-};
-
-// Create a new node
-struct Node* createNode(int data) {
-    struct Node* new_node =
-      (struct Node*)malloc(sizeof(struct Node));
-    new_node->data = data;
-    new_node->prev = NULL;
-    new_node->next = NULL;
-return new_node;
-}
-
-// Insert a node at the beginning
-struct Node* insertBegin(struct Node* head, int data) {
-
-    // Create a new node
-    struct Node* new_node = createNode(data);
-
-// Make next of it as head
-    new_node->next = head;
-
-// Set previous of head as new node
-    if (head != NULL) {
-        head->prev = new_node;
-}
-
-    // Return new node as new head
-    return new_node;
-}
-
-// Print the doubly linked list
-void printList(struct Node* head) {
-    struct Node* curr = head;
-    while (curr != NULL) {
-        printf("%d ", curr->data);
-        curr = curr->next;
-}
-  	printf("\\n");
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 2 <-> 3 <-> 4
-    struct Node *head = createNode(2);
-    head->next = createNode(3);
-    head->next->prev = head;
-    head->next->next = createNode(4);
-    head->next->next->prev = head->next;
-
-// Print the original list
-    printf("Original Linked List: ");
-    printList(head);
-
-// Insert a new node at the front of the list
-    head = insertBegin(head, 1);
-
-// Print the updated list
-  	printf("After inserting Node 1 at the front: ");
-    printList(head);
-
-return 0;
-}
-
-````
-
-Java
-````
-// Java Program to insert a node at the beginning of a
-// doubly linked list
-
-class Node {
-    int data;
-    Node prev, next;
-
-// Node structure for the doubly linked list
-    Node(int d) {
-        data = d;
-        prev = null;
-next = null;
-}
-}
-
-class GfG {
-
-    // Insert a node at the beginning
-    static Node insertBegin(Node head, int data) {
-
-        // Create a new node
-        Node new_node = new Node(data);
-
-// Make next of it as head
-        new_node.next = head;
-
-// Set previous of head as new node
-        if (head != null) {
-            head.prev = new_node;
-}
-
-        // Return new node as new head
-        return new_node;
-}
-
-    // Print the doubly linked list
-    static void printList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            System.out.print(curr.data + " ");
-            curr = curr.next;
-}
-      	System.out.println();
-}
-
-    public static void main(String[] args) {
-
-        // Create a hardcoded doubly linked list:
-        // 2 <-> 3 <-> 4
-        Node head = new Node(2);
-        head.next = new Node(3);
-        head.next.prev = head;
-        head.next.next = new Node(4);
-        head.next.next.prev = head.next;
-
-// Print the original list
-        System.out.print("Original Linked List: ");
-        printList(head);
-
-// Insert a new node at the front of the list
-        head = insertBegin(head, 1);
-
-// Print the updated list
-      	System.out.print(
-            "After inserting Node 1 at the front: ");
-        printList(head);
-}
-}
-
-````
-
-Python
-````
-# Python Program to insert a node at the beginning
-#of doubly linked list
-
-# Node structure for the doubly linked list
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.prev = None
-        self.next = None
-
-# Insert a node at the beginning
-def insertBegin(head, data):
-
-    # Create a new node
-    new_node = Node(data)
-
-    # Make next of it as head
-    new_node.next = head
-
-    # Set previous of head as new node
-    if head is not None:
-        head.prev = new_node
-
-    # Return new node as new head
-    return new_node
-
-# Print the doubly linked list
-def printList(head):
-    curr = head
-    while curr is not None:
-        print(curr.data, end=" ")
-        curr = curr.next
-    print()
-
-if __name__ == "__main__":
-
-    # Create a hardcoded doubly linked list:
-    # 2 <-> 3 <-> 4
-    head = Node(2)
-    head.next = Node(3)
-    head.next.prev = head
-    head.next.next = Node(4)
-    head.next.next.prev = head.next
-
-    # Print the original list
-    print("Original Linked List:", end=\' \')
-    printList(head)
-
-    # Insert a new node at the front of the list
-    head = insertBegin(head, 1)
-
-    # Print the updated list
-    print("After inserting Node 1 at the front:", end=\' \')
-    printList(head)
-
-````
-
-C#
-````
-// C# Program to insert a node at the beginning of a
-// doubly linked list
-
-using System;
-
-// Node structure for the doubly linked list
-class Node {
-    public int data;
-public Node prev, next;
-
-// Constructor for creating a new node
-    public Node(int d) {
-        data = d;
-        prev = null;
-next = null;
-}
-}
-
-class GfG {
-
-    // Insert a node at the beginning
-    public static
-    Node insertBegin(Node head, int data) {
-
-        // Create a new node
-        Node new_node = new Node(data);
-
-// Make next of it as head
-        new_node.next = head;
-
-// Set previous of head as new node
-        if (head != null) {
-            head.prev = new_node;
-}
-
-        // Return new node as new head
-        return new_node;
-}
-
-    // Print the doubly linked list
-    public static void printList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            Console.Write(curr.data + " ");
-            curr = curr.next;
-}
-      	Console.WriteLine();
-}
-
-    public static void Main(string[] args) {
-
-        // Create a hardcoded doubly linked list:
-        // 2 <-> 3 <-> 4
-        Node head = new Node(2);
-        head.next = new Node(3);
-        head.next.prev = head;
-        head.next.next = new Node(4);
-        head.next.next.prev = head.next;
-
-// Print the original list
-        Console.Write("Original Linked List: ");
-        printList(head);
-
-// Insert a new node at the front of the list
-        head = insertBegin(head, 1);
-
-// Print the updated list
-      	Console.Write
-        ("After inserting Node 1 at the front: ");
-        printList(head);
-}
-}
-
-````
-
-JavaScript
-````
-// JavaScript Program to insert a node at the
-//beginning of doubly linked list
-
-// Node structure for the doubly linked list
-function Node(data) {
-    this.data = data;
-    this.prev = null;
-    this.next = null;
-}
-
-// Insert a node at the beginning
-function insertBegin(head, data) {
-
-    // Create a new node
-    const new_node = new Node(data);
-
-// Make next of it as head
-    new_node.next = head;
-
-// Set previous of head as new node
-    if (head !== null) {
-        head.prev = new_node;
-}
-
-    // Return new node as new head
-    return new_node;
-}
-
-// Print the doubly linked list
-function printList(head) {
-    let curr = head;
-    while (curr !== null) {
-        console.log(curr.data);
-        curr = curr.next;
-}
-}
-
-// Create a hardcoded doubly linked list:
-// 2 <-> 3 <-> 4
-let head = new Node(2);
-head.next = new Node(3);
-head.next.prev = head;
-head.next.next = new Node(4);
-head.next.next.prev = head.next;
-
-// Print the original list
-console.log("Original Linked List:");
-printList(head);
-
-// Insert a new node at the front of the list
-console.log
-("After inserting Node 1 at the front:");
-let data = 1;
-head = insertBegin(head, data);
-
-// Print the updated list
-printList(head);
-
-````
-
-
-
-
-
-
-
-
-**Output**
-```
-
-Original Linked List: 2 3 4
-After inserting Node 1 at the front: 1 2 3 4
-
-```
-
-[Insertion at the End of Doubly Linked List](https://www.geeksforgeeks.org/insert-a-node-at-the-end-of-doubly-linked-list/)
----------------------------------------------------------------------------------------------------------------------------
-
-![Insertion-at-the-End-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809123955/Insertion-at-the-End-in-Doubly-Linked-List.webp)
-
-Insertion at the End in the Doubly Linked List
-
-
-To insert a new node at the end of the doubly linked list, we can use
-the following steps:
-
-* Allocate memory for a new node and assign the provided value to its
-  data field.
-* Initialize the next pointer of the new node to nullptr.
-* If the list is empty:
-  + Set the previous pointer of the new node to nullptr.
-  + Update the head pointer to point to the new node.
-                                                                                          * If the list is not empty:
-                                                                                          + Traverse the list starting from the head to reach the last
-                                                                                          node.
-                                                                                          + Set the next pointer of the last node to point to the new
-                                                                                          node.
-                                                                                          + Set the previous pointer of the new node to point to the last
-                                                                                          node.
-
-                                                                                          Below are the implementation of the above approach:
-
-                                                                                          C++
-                                                                                          ````
-                                                                                          // C++ Program to insert a node at the end of
-//doubly linked list
-
-#include <bits/stdc++.h>
-using namespace std;
-
-struct Node {
-    int data;
-    Node *next, *prev;
-
-    Node(int new_data) {
-        data = new_data;
-next = prev = nullptr;
-}
-};
-
-// Function to insert a new node at the end of
-//doubly linked list
-Node *insertEnd(Node *head, int new_data) {
-
-    // Create a new node
-    Node *new_node = new Node(new_data);
-
-// If the linked list is empty, set the new
-  	//node as the head of linked list
-    if (head == NULL) {
-        head = new_node;
-}
-    else {
-          Node *curr = head;
-        while (curr->next != NULL) {
-            curr = curr->next;
-}
-
-        // Set the next of last node to new node
-        curr->next = new_node;
-
-// Set prev of new node to last node
-        new_node->prev = curr;
-}
-
-    // Return the head of the doubly linked list
-    return head;
-}
-
-void printList(Node *head) {
-    Node *curr = head;
-    while (curr != NULL) {
-        cout << curr->data << " ";
-        curr = curr->next;
-}
-    cout << endl;
-}
-
-int main() {
-
-    // Create a harcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    Node *head = new Node(1);
-    head->next = new Node(2);
-    head->next->prev = head;
-    head->next->next = new Node(3);
-    head->next->next->prev = head->next;
-
-// Print the original list
-    cout << "Original Linked List: ";
-    printList(head);
-
-// Insert a new node with data 4 at the end
-    cout << "Inserting Node with data 4 at the end: ";
-int data = 4;
-    head = insertEnd(head, data);
-
-// Print the updated list
-    printList(head);
-
-return 0;
-}
-
-````
-
-C
-````
-// C Program to insert a node at the end of
-//doubly linked list
-
-#include <stdio.h>
-
-struct Node {
-    int data;
-    struct Node *next;
-    struct Node *prev;
-};
-
-// Function to create a new node with the given data
-struct Node *createNode(int new_data) {
-    struct Node *new_node =
-    (struct Node *)malloc(sizeof(struct Node));
-    new_node->data = new_data;
-    new_node->next = NULL;
-return new_node;
-}
-
-// Function to insert a new node at the end of the
-//doubly linked list
-struct Node* insertEnd(struct Node *head, int new_data) {
-    struct Node *new_node = createNode(new_data);
-
-// If the linked list is empty, set the
- 	//new node as the head
-    if (head == NULL) {
-        head = new_node;
-} else {
-        struct Node *curr = head;
-        while (curr->next != NULL) {
-            curr = curr->next;
-}
-
-        // Set the next of last node to new node
-        curr->next = new_node;
-// Set prev of new node to last node
-        new_node->prev = curr;
-}
-
-    return head;
-}
-
-void printList(struct Node *head) {
-    struct Node *curr = head;
-    while (curr != NULL) {
-        printf("%d ", curr->data);
-        curr = curr->next;
-}
-    printf("\\n");
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    struct Node *head = createNode(1);
-    head->next = createNode(2);
-    head->next->prev = head;
-    head->next->next = createNode(3);
-    head->next->next->prev = head->next;
-
-// Print the original list
-    printf("Original Linked List: ");
-    printList(head);
-
-// Insert a new node with data 4 at the end
-    printf("Inserting Node with data 4 at the end: ");
-    head = insertEnd(head, 4);
-
-// Print the updated list
-    printList(head);
-
-return 0;
-}
-
-````
-
-Java
-````
-// Java Program to insert a node at the end of
-// doubly linked list
-
-class Node {
-    int data;
-    Node next, prev;
-
-    Node(int newData) {
-        data = newData;
-next = prev = null;
-}
-}
-
-class GFG {
-
-    // Function to insert a new node at the end of the
-    // doubly linked list
-    public static Node insertEnd(Node head, int newData) {
-
-        // Create a new node
-        Node newNode = new Node(newData);
-
-// If the linked list is empty, set the new node as
-        // the head
-        if (head == null) {
-            head = newNode;
-}
-        else {
-            Node curr = head;
-            while (curr.next != null) {
-                curr = curr.next;
-}
-
-            // Set the next of last node to the new node
-            curr.next = newNode;
-
-// Set the prev of new node to the last node
-            newNode.prev = curr;
-}
-
-        return head;
-}
-
-    // Function to print the doubly linked list
-    public static void printList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            System.out.print(curr.data + " ");
-            curr = curr.next;
-}
-        System.out.println();
-}
-
-    public static void main(String[] args) {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.next = new Node(2);
-        head.next.prev = head;
-        head.next.next = new Node(3);
-        head.next.next.prev = head.next;
-
-// Print the original list
-        System.out.println("Original Linked List: ");
-        printList(head);
-
-// Insert a new node with data 4 at the end
-        System.out.println(
-            "Inserting Node with data 4 at the end: ");
-int data = 4;
-        head = insertEnd(head, data);
-
-// Print the updated list
-        printList(head);
-}
-}
-
-````
-
-Python
-````
-# Python Program to insert a node at the end of
-#doubly linked list
-
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-        self.prev = None
-
-# Function to insert a new node at the end of the
-#doubly linked list
-def insert_end(head, new_data):
-
-    # Create a new node
-    new_node = Node(new_data)
-
-    # If the linked list is empty, set the new node
-    #as the head
-    if head is None:
-        head = new_node
-    else:
-        curr = head
-        while curr.next is not None:
-            curr = curr.next
-
-        # Set the next of the last node to the new node
-        curr.next = new_node
-
-        # Set the prev of the new node to the last node
-        new_node.prev = curr
-
-    return head
-
-def print_list(head):
-    curr = head
-    while curr is not None:
-        print(curr.data, end=" ")
-        curr = curr.next
-    print()
-
-if __name__ == "__main__":
-
-    # Create a hardcoded doubly linked list:
-    # 1 <-> 2 <-> 3
-    head = Node(1)
-    head.next = Node(2)
-    head.next.prev = head
-    head.next.next = Node(3)
-    head.next.next.prev = head.next
-
-    # Print the original list
-    print("Original Linked List: ", end="")
-    print_list(head)
-
-    # Insert a new node with data 4 at the end
-    print("Inserting Node with data 4 at the end: ", end="")
-    data = 4
-    head = insert_end(head, data)
-
-    # Print the updated list
-    print_list(head)
-
-````
-
-C#
-````
-// C# Program to insert a node at the end of
-//doubly linked list
-
-using System;
-
-class Node {
-    public int Data;
-public Node Next;
-public Node Prev;
-
-public Node(int data) {
-        Data = data;
-Next = null;
-        Prev = null;
-}
-}
-
-class GFG {
-
-    // Function to insert a new node at the end
-  	//of the doubly linked list
-    public static Node InsertEnd(Node head, int newData) {
-
-          // Create a new node
-        Node newNode = new Node(newData);
-
-// If the linked list is empty, set the
-      	//new node as the head
-        if (head == null) {
-            head = newNode;
-}
-        else {
-            Node curr = head;
-            while (curr.Next != null) {
-                curr = curr.Next;
-}
-
-            // Set the next of the last node to
-          	//the new node
-            curr.Next = newNode;
-
-// Set the prev of the new node to
-          	//the last node
-            newNode.Prev = curr;
-}
-
-        return head;
-}
-
-    // Function to print the doubly linked list
-    public static void PrintList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            Console.Write(curr.Data + " ");
-            curr = curr.Next;
-}
-        Console.WriteLine();
-}
-
-    static void Main() {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.Next = new Node(2);
-        head.Next.Prev = head;
-        head.Next.Next = new Node(3);
-        head.Next.Next.Prev = head.Next;
-
-// Print the original list
-        Console.Write("Original Linked List: ");
-        PrintList(head);
-
-// Insert a new node with data 4 at the end
-        Console.Write("Inserting Node with data 4 at the end: ");
-int data = 4;
-        head = InsertEnd(head, data);
-
-// Print the updated list
-        PrintList(head);
-}
-}
-
-````
-
-JavaScript
-````
-// Javascript Program to insert a node at the end of
-//doublylinked list
-
-class Node {
-    constructor(data)
-    {
-        this.data = data;
-        this.next = null;
-        this.prev = null;
-}
-}
-
-function insertEnd(head, newData) {
-
-    // Create a new node
-    const newNode = new Node(newData);
-
-// If the linked list is empty, set the
-    //new node as the head
-    if (head === null) {
-        head = newNode;
-}
-    else {
-        let curr = head;
-        while (curr.next !== null) {
-            curr = curr.next;
-}
-
-        // Set the next of the last node to the
-        //new node
-        curr.next = newNode;
-
-// Set the prev of the new node to the
-        //last node
-        newNode.prev = curr;
-}
-
-    return head;
-}
-
-function printList(head)
-{
-    let curr = head;
-    let result = "";
-    while (curr !== null) {
-        result += curr.data + " ";
-        curr = curr.next;
-}
-    console.log(result.trim());
-}
-
-// Create a hardcoded doubly linked list:
-// 1 <-> 2 <-> 3
-let head = new Node(1);
-head.next = new Node(2);
-head.next.prev = head;
-head.next.next = new Node(3);
-head.next.next.prev = head.next;
-
-// Print the original list
-console.log("Original Linked List: ");
-printList(head);
-
-// Insert a new node with data 4 at the end
-console.log("Inserting Node with data 4 at the end: ");
-const data = 4;
-head = insertEnd(head, data);
-
-// Print the updated list
-printList(head);
-
-````
-
-
-
-
-**Output**
-```
-
-Original Linked List: 1 2 3
-Inserting Node with data 4 at the end: 1 2 3 4
-
-```
-
-[Insertion at a Specific Position in Doubly Linked List](https://www.geeksforgeeks.org/insert-a-node-at-a-specific-position-in-doubly-linked-list/)
----------------------------------------------------------------------------------------------------------------------------------------------------
-
-To insert a node at a specific Position in doubly linked list, we can
-use the following steps:
-
-![Insertion-at-a-Specific-Position-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124039/Insertion-at-a-Specific-Position-in-Doubly-Linked-List.webp)
-
-
-Insertion at a Specific Position in Doubly Linked List
-
-
-
-To insert a new node at a specific position,
-
-* If position = 1, create a new node and make it the head of the linked
-  list and return it.
-* Otherwise, traverse the list to reach the node at position – 1,
-  say ****curr****.
-* If the position is valid, create a new node with given data,
-  say ****new\\_node****.
-* Update the next pointer of new node to the next
-                                                                                                                                             of current node and prev pointer of new node to current
-                                                                                                                                             node, ****new\\_node->next = curr->next****and ****new\\_node->prev = curr.****
-                                                                                                                                             * Similarly, update next pointer of current node to
-                                                                                                                                                              thenew node, ****curr->next = new\\_node****.
-                                                                                                                                                              * If the new node is not the last node, update prev pointer of new
-                                                                                                                                                                                                          node’s next to the new node, ****new\\_node->next->prev = new\\_node.****
-
-                                                                                                                                                                                                          Below is the implementation of the above approach:
-
-                                                                                                                                                                                                          C++
-                                                                                                                                                                                                          ````
-                                                                                                                                                                                                          // C++ Program to insert a node at a given position
-
-                                                                                                                                                                                                      #include <bits/stdc++.h>
-                                                                                                                                                                                                      using namespace std;
-
-struct Node {
-    int data;
-    Node *next, *prev;
-
-    Node(int new_data) {
-        data = new_data;
-next = prev = nullptr;
-}
-};
-
-// Function to insert a new node at a given position
-Node *insertAtPosition(Node *head, int pos, int new_data) {
-
-    // Create a new node
-    Node *new_node = new Node(new_data);
-
-// Insertion at the beginning
-    if (pos == 1) {
-        new_node->next = head;
-
-// If the linked list is not empty, set the prev
-      	//of head to new node
-        if (head != NULL)
-            head->prev = new_node;
-
-// Set the new node as the head of linked list
-        head = new_node;
-return head;
-}
-
-    Node *curr = head;
-// Traverse the list to find the node before the
-    // insertion point
-    for (int i = 1; i < pos - 1 && curr != NULL; ++i) {
-        curr = curr->next;
-}
-
-    // If the position is out of bounds
-    if (curr == NULL) {
-        cout << "Position is out of bounds." << endl;
-        delete new_node;
-return head;
-}
-
-    // Set the prev of new node to curr
-    new_node->prev = curr;
-
-// Set the new of new node to next of curr
-    new_node->next = curr->next;
-
-// Update the next of current node to new node
-       curr->next = new_node;
-
-// If the new node is not the last node, update prev
-                                             //of next node to new node
-                                             if (new_node->next != NULL)
-                                             new_node->next->prev = new_node;
-
-// Return the head of the doubly linked list
-    return head;
-}
-
-void printList(Node *head) {
-    Node *curr = head;
-    while (curr != NULL) {
-        cout << curr->data << " ";
-        curr = curr->next;
-}
-    cout << endl;
-}
-
-int main() {
-
-    // Create a harcoded doubly linked list:
-    // 1 <-> 2 <-> 4
-    Node *head = new Node(1);
-    head->next = new Node(2);
-    head->next->prev = head;
-    head->next->next = new Node(4);
-    head->next->next->prev = head->next;
-
-// Print the original list
-    cout << "Original Linked List: ";
-    printList(head);
-
-// Insert new node with data 3 at position 3
-    cout << "Inserting Node with data 3 at position 3: ";
-int data = 3;
-int pos = 3;
-    head = insertAtPosition(head, pos, data);
-
-// Print the updated list
-    printList(head);
-
-return 0;
-}
-
-````
-
-C
-````
-// C Program to insert a node at a given position
-
-#include <stdio.h>
-
-struct Node {
-    int data;
-    struct Node * next;
-    struct Node * prev;
-};
-
-// Function to create a new node with the given data
-struct Node * createNode(int new_data) {
-    struct Node * new_node =
-        (struct Node * ) malloc(sizeof(struct Node));
-    new_node -> data = new_data;
-    new_node -> next = NULL;
-return new_node;
-}
-
-// Function to insert a new node at a given position
-struct Node * insertAtPosition(struct Node * head, int pos, int new_data) {
-    // Create a new node
-    struct Node * new_node = createNode(new_data);
-
-// Insertion at the beginning
-    if (pos == 1) {
-        new_node -> next = head;
-
-// If the linked list is not empty, set the
-      //prev of head to new node
-        if (head != NULL) {
-            head -> prev = new_node;
-}
-
-        // Set the new node as the head of linked list
-        head = new_node;
-return head;
-}
-
-    struct Node * curr = head;
-
-// Traverse the list to find the node before the insertion point
-    for (int i = 1; i < pos - 1 && curr != NULL; ++i) {
-        curr = curr -> next;
-}
-
-    // If the position is out of bounds
-    if (curr == NULL) {
-        printf("Position is out of bounds.\\n");
-        free(new_node);
-return head;
-}
-
-    // Set the prev of new node to curr
-    new_node -> prev = curr;
-
-// Set the next of new node to next of curr
-    new_node -> next = curr -> next;
-
-// Update the next of current node to new node
-       curr -> next = new_node;
-
-// If the new node is not the last node, update
-                                             //the prev of next node to new node
-                                             if (new_node -> next != NULL) {
-                                             new_node -> next -> prev = new_node;
-}
-
-    // Return the head of the doubly linked list
-    return head;
-}
-
-// Function to print the linked list
-void printList(struct Node * head) {
-    struct Node * curr = head;
-    while (curr != NULL) {
-        printf("%d ", curr -> data);
-        curr = curr -> next;
-}
-    printf("\\n");
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 4
-    struct Node * head = createNode(1);
-    head -> next = createNode(2);
-    head -> next -> prev = head;
-    head -> next -> next = createNode(4);
-    head -> next -> next -> prev = head -> next;
-
-// Print the original list
-    printf("Original Linked List: ");
-    printList(head);
-
-// Insert new node with data 3 at position 3
-    printf("Inserting Node with data 3 at position 3: ");
-int data = 3;
-int pos = 3;
-    head = insertAtPosition(head, pos, data);
-
-// Print the updated list
-    printList(head);
-
-return 0;
-}
-
-````
-
-Java
-````
-// Java Program to insert a node at a given position
-
-class Node {
-    int data;
-    Node next;
-    Node prev;
-
-    Node(int new_data) {
-        data = new_data;
-next = prev = null;
-}
-}
-
-class GFG {
-
-    // Function to insert a new node at a given position
-    public static Node insertAtPosition(Node head, int pos, int new_data) {
-        // Create a new node
-        Node new_node = new Node(new_data);
-
-// Insertion at the beginning
-        if (pos == 1) {
-            new_node.next = head;
-
-// If the linked list is not empty, set
-          	//the prev of head to new node
-            if (head != null) {
-                head.prev = new_node;
-}
-
-            // Set the new node as the head of linked list
-            head = new_node;
-return head;
-}
-
-        Node curr = head;
-
-// Traverse the list to find the node before
-      	//the insertion point
-        for (int i = 1; i < pos - 1 && curr != null; ++i) {
-            curr = curr.next;
-}
-
-        // If the position is out of bounds
-        if (curr == null) {
-            System.out.println("Position is out of bounds.");
-return head;
-}
-
-        // Set the prev of new node to curr
-        new_node.prev = curr;
-
-// Set the next of new node to next of curr
-        new_node.next = curr.next;
-
-// Update the next of current node to new node
-       curr.next = new_node;
-
-// If the new node is not the last node, update
-                                             //prev of next node to new node
-                                             if (new_node.next != null) {
-                                             new_node.next.prev = new_node;
-}
-
-        // Return the head of the doubly linked list
-        return head;
-}
-
-    // Function to print the linked list
-    public static void printList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            System.out.print(curr.data + " ");
-            curr = curr.next;
-}
-        System.out.println();
-}
-
-    public static void main(String[] args) {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 4
-        Node head = new Node(1);
-        head.next = new Node(2);
-        head.next.prev = head;
-        head.next.next = new Node(4);
-        head.next.next.prev = head.next;
-
-// Print the original list
-        System.out.print("Original Linked List: ");
-        printList(head);
-
-// Insert new node with data 3 at position 3
-        System.out.print("Inserting Node with data 3 at position 3: ");
-int data = 3;
-int pos = 3;
-        head = insertAtPosition(head, pos, data);
-
-// Print the updated list
-        printList(head);
-}
-}
-
-````
-
-Python
-````
-# Python Program to insert a node at a given position
-
-class Node:
-    def __init__(self, new_data):
-        self.data = new_data
-        self.next = None
-        self.prev = None
-
-def insert_at_position(head, pos, new_data):
-
-    # Create a new node
-    new_node = Node(new_data)
-
-    # Insertion at the beginning
-    if pos == 1:
-        new_node.next = head
-
-        # If the linked list is not empty, set the
-        #prev of head to new node
-        if head is not None:
-            head.prev = new_node
-
-        # Set the new node as the head of the linked list
-        head = new_node
-        return head
-
-    curr = head
-
-    # Traverse the list to find the node before the
-    #insertion point
-    for _ in range(1, pos - 1):
-        if curr is None:
-            print("Position is out of bounds.")
-            return head
-        curr = curr.next
-
-    # If the position is out of bounds
-    if curr is None:
-        print("Position is out of bounds.")
-        return head
-
-    # Set the prev of new node to curr
-    new_node.prev = curr
-
-    # Set the next of new node to next of curr
-    new_node.next = curr.next
-
-    # Update the next of current node to new node
-                       curr.next = new_node
-
-                       # If the new node is not the last node, update
-                                                                   #prev of next node to new node
-                                                                   if new_node.next is not None:
-                                                                   new_node.next.prev = new_node
-
-                                                                   return head
-
-                                                                   def print_list(head):
-                                                                   curr = head
-                                                                   while curr is not None:
-                                                                   print(curr.data, end=" ")
-                                                                   curr = curr.next
-                                                                   print()
-
-                                                                   if __name__ == "__main__":
-
-                                                                   # Create a hardcoded doubly linked list:
-    # 1 <-> 2 <-> 4
-    head = Node(1)
-    head.next = Node(2)
-    head.next.prev = head
-    head.next.next = Node(4)
-    head.next.next.prev = head.next
-
-    # Print the original list
-    print("Original Linked List: ", end="")
-    print_list(head)
-
-    # Insert new node with data 3 at position 3
-    print("Inserting Node with data 3 at position 3: ", end="")
-    data = 3
-    pos = 3
-    head = insert_at_position(head, pos, data)
-
-    # Print the updated list
-    print_list(head)
-
-````
-
-C#
-````
-// C# Program to insert a node at a given position
-
-using System;
-
-class Node {
-    public int Data;
-public Node Next;
-public Node Prev;
-
-public Node(int data) {
-        Data = data;
-Next = null;
-        Prev = null;
-}
-}
-
-class GFG {
-
-    // Function to insert a new node at a given position
-    static Node InsertAtPosition(Node head, int pos, int newData) {
-
-        // Create a new node
-        Node newNode = new Node(newData);
-
-// Insertion at the beginning
-        if (pos == 1) {
-            newNode.Next = head;
-            if (head != null)
-                head.Prev = newNode;
-            head = newNode;
-return head;
-}
-
-        Node curr = head;
-
-// Traverse the list to find the node
-      	 //before the insertion point
-        for (int i = 1; i < pos - 1 && curr != null; ++i) {
-            curr = curr.Next;
-}
-
-        // If the position is out of bounds
-        if (curr == null) {
-            Console.WriteLine("Position is out of bounds.");
-return head;
-}
-
-        // Set the prev of new node to curr
-        newNode.Prev = curr;
-
-// Set the next of new node to the next of curr
-        newNode.Next = curr.Next;
-
-// Update the next of current node to new node
-       curr.Next = newNode;
-
-// If the new node is not the last node, update
-                                             //prev of next node to new node
-                                             if (newNode.Next != null)
-                                             newNode.Next.Prev = newNode;
-
-return head;
-}
-
-    // Function to print the list
-    static void PrintList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            Console.Write(curr.Data + " ");
-            curr = curr.Next;
-}
-        Console.WriteLine();
-}
-
-    static void Main() {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 4
-        Node head = new Node(1);
-        head.Next = new Node(2);
-        head.Next.Prev = head;
-        head.Next.Next = new Node(4);
-        head.Next.Next.Prev = head.Next;
-
-// Print the original list
-        Console.WriteLine("Original Linked List: ");
-        PrintList(head);
-
-// Insert new node with data 3 at position 3
-        Console.WriteLine("Inserting Node with data 3 at position 3: ");
-        head = InsertAtPosition(head, 3, 3);
-
-// Print the updated list
-        PrintList(head);
-}
-}
-
-````
-
-JavaScript
-````
-// Javascript Program to insert a node at a given position
-
-class Node {
-    constructor(data) {
-        this.data = data;
-        this.next = null;
-        this.prev = null;
-}
-}
-
-// Function to insert a new node at a given position
-function insertAtPosition(head, pos, newData) {
-
-    // Create a new node
-    let newNode = new Node(newData);
-
-// Insertion at the beginning
-    if (pos === 1) {
-        newNode.next = head;
-        if (head !== null) {
-            head.prev = newNode;
-}
-        head = newNode;
-return head;
-}
-
-    let curr = head;
-
-// Traverse the list to find the node
-    //before the insertion point
-    for (let i = 1; i < pos - 1 && curr !== null; ++i) {
-        curr = curr.next;
-}
-
-    // If the position is out of bounds
-    if (curr === null) {
-        console.log("Position is out of bounds.");
-return head;
-}
-
-    // Set the prev of new node to curr
-    newNode.prev = curr;
-
-// Set the next of new node to the next of curr
-    newNode.next = curr.next;
-
-// Update the next of current node to new node
-       curr.next = newNode;
-
-// If the new node is not the last node,
-    // update prev of next node to new node
-           if (newNode.next !== null) {
-           newNode.next.prev = newNode;
-}
-
-    return head;
-}
-
-// Function to print the list
-function printList(head) {
-    let curr = head;
-    while (curr !== null) {
-        console.log(curr.data + " ");
-        curr = curr.next;
-}
-    console.log();
-}
-
-// Create a hardcoded doubly linked list:
-// 1 <-> 2 <-> 4
-let head = new Node(1);
-head.next = new Node(2);
-head.next.prev = head;
-head.next.next = new Node(4);
-head.next.next.prev = head.next;
-
-// Print the original list
-console.log("Original Linked List:");
-printList(head);
-
-// Insert new node with data 3 at position 3
-console.log("Inserting Node with data 3 at position 3:");
-head = insertAtPosition(head, 3, 3);
-
-// Print the updated list
-printList(head);
-
-````
-
-
-
-
-
-**Output**
-```
-
-Original Linked List: 1 2 4
-Inserting Node with data 3 at position 3: 1 2 3 4
-
-```
-
-[Deletion at the Beginning of Doubly Linked List](https://www.geeksforgeeks.org/deletion-at-beginning-removal-of-first-node-in-a-doubly-linked-list/)
------------------------------------------------------------------------------------------------------------------------------------------------------
-
-![Deletion-at-the-Beginning-of-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124112/Deletion-at-the-Beginning-of-Doubly-Linked-List.webp)
-
-Deletion at the Beginning of Doubly Linked List
-
-
-To delete a node at the beginning in doubly linked list, we can use the
-following steps:
-
-* Check if the list is empty, there is nothing to delete. Return.
-* Store the head pointer in a variable, say ****temp****.
-* Update the head of linked list to the node next to the current head, ****head = head->next****.
-                                                                        * If the new head is not NULL, update the previous pointer of new head
-                                                                                                           to NULL, ****head->prev = NULL****.
-
-                                                                                                           Below is the implementation of the above approach:
-
-                                                                                                           C++
-                                                                                                           ````
-                                                                                                           // C++ Program to delete a node from the
-// beginning of Doubly Linked List
-
-#include <bits/stdc++.h>
-using namespace std;
-
-struct Node{
-    int data;
-    Node *prev;
-    Node *next;
-    Node(int d) {
-      	data = d;
-      	prev = next = nullptr;
-}
-};
-
-// Deletes the first node (head) of the list
-// and returns the second node as new head
-Node *delHead(Node *head) {
-
-    // If empty, return
-    if (head == nullptr)
-        return nullptr;
-
-// Store in temp for deletion later
-    Node *temp = head;
-
-// Move head to the next node
-    head = head->next;
-
-// Set prev of the new head
-    if (head != nullptr)
-        head->prev = nullptr;
-
-// Free memory and return new head
-    delete temp;
-return head;
-}
-
-void printList(Node *head) {
-    for (Node *curr = head; curr != nullptr; curr = curr->next)
-        cout << curr->data << " ";
-    cout << endl;
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    struct Node *head = new Node(1);
-    head->next = new Node(2);
-    head->next->prev = head;
-    head->next->next = new Node(3);
-    head->next->next->prev = head->next;
-
-    printf("Original Linked List: ");
-    printList(head);
-
-    printf("After Deletion at the beginning: ");
-    head = delHead(head);
-
-    printList(head);
-
-return 0;
-}
-
-````
-
-C
-````
-// C Program to delete a node from the
-// beginning of Doubly Linked List
-
-#include <stdio.h>
-
-struct Node {
-    int data;
-    struct Node *prev;
-    struct Node *next;
-};
-
-// Function to create a new node
-struct Node *createNode(int data) {
-    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
-    newNode->data = data;
-    newNode->prev = NULL;
-    newNode->next = NULL;
-return newNode;
-}
-
-// Function to delete the first node (head) of the list
-// and return the second node as the new head
-struct Node *delHead(struct Node *head) {
-    // If empty, return NULL
-    if (head == NULL)
-        return NULL;
-
-// Store in temp for deletion later
-    struct Node *temp = head;
-
-// Move head to the next node
-    head = head->next;
-
-// Set prev of the new head
-    if (head != NULL)
-        head->prev = NULL;
-
-// Free memory and return new head
-    free(temp);
-return head;
-}
-
-void printList(struct Node *head) {
-    struct Node *curr = head;
-    while (curr != NULL) {
-        printf("%d ", curr->data);
-        curr = curr->next;
-}
-    printf("\\n");
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    struct Node *head = createNode(1);
-    head->next = createNode(2);
-    head->next->prev = head;
-    head->next->next = createNode(3);
-    head->next->next->prev = head->next;
-
-    printf("Original Linked List: ");
-    printList(head);
-
-    printf("After Deletion at the beginning: ");
-    head = delHead(head);
-
-    printList(head);
-
-return 0;
-}
-
-````
-
-Java
-````
-// Java Program to delete a node from the
-// beginning of Doubly Linked List
-
-class Node {
-    int data;
-    Node prev;
-    Node next;
-
-    Node(int data) {
-        this.data = data;
-        this.prev = null;
-        this.next = null;
-}
-}
-
-class GFG {
-
-    // Function to delete the first node (head) of the list
-    // and return the second node as the new head
-    public static Node delHead(Node head) {
-        // If empty, return null
-        if (head == null) {
-            return null;
-}
-
-        // Store in temp for deletion later
-        Node temp = head;
-
-// Move head to the next node
-        head = head.next;
-
-// Set prev of the new head
-        if (head != null) {
-            head.prev = null;
-}
-
-        // Return new head
-        return head;
-}
-
-    public static void printList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            System.out.print(curr.data + " ");
-            curr = curr.next;
-}
-        System.out.println();
-}
-
-    public static void main(String[] args) {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.next = new Node(2);
-        head.next.prev = head;
-        head.next.next = new Node(3);
-        head.next.next.prev = head.next;
-
-        System.out.print("Original Linked List: ");
-        printList(head);
-
-        System.out.print("After Deletion at the beginning: ");
-        head = delHead(head);
-
-        printList(head);
-}
-}
-
-````
-
-Python
-````
-# Python Program to delete a node from the
-# beginning of Doubly Linked List
-
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.prev = None
-        self.next = None
-
-# Function to delete the first node (head) of the list
-# and return the second node as the new head
-def del_head(head):
-
-    # If empty, return None
-    if head is None:
-        return None
-
-    # Store in temp for deletion later
-    temp = head
-
-    # Move head to the next node
-    head = head.next
-
-    # Set prev of the new head
-    if head is not None:
-        head.prev = None
-
-    # Return new head
-    return head
-
-def print_list(head):
-    curr = head
-    while curr is not None:
-        print(curr.data, end=" ")
-        curr = curr.next
-    print()
-
-
-if __name__ == "__main__":
-
-	# Create a hardcoded doubly linked list:
-    # 1 <-> 2 <-> 3
-    head = Node(1)
-    head.next = Node(2)
-    head.next.prev = head
-    head.next.next = Node(3)
-    head.next.next.prev = head.next
-
-    print("Original Linked List: ", end="")
-    print_list(head)
-
-    print("After Deletion at the beginning: ", end="")
-    head = del_head(head)
-
-    print_list(head)
-
-````
-
-C#
-````
-// C# Program to delete a node from the
-// beginning of Doubly Linked List
-
-using System;
-
-class Node {
-    public int Data;
-public Node Prev;
-public Node Next;
-
-public Node(int data) {
-        Data = data;
-        Prev = null;
-Next = null;
-}
-}
-
-class GFG {
-
-    // Deletes the first node (head) of the list
-    // and returns the second node as the new head
-    public static Node DelHead(Node head) {
-
-        // If empty, return null
-        if (head == null)
-            return null;
-
-// Move head to the next node
-        head = head.Next;
-
-// Set prev of the new head
-        if (head != null)
-            head.Prev = null;
-
-// Return new head
-        return head;
-}
-
-    public static void PrintList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            Console.Write(curr.Data + " ");
-            curr = curr.Next;
-}
-        Console.WriteLine();
-}
-
-    static void Main() {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.Next = new Node(2);
-        head.Next.Prev = head;
-        head.Next.Next = new Node(3);
-        head.Next.Next.Prev = head.Next;
-
-        Console.Write("Original Linked List: ");
-        PrintList(head);
-
-        Console.Write("After Deletion at the beginning: ");
-        head = DelHead(head);
-
-        PrintList(head);
-}
-}
-
-````
-
-JavaScript
-````
-// JavaScript Program to delete a node from the
-// beginning of Doubly Linked List
-class Node {
-    constructor(data) {
-        this.data = data;
-        this.prev = null;
-        this.next = null;
-}
-}
-
-// Deletes the first node (head) of the list and returns the second node as the new head
-function delHead(head) {
-    // If empty, return null
-    if (head === null) {
-        return null;
-}
-
-    // Store in temp for deletion later
-    let temp = head;
-
-// Move head to the next node
-    head = head.next;
-
-// Set prev of the new head
-    if (head !== null) {
-        head.prev = null;
-}
-
-    // Return new head
-    return head;
-}
-
-// Function to print the list
-function printList(head) {
-    let curr = head;
-    let output = \'\';
-    while (curr !== null) {
-        output += curr.data + \' \';
-        curr = curr.next;
-}
-    console.log(output.trim());
-}
-
-// Create a hardcoded doubly linked list:
-// 1 <-> 2 <-> 3
-let head = new Node(1);
-head.next = new Node(2);
-head.next.prev = head;
-head.next.next = new Node(3);
-head.next.next.prev = head.next;
-
-console.log("Original Linked List: ");
-printList(head);
-
-console.log("After Deletion at the beginning: ");
-head = delHead(head);
-
-printList(head);
-
-````
-
-
-
-**Output**
-```
-
-Original Linked List: 1 2 3
-After Deletion at the beginning: 2 3
-
-```
-
-[Deletion at the End of Doubly Linked List](https://www.geeksforgeeks.org/deletion-at-end-removal-of-last-node-in-a-doubly-linked-list/)
-----------------------------------------------------------------------------------------------------------------------------------------
-
-![Deletion-at-the-End-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124140/Deletion-at-the-End-in-Doubly-Linked-List.webp)
-
-Deletion at the End in Doubly Linked List
-
-
-To delete a node at the end in doubly linked list, we can use the
-following steps:
-
-* Check if the doubly linked list is empty. If it is empty, then there
-  is nothing to delete.
-* If the list is not empty, then move to the last node of the doubly
-  linked list, say ****curr****.
-* Update the second-to-last node\'s next pointer to NULL, ****curr->prev->next = NULL****.
-* Free the memory allocated for the node that was deleted.
-
-Below is the implementation of the above approach:
-
-C++
-````
-// C++ Program to delete a node from the end of
-//Doubly Linked List
-
-#include <bits/stdc++.h>
-using namespace std;
-
-struct Node {
-    int data;
-    Node *prev;
-    Node *next;
-    Node(int d) {
-        data = d;
-        prev = NULL;
-        next = NULL;
-    }
-};
-
-// Function to delete the last node of the doubly
-// linked list
-Node *delLast(Node *head) {
-
-    // Corner cases
-    if (head == NULL)
-        return NULL;
-    if (head->next == NULL) {
-        delete head;
-        return NULL;
-    }
-
-    // Traverse to the last node
-    Node *curr = head;
-    while (curr->next != NULL)
-        curr = curr->next;
-
-    // Update the previous node\'s next pointer
-                                                                                         curr->prev->next = NULL;
-
-// Delete the last node
-    delete curr;
-
-// Return the updated head
-    return head;
-}
-
-void printList(Node *head) {
-    Node *curr = head;
-    while (curr != NULL) {
-        cout << curr->data << " ";
-        curr = curr->next;
-}
-    cout << endl;
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    struct Node *head = new Node(1);
-    head->next = new Node(2);
-    head->next->prev = head;
-    head->next->next = new Node(3);
-    head->next->next->prev = head->next;
-
-    printf("Original Linked List: ");
-    printList(head);
-
-    printf("After Deletion at the end: ");
-    head = delLast(head);
-
-    printList(head);
-
-return 0;
-}
-
-````
-
-C
-````
-// C Program to delete a node from the end of
-//Doubly Linked List
-
-#include <stdio.h>
-
-struct Node {
-    int data;
-    struct Node* prev;
-    struct Node* next;
-};
-
-// Function to delete the last node of the
-//doubly linked list
-struct Node* delLast(struct Node *head) {
-
-    // Corner cases
-    if (head == NULL)
-        return NULL;
-    if (head->next == NULL) {
-        free(head);
-return NULL;
-}
-
-    // Traverse to the last node
-    struct Node *curr = head;
-    while (curr->next != NULL)
-        curr = curr->next;
-
-// Update the previous node\'s next pointer
-    curr->prev->next = NULL;
-
-    // Delete the last node
-    free(curr);
-
-    // Return the updated head
-    return head;
-}
-
-// Function to print the list
-void printList(struct Node *head) {
-    struct Node *curr = head;
-    while (curr != NULL) {
-        printf("%d ", curr->data);
-        curr = curr->next;
-    }
-    printf("\\n");
-}
-
-// Function to create a new node
-struct Node* createNode(int data) {
-    struct Node *newNode =
-      (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = data;
-    newNode->prev = NULL;
-    newNode->next = NULL;
-    return newNode;
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    struct Node *head = createNode(1);
-    head->next = createNode(2);
-    head->next->prev = head;
-    head->next->next = createNode(3);
-    head->next->next->prev = head->next;
-
-    printf("Original Linked List: ");
-    printList(head);
-
-    printf("After Deletion at the end: ");
-    head = delLast(head);
-
-    printList(head);
-
-    return 0;
-}
-
-````
-
-Java
-````
-// Java Program to delete a node from the end of
-//Doubly Linked List
-
-class Node {
-    int data;
-    Node prev;
-    Node next;
-
-    Node(int data) {
-        this.data = data;
-        this.prev = null;
-        this.next = null;
-    }
-}
-
-class GFG {
-
-    // Function to delete the last node of the
-  	//doubly linked list
-    public static Node delLast(Node head) {
-
-        // Corner cases
-        if (head == null) {
-            return null;
-        }
-        if (head.next == null) {
-            return null;
-        }
-
-        // Traverse to the last node
-        Node curr = head;
-        while (curr.next != null) {
-            curr = curr.next;
-        }
-
-        // Update the previous node\'s next pointer
-       if (curr.prev != null) {
-       curr.prev.next = null;
-}
-
-        // Return the updated head
-        return head;
-}
-
-    // Function to print the list
-    public static void printList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            System.out.print(curr.data + " ");
-            curr = curr.next;
-}
-        System.out.println();
-}
-
-    public static void main(String[] args) {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.next = new Node(2);
-        head.next.prev = head;
-        head.next.next = new Node(3);
-        head.next.next.prev = head.next;
-
-        System.out.print("Original Linked List: ");
-        printList(head);
-
-        System.out.print("After Deletion at the end: ");
-        head = delLast(head);
-
-        printList(head);
-}
-}
-
-````
-
-Python
-````
-# Python Program to delete a node from the end of
-#Doubly Linked List
-
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.prev = None
-        self.next = None
-
-def del_last(head):
-
-    # Corner cases
-    if head is None:
-        return None
-    if head.next is None:
-        return None
-
-    # Traverse to the last node
-    curr = head
-    while curr.next is not None:
-        curr = curr.next
-
-    # Update the previous node\'s next pointer
-    if curr.prev is not None:
-        curr.prev.next = None
-
-    # Return the updated head
-    return head
-
-def print_list(head):
-    curr = head
-    while curr is not None:
-        print(curr.data, end=" ")
-        curr = curr.next
-    print()
-
-if __name__ == "__main__":
-
-    # Create a hardcoded doubly linked list:
-    # 1 <-> 2 <-> 3
-    head = Node(1)
-    head.next = Node(2)
-    head.next.prev = head
-    head.next.next = Node(3)
-    head.next.next.prev = head.next
-
-    print("Original Linked List: ", end="")
-    print_list(head)
-
-    print("After Deletion at the end: ", end="")
-    head = del_last(head)
-
-    print_list(head)
-
-````
-
-C#
-````
-// C# Program to delete a node from the end of
-//Doubly Linked List
-
-using System;
-
-class Node {
-    public int Data;
-    public Node Prev;
-    public Node Next;
-
-    public Node(int data) {
-        Data = data;
-        Prev = null;
-        Next = null;
-    }
-}
-
-class GFG {
-
-    // Function to delete the last node of the
-  	//doubly linked list
-    static Node DelLast(Node head) {
-
-      	// Corner cases
-        if (head == null)
-            return null;
-        if (head.Next == null) {
-            return null;
-        }
-
-        // Traverse to the last node
-        Node curr = head;
-        while (curr.Next != null)
-            curr = curr.Next;
-
-        // Update the previous node\'s next pointer
-                                     if (curr.Prev != null)
-                                     curr.Prev.Next = null;
-
-// Delete the last node
-        curr = null;
-
-// Return the updated head
-        return head;
-}
-
-    // Function to print the list
-    static void PrintList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            Console.Write(curr.Data + " ");
-            curr = curr.Next;
-}
-        Console.WriteLine();
-}
-
-    static void Main() {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.Next = new Node(2);
-        head.Next.Prev = head;
-        head.Next.Next = new Node(3);
-        head.Next.Next.Prev = head.Next;
-
-        Console.Write("Original Linked List: ");
-        PrintList(head);
-
-        Console.Write("After Deletion at the end: ");
-        head = DelLast(head);
-
-        PrintList(head);
-}
-}
-
-````
-
-JavaScript
-````
-class Node {
-    constructor(data) {
-        this.data = data;
-        this.prev = null;
-        this.next = null;
-}
-}
-
-// Function to delete the last node of the
-//doubly linked list
-function delLast(head) {
-    // Corner cases
-    if (head === null) return null;
-    if (head.next === null) {
-        // Only one node in the list
-        return null;
-}
-
-    // Traverse to the last node
-    let curr = head;
-    while (curr.next !== null) {
-        curr = curr.next;
-}
-
-    // Update the previous node\'s next pointer
-    if (curr.prev !== null) {
-        curr.prev.next = null;
-    }
-
-    // Node curr is now deleted (garbage collected in JS)
-    return head;
-}
-
-// Function to print the list
-function printList(head) {
-    let curr = head;
-    while (curr !== null) {
-        console.log(curr.data + " ");
-        curr = curr.next;
-    }
-}
-
-// Create a hardcoded doubly linked list:
-// 1 <-> 2 <-> 3
-let head = new Node(1);
-head.next = new Node(2);
-head.next.prev = head;
-head.next.next = new Node(3);
-head.next.next.prev = head.next;
-
-console.log("Original Linked List:");
-printList(head);
-
-console.log("After Deletion at the end:");
-head = delLast(head);
-
-printList(head);
-
-````
-
-
-
-
-**Output**
-```
-
-Original Linked List: 1 2 3
-After Deletion at the end: 1 2
-
-```
-
-[Deletion at a Specific Position in Doubly Linked List](https://www.geeksforgeeks.org/delete-doubly-linked-list-node-given-position)
-------------------------------------------------------------------------------------------------------------------------------------
-
-![Deletion-at-a-Specific-Position-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124205/Deletion-at-a-Specific-Position-in-Doubly-Linked-List.webp)
-
-
-Deletion at a Specific Position in Doubly Linked List
-
-
-
-To delete a node at a specific position in doubly linked list, we can
-use the following steps:
-
-* Traverse to the node at the specified position, say ****curr****.
-* If the position is valid, adjust the pointers to skip the node to be
-  deleted.
-  + If curr is not the head of the linked list, update the next
-    pointer of the node before curr to point to the node after curr, ****curr->prev->next = curr-next****.
-  + If curr is not the last node of the linked list, update the
-    previous pointer of the node after curr to the node before curr, ****curr->next->prev = curr->prev****.
-* Free the memory allocated for the deleted node.
-
-Below is the implementation of the above approach:
-
-C++
-````
-// C++ Program to delete node at a specific position
-// in Doubly Linked List
-
-#include <iostream>
-
-using namespace std;
-
-struct Node {
-    int data;
-    Node * prev;
-    Node * next;
-    Node(int d) {
-        data = d;
-        prev = next = NULL;
-    }
-};
-
-// Function to delete a node at a specific position
-// in the doubly linked list
-Node * delPos(Node * head, int pos) {
-
-    // If the list is empty
-    if (!head)
-        return head;
-
-    Node * curr = head;
-
-    // Traverse to the node at the given position
-    for (int i = 1; curr && i < pos; ++i) {
-        curr = curr -> next;
-    }
-
-    // If the position is out of range
-    if (!curr)
-        return head;
-
-    // Update the previous node\'s next pointer
-           if (curr -> prev)
-           curr -> prev -> next = curr -> next;
-
-// Update the next node\'s prev pointer
-    if (curr -> next)
-        curr -> next -> prev = curr -> prev;
-
-    // If the node to be deleted is the head node
-    if (head == curr)
-        head = curr -> next;
-
-    // Deallocate memory for the deleted node
-    delete curr;
-    return head;
-}
-
-// Function to print the doubly linked list
-void printList(Node * head) {
-    Node * curr = head;
-    while (curr != nullptr) {
-        cout << curr -> data << " ";
-        curr = curr -> next;
-    }
-    cout << endl;
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    struct Node * head = new Node(1);
-    head -> next = new Node(2);
-    head -> next -> prev = head;
-    head -> next -> next = new Node(3);
-    head -> next -> next -> prev = head -> next;
-
-    cout << "Original Linked List: ";
-    printList(head);
-
-    cout << "After Deletion at the position 2: ";
-    head = delPos(head, 2);
-
-    printList(head);
-
-    return 0;
-}
-
-````
-
-C
-````
-// C Program to delete node at a specific position
-//in Doubly Linked List
-
-#include <stdio.h>
-
-struct Node {
-    int data;
-    struct Node * prev;
-    struct Node * next;
-};
-
-struct Node * createNode(int data) {
-    struct Node * newNode = (struct Node * )
-    malloc(sizeof(struct Node));
-    newNode -> data = data;
-    newNode -> prev = NULL;
-    newNode -> next = NULL;
-    return newNode;
-}
-
-// Function to delete a node at a specific
-//position in the doubly linked list
-struct Node * delPos(struct Node * head, int pos) {
-
-    // If the list is empty
-    if (head == NULL)
-        return head;
-
-    struct Node * curr = head;
-
-    // Traverse to the node at the given position
-    for (int i = 1; curr && i < pos; ++i) {
-        curr = curr -> next;
-    }
-
-    // If the position is out of range
-    if (curr == NULL)
-        return head;
-
-    // Update the previous node\'s next pointer
-       if (curr -> prev)
-       curr -> prev -> next = curr -> next;
-
-// Update the next node\'s prev pointer
-    if (curr -> next)
-        curr -> next -> prev = curr -> prev;
-
-    // If the node to be deleted is the head node
-    if (head == curr)
-        head = curr -> next;
-
-    // Deallocate memory for the deleted node
-    free(curr);
-    return head;
-}
-
-// Function to print the doubly linked list
-void printList(struct Node * head) {
-    struct Node * curr = head;
-    while (curr != NULL) {
-        printf("%d ", curr -> data);
-        curr = curr -> next;
-    }
-    printf("\\n");
-}
-
-int main() {
-
-    // Create a hardcoded doubly linked list:
-    // 1 <-> 2 <-> 3
-    struct Node * head = createNode(1);
-    struct Node * temp1 = createNode(2);
-    struct Node * temp2 = createNode(3);
-
-    // Link the nodes together
-    head -> next = temp1;
-    temp1 -> prev = head;
-    temp1 -> next = temp2;
-    temp2 -> prev = temp1;
-
-    printf("Original Linked List: ");
-    printList(head);
-
-    // Delete node at position 2
-    head = delPos(head, 2);
-
-    printf("After Deletion at position 2: ");
-    printList(head);
-
-    return 0;
-}
-
-````
-
-Java
-````
-// Java Program to delete node at a specific position in Doubly Linked List
-
-class Node {
-    int data;
-    Node prev;
-    Node next;
-
-    Node(int d) {
-        data = d;
-        prev = null;
-        next = null;
-    }
-}
-
-class GFG {
-
-    // Function to delete a node at a
-  	//specific position in the doubly linked list
-    public static Node delPos(Node head, int pos) {
-
-        // If the list is empty
-        if (head == null) {
-            return head;
-        }
-
-        Node curr = head;
-
-        // Traverse to the node at the given position
-        for (int i = 1; curr != null && i < pos; ++i) {
-            curr = curr.next;
-        }
-
-        // If the position is out of range
-        if (curr == null) {
-            return head;
-        }
-
-        // Update the previous node\'s next pointer
-       if (curr.prev != null) {
-       curr.prev.next = curr.next;
-}
-
-        // Update the next node\'s prev pointer
-        if (curr.next != null) {
-            curr.next.prev = curr.prev;
-        }
-
-        // If the node to be deleted is the head node
-        if (head == curr) {
-            head = curr.next;
-        }
-
-        // Return the updated head
-        return head;
-    }
-
-    // Function to print the doubly linked list
-    public static void printList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            System.out.print(curr.data + " ");
-            curr = curr.next;
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args) {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.next = new Node(2);
-        head.next.prev = head;
-        head.next.next = new Node(3);
-        head.next.next.prev = head.next;
-
-        System.out.print("Original Linked List: ");
-        printList(head);
-
-        System.out.print("After Deletion at position 2: ");
-        head = delPos(head, 2);
-
-        printList(head);
-    }
-}
-
-````
-
-Python
-````
-# Python Program to delete node at a specific position
-#in Doubly Linked List
-
-
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.prev = None
-        self.next = None
-
-
-# Function to delete a node at a specific position
-#in the doubly linked list
-def del_pos(head, pos):
-    # If the list is empty
-    if head is None:
-        return head
-
-    curr = head
-
-    # Traverse to the node at the given position
-    for i in range(1, pos):
-        if curr is None:
-            return head
-        curr = curr.next
-
-    # If the position is out of range
-    if curr is None:
-        return head
-
-    # Update the previous node\'s next pointer
-               if curr.prev is not None:
-               curr.prev.next = curr.next
-
-               # Update the next node\'s prev pointer
-    if curr.next is not None:
-        curr.next.prev = curr.prev
-
-    # If the node to be deleted is the head node
-    if head == curr:
-        head = curr.next
-
-    # Return the updated head
-    return head
-
-
-def print_list(head):
-    curr = head
-    while curr is not None:
-        print(curr.data, end=" ")
-        curr = curr.next
-    print()
-
-
-if __name__ == "__main__":
-
-    # Create a hardcoded doubly linked list:
-    # 1 <-> 2 <-> 3
-    head = Node(1)
-    head.next = Node(2)
-    head.next.prev = head
-    head.next.next = Node(3)
-    head.next.next.prev = head.next
-
-    print("Original Linked List: ", end="")
-    print_list(head)
-
-    print("After Deletion at the position 2: ", end="")
-    head = del_pos(head, 2)
-
-    print_list(head)
-
-````
-
-C#
-````
-// C# Program to delete node at a specific position
-//in Doubly Linked List
-
-using System;
-
-class Node {
-    public int Data;
-    public Node Prev;
-    public Node Next;
-
-    public Node(int data) {
-        Data = data;
-        Prev = null;
-        Next = null;
-    }
-}
-
-class Program {
-    // Function to delete a node at a specific position
-    // in the doubly linked list
-    static Node DelPos(Node head, int pos) {
-        // If the list is empty
-        if (head == null)
-            return head;
-
-        Node curr = head;
-
-        // Traverse to the node at the given position
-        for (int i = 1; curr != null && i < pos; ++i) {
-            curr = curr.Next;
-        }
-
-        // If the position is out of range
-        if (curr == null)
-            return head;
-
-        // Update the previous node\'s next pointer
-                     if (curr.Prev != null)
-                     curr.Prev.Next = curr.Next;
-
-// Update the next node\'s prev pointer
-        if (curr.Next != null)
-            curr.Next.Prev = curr.Prev;
-
-        // If the node to be deleted is the head node
-        if (head == curr)
-            head = curr.Next;
-
-        // Deallocate memory for the deleted node
-        // In C#, garbage collection will handle this
-      	//automatically
-
-        return head;
-    }
-
-    // Function to print the doubly linked list
-    static void PrintList(Node head) {
-        Node curr = head;
-        while (curr != null) {
-            Console.Write(curr.Data + " ");
-            curr = curr.Next;
-        }
-        Console.WriteLine();
-    }
-
-    static void Main() {
-
-        // Create a hardcoded doubly linked list:
-        // 1 <-> 2 <-> 3
-        Node head = new Node(1);
-        head.Next = new Node(2);
-        head.Next.Prev = head;
-        head.Next.Next = new Node(3);
-        head.Next.Next.Prev = head.Next;
-
-        Console.Write("Original Linked List: ");
-        PrintList(head);
-
-        Console.Write("After Deletion at position 2: ");
-        head = DelPos(head, 2);
-
-        PrintList(head);
-    }
-}
-
-````
-
-JavaScript
-````
-class Node {
-	constructor(data) {
-		this.data = data;
-		this.prev = null;
-		this.next = null;
-	}
-}
-
-// Function to delete a node at a specific position
-// in the doubly linked list
-function delPos(head, pos) {
-	// If the list is empty
-	if (head === null) return head;
-
-	let curr = head;
-
-	// Traverse to the node at the given position
-	for (let i = 1; curr && i < pos; ++i) {
-		curr = curr.next;
-	}
-
-	// If the position is out of range
-	if (curr === null) return head;
-
-	// Update the previous node\'s next pointer
-       if (curr.prev) {
-       curr.prev.next = curr.next;
-}
-
-	// Update the next node\'s prev pointer
-	if (curr.next) {
-		curr.next.prev = curr.prev;
-	}
-
-	// If the node to be deleted is the head node
-	if (head === curr) {
-		head = curr.next;
-	}
-
-	// Deallocate memory for the deleted node
-	// In JavaScript, garbage collection handles
-    //this automatically
-
-	return head;
-}
-
-// Function to print the doubly linked list
-function printList(head) {
-	let curr = head;
-	let result = [];
-	while (curr !== null) {
-		result.push(curr.data);
-		curr = curr.next;
-	}
-	console.log(result.join(\' \'));
-}
-
-
-// Create a hardcoded doubly linked list:
-// 1 <-> 2 <-> 3
-let head = new Node(1);
-head.next = new Node(2);
-head.next.prev = head;
-head.next.next = new Node(3);
-head.next.next.prev = head.next;
-
-console.log("Original Linked List:");
-printList(head);
-
-console.log("After Deletion at the position 2:");
-head = delPos(head, 2);
-
-printList(head);
-
-````
-
-
-**Output**
-```
-
-Original Linked List: 1 2 3
-After Deletion at the position 2: 1 3
-
-```
-
-Advantages of Doubly Linked List
---------------------------------
-
-* ****Efficient traversal in both directions:**** Doubly linked lists allow for efficient traversal of the list in both
-  directions, making it suitable for applications where frequent
-  insertions and deletions are required.
-* ****Easy insertion and deletion of nodes:**** The presence of pointers to both the previous and next nodes makes it
-  easy to insert or delete nodes from the list, without having to
-  traverse the entire list.
-* ****Can be used to implement a stack or queue:**** Doubly linked lists can be used to implement both stacks and queues,
-  which are common data structures used in programming.
-
-Disadvantages of Doubly Linked List
------------------------------------
-
-* ****More complex than singly linked lists:****
-  Doubly linked lists are more complex than singly linked lists, as they
-  require additional pointers for each node.
-* ****More memory overhead:**** Doubly linked lists require more memory overhead than singly linked
-  lists, as each node stores two pointers instead of one.', e'A doubly linked list
-is a more complex data structure than a singly linked list, but it
-offers several advantages. The main advantage of a doubly linked list is
-that it allows for efficient traversal of the list in both directions.
-This is because each node in the list contains a pointer to the previous
-node and a pointer to the next node. This allows for quick and easy
-insertion and deletion of nodes from the list, as well as efficient
-traversal of the list in both directions.', 'Doubly Linked List Tutorial', 4, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2bbe24be-6a3c-49ad-bb76-363d65e58895', e'Given a number
 
 ****n****
@@ -22788,6 +14714,1650 @@ if (isEven(n)) {
 true
 ```
 ', '', 'Check whether a given number is even or odd', 20, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('192cb6e4-14cd-4265-9d7d-7cbf5bc0817f', e'****Properties of Priority Queue****
+------------------------------------
+
+*****So, a priority Queue is an extension of the*****
+[*****queue*****](https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/)
+*****with the following properties.*****
+
+* Every item has a priority associated with it.
+* An element with high priority is dequeued before an element with low priority.
+* If two elements have the same priority, they are served according to their order in the queue.
+
+
+In the below priority queue, an element with a maximum ASCII value will have the highest priority. The elements with higher priority are served first.
+
+
+![](https://media.geeksforgeeks.org/wp-content/cdn-uploads/Priority-Queue-min-1024x512.png)
+
+****How is Priority assigned to the elements in a Priority Queue?****
+---------------------------------------------------------------------
+
+
+In a priority queue, generally, the value of an element is considered for assigning the priority.
+
+
+For example, the element with the highest value is assigned the highest priority and the element with the lowest value is assigned the lowest priority. The reverse case can also be used i.e., the element with the lowest value can be assigned the highest priority. Also, the priority can be assigned according to our needs.
+
+
+****Operations of a Priority Queue:****
+---------------------------------------
+
+
+A typical priority queue supports the following operations:
+
+
+### ****1) Insertion in a Priority Queue****
+
+
+When a new element is inserted in a priority queue, it moves to the empty slot from top to bottom and left to right. However, if the element is not in the correct place then it will be compared with the parent node. If the element is not in the correct order, the elements are swapped. The swapping process continues until all the elements are placed in the correct position.
+
+
+### ****2) Deletion in a Priority Queue****
+
+
+As you know that in a max heap, the maximum element is the root node. And it will remove the element which has maximum priority first. Thus, you remove the root node from the queue. This removal creates an empty slot, which will be further filled with new insertion. Then, it compares the newly inserted element with all the elements inside the queue to maintain the heap invariant.
+
+
+### ****3) Peek in a Priority Queue****
+
+
+This operation helps to return the maximum element from Max Heap or the minimum element from Min Heap without deleting the node from the priority queue.
+
+
+Types of Priority Queue:
+------------------------
+
+### ****1) Ascending Order Priority Queue****
+
+
+As the name suggests, in ascending order priority queue, the element with a lower priority value is given a higher priority in the priority list. For example, if we have the following elements in a priority queue arranged in ascending order like 4,6,8,9,10. Here, 4 is the smallest number, therefore, it will get the highest priority in a priority queue and so when we dequeue from this type of priority queue, 4 will remove from the queue and dequeue returns 4.
+
+
+### ****2) Descending order Priority Queue****
+
+
+The root node is the maximum element in a max heap, as you may know. It will also remove the element with the highest priority first. As a result, the root node is removed from the queue. This deletion leaves an empty space, which will be filled with fresh insertions in the future. The heap invariant is then maintained by comparing the newly inserted element to all other entries in the queue.
+
+
+![Types of Priority Queues](https://media.geeksforgeeks.org/wp-content/uploads/20220623153252/priorityqueue.jpg)
+
+Types of Priority Queues
+
+****Difference between Priority Queue and Normal Queue?****
+-----------------------------------------------------------
+
+
+There is no priority attached to elements in a queue, the rule of first-in-first-out(FIFO) is implemented whereas, in a priority queue, the elements have a priority. The elements with higher priority are served first.
+
+
+****How to Implement Priority Queue?****
+----------------------------------------
+
+
+Priority queue can be implemented using the following data structures:
+
+
+* Arrays
+* Linked list
+* Heap data structure
+* Binary search tree
+
+****Let’s discuss all these in detail.****
+
+### ****1) Implement Priority Queue Using Array:****
+
+
+A simple implementation is to use an array of the following structure.
+
+
+> struct item {
+>
+>
+>
+> int item;
+>
+>
+>
+> int priority;
+>
+>
+>
+> }
+
+* ****enqueue():****
+  This function is used to insert new data into the queue.
+* ****dequeue():****
+  This function removes the element with the highest priority from the queue.
+* ****peek()/top():****
+  This function is used to get the highest priority element in the queue without removing it from the queue.
+
+C++
+
+````
+// C++ program to implement Priority Queue
+// using Arrays
+#include <bits/stdc++.h>
+using namespace std;
+
+// Structure for the elements in the
+// priority queue
+struct item {
+    int value;
+    int priority;
+};
+
+// Store the element of a priority queue
+item pr[100000];
+
+// Pointer to the last index
+int size = -1;
+
+// Function to insert a new element
+// into priority queue
+void enqueue(int value, int priority)
+{
+    // Increase the size
+    size++;
+
+    // Insert the element
+    pr[size].value = value;
+    pr[size].priority = priority;
+}
+
+// Function to check the top element
+int peek()
+{
+    int highestPriority = INT_MIN;
+    int ind = -1;
+
+    // Check for the element with
+    // highest priority
+    for (int i = 0; i <= size; i++) {
+
+        // If priority is same choose
+        // the element with the
+        // highest value
+        if (highestPriority == pr[i].priority && ind > -1
+            && pr[ind].value < pr[i].value) {
+            highestPriority = pr[i].priority;
+            ind = i;
+        }
+        else if (highestPriority < pr[i].priority) {
+            highestPriority = pr[i].priority;
+            ind = i;
+        }
+    }
+
+    // Return position of the element
+    return ind;
+}
+
+// Function to remove the element with
+// the highest priority
+void dequeue()
+{
+    // Find the position of the element
+    // with highest priority
+    int ind = peek();
+
+    // Shift the element one index before
+    // from the position of the element
+    // with highest priority is found
+    for (int i = ind; i < size; i++) {
+        pr[i] = pr[i + 1];
+    }
+
+    // Decrease the size of the
+    // priority queue by one
+    size--;
+}
+
+// Driver Code
+int main()
+{
+    // Function Call to insert elements
+    // as per the priority
+    enqueue(10, 2);
+    enqueue(14, 4);
+    enqueue(16, 4);
+    enqueue(12, 3);
+
+    // Stores the top element
+    // at the moment
+    int ind = peek();
+
+    cout << pr[ind].value << endl;
+
+    // Dequeue the top element
+    dequeue();
+
+    // Check the top element
+    ind = peek();
+    cout << pr[ind].value << endl;
+
+    // Dequeue the top element
+    dequeue();
+
+    // Check the top element
+    ind = peek();
+    cout << pr[ind].value << endl;
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// Java program to implement Priority Queue
+// using Arrays
+import java.util.*;
+
+// Structure for the elements in the
+// priority queue
+class item {
+  public int value;
+  public int priority;
+};
+
+class GFG {
+
+  // Store the element of a priority queue
+  static item[] pr = new item[100000];
+
+  // Pointer to the last index
+  static int size = -1;
+  // Function to insert a new element
+  // into priority queue
+  static void enqueue(int value, int priority)
+  {
+    // Increase the size
+    size++;
+
+    // Insert the element
+    pr[size] = new item();
+    pr[size].value = value;
+    pr[size].priority = priority;
+  }
+
+  // Function to check the top element
+  static int peek()
+  {
+    int highestPriority = Integer.MIN_VALUE;
+    int ind = -1;
+
+    // Check for the element with
+    // highest priority
+    for (int i = 0; i <= size; i++) {
+
+      // If priority is same choose
+      // the element with the
+      // highest value
+      if (highestPriority == pr[i].priority
+          && ind > -1
+          && pr[ind].value < pr[i].value) {
+        highestPriority = pr[i].priority;
+        ind = i;
+      }
+      else if (highestPriority < pr[i].priority) {
+        highestPriority = pr[i].priority;
+        ind = i;
+      }
+    }
+
+    // Return position of the element
+    return ind;
+  }
+
+  // Function to remove the element with
+  // the highest priority
+  static void dequeue()
+  {
+    // Find the position of the element
+    // with highest priority
+    int ind = peek();
+
+    // Shift the element one index before
+    // from the position of the element
+    // with highest priority is found
+    for (int i = ind; i < size; i++) {
+      pr[i] = pr[i + 1];
+    }
+
+    // Decrease the size of the
+    // priority queue by one
+    size--;
+  }
+
+  public static void main(String[] args)
+  {
+    // Function Call to insert elements
+    // as per the priority
+    enqueue(10, 2);
+    enqueue(14, 4);
+    enqueue(16, 4);
+    enqueue(12, 3);
+
+    // Stores the top element
+    // at the moment
+    int ind = peek();
+
+    System.out.println(pr[ind].value);
+
+    // Dequeue the top element
+    dequeue();
+
+    // Check the top element
+    ind = peek();
+    System.out.println(pr[ind].value);
+
+    // Dequeue the top element
+    dequeue();
+
+    // Check the top element
+    ind = peek();
+    System.out.println(pr[ind].value);
+  }
+}
+
+// this code is contributed by phasing17
+
+````
+
+Python
+
+````
+import sys
+
+# Structure for the elements in the
+# priority queue
+class item :
+    value = 0
+    priority = 0
+class GFG :
+
+    # Store the element of a priority queue
+    pr = [None] * (100000)
+
+    # Pointer to the last index
+    size = -1
+
+    # Function to insert a new element
+    # into priority queue
+    @staticmethod
+    def enqueue( value,  priority) :
+
+        # Increase the size
+        GFG.size += 1
+
+        # Insert the element
+        GFG.pr[GFG.size] = item()
+        GFG.pr[GFG.size].value = value
+        GFG.pr[GFG.size].priority = priority
+
+    # Function to check the top element
+    @staticmethod
+    def  peek() :
+        highestPriority = -sys.maxsize
+        ind = -1
+
+        # Check for the element with
+        # highest priority
+        i = 0
+        while (i <= GFG.size) :
+
+            # If priority is same choose
+            # the element with the
+            # highest value
+            if (highestPriority == GFG.pr[i].priority and ind > -1 and GFG.pr[ind].value < GFG.pr[i].value) :
+                highestPriority = GFG.pr[i].priority
+                ind = i
+            elif(highestPriority < GFG.pr[i].priority) :
+                highestPriority = GFG.pr[i].priority
+                ind = i
+            i += 1
+
+        # Return position of the element
+        return ind
+
+    # Function to remove the element with
+    # the highest priority
+    @staticmethod
+    def dequeue() :
+
+        # Find the position of the element
+        # with highest priority
+        ind = GFG.peek()
+
+        # Shift the element one index before
+        # from the position of the element
+        # with highest priority is found
+        i = ind
+        while (i < GFG.size) :
+            GFG.pr[i] = GFG.pr[i + 1]
+            i += 1
+
+        # Decrease the size of the
+        # priority queue by one
+        GFG.size -= 1
+    @staticmethod
+    def main( args) :
+
+        # Function Call to insert elements
+        # as per the priority
+        GFG.enqueue(10, 2)
+        GFG.enqueue(14, 4)
+        GFG.enqueue(16, 4)
+        GFG.enqueue(12, 3)
+
+        # Stores the top element
+        # at the moment
+        ind = GFG.peek()
+        print(GFG.pr[ind].value)
+
+        # Dequeue the top element
+        GFG.dequeue()
+
+        # Check the top element
+        ind = GFG.peek()
+        print(GFG.pr[ind].value)
+
+        # Dequeue the top element
+        GFG.dequeue()
+
+        # Check the top element
+        ind = GFG.peek()
+        print(GFG.pr[ind].value)
+
+if __name__=="__main__":
+    GFG.main([])
+
+    # This code is contributed by aadityaburujwale.
+
+````
+
+C#
+
+````
+// C# program to implement Priority Queue
+// using Arrays
+
+using System;
+
+// Structure for the elements in the
+// priority queue
+public class item {
+    public int value;
+    public int priority;
+};
+
+
+public class GFG
+{
+
+    // Store the element of a priority queue
+    static item[] pr = new item[100000];
+
+    // Pointer to the last index
+    static int size = -1;
+    // Function to insert a new element
+    // into priority queue
+    static void enqueue(int value, int priority)
+    {
+        // Increase the size
+        size++;
+
+        // Insert the element
+        pr[size] = new item();
+        pr[size].value = value;
+        pr[size].priority = priority;
+    }
+
+    // Function to check the top element
+    static int peek()
+    {
+        int highestPriority =  int.MinValue;
+        int ind = -1;
+
+        // Check for the element with
+        // highest priority
+        for (int i = 0; i <= size; i++) {
+
+            // If priority is same choose
+            // the element with the
+            // highest value
+            if (highestPriority == pr[i].priority && ind > -1
+                && pr[ind].value < pr[i].value) {
+                highestPriority = pr[i].priority;
+                ind = i;
+            }
+            else if (highestPriority < pr[i].priority) {
+                highestPriority = pr[i].priority;
+                ind = i;
+            }
+        }
+
+        // Return position of the element
+        return ind;
+    }
+
+    // Function to remove the element with
+    // the highest priority
+    static void dequeue()
+    {
+        // Find the position of the element
+        // with highest priority
+        int ind = peek();
+
+        // Shift the element one index before
+        // from the position of the element
+        // with highest priority is found
+        for (int i = ind; i < size; i++) {
+            pr[i] = pr[i + 1];
+        }
+
+        // Decrease the size of the
+        // priority queue by one
+        size--;
+    }
+
+    public static void Main(string[] args)
+    {
+         // Function Call to insert elements
+        // as per the priority
+        enqueue(10, 2);
+        enqueue(14, 4);
+        enqueue(16, 4);
+        enqueue(12, 3);
+
+        // Stores the top element
+        // at the moment
+        int ind = peek();
+
+        Console.WriteLine(pr[ind].value);
+
+        // Dequeue the top element
+        dequeue();
+
+        // Check the top element
+        ind = peek();
+        Console.WriteLine(pr[ind].value);
+
+        // Dequeue the top element
+        dequeue();
+
+        // Check the top element
+        ind = peek();
+        Console.WriteLine(pr[ind].value);
+    }
+}
+
+//this code is contributed by phasing17
+
+````
+
+JavaScript
+
+````
+// JavaScript program to implement Priority Queue
+// using Arrays
+
+// Structure for the elements in the
+// priority queue
+class item {
+    constructor()
+    {
+        this.value;
+        this.priority;
+    }
+};
+
+// Store the element of a priority queue
+let pr = [];
+for (var i = 0; i < 100000; i++)
+    pr.push(new item());
+
+// Pointer to the last index
+let size = -1;
+
+// Function to insert a new element
+// into priority queue
+function enqueue(value, priority)
+{
+    // Increase the size
+    size++;
+
+    // Insert the element
+    pr[size] = new item();
+    pr[size].value = value;
+    pr[size].priority = priority;
+}
+
+// Function to check the top element
+function peek()
+{
+    let highestPriority = Number.MIN_SAFE_INTEGER;
+    let ind = -1;
+
+    // Check for the element with
+    // highest priority
+    for (var i = 0; i <= size; i++) {
+
+        // If priority is same choose
+        // the element with the
+        // highest value
+        if (highestPriority == pr[i].priority && ind > -1
+            && pr[ind].value < pr[i].value) {
+            highestPriority = pr[i].priority;
+            ind = i;
+        }
+        else if (highestPriority < pr[i].priority) {
+            highestPriority = pr[i].priority;
+            ind = i;
+        }
+    }
+
+    // Return position of the element
+    return ind;
+}
+
+// Function to remove the element with
+// the highest priority
+function dequeue()
+{
+    // Find the position of the element
+    // with highest priority
+    let ind = peek();
+
+    // Shift the element one index before
+    // from the position of the element
+    // with highest priority is found
+    for (var i = ind; i < size; i++) {
+        pr[i] = pr[i + 1];
+    }
+
+    // Decrease the size of the
+    // priority queue by one
+    size--;
+}
+
+// Function Call to insert elements
+// as per the priority
+enqueue(10, 2);
+enqueue(14, 4);
+enqueue(16, 4);
+enqueue(12, 3);
+
+// Stores the top element
+// at the moment
+let ind = peek();
+
+console.log(pr[ind].value);
+
+// Dequeue the top element
+dequeue();
+
+// Check the top element
+ind = peek();
+console.log(pr[ind].value);
+
+// Dequeue the top element
+dequeue();
+
+// Check the top element
+ind = peek();
+console.log(pr[ind].value);
+
+// this code is contributed by phasing17
+
+````
+
+
+
+
+**Output**
+```
+16
+14
+12
+```
+> ****Note:****
+> Read
+>
+> [****this article****](https://www.geeksforgeeks.org/priority-queue-using-array-in-c/)
+>
+> for more details.
+
+### ****2) Implement Priority Queue Using Linked List:****
+
+
+In a LinkedList implementation, the entries are sorted in descending order based on their priority. The highest priority element is always added to the front of the priority queue, which is formed using linked lists. The functions like
+
+****push()****
+,
+
+****pop()****
+, and
+
+****peek()****
+are used to implement a priority queue using a linked list and are explained as follows:
+
+
+* ****push():****
+  This function is used to insert new data into the queue.
+* ****pop():****
+  This function removes the element with the highest priority from the queue.
+* ****peek() / top():****
+  This function is used to get the highest priority element in the queue without removing it from the queue.
+
+C++
+
+````
+// C++ code to implement Priority Queue
+// using Linked List
+#include <bits/stdc++.h>
+using namespace std;
+
+// Node
+typedef struct node {
+    int data;
+
+    // Lower values indicate
+    // higher priority
+    int priority;
+
+    struct node* next;
+
+} Node;
+
+// Function to create a new node
+Node* newNode(int d, int p)
+{
+    Node* temp = (Node*)malloc(sizeof(Node));
+    temp->data = d;
+    temp->priority = p;
+    temp->next = NULL;
+
+    return temp;
+}
+
+// Return the value at head
+int peek(Node** head) { return (*head)->data; }
+
+// Removes the element with the
+// highest priority form the list
+void pop(Node** head)
+{
+    Node* temp = *head;
+    (*head) = (*head)->next;
+    free(temp);
+}
+
+// Function to push according to priority
+void push(Node** head, int d, int p)
+{
+    Node* start = (*head);
+
+    // Create new Node
+    Node* temp = newNode(d, p);
+
+    // Special Case: The head of list has
+    // lesser priority than new node
+    if ((*head)->priority < p) {
+
+        // Insert New Node before head
+        temp->next = *head;
+        (*head) = temp;
+    }
+    else {
+
+        // Traverse the list and find a
+        // position to insert new node
+        while (start->next != NULL
+               && start->next->priority > p) {
+            start = start->next;
+        }
+
+        // Either at the ends of the list
+        // or at required position
+        temp->next = start->next;
+        start->next = temp;
+    }
+}
+
+// Function to check is list is empty
+int isEmpty(Node** head) { return (*head) == NULL; }
+
+// Driver code
+int main()
+{
+
+    // Create a Priority Queue
+    // 7->4->5->6
+    Node* pq = newNode(4, 1);
+    push(&pq, 5, 2);
+    push(&pq, 6, 3);
+    push(&pq, 7, 0);
+
+    while (!isEmpty(&pq)) {
+        cout << " " << peek(&pq);
+        pop(&pq);
+    }
+    return 0;
+}
+
+````
+
+Java
+
+````
+// Java code to implement Priority Queue
+// using Linked List
+import java.util.* ;
+
+class Solution
+{
+
+// Node
+static class Node {
+    int data;
+
+    // Lower values indicate higher priority
+    int priority;
+    Node next;
+
+}
+
+static Node node = new Node();
+
+// Function to Create A New Node
+static Node newNode(int d, int p)
+{
+    Node temp = new Node();
+    temp.data = d;
+    temp.priority = p;
+    temp.next = null;
+
+    return temp;
+}
+
+// Return the value at head
+static int peek(Node head)
+{
+    return (head).data;
+}
+
+// Removes the element with the
+// highest priority from the list
+static Node pop(Node head)
+{
+    Node temp = head;
+    (head) = (head).next;
+    return head;
+}
+
+// Function to push according to priority
+static Node push(Node head, int d, int p)
+{
+    Node start = (head);
+
+    // Create new Node
+    Node temp = newNode(d, p);
+
+    // Special Case: The head of list has lesser
+    // priority than new node. So insert new
+    // node before head node and change head node.
+    if ((head).priority < p) {
+
+        // Insert New Node before head
+        temp.next = head;
+        (head) = temp;
+    }
+    else {
+
+        // Traverse the list and find a
+        // position to insert new node
+        while (start.next != null &&
+            start.next.priority > p) {
+            start = start.next;
+        }
+
+        // Either at the ends of the list
+        // or at required position
+        temp.next = start.next;
+        start.next = temp;
+    }
+    return head;
+}
+
+// Function to check is list is empty
+static int isEmpty(Node head)
+{
+    return ((head) == null)?1:0;
+}
+
+// Driver code
+public static void main(String args[])
+{
+    // Create a Priority Queue
+    // 7.4.5.6
+    Node pq = newNode(4, 1);
+    pq =push(pq, 5, 2);
+    pq =push(pq, 6, 3);
+    pq =push(pq, 7, 0);
+
+    while (isEmpty(pq)==0) {
+        System.out.printf("%d ", peek(pq));
+        pq=pop(pq);
+    }
+
+}
+}
+
+// This code is contributed by ishankhandelwals.
+
+````
+
+Python
+
+````
+# Python3 code to implement Priority Queue
+# using Singly Linked List
+
+# Class to create new node which includes
+# Node Data, and Node Priority
+class PriorityQueueNode:
+
+    def _init_(self, value, pr):
+
+        self.data = value
+        self.priority = pr
+        self.next = None
+
+# Implementation of Priority Queue
+
+
+class PriorityQueue:
+
+    def _init_(self):
+
+        self.front = None
+
+    # Method to check Priority Queue is Empty
+    # or not if Empty then it will return True
+    # Otherwise False
+    def isEmpty(self):
+
+        return True if self.front == None else False
+
+    # Method to add items in Priority Queue
+    # According to their priority value
+    def push(self, value, priority):
+
+        # Condition check for checking Priority
+        # Queue is empty or not
+        if self.isEmpty() == True:
+
+            # Creating a new node and assigning
+            # it to class variable
+            self.front = PriorityQueueNode(value,
+                                           priority)
+
+            # Returning 1 for successful execution
+            return 1
+
+        else:
+
+            # Special condition check to see that
+            # first node priority value
+            if self.front.priority < priority:
+
+                # Creating a new node
+                newNode = PriorityQueueNode(value,
+                                            priority)
+
+                # Updating the new node next value
+                newNode.next = self.front
+
+                # Assigning it to self.front
+                self.front = newNode
+
+                # Returning 1 for successful execution
+                return 1
+
+            else:
+
+                # Traversing through Queue until it
+                # finds the next smaller priority node
+                temp = self.front
+
+                while temp.next:
+
+                    # If same priority node found then current
+                    # node will come after previous node
+                    if priority >= temp.next.priority:
+                        break
+
+                    temp = temp.next
+
+                newNode = PriorityQueueNode(value,
+                                            priority)
+                newNode.next = temp.next
+                temp.next = newNode
+
+                # Returning 1 for successful execution
+                return 1
+
+    # Method to remove high priority item
+    # from the Priority Queue
+    def pop(self):
+
+        # Condition check for checking
+        # Priority Queue is empty or not
+        if self.isEmpty() == True:
+            return
+
+        else:
+
+            # Removing high priority node from
+            # Priority Queue, and updating front
+            # with next node
+            self.front = self.front.next
+            return 1
+
+    # Method to return high priority node
+    # value Not removing it
+    def peek(self):
+
+        # Condition check for checking Priority
+        # Queue is empty or not
+        if self.isEmpty() == True:
+            return
+        else:
+            return self.front.data
+
+    # Method to Traverse through Priority
+    # Queue
+    def traverse(self):
+
+        # Condition check for checking Priority
+        # Queue is empty or not
+        if self.isEmpty() == True:
+            return "Queue is Empty!"
+        else:
+            temp = self.front
+            while temp:
+                print(temp.data, end=" ")
+                temp = temp.next
+
+
+# Driver code
+if _name_ == "_main_":
+
+    # Creating an instance of Priority
+    # Queue, and adding values
+    # 7 -> 4 -> 5 -> 6
+    pq = PriorityQueue()
+    pq.push(4, 1)
+    pq.push(5, 2)
+    pq.push(6, 3)
+    pq.push(7, 0)
+
+    # Traversing through Priority Queue
+    pq.traverse()
+
+    # Removing highest Priority item
+    # for priority queue
+    pq.pop()
+
+````
+
+C#
+
+````
+// C# code to implement Priority Queue
+// using Linked List
+using System;
+
+class GFG
+{
+  // Node
+  public class Node
+  {
+    public int data;
+
+    // Lower values indicate
+    // higher priority
+    public int priority;
+
+    public Node next;
+  }
+
+  public static Node node = new Node();
+
+  // Function to Create A New Node
+  public static Node newNode(int d, int p)
+  {
+    Node temp = new Node();
+    temp.data = d;
+    temp.priority = p;
+    temp.next = null;
+
+    return temp;
+  }
+
+  // Return the value at head
+  public static int peek(Node head)
+  {
+    return (head).data;
+  }
+
+  // Removes the element with the
+  // highest priority from the list
+  public static Node pop(Node head)
+  {
+    Node temp = head;
+    (head) = (head).next;
+    return head;
+  }
+
+  // Function to push according to priority
+  public static Node push(Node head,
+                          int d, int p)
+  {
+    Node start = (head);
+
+    // Create new Node
+    Node temp = newNode(d, p);
+
+    // Special Case: The head of list
+    // has lesser priority than new node.
+    // So insert new node before head node
+    // and change head node.
+    if ((head).priority < p)
+    {
+
+      // Insert New Node before head
+      temp.next = head;
+      (head) = temp;
+    }
+    else
+    {
+
+      // Traverse the list and find a
+      // position to insert new node
+      while (start.next != null &&
+             start.next.priority > p)
+      {
+        start = start.next;
+      }
+
+      // Either at the ends of the list
+      // or at required position
+      temp.next = start.next;
+      start.next = temp;
+    }
+    return head;
+  }
+
+  // Function to check is list is empty
+  public static int isEmpty(Node head)
+  {
+    return ((head) == null) ? 1 : 0;
+  }
+
+  // Driver code
+  public static void Main(string[] args)
+  {
+    // Create a Priority Queue
+    // 7.4.5.6
+    Node pq = newNode(4, 1);
+    pq = push(pq, 5, 2);
+    pq = push(pq, 6, 3);
+    pq = push(pq, 7, 0);
+
+    while (isEmpty(pq) == 0)
+    {
+      Console.Write("{0:D} ", peek(pq));
+      pq = pop(pq);
+    }
+  }
+}
+
+// This code is contributed by ishankhandelwals.
+
+````
+
+JavaScript
+
+````
+// JavaScript code to implement Priority Queue
+// using Linked List
+// Node
+class Node {
+
+    // Lower values indicate
+    // higher priority
+    constructor() {
+        this.data = 0;
+        this.priority = 0;
+        this.next = null;
+    }
+}
+
+var node = new Node();
+
+// Function to Create A New Node
+function newNode(d, p) {
+    var temp = new Node();
+    temp.data = d;
+    temp.priority = p;
+    temp.next = null;
+
+    return temp;
+}
+
+// Return the value at head
+function peek(head) {
+    return head.data;
+}
+
+// Removes the element with the
+// highest priority from the list
+function pop(head) {
+    var temp = head;
+    head = head.next;
+    return head;
+}
+
+// Function to push according to priority
+function push(head, d, p) {
+    var start = head;
+
+    // Create new Node
+    var temp = newNode(d, p);
+
+    // Special Case: The head of list
+    // has lesser priority than new node.
+    // So insert new node before head node
+    // and change head node.
+    if (head.priority < p) {
+
+        // Insert New Node before head
+        temp.next = head;
+        head = temp;
+    }
+    else {
+
+        // Traverse the list and find a
+        // position to insert new node
+        while (start.next != null && start.next.priority > p) {
+            start = start.next;
+        }
+
+        // Either at the ends of the list
+        // or at required position
+        temp.next = start.next;
+        start.next = temp;
+    }
+    return head;
+}
+
+// Function to check is list is empty
+function isEmpty(head) {
+    return head == null ? 1 : 0;
+}
+
+// Driver code
+// Create a Priority Queue
+// 7.4.5.6
+var pq = newNode(4, 1);
+pq = push(pq, 5, 2);
+pq = push(pq, 6, 3);
+pq = push(pq, 7, 0);
+
+while (isEmpty(pq) == 0) {
+    console.log(peek(pq)," ");
+    pq = pop(pq);
+}
+
+// This code is contributed by ishankhandelwals.
+
+````
+
+
+
+
+**Output**
+```
+ 6 5 4 7
+```
+
+
+Refer to
+
+[this article](https://www.geeksforgeeks.org/priority-queue-using-linked-list/)
+for more details.
+
+
+> ****Note:****
+> We can also use Linked List, time complexity of all operations with linked list remains same as array. The advantage with linked list is
+>
+>
+> deleteHighestPriority()
+>
+>
+> can be more efficient as we don’t have to move items.
+
+### ****3) Implement Priority Queue Using Heaps:****
+
+
+Binary Heap is generally preferred for priority queue implementation because heaps provide better performance compared to arrays or LinkedList. Considering the properties of a heap, The entry with the largest key is on the top and can be removed immediately. It will, however, take time O(log n) to restore the heap property for the remaining keys. However if another entry is to be inserted immediately, then some of this time may be combined with the O(log n) time needed to insert the new entry. Thus the representation of a priority queue as a heap proves advantageous for large n, since it is represented efficiently in contiguous storage and is guaranteed to require only logarithmic time for both insertions and deletions. Operations on Binary Heap are as follows:
+
+
+* ****insert(p):****
+  Inserts a new element with priority p.
+* ****extractMax():****
+  Extracts an element with maximum priority.
+* ****remove(i):****
+  Removes an element pointed by an iterator i.
+* ****getMax():****
+  Returns an element with maximum priority.
+* ****changePriority(i, p):****
+  Changes the priority of an element pointed by
+
+  ****i to p****
+  .
+
+> Refer to
+>
+> [this article](https://www.geeksforgeeks.org/priority-queue-using-binary-heap/)
+> for code implementation.
+
+### ****4) Implement Priority Queue Using Binary Search Tree:****
+
+
+A Self-Balancing Binary Search Tree like AVL Tree, Red-Black Tree, etc. can also be used to implement a priority queue. Operations like peek(), insert() and delete() can be performed using BST.
+
+
+****Applications of Priority Queue:****
+---------------------------------------
+
+* CPU Scheduling
+* Graph algorithms like
+
+  [Dijkstra’s shortest path algorithm](https://www.geeksforgeeks.org/greedy-algorithms-set-7-dijkstras-algorithm-for-adjacency-list-representation/)
+  ,
+
+  [Prim’s Minimum Spanning Tree](https://www.geeksforgeeks.org/greedy-algorithms-set-5-prims-mst-for-adjacency-list-representation/)
+  , etc.
+* All
+
+  [queue applications](https://www.geeksforgeeks.org/applications-of-queue-data-structure/)
+  where priority is involved.
+* Data compression in Huffman code
+* Event-driven simulation such as customers waiting in a queue.
+* Finding Kth largest/smallest element.
+
+****Advantages of Priority Queue:****
+-------------------------------------
+
+* It helps to access the elements in a faster way. This is because elements in a priority queue are ordered by priority, one can easily retrieve the highest priority element without having to search through the entire queue.
+* The ordering of elements in a Priority Queue is done dynamically. Elements in a priority queue can have their priority values updated, which allows the queue to dynamically reorder itself as priorities change.
+* Efficient algorithms can be implemented. Priority queues are used in many algorithms to improve their efficiency, such as Dijkstra’s algorithm for finding the shortest path in a graph and the A\\* search algorithm for pathfinding.
+* Included in real-time systems. This is because priority queues allow you to quickly retrieve the highest priority element, they are often used in real-time systems where time is of the essence.
+
+****Disadvantages of Priority Queue:****
+----------------------------------------
+
+* High complexity. Priority queues are more complex than simple data structures like arrays and linked lists, and may be more difficult to implement and maintain.
+* High consumption of memory. Storing the priority value for each element in a priority queue can take up additional memory, which may be a concern in systems with limited resources.
+* It is not always the most efficient data structure. In some cases, other data structures like heaps or binary search trees may be more efficient for certain operations, such as finding the minimum or maximum element in the queue.
+* At times it is less predictable:. This is because the order of elements in a priority queue is determined by their priority values, the order in which elements are retrieved may be less predictable than with other data structures like stacks or queues, which follow a first-in, first-out (FIFO) or last-in, first-out (LIFO) order.
+', 'A priority queue is a type of queue that arranges elements based on their priority values. Elements with higher priority values are typically retrieved or removed before elements with lower priority values. Each element has a priority value associated with it. When we add an item, it is inserted in a position based on its priority value.', 'What is Priority Queue | Introduction to Priority Queue', 10, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('7106768d-cb8a-49a3-b944-1aa4e1266f10', e'Need of Recursive Function:
+---------------------------
+
+
+A recursive function is a function that solves a problem by solving smaller instances of the same problem. This technique is often used in programming to solve problems that can be broken down into simpler, similar subproblems.
+
+
+### 1. ****Solving complex tasks:****
+
+
+Recursive functions break complex problems into smaller instances of the same problem, resulting in compact and readable code.
+
+
+### 2. Divide and Conquer:
+
+
+Recursive functions are suitable for divide-and-conquer algorithms such as merge sort and quicksort, breaking problems into smaller subproblems, solving them recursively, and merging the solutions with the original problem.
+
+
+### 3. ****Backtracking**** :
+
+
+Recursive backtracking is ideal for exploring and solving problems like N-Queens and Sudoku.
+
+
+
+### 4. Dynamic ****programming:****
+
+
+Recursive functions efficiently solve dynamic programming problems by solving subproblems and combining their solutions into a complete solution.
+
+
+### 5. Tree and ****graph structures:****
+
+
+Recursive functions are great for working with tree and graph structures, simplifying traversal and pattern recognition tasks
+
+****.****
+
+How to write a Recursive Function:
+----------------------------------
+
+### Components of a recursive function:
+
+****Base case:****
+Every recursive function must have a base case. The base case is the simplest scenario that does not require further recursion. This is a termination condition that prevents the function from calling itself indefinitely. Without a proper base case, a recursive function can lead to infinite recursion.
+
+
+****Recursive case:****
+In the recursive case, the function calls itself with the modified arguments. This is the essence of recursion – solving a larger problem by breaking it down into smaller instances of the same problem. The recursive case should move closer to the base case with each iteration.
+
+
+Let’s consider the example of
+
+[factorial of number](https://www.geeksforgeeks.org/program-for-factorial-of-a-number/)
+:
+
+
+In this example, the base case is when
+
+****n****
+is
+
+****0****
+, and the function returns
+
+****1****
+. The recursive case multiplies
+
+****n****
+with the result of the function called with parameter
+
+****n – 1****
+. The process continues until the base case is reached.
+
+
+It’s essential to ensure that the recursive function has a correct base case and that the recursive calls lead to the base case, otherwise, the procedure might run indefinitely, leading to a stack overflow (exceeding the available memory allocated for function calls).
+
+
+Below is the implementation of factorial of a number:
+
+
+C++
+
+````
+#include <iostream>
+using namespace std;
+
+// Recursive Function to calculate Factorial of a number
+int factorial(int n)
+{
+    // Base case
+    if (n == 0) {
+        return 1;
+    }
+
+    // Recursive case
+    return n * factorial(n - 1);
+}
+
+// Driver Code
+
+int main()
+{
+    int n = 4;
+
+    cout << "Factorial of " << n
+         << " is:" << factorial(n);
+    return 0;
+}
+
+````
+
+Java
+
+````
+import java.util.Scanner;
+
+public class Factorial {
+    // Recursive Function to calculate the factorial of a number
+    static int factorial(int n) {
+        // Base case: If n is 0, the factorial is 1.
+        if (n == 0) {
+            return 1;
+        }
+
+        // Recursive case: Calculate the factorial by multiplying n with the factorial of (n - 1).
+        return n * factorial(n - 1);
+    }
+
+    public static void main(String[] args) {
+        int n = 4;
+
+        // Calculate and print the factorial of n.
+        int result = factorial(n);
+        System.out.println("Factorial of " + n + " is: " + result);
+    }
+}
+
+````
+
+Python
+
+````
+# Recursive Function to calculate Factorial of a number
+def factorial(n):
+    # Base case
+    if n == 0:
+        return 1
+
+    # Recursive case
+    return n * factorial(n - 1)
+
+# Driver Code
+if __name__ == "__main__":
+    n = 4
+
+    print("Factorial of", n, "is:", factorial(n))
+
+````
+
+C#
+
+````
+using System;
+
+class Program
+{
+    // Recursive Function to calculate Factorial of a number
+    static int Factorial(int n)
+    {
+        // Base case
+        if (n == 0)
+        {
+            return 1;
+        }
+
+        // Recursive case
+        return n * Factorial(n - 1);
+    }
+
+    // Driver Code
+    static void Main()
+    {
+        int n = 4;
+
+        Console.WriteLine("Factorial of " + n + " is: " + Factorial(n));
+    }
+}
+
+````
+
+JavaScript
+
+````
+// Function to calculate the factorial of a number using recursion
+function factorial(n) {
+    // Base case: If n is 0, the factorial is 1.
+    if (n === 0) {
+        return 1;
+    }
+
+    // Recursive case: Calculate the factorial by multiplying n with the factorial of (n - 1).
+    return n * factorial(n - 1);
+}
+
+// Main function
+function main() {
+    // Given number
+    let n = 4;
+
+    // Calculate the factorial of n.
+    let result = factorial(n);
+
+    // Print the result
+    console.log("Factorial of " + n + " is: " + result);
+}
+
+// Call the main function
+main();
+
+````
+
+
+
+
+**Output**
+```
+Factorial of 4 is:24
+```
+
+****Time Complexity:****
+O(n)
+
+
+
+****Auxiliary Space:****
+O(n)
+
+', 'In other words, a recursive function is a function that solves a problem by solving smaller instances of the same problem. This technique is commonly used in programming to solve problems that can be broken down into simpler, similar subproblems.', 'Recursive Functions', 11, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('6477db8f-1fdf-4441-80b4-09122d290265', e'
 [Factorial](https://www.geeksforgeeks.org/factorial/)
 of a number
@@ -32249,199 +25819,6 @@ Disadvantages of Doubly Linked List
   require additional pointers for each node.
 * ****More memory overhead:**** Doubly linked lists require more memory overhead than singly linked
   lists, as each node stores two pointers instead of one.', 'A doubly linked list is a more complex data structure than a singly linked list, but it offers several advantages. The main advantage of a doubly linked list is that it allows for efficient traversal of the list in both directions. This is because each node in the list contains a pointer to the previous node and a pointer to the next node. This allows for quick and easy insertion and deletion of nodes from the list, as well as efficient traversal of the list in both directions.', 'Doubly Linked List Tutorial', 2, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ff4db851-5e60-40f5-9ff9-ab98645fc05c', e'**Types of Queues:**
-
-There are **five different types of queues** that are used in
-different scenarios. They are:
-
-1. Input Restricted Queue (this is a Simple Queue)
-2. Output Restricted Queue (this is also a Simple Queue)
-3. Circular Queue
-4. Double Ended Queue (Deque)
-5. Priority Queue
-   * Ascending Priority Queue
-   * Descending Priority Queue
-
-![Types of Queues](https://media.geeksforgeeks.org/wp-content/uploads/20220623134709/typesofqueues.jpg)
-
-Types of Queues
-
-**1.** [**Circular Queue**](https://www.geeksforgeeks.org/circular-queue-set-1-introduction-array-implementation/)**:** Circular Queue is a linear data structure in which the
-operations are performed based on FIFO (First In First Out) principle and
-the last position is connected back to the first position to make a
-circle. It is also called **‘Ring Buffer’**. This queue is
-primarily used in the following cases:
-
-1. **Memory Management:** The unused memory locations in the
-   case of ordinary queues can be utilized in circular queues.
-2. **Traffic system:** In a computer-controlled traffic
-   system, circular queues are used to switch on the traffic lights one by
-   one repeatedly as per the time set.
-3. **CPU Scheduling:** Operating systems often maintain a
-   queue of processes that are ready to execute or that are waiting for a
-   particular event to occur.
-
-The time complexity for the circular Queue is O(1).
-
-**2. Input restricted Queue:** In this type of Queue, the
-input can be taken from one side only(rear) and deletion of elements can
-be done from both sides(front and rear). This kind of Queue does not
-follow FIFO(first in first out).  This queue is used in cases where
-the consumption of the data needs to be in FIFO order but if there is a
-need to remove the recently inserted data for some reason and one such
-case can be irrelevant data, performance issue, etc.
-
-
-
-![Input Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131417/inputrestrictedqueue.jpg)
-
-Input Restricted Queue
-
-**Advantages of Input restricted Queue:**
-
-* Prevents overflow and overloading of the queue by limiting the number of
-  items added
-* Helps maintain stability and predictable performance of the system
-
-**Disadvantages of Input restricted Queue:**
-
-* May lead to resource wastage if the restriction is set too low and items
-  are frequently discarded
-* May lead to waiting or blocking if the restriction is set too high and
-  the queue is full, preventing new items from being added.
-
-**3. Output restricted Queue:** In this type of Queue, the
-input can be taken from both sides(rear and front) and the deletion of the
-element can be done from only one side(front).  This queue is used in
-the case where the inputs have some priority order to be executed and the
-input can be placed even in the first place so that it is executed
-first.
-
-![Output Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131455/outputrestrictedqueue.jpg)
-
-Output Restricted Queue
-
-**4.** [**Double ended Queue**](https://www.geeksforgeeks.org/deque-set-1-introduction-applications/)**:** Double Ended Queue is also a Queue data structure in
-which the insertion and deletion operations are performed at both the ends
-(front and rear). That means, we can insert at both front and rear
-positions and can delete from both front and rear positions.  Since
-Deque supports both stack and queue operations, it can be used as both.
-The Deque data structure supports clockwise and anticlockwise rotations in
-O(1) time which can be useful in certain applications. Also, the problems
-where elements need to be removed and or added both ends can be
-efficiently solved using Deque.
-
-![Double Ended Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131811/doubleended.jpg)
-
-Double Ended Queue
-
-**5.** [**Priority Queue**](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/)**:** A priority queue is a special type of queue in which
-each element is associated with a priority and is served according to its
-priority. There are two types of Priority Queues. They are:
-
-1. **Ascending Priority Queue:** Element can be inserted
-   arbitrarily but only smallest element can be removed. For example,
-   suppose there is an array having elements 4, 2, 8 in the same order. So,
-   while inserting the elements, the insertion will be in the same sequence
-   but while deleting, the order will be 2, 4, 8.
-2. **Descending priority Queue:** Element can be inserted
-   arbitrarily but only the largest element can be removed first from the
-   given Queue. For example, suppose there is an array having elements 4,
-   2, 8 in the same order. So, while inserting the elements, the insertion
-   will be in the same sequence but while deleting, the order will be 8, 4, 2.
-
-The time complexity of the Priority Queue is O(logn).
-
-[**Applications of a Queue:**](https://www.geeksforgeeks.org/applications-of-queue-data-structure/)
-
-The [queue](https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation is used when things don’t have to be processed immediately, but have to be processed in First In First Out order like [Breadth First Search](https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/). This property of Queue makes it also useful in the following kind of scenarios.
-
-1. When a resource is shared among multiple consumers. Examples include   [CPU scheduling](https://www.geeksforgeeks.org/cpu-scheduling-in-operating-systems/),   [Disk Scheduling](https://www.geeksforgeeks.org/disk-scheduling-algorithms/).
-2. When data is transferred asynchronously (data not necessarily received
-   at the same rate as sent) between two processes. Examples include IO
-   Buffers, [pipes](https://www.geeksforgeeks.org/piping-in-unix-or-linux/), file IO, etc.
-3. Linear Queue: A linear queue is a type of queue where data elements are
-   added to the end of the queue and removed from the front of the queue.
-   Linear queues are used in applications where data elements need to be
-   processed in the order in which they are received. Examples include
-   printer queues and message queues.
-4. Circular Queue: A circular queue is similar to a linear queue, but the
-   end of the queue is connected to the front of the queue. This allows for
-   efficient use of space in memory and can improve performance. Circular
-   queues are used in applications where the data elements need to be
-   processed in a circular fashion. Examples include CPU scheduling and
-   memory management.
-5. Priority Queue: A priority queue is a type of queue where each element
-   is assigned a priority level. Elements with higher priority levels are
-   processed before elements with lower priority levels. Priority queues
-   are used in applications where certain tasks or data elements need to be
-   processed with higher priority. Examples include operating system task
-   scheduling and network packet scheduling.
-6. Double-ended Queue: A double-ended queue, also known as a deque, is a
-   type of queue where elements can be added or removed from either end of
-   the queue. This allows for more flexibility in data processing and can
-   be used in applications where elements need to be processed in multiple
-   directions. Examples include job scheduling and searching algorithms.
-7. Concurrent Queue: A concurrent queue is a type of queue that is designed
-   to handle multiple threads accessing the queue simultaneously.
-   Concurrent queues are used in multi-threaded applications where data
-   needs to be shared between threads in a thread-safe manner. Examples
-   include database transactions and web server requests.
-
-**Issues of Queue :**
-
-Some common issues that can arise when using queues:
-
-1. Queue overflow: Queue overflow occurs when the queue reaches its maximum
-   capacity and is unable to accept any more elements. This can cause data
-   loss and can lead to application crashes.
-2. Queue underflow: Queue underflow occurs when an attempt is made to
-   remove an element from an empty queue. This can cause errors and
-   application crashes.
-3. Priority inversion: Priority inversion occurs in priority queues when a
-   low-priority task holds a resource that a high-priority task needs. This
-   can cause delays in processing and can impact system performance.
-4. Deadlocks: Deadlocks occur when multiple threads or processes are
-   waiting for each other to release resources, resulting in a situation
-   where none of the threads can proceed. This can happen when using
-   concurrent queues and can lead to system crashes.
-5. Performance issues: Queue performance can be impacted by various
-   factors, such as the size of the queue, the frequency of access, and the
-   type of operations performed on the queue. Poor queue performance can
-   lead to slower system performance and reduced user experience.
-6. Synchronization issues: Synchronization issues can arise when multiple
-   threads are accessing the same queue simultaneously. This can result in
-   data corruption, race conditions, and other errors.
-7. Memory management issues: Queues can use up significant amounts of
-   memory, especially when processing large data sets. Memory leaks and
-   other memory management issues can occur, leading to system crashes and
-   other errors.
-
-**Reference :**
-
-Some references for further reading on queues:
-
-1. “Data Structures and Algorithms in Java” by Robert Lafore – This book
-   provides an in-depth explanation of different types of queues and their
-   implementations in Java.
-2. “Introduction to Algorithms” by Thomas H. Cormen et al. – This textbook
-   covers the basic concepts of data structures and algorithms, including
-   queues and their various applications.
-3. “Concurrency in C# Cookbook” by Stephen Cleary – This book provides
-   practical examples of how to use concurrent queues in C# programming.
-4. “Queue (abstract data type)” on Wikipedia – This article provides an
-   overview of queues and their properties, as well as examples of their
-   applications.
-5. “The Art of Computer Programming, Volume 1: Fundamental Algorithms” by
-   Donald E. Knuth – This book includes a detailed analysis of different
-   queue algorithms and their performance.
-6. “Queues and the Producer-Consumer Problem” by Douglas C. Schmidt – This
-   paper discusses how queues can be used to solve the producer-consumer
-   problem in concurrent programming.', e'Queue is a linear structure that follows a particular order in which the
-operations are performed. The order is First In First Out (FIFO). A good
-example of a queue is any queue of consumers for a resource where the
-consumer that came first is served first. In this article, the different
-types of queues are discussed.', 'Different Types of Queues and its Applications', 2, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('c8c6920e-7046-48a4-8dbe-89905c592b0d', e'
 [Time Complexity](https://www.geeksforgeeks.org/understanding-time-complexity-simple-examples/)
 is a concept in computer science that deals with the quantification of the amount of time taken by a set of code or
@@ -32667,2169 +26044,6 @@ The basic operations that can be performed on a stack include push, pop, and pee
 * [****Implementation of Stack using Linked List****](https://www.geeksforgeeks.org/implement-a-stack-using-singly-linked-list/)
 
 ', 'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 8, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('1c9888f0-5d92-4cf6-b41a-deff87b117b1', e'
-Table of Content
-
-* [Operations on Circular Queue](#operations-on-circular-queue)
-* [Implement Circular Queue using Array](#implement-circular-queue-using-array)
-* [Complexity Analysis of Circular Queue Operations](#complexity-analysis-of-circular-queue-operations)
-### Operations on Circular Queue
-
-* ****getFront:****
-  Get the front item from the queue.
-* ****getRear:****
-  Get the last item from the queue.
-* ****enqueue(value):****
-  To
-
-  ****insert****
-  an element into the circular queue. In a circular queue, the new element is always inserted at the rear position.
-* ****dequeue()****
-  : To
-
-  ****delete****
-  an element from the circular queue. In a circular queue, the element is always deleted from the front position.
-
-### Implement Circular Queue using Array
-
-1. Initialize an
-
-   ****array****
-   of
-
-   ****size n****
-   , where
-
-   ****n is the maximum number of element****
-   s that the queue can hold.
-2. Initialize
-
-   ****three variables (size, capacity, and front.)****
-3. ****Enqueue:****
-   To enqueue an
-
-   ****element x****
-   into the queue, do the following:
-   1. Check if
-
-      ****size == capacity****
-      (queue is full), display
-
-      ****“Queue is full”.****
-   2. If not full: calculate
-
-      ****rear = (front + size) % capacity****
-      and
-
-      ****Insert****
-      value at the rear index.
-
-      ****Increment****
-      size by 1.
-4. ****Dequeue:****
-   To dequeue an element from the queue, do the following:
-   1. Check if
-
-      ****size == 0 (****
-      queue is empty), display
-
-      ****“Queue is empty”.****
-   2. If not empty:
-
-      ****retrieve****
-      the element at the
-
-      ****front index****
-      and
-
-      ****move front = (front + 1) % capacity****
-      . Also,
-
-      ****decrement****
-      size by 1 and
-
-      ****return the removed element.****
-
-****Illustration of Circular Queue****
-:
-
-
-
-
-
-
-
-
-
-****Below is the implementation of above approach:****
-
-C++
-
-````
-// C++ program for insertion and
-// deletion in Circular Queue
-#include <iostream>
-using namespace std;
-
-class MyQueue {
-private:
-    int *arr;
-    int front, size;
-    int capacity;
-
-public:
-
-    // Constructor to initialize the queue
-    MyQueue(int c) {
-        arr = new int[c];
-        capacity = c;
-        size = 0;
-        front = 0;
-    }
-
-    // Get the front element
-    int getFront() {
-
-        // Queue is empty
-        if (size == 0)
-            return -1;
-        return arr[front];
-    }
-
-    // Get the rear element
-    int getRear() {
-
-        // Queue is empty
-        if (size == 0)
-            return -1;
-        int rear = (front + size - 1) % capacity;
-        return arr[rear];
-    }
-
-    // Insert an element at the rear
-    void enqueue(int x) {
-
-        // Queue is full
-        if (size == capacity)
-            return;
-        int rear = (front + size) % capacity;
-        arr[rear] = x;
-        size++;
-    }
-
-    // Remove an element from the front
-    int dequeue() {
-
-        // Queue is empty
-        if (size == 0)
-            return -1;
-        int res = arr[front];
-        front = (front + 1) % capacity;
-        size--;
-        return res;
-    }
-};
-
-int main() {
-    MyQueue q(4);
-    q.enqueue(10);
-    cout << q.getFront() << " " << q.getRear() << endl;
-    q.enqueue(20);
-    cout << q.getFront() << " " << q.getRear() << endl;
-    q.enqueue(30);
-    cout << q.getFront() << " " << q.getRear() << endl;
-    q.enqueue(40);
-    cout << q.getFront() << " " << q.getRear() << endl;
-    q.dequeue();
-    cout << q.getFront() << " " << q.getRear() << endl;
-    q.dequeue();
-    cout << q.getFront() << " " << q.getRear() << endl;
-    q.enqueue(50);
-    cout << q.getFront() << " " << q.getRear() << endl;
-    return 0;
-}
-
-````
-
-Java
-
-````
-// Java program for insertion and
-// deletion in Circular Queue
-class MyQueue {
-    private int[] arr;
-    private int front;
-    private int size;
-    private int capacity;
-
-    // Constructor to initialize the queue
-    public MyQueue(int c) {
-        arr = new int[c];
-        capacity = c;
-        size = 0;
-        front = 0;
-    }
-
-    // Get the front element
-    public int getFront() {
-
-        // Queue is empty
-        if (size == 0)
-            return -1;
-        return arr[front];
-    }
-
-    // Get the rear element
-    public int getRear() {
-
-        // Queue is empty
-        if (size == 0)
-            return -1;
-        int rear = (front + size - 1) % capacity;
-        return arr[rear];
-    }
-
-    // Insert an element at the rear
-    public void enqueue(int x) {
-
-        // Queue is full
-        if (size == capacity)
-            return;
-        int rear = (front + size) % capacity;
-        arr[rear] = x;
-        size++;
-    }
-
-    // Remove an element from the front
-    public int dequeue() {
-
-        // Queue is empty
-        if (size == 0)
-            return -1;
-        int res = arr[front];
-        front = (front + 1) % capacity;
-        size--;
-        return res;
-    }
-}
-
-class GfG {
-
-    public static void main(String[] args) {
-        MyQueue q = new MyQueue(4);
-        q.enqueue(10);
-        System.out.println(q.getFront() + " " + q.getRear());
-        q.enqueue(20);
-        System.out.println(q.getFront() + " " + q.getRear());
-        q.enqueue(30);
-        System.out.println(q.getFront() + " " + q.getRear());
-        q.enqueue(40);
-        System.out.println(q.getFront() + " " + q.getRear());
-        q.dequeue();
-        System.out.println(q.getFront() + " " + q.getRear());
-        q.dequeue();
-        System.out.println(q.getFront() + " " + q.getRear());
-        q.enqueue(50);
-        System.out.println(q.getFront() + " " + q.getRear());
-    }
-}
-
-````
-
-Python
-
-````
-# python3 program for insertion and
-# deletion in Circular Queue
-class MyQueue:
-    def __init__(self, c):
-        self.l = [None] * c
-        self.cap = c
-        self.size = 0
-        self.front = 0
-
-    def getFront(self):
-
-        # Check if queue is empty
-        if self.size == 0:
-            return None
-        return self.l[self.front]
-
-    def getRear(self):
-
-        # Check if queue is empty
-        if self.size == 0:
-            return None
-
-        # Calculate rear index
-        rear = (self.front + self.size - 1) % self.cap
-        return self.l[rear]
-
-    def enqueue(self, x):
-
-        # Check if queue is full
-        if self.size == self.cap:
-            return
-
-        # Calculate rear index
-        rear = (self.front + self.size) % self.cap
-        self.l[rear] = x
-        self.size += 1
-
-    def dequeue(self):
-
-        # Check if queue is empty
-        if self.size == 0:
-            return None
-        res = self.l[self.front]
-
-        # Move front index circularly
-        self.front = (self.front + 1) % self.cap
-        self.size -= 1
-        return res
-
-q = MyQueue(4)
-q.enqueue(10)
-print(q.getFront(), q.getRear())
-q.enqueue(20)
-print(q.getFront(), q.getRear())
-q.enqueue(30)
-print(q.getFront(), q.getRear())
-q.enqueue(40)
-print(q.getFront(), q.getRear())
-q.dequeue()
-print(q.getFront(), q.getRear())
-q.dequeue()
-print(q.getFront(), q.getRear())
-q.enqueue(50)
-print(q.getFront(), q.getRear())
-
-````
-
-C#
-
-````
-// C# program for insertion and
-// deletion in Circular Queue
-using System;
-
-class MyQueue {
-    private int[] arr;
-    private int front;
-    private int size;
-    private int capacity;
-
-    // Constructor to initialize the queue
-    public MyQueue(int c) {
-        arr = new int[c];
-        capacity = c;
-        size = 0;
-        front = 0;
-    }
-
-    // Get the front element
-    public int getFront() {
-
-        // Queue is empty
-        if (size == 0)
-          return -1;
-        return arr[front];
-    }
-
-    // Get the rear element
-    public int getRear() {
-
-        // Queue is empty
-        if (size == 0)
-          return -1;
-        int rear = (front + size - 1) % capacity;
-        return arr[rear];
-    }
-
-    // Insert an element at the rear
-    public void enqueue(int x) {
-
-        // Queue is full
-        if (size == capacity) return;
-        int rear = (front + size) % capacity;
-        arr[rear] = x;
-        size++;
-    }
-
-    // Remove an element from the front
-    public int dequeue() {
-
-        // Queue is empty
-        if (size == 0) return -1;
-        int res = arr[front];
-        front = (front + 1) % capacity;
-        size--;
-        return res;
-    }
-}
-class GfG {
-
-        static void Main(string[] args) {
-        MyQueue q = new MyQueue(4);
-        q.enqueue(10);
-        Console.WriteLine(q.getFront() + " " + q.getRear());
-        q.enqueue(20);
-        Console.WriteLine(q.getFront() + " " + q.getRear());
-        q.enqueue(30);
-        Console.WriteLine(q.getFront() + " " + q.getRear());
-        q.enqueue(40);
-        Console.WriteLine(q.getFront() + " " + q.getRear());
-        q.dequeue();
-        Console.WriteLine(q.getFront() + " " + q.getRear());
-        q.dequeue();
-        Console.WriteLine(q.getFront() + " " + q.getRear());
-        q.enqueue(50);
-        Console.WriteLine(q.getFront() + " " + q.getRear());
-    }
-}
-
-````
-
-JavaScript
-
-````
-// JS program for insertion and
-// deletion in Circular Queue
-class MyQueue {
-    constructor(c) {
-        this.arr = new Array(c).fill(null);
-        this.capacity = c;
-        this.size = 0;
-        this.front = 0;
-    }
-
-    // Get the front element
-    getFront() {
-
-        // Queue is empty
-        if (this.size === 0) return null;
-        return this.arr[this.front];
-    }
-
-    // Get the rear element
-    getRear() {
-
-        // Queue is empty
-        if (this.size === 0) return null;
-        let rear = (this.front + this.size - 1) % this.capacity;
-        return this.arr[rear];
-    }
-
-    // Insert an element at the rear
-    enqueue(x) {
-
-        // Queue is full
-        if (this.size === this.capacity) return;
-        let rear = (this.front + this.size) % this.capacity;
-        this.arr[rear] = x;
-        this.size++;
-    }
-
-    // Remove an element from the front
-    dequeue() {
-
-        // Queue is empty
-        if (this.size === 0) return null;
-        let res = this.arr[this.front];
-        this.front = (this.front + 1) % this.capacity;
-        this.size--;
-        return res;
-    }
-}
-
-const q = new MyQueue(4);
-q.enqueue(10);
-console.log(q.getFront(), q.getRear());
-q.enqueue(20);
-console.log(q.getFront(), q.getRear());
-q.enqueue(30);
-console.log(q.getFront(), q.getRear());
-q.enqueue(40);
-console.log(q.getFront(), q.getRear());
-q.dequeue();
-console.log(q.getFront(), q.getRear());
-q.dequeue();
-console.log(q.getFront(), q.getRear());
-q.enqueue(50);
-console.log(q.getFront(), q.getRear());
-
-````
-
-
-
-
-**Output**
-```
-10 10
-10 20
-10 30
-10 40
-20 40
-30 40
-30 50
-
-```
-### Complexity Analysis of Circular Queue Operations
-
-****Time Complexity:****
-
-****Auxiliary Space:****
-O(size), where
-
-****size****
-is the number of elements in the circular queue.
-', e'A Circular Queue is another way of implementing a normal queue
-where the last element of the queue is connected
-to the first element of the queue forming a circle.', 'Introduction to Circular Queue', 9, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('192cb6e4-14cd-4265-9d7d-7cbf5bc0817f', e'****Properties of Priority Queue****
-------------------------------------
-
-*****So, a priority Queue is an extension of the*****
-[*****queue*****](https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/)
-*****with the following properties.*****
-
-* Every item has a priority associated with it.
-* An element with high priority is dequeued before an element with low priority.
-* If two elements have the same priority, they are served according to their order in the queue.
-
-
-In the below priority queue, an element with a maximum ASCII value will have the highest priority. The elements with higher priority are served first.
-
-
-![](https://media.geeksforgeeks.org/wp-content/cdn-uploads/Priority-Queue-min-1024x512.png)
-
-****How is Priority assigned to the elements in a Priority Queue?****
----------------------------------------------------------------------
-
-
-In a priority queue, generally, the value of an element is considered for assigning the priority.
-
-
-For example, the element with the highest value is assigned the highest priority and the element with the lowest value is assigned the lowest priority. The reverse case can also be used i.e., the element with the lowest value can be assigned the highest priority. Also, the priority can be assigned according to our needs.
-
-
-****Operations of a Priority Queue:****
----------------------------------------
-
-
-A typical priority queue supports the following operations:
-
-
-### ****1) Insertion in a Priority Queue****
-
-
-When a new element is inserted in a priority queue, it moves to the empty slot from top to bottom and left to right. However, if the element is not in the correct place then it will be compared with the parent node. If the element is not in the correct order, the elements are swapped. The swapping process continues until all the elements are placed in the correct position.
-
-
-### ****2) Deletion in a Priority Queue****
-
-
-As you know that in a max heap, the maximum element is the root node. And it will remove the element which has maximum priority first. Thus, you remove the root node from the queue. This removal creates an empty slot, which will be further filled with new insertion. Then, it compares the newly inserted element with all the elements inside the queue to maintain the heap invariant.
-
-
-### ****3) Peek in a Priority Queue****
-
-
-This operation helps to return the maximum element from Max Heap or the minimum element from Min Heap without deleting the node from the priority queue.
-
-
-Types of Priority Queue:
-------------------------
-
-### ****1) Ascending Order Priority Queue****
-
-
-As the name suggests, in ascending order priority queue, the element with a lower priority value is given a higher priority in the priority list. For example, if we have the following elements in a priority queue arranged in ascending order like 4,6,8,9,10. Here, 4 is the smallest number, therefore, it will get the highest priority in a priority queue and so when we dequeue from this type of priority queue, 4 will remove from the queue and dequeue returns 4.
-
-
-### ****2) Descending order Priority Queue****
-
-
-The root node is the maximum element in a max heap, as you may know. It will also remove the element with the highest priority first. As a result, the root node is removed from the queue. This deletion leaves an empty space, which will be filled with fresh insertions in the future. The heap invariant is then maintained by comparing the newly inserted element to all other entries in the queue.
-
-
-![Types of Priority Queues](https://media.geeksforgeeks.org/wp-content/uploads/20220623153252/priorityqueue.jpg)
-
-Types of Priority Queues
-
-****Difference between Priority Queue and Normal Queue?****
------------------------------------------------------------
-
-
-There is no priority attached to elements in a queue, the rule of first-in-first-out(FIFO) is implemented whereas, in a priority queue, the elements have a priority. The elements with higher priority are served first.
-
-
-****How to Implement Priority Queue?****
-----------------------------------------
-
-
-Priority queue can be implemented using the following data structures:
-
-
-* Arrays
-* Linked list
-* Heap data structure
-* Binary search tree
-
-****Let’s discuss all these in detail.****
-
-### ****1) Implement Priority Queue Using Array:****
-
-
-A simple implementation is to use an array of the following structure.
-
-
-> struct item {
->
->
->
-> int item;
->
->
->
-> int priority;
->
->
->
-> }
-
-* ****enqueue():****
-  This function is used to insert new data into the queue.
-* ****dequeue():****
-  This function removes the element with the highest priority from the queue.
-* ****peek()/top():****
-  This function is used to get the highest priority element in the queue without removing it from the queue.
-
-C++
-
-````
-// C++ program to implement Priority Queue
-// using Arrays
-#include <bits/stdc++.h>
-using namespace std;
-
-// Structure for the elements in the
-// priority queue
-struct item {
-    int value;
-    int priority;
-};
-
-// Store the element of a priority queue
-item pr[100000];
-
-// Pointer to the last index
-int size = -1;
-
-// Function to insert a new element
-// into priority queue
-void enqueue(int value, int priority)
-{
-    // Increase the size
-    size++;
-
-    // Insert the element
-    pr[size].value = value;
-    pr[size].priority = priority;
-}
-
-// Function to check the top element
-int peek()
-{
-    int highestPriority = INT_MIN;
-    int ind = -1;
-
-    // Check for the element with
-    // highest priority
-    for (int i = 0; i <= size; i++) {
-
-        // If priority is same choose
-        // the element with the
-        // highest value
-        if (highestPriority == pr[i].priority && ind > -1
-            && pr[ind].value < pr[i].value) {
-            highestPriority = pr[i].priority;
-            ind = i;
-        }
-        else if (highestPriority < pr[i].priority) {
-            highestPriority = pr[i].priority;
-            ind = i;
-        }
-    }
-
-    // Return position of the element
-    return ind;
-}
-
-// Function to remove the element with
-// the highest priority
-void dequeue()
-{
-    // Find the position of the element
-    // with highest priority
-    int ind = peek();
-
-    // Shift the element one index before
-    // from the position of the element
-    // with highest priority is found
-    for (int i = ind; i < size; i++) {
-        pr[i] = pr[i + 1];
-    }
-
-    // Decrease the size of the
-    // priority queue by one
-    size--;
-}
-
-// Driver Code
-int main()
-{
-    // Function Call to insert elements
-    // as per the priority
-    enqueue(10, 2);
-    enqueue(14, 4);
-    enqueue(16, 4);
-    enqueue(12, 3);
-
-    // Stores the top element
-    // at the moment
-    int ind = peek();
-
-    cout << pr[ind].value << endl;
-
-    // Dequeue the top element
-    dequeue();
-
-    // Check the top element
-    ind = peek();
-    cout << pr[ind].value << endl;
-
-    // Dequeue the top element
-    dequeue();
-
-    // Check the top element
-    ind = peek();
-    cout << pr[ind].value << endl;
-
-    return 0;
-}
-
-````
-
-Java
-
-````
-// Java program to implement Priority Queue
-// using Arrays
-import java.util.*;
-
-// Structure for the elements in the
-// priority queue
-class item {
-  public int value;
-  public int priority;
-};
-
-class GFG {
-
-  // Store the element of a priority queue
-  static item[] pr = new item[100000];
-
-  // Pointer to the last index
-  static int size = -1;
-  // Function to insert a new element
-  // into priority queue
-  static void enqueue(int value, int priority)
-  {
-    // Increase the size
-    size++;
-
-    // Insert the element
-    pr[size] = new item();
-    pr[size].value = value;
-    pr[size].priority = priority;
-  }
-
-  // Function to check the top element
-  static int peek()
-  {
-    int highestPriority = Integer.MIN_VALUE;
-    int ind = -1;
-
-    // Check for the element with
-    // highest priority
-    for (int i = 0; i <= size; i++) {
-
-      // If priority is same choose
-      // the element with the
-      // highest value
-      if (highestPriority == pr[i].priority
-          && ind > -1
-          && pr[ind].value < pr[i].value) {
-        highestPriority = pr[i].priority;
-        ind = i;
-      }
-      else if (highestPriority < pr[i].priority) {
-        highestPriority = pr[i].priority;
-        ind = i;
-      }
-    }
-
-    // Return position of the element
-    return ind;
-  }
-
-  // Function to remove the element with
-  // the highest priority
-  static void dequeue()
-  {
-    // Find the position of the element
-    // with highest priority
-    int ind = peek();
-
-    // Shift the element one index before
-    // from the position of the element
-    // with highest priority is found
-    for (int i = ind; i < size; i++) {
-      pr[i] = pr[i + 1];
-    }
-
-    // Decrease the size of the
-    // priority queue by one
-    size--;
-  }
-
-  public static void main(String[] args)
-  {
-    // Function Call to insert elements
-    // as per the priority
-    enqueue(10, 2);
-    enqueue(14, 4);
-    enqueue(16, 4);
-    enqueue(12, 3);
-
-    // Stores the top element
-    // at the moment
-    int ind = peek();
-
-    System.out.println(pr[ind].value);
-
-    // Dequeue the top element
-    dequeue();
-
-    // Check the top element
-    ind = peek();
-    System.out.println(pr[ind].value);
-
-    // Dequeue the top element
-    dequeue();
-
-    // Check the top element
-    ind = peek();
-    System.out.println(pr[ind].value);
-  }
-}
-
-// this code is contributed by phasing17
-
-````
-
-Python
-
-````
-import sys
-
-# Structure for the elements in the
-# priority queue
-class item :
-    value = 0
-    priority = 0
-class GFG :
-
-    # Store the element of a priority queue
-    pr = [None] * (100000)
-
-    # Pointer to the last index
-    size = -1
-
-    # Function to insert a new element
-    # into priority queue
-    @staticmethod
-    def enqueue( value,  priority) :
-
-        # Increase the size
-        GFG.size += 1
-
-        # Insert the element
-        GFG.pr[GFG.size] = item()
-        GFG.pr[GFG.size].value = value
-        GFG.pr[GFG.size].priority = priority
-
-    # Function to check the top element
-    @staticmethod
-    def  peek() :
-        highestPriority = -sys.maxsize
-        ind = -1
-
-        # Check for the element with
-        # highest priority
-        i = 0
-        while (i <= GFG.size) :
-
-            # If priority is same choose
-            # the element with the
-            # highest value
-            if (highestPriority == GFG.pr[i].priority and ind > -1 and GFG.pr[ind].value < GFG.pr[i].value) :
-                highestPriority = GFG.pr[i].priority
-                ind = i
-            elif(highestPriority < GFG.pr[i].priority) :
-                highestPriority = GFG.pr[i].priority
-                ind = i
-            i += 1
-
-        # Return position of the element
-        return ind
-
-    # Function to remove the element with
-    # the highest priority
-    @staticmethod
-    def dequeue() :
-
-        # Find the position of the element
-        # with highest priority
-        ind = GFG.peek()
-
-        # Shift the element one index before
-        # from the position of the element
-        # with highest priority is found
-        i = ind
-        while (i < GFG.size) :
-            GFG.pr[i] = GFG.pr[i + 1]
-            i += 1
-
-        # Decrease the size of the
-        # priority queue by one
-        GFG.size -= 1
-    @staticmethod
-    def main( args) :
-
-        # Function Call to insert elements
-        # as per the priority
-        GFG.enqueue(10, 2)
-        GFG.enqueue(14, 4)
-        GFG.enqueue(16, 4)
-        GFG.enqueue(12, 3)
-
-        # Stores the top element
-        # at the moment
-        ind = GFG.peek()
-        print(GFG.pr[ind].value)
-
-        # Dequeue the top element
-        GFG.dequeue()
-
-        # Check the top element
-        ind = GFG.peek()
-        print(GFG.pr[ind].value)
-
-        # Dequeue the top element
-        GFG.dequeue()
-
-        # Check the top element
-        ind = GFG.peek()
-        print(GFG.pr[ind].value)
-
-if __name__=="__main__":
-    GFG.main([])
-
-    # This code is contributed by aadityaburujwale.
-
-````
-
-C#
-
-````
-// C# program to implement Priority Queue
-// using Arrays
-
-using System;
-
-// Structure for the elements in the
-// priority queue
-public class item {
-    public int value;
-    public int priority;
-};
-
-
-public class GFG
-{
-
-    // Store the element of a priority queue
-    static item[] pr = new item[100000];
-
-    // Pointer to the last index
-    static int size = -1;
-    // Function to insert a new element
-    // into priority queue
-    static void enqueue(int value, int priority)
-    {
-        // Increase the size
-        size++;
-
-        // Insert the element
-        pr[size] = new item();
-        pr[size].value = value;
-        pr[size].priority = priority;
-    }
-
-    // Function to check the top element
-    static int peek()
-    {
-        int highestPriority =  int.MinValue;
-        int ind = -1;
-
-        // Check for the element with
-        // highest priority
-        for (int i = 0; i <= size; i++) {
-
-            // If priority is same choose
-            // the element with the
-            // highest value
-            if (highestPriority == pr[i].priority && ind > -1
-                && pr[ind].value < pr[i].value) {
-                highestPriority = pr[i].priority;
-                ind = i;
-            }
-            else if (highestPriority < pr[i].priority) {
-                highestPriority = pr[i].priority;
-                ind = i;
-            }
-        }
-
-        // Return position of the element
-        return ind;
-    }
-
-    // Function to remove the element with
-    // the highest priority
-    static void dequeue()
-    {
-        // Find the position of the element
-        // with highest priority
-        int ind = peek();
-
-        // Shift the element one index before
-        // from the position of the element
-        // with highest priority is found
-        for (int i = ind; i < size; i++) {
-            pr[i] = pr[i + 1];
-        }
-
-        // Decrease the size of the
-        // priority queue by one
-        size--;
-    }
-
-    public static void Main(string[] args)
-    {
-         // Function Call to insert elements
-        // as per the priority
-        enqueue(10, 2);
-        enqueue(14, 4);
-        enqueue(16, 4);
-        enqueue(12, 3);
-
-        // Stores the top element
-        // at the moment
-        int ind = peek();
-
-        Console.WriteLine(pr[ind].value);
-
-        // Dequeue the top element
-        dequeue();
-
-        // Check the top element
-        ind = peek();
-        Console.WriteLine(pr[ind].value);
-
-        // Dequeue the top element
-        dequeue();
-
-        // Check the top element
-        ind = peek();
-        Console.WriteLine(pr[ind].value);
-    }
-}
-
-//this code is contributed by phasing17
-
-````
-
-JavaScript
-
-````
-// JavaScript program to implement Priority Queue
-// using Arrays
-
-// Structure for the elements in the
-// priority queue
-class item {
-    constructor()
-    {
-        this.value;
-        this.priority;
-    }
-};
-
-// Store the element of a priority queue
-let pr = [];
-for (var i = 0; i < 100000; i++)
-    pr.push(new item());
-
-// Pointer to the last index
-let size = -1;
-
-// Function to insert a new element
-// into priority queue
-function enqueue(value, priority)
-{
-    // Increase the size
-    size++;
-
-    // Insert the element
-    pr[size] = new item();
-    pr[size].value = value;
-    pr[size].priority = priority;
-}
-
-// Function to check the top element
-function peek()
-{
-    let highestPriority = Number.MIN_SAFE_INTEGER;
-    let ind = -1;
-
-    // Check for the element with
-    // highest priority
-    for (var i = 0; i <= size; i++) {
-
-        // If priority is same choose
-        // the element with the
-        // highest value
-        if (highestPriority == pr[i].priority && ind > -1
-            && pr[ind].value < pr[i].value) {
-            highestPriority = pr[i].priority;
-            ind = i;
-        }
-        else if (highestPriority < pr[i].priority) {
-            highestPriority = pr[i].priority;
-            ind = i;
-        }
-    }
-
-    // Return position of the element
-    return ind;
-}
-
-// Function to remove the element with
-// the highest priority
-function dequeue()
-{
-    // Find the position of the element
-    // with highest priority
-    let ind = peek();
-
-    // Shift the element one index before
-    // from the position of the element
-    // with highest priority is found
-    for (var i = ind; i < size; i++) {
-        pr[i] = pr[i + 1];
-    }
-
-    // Decrease the size of the
-    // priority queue by one
-    size--;
-}
-
-// Function Call to insert elements
-// as per the priority
-enqueue(10, 2);
-enqueue(14, 4);
-enqueue(16, 4);
-enqueue(12, 3);
-
-// Stores the top element
-// at the moment
-let ind = peek();
-
-console.log(pr[ind].value);
-
-// Dequeue the top element
-dequeue();
-
-// Check the top element
-ind = peek();
-console.log(pr[ind].value);
-
-// Dequeue the top element
-dequeue();
-
-// Check the top element
-ind = peek();
-console.log(pr[ind].value);
-
-// this code is contributed by phasing17
-
-````
-
-
-
-
-**Output**
-```
-16
-14
-12
-```
-> ****Note:****
-> Read
->
-> [****this article****](https://www.geeksforgeeks.org/priority-queue-using-array-in-c/)
->
-> for more details.
-
-### ****2) Implement Priority Queue Using Linked List:****
-
-
-In a LinkedList implementation, the entries are sorted in descending order based on their priority. The highest priority element is always added to the front of the priority queue, which is formed using linked lists. The functions like
-
-****push()****
-,
-
-****pop()****
-, and
-
-****peek()****
-are used to implement a priority queue using a linked list and are explained as follows:
-
-
-* ****push():****
-  This function is used to insert new data into the queue.
-* ****pop():****
-  This function removes the element with the highest priority from the queue.
-* ****peek() / top():****
-  This function is used to get the highest priority element in the queue without removing it from the queue.
-
-C++
-
-````
-// C++ code to implement Priority Queue
-// using Linked List
-#include <bits/stdc++.h>
-using namespace std;
-
-// Node
-typedef struct node {
-    int data;
-
-    // Lower values indicate
-    // higher priority
-    int priority;
-
-    struct node* next;
-
-} Node;
-
-// Function to create a new node
-Node* newNode(int d, int p)
-{
-    Node* temp = (Node*)malloc(sizeof(Node));
-    temp->data = d;
-    temp->priority = p;
-    temp->next = NULL;
-
-    return temp;
-}
-
-// Return the value at head
-int peek(Node** head) { return (*head)->data; }
-
-// Removes the element with the
-// highest priority form the list
-void pop(Node** head)
-{
-    Node* temp = *head;
-    (*head) = (*head)->next;
-    free(temp);
-}
-
-// Function to push according to priority
-void push(Node** head, int d, int p)
-{
-    Node* start = (*head);
-
-    // Create new Node
-    Node* temp = newNode(d, p);
-
-    // Special Case: The head of list has
-    // lesser priority than new node
-    if ((*head)->priority < p) {
-
-        // Insert New Node before head
-        temp->next = *head;
-        (*head) = temp;
-    }
-    else {
-
-        // Traverse the list and find a
-        // position to insert new node
-        while (start->next != NULL
-               && start->next->priority > p) {
-            start = start->next;
-        }
-
-        // Either at the ends of the list
-        // or at required position
-        temp->next = start->next;
-        start->next = temp;
-    }
-}
-
-// Function to check is list is empty
-int isEmpty(Node** head) { return (*head) == NULL; }
-
-// Driver code
-int main()
-{
-
-    // Create a Priority Queue
-    // 7->4->5->6
-    Node* pq = newNode(4, 1);
-    push(&pq, 5, 2);
-    push(&pq, 6, 3);
-    push(&pq, 7, 0);
-
-    while (!isEmpty(&pq)) {
-        cout << " " << peek(&pq);
-        pop(&pq);
-    }
-    return 0;
-}
-
-````
-
-Java
-
-````
-// Java code to implement Priority Queue
-// using Linked List
-import java.util.* ;
-
-class Solution
-{
-
-// Node
-static class Node {
-    int data;
-
-    // Lower values indicate higher priority
-    int priority;
-    Node next;
-
-}
-
-static Node node = new Node();
-
-// Function to Create A New Node
-static Node newNode(int d, int p)
-{
-    Node temp = new Node();
-    temp.data = d;
-    temp.priority = p;
-    temp.next = null;
-
-    return temp;
-}
-
-// Return the value at head
-static int peek(Node head)
-{
-    return (head).data;
-}
-
-// Removes the element with the
-// highest priority from the list
-static Node pop(Node head)
-{
-    Node temp = head;
-    (head) = (head).next;
-    return head;
-}
-
-// Function to push according to priority
-static Node push(Node head, int d, int p)
-{
-    Node start = (head);
-
-    // Create new Node
-    Node temp = newNode(d, p);
-
-    // Special Case: The head of list has lesser
-    // priority than new node. So insert new
-    // node before head node and change head node.
-    if ((head).priority < p) {
-
-        // Insert New Node before head
-        temp.next = head;
-        (head) = temp;
-    }
-    else {
-
-        // Traverse the list and find a
-        // position to insert new node
-        while (start.next != null &&
-            start.next.priority > p) {
-            start = start.next;
-        }
-
-        // Either at the ends of the list
-        // or at required position
-        temp.next = start.next;
-        start.next = temp;
-    }
-    return head;
-}
-
-// Function to check is list is empty
-static int isEmpty(Node head)
-{
-    return ((head) == null)?1:0;
-}
-
-// Driver code
-public static void main(String args[])
-{
-    // Create a Priority Queue
-    // 7.4.5.6
-    Node pq = newNode(4, 1);
-    pq =push(pq, 5, 2);
-    pq =push(pq, 6, 3);
-    pq =push(pq, 7, 0);
-
-    while (isEmpty(pq)==0) {
-        System.out.printf("%d ", peek(pq));
-        pq=pop(pq);
-    }
-
-}
-}
-
-// This code is contributed by ishankhandelwals.
-
-````
-
-Python
-
-````
-# Python3 code to implement Priority Queue
-# using Singly Linked List
-
-# Class to create new node which includes
-# Node Data, and Node Priority
-class PriorityQueueNode:
-
-    def _init_(self, value, pr):
-
-        self.data = value
-        self.priority = pr
-        self.next = None
-
-# Implementation of Priority Queue
-
-
-class PriorityQueue:
-
-    def _init_(self):
-
-        self.front = None
-
-    # Method to check Priority Queue is Empty
-    # or not if Empty then it will return True
-    # Otherwise False
-    def isEmpty(self):
-
-        return True if self.front == None else False
-
-    # Method to add items in Priority Queue
-    # According to their priority value
-    def push(self, value, priority):
-
-        # Condition check for checking Priority
-        # Queue is empty or not
-        if self.isEmpty() == True:
-
-            # Creating a new node and assigning
-            # it to class variable
-            self.front = PriorityQueueNode(value,
-                                           priority)
-
-            # Returning 1 for successful execution
-            return 1
-
-        else:
-
-            # Special condition check to see that
-            # first node priority value
-            if self.front.priority < priority:
-
-                # Creating a new node
-                newNode = PriorityQueueNode(value,
-                                            priority)
-
-                # Updating the new node next value
-                newNode.next = self.front
-
-                # Assigning it to self.front
-                self.front = newNode
-
-                # Returning 1 for successful execution
-                return 1
-
-            else:
-
-                # Traversing through Queue until it
-                # finds the next smaller priority node
-                temp = self.front
-
-                while temp.next:
-
-                    # If same priority node found then current
-                    # node will come after previous node
-                    if priority >= temp.next.priority:
-                        break
-
-                    temp = temp.next
-
-                newNode = PriorityQueueNode(value,
-                                            priority)
-                newNode.next = temp.next
-                temp.next = newNode
-
-                # Returning 1 for successful execution
-                return 1
-
-    # Method to remove high priority item
-    # from the Priority Queue
-    def pop(self):
-
-        # Condition check for checking
-        # Priority Queue is empty or not
-        if self.isEmpty() == True:
-            return
-
-        else:
-
-            # Removing high priority node from
-            # Priority Queue, and updating front
-            # with next node
-            self.front = self.front.next
-            return 1
-
-    # Method to return high priority node
-    # value Not removing it
-    def peek(self):
-
-        # Condition check for checking Priority
-        # Queue is empty or not
-        if self.isEmpty() == True:
-            return
-        else:
-            return self.front.data
-
-    # Method to Traverse through Priority
-    # Queue
-    def traverse(self):
-
-        # Condition check for checking Priority
-        # Queue is empty or not
-        if self.isEmpty() == True:
-            return "Queue is Empty!"
-        else:
-            temp = self.front
-            while temp:
-                print(temp.data, end=" ")
-                temp = temp.next
-
-
-# Driver code
-if _name_ == "_main_":
-
-    # Creating an instance of Priority
-    # Queue, and adding values
-    # 7 -> 4 -> 5 -> 6
-    pq = PriorityQueue()
-    pq.push(4, 1)
-    pq.push(5, 2)
-    pq.push(6, 3)
-    pq.push(7, 0)
-
-    # Traversing through Priority Queue
-    pq.traverse()
-
-    # Removing highest Priority item
-    # for priority queue
-    pq.pop()
-
-````
-
-C#
-
-````
-// C# code to implement Priority Queue
-// using Linked List
-using System;
-
-class GFG
-{
-  // Node
-  public class Node
-  {
-    public int data;
-
-    // Lower values indicate
-    // higher priority
-    public int priority;
-
-    public Node next;
-  }
-
-  public static Node node = new Node();
-
-  // Function to Create A New Node
-  public static Node newNode(int d, int p)
-  {
-    Node temp = new Node();
-    temp.data = d;
-    temp.priority = p;
-    temp.next = null;
-
-    return temp;
-  }
-
-  // Return the value at head
-  public static int peek(Node head)
-  {
-    return (head).data;
-  }
-
-  // Removes the element with the
-  // highest priority from the list
-  public static Node pop(Node head)
-  {
-    Node temp = head;
-    (head) = (head).next;
-    return head;
-  }
-
-  // Function to push according to priority
-  public static Node push(Node head,
-                          int d, int p)
-  {
-    Node start = (head);
-
-    // Create new Node
-    Node temp = newNode(d, p);
-
-    // Special Case: The head of list
-    // has lesser priority than new node.
-    // So insert new node before head node
-    // and change head node.
-    if ((head).priority < p)
-    {
-
-      // Insert New Node before head
-      temp.next = head;
-      (head) = temp;
-    }
-    else
-    {
-
-      // Traverse the list and find a
-      // position to insert new node
-      while (start.next != null &&
-             start.next.priority > p)
-      {
-        start = start.next;
-      }
-
-      // Either at the ends of the list
-      // or at required position
-      temp.next = start.next;
-      start.next = temp;
-    }
-    return head;
-  }
-
-  // Function to check is list is empty
-  public static int isEmpty(Node head)
-  {
-    return ((head) == null) ? 1 : 0;
-  }
-
-  // Driver code
-  public static void Main(string[] args)
-  {
-    // Create a Priority Queue
-    // 7.4.5.6
-    Node pq = newNode(4, 1);
-    pq = push(pq, 5, 2);
-    pq = push(pq, 6, 3);
-    pq = push(pq, 7, 0);
-
-    while (isEmpty(pq) == 0)
-    {
-      Console.Write("{0:D} ", peek(pq));
-      pq = pop(pq);
-    }
-  }
-}
-
-// This code is contributed by ishankhandelwals.
-
-````
-
-JavaScript
-
-````
-// JavaScript code to implement Priority Queue
-// using Linked List
-// Node
-class Node {
-
-    // Lower values indicate
-    // higher priority
-    constructor() {
-        this.data = 0;
-        this.priority = 0;
-        this.next = null;
-    }
-}
-
-var node = new Node();
-
-// Function to Create A New Node
-function newNode(d, p) {
-    var temp = new Node();
-    temp.data = d;
-    temp.priority = p;
-    temp.next = null;
-
-    return temp;
-}
-
-// Return the value at head
-function peek(head) {
-    return head.data;
-}
-
-// Removes the element with the
-// highest priority from the list
-function pop(head) {
-    var temp = head;
-    head = head.next;
-    return head;
-}
-
-// Function to push according to priority
-function push(head, d, p) {
-    var start = head;
-
-    // Create new Node
-    var temp = newNode(d, p);
-
-    // Special Case: The head of list
-    // has lesser priority than new node.
-    // So insert new node before head node
-    // and change head node.
-    if (head.priority < p) {
-
-        // Insert New Node before head
-        temp.next = head;
-        head = temp;
-    }
-    else {
-
-        // Traverse the list and find a
-        // position to insert new node
-        while (start.next != null && start.next.priority > p) {
-            start = start.next;
-        }
-
-        // Either at the ends of the list
-        // or at required position
-        temp.next = start.next;
-        start.next = temp;
-    }
-    return head;
-}
-
-// Function to check is list is empty
-function isEmpty(head) {
-    return head == null ? 1 : 0;
-}
-
-// Driver code
-// Create a Priority Queue
-// 7.4.5.6
-var pq = newNode(4, 1);
-pq = push(pq, 5, 2);
-pq = push(pq, 6, 3);
-pq = push(pq, 7, 0);
-
-while (isEmpty(pq) == 0) {
-    console.log(peek(pq)," ");
-    pq = pop(pq);
-}
-
-// This code is contributed by ishankhandelwals.
-
-````
-
-
-
-
-**Output**
-```
- 6 5 4 7
-```
-
-
-Refer to
-
-[this article](https://www.geeksforgeeks.org/priority-queue-using-linked-list/)
-for more details.
-
-
-> ****Note:****
-> We can also use Linked List, time complexity of all operations with linked list remains same as array. The advantage with linked list is
->
->
-> deleteHighestPriority()
->
->
-> can be more efficient as we don’t have to move items.
-
-### ****3) Implement Priority Queue Using Heaps:****
-
-
-Binary Heap is generally preferred for priority queue implementation because heaps provide better performance compared to arrays or LinkedList. Considering the properties of a heap, The entry with the largest key is on the top and can be removed immediately. It will, however, take time O(log n) to restore the heap property for the remaining keys. However if another entry is to be inserted immediately, then some of this time may be combined with the O(log n) time needed to insert the new entry. Thus the representation of a priority queue as a heap proves advantageous for large n, since it is represented efficiently in contiguous storage and is guaranteed to require only logarithmic time for both insertions and deletions. Operations on Binary Heap are as follows:
-
-
-* ****insert(p):****
-  Inserts a new element with priority p.
-* ****extractMax():****
-  Extracts an element with maximum priority.
-* ****remove(i):****
-  Removes an element pointed by an iterator i.
-* ****getMax():****
-  Returns an element with maximum priority.
-* ****changePriority(i, p):****
-  Changes the priority of an element pointed by
-
-  ****i to p****
-  .
-
-> Refer to
->
-> [this article](https://www.geeksforgeeks.org/priority-queue-using-binary-heap/)
-> for code implementation.
-
-### ****4) Implement Priority Queue Using Binary Search Tree:****
-
-
-A Self-Balancing Binary Search Tree like AVL Tree, Red-Black Tree, etc. can also be used to implement a priority queue. Operations like peek(), insert() and delete() can be performed using BST.
-
-
-****Applications of Priority Queue:****
----------------------------------------
-
-* CPU Scheduling
-* Graph algorithms like
-
-  [Dijkstra’s shortest path algorithm](https://www.geeksforgeeks.org/greedy-algorithms-set-7-dijkstras-algorithm-for-adjacency-list-representation/)
-  ,
-
-  [Prim’s Minimum Spanning Tree](https://www.geeksforgeeks.org/greedy-algorithms-set-5-prims-mst-for-adjacency-list-representation/)
-  , etc.
-* All
-
-  [queue applications](https://www.geeksforgeeks.org/applications-of-queue-data-structure/)
-  where priority is involved.
-* Data compression in Huffman code
-* Event-driven simulation such as customers waiting in a queue.
-* Finding Kth largest/smallest element.
-
-****Advantages of Priority Queue:****
--------------------------------------
-
-* It helps to access the elements in a faster way. This is because elements in a priority queue are ordered by priority, one can easily retrieve the highest priority element without having to search through the entire queue.
-* The ordering of elements in a Priority Queue is done dynamically. Elements in a priority queue can have their priority values updated, which allows the queue to dynamically reorder itself as priorities change.
-* Efficient algorithms can be implemented. Priority queues are used in many algorithms to improve their efficiency, such as Dijkstra’s algorithm for finding the shortest path in a graph and the A\\* search algorithm for pathfinding.
-* Included in real-time systems. This is because priority queues allow you to quickly retrieve the highest priority element, they are often used in real-time systems where time is of the essence.
-
-****Disadvantages of Priority Queue:****
-----------------------------------------
-
-* High complexity. Priority queues are more complex than simple data structures like arrays and linked lists, and may be more difficult to implement and maintain.
-* High consumption of memory. Storing the priority value for each element in a priority queue can take up additional memory, which may be a concern in systems with limited resources.
-* It is not always the most efficient data structure. In some cases, other data structures like heaps or binary search trees may be more efficient for certain operations, such as finding the minimum or maximum element in the queue.
-* At times it is less predictable:. This is because the order of elements in a priority queue is determined by their priority values, the order in which elements are retrieved may be less predictable than with other data structures like stacks or queues, which follow a first-in, first-out (FIFO) or last-in, first-out (LIFO) order.
-', 'A priority queue is a type of queue that arranges elements based on their priority values. Elements with higher priority values are typically retrieved or removed before elements with lower priority values. Each element has a priority value associated with it. When we add an item, it is inserted in a position based on its priority value.', 'What is Priority Queue | Introduction to Priority Queue', 10, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('7106768d-cb8a-49a3-b944-1aa4e1266f10', e'Need of Recursive Function:
----------------------------
-
-
-A recursive function is a function that solves a problem by solving smaller instances of the same problem. This technique is often used in programming to solve problems that can be broken down into simpler, similar subproblems.
-
-
-### 1. ****Solving complex tasks:****
-
-
-Recursive functions break complex problems into smaller instances of the same problem, resulting in compact and readable code.
-
-
-### 2. Divide and Conquer:
-
-
-Recursive functions are suitable for divide-and-conquer algorithms such as merge sort and quicksort, breaking problems into smaller subproblems, solving them recursively, and merging the solutions with the original problem.
-
-
-### 3. ****Backtracking**** :
-
-
-Recursive backtracking is ideal for exploring and solving problems like N-Queens and Sudoku.
-
-
-
-### 4. Dynamic ****programming:****
-
-
-Recursive functions efficiently solve dynamic programming problems by solving subproblems and combining their solutions into a complete solution.
-
-
-### 5. Tree and ****graph structures:****
-
-
-Recursive functions are great for working with tree and graph structures, simplifying traversal and pattern recognition tasks
-
-****.****
-
-How to write a Recursive Function:
-----------------------------------
-
-### Components of a recursive function:
-
-****Base case:****
-Every recursive function must have a base case. The base case is the simplest scenario that does not require further recursion. This is a termination condition that prevents the function from calling itself indefinitely. Without a proper base case, a recursive function can lead to infinite recursion.
-
-
-****Recursive case:****
-In the recursive case, the function calls itself with the modified arguments. This is the essence of recursion – solving a larger problem by breaking it down into smaller instances of the same problem. The recursive case should move closer to the base case with each iteration.
-
-
-Let’s consider the example of
-
-[factorial of number](https://www.geeksforgeeks.org/program-for-factorial-of-a-number/)
-:
-
-
-In this example, the base case is when
-
-****n****
-is
-
-****0****
-, and the function returns
-
-****1****
-. The recursive case multiplies
-
-****n****
-with the result of the function called with parameter
-
-****n – 1****
-. The process continues until the base case is reached.
-
-
-It’s essential to ensure that the recursive function has a correct base case and that the recursive calls lead to the base case, otherwise, the procedure might run indefinitely, leading to a stack overflow (exceeding the available memory allocated for function calls).
-
-
-Below is the implementation of factorial of a number:
-
-
-C++
-
-````
-#include <iostream>
-using namespace std;
-
-// Recursive Function to calculate Factorial of a number
-int factorial(int n)
-{
-    // Base case
-    if (n == 0) {
-        return 1;
-    }
-
-    // Recursive case
-    return n * factorial(n - 1);
-}
-
-// Driver Code
-
-int main()
-{
-    int n = 4;
-
-    cout << "Factorial of " << n
-         << " is:" << factorial(n);
-    return 0;
-}
-
-````
-
-Java
-
-````
-import java.util.Scanner;
-
-public class Factorial {
-    // Recursive Function to calculate the factorial of a number
-    static int factorial(int n) {
-        // Base case: If n is 0, the factorial is 1.
-        if (n == 0) {
-            return 1;
-        }
-
-        // Recursive case: Calculate the factorial by multiplying n with the factorial of (n - 1).
-        return n * factorial(n - 1);
-    }
-
-    public static void main(String[] args) {
-        int n = 4;
-
-        // Calculate and print the factorial of n.
-        int result = factorial(n);
-        System.out.println("Factorial of " + n + " is: " + result);
-    }
-}
-
-````
-
-Python
-
-````
-# Recursive Function to calculate Factorial of a number
-def factorial(n):
-    # Base case
-    if n == 0:
-        return 1
-
-    # Recursive case
-    return n * factorial(n - 1)
-
-# Driver Code
-if __name__ == "__main__":
-    n = 4
-
-    print("Factorial of", n, "is:", factorial(n))
-
-````
-
-C#
-
-````
-using System;
-
-class Program
-{
-    // Recursive Function to calculate Factorial of a number
-    static int Factorial(int n)
-    {
-        // Base case
-        if (n == 0)
-        {
-            return 1;
-        }
-
-        // Recursive case
-        return n * Factorial(n - 1);
-    }
-
-    // Driver Code
-    static void Main()
-    {
-        int n = 4;
-
-        Console.WriteLine("Factorial of " + n + " is: " + Factorial(n));
-    }
-}
-
-````
-
-JavaScript
-
-````
-// Function to calculate the factorial of a number using recursion
-function factorial(n) {
-    // Base case: If n is 0, the factorial is 1.
-    if (n === 0) {
-        return 1;
-    }
-
-    // Recursive case: Calculate the factorial by multiplying n with the factorial of (n - 1).
-    return n * factorial(n - 1);
-}
-
-// Main function
-function main() {
-    // Given number
-    let n = 4;
-
-    // Calculate the factorial of n.
-    let result = factorial(n);
-
-    // Print the result
-    console.log("Factorial of " + n + " is: " + result);
-}
-
-// Call the main function
-main();
-
-````
-
-
-
-
-**Output**
-```
-Factorial of 4 is:24
-```
-
-****Time Complexity:****
-O(n)
-
-
-
-****Auxiliary Space:****
-O(n)
-
-', 'In other words, a recursive function is a function that solves a problem by solving smaller instances of the same problem. This technique is commonly used in programming to solve problems that can be broken down into simpler, similar subproblems.', 'Recursive Functions', 11, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('22607c58-8b6f-45e8-ab9c-6da9a201ea46', e'What is a Hash Function?
 ------------------------
 
@@ -39026,567 +30240,6 @@ and second hash-function is
 ****h2(k) = 1 + (k mod 5)****
 
 ', 'In Hashing, hash functions were used to generate hash values. The hash value is used to create an index for the keys in the hash table. The hash function may return the same hash value for two or more keys. When two or more keys have the same hash value, a collision happens. To handle this collision, we use Collision Resolution Techniques', 'Collision Resolution Techniques', 14, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('d6d953c0-ff47-4998-ae93-b22677a0fd02', e'**Basic Operations on Queue:**
-------------------------------
-
-Some of the basic operations for Queue in Data Structure are:
-
-* **enqueue() –** Insertion of elements to the queue.
-* **dequeue() –** Removal of elements from the queue.
-* **peek() or front()-** Acquires the data element available
-  at the front node of the queue without deleting it.
-* **rear() –** This operation returns the element at the rear
-  end without removing it.
-* **isFull() –** Validates if the queue is full.
-* **isEmpty() –** Checks if the queue is empty.
-* **size():** This operation returns the size of the queue
-  i.e. the total number of elements it contains.
-
-![](https://media.geeksforgeeks.org/wp-content/uploads/20221209094646/Queue-768.png)
-
-Queue Data Structure
-
-### **Operation 1: enqueue()**
-
-Inserts an element at the end of the queue i.e. at the rear end.
-
-The following steps should be taken to enqueue (insert) data into a queue:
-
-* Check if the queue is full.
-* If the queue is full, return overflow error and exit.
-* If the queue is not full, increment the rear pointer to point to the
-  next empty space.
-* Add the data element to the queue location, where the rear is pointing.
-* return success.
-
-![Enqueue representation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122158/fifo1-660x371.png)
-
-Enqueue representation
-
-Below is the Implementation of the above approach:
-
-* C++
-
-
-C++
-```
-void queueEnqueue(int data)
-{  // Check queue is full or not
-    if (capacity == rear) {
-        printf("\\nQueue is full\\n");
-        return;  }
-    // Insert element at the rear
-    else {  queue[rear] = data;  rear++;  }
-        return;  }
-```
-
-
-
-
-
-
-
-
-**Complexity Analysis:**
-**Time Complexity:** O(1)
-**Space Complexity:** O(N)
-
-### **Operation 2: dequeue()**
-
-This operation removes and returns an element that is at the front end of
-the queue.
-
-The following steps are taken to perform the dequeue operation:
-
-* Check if the queue is empty.
-* If the queue is empty, return the underflow error and exit.
-* If the queue is not empty, access the data where the front is pointing.
-* Increment the front pointer to point to the next available data element.
-* The Return success.
-
-![Dequeue operation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122625/fifo2-660x371.png)
-
-Dequeue operation
-
-Below is the Implementation of above approach:
-
-* C++
-C++
-```
- void queueDequeue()  {
-     // If queue is empty
-     if (front == rear) {
-        printf("\\nQueue is empty\\n");
-         return;  }
-     // Shift all the elements from index 2
-    // till rear to the left by one
-    else {
-        for (int i = 0; i < rear - 1; i++)
-            {
-                queue[i] = queue[i + 1];
-            }
-        // decrement rear  rear--;
-    }
-        return;
- }
-```
-
-**Complexity Analysis:**
-**Time Complexity:** O(1)
-**Space Complexity:** O(N)
-
-### Operation 4 : rear()
-
-This operation returns the element at the rear end without removing it.
-
-The following steps are taken to perform the rear operation:
-
-* If the queue is empty return the most minimum value.
-* otherwise, return the rear value.
-
-Below is the Implementation of the above approach:
-
-* C++
-
-C++
-```
-//Function to get rear of queue
-int rear(Queue* queue)  {
-    if (isEmpty(queue))
-        return INT_MIN;
-    return queue->arr[queue->rear];
-
-}
-
-```
-
-
-
-**Complexity Analysis:**
-**Time Complexity:** O(1)
-**Space Complexity:** O(N)
-
-### **Operation 5: isEmpty():**
-
-This operation returns a boolean value that indicates whether the queue is
-empty or not.
-
-The following steps are taken to perform the Empty operation:
-
-* check if front value is equal to -1 or not, if yes then return true
-  means queue is empty.
-* Otherwise return false, means queue is not empty
-
-Below is the implementation of the above approach:
-
-* C++
-
-
-C++
-```
-// This function will check whether
-//the queue is empty or not:
-    bool isEmpty() {
-    if (front == -1)
-        return true;
-    else return false;
-}
-```
-
-
-
-**Complexity Analysis:**
-**Time Complexity:** O(1)
-**Space Complexity:** O(N)
-
-### **Operation 6 : isFull()**
-
-This operation returns a boolean value that indicates whether the queue is
-full or not.
-
-The following steps are taken to perform the isFull() operation:
-
-* Check if front value is equal to zero and rear is equal to the capacity
-  of queue if yes then return true.
-* otherwise return false
-
-Below is the Implementation of the above approach:
-
-* C++
-
-
-C++
-```
-// This function will check
-// whether the queue is full or not.
-bool isFull()  {
-    if (front == 0 && rear == MAX_SIZE - 1) {
-        return true;
-    }
-    return false;
-}
-```
-
-**Complexity Analysis:**
-**Time Complexity:** O(1)
-**Space Complexity:** O(N)
-
-### Operation 7: size()
-
-This operation returns the size of the queue i.e. the total number of
-elements it contains.
-
-```
-queuename.size()
-Parameters :
-No parameters are passed
-Returns :
-Number of elements in the container
-```
-
-* C++
-
-
-C++
-```
-// CPP program to illustrate
-// Implementation of size() function
-#include <iostream>
-#include <queue>
-using namespace std;
-int main()  {
-    int sum = 0;
-    queue<int> myqueue;
-    myqueue.push(1);
-    myqueue.push(8);
-    myqueue.push(3);
-    myqueue.push(6);
-    myqueue.push(2);
-    // Queue becomes 1, 8, 3, 6, 2
-    cout << myqueue.size();
-    return 0;
-
-}
-```
-
-**Complexity Analysis:**
-**Time Complexity:** O(1)
-**Space Complexity:** O(N)
-
-', '', 'Basic Operations for Queue in Data Structure', 3, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0f01db32-ffc7-4834-9e6c-2ac158bdbac3', e'
-****Enqueue**** and when an element is deleted from the queue, then the operation is known as ****Dequeue.**** It is important to know that we cannot insert an element if the size of the queue is full and cannot delete an element when the queue itself is empty. If we try to insert an element even after the queue is full, then such a condition is known as overflow whereas, if we try to delete an element even after the queue is empty then such a condition is known as underflow.
-
-****Primary Queue Operations:****
-
-* ****void enqueue(int Element):**** When this operation is performed, an element is inserted in the queue
-  at the end i.e. at the rear end. (Where T is Generic i.e we can define
-  Queue of any type of data structure.) This operation take ****constant time i.e O(1).****
-* ****int dequeue():****
-  When this operation is performed, an element is removed from the front
-  end and is returned. This operation take ****constant time i.e O(1).****
-
-****Auxiliary Queue Operations:****
-
-* ****int front():**** This operation will return the element at the front without removing
-  it and it take O(1) time.
-* ****int rear():**** This operation will return the element at the rear without removing
-  it, Its Time Complexity is O(1).
-* ****int isEmpty():**** This operation indicates whether the queue is empty or not. This
-  Operation also done in O(1).
-* ****int size():**** This operation will return the size of the queue i.e. the total
-  number of elements present in the queue and it’s time complexity is
-  O(1).
-
-****Types of Queues:****
-
-* ****Simple Queue:**** Simple queue also known as a linear queue is the most basic version
-  of a queue. Here, insertion of an element i.e. the Enqueue operation
-  takes place at the rear end and removal of an element i.e. the Dequeue
-  operation takes place at the front end.
-* ****Circular Queue:****This is mainly an efficient array implementation of Simple Queue. In
-  a circular queue, the element of the queue act as a circular ring. The
-  working of a circular queue is similar to the linear queue except for
-  the fact that the last element is connected to the first element. Its
-  advantage is that the memory is utilized in a better way. This is
-  because if there is an empty space i.e. if no element is present at a
-  certain position in the queue, then an element can be easily added at
-  that position.
-* ****Priority Queue:**** This queue is a special type of queue. Its specialty is that it
-  arranges the elements in a queue based on some priority. The priority
-  can be something where the element with the highest value has the
-  priority so it creates a queue with decreasing order of values. The
-  priority can also be such that the element with the lowest value gets
-  the highest priority so in turn it creates a queue with increasing
-  order of values.
-* ****Dequeue:**** Dequeue is also known as Double Ended Queue. As the name suggests
-  double ended, it means that an element can be inserted or removed from
-  both the ends of the queue unlike the other queues in which it can be
-  done only from one end. Because of this property it may not obey the
-  First In First Out property.
-
-****Implementation of Queue:****
-
-* ****Sequential allocation:**** A queue can be implemented using an array. It can organize a limited
-  number of elements.
-* ****Linked list allocation:****
-  A queue can be implemented using a linked list. It can organize an
-  unlimited number of elements.
-
-****Applications of Queue:****
-
-* ****Multi programming:**** Multi programming means when multiple programs are running in the
-  main memory. It is essential to organize these multiple programs and
-  these multiple programs are organized as queues.
-* ****Network:**** In a network, a queue is used in devices such as a router or a
-  switch. another application of a queue is a mail queue which is a
-  directory that stores data and controls files for mail messages.
-* ****Job Scheduling:**** The computer has a task to execute a particular number of jobs that
-  are scheduled to be executed one after another. These jobs are
-  assigned to the processor one by one which is organized using a
-  queue.
-* ****Shared resources:**** Queues are used as waiting lists for a single shared resource.
-
-****Real-time application of Queue:****
-
-* Working as a buffer between a slow and a fast device. For example
-  keyboard and CPU, and two devices on network.
-* ATM Booth Line
-* Ticket Counter Line
-* CPU task scheduling
-* Waiting time of each customer at call centers.
-
-****Advantages of Queue:****
-
-* A large amount of data can be managed efficiently with ease.
-* Operations such as insertion and deletion can be performed with ease
-  as it follows the first in first out rule.
-* Queues are useful when a particular service is used by multiple
-  consumers.
-* Queues are fast in speed for data inter-process communication.
-* Queues can be used in the implementation of other data
-  structures.
-
-****Disadvantages of Queue:****
-
-* The operations such as insertion and deletion of elements from the
-  middle are time consuming.
-* In a classical queue, a new element can only be inserted when the
-  existing elements are deleted from the queue.
-* Searching an element takes O(N) time.
-* Maximum size of a queue must be defined prior in case of array
-  implementation.
-
-', e'A Queue
-is a linear data structure. This data structure follows a particular
-order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
-come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 4, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('dfada5ab-a189-4507-8c06-78c269c52440', e'Basic Terminologies of Queue
-----------------------------
-
-* ****Front:**** Position of the entry in a queue ready to be served, that is, the
-  first entry that will be removed from the queue, is called the ****front**** of the queue. It is also referred as the ****head**** of the queue.
-* ****Rear:****
-  Position of the last entry in the queue, that is, the one most
-  recently added, is called the ****rear**** of the queue. It is also referred as the ****tail**** of the queue.
-* ****Size:**** Size refers to the ****current**** number of elements in the queue.
-* ****Capacity:**** Capacity refers to the ****maximum**** number of elements the queue can hold.
-
-****Representation of Queue****
--------------------------------
-
-![Representation-of-Queue-Data-Structure](https://media.geeksforgeeks.org/wp-content/uploads/20241212130245410876/Representation-of-Queue-Data-Structure-768.webp)
-
-Operations on Queue
--------------------
-
-### ****1. Enqueue:****
-
-Enqueue operation ****adds (or stores) an element to the end of the queue****.
-
-****Steps:****
-
-1. Check if the ****queue is full****. If so, return an ****overflow**** error and exit.
-2. If the queue is ****not full****, increment the ****rear**** pointer to the next available position.
-3. Insert the element at the rear.
-
-
-![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)
-
-
-![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)
-
-
-![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)
-
-
-![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)
-
-
-![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)
-
-
-![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)
-
-
-
-Previous
-
-
-
-
-
-Pause
-
-Next
-
-
-
-
-
-3 / 6
-
-
-
-### ****2. Dequeue:****
-
-Dequeue operation removes the element at the front of the queue. The
-following steps are taken to perform the dequeue operation:
-
-
-1. Check if the ****queue is empty****. If so, return an ****underflow**** error.
-2. Remove the element at the ****front****.
-3. ****Increment**** the ****front**** pointer to the next element.
-
-
-![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
-
-
-![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
-
-
-![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
-
-
-![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
-
-
-![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
-
-
-![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
-
-
-
-Previous
-
-
-
-
-
-Play
-
-Next
-
-
-
-
-
-1 / 6
-
-
-
-### ****3. Peek or Front Operation:****
-
-This operation returns the element at the front end without removing
-it.
-
-### 4. Size Operation:
-
-This operation returns the numbers of elements present in the
-queue.
-
-### ****5. isEmpty Operation:****
-
-This operation returns a boolean value that indicates whether the queue
-is empty or not.
-
-### ****6. isFull Operation:****
-
-This operation returns a boolean value that indicates whether the queue
-is full or not.
-
-Implementation of Queue Data Structure
---------------------------------------
-
-Queue can be implemented using following data structures:
-
-* [Implementation of Queue using Arrays](https://www.geeksforgeeks.org/introduction-and-array-implementation-of-queue)
-* [Implementation of Queue using Linked List](https://www.geeksforgeeks.org/queue-linked-list-implementation)
-
-Complexity Analysis of Operations on Queue
-------------------------------------------
-
-| ****Operations**** | ****Time Complexity**** | ****Space Complexity**** |
-| --- | --- | --- |
-| ****enqueue**** | O(1) | O(1) |
-| ****dequeue**** | O(1) | O(1) |
-| front | O(1) | O(1) |
-| size | O(1) | O(1) |
-| isEmpty | O(1) | O(1) |
-| isFull | O(1) | O(1) |
-
-****Types of Queues****
------------------------
-
-Queue data structure can be classified into 4 types:
-
-1. ****Simple Queue:**** Simple Queue simply follows ****FIFO**** Structure. We can only insert the element at the back and remove the
-   element from the front of the queue.
-2. [****Double-Ended Queue (Deque)****](https://www.geeksforgeeks.org/deque-set-1-introduction-applications)****:****
-   In a double-ended queue the insertion and deletion operations, both
-   can be performed from both ends. They are of two types:
-   * ****Input Restricted Queue:**** This is a simple queue. In this type of queue, the input can be
-     taken from only one end but deletion can be done from any of the
-     ends.
-   * ****Output Restricted Queue:****
-     This is also a simple queue. In this type of queue, the input can
-     be taken from both ends but deletion can be done from only one
-     end.
-3. [****Circular Queue:****](https://www.geeksforgeeks.org/introduction-to-circular-queue) This is a special type of queue where the last position is connected
-   back to the first position. Here also the operations are performed in
-   FIFO order.
-4. [****Priority Queue****](https://www.geeksforgeeks.org/priority-queue-set-1-introduction)****:****
-   A priority queue is a special queue where the elements are accessed
-   based on the priority assigned to them. They are of two types:
-   * ****Ascending Priority Queue:**** In Ascending Priority Queue, the elements are arranged in
-     increasing order of their priority values. Element with smallest
-     priority value is popped first.
-   * ****Descending Priority Queue:**** In Descending Priority Queue, the elements are arranged in
-     decreasing order of their priority values. Element with largest
-     priority is popped first.
-
-![Types-of-Queue](https://media.geeksforgeeks.org/wp-content/uploads/20241212125924381216/Types-of-Queue-660.webp)
-
-****Applications of Queue Data Structure****
---------------------------------------------
-
-Application of queue is common. In a computer system, there may be
-queues of tasks waiting for the printer, for access to disk storage, or
-even in a time-sharing system, for use of the CPU. Within a single
-program, there may be multiple requests to be kept in a queue, or one
-task may create other tasks, which must be done in turn by keeping them
-in a queue.
-
-* A Queue is always used as a buffer when we have a speed mismatch
-  between a producer and consumer. For example keyboard and CPU.
-* Queue can be used where we have a single resource and multiple
-  consumers like a single CPU and multiple processes.
-* In a network, a queue is used in devices such as a router/switch and
-  mail queue.
-* Queue can be used in various algorithm techniques like Breadth First
-  Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
-', 'Introduction to Queue Data Structure', 1, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '93e4dba5-5b14-488f-a3ad-45c90459826b');
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('bdde6e1b-edc4-4731-a95b-bd1a61a42a7d', e'Basic terminologies of Array
 ----------------------------
 
@@ -43057,7 +33710,7 @@ Let A[N][N] be input matrix.
 
     ```
     ', '', 'Adjoint and Inverse of a Matrix', 11, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-    INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('610cd734-a640-4ad0-9ed2-9360a01d068a', e'****Examples:****
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('610cd734-a640-4ad0-9ed2-9360a01d068a', e'****Examples:****
 
     ```
     Input: board[] =  {\'X\', \'X\', \'O\',
@@ -44260,6 +34913,113 @@ Given board is valid
 ****Auxiliary Space: O(N)****
 ', e'A Tic-Tac-Toe board is given after some moves are played. Find out if the given board is valid, i.e., is it possible to reach this board position after some moves or not.
 ', 'Validity of a given Tic-Tac-Toe board configuration', 12, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0f01db32-ffc7-4834-9e6c-2ac158bdbac3', e'
+****Enqueue**** and when an element is deleted from the queue, then the operation is known as ****Dequeue.**** It is important to know that we cannot insert an element if the size of the queue is full and cannot delete an element when the queue itself is empty. If we try to insert an element even after the queue is full, then such a condition is known as overflow whereas, if we try to delete an element even after the queue is empty then such a condition is known as underflow.
+
+****Primary Queue Operations:****
+
+* ****void enqueue(int Element):**** When this operation is performed, an element is inserted in the queue
+  at the end i.e. at the rear end. (Where T is Generic i.e we can define
+  Queue of any type of data structure.) This operation take ****constant time i.e O(1).****
+* ****int dequeue():****
+  When this operation is performed, an element is removed from the front
+  end and is returned. This operation take ****constant time i.e O(1).****
+
+****Auxiliary Queue Operations:****
+
+* ****int front():**** This operation will return the element at the front without removing
+  it and it take O(1) time.
+* ****int rear():**** This operation will return the element at the rear without removing
+  it, Its Time Complexity is O(1).
+* ****int isEmpty():**** This operation indicates whether the queue is empty or not. This
+  Operation also done in O(1).
+* ****int size():**** This operation will return the size of the queue i.e. the total
+  number of elements present in the queue and it’s time complexity is
+  O(1).
+
+****Types of Queues:****
+
+* ****Simple Queue:**** Simple queue also known as a linear queue is the most basic version
+  of a queue. Here, insertion of an element i.e. the Enqueue operation
+  takes place at the rear end and removal of an element i.e. the Dequeue
+  operation takes place at the front end.
+* ****Circular Queue:****This is mainly an efficient array implementation of Simple Queue. In
+  a circular queue, the element of the queue act as a circular ring. The
+  working of a circular queue is similar to the linear queue except for
+  the fact that the last element is connected to the first element. Its
+  advantage is that the memory is utilized in a better way. This is
+  because if there is an empty space i.e. if no element is present at a
+  certain position in the queue, then an element can be easily added at
+  that position.
+* ****Priority Queue:**** This queue is a special type of queue. Its specialty is that it
+  arranges the elements in a queue based on some priority. The priority
+  can be something where the element with the highest value has the
+  priority so it creates a queue with decreasing order of values. The
+  priority can also be such that the element with the lowest value gets
+  the highest priority so in turn it creates a queue with increasing
+  order of values.
+* ****Dequeue:**** Dequeue is also known as Double Ended Queue. As the name suggests
+  double ended, it means that an element can be inserted or removed from
+  both the ends of the queue unlike the other queues in which it can be
+  done only from one end. Because of this property it may not obey the
+  First In First Out property.
+
+****Implementation of Queue:****
+
+* ****Sequential allocation:**** A queue can be implemented using an array. It can organize a limited
+  number of elements.
+* ****Linked list allocation:****
+  A queue can be implemented using a linked list. It can organize an
+  unlimited number of elements.
+
+****Applications of Queue:****
+
+* ****Multi programming:**** Multi programming means when multiple programs are running in the
+  main memory. It is essential to organize these multiple programs and
+  these multiple programs are organized as queues.
+* ****Network:**** In a network, a queue is used in devices such as a router or a
+  switch. another application of a queue is a mail queue which is a
+  directory that stores data and controls files for mail messages.
+* ****Job Scheduling:**** The computer has a task to execute a particular number of jobs that
+  are scheduled to be executed one after another. These jobs are
+  assigned to the processor one by one which is organized using a
+  queue.
+* ****Shared resources:**** Queues are used as waiting lists for a single shared resource.
+
+****Real-time application of Queue:****
+
+* Working as a buffer between a slow and a fast device. For example
+  keyboard and CPU, and two devices on network.
+* ATM Booth Line
+* Ticket Counter Line
+* CPU task scheduling
+* Waiting time of each customer at call centers.
+
+****Advantages of Queue:****
+
+* A large amount of data can be managed efficiently with ease.
+* Operations such as insertion and deletion can be performed with ease
+  as it follows the first in first out rule.
+* Queues are useful when a particular service is used by multiple
+  consumers.
+* Queues are fast in speed for data inter-process communication.
+* Queues can be used in the implementation of other data
+  structures.
+
+****Disadvantages of Queue:****
+
+* The operations such as insertion and deletion of elements from the
+  middle are time consuming.
+* In a classical queue, a new element can only be inserted when the
+  existing elements are deleted from the queue.
+* Searching an element takes O(N) time.
+* Maximum size of a queue must be defined prior in case of array
+  implementation.
+
+', e'A Queue
+is a linear data structure. This data structure follows a particular
+order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 5, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('4cd8171b-fbfb-4ac2-bd58-4d59d056750d', e'What is a Circular Linked List?
 -------------------------------
 
@@ -54520,130 +45280,6 @@ is the number of nodes.
 
 ****Auxiliary Space :****
 O(1)', '', 'Remove every k-th node of the linked list', 13, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('039efe3e-47d0-410e-b3db-a9e64d9bedd7', e'Representation of Stack Data Structure:
----------------------------------------
-
-Stack follows LIFO (Last In First Out) Principle so the element which
-is pushed last is popped first.
-
-
-![Stack-representation-in-Data-Structures-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180735/Stack-representation-in-Data-Structures-(1).webp)
-
-****Types of Stack:****
------------------------
-
-* ****Fixed Size Stack****
-  : As the name suggests, a fixed size stack has a fixed size and cannot
-  grow or shrink dynamically. If the stack is full and an attempt is
-  made to add an element to it, an overflow error occurs. If the stack
-  is empty and an attempt is made to remove an element from it, an
-  underflow error occurs.
-* ****Dynamic Size Stack****
-  : A dynamic size stack can grow or shrink dynamically. When the stack
-  is full, it automatically increases its size to accommodate the new
-  element, and when the stack is empty, it decreases its size. This type
-  of stack is implemented using a linked list, as it allows for easy
-  resizing of the stack.
-
-Basic Operations on Stack:
---------------------------
-
-In order to make manipulations in a stack, there are certain operations
-provided to us.
-
-
-* ****push()****  to insert an element into the stack
-* ****pop()****  to remove an element from the stack
-* ****top()****  Returns the top element of the stack.
-* ****isEmpty()****  returns true if stack is empty else false.
-* ****isFull()****  returns true if the stack is full else false.
-
-To implement stack, we need to maintain reference to the top
-item.
-
-### ****Push Operation on Stack****
-
-Adds an item to the stack. If the stack is full, then it is said to be
-an  ****Overflow condition.****
-
- ****Algorithm for Push Operation:****
-
-* Before pushing the element to the stack, we check if the stack is  ****full****  .
-* If the stack is full  ****(top == capacity-1)****  , then  ****Stack Overflows****  and we cannot insert the element to the stack.
-* Otherwise, we increment the value of top by 1  ****(top = top + 1)****  and the new value is inserted at  ****top position****  .
-* The elements can be pushed into the stack till we reach the  ****capacity****  of the stack.
-
-![Push-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180844/Push-Operation-in-Stack-(1).webp)
-### ****Pop Operation in Stack****
-
-Removes an item from the stack. The items are popped in the reversed
-order in which they are pushed. If the stack is empty, then it is said
-to be an  ****Underflow condition.****
-
-****Algorithm for Pop Operation:****
-
-* Before popping the element from the stack, we check if the stack is  ****empty****  .
-* If the stack is empty (top == -1), then  ****Stack Underflows****  and we cannot remove any element from the stack.
-* Otherwise, we store the value at top, decrement the value of top by 1  ****(top = top – 1)****  and return the stored top value.
-
-![Pop-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180943/Pop-Operation-in-Stack-(1).webp)
-### ****Top or Peek Operation on Stack****
-
-Returns the top element of the stack.
-
-****Algorithm for Top Operation:****
-
-* Before returning the top element from the stack, we check if the
-  stack is empty.
-* If the stack is empty (top == -1), we simply print “Stack is empty”.
-* Otherwise, we return the element stored at  ****index = top****  .
-
-![Top-or-Peek-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181023/Top-or-Peek-Operation-in-Stack-(1).webp)
-### ****isEmpty Operation in Stack Data Structure:****
-
-Returns true if the stack is empty, else false.
-
-****Algorithm for isEmpty Operation****:
-
-* Check for the value of  ****top****  in stack.
-* If  ****(top == -1)****, then the stack is  ****empty****  so return  ****true****  .
-* Otherwise, the stack is not empty so return  ****false****  .
-
-![isEmpty-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181101/isEmpty-Operation-in-Stack-(1).webp)
-### isFull ****Operation in Stack**** ****Data Structure****:
-
-Returns true if the stack is full, else false.
-
-****Algorithm for isFull Operation:****
-
-* Check for the value of  ****top****  in stack.
-* If  ****(top == capacity-1),****  then the stack is  ****full****  so return  ****true****.
-* Otherwise, the stack is not full so return  ****false****.
-
-![isFull-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181147/isFull-Operation-in-Stack-(1).webp)
-
-Implementation of Stack
------------------------
-
-
-The basic operations that can be performed on a stack include push, pop,
-and peek. There are two ways to implement a stack –
-
-
-* [****Implementation of Stack using Array****](https://www.geeksforgeeks.org/implement-stack-using-array/)
-* [****Implementation of Stack using Linked List****](https://www.geeksforgeeks.org/implement-a-stack-using-singly-linked-list/)
-
-****Complexity Analysis of Operations on Stack Data Structure:****
-------------------------------------------------------------------
-
-| ****Operations**** | ****Time Complexity**** | ****Space Complexity**** |
-| --- | --- | --- |
-| ****push()**** | O(1) | O(1) |
-| ****pop()**** | O(1) | O(1) |
-| top() or  ****pee****k() | O(1) | O(1) |
-| isEmpty() | O(1) | O(1) |
-| isFull() | O(1) | O(1) |', e'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
-both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 1, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('237c88d5-987b-4fc0-8bd1-d27a07cd1aa9', e'Understanding Node Structure
 ----------------------------
 
@@ -56609,94 +47245,6 @@ console.log(calculateFraction(a, b));
 : O(max(log10(a), log10(b))), to store the result.
 
 ', '', 'Fraction to Recurring Decimal', 1, null, '598d78e5-c34f-437f-88fb-31557168c07b', 'fa41a74d-5590-49a6-84f7-ad1ceed83eaf');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ba83bbd2-32b7-445a-9895-7a9502446497', e'Advantages of Linked Lists (or Most Common Use Cases):
-------------------------------------------------------
-
-* Linked Lists are mostly used because of their effective insertion and
-  deletion.  We only need to change few pointers (or references) to
-  insert (or delete) an item in the middle
-* [Insertion and deletion](https://www.geeksforgeeks.org/insertion-deletion-stl-set-c/) at any point in a linked list take O(1) time. Whereas in an [array](https://www.geeksforgeeks.org/array-data-structure/)
-  data structure, insertion / deletion in the middle takes O(n)
-  time.
-* This data structure is simple and can be also used to implement [a stack](https://www.geeksforgeeks.org/stack-data-structure/), [queues,](https://www.geeksforgeeks.org/queue-data-structure/) and other [abstract data structures](https://www.geeksforgeeks.org/abstract-data-types/).
-* Implementation of Queue and Deque data structures : Simple array
-  implementation is not efficient at all. We must use circular array to
-  efficiently implement which is complex. But with linked list, it is
-  easy and straightforward. That is why most of the language libraries
-  use Linked List internally to implement these data structures..
-* Linked List might turn out to be more space efficient compare to
-  arrays in cases where we cannot guess the number of elements in
-  advance. In case of arrays, the whole memory for items is allocated
-  together. Even with dynamic sized arrays like vector in C++ or list in
-  Python or ArrayList in Java. the internal working involves
-  de-allocation of whole memory and allocation of a bigger chunk when
-  insertions happen beyond the current capacity.
-
-Applications of Linked Lists:
------------------------------
-
-* Linked Lists can be used to implement stacks, queue, deque, [sparse matrices](https://www.geeksforgeeks.org/sparse-matrix-representation/) and adjacency list representation of graphs.
-* [Dynamic memory allocation](https://www.geeksforgeeks.org/what-is-dynamic-memory-allocation/)
-  in operating systems and compilers (linked list of free blocks).
-* Manipulation of polynomials
-* Arithmetic operations on long integers.
-* In operating systems, they can be used in Memory management, process
-  scheduling (for example circular linked list for round robin
-  scheduling) and file system.
-* Algorithms that need to frequently insert or delete items from large
-  collections of data.
-* LRU cache, which uses a doubly linked list to keep track of the most
-  recently used items in a cache.
-
-Applications of Linked Lists in real world:
--------------------------------------------
-
-* The list of songs in the music player are linked to the previous and
-  next songs.
-* In a web browser, previous and next web page URLs can be linked
-  through the previous and next buttons (Doubly Linked List)
-* In image viewer, the previous and next images can be linked with the
-  help of the previous and next buttons (Doubly Linked List)
-* Circular Linked Lists can be used to implement things in round manner
-  where we go to every element one by one.
-* Linked List are preferred over arrays for implementations of Queue
-  and Deque data structures because of fast deletions (or insertions)
-  from the front of the linked lists.
-
-Disadvantages of Linked Lists:
-------------------------------
-
-Linked lists are a popular data structure in computer science, but like
-any other data structure, they have certain disadvantages as well. Some
-of the key disadvantages of linked lists are:
-
-* ****Slow Access Time:**** Accessing elements in a linked list can be slow, as you need to
-  traverse the linked list to find the element you are looking for,
-  which is an O(n) operation. This makes linked lists a poor choice for
-  situations where you need to access elements quickly.
-* ****Pointers or References:****
-  Linked lists use pointers or references to access the next node, which
-  can make them more complex to understand and use compared to arrays.
-  This complexity can make linked lists more difficult to debug and
-  maintain.
-* ****Higher overhead:**** Linked lists have a higher overhead compared to arrays, as each node
-  in a linked list requires extra memory to store the reference to the
-  next node.
-* ****Cache Inefficiency:**** Linked lists are cache-inefficient because the memory is not
-  contiguous. This means that when you traverse a linked list, you are
-  not likely to get the data you need in the cache, leading to cache
-  misses and slow performance.
-
-In conclusion, linked lists are a powerful and flexible data structure,
-but they have certain disadvantages that need to be taken into
-consideration when deciding whether to use them or not. For example, if
-you need fast access time, arrays might be a better choice, but if you
-need to insert or delete elements frequently, linked lists might be the
-better choice.
-', e'A Linked List is a linear data structure
-that is used to store a collection of data with the help of nodes.
-Please remember the following points before moving forward.
-', 'Applications, Advantages and Disadvantages of Linked List', 5, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('864de22e-8f8d-4d5d-93ff-2bb5714cc2f5', e'Let’s take a look a simple example to demonstrate the use of vector
 container:
 
@@ -57042,6 +47590,741 @@ simple and fast way of storing multiple values under a single name. In
 this article, we will study the different aspects of array in C language
 such as array declaration, definition, initialization, types of arrays,
 array syntax, advantages and disadvantages, and many more.', 'C Arrays', 3, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ff4db851-5e60-40f5-9ff9-ab98645fc05c', e'**Types of Queues:**
+
+There are **five different types of queues** that are used in
+different scenarios. They are:
+
+1. Input Restricted Queue (this is a Simple Queue)
+2. Output Restricted Queue (this is also a Simple Queue)
+3. Circular Queue
+4. Double Ended Queue (Deque)
+5. Priority Queue
+   * Ascending Priority Queue
+   * Descending Priority Queue
+
+![Types of Queues](https://media.geeksforgeeks.org/wp-content/uploads/20220623134709/typesofqueues.jpg)
+
+Types of Queues
+
+**1.** [**Circular Queue**](https://www.geeksforgeeks.org/circular-queue-set-1-introduction-array-implementation/)**:** Circular Queue is a linear data structure in which the
+operations are performed based on FIFO (First In First Out) principle and
+the last position is connected back to the first position to make a
+circle. It is also called **‘Ring Buffer’**. This queue is
+primarily used in the following cases:
+
+1. **Memory Management:** The unused memory locations in the
+   case of ordinary queues can be utilized in circular queues.
+2. **Traffic system:** In a computer-controlled traffic
+   system, circular queues are used to switch on the traffic lights one by
+   one repeatedly as per the time set.
+3. **CPU Scheduling:** Operating systems often maintain a
+   queue of processes that are ready to execute or that are waiting for a
+   particular event to occur.
+
+The time complexity for the circular Queue is O(1).
+
+**2. Input restricted Queue:** In this type of Queue, the
+input can be taken from one side only(rear) and deletion of elements can
+be done from both sides(front and rear). This kind of Queue does not
+follow FIFO(first in first out).  This queue is used in cases where
+the consumption of the data needs to be in FIFO order but if there is a
+need to remove the recently inserted data for some reason and one such
+case can be irrelevant data, performance issue, etc.
+
+
+
+![Input Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131417/inputrestrictedqueue.jpg)
+
+Input Restricted Queue
+
+**Advantages of Input restricted Queue:**
+
+* Prevents overflow and overloading of the queue by limiting the number of
+  items added
+* Helps maintain stability and predictable performance of the system
+
+**Disadvantages of Input restricted Queue:**
+
+* May lead to resource wastage if the restriction is set too low and items
+  are frequently discarded
+* May lead to waiting or blocking if the restriction is set too high and
+  the queue is full, preventing new items from being added.
+
+**3. Output restricted Queue:** In this type of Queue, the
+input can be taken from both sides(rear and front) and the deletion of the
+element can be done from only one side(front).  This queue is used in
+the case where the inputs have some priority order to be executed and the
+input can be placed even in the first place so that it is executed
+first.
+
+![Output Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131455/outputrestrictedqueue.jpg)
+
+Output Restricted Queue
+
+**4.** [**Double ended Queue**](https://www.geeksforgeeks.org/deque-set-1-introduction-applications/)**:** Double Ended Queue is also a Queue data structure in
+which the insertion and deletion operations are performed at both the ends
+(front and rear). That means, we can insert at both front and rear
+positions and can delete from both front and rear positions.  Since
+Deque supports both stack and queue operations, it can be used as both.
+The Deque data structure supports clockwise and anticlockwise rotations in
+O(1) time which can be useful in certain applications. Also, the problems
+where elements need to be removed and or added both ends can be
+efficiently solved using Deque.
+
+![Double Ended Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131811/doubleended.jpg)
+
+Double Ended Queue
+
+**5.** [**Priority Queue**](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/)**:** A priority queue is a special type of queue in which
+each element is associated with a priority and is served according to its
+priority. There are two types of Priority Queues. They are:
+
+1. **Ascending Priority Queue:** Element can be inserted
+   arbitrarily but only smallest element can be removed. For example,
+   suppose there is an array having elements 4, 2, 8 in the same order. So,
+   while inserting the elements, the insertion will be in the same sequence
+   but while deleting, the order will be 2, 4, 8.
+2. **Descending priority Queue:** Element can be inserted
+   arbitrarily but only the largest element can be removed first from the
+   given Queue. For example, suppose there is an array having elements 4,
+   2, 8 in the same order. So, while inserting the elements, the insertion
+   will be in the same sequence but while deleting, the order will be 8, 4, 2.
+
+The time complexity of the Priority Queue is O(logn).
+
+[**Applications of a Queue:**](https://www.geeksforgeeks.org/applications-of-queue-data-structure/)
+
+The [queue](https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation is used when things don’t have to be processed immediately, but have to be processed in First In First Out order like [Breadth First Search](https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/). This property of Queue makes it also useful in the following kind of scenarios.
+
+1. When a resource is shared among multiple consumers. Examples include   [CPU scheduling](https://www.geeksforgeeks.org/cpu-scheduling-in-operating-systems/),   [Disk Scheduling](https://www.geeksforgeeks.org/disk-scheduling-algorithms/).
+2. When data is transferred asynchronously (data not necessarily received
+   at the same rate as sent) between two processes. Examples include IO
+   Buffers, [pipes](https://www.geeksforgeeks.org/piping-in-unix-or-linux/), file IO, etc.
+3. Linear Queue: A linear queue is a type of queue where data elements are
+   added to the end of the queue and removed from the front of the queue.
+   Linear queues are used in applications where data elements need to be
+   processed in the order in which they are received. Examples include
+   printer queues and message queues.
+4. Circular Queue: A circular queue is similar to a linear queue, but the
+   end of the queue is connected to the front of the queue. This allows for
+   efficient use of space in memory and can improve performance. Circular
+   queues are used in applications where the data elements need to be
+   processed in a circular fashion. Examples include CPU scheduling and
+   memory management.
+5. Priority Queue: A priority queue is a type of queue where each element
+   is assigned a priority level. Elements with higher priority levels are
+   processed before elements with lower priority levels. Priority queues
+   are used in applications where certain tasks or data elements need to be
+   processed with higher priority. Examples include operating system task
+   scheduling and network packet scheduling.
+6. Double-ended Queue: A double-ended queue, also known as a deque, is a
+   type of queue where elements can be added or removed from either end of
+   the queue. This allows for more flexibility in data processing and can
+   be used in applications where elements need to be processed in multiple
+   directions. Examples include job scheduling and searching algorithms.
+7. Concurrent Queue: A concurrent queue is a type of queue that is designed
+   to handle multiple threads accessing the queue simultaneously.
+   Concurrent queues are used in multi-threaded applications where data
+   needs to be shared between threads in a thread-safe manner. Examples
+   include database transactions and web server requests.
+
+**Issues of Queue :**
+
+Some common issues that can arise when using queues:
+
+1. Queue overflow: Queue overflow occurs when the queue reaches its maximum
+   capacity and is unable to accept any more elements. This can cause data
+   loss and can lead to application crashes.
+2. Queue underflow: Queue underflow occurs when an attempt is made to
+   remove an element from an empty queue. This can cause errors and
+   application crashes.
+3. Priority inversion: Priority inversion occurs in priority queues when a
+   low-priority task holds a resource that a high-priority task needs. This
+   can cause delays in processing and can impact system performance.
+4. Deadlocks: Deadlocks occur when multiple threads or processes are
+   waiting for each other to release resources, resulting in a situation
+   where none of the threads can proceed. This can happen when using
+   concurrent queues and can lead to system crashes.
+5. Performance issues: Queue performance can be impacted by various
+   factors, such as the size of the queue, the frequency of access, and the
+   type of operations performed on the queue. Poor queue performance can
+   lead to slower system performance and reduced user experience.
+6. Synchronization issues: Synchronization issues can arise when multiple
+   threads are accessing the same queue simultaneously. This can result in
+   data corruption, race conditions, and other errors.
+7. Memory management issues: Queues can use up significant amounts of
+   memory, especially when processing large data sets. Memory leaks and
+   other memory management issues can occur, leading to system crashes and
+   other errors.
+
+**Reference :**
+
+Some references for further reading on queues:
+
+1. “Data Structures and Algorithms in Java” by Robert Lafore – This book
+   provides an in-depth explanation of different types of queues and their
+   implementations in Java.
+2. “Introduction to Algorithms” by Thomas H. Cormen et al. – This textbook
+   covers the basic concepts of data structures and algorithms, including
+   queues and their various applications.
+3. “Concurrency in C# Cookbook” by Stephen Cleary – This book provides
+   practical examples of how to use concurrent queues in C# programming.
+4. “Queue (abstract data type)” on Wikipedia – This article provides an
+   overview of queues and their properties, as well as examples of their
+   applications.
+5. “The Art of Computer Programming, Volume 1: Fundamental Algorithms” by
+   Donald E. Knuth – This book includes a detailed analysis of different
+   queue algorithms and their performance.
+6. “Queues and the Producer-Consumer Problem” by Douglas C. Schmidt – This
+   paper discusses how queues can be used to solve the producer-consumer
+   problem in concurrent programming.', e'Queue is a linear structure that follows a particular order in which the
+operations are performed. The order is First In First Out (FIFO). A good
+example of a queue is any queue of consumers for a resource where the
+consumer that came first is served first. In this article, the different
+types of queues are discussed.', 'Different Types of Queues and its Applications', 6, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('d6d953c0-ff47-4998-ae93-b22677a0fd02', e'**Basic Operations on Queue:**
+------------------------------
+
+Some of the basic operations for Queue in Data Structure are:
+
+* **enqueue() –** Insertion of elements to the queue.
+* **dequeue() –** Removal of elements from the queue.
+* **peek() or front()-** Acquires the data element available
+  at the front node of the queue without deleting it.
+* **rear() –** This operation returns the element at the rear
+  end without removing it.
+* **isFull() –** Validates if the queue is full.
+* **isEmpty() –** Checks if the queue is empty.
+* **size():** This operation returns the size of the queue
+  i.e. the total number of elements it contains.
+
+![](https://media.geeksforgeeks.org/wp-content/uploads/20221209094646/Queue-768.png)
+
+Queue Data Structure
+
+### **Operation 1: enqueue()**
+
+Inserts an element at the end of the queue i.e. at the rear end.
+
+The following steps should be taken to enqueue (insert) data into a queue:
+
+* Check if the queue is full.
+* If the queue is full, return overflow error and exit.
+* If the queue is not full, increment the rear pointer to point to the
+  next empty space.
+* Add the data element to the queue location, where the rear is pointing.
+* return success.
+
+![Enqueue representation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122158/fifo1-660x371.png)
+
+Enqueue representation
+
+Below is the Implementation of the above approach:
+
+* C++
+
+
+C++
+```
+void queueEnqueue(int data)
+{  // Check queue is full or not
+    if (capacity == rear) {
+        printf("\\nQueue is full\\n");
+        return;  }
+    // Insert element at the rear
+    else {  queue[rear] = data;  rear++;  }
+        return;  }
+```
+
+
+
+
+
+
+
+
+**Complexity Analysis:**
+**Time Complexity:** O(1)
+**Space Complexity:** O(N)
+
+### **Operation 2: dequeue()**
+
+This operation removes and returns an element that is at the front end of
+the queue.
+
+The following steps are taken to perform the dequeue operation:
+
+* Check if the queue is empty.
+* If the queue is empty, return the underflow error and exit.
+* If the queue is not empty, access the data where the front is pointing.
+* Increment the front pointer to point to the next available data element.
+* The Return success.
+
+![Dequeue operation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122625/fifo2-660x371.png)
+
+Dequeue operation
+
+Below is the Implementation of above approach:
+
+* C++
+C++
+```
+ void queueDequeue()  {
+     // If queue is empty
+     if (front == rear) {
+        printf("\\nQueue is empty\\n");
+         return;  }
+     // Shift all the elements from index 2
+    // till rear to the left by one
+    else {
+        for (int i = 0; i < rear - 1; i++)
+            {
+                queue[i] = queue[i + 1];
+            }
+        // decrement rear  rear--;
+    }
+        return;
+ }
+```
+
+**Complexity Analysis:**
+**Time Complexity:** O(1)
+**Space Complexity:** O(N)
+
+### Operation 4 : rear()
+
+This operation returns the element at the rear end without removing it.
+
+The following steps are taken to perform the rear operation:
+
+* If the queue is empty return the most minimum value.
+* otherwise, return the rear value.
+
+Below is the Implementation of the above approach:
+
+* C++
+
+C++
+```
+//Function to get rear of queue
+int rear(Queue* queue)  {
+    if (isEmpty(queue))
+        return INT_MIN;
+    return queue->arr[queue->rear];
+
+}
+
+```
+
+
+
+**Complexity Analysis:**
+**Time Complexity:** O(1)
+**Space Complexity:** O(N)
+
+### **Operation 5: isEmpty():**
+
+This operation returns a boolean value that indicates whether the queue is
+empty or not.
+
+The following steps are taken to perform the Empty operation:
+
+* check if front value is equal to -1 or not, if yes then return true
+  means queue is empty.
+* Otherwise return false, means queue is not empty
+
+Below is the implementation of the above approach:
+
+* C++
+
+
+C++
+```
+// This function will check whether
+//the queue is empty or not:
+    bool isEmpty() {
+    if (front == -1)
+        return true;
+    else return false;
+}
+```
+
+
+
+**Complexity Analysis:**
+**Time Complexity:** O(1)
+**Space Complexity:** O(N)
+
+### **Operation 6 : isFull()**
+
+This operation returns a boolean value that indicates whether the queue is
+full or not.
+
+The following steps are taken to perform the isFull() operation:
+
+* Check if front value is equal to zero and rear is equal to the capacity
+  of queue if yes then return true.
+* otherwise return false
+
+Below is the Implementation of the above approach:
+
+* C++
+
+
+C++
+```
+// This function will check
+// whether the queue is full or not.
+bool isFull()  {
+    if (front == 0 && rear == MAX_SIZE - 1) {
+        return true;
+    }
+    return false;
+}
+```
+
+**Complexity Analysis:**
+**Time Complexity:** O(1)
+**Space Complexity:** O(N)
+
+### Operation 7: size()
+
+This operation returns the size of the queue i.e. the total number of
+elements it contains.
+
+```
+queuename.size()
+Parameters :
+No parameters are passed
+Returns :
+Number of elements in the container
+```
+
+* C++
+
+
+C++
+```
+// CPP program to illustrate
+// Implementation of size() function
+#include <iostream>
+#include <queue>
+using namespace std;
+int main()  {
+    int sum = 0;
+    queue<int> myqueue;
+    myqueue.push(1);
+    myqueue.push(8);
+    myqueue.push(3);
+    myqueue.push(6);
+    myqueue.push(2);
+    // Queue becomes 1, 8, 3, 6, 2
+    cout << myqueue.size();
+    return 0;
+
+}
+```
+
+**Complexity Analysis:**
+**Time Complexity:** O(1)
+**Space Complexity:** O(N)
+
+', '', 'Basic Operations for Queue in Data Structure', 7, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('dfada5ab-a189-4507-8c06-78c269c52440', e'Basic Terminologies of Queue
+----------------------------
+
+* ****Front:**** Position of the entry in a queue ready to be served, that is, the
+  first entry that will be removed from the queue, is called the ****front**** of the queue. It is also referred as the ****head**** of the queue.
+* ****Rear:****
+  Position of the last entry in the queue, that is, the one most
+  recently added, is called the ****rear**** of the queue. It is also referred as the ****tail**** of the queue.
+* ****Size:**** Size refers to the ****current**** number of elements in the queue.
+* ****Capacity:**** Capacity refers to the ****maximum**** number of elements the queue can hold.
+
+****Representation of Queue****
+-------------------------------
+
+![Representation-of-Queue-Data-Structure](https://media.geeksforgeeks.org/wp-content/uploads/20241212130245410876/Representation-of-Queue-Data-Structure-768.webp)
+
+Operations on Queue
+-------------------
+
+### ****1. Enqueue:****
+
+Enqueue operation ****adds (or stores) an element to the end of the queue****.
+
+****Steps:****
+
+1. Check if the ****queue is full****. If so, return an ****overflow**** error and exit.
+2. If the queue is ****not full****, increment the ****rear**** pointer to the next available position.
+3. Insert the element at the rear.
+
+
+![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)
+
+
+![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)
+
+
+![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)
+
+
+![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)
+
+
+![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)
+
+
+![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)
+
+
+
+Previous
+
+
+
+
+
+Pause
+
+Next
+
+
+
+
+
+3 / 6
+
+
+
+### ****2. Dequeue:****
+
+Dequeue operation removes the element at the front of the queue. The
+following steps are taken to perform the dequeue operation:
+
+
+1. Check if the ****queue is empty****. If so, return an ****underflow**** error.
+2. Remove the element at the ****front****.
+3. ****Increment**** the ****front**** pointer to the next element.
+
+
+![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+
+Previous
+
+
+
+
+
+Play
+
+Next
+
+
+
+
+
+1 / 6
+
+
+
+### ****3. Peek or Front Operation:****
+
+This operation returns the element at the front end without removing
+it.
+
+### 4. Size Operation:
+
+This operation returns the numbers of elements present in the
+queue.
+
+### ****5. isEmpty Operation:****
+
+This operation returns a boolean value that indicates whether the queue
+is empty or not.
+
+### ****6. isFull Operation:****
+
+This operation returns a boolean value that indicates whether the queue
+is full or not.
+
+Implementation of Queue Data Structure
+--------------------------------------
+
+Queue can be implemented using following data structures:
+
+* [Implementation of Queue using Arrays](https://www.geeksforgeeks.org/introduction-and-array-implementation-of-queue)
+* [Implementation of Queue using Linked List](https://www.geeksforgeeks.org/queue-linked-list-implementation)
+
+Complexity Analysis of Operations on Queue
+------------------------------------------
+
+| ****Operations**** | ****Time Complexity**** | ****Space Complexity**** |
+| --- | --- | --- |
+| ****enqueue**** | O(1) | O(1) |
+| ****dequeue**** | O(1) | O(1) |
+| front | O(1) | O(1) |
+| size | O(1) | O(1) |
+| isEmpty | O(1) | O(1) |
+| isFull | O(1) | O(1) |
+
+****Types of Queues****
+-----------------------
+
+Queue data structure can be classified into 4 types:
+
+1. ****Simple Queue:**** Simple Queue simply follows ****FIFO**** Structure. We can only insert the element at the back and remove the
+   element from the front of the queue.
+2. [****Double-Ended Queue (Deque)****](https://www.geeksforgeeks.org/deque-set-1-introduction-applications)****:****
+   In a double-ended queue the insertion and deletion operations, both
+   can be performed from both ends. They are of two types:
+   * ****Input Restricted Queue:**** This is a simple queue. In this type of queue, the input can be
+     taken from only one end but deletion can be done from any of the
+     ends.
+   * ****Output Restricted Queue:****
+     This is also a simple queue. In this type of queue, the input can
+     be taken from both ends but deletion can be done from only one
+     end.
+3. [****Circular Queue:****](https://www.geeksforgeeks.org/introduction-to-circular-queue) This is a special type of queue where the last position is connected
+   back to the first position. Here also the operations are performed in
+   FIFO order.
+4. [****Priority Queue****](https://www.geeksforgeeks.org/priority-queue-set-1-introduction)****:****
+   A priority queue is a special queue where the elements are accessed
+   based on the priority assigned to them. They are of two types:
+   * ****Ascending Priority Queue:**** In Ascending Priority Queue, the elements are arranged in
+     increasing order of their priority values. Element with smallest
+     priority value is popped first.
+   * ****Descending Priority Queue:**** In Descending Priority Queue, the elements are arranged in
+     decreasing order of their priority values. Element with largest
+     priority is popped first.
+
+![Types-of-Queue](https://media.geeksforgeeks.org/wp-content/uploads/20241212125924381216/Types-of-Queue-660.webp)
+
+****Applications of Queue Data Structure****
+--------------------------------------------
+
+Application of queue is common. In a computer system, there may be
+queues of tasks waiting for the printer, for access to disk storage, or
+even in a time-sharing system, for use of the CPU. Within a single
+program, there may be multiple requests to be kept in a queue, or one
+task may create other tasks, which must be done in turn by keeping them
+in a queue.
+
+* A Queue is always used as a buffer when we have a speed mismatch
+  between a producer and consumer. For example keyboard and CPU.
+* Queue can be used where we have a single resource and multiple
+  consumers like a single CPU and multiple processes.
+* In a network, a queue is used in devices such as a router/switch and
+  mail queue.
+* Queue can be used in various algorithm techniques like Breadth First
+  Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
+', 'Introduction to Queue Data Structure', 4, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ba83bbd2-32b7-445a-9895-7a9502446497', e'Advantages of Linked Lists (or Most Common Use Cases):
+------------------------------------------------------
+
+* Linked Lists are mostly used because of their effective insertion and
+  deletion.  We only need to change few pointers (or references) to
+  insert (or delete) an item in the middle
+* [Insertion and deletion](https://www.geeksforgeeks.org/insertion-deletion-stl-set-c/) at any point in a linked list take O(1) time. Whereas in an [array](https://www.geeksforgeeks.org/array-data-structure/)
+  data structure, insertion / deletion in the middle takes O(n)
+  time.
+* This data structure is simple and can be also used to implement [a stack](https://www.geeksforgeeks.org/stack-data-structure/), [queues,](https://www.geeksforgeeks.org/queue-data-structure/) and other [abstract data structures](https://www.geeksforgeeks.org/abstract-data-types/).
+* Implementation of Queue and Deque data structures : Simple array
+  implementation is not efficient at all. We must use circular array to
+  efficiently implement which is complex. But with linked list, it is
+  easy and straightforward. That is why most of the language libraries
+  use Linked List internally to implement these data structures..
+* Linked List might turn out to be more space efficient compare to
+  arrays in cases where we cannot guess the number of elements in
+  advance. In case of arrays, the whole memory for items is allocated
+  together. Even with dynamic sized arrays like vector in C++ or list in
+  Python or ArrayList in Java. the internal working involves
+  de-allocation of whole memory and allocation of a bigger chunk when
+  insertions happen beyond the current capacity.
+
+Applications of Linked Lists:
+-----------------------------
+
+* Linked Lists can be used to implement stacks, queue, deque, [sparse matrices](https://www.geeksforgeeks.org/sparse-matrix-representation/) and adjacency list representation of graphs.
+* [Dynamic memory allocation](https://www.geeksforgeeks.org/what-is-dynamic-memory-allocation/)
+  in operating systems and compilers (linked list of free blocks).
+* Manipulation of polynomials
+* Arithmetic operations on long integers.
+* In operating systems, they can be used in Memory management, process
+  scheduling (for example circular linked list for round robin
+  scheduling) and file system.
+* Algorithms that need to frequently insert or delete items from large
+  collections of data.
+* LRU cache, which uses a doubly linked list to keep track of the most
+  recently used items in a cache.
+
+Applications of Linked Lists in real world:
+-------------------------------------------
+
+* The list of songs in the music player are linked to the previous and
+  next songs.
+* In a web browser, previous and next web page URLs can be linked
+  through the previous and next buttons (Doubly Linked List)
+* In image viewer, the previous and next images can be linked with the
+  help of the previous and next buttons (Doubly Linked List)
+* Circular Linked Lists can be used to implement things in round manner
+  where we go to every element one by one.
+* Linked List are preferred over arrays for implementations of Queue
+  and Deque data structures because of fast deletions (or insertions)
+  from the front of the linked lists.
+
+Disadvantages of Linked Lists:
+------------------------------
+
+Linked lists are a popular data structure in computer science, but like
+any other data structure, they have certain disadvantages as well. Some
+of the key disadvantages of linked lists are:
+
+* ****Slow Access Time:**** Accessing elements in a linked list can be slow, as you need to
+  traverse the linked list to find the element you are looking for,
+  which is an O(n) operation. This makes linked lists a poor choice for
+  situations where you need to access elements quickly.
+* ****Pointers or References:****
+  Linked lists use pointers or references to access the next node, which
+  can make them more complex to understand and use compared to arrays.
+  This complexity can make linked lists more difficult to debug and
+  maintain.
+* ****Higher overhead:**** Linked lists have a higher overhead compared to arrays, as each node
+  in a linked list requires extra memory to store the reference to the
+  next node.
+* ****Cache Inefficiency:**** Linked lists are cache-inefficient because the memory is not
+  contiguous. This means that when you traverse a linked list, you are
+  not likely to get the data you need in the cache, leading to cache
+  misses and slow performance.
+
+In conclusion, linked lists are a powerful and flexible data structure,
+but they have certain disadvantages that need to be taken into
+consideration when deciding whether to use them or not. For example, if
+you need fast access time, arrays might be a better choice, but if you
+need to insert or delete elements frequently, linked lists might be the
+better choice.
+', e'A Linked List is a linear data structure
+that is used to store a collection of data with the help of nodes.
+Please remember the following points before moving forward.
+', 'Applications, Advantages and Disadvantages of Linked List', 15, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('fe47d547-098c-4d93-a52b-09f5533ea97c', e'Understanding Node Structure
 ----------------------------
 
@@ -58625,7 +49908,8724 @@ function deleteAtPosition(head, position) {
 
 
 ', e'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data field and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient
-insertion and deletion operations.', 'Singly Linked List Tutorial', 1, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '853e7ebc-48f7-4f47-aa0f-7cd103b4e503');
+insertion and deletion operations.', 'Singly Linked List Tutorial', 12, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '853e7ebc-48f7-4f47-aa0f-7cd103b4e503');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2220549e-2da8-4f0c-9d38-2495ce6b234e', e'What is a Circular Linked List?
+-------------------------------
+
+A ****circular linked list****
+is a special type of linked list where all the nodes are connected to
+form a circle. Unlike a regular linked list, which ends with a node
+pointing to ****NULL****, the last node in a circular linked list points back to the first
+node. This means that you can keep traversing the list without ever
+reaching a ****NULL**** value.
+
+Types of Circular Linked Lists
+------------------------------
+
+We can create a circular linked list from both [singly linked lists](https://www.geeksforgeeks.org/introduction-to-singly-linked-list/) and [doubly linked lists](https://www.geeksforgeeks.org/doubly-linked-list-tutorial-2/). So, circular linked list are basically of two types:
+
+### 1. Circular Singly Linked List
+
+In ****Circular Singly Linked List****, each node has just one pointer called the “****next****” pointer. The next pointer of ****last node**** points back to the ****first node**** and this results in forming a circle. In this type of Linked list we
+can only move through the list in one direction.
+
+![Representation-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806130914/Representation-of-circular-linked-list.webp)
+
+Representation of Circular Singly Linked List
+
+### 2. Circular Doubly Linked List:
+
+In ****circular doubly linked**** ****list,**** each node has two pointers ****prev**** and ****next,**** similar to doubly linked list. The ****prev**** pointer points to the previous node and the ****next**** points to the next node. Here, in addition to the ****last**** node storing the address of the first node, the ****first node**** will also store the address of the ****last node****.
+
+![Representation-of-circular-doubly-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806145223/Representation-of-circular-doubly-linked-list.webp)
+
+Representation of Circular Doubly Linked List
+
+****Note:**** In this article, we will use the circular singly linked list to explain
+the working of circular linked lists.
+
+Representation of a Circular Singly Linked List
+-----------------------------------------------
+
+Let’s take a look on the structure of a circular linked list.
+
+
+
+![Node-structure-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806145414/Node-structure-of-circular-linked-list.webp)
+
+Representation of a Circular Singly Linked List
+
+### Create/Declare a Node of Circular Linked List
+
+Syntax to Declare a Circular Linked List in Different Languages:
+
+
+C++
+````
+// Node structure
+struct Node {
+    int data;
+    Node* next;
+
+    Node(int value){
+        data = value;
+        next = nullptr;
+    }
+};
+
+````
+
+C
+````
+// Node structure
+struct Node
+{
+    int data;
+    struct Node *next;
+};
+
+// Function to create a new node
+struct Node *createNode(int value){
+
+    // Allocate memory
+    struct Node *newNode =
+      (struct Node *)malloc(sizeof(struct Node));
+
+    // Set the data
+    newNode->data = value;
+
+    // Initialize next to NULL
+    newNode->next = NULL;
+
+    // Return the new node
+    return newNode;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+
+    Node(int data)
+    {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+````
+
+C#
+````
+public class Node {
+    public int data;
+    public Node next;
+
+    public Node(int data){
+        this.data = data;
+        this.next = null;
+    }
+}
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(data)
+    {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+````
+
+
+
+
+
+
+
+In the code above, each node has ****data**** and a ****pointer**** to the next node. When we create multiple nodes for a circular linked
+list, we only need to connect the last node back to the first one.
+
+Example of Creating a Circular Linked List
+------------------------------------------
+
+Here’s an example of creating a circular linked list with three nodes
+(2, 3, 4):
+
+![Circular-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240806111438/Circular-Linked-List.png)
+
+Created a circular linked list with 3 nodes
+
+
+C++
+````
+// Initilize and allocate memory for nodes
+first = new Node(2);
+second = new Node(3);
+last = new Node(4);
+
+// Connect nodes
+first->next = second;
+second->next = last;
+
+// Connect last node to first node
+last->next = first;
+
+````
+
+C
+````
+// Allocate memory for nodes
+struct Node *first =
+  (struct Node *)malloc(sizeof(struct Node));
+struct Node *second =
+  (struct Node *)malloc(sizeof(struct Node));
+struct Node *last =
+  (struct Node *)malloc(sizeof(struct Node));
+
+// Initilize nodes
+first->data = 2;
+second->data = 3;
+last->data = 4;
+
+// Connect nodes
+first->next = second;
+second->next = last;
+last->next = first;
+
+````
+
+Java
+````
+// Initilize and allocate memory for nodes
+Node first = new Node(2);
+Node second = new Node(3);
+Node last = new Node(4);
+
+// Connect nodes
+first.next = second;
+second.next = last;
+last.next = first;
+
+````
+
+Python
+````
+# Initilize and allocate memory for nodes
+first = Node(2)
+second = Node(3)
+last = Node(4)
+
+# Connect nodes
+first.next = second
+second.next = last
+last.next = first
+
+````
+
+C#
+````
+// Initilize and allocate memory for nodes
+Node first = new Node(2);
+Node second = new Node(3);
+Node last = new Node(4);
+
+// Connect nodes
+first.next = second;
+second.next = last;
+last.next = first;
+
+````
+
+JavaScript
+````
+// Initilize and allocate memory for nodes
+let first = new Node(2);
+let second = new Node(3);
+let last = new Node(4);
+
+// Connect nodes
+first.next = second;
+second.next = last;
+last.next = first;
+
+````
+
+
+
+
+
+In the above code, we have created three nodes ****first, second,**** and ****last**** having values ****2, 3,**** and ****4**** respectively.
+
+* After creating three nodes, we have connected these node in a
+  series.
+* Connect the first node “****first”**** to “****second”**** node by ****s****toring the address of “****second”**** nodeinto ****first’s**** next
+* Connect the second node “****second”**** to “****second”**** node by ****s****toring the address of “****third****” node into ****second’s**** next
+* After connecting all the nodes, we reach the key characteristic of a
+  circular linked list: linking the last node back to the first node. Therefore, we store the address of the “****first****” node in the “****last****” node.
+
+### Why have we taken a pointer that points to the last node instead of the first node?
+
+For the insertion of a node at the beginning, we need to traverse the
+whole list. Also, for insertion at the end, the whole list has to be
+traversed. If instead of the start pointer, we take a pointer to the
+last node, then in both cases there won’t be any need to traverse the
+whole list. So insertion at the beginning or at the end takes constant
+time, irrespective of the length of the list.
+
+Operations on the Circular Linked list:
+---------------------------------------
+
+We can do some operations on the circular linked list similar to the
+singly and doubly linked list which are:
+
+* ****Insertion****
+  + Insertion at the empty list
+  + Insertion at the beginning
+  + Insertion at the end
+  + Insertion at the given position
+* ****Deletion****
+  + Delete the first node
+  + Delete the last node
+  + Delete the node from any position
+* ****Searching****
+
+****Note:**** We will be using the circular singly linked list to represent the
+working of the circular linked list.
+
+[Insertion in the circular linked list:](https://www.geeksforgeeks.org/circular-singly-linked-list-insertion/)
+--------------------------------------------------------------------------------------------------------------
+
+Insertion is a fundamental operation in linked lists that involves
+adding a new node to the list. The only extra step is connecting the
+last node to the first one. In the circular linked list mentioned below,
+we can insert nodes in four ways:
+
+### 1. Insertion in an empty List in the circular linked list
+
+> To insert a node in empty circular linked list, creates a ****new node**** with the given data, sets its next pointer to point to itself, and
+> updates the ****last**** pointer to reference this ****new node****.
+
+![Insertion-in-an-empty-list-in-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806193408/Insertion-in-an-empty-list-in-circular-linked-list.webp)
+
+Insertion in an empty List
+
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node{
+    int data;
+    Node *next;
+    Node(int value){
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to insert a node into an empty circular singly linked list
+Node *insertInEmptyList(Node *last, int data){
+    if (last != nullptr) return last;
+
+    // Create a new node
+    Node *newNode = new Node(data);
+
+    // Point newNode to itself
+    newNode->next = newNode;
+
+    // Update last to point to the new node
+    last = newNode;
+    return last;
+}
+
+void printList(Node* last){
+    if(last == NULL) return;
+
+    // Start from the head node
+    Node* head = last->next;
+    while (true) {
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next) break;
+    }
+    cout << endl;
+}
+
+int main(){
+    Node *last = nullptr;
+
+    // Insert a node into the empty list
+    last = insertInEmptyList(last, 1);
+
+    // Print the list
+    cout << "List after insertion: ";
+    printList(last);
+
+    return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the Node structure
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+struct Node* createNode(int value);
+
+// Function to insert a node into an empty
+// circular singly linked list
+struct Node* insertInEmptyList(struct Node* last, int data) {
+    if (last != NULL) return last;
+
+    // Create a new node
+    struct Node* newNode = createNode(data);
+
+    // Update last to point to the new node
+    last = newNode;
+    return last;
+}
+
+void printList(struct Node* last) {
+    if (last == NULL) return;
+
+    // Start from the head node
+    struct Node* head = last->next;
+    while (1) {
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next) break;
+    }
+    printf("\\n");
+}
+
+struct Node* createNode(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = newNode;
+    return newNode;
+}
+
+int main() {
+    struct Node* last = NULL;
+
+    // Insert a node into the empty list
+    last = insertInEmptyList(last, 1);
+
+    // Print the list
+    printf("List after insertion: ");
+    printList(last);
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+
+    Node(int value) {
+        data = value;
+        next = null;
+    }
+}
+
+public class Main {
+    // Function to insert a node into an empty
+    // circular singly linked list
+    static Node insertInEmptyList(Node last, int data) {
+        if (last != null) return last;
+
+        // Create a new node
+        Node newNode = new Node(data);
+
+        // Point newNode to itself
+        newNode.next = newNode;
+
+        // Update last to point to the new node
+        last = newNode;
+        return last;
+    }
+
+    // Function to print the list
+    static void printList(Node last) {
+        if (last == null) return;
+
+        // Start from the head node
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next) break;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        Node last = null;
+
+        // Insert a node into the empty list
+        last = insertInEmptyList(last, 1);
+
+        // Print the list
+        System.out.print("List after insertion: ");
+        printList(last);
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, value):
+        self.data = value
+        self.next = self  # Point to itself
+
+def insertInEmptyList(last, data):
+    if last is not None:
+        return last
+
+    # Create a new node
+    new_node = Node(data)
+
+    # Update last to point to the new node
+    last = new_node
+    return last
+
+def printList(last):
+    if last is None:
+        return
+
+    # Start from the head node
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+if __name__ == "__main__":
+    last = None
+
+    # Insert a node into the empty list
+    last = insertInEmptyList(last, 1)
+
+    # Print the list
+    print("List after insertion: ", end="")
+    printList(last)
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(value)
+    {
+        this.data = value;
+        this.next = null;
+    }
+}
+
+function insertInEmptyList(last, data)
+{
+    if (last !== null)
+        return last;
+
+    // Create a new node
+    let newNode = new Node(data);
+
+    // Point newNode to itself
+    newNode.next = newNode;
+
+    // Update last to point to the new node
+    last = newNode;
+    return last;
+}
+
+function printList(last)
+{
+    if (last === null)
+        return;
+
+    // Start from the head node
+    let head = last.next;
+    while (true) {
+        console.log(head.data);
+        head = head.next;
+        if (head === last.next)
+            break;
+    }
+}
+
+// Main function
+
+let last = null;
+
+// Insert a node into the empty list
+last = insertInEmptyList(last, 1);
+
+// Print the list
+console.log("List after insertion:");
+printList(last);
+
+````
+
+
+
+
+**Output**
+```
+
+List after insertion: 1
+
+```
+### 2. Insertion at the beginning in circular linked list
+
+> To insert a new node at the beginning of a circular linked list, we
+> first create the ****new node****
+> and allocate memory for it. If the list is empty (indicated by the
+> last pointer being ****NULL****), we make the ****new node****
+> point to itself. If the list already contains nodes then we set the ****new node’s**** next pointer to point to the ****current head**** of the list (which is ****last->next****), and then update the last node’s next pointer to point to the ****new node****. This maintains the circular structure of the list.
+
+![Insertion-at-the-beginning-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150314/Insertion-at-the-beginning-of-circular-linked-list.webp)
+
+Insertion at the beginning in circular linked list
+
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+
+    Node(int value)
+    {
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to insert a node at the beginning of the
+// circular linked list
+Node* insertAtBeginning(Node* last, int value){
+    // Allocate memory for the new node and set its data
+    Node* newNode = new Node(value);
+
+    // If the list is empty, make the new node point to
+    // itself and set it as last
+    if (last == nullptr) {
+        newNode->next = newNode;
+        return newNode;
+    }
+
+    // Insert the new node at the beginning
+    newNode->next = last->next;
+    last->next = newNode;
+
+    return last;
+}
+
+void printList(Node* last){
+  if(last == NULL) return;
+
+    // Start from the head node
+    Node* head = last->next;
+    while (true) {
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next)
+            break;
+    }
+    cout << endl;
+}
+
+int main(){
+
+    // Create circular linked list: 2, 3, 4
+    Node* first = new Node(2);
+    first->next = new Node(3);
+    first->next->next = new Node(4);
+
+    Node* last = first->next->next;
+    last->next = first;
+
+    cout << "Original list: ";
+    printList(last);
+
+    // Insert 5 at the beginning
+    last = insertAtBeginning(last, 5);
+
+    cout << "List after inserting 5 at the beginning: ";
+    printList(last);
+
+    return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the Node structure
+struct Node
+{
+    int data;
+    struct Node *next;
+};
+
+// Function to create a new node
+struct Node *createNode(int value)
+{
+    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to insert a node at the beginning
+// of the circular linked list
+struct Node *insertAtBeginning(struct Node *last, int value)
+{
+    struct Node *newNode = createNode(value);
+
+    // If the list is empty, make the new node point to itself
+    // and set it as last
+    if (last == NULL)
+    {
+        newNode->next = newNode;
+        return newNode;
+    }
+
+    // Insert the new node at the beginning
+    newNode->next = last->next;
+    last->next = newNode;
+
+    return last;
+}
+
+void printList(struct Node *last)
+{
+    if (last == NULL) return;
+
+    struct Node *head = last->next;
+    while (1){
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next)
+            break;
+    }
+    printf("\\n");
+}
+
+int main()
+{
+    // Create circular linked list: 2, 3, 4
+    struct Node *first = createNode(2);
+    first->next = createNode(3);
+    first->next->next = createNode(4);
+    struct Node *last = first->next->next;
+    last->next = first;
+
+    printf("Original list: ");
+    printList(last);
+
+    // Insert 5 at the beginning
+    last = insertAtBeginning(last, 5);
+
+    printf("List after inserting 5 at the beginning: ");
+    printList(last);
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+
+    Node(int value){
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+
+    // Function to insert a node at the beginning of the
+    // circular linked list
+    public static Node insertAtBeginning(Node last,
+                                         int value){
+        Node newNode = new Node(value);
+
+        // If the list is empty, make the new node point to
+        // itself and set it as last
+        if (last == null) {
+            newNode.next = newNode;
+            return newNode;
+        }
+
+        // Insert the new node at the beginning
+        newNode.next = last.next;
+        last.next = newNode;
+
+        return last;
+    }
+
+    // Function to print the circular linked list
+    public static void printList(Node last){
+        if (last == null)
+            return;
+
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next) break;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args){
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+        Node last = first.next.next;
+        last.next = first;
+
+        System.out.print("Original list: ");
+        printList(last);
+
+        // Insert 5 at the beginning
+        last = insertAtBeginning(last, 5);
+
+        System.out.print(
+            "List after inserting 5 at the beginning: ");
+        printList(last);
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+# Function to insert a node at the beginning of the circular linked list
+def insert_at_beginning(last, value):
+    new_node = Node(value)
+
+    # If the list is empty, make the new node point to itself and set it as last
+    if last is None:
+        new_node.next = new_node
+        return new_node
+
+    # Insert the new node at the beginning
+    new_node.next = last.next
+    last.next = new_node
+
+    return last
+
+# Function to print the circular linked list
+def print_list(last):
+    if last is None:
+        return
+
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+# Create circular linked list: 2, 3, 4
+first = Node(2)
+first.next = Node(3)
+first.next.next = Node(4)
+last = first.next.next
+last.next = first
+
+print("Original list: ", end="")
+print_list(last)
+
+# Insert 5 at the beginning
+last = insert_at_beginning(last, 5)
+
+print("List after inserting 5 at the beginning: ", end="")
+print_list(last)
+
+````
+
+C#
+````
+using System;
+
+public class Node
+{
+    public int data;
+    public Node next;
+
+    public Node(int value)
+    {
+        data = value;
+        next = null;
+    }
+}
+
+public class CircularLinkedList
+{
+    // Function to insert a node at the beginning of the circular linked list
+    public static Node InsertAtBeginning(Node last, int value)
+    {
+        Node newNode = new Node(value);
+
+        // If the list is empty, make the new node point to itself and set it as last
+        if (last == null)
+        {
+            newNode.next = newNode;
+            return newNode;
+        }
+
+        // Insert the new node at the beginning
+        newNode.next = last.next;
+        last.next = newNode;
+
+        return last;
+    }
+
+    // Function to print the circular linked list
+    public static void PrintList(Node last)
+    {
+        if (last == null)
+            return;
+
+        Node head = last.next;
+        while (true)
+        {
+            Console.Write(head.data + " ");
+            head = head.next;
+            if (head == last.next)
+                break;
+        }
+        Console.WriteLine();
+    }
+
+    public static void Main(string[] args)
+    {
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+        Node last = first.next.next;
+        last.next = first;
+
+        Console.Write("Original list: ");
+        PrintList(last);
+
+        // Insert 5 at the beginning
+        last = InsertAtBeginning(last, 5);
+
+        Console.Write("List after inserting 5 at the beginning: ");
+        PrintList(last);
+    }
+}
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(data)
+    {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+// Function to insert a node at the beginning of the
+// circular linked list
+function insertAtBeginning(last, value)
+{
+    const newNode = new Node(value);
+
+    // If the list is empty, make the new node point to
+    // itself and set it as last
+    if (last === null) {
+        newNode.next = newNode;
+        return newNode;
+    }
+
+    // Insert the new node at the beginning
+    newNode.next = last.next;
+    last.next = newNode;
+
+    return last;
+}
+
+// Function to print the circular linked list
+function printList(last)
+{
+    if (last === null)
+        return;
+
+    let head = last.next;
+    while (true) {
+        console.log(head.data + " ");
+        head = head.next;
+        if (head === last.next)
+            break;
+    }
+    console.log();
+}
+
+// Create circular linked list: 2, 3, 4
+const first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+let last
+    = first.next.next; // Using let to allow reassignment
+last.next = first;
+
+console.log("Original list: ");
+printList(last);
+
+// Insert 5 at the beginning
+last = insertAtBeginning(last, 5);
+
+console.log("List after inserting 5 at the beginning: ");
+printList(last);
+
+````
+
+
+
+
+
+**Output**
+```
+
+Original list: 2 3 4
+List after inserting 5 at the beginning: 5 2 3 4
+
+```
+### 3. Insertion at the end in circular linked list
+
+> To insert a new node at the end of a circular linked list, we first
+> create the new node and allocate memory for it. If the list is empty
+> (mean, ****last**** or ****tail**** pointer being ****NULL****), we initialize the list with the ****new node**** and making it point to itself to form a circular structure. If the
+> list already contains nodes then we set the ****new node’s**** next pointer to point to the ****current head**** (which is ****tail->next****), then update the ****current tail’s**** next pointer to point to the ****new node****. Finally, we update the ****tail pointer**** to the ****new node.**** This will ensure that the ****new node**** is now the ****last node**** in the list while maintaining the circular linkage.
+
+![Insertion-at-the-end-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150353/Insertion-at-the-end-of-circular-linked-list.webp)
+
+Insertion at the end in circular linked list
+
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node{
+    int data;
+    Node *next;
+    Node(int value)
+    {
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to insert a node at the end of a circular linked list
+Node *insertEnd(Node *tail, int value)
+{
+    Node *newNode = new Node(value);
+    if (tail == nullptr){
+        // If the list is empty, initialize it with the new node
+        tail = newNode;
+
+        // Point to itself to form a circular structure
+        newNode->next = newNode;
+    }
+    else{
+        // Insert new node after the current tail
+        // and update the tail pointer.
+        // New node points to the head node
+        newNode->next = tail->next;
+
+        // Tail node points to the new node
+        tail->next = newNode;
+
+        // Update tail to be the new node
+        tail = newNode;
+    }
+    return tail;
+}
+
+void printList(Node *last){
+  if(last == NULL) return;
+
+    // Start from the head node
+    Node *head = last->next;
+    while (true){
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next)
+            break;
+    }
+    cout << endl;
+}
+
+int main(){
+    // Create circular linked list: 2, 3, 4
+    Node *first = new Node(2);
+    first->next = new Node(3);
+    first->next->next = new Node(4);
+
+    Node *last = first->next->next;
+    last->next = first;
+
+    cout << "Original list: ";
+    printList(last);
+
+    // Insert elements at the end of the circular linked list
+    last = insertEnd(last, 5);
+    last = insertEnd(last, 6);
+
+    cout << "List after inserting 5 and 6: ";
+    printList(last);
+
+    return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the Node structure
+struct Node
+{
+    int data;
+    struct Node *next;
+};
+
+// Function to create a new node
+struct Node *createNode(int value);
+
+// Function to insert a node at the end of a circular linked list
+struct Node *insertEnd(struct Node *tail, int value)
+{
+    struct Node *newNode = createNode(value);
+    if (tail == NULL)
+    {
+        // If the list is empty, initialize it with the new node
+        tail = newNode;
+        newNode->next = newNode;
+    }
+    else
+    {
+        // Insert new node after the current tail and update the tail pointer
+        newNode->next = tail->next;
+        tail->next = newNode;
+        tail = newNode;
+    }
+    return tail;
+}
+
+// Function to print the circular linked list
+void printList(struct Node *last)
+{
+    if (last == NULL)
+        return;
+
+    struct Node *head = last->next;
+    while (1)
+    {
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next)
+            break;
+    }
+    printf("\\n");
+}
+
+struct Node *createNode(int value)
+{
+    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+int main()
+{
+    // Create circular linked list: 2, 3, 4
+    struct Node *first = createNode(2);
+    first->next = createNode(3);
+    first->next->next = createNode(4);
+
+    struct Node *last = first->next->next;
+    last->next = first;
+
+    printf("Original list: ");
+    printList(last);
+
+    // Insert elements at the end of the circular linked list
+    last = insertEnd(last, 5);
+    last = insertEnd(last, 6);
+
+    printf("List after inserting 5 and 6: ");
+    printList(last);
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+
+    Node(int value){
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+
+    // Function to insert a node at the end of a circular
+    // linked list
+    static Node insertEnd(Node tail, int value){
+        Node newNode = new Node(value);
+        if (tail == null) {
+            // If the list is empty, initialize it with the
+            // new node
+            tail = newNode;
+            newNode.next = newNode;
+        }
+        else {
+            // Insert new node after the current tail and
+            // update the tail pointer
+            newNode.next = tail.next;
+            tail.next = newNode;
+            tail = newNode;
+        }
+        return tail;
+    }
+
+    // Function to print the circular linked list
+    static void printList(Node last){
+        if (last == null) return;
+
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next) break;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args){
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+
+        Node last = first.next.next;
+        last.next = first;
+
+        System.out.print("Original list: ");
+        printList(last);
+
+        // Insert elements at the end of the circular linked
+        // list
+        last = insertEnd(last, 5);
+        last = insertEnd(last, 6);
+
+        System.out.print("List after inserting 5 and 6: ");
+        printList(last);
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, value):
+        self.data = value
+        self.next = None
+
+# Function to insert a node at the end of a circular linked list
+
+
+def insert_end(tail, value):
+    new_node = Node(value)
+    if tail is None:
+        # If the list is empty, initialize
+        # it with the new node
+        tail = new_node
+        new_node.next = new_node
+    else:
+        # Insert new node after the current tail
+        # and update the tail pointer
+        new_node.next = tail.next
+        tail.next = new_node
+        tail = new_node
+    return tail
+
+# Function to print the circular linked list
+
+
+def print_list(last):
+    if last is None:
+        return
+
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+
+if __name__ == "__main__":
+    # Create circular linked list: 2, 3, 4
+    first = Node(2)
+    first.next = Node(3)
+    first.next.next = Node(4)
+
+    last = first.next.next
+    last.next = first
+
+    print("Original list: ", end="")
+    print_list(last)
+
+    # Insert elements at the end of the circular linked list
+    last = insert_end(last, 5)
+    last = insert_end(last, 6)
+
+    print("List after inserting 5 and 6: ", end="")
+    print_list(last)
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(value){
+        this.data = value;
+        this.next = null;
+    }
+}
+
+// Function to insert a node at the end of a circular linked
+// list
+function insertEnd(tail, value){
+    let newNode = new Node(value);
+    if (tail === null) {
+        // If the list is empty, initialize it with the new
+        // node
+        tail = newNode;
+        newNode.next = newNode;
+    }
+    else {
+        // Insert new node after the current tail and update
+        // the tail pointer
+        newNode.next = tail.next;
+        tail.next = newNode;
+        tail = newNode;
+    }
+    return tail;
+}
+
+// Function to print the circular linked list
+function printList(last)
+{
+    if (last === null)
+        return;
+
+    let head = last.next;
+    while (true) {
+        console.log(head.data + " ");
+        head = head.next;
+        if (head === last.next)
+            break;
+    }
+    console.log();
+}
+
+// Create circular linked list: 2, 3, 4
+let first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+let last = first.next.next;
+last.next = first;
+
+console.log("Original list: ");
+printList(last);
+
+// Insert elements at the end of the circular linked
+// list
+last = insertEnd(last, 5);
+last = insertEnd(last, 6);
+
+console.log("List after inserting 5 and 6: ");
+printList(last);
+
+````
+
+**Output**
+```
+
+Original list: 2 3 4
+List after inserting 5 and 6: 2 3 4 5 6
+
+```
+### 4. Insertion at specific position in circular linked list
+
+> To insert a new node at a specific position in a circular linked
+> list, we first check if the list is empty. If it is and the ****position**** is not ****1****
+> then we print an error message because the position doesn’t exist in
+> the list. If the ****position**** is ****1**** then we create the ****new node**** and make it point to itself. If the list is not empty, we create the ****new node**** and traverse the list to find the correct insertion point. If the ****position**** is ****1****, we insert the ****new node****
+> at the beginning by adjusting the pointers accordingly. For other
+> positions, we traverse through the list until we reach the desired
+> position and inserting the ****new node****
+> by updating the pointers. If the new node is inserted at the end, we
+> also update the ****last****
+> pointer to reference the new node, maintaining the circular structure
+> of the list.
+
+![Insertion-at-specific-position-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150431/Insertion-at-specific-position-of-circular-linked-list.webp)
+
+Insertion at specific position in circular linked list
+
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node{
+    int data;
+    Node *next;
+    Node(int value){
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to insert a node at a specific position in a circular linked list
+Node *insertAtPosition(Node *last, int data, int pos){
+    if (last == nullptr){
+        // If the list is empty
+        if (pos != 1){
+            cout << "Invalid position!" << endl;
+            return last;
+        }
+        // Create a new node and make it point to itself
+        Node *newNode = new Node(data);
+        last = newNode;
+        last->next = last;
+        return last;
+    }
+
+    // Create a new node with the given data
+    Node *newNode = new Node(data);
+
+    // curr will point to head initially
+    Node *curr = last->next;
+
+    if (pos == 1){
+        // Insert at the beginning
+        newNode->next = curr;
+        last->next = newNode;
+        return last;
+    }
+
+    // Traverse the list to find the insertion point
+    for (int i = 1; i < pos - 1; ++i) {
+        curr = curr->next;
+
+        // If position is out of bounds
+        if (curr == last->next){
+            cout << "Invalid position!" << endl;
+            return last;
+        }
+    }
+    // Insert the new node at the desired position
+    newNode->next = curr->next;
+    curr->next = newNode;
+
+    // Update last if the new node is inserted at the end
+    if (curr == last) last = newNode;
+
+    return last;
+}
+
+void printList(Node *last){
+    if (last == NULL) return;
+
+    Node *head = last->next;
+    while (true){
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next) break;
+    }
+    cout << endl;
+}
+
+int main(){
+    // Create circular linked list: 2, 3, 4
+    Node *first = new Node(2);
+    first->next = new Node(3);
+    first->next->next = new Node(4);
+
+    Node *last = first->next->next;
+    last->next = first;
+
+    cout << "Original list: ";
+    printList(last);
+
+    // Insert elements at specific positions
+    int data = 5, pos = 2;
+    last = insertAtPosition(last, data, pos);
+    cout << "List after insertions: ";
+    printList(last);
+
+    return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the Node structure
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+struct Node* createNode(int value);
+
+// Function to insert a node at a specific position in a circular linked list
+struct Node* insertAtPosition(struct Node *last, int data, int pos) {
+    if (last == NULL) {
+        // If the list is empty
+        if (pos != 1) {
+            printf("Invalid position!\\n");
+            return last;
+        }
+        // Create a new node and make it point to itself
+        struct Node *newNode = createNode(data);
+        last = newNode;
+        last->next = last;
+        return last;
+    }
+
+    // Create a new node with the given data
+    struct Node *newNode = createNode(data);
+
+    // curr will point to head initially
+    struct Node *curr = last->next;
+
+    if (pos == 1) {
+        // Insert at the beginning
+        newNode->next = curr;
+        last->next = newNode;
+        return last;
+    }
+
+    // Traverse the list to find the insertion point
+    for (int i = 1; i < pos - 1; ++i) {
+        curr = curr->next;
+
+        // If position is out of bounds
+        if (curr == last->next) {
+            printf("Invalid position!\\n");
+            return last;
+        }
+    }
+
+    // Insert the new node at the desired position
+    newNode->next = curr->next;
+    curr->next = newNode;
+
+    // Update last if the new node is inserted at the end
+    if (curr == last) last = newNode;
+
+    return last;
+}
+
+// Function to print the circular linked list
+void printList(struct Node *last) {
+    if (last == NULL) return;
+
+    struct Node *head = last->next;
+    while (1) {
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next) break;
+    }
+    printf("\\n");
+}
+
+// Function to create a new node
+struct Node* createNode(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+int main() {
+    // Create circular linked list: 2, 3, 4
+    struct Node *first = createNode(2);
+    first->next = createNode(3);
+    first->next->next = createNode(4);
+
+    struct Node *last = first->next->next;
+    last->next = first;
+
+    printf("Original list: ");
+    printList(last);
+
+    // Insert elements at specific positions
+    int data = 5, pos = 2;
+    last = insertAtPosition(last, data, pos);
+    printf("List after insertions: ");
+    printList(last);
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+
+    Node(int value){
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+
+    // Function to insert a node at a specific position in a
+    // circular linked list
+    static Node insertAtPosition(Node last, int data,
+                                 int pos){
+        if (last == null) {
+            // If the list is empty
+            if (pos != 1) {
+                System.out.println("Invalid position!");
+                return last;
+            }
+            // Create a new node and make it point to itself
+            Node newNode = new Node(data);
+            last = newNode;
+            last.next = last;
+            return last;
+        }
+
+        // Create a new node with the given data
+        Node newNode = new Node(data);
+
+        // curr will point to head initially
+        Node curr = last.next;
+
+        if (pos == 1) {
+            // Insert at the beginning
+            newNode.next = curr;
+            last.next = newNode;
+            return last;
+        }
+
+        // Traverse the list to find the insertion point
+        for (int i = 1; i < pos - 1; ++i) {
+            curr = curr.next;
+
+            // If position is out of bounds
+            if (curr == last.next) {
+                System.out.println("Invalid position!");
+                return last;
+            }
+        }
+
+        // Insert the new node at the desired position
+        newNode.next = curr.next;
+        curr.next = newNode;
+
+        // Update last if the new node is inserted at the
+        // end
+        if (curr == last)
+            last = newNode;
+
+        return last;
+    }
+
+    static void printList(Node last){
+        if (last == null)
+            return;
+
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next)
+                break;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args)
+    {
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+
+        Node last = first.next.next;
+        last.next = first;
+
+        System.out.print("Original list: ");
+        printList(last);
+
+        // Insert elements at specific positions
+        int data = 5, pos = 2;
+        last = insertAtPosition(last, data, pos);
+        System.out.print("List after insertions: ");
+        printList(last);
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, value):
+        self.data = value
+        self.next = None
+
+# Function to insert a node at a specific position in a circular linked list
+def insertAtPosition(last, data, pos):
+    if last is None:
+        # If the list is empty
+        if pos != 1:
+            print("Invalid position!")
+            return last
+        # Create a new node and make it point to itself
+        new_node = Node(data)
+        last = new_node
+        last.next = last
+        return last
+
+    # Create a new node with the given data
+    new_node = Node(data)
+
+    # curr will point to head initially
+    curr = last.next
+
+    if pos == 1:
+        # Insert at the beginning
+        new_node.next = curr
+        last.next = new_node
+        return last
+
+    # Traverse the list to find the insertion point
+    for i in range(1, pos - 1):
+        curr = curr.next
+
+        # If position is out of bounds
+        if curr == last.next:
+            print("Invalid position!")
+            return last
+
+    # Insert the new node at the desired position
+    new_node.next = curr.next
+    curr.next = new_node
+
+    # Update last if the new node is inserted at the end
+    if curr == last:
+        last = new_node
+
+    return last
+
+# Function to print the circular linked list
+def print_list(last):
+    if last is None:
+        return
+
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+if __name__ == "__main__":
+    # Create circular linked list: 2, 3, 4
+    first = Node(2)
+    first.next = Node(3)
+    first.next.next = Node(4)
+
+    last = first.next.next
+    last.next = first
+
+    print("Original list: ", end="")
+    print_list(last)
+
+    # Insert elements at specific positions
+    data = 5
+    pos = 2
+    last = insertAtPosition(last, data, pos)
+    print("List after insertions: ", end="")
+    print_list(last)
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(value){
+        this.data = value;
+        this.next = null;
+    }
+}
+
+// Function to insert a node at a specific position in a
+// circular linked list
+function insertAtPosition(last, data, pos)
+{
+    if (last === null) {
+        // If the list is empty
+        if (pos !== 1) {
+            console.log("Invalid position!");
+            return last;
+        }
+        // Create a new node and make it point to itself
+        let newNode = new Node(data);
+        last = newNode;
+        last.next = last;
+        return last;
+    }
+
+    // Create a new node with the given data
+    let newNode = new Node(data);
+
+    // curr will point to head initially
+    let curr = last.next;
+
+    if (pos === 1) {
+        // Insert at the beginning
+        newNode.next = curr;
+        last.next = newNode;
+        return last;
+    }
+
+    // Traverse the list to find the insertion point
+    for (let i = 1; i < pos - 1; ++i) {
+        curr = curr.next;
+
+        // If position is out of bounds
+        if (curr === last.next) {
+            console.log("Invalid position!");
+            return last;
+        }
+    }
+
+    // Insert the new node at the desired position
+    newNode.next = curr.next;
+    curr.next = newNode;
+
+    // Update last if the new node is inserted at the end
+    if (curr === last)
+        last = newNode;
+
+    return last;
+}
+
+// Function to print the circular linked list
+function printList(last){
+    if (last === null)
+        return;
+
+    let head = last.next;
+    while (true) {
+        console.log(head.data + " ");
+        head = head.next;
+        if (head === last.next)
+            break;
+    }
+    console.log();
+}
+
+// Create circular linked list: 2, 3, 4
+let first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+let last = first.next.next;
+last.next = first;
+
+console.log("Original list: ");
+printList(last);
+
+// Insert elements at specific positions
+let data = 5;
+let pos = 2;
+last = insertAtPosition(last, data, pos);
+console.log("List after insertions: ");
+printList(last);
+
+````
+
+
+**Output**
+```
+
+Original list: 2 3 4
+List after insertions: 2 5 3 4
+
+```
+
+[Deletion from a Circular Linked List](https://www.geeksforgeeks.org/deletion-circular-linked-list/?ref=ml_lbp)
+---------------------------------------------------------------------------------------------------------------
+
+Deletion involves removing a node from the linked list. The main
+difference is that we need to ensure the list remains circular after the
+deletion. We can delete a node in a circular linked list in three
+ways:
+
+### 1. Delete the first node in circular linked list
+
+> To delete the first node of a circular linked list, we first check if
+> the list is empty. If it is then we print a message and return ****NULL****. If the list contains only one node (the ****head**** is the same as the ****last****) then we delete that node and set the ****last**** pointer to ****NULL****. If there are multiple nodes then we update the ****last->next**** pointer to skip the ****head**** node and effectively removing it from the list. We then delete the ****head**** node to free the allocated memory. Finally, we return the updated ****last**** pointer, which still points to the ****last**** node in the list.
+
+![Deletion-from-the-beginning-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150500/Deletion-from-the-beginning-of-circular-linked-list.webp)
+
+Delete the first node in circular linked list
+
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int value) {
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to delete the first node of the circular linked list
+Node* deleteFirstNode(Node* last) {
+    if (last == nullptr) {
+        // If the list is empty
+        cout << "List is empty" << endl;
+        return nullptr;
+    }
+
+    Node* head = last->next;
+
+    if (head == last) {
+        // If there is only one node in the list
+        delete head;
+        last = nullptr;
+    } else {
+        // More than one node in the list
+        last->next = head->next;
+        delete head;
+    }
+
+    return last;
+}
+
+void printList(Node* last) {
+    if(last == NULL) return ;
+
+    Node *head = last->next;
+    while (true){
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next) break;
+    }
+    cout << endl;
+}
+
+int main() {
+    // Create circular linked list: 2, 3, 4
+    Node* first = new Node(2);
+    first->next = new Node(3);
+    first->next->next = new Node(4);
+
+    Node* last = first->next->next;
+    last->next = first;
+
+    cout << "Original list: ";
+    printList(last);
+
+    // Delete the first node
+    last = deleteFirstNode(last);
+
+    cout << "List after deleting first node: ";
+    printList(last);
+
+    return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+struct Node* deleteFirstNode(struct Node* last) {
+    if (last == NULL) {
+        // If the list is empty
+        printf("List is empty\\n");
+        return NULL;
+    }
+
+    struct Node* head = last->next;
+
+    if (head == last) {
+        // If there is only one node in the list
+        free(head);
+        last = NULL;
+    } else {
+        // More than one node in the list
+        last->next = head->next;
+        free(head);
+    }
+
+    return last;
+}
+
+void printList(struct Node* last) {
+    if (last == NULL) return;
+
+    struct Node* head = last->next;
+    while (1) {
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next) break;
+    }
+    printf("\\n");
+}
+
+struct Node* createNode(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+int main() {
+    struct Node* first = createNode(2);
+    first->next = createNode(3);
+    first->next->next = createNode(4);
+
+    struct Node* last = first->next->next;
+    last->next = first;
+
+    printf("Original list: ");
+    printList(last);
+
+    last = deleteFirstNode(last);
+
+    printf("List after deleting first node: ");
+    printList(last);
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+
+    Node(int value) {
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+    public static Node deleteFirstNode(Node last) {
+        if (last == null) {
+            // If the list is empty
+            System.out.println("List is empty");
+            return null;
+        }
+
+        Node head = last.next;
+
+        if (head == last) {
+            // If there is only one node in the list
+            last = null;
+        } else {
+            // More than one node in the list
+            last.next = head.next;
+        }
+
+        return last;
+    }
+
+    public static void printList(Node last) {
+        if (last == null) return;
+
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next) break;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+
+        Node last = first.next.next;
+        last.next = first;
+
+        System.out.print("Original list: ");
+        printList(last);
+
+        // Delete the first node
+        last = deleteFirstNode(last);
+
+        System.out.print("List after deleting first node: ");
+        printList(last);
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+def deleteFirstNode(last):
+    if last is None:
+        # If the list is empty
+        print("List is empty")
+        return None
+
+    head = last.next
+
+    if head == last:
+        # If there is only one node in the list
+        last = None
+    else:
+        # More than one node in the list
+        last.next = head.next
+
+    return last
+
+def print_list(last):
+    if last is None:
+        return
+
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+# Create circular linked list: 2, 3, 4
+first = Node(2)
+first.next = Node(3)
+first.next.next = Node(4)
+
+last = first.next.next
+last.next = first
+
+print("Original list: ", end="")
+print_list(last)
+
+# Delete the first node
+last = deleteFirstNode(last)
+
+print("List after deleting first node: ", end="")
+print_list(last)
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+function deleteFirstNode(last) {
+    if (last === null) {
+        // If the list is empty
+        console.log("List is empty");
+        return null;
+    }
+
+    let head = last.next;
+
+    if (head === last) {
+        // If there is only one node in the list
+        last = null;
+    } else {
+        // More than one node in the list
+        last.next = head.next;
+    }
+
+    return last;
+}
+
+function printList(last) {
+    if (last === null) return;
+
+    let head = last.next;
+    while (true) {
+        console.log(head.data + " ");
+        head = head.next;
+        if (head === last.next) break;
+    }
+    console.log();
+}
+
+// Create circular linked list: 2, 3, 4
+let first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+let last = first.next.next;
+last.next = first;
+
+console.log("Original list: ");
+printList(last);
+
+// Delete the first node
+last = deleteFirstNode(last);
+
+console.log("List after deleting first node: ");
+printList(last);
+
+````
+
+
+
+
+**Output**
+```
+
+Original list: 2 3 4
+List after deleting first node: 3 4
+
+```
+### 2. Delete a specific node in circular linked list
+
+> To delete a specific node from a circular linked list, we first check
+> if the list is empty. If it is then we print a message and return ****nullptr****. If the list contains only one node and it matches the ****key**** then we delete that node and set ****last**** to ****nullptr****. If the node to be deleted is the first node then we update
+> the ****next**** pointer of the ****last**** node to skip the ****head**** node and delete the ****head****. For other nodes, we traverse the list using two pointers: ****curr**** (to find the node) and ****prev****
+> (to keep track of the previous node). If we find the node with the
+> matching key then we update the next pointer of ****prev**** to skip the ****curr****
+> node and delete it. If the node is found and it is the last node, we
+> update the ****last****
+> pointer accordingly. If the node is not found then do nothing and ****tail**** or ****last**** as it is. Finally, we return the updated ****last**** pointer.
+
+![Delete-a-specific-node-in-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150531/Delete-a-specific-node-in-circular-linked-list.webp)
+
+Delete a specific node in circular linked list
+
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int value) {
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to delete a specific node in the circular linked list
+Node* deleteSpecificNode(Node* last, int key) {
+    if (last == nullptr) {
+        // If the list is empty
+        cout << "List is empty, nothing to delete." << endl;
+        return nullptr;
+    }
+
+    Node* curr = last->next;
+    Node* prev = last;
+
+    // If the node to be deleted is the only node in the list
+    if (curr == last && curr->data == key) {
+        delete curr;
+        last = nullptr;
+        return last;
+    }
+
+    // If the node to be deleted is the first node
+    if (curr->data == key) {
+        last->next = curr->next;
+        delete curr;
+        return last;
+    }
+
+    // Traverse the list to find the node to be deleted
+    while (curr != last && curr->data != key) {
+        prev = curr;
+        curr = curr->next;
+    }
+
+    // If the node to be deleted is found
+    if (curr->data == key) {
+        prev->next = curr->next;
+        if (curr == last) {
+            last = prev;
+        }
+        delete curr;
+    } else {
+        // If the node to be deleted is not found
+        cout << "Node with data " << key
+          << " not found." << endl;
+    }
+
+    return last;
+}
+
+// Function to print the circular linked list
+void printList(Node* last) {
+     if (last == NULL){
+        cout << "List is Empty";
+        return;
+    }
+
+    Node *head = last->next;
+    while (true){
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next) break;
+    }
+    cout << endl;
+}
+
+int main() {
+    // Create circular linked list: 2, 3, 4
+    Node* first = new Node(2);
+    first->next = new Node(3);
+    first->next->next = new Node(4);
+
+    Node* last = first->next->next;
+    last->next = first;
+
+    cout << "Original list: ";
+    printList(last);
+
+    // Delete a specific node
+    int key = 3;
+    last = deleteSpecificNode(last, key);
+
+    cout << "List after deleting node " << key << ": ";
+    printList(last);
+
+    return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the structure for a node in the circular linked list
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+// Function to delete a specific node in the circular linked list
+struct Node* deleteSpecificNode(struct Node* last, int key) {
+    if (last == NULL) {
+        // If the list is empty
+        printf("List is empty, nothing to delete.\\n");
+        return NULL;
+    }
+
+    struct Node* curr = last->next;
+    struct Node* prev = last;
+
+    // If the node to be deleted is the only node in the list
+    if (curr == last && curr->data == key) {
+        free(curr);
+        last = NULL;
+        return last;
+    }
+
+    // If the node to be deleted is the first node
+    if (curr->data == key) {
+        last->next = curr->next;
+        free(curr);
+        return last;
+    }
+
+    // Traverse the list to find the node to be deleted
+    while (curr != last && curr->data != key) {
+        prev = curr;
+        curr = curr->next;
+    }
+
+    // If the node to be deleted is found
+    if (curr->data == key) {
+        prev->next = curr->next;
+        if (curr == last) {
+            last = prev;
+        }
+        free(curr);
+    } else {
+        // If the node to be deleted is not found
+        printf("Node with data %d not found.\\n", key);
+    }
+
+    return last;
+}
+
+void printList(struct Node* last) {
+    if (last == NULL) {
+        printf("List is Empty");
+        return;
+    }
+
+    struct Node* head = last->next;
+    while (1) {
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next) break;
+    }
+    printf("\\n");
+}
+
+struct Node* createNode(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+int main() {
+    // Create circular linked list: 2, 3, 4
+    struct Node* first = createNode(2);
+    first->next = createNode(3);
+    first->next->next = createNode(4);
+
+    struct Node* last = first->next->next;
+    last->next = first;
+
+    printf("Original list: ");
+    printList(last);
+
+    // Delete a specific node
+    int key = 3;
+    last = deleteSpecificNode(last, key);
+
+    printf("List after deleting node %d: ", key);
+    printList(last);
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+    Node(int value){
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+    public static Node deleteSpecificNode(Node last,
+                                          int key){
+        if (last == null) {
+            // If the list is empty
+            System.out.println(
+                "List is empty, nothing to delete.");
+            return null;
+        }
+        Node curr = last.next;
+        Node prev = last;
+
+        // If the node to be deleted is the only node in the
+        // list
+        if (curr == last && curr.data == key) {
+            last = null;
+            return last;
+        }
+
+        // If the node to be deleted is the first node
+        if (curr.data == key) {
+            last.next = curr.next;
+            return last;
+        }
+
+        // Traverse the list to find the node to be deleted
+        while (curr != last && curr.data != key) {
+            prev = curr;
+            curr = curr.next;
+        }
+
+        // If the node to be deleted is found
+        if (curr.data == key) {
+            prev.next = curr.next;
+            if (curr == last) {
+                last = prev;
+            }
+        }
+        else {
+            // If the node to be deleted is not found
+            System.out.println("Node with data " + key
+                               + " not found.");
+        }
+        return last;
+    }
+
+    public static void printList(Node last){
+        if (last == null) {
+            System.out.println("List is Empty");
+            return;
+        }
+
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next)
+                break;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args){
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+
+        Node last = first.next.next;
+        last.next = first;
+
+        System.out.print("Original list: ");
+        printList(last);
+
+        // Delete a specific node
+        int key = 3;
+        last = deleteSpecificNode(last, key);
+
+        System.out.print("List after deleting node " + key
+                         + ": ");
+        printList(last);
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+def deleteSpecificNode(last, key):
+    if last is None:
+        # If the list is empty
+        print("List is empty, nothing to delete.")
+        return None
+
+    curr = last.next
+    prev = last
+
+    # If the node to be deleted is the only node in the list
+    if curr == last and curr.data == key:
+        last = None
+        return last
+
+    # If the node to be deleted is the first node
+    if curr.data == key:
+        last.next = curr.next
+        return last
+
+    # Traverse the list to find the node to be deleted
+    while curr != last and curr.data != key:
+        prev = curr
+        curr = curr.next
+
+    # If the node to be deleted is found
+    if curr.data == key:
+        prev.next = curr.next
+        if curr == last:
+            last = prev
+    else:
+        # If the node to be deleted is not found
+        print(f"Node with data {key} not found.")
+
+    return last
+
+def printList(last):
+    if last is None:
+        print("List is Empty")
+        return
+
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+# Create circular linked list: 2, 3, 4
+first = Node(2)
+first.next = Node(3)
+first.next.next = Node(4)
+
+last = first.next.next
+last.next = first
+
+print("Original list: ", end="")
+printList(last)
+
+# Delete a specific node
+key = 3
+last = deleteSpecificNode(last, key)
+
+print(f"List after deleting node {key}: ", end="")
+printList(last)
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+function deleteSpecificNode(last, key) {
+    if (last === null) {
+        // If the list is empty
+        console.log("List is empty, nothing to delete.");
+        return null;
+    }
+
+    let curr = last.next;
+    let prev = last;
+
+    // If the node to be deleted is the only node in the list
+    if (curr === last && curr.data === key) {
+        last = null;
+        return last;
+    }
+
+    // If the node to be deleted is the first node
+    if (curr.data === key) {
+        last.next = curr.next;
+        return last;
+    }
+
+    // Traverse the list to find the node to be deleted
+    while (curr !== last && curr.data !== key) {
+        prev = curr;
+        curr = curr.next;
+    }
+
+    // If the node to be deleted is found
+    if (curr.data === key) {
+        prev.next = curr.next;
+        if (curr === last) {
+            last = prev;
+        }
+    } else {
+        // If the node to be deleted is not found
+        console.log("Node with data " + key + " not found.");
+    }
+
+    return last;
+}
+
+function printList(last) {
+    if (last === null) {
+        console.log("List is Empty");
+        return;
+    }
+
+    let head = last.next;
+    while (true) {
+        console.log(head.data + " ");
+        head = head.next;
+        if (head === last.next) break;
+    }
+    console.log();
+}
+
+// Create circular linked list: 2, 3, 4
+let first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+let last = first.next.next;
+last.next = first;
+
+console.log("Original list: ");
+printList(last);
+
+// Delete a specific node
+let key = 3;
+last = deleteSpecificNode(last, key);
+
+console.log("List after deleting node " + key + ": ");
+printList(last);
+
+````
+
+
+
+**Output**
+```
+
+Original list: 2 3 4
+List after deleting node 3: 2 4
+
+```
+### 3. Deletion at the end of Circular linked list
+
+> To delete the last node in a circular linked list, we first check if
+> the list is empty. If it is, we print a message and return ****nullptr****. If the list contains only one node (where the ****head**** is the same as the ****last****), we delete that node and set ****last**** to ****nullptr****. For lists with multiple nodes, we need to traverse the list to find
+> the ****second last node****. We do this by starting from the ****head**** and moving through the list until we reach the node whose next
+> pointer points to ****last****. Once we find the ****second last**** node then we update its next pointer to point back to the ****head,****
+> this effectively removing the last node from the list. We then delete
+> the last node to free up memory and return the updated ****last**** pointer, which now points to the last node.
+
+![Deletion-at-the-end-of-circular-linked-list](https://media.geeksforgeeks.org/wp-content/uploads/20240806150601/Deletion-at-the-end-of-circular-linked-list.webp)
+
+Deletion at the end of Circular linked list
+
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int value) {
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to delete the last node in the circular linked list
+Node* deleteLastNode(Node* last) {
+    if (last == nullptr) {
+        // If the list is empty
+        cout << "List is empty, nothing to delete." << endl;
+        return nullptr;
+    }
+    Node* head = last->next;
+
+    // If there is only one node in the list
+    if (head == last) {
+        delete last;
+        last = nullptr;
+        return last;
+    }
+    // Traverse the list to find the second last node
+    Node* curr = head;
+    while (curr->next != last) {
+        curr = curr->next;
+    }
+    // Update the second last node\'s next pointer
+    // to point to head
+    curr->next = head;
+delete last;
+last = curr;
+
+    return last;
+}
+
+void printList(Node* last) {
+   if(last == NULL) return;
+
+    Node *head = last->next;
+    while (true){
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next) break;
+}
+    cout << endl;
+}
+
+int main() {
+    // Create circular linked list: 2, 3, 4
+    Node* first = new Node(2);
+first->next = new Node(3);
+first->next->next = new Node(4);
+
+    Node* last = first->next->next;
+last->next = first;
+
+    cout << "Original list: ";
+    printList(last);
+
+// Delete the last node
+    last = deleteLastNode(last);
+
+    cout << "List after deleting last node: ";
+    printList(last);
+
+return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the structure for a node in the circular linked list
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+// Function to delete the last node in the circular linked list
+struct Node* deleteLastNode(struct Node* last) {
+    if (last == NULL) {
+        // If the list is empty
+        printf("List is empty, nothing to delete.\\n");
+return NULL;
+}
+    struct Node* head = last->next;
+
+// If there is only one node in the list
+    if (head == last) {
+        free(last);
+last = NULL;
+        return last;
+}
+    // Traverse the list to find the second last node
+    struct Node* curr = head;
+    while (curr->next != last) {
+        curr = curr->next;
+}
+    // Update the second last node\'s next pointer to point to head
+    curr->next = head;
+    free(last);
+    last = curr;
+
+    return last;
+}
+
+void printList(struct Node* last) {
+    if (last == NULL) return;
+
+    struct Node* head = last->next;
+    while (1) {
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next) break;
+    }
+    printf("\\n");
+}
+
+struct Node* createNode(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+int main() {
+    // Create circular linked list: 2, 3, 4
+    struct Node* first = createNode(2);
+    first->next = createNode(3);
+    first->next->next = createNode(4);
+
+    struct Node* last = first->next->next;
+    last->next = first;
+
+    printf("Original list: ");
+    printList(last);
+
+    // Delete the last node
+    last = deleteLastNode(last);
+
+    printf("List after deleting last node: ");
+    printList(last);
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+
+    Node(int value){
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+    public static Node deleteLastNode(Node last){
+        if (last == null) {
+            // If the list is empty
+            System.out.println(
+                "List is empty, nothing to delete.");
+            return null;
+        }
+        Node head = last.next;
+
+        // If there is only one node in the list
+        if (head == last) {
+            last = null;
+            return last;
+        }
+        // Traverse the list to find the second last node
+        Node curr = head;
+        while (curr.next != last) {
+            curr = curr.next;
+        }
+        // Update the second last node\'s next pointer to
+           // point to head
+           curr.next = head;
+last = curr;
+
+        return last;
+}
+
+    public static void printList(Node last){
+        if (last == null)
+            return;
+
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next)
+                break;
+}
+        System.out.println();
+}
+
+    public static void main(String[] args){
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+        Node last = first.next.next;
+last.next = first;
+
+        System.out.print("Original list: ");
+        printList(last);
+
+// Delete the last node
+        last = deleteLastNode(last);
+
+        System.out.print("List after deleting last node: ");
+        printList(last);
+}
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+def deleteLastNode(last):
+    if last is None:
+        # If the list is empty
+        print("List is empty, nothing to delete.")
+        return None
+
+    head = last.next
+
+    # If there is only one node in the list
+    if head == last:
+        last = None
+        return last
+
+    # Traverse the list to find the second last node
+    curr = head
+    while curr.next != last:
+        curr = curr.next
+
+    # Update the second last node\'s next pointer to point to head
+    curr.next = head
+    last = curr
+
+    return last
+
+def printList(last):
+    if last is None:
+        return
+
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+# Create circular linked list: 2, 3, 4
+first = Node(2)
+first.next = Node(3)
+first.next.next = Node(4)
+
+last = first.next.next
+last.next = first
+
+print("Original list: ", end="")
+printList(last)
+
+# Delete the last node
+last = deleteLastNode(last)
+
+print("List after deleting last node: ", end="")
+printList(last)
+
+````
+
+C#
+````
+using System;
+
+public class Node {
+    public int data;
+    public Node next;
+
+    public Node(int value)
+    {
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+    // Function to delete the last node in the circular
+    // linked list
+    public static Node deleteLastNode(Node last)
+    {
+        if (last == null) {
+            // If the list is empty
+            Console.WriteLine(
+                "List is empty, nothing to delete.");
+            return null;
+        }
+        Node head = last.next;
+
+        // If there is only one node in the list
+        if (head == last) {
+            last = null;
+            return last;
+        }
+        // Traverse the list to find the second last node
+        Node curr = head;
+        while (curr.next != last) {
+            curr = curr.next;
+        }
+        // Update the second last node\'s next pointer
+          // to point to head
+          curr.next = head;
+last = curr;
+
+        return last;
+}
+
+    // Function to print the circular linked list
+    public static void printList(Node last)
+    {
+        if (last == null) {
+            Console.WriteLine("List is Empty");
+            return;
+}
+
+        Node head = last.next;
+        while (true) {
+            Console.Write(head.data + " ");
+            head = head.next;
+            if (head == last.next)
+                break;
+}
+        Console.WriteLine();
+}
+
+    public static void Main(string[] args)
+    {
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+        Node last = first.next.next;
+last.next = first;
+
+        Console.Write("Original list: ");
+        printList(last);
+
+// Delete the last node
+        last = deleteLastNode(last);
+
+        Console.Write("List after deleting last node: ");
+        printList(last);
+}
+}
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+}
+}
+
+function deleteLastNode(last) {
+    if (last === null) {
+        // If the list is empty
+        console.log("List is empty, nothing to delete.");
+return null;
+}
+    let head = last.next;
+
+// If there is only one node in the list
+    if (head === last) {
+        last = null;
+        return last;
+}
+    // Traverse the list to find the second last node
+    let curr = head;
+    while (curr.next !== last) {
+        curr = curr.next;
+}
+    // Update the second last node\'s next pointer to point to head
+    curr.next = head;
+    last = curr;
+
+    return last;
+}
+
+function printList(last) {
+    if (last === null) return;
+
+    let head = last.next;
+    while (true) {
+        process.stdout.write(head.data + " ");
+        head = head.next;
+        if (head === last.next) break;
+    }
+    console.log();
+}
+
+// Create circular linked list: 2, 3, 4
+let first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+let last = first.next.next;
+last.next = first;
+
+console.log("Original list: ");
+printList(last);
+
+// Delete the last node
+last = deleteLastNode(last);
+
+console.log("List after deleting last node: ");
+printList(last);
+
+````
+
+**Output**
+```
+
+Original list: 2 3 4
+List after deleting last node: 2 3
+
+```
+
+[Searching in Circular Linked list](https://www.geeksforgeeks.org/searching-in-circular-linked-list/?ref=ml_lbp)
+----------------------------------------------------------------------------------------------------------------
+
+Searching in a circular linked list is similar to searching in a
+regular linked list. We start at a given node and traverse the list
+until you either find the target value or return to the starting node.
+Since the list is circular, make sure to keep track of where you started
+to avoid an infinite loop.
+
+> To search for a specific value in a circular linked list, we first
+> check if the list is empty. If it is then we return ****false****. If the list contains nodes then we start from the ****head**** node (which is the ****last->next****) and traverse the list. We use a pointer ****curr**** to iterate through the nodes until we reach back to the ****head****. During traversal, if we find a node whose ****data**** matches the given ****key**** then we return ****true**** to indicating that the value was found. After the loop, we also check
+> the last node to ensure we don’t miss it. If the ****key**** is not found after traversing the entire list then we return ****false****.
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int value) {
+        data = value;
+        next = nullptr;
+    }
+};
+
+// Function to search for a specific value in the
+// circular linked list
+bool search(Node* last, int key) {
+    if (last == nullptr) {
+        // If the list is empty
+        return false;
+    }
+
+    Node* head = last->next;
+    Node* curr = head;
+
+    // Traverse the list to find the key
+    while (curr != last) {
+        if (curr->data == key) {
+          // Key found
+            return true;
+        }
+        curr = curr->next;
+    }
+
+    // Check the last node
+    if (last->data == key) {
+      // Key found
+        return true;
+    }
+    // Key not found
+    return false;
+}
+
+void printList(Node* last) {
+   if(last == NULL) return;
+
+    Node *head = last->next;
+    while (true){
+        cout << head->data << " ";
+        head = head->next;
+        if (head == last->next) break;
+    }
+    cout << endl;
+}
+
+int main() {
+    // Create circular linked list: 2, 3, 4
+    Node* first = new Node(2);
+    first->next = new Node(3);
+    first->next->next = new Node(4);
+
+    Node* last = first->next->next;
+    last->next = first;
+
+    cout << "Original list: ";
+    printList(last);
+
+    // Search for a specific value
+    int key = 3;
+    bool found = search(last, key);
+    if (found) {
+        cout << "Value " << key << " found in the list." << endl;
+    } else {
+        cout << "Value " << key << " not found in the list." << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Definition of the Node structure
+struct Node{
+    int data;
+    struct Node *next;
+};
+
+// Function to search for a specific value in the circular linked list
+int search(struct Node *last, int key){
+    if (last == NULL){
+        // If the list is empty
+        return 0;
+    }
+
+    struct Node *head = last->next;
+    struct Node *curr = head;
+
+    // Traverse the list to find the key
+    while (curr != last){
+        if (curr->data == key){
+            // Key found
+            return 1;
+        }
+        curr = curr->next;
+    }
+
+    // Check the last node
+    if (last->data == key){
+        // Key found
+        return 1;
+    }
+    // Key not found
+    return 0;
+}
+
+// Function to print the circular linked list
+void printList(struct Node *last){
+    if (last == NULL) return;
+
+    struct Node *head = last->next;
+    while (1){
+        printf("%d ", head->data);
+        head = head->next;
+        if (head == last->next)
+            break;
+    }
+    printf("\\n");
+}
+// Function to create a new node
+struct Node *createNode(int value){
+    struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
+    temp->data = value;
+    temp->next = NULL;
+    return temp;
+}
+
+int main(){
+    // Create circular linked list: 2, 3, 4
+    struct Node *first = createNode(2);
+    first->next = createNode(3);
+    first->next->next = createNode(4);
+
+    struct Node *last = first->next->next;
+    last->next = first;
+
+    printf("Original list: ");
+    printList(last);
+
+    // Search for a specific value
+    int key = 3;
+    int found = search(last, key);
+    if (found){
+        printf("Value %d found in the list.\\n", key);
+    }
+    else{
+        printf("Value %d not found in the list.\\n", key);
+    }
+
+    return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node next;
+    Node(int value) {
+        data = value;
+        next = null;
+    }
+}
+
+public class CircularLinkedList {
+    // Function to search for a specific value
+    // in the circular linked list
+    static boolean search(Node last, int key) {
+        if (last == null) {
+            // If the list is empty
+            return false;
+        }
+
+        Node head = last.next;
+        Node curr = head;
+
+        // Traverse the list to find the key
+        while (curr != last) {
+            if (curr.data == key) {
+                // Key found
+                return true;
+            }
+            curr = curr.next;
+        }
+
+        // Check the last node
+        if (last.data == key) {
+            // Key found
+            return true;
+        }
+        // Key not found
+        return false;
+    }
+
+    static void printList(Node last) {
+        if (last == null) return;
+
+        Node head = last.next;
+        while (true) {
+            System.out.print(head.data + " ");
+            head = head.next;
+            if (head == last.next) break;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+
+        Node last = first.next.next;
+        last.next = first;
+
+        System.out.print("Original list: ");
+        printList(last);
+
+        // Search for a specific value
+        int key = 3;
+        boolean found = search(last, key);
+        if (found) {
+            System.out.println("Value " + key
+                               + " found in the list.");
+        } else {
+            System.out.println("Value " + key +
+                               " not found in the list.");
+        }
+    }
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, value):
+        self.data = value
+        self.next = None
+
+def search(last, key):
+    if last is None:
+        # If the list is empty
+        return False
+
+    head = last.next
+    curr = head
+
+    # Traverse the list to find the key
+    while curr != last:
+        if curr.data == key:
+            # Key found
+            return True
+        curr = curr.next
+
+    # Check the last node
+    if last.data == key:
+        # Key found
+        return True
+    # Key not found
+    return False
+
+def print_list(last):
+    if last is None:
+        return
+
+    head = last.next
+    while True:
+        print(head.data, end=" ")
+        head = head.next
+        if head == last.next:
+            break
+    print()
+
+if __name__ == "__main__":
+    # Create circular linked list: 2, 3, 4
+    first = Node(2)
+    first.next = Node(3)
+    first.next.next = Node(4)
+
+    last = first.next.next
+    last.next = first
+
+    print("Original list:", end=" ")
+    print_list(last)
+
+    # Search for a specific value
+    key = 3
+    found = search(last, key)
+    if found:
+        print(f"Value {key} found in the list.")
+    else:
+        print(f"Value {key} not found in the list.")
+
+````
+
+C#
+````
+using System;
+
+public class Node {
+    public int data;
+    public Node next;
+    public Node(int value){
+        data = value;
+        next = null;
+    }
+}
+
+public class GFG {
+    // Function to search for a specific value in the
+    // circular linked list
+    public static bool Search(Node last, int key){
+        if (last == null) {
+            // If the list is empty
+            return false;
+        }
+
+        Node head = last.next;
+        Node curr = head;
+
+        // Traverse the list to find the key
+        while (curr != last) {
+            if (curr.data == key) {
+                // Key found
+                return true;
+            }
+            curr = curr.next;
+        }
+
+        // Check the last node
+        if (last.data == key) {
+            // Key found
+            return true;
+        }
+        // Key not found
+        return false;
+    }
+
+    public static void PrintList(Node last){
+        if (last == null)
+            return;
+
+        Node head = last.next;
+        while (true) {
+            Console.Write(head.data + " ");
+            head = head.next;
+            if (head == last.next)
+                break;
+        }
+        Console.WriteLine();
+    }
+
+    public static void Main(string[] args){
+        // Create circular linked list: 2, 3, 4
+        Node first = new Node(2);
+        first.next = new Node(3);
+        first.next.next = new Node(4);
+
+        Node last = first.next.next;
+        last.next = first;
+
+        Console.Write("Original list: ");
+        PrintList(last);
+
+        // Search for a specific value
+        int key = 3;
+        bool found = Search(last, key);
+        if (found) {
+            Console.WriteLine("Value " + key
+                              + " found in the list.");
+        }
+        else {
+            Console.WriteLine("Value " + key
+                              + " not found in the list.");
+        }
+    }
+}
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(value){
+        this.data = value;
+        this.next = null;
+    }
+}
+
+function search(last, key){
+    if (last === null) {
+        // If the list is empty
+        return false;
+    }
+
+    let head = last.next;
+    let curr = head;
+
+    // Traverse the list to find the key
+    while (curr !== last) {
+        if (curr.data === key) {
+            // Key found
+            return true;
+        }
+        curr = curr.next;
+    }
+
+    // Check the last node
+    if (last.data === key) {
+        // Key found
+        return true;
+    }
+    // Key not found
+    return false;
+}
+
+function printList(last){
+    if (last === null)
+        return;
+
+    let head = last.next;
+    while (true) {
+        process.stdout.write(head.data + " ");
+        head = head.next;
+        if (head === last.next)
+            break;
+    }
+    console.log();
+}
+
+// Create circular linked list: 2, 3, 4
+let first = new Node(2);
+first.next = new Node(3);
+first.next.next = new Node(4);
+
+let last = first.next.next;
+last.next = first;
+
+console.log("Original list:");
+printList(last);
+
+// Search for a specific value
+let key = 3;
+let found = search(last, key);
+if (found) {
+    console.log(`Value ${key} found in the list.`);
+}
+else {
+    console.log(`Value ${key} not found in the list.`);
+}
+
+````
+
+
+
+
+**Output**
+```
+
+Original list: 2 3 4
+Value 3 found in the list.
+
+```
+
+Advantages of Circular Linked Lists
+-----------------------------------
+
+* In circular linked list, the last node points to the first node.
+  There are no null references, making traversal easier and reducing the
+  chances of encountering null pointer exceptions.
+* We can traverse the list from any node and return to it without
+  needing to restart from the head, which is useful in applications
+  requiring a circular iteration.
+* Circular linked lists can easily implement circular queues, where the
+  last element connects back to the first, allowing for efficient
+  resource management.
+* In a circular linked list, each node has a reference to the next node
+  in the sequence. Although it doesn’t have a direct reference to the
+  previous node like a doubly linked list, we can still find the
+  previous node by traversing the list.
+
+Disadvantages of Circular Linked Lists
+--------------------------------------
+
+* Circular linked lists are more complex to implement than singly
+  linked lists.
+* Traversing a circular linked list without a clear stopping condition
+  can lead to infinite loops if not handled carefully.
+* Debugging can be more challenging due to the circular nature, as
+  traditional methods of traversing linked lists may not apply.
+
+Applications of Circular Linked Lists
+-------------------------------------
+
+* It is used for time-sharing among different users, typically through
+  a ****Round-Robin scheduling mechanism.****
+* In multiplayer games, a circular linked list can be used to switch
+  between players. After the last player’s turn, the list cycles back to
+  the first player.
+* Circular linked lists are often used in buffering applications, such
+  as streaming data, where data is continuously produced and
+  consumed.
+* In media players, circular linked lists can manage playlists, this
+  allowing users to loop through songs continuously.
+* Browsers use circular linked lists to manage the cache. This allows
+  you to navigate back through your browsing history efficiently by
+  pressing the BACK button.', e'A circular linked list is a data structure where the last node connects back to the first,
+forming a loop. This structure allows for continuous traversal without
+any interruptions. Circular linked lists are especially helpful for
+tasks like scheduling and managing playlists, this allowing for smooth navigation. In this tutorial, we’ll cover the
+basics of circular linked lists, how to work with them, their advantages
+and disadvantages, and their applications.', 'Introduction to Circular Linked List', 14, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('039efe3e-47d0-410e-b3db-a9e64d9bedd7', e'Representation of Stack Data Structure:
+---------------------------------------
+
+Stack follows LIFO (Last In First Out) Principle so the element which
+is pushed last is popped first.
+
+
+![Stack-representation-in-Data-Structures-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180735/Stack-representation-in-Data-Structures-(1).webp)
+
+****Types of Stack:****
+-----------------------
+
+* ****Fixed Size Stack****
+  : As the name suggests, a fixed size stack has a fixed size and cannot
+  grow or shrink dynamically. If the stack is full and an attempt is
+  made to add an element to it, an overflow error occurs. If the stack
+  is empty and an attempt is made to remove an element from it, an
+  underflow error occurs.
+* ****Dynamic Size Stack****
+  : A dynamic size stack can grow or shrink dynamically. When the stack
+  is full, it automatically increases its size to accommodate the new
+  element, and when the stack is empty, it decreases its size. This type
+  of stack is implemented using a linked list, as it allows for easy
+  resizing of the stack.
+
+Basic Operations on Stack:
+--------------------------
+
+In order to make manipulations in a stack, there are certain operations
+provided to us.
+
+
+* ****push()****  to insert an element into the stack
+* ****pop()****  to remove an element from the stack
+* ****top()****  Returns the top element of the stack.
+* ****isEmpty()****  returns true if stack is empty else false.
+* ****isFull()****  returns true if the stack is full else false.
+
+To implement stack, we need to maintain reference to the top
+item.
+
+### ****Push Operation on Stack****
+
+Adds an item to the stack. If the stack is full, then it is said to be
+an  ****Overflow condition.****
+
+ ****Algorithm for Push Operation:****
+
+* Before pushing the element to the stack, we check if the stack is  ****full****  .
+* If the stack is full  ****(top == capacity-1)****  , then  ****Stack Overflows****  and we cannot insert the element to the stack.
+* Otherwise, we increment the value of top by 1  ****(top = top + 1)****  and the new value is inserted at  ****top position****  .
+* The elements can be pushed into the stack till we reach the  ****capacity****  of the stack.
+
+![Push-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180844/Push-Operation-in-Stack-(1).webp)
+### ****Pop Operation in Stack****
+
+Removes an item from the stack. The items are popped in the reversed
+order in which they are pushed. If the stack is empty, then it is said
+to be an  ****Underflow condition.****
+
+****Algorithm for Pop Operation:****
+
+* Before popping the element from the stack, we check if the stack is  ****empty****  .
+* If the stack is empty (top == -1), then  ****Stack Underflows****  and we cannot remove any element from the stack.
+* Otherwise, we store the value at top, decrement the value of top by 1  ****(top = top – 1)****  and return the stored top value.
+
+![Pop-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180943/Pop-Operation-in-Stack-(1).webp)
+### ****Top or Peek Operation on Stack****
+
+Returns the top element of the stack.
+
+****Algorithm for Top Operation:****
+
+* Before returning the top element from the stack, we check if the
+  stack is empty.
+* If the stack is empty (top == -1), we simply print “Stack is empty”.
+* Otherwise, we return the element stored at  ****index = top****  .
+
+![Top-or-Peek-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181023/Top-or-Peek-Operation-in-Stack-(1).webp)
+### ****isEmpty Operation in Stack Data Structure:****
+
+Returns true if the stack is empty, else false.
+
+****Algorithm for isEmpty Operation****:
+
+* Check for the value of  ****top****  in stack.
+* If  ****(top == -1)****, then the stack is  ****empty****  so return  ****true****  .
+* Otherwise, the stack is not empty so return  ****false****  .
+
+![isEmpty-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181101/isEmpty-Operation-in-Stack-(1).webp)
+### isFull ****Operation in Stack**** ****Data Structure****:
+
+Returns true if the stack is full, else false.
+
+****Algorithm for isFull Operation:****
+
+* Check for the value of  ****top****  in stack.
+* If  ****(top == capacity-1),****  then the stack is  ****full****  so return  ****true****.
+* Otherwise, the stack is not full so return  ****false****.
+
+![isFull-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181147/isFull-Operation-in-Stack-(1).webp)
+
+Implementation of Stack
+-----------------------
+
+
+The basic operations that can be performed on a stack include push, pop,
+and peek. There are two ways to implement a stack –
+
+
+* [****Implementation of Stack using Array****](https://www.geeksforgeeks.org/implement-stack-using-array/)
+* [****Implementation of Stack using Linked List****](https://www.geeksforgeeks.org/implement-a-stack-using-singly-linked-list/)
+
+****Complexity Analysis of Operations on Stack Data Structure:****
+------------------------------------------------------------------
+
+| ****Operations**** | ****Time Complexity**** | ****Space Complexity**** |
+| --- | --- | --- |
+| ****push()**** | O(1) | O(1) |
+| ****pop()**** | O(1) | O(1) |
+| top() or  ****pee****k() | O(1) | O(1) |
+| isEmpty() | O(1) | O(1) |
+| isFull() | O(1) | O(1) |', e'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
+both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 8, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2b55a666-302b-4c46-8d3a-3fdaefcca1e7', e'Implement Stack using Array:
+----------------------------
+
+> To implement a stack using an array, initialize an array and treat
+> its end as the stack’s top. Implement ****push**** (add to end), ****pop**** (remove from end), and ****peek**** (check end) operations, handling cases for an ****empty**** or f****ull stack****.
+
+****Step-by-step approach:****
+
+1. ****Initialize an array**** to represent the stack.
+2. Use the ****end of the array**** to represent the ****top of the stack****.
+3. Implement ****push**** (add to end), ****pop**** (remove from the end), and ****peek**** (check end) operations, ensuring to handle empty and full stack
+   conditions.
+
+Implement Stack Operations using Array:
+---------------------------------------
+
+
+Here are the following operations of implement stack using array:
+
+### ****Push Operation in Stack:****
+
+Adds an item to the stack. If the stack is full, then it is said to be
+an ****Overflow condition.****
+
+****Algorithm for Push Operation:****
+
+> * Before pushing the element to the stack, we check if the stack
+>   is ****full****.
+> * If the stack is full ****(top == capacity-1)**** , then ****Stack Overflows****and we cannot insert the element to the stack.
+> * Otherwise, we increment the value of top by 1 ****(top = top + 1)**** and the new value is inserted at ****top position****.
+> * The elements can be pushed into the stack till we reach
+>   the ****capacity**** of the stack.
+
+![push-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114219/push-operation-in-stack-1.webp)![push-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114219/push-operation-in-stack-1.webp)
+
+
+![push-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114220/push-operation-in-stack-2.webp)![push-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114220/push-operation-in-stack-2.webp)
+
+
+![push-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114221/push-operation-in-stack-3.webp)![push-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114221/push-operation-in-stack-3.webp)
+
+
+![push-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-4.webp)![push-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-4.webp)
+
+
+![push-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-5.webp)![push-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-5.webp)
+
+
+![push-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114223/push-operation-in-stack-6.webp)![push-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114223/push-operation-in-stack-6.webp)
+
+
+
+Previous
+
+
+
+
+
+Pause
+
+Next
+
+
+
+
+
+5 / 6
+
+### ****Pop Operation in Stack:****
+
+Removes an item from the stack. The items are popped in the reversed
+order in which they are pushed. If the stack is empty, then it is said
+to be an ****Underflow condition.****
+
+****Algorithm for Pop Operation:****
+
+> * Before popping the element from the stack, we check if the stack
+>   is ****empty****.
+> * If the stack is empty (top == -1), then ****Stack Underflows**** and we cannot remove any element from the stack.
+> * Otherwise, we store the value at top, decrement the value of top by
+>   1 ****(top = top – 1)**** and return the stored top value.
+
+![pop-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+
+Previous
+
+
+
+
+
+Play
+
+Next
+
+
+
+
+
+1 / 6
+
+
+
+
+### ****Top or Peek Operation in Stack:****
+
+Returns the top element of the stack.
+
+****Algorithm for Top Operation:****
+
+> * Before returning the top element from the stack, we check if the
+>   stack is empty.
+> * If the stack is empty (top == -1), we simply print “Stack is
+>   empty”.
+> * Otherwise, we return the element stored at ****index = top****.
+
+### ****isEmpty Operation in Stack:****
+
+Returns true if the stack is empty, else false.
+
+****Algorithm for isEmpty Operation****:
+
+> * Check for the value of ****top**** in stack.
+> * If ****(top == -1)**** , then the stack is ****empty****so return ****true****.
+> * Otherwise, the stack is not empty so return ****false****.
+
+### isFull ****Operation in Stack****:
+
+Returns true if the stack is full, else false.
+
+****Algorithm for isFull Operation:****
+
+> * Check for the value of ****top**** in stack.
+> * If ****(top == capacity-1),**** then the stack is ****full**** so return ****true****.
+> * Otherwise, the stack is not full so return ****false.****
+
+Below is the implementation of the above approach:
+
+C++
+````
+/* C++ program to implement basic stack
+operations */
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define MAX 1000
+
+class Stack {
+    int top;
+
+public:
+    int a[MAX]; // Maximum size of Stack
+
+    Stack() { top = -1; }
+    bool push(int x);
+    int pop();
+    int peek();
+    bool isEmpty();
+};
+
+bool Stack::push(int x)
+{
+    if (top >= (MAX - 1)) {
+        cout << "Stack Overflow";
+        return false;
+    }
+    else {
+        a[++top] = x;
+        cout << x << " pushed into stack\\n";
+        return true;
+    }
+}
+
+int Stack::pop()
+{
+    if (top < 0) {
+        cout << "Stack Underflow";
+        return 0;
+    }
+    else {
+        int x = a[top--];
+        return x;
+    }
+}
+int Stack::peek()
+{
+    if (top < 0) {
+        cout << "Stack is Empty";
+        return 0;
+    }
+    else {
+        int x = a[top];
+        return x;
+    }
+}
+
+bool Stack::isEmpty()
+{
+    return (top < 0);
+}
+
+// Driver program to test above functions
+int main()
+{
+    class Stack s;
+    s.push(10);
+    s.push(20);
+    s.push(30);
+    cout << s.pop() << " Popped from stack\\n";
+
+    //print top element of stack after popping
+    cout << "Top element is : " << s.peek() << endl;
+
+    //print all elements in stack :
+    cout <<"Elements present in stack : ";
+    while(!s.isEmpty())
+    {
+        // print top element in stack
+        cout << s.peek() <<" ";
+        // remove top element in stack
+        s.pop();
+    }
+
+    return 0;
+}
+
+````
+
+C
+````
+// C program for array implementation of stack
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+// A structure to represent a stack
+struct Stack {
+    int top;
+    unsigned capacity;
+    int* array;
+};
+
+// function to create a stack of given capacity. It initializes size of
+// stack as 0
+struct Stack* createStack(unsigned capacity)
+{
+    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
+    stack->capacity = capacity;
+    stack->top = -1;
+    stack->array = (int*)malloc(stack->capacity * sizeof(int));
+    return stack;
+}
+
+// Stack is full when top is equal to the last index
+int isFull(struct Stack* stack)
+{
+    return stack->top == stack->capacity - 1;
+}
+
+// Stack is empty when top is equal to -1
+int isEmpty(struct Stack* stack)
+{
+    return stack->top == -1;
+}
+
+// Function to add an item to stack. It increases top by 1
+void push(struct Stack* stack, int item)
+{
+    if (isFull(stack))
+        return;
+    stack->array[++stack->top] = item;
+    printf("%d pushed to stack\\n", item);
+}
+
+// Function to remove an item from stack. It decreases top by 1
+int pop(struct Stack* stack)
+{
+    if (isEmpty(stack))
+        return INT_MIN;
+    return stack->array[stack->top--];
+}
+
+// Function to return the top from stack without removing it
+int peek(struct Stack* stack)
+{
+    if (isEmpty(stack))
+        return INT_MIN;
+    return stack->array[stack->top];
+}
+
+// Driver program to test above functions
+int main()
+{
+    struct Stack* stack = createStack(100);
+
+    push(stack, 10);
+    push(stack, 20);
+    push(stack, 30);
+
+    printf("%d popped from stack\\n", pop(stack));
+
+    return 0;
+}
+
+````
+
+Java
+````
+/* Java program to implement basic stack
+operations */
+class Stack {
+    static final int MAX = 1000;
+    int top;
+    int a[] = new int[MAX]; // Maximum size of Stack
+
+    boolean isEmpty()
+    {
+        return (top < 0);
+    }
+    Stack()
+    {
+        top = -1;
+    }
+
+    boolean push(int x)
+    {
+        if (top >= (MAX - 1)) {
+            System.out.println("Stack Overflow");
+            return false;
+        }
+        else {
+            a[++top] = x;
+            System.out.println(x + " pushed into stack");
+            return true;
+        }
+    }
+
+    int pop()
+    {
+        if (top < 0) {
+            System.out.println("Stack Underflow");
+            return 0;
+        }
+        else {
+            int x = a[top--];
+            return x;
+        }
+    }
+
+    int peek()
+    {
+        if (top < 0) {
+            System.out.println("Stack Underflow");
+            return 0;
+        }
+        else {
+            int x = a[top];
+            return x;
+        }
+    }
+
+    void print(){
+    for(int i = top;i>-1;i--){
+    System.out.print(" "+ a[i]);
+    }
+}
+}
+
+// Driver code
+class Main {
+    public static void main(String args[])
+    {
+        Stack s = new Stack();
+        s.push(10);
+        s.push(20);
+        s.push(30);
+        System.out.println(s.pop() + " Popped from stack");
+        System.out.println("Top element is :" + s.peek());
+        System.out.print("Elements present in stack :");
+        s.print();
+    }
+}
+
+````
+
+Python3
+````
+# Python program for implementation of stack
+
+# import maxsize from sys module
+# Used to return -infinite when stack is empty
+from sys import maxsize
+
+# Function to create a stack. It initializes size of stack as 0
+def createStack():
+    stack = []
+    return stack
+
+# Stack is empty when stack size is 0
+def isEmpty(stack):
+    return len(stack) == 0
+
+# Function to add an item to stack. It increases size by 1
+def push(stack, item):
+    stack.append(item)
+    print(item + " pushed to stack ")
+
+# Function to remove an item from stack. It decreases size by 1
+def pop(stack):
+    if (isEmpty(stack)):
+        return str(-maxsize -1) # return minus infinite
+
+    return stack.pop()
+
+# Function to return the top from stack without removing it
+def peek(stack):
+    if (isEmpty(stack)):
+        return str(-maxsize -1) # return minus infinite
+    return stack[len(stack) - 1]
+
+# Driver program to test above functions
+stack = createStack()
+push(stack, str(10))
+push(stack, str(20))
+push(stack, str(30))
+print(pop(stack) + " popped from stack")
+
+````
+
+C#
+````
+// C# program to implement basic stack
+// operations
+using System;
+
+namespace ImplementStack {
+class Stack {
+    private int[] ele;
+    private int top;
+    private int max;
+    public Stack(int size)
+    {
+        ele = new int[size]; // Maximum size of Stack
+        top = -1;
+        max = size;
+    }
+
+    public void push(int item)
+    {
+        if (top == max - 1) {
+            Console.WriteLine("Stack Overflow");
+            return;
+        }
+        else {
+            ele[++top] = item;
+        }
+    }
+
+    public int pop()
+    {
+        if (top == -1) {
+            Console.WriteLine("Stack is Empty");
+            return -1;
+        }
+        else {
+            Console.WriteLine("{0} popped from stack ", ele[top]);
+            return ele[top--];
+        }
+    }
+
+    public int peek()
+    {
+        if (top == -1) {
+            Console.WriteLine("Stack is Empty");
+            return -1;
+        }
+        else {
+            Console.WriteLine("{0} popped from stack ", ele[top]);
+            return ele[top];
+        }
+    }
+
+    public void printStack()
+    {
+        if (top == -1) {
+            Console.WriteLine("Stack is Empty");
+            return;
+        }
+        else {
+            for (int i = 0; i <= top; i++) {
+                Console.WriteLine("{0} pushed into stack", ele[i]);
+            }
+        }
+    }
+}
+
+// Driver program to test above functions
+class Program {
+    static void Main()
+    {
+        Stack p = new Stack(5);
+
+        p.push(10);
+        p.push(20);
+        p.push(30);
+        p.printStack();
+        p.pop();
+    }
+}
+}
+
+````
+
+JavaScript
+````
+/* javascript program to implement basic stack
+operations
+*/
+var t = -1;
+    var MAX = 1000;
+    var a = Array(MAX).fill(0); // Maximum size of Stack
+
+    function isEmpty() {
+        return (t < 0);
+    }
+
+    function push(x) {
+        if (t >= (MAX - 1)) {
+            console.log("Stack Overflow");
+            return false;
+        } else {
+        t+=1;
+            a[t] = x;
+
+            console.log(x + " pushed into stack<br/>");
+            return true;
+        }
+    }
+
+    function pop() {
+        if (t < 0) {
+            console.log("Stack Underflow");
+            return 0;
+        } else {
+            var x = a[t];
+            t-=1;
+            return x;
+        }
+    }
+
+    function peek() {
+        if (t < 0) {
+            console.log("Stack Underflow");
+            return 0;
+        } else {
+            var x = a[t];
+            return x;
+        }
+    }
+
+    function print() {
+        for (i = t; i > -1; i--) {
+            console.log(" " + a[i]);
+        }
+    }
+
+        push(10);
+        push(20);
+        push(30);
+        console.log(pop() + " Popped from stack");
+        console.log("<br/>Top element is :" + peek());
+        console.log("<br/>Elements present in stack : ");
+        print();
+
+````
+
+**Output**
+```
+
+10 pushed into stack
+20 pushed into stack
+30 pushed into stack
+30 Popped from stack
+Top element is : 20
+Elements present in stack : 20 10
+```
+### Complexity Analysis:
+
+* ****Time Complexity****:
+  + `push`: O(1)
+  + `pop`: O(1)
+  + `peek`: O(1)
+  + `is_empty`: O(1)
+  + is\\_full: O(1)
+* ****Auxiliary Space****: O(n), where n is the number of items in the stack.
+
+Advantages of Array Implementation:
+-----------------------------------
+
+* Easy to implement.
+* Memory is saved as pointers are not involved.
+
+Disadvantages of Array Implementation:
+--------------------------------------
+
+* It is not dynamic i.e., it doesn’t grow and shrink depending on needs
+  at runtime. [But in case of dynamic sized arrays like vector in C++,
+  list in Python, ArrayList in Java, stacks can grow and shrink with
+  array implementation as well].
+* The total size of the stack must be defined beforehand.
+', e'Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
+Arrays. In Array-based approach, all stack-related operations are
+executed using arrays. Let’s see how we can implement each operation on
+the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 9, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('b41b7e34-c749-4217-b0f3-6b496b632261', e'Applications of Stacks:
+-----------------------
+
+* ****Function calls:****
+  Stacks are used to keep track of the return addresses of function
+  calls, allowing the program to return to the correct location after a
+  function has finished executing.
+* ****Recursion:**** Stacks are used to store the local variables and return addresses of
+  recursive function calls, allowing the program to keep track of the
+  current state of the recursion.
+* ****Expression evaluation:**** Stacks are used to evaluate expressions in postfix notation (Reverse
+  Polish Notation).
+* ****Syntax parsing:**** Stacks are used to check the validity of syntax in programming
+  languages and other formal languages.
+* ****Memory management:**** Stacks are used to allocate and manage memory in some operating
+  systems and programming languages.
+* Used to solve popular problems like [Next Greater](https://www.geeksforgeeks.org/next-greater-element/), [Previous Greater](https://www.geeksforgeeks.org/previous-greater-element/), [Next Smaller](https://www.geeksforgeeks.org/next-smaller-element/), [Previous Smaller](https://www.geeksforgeeks.org/find-the-nearest-smaller-numbers-on-left-side-in-an-array/), [Largest Area in a Histogram](https://www.geeksforgeeks.org/largest-rectangular-area-in-a-histogram-using-stack/) and [Stock Span Problems](https://www.geeksforgeeks.org/the-stock-span-problem/).
+
+Advantages of Stacks:
+---------------------
+
+* ****Simplicity:**** Stacks are a simple and easy-to-understand data structure, making
+  them suitable for a wide range of applications.
+* ****Efficiency:**** Push and pop operations on a stack can be performed in constant time ****(O(1))****, providing efficient access to data.
+* ****Last-in, First-out (LIFO):****
+  Stacks follow the LIFO principle, ensuring that the last element added
+  to the stack is the first one removed. This behavior is useful in many
+  scenarios, such as function calls and expression evaluation.
+* ****Limited memory usage:**** Stacks only need to store the elements that have been pushed onto
+  them, making them memory-efficient compared to other data
+  structures.
+
+Disadvantages of Stacks:
+------------------------
+
+* ****Limited access:****
+  Elements in a stack can only be accessed from the top, making it
+  difficult to retrieve or modify elements in the middle of the
+  stack.
+* ****Potential for overflow:**** If more elements are pushed onto a stack than it can hold, an
+  overflow error will occur, resulting in a loss of data.
+* ****Not suitable for random access:**** Stacks do not allow for random access to elements, making them
+  unsuitable for applications where elements need to be accessed in a
+  specific order.
+* ****Limited capacity:****
+  Stacks have a fixed capacity, which can be a limitation if the number
+  of elements that need to be stored is unknown or highly
+  variable.
+', e'A stack is a linear data structure
+in which the insertion of a new element and removal of an existing
+element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 11, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('9a7d3527-1c48-4e9d-8aac-990f873ca15d', e'What is a Doubly Linked List?
+-----------------------------
+
+A ****doubly linked list****
+is a data structure that consists of a set of nodes, each of which
+contains a ****value**** and ****two pointers****, one pointing to the ****previous node**** in the list and one pointing to the ****next node****
+in the list. This allows for efficient traversal of the list in ****both directions****, making it suitable for applications where frequent ****insertions**** and ****deletions**** are required.
+
+![Insertion-at-the-End-in-Doubly-Linked-List-copy](https://media.geeksforgeeks.org/wp-content/uploads/20240809123741/Insertion-at-the-End-in-Doubly-Linked-List-copy.webp)
+
+Doubly Linked List
+
+
+Representation of Doubly Linked List in Data Structure
+------------------------------------------------------
+
+In a data structure, a doubly linked list is represented using nodes
+that have three fields:
+
+1. Data
+2. A pointer to the next node (****next****)
+3. A pointer to the previous node (****prev****)
+
+![Node-Structure-of-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124907/Node-Structure-of-Doubly-Linked-List.webp)
+
+Node Structure of Doubly Linked List
+
+
+Node Definition
+---------------
+
+Here is how a node in a Doubly Linked List is typically
+represented:
+
+[Try it on GfG Practice
+![redirect icon](https://media.geeksforgeeks.org/auth-dashboard-uploads/Group-arrow.svg)](https://www.geeksforgeeks.org/problems/display-doubly-linked-list--154650/1?itm_source=geeksforgeeks&itm_medium=article&itm_campaign=practice_card)
+C++
+````
+struct Node {
+
+    // To store the Value or data.
+    int data;
+
+    // Pointer to point the Previous Element
+    Node* prev;
+
+    // Pointer to point the Next Element
+    Node* next;
+
+    // Constructor
+    Node(int d) {
+       data = d;
+       prev = next = nullptr;
+    }
+};
+
+````
+
+C
+````
+struct Node {
+
+    // To store the Value or data.
+    int data;
+
+    // Pointer to point the Previous Element
+    Node* prev;
+
+    // Pointer to point the Next Element
+    Node* next;
+};
+
+// Function to create a new node
+struct Node *createNode(int new_data) {
+    struct Node *new_node = (struct Node *)
+    malloc(sizeof(struct Node));
+    new_node->data = new_data;
+    new_node->next = NULL;
+    new_node->prev = NULL;
+    return new_node;
+}
+
+````
+
+Java
+````
+class Node {
+
+    // To store the Value or data.
+    int data;
+
+    // Reference to the Previous Node
+    Node prev;
+
+    // Reference to the next Node
+    Node next;
+
+    // Constructor
+    Node(int d) {
+       data = d;
+       prev = next = null;
+    }
+};
+
+````
+
+Python
+````
+class Node:
+
+    def __init__(self, data):
+        # To store the value or data.
+        self.data = data
+
+        # Reference to the previous node
+        self.prev = None
+
+        # Reference to the next node
+        self.next = None
+
+````
+
+C#
+````
+class Node
+{
+  	// To store the value or data
+    public int Data;
+
+  	// Pointer to the next node
+    public Node Next;
+
+  	// Pointer to the previous node
+    public Node Prev;
+
+    // Constructor
+    public Node(int d)
+    {
+        Data = d;
+        Prev = Next = null;
+    }
+}
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(data)
+    {
+        // To store the value or data.
+        this.data = data;
+
+        // Reference to the previous node
+        this.prev = null;
+
+        // Reference to the next node
+        this.next = null;
+    }
+}
+
+````
+
+Each node in a ****Doubly Linked List**** contains the ****data**** it holds, a pointer to the ****next**** node in the list, and a pointer to the ****previous****
+node in the list. By linking these nodes together through the ****next**** and ****prev****
+pointers, we can traverse the list in both directions (forward and
+backward), which is a key feature of a Doubly Linked List.
+
+[Operations on Doubly Linked List](https://www.geeksforgeeks.org/doubly-linked-list-tutorial)
+---------------------------------------------------------------------------------------------
+
+* ****Traversal in Doubly Linked List****
+* ****Searching in Doubly Linked List****
+* ****Finding Length of Doubly Linked List****
+* [****Insertion in Doubly Linked List****:](https://www.geeksforgeeks.org/introduction-and-insertion-in-a-doubly-linked-list)
+  + Insertion at the beginning of Doubly Linked List
+  + Insertion at the end of the Doubly Linked List
+  + Insertion at a specific position in Doubly Linked List
+* [****Deletion in Doubly Linked List****:](https://www.geeksforgeeks.org/delete-a-node-in-a-doubly-linked-list)
+  + Deletion of a node at the beginning of Doubly Linked List
+  + Deletion of a node at the end of Doubly Linked List
+  + Deletion of a node at a specific position in Doubly Linked
+    List
+
+Let\'s go through each of the operations mentioned above, one by
+one.
+
+[Traversal in Doubly Linked List](https://www.geeksforgeeks.org/traversal-in-doubly-linked-list/)
+-------------------------------------------------------------------------------------------------
+
+To Traverse the doubly list, we can use the following steps:
+
+****a. Forward Traversal:****
+
+* Initialize a pointer to the head of the linked list.
+* While the pointer is not null:
+  + Visit the data at the current node.
+  + Move the pointer to the next node.
+
+****b. Backward Traversal:****
+
+* Initialize a pointer to the tail of the linked list.
+* While the pointer is not null:
+  + Visit the data at the current node.
+  + Move the pointer to the previous node.
+
+Below are the implementation of the above approach:
+
+C++
+````
+#include <iostream>
+using namespace std;
+
+// Define the Node structure
+struct Node {
+    int data;
+    Node* next;
+    Node* prev;
+
+// Constructor to initialize Node with data
+    Node(int data) : data(data), next(nullptr),
+  	prev(nullptr) {}
+};
+
+// Function to traverse the doubly linked list
+// in forward direction
+void forwardTraversal(Node* head) {
+
+    // Start traversal from the head of the list
+    Node* curr = head;
+
+// Continue until current node is not null
+    // (end of list)
+    while (curr != nullptr) {
+
+        // Output data of the current node
+        cout << curr->data << " ";
+
+// Move to the next node
+        curr = curr->next;
+}
+
+    // Print newline after traversal
+    cout << endl;
+}
+
+// Function to traverse the doubly linked list
+// in backward direction
+void backwardTraversal(Node* tail) {
+
+    // Start traversal from the tail of the list
+    Node* curr = tail;
+
+// Continue until current node is not null
+    // (end of list)
+    while (curr != nullptr) {
+
+        // Output data of the current node
+        cout << curr->data << " ";
+
+// Move to the previous node
+        curr = curr->prev;
+}
+
+    // Print newline after traversal
+    cout << endl;
+}
+
+int main() {
+
+    // Sample usage of the doubly linked list and
+    // traversal functions
+    Node* head = new Node(1);
+    Node* second = new Node(2);
+    Node* third = new Node(3);
+
+    head->next = second;
+second->prev = head;
+second->next = third;
+    third->prev = second;
+
+    cout << "Forward Traversal:" << endl;
+    forwardTraversal(head);
+
+    cout << "Backward Traversal:" << endl;
+    backwardTraversal(third);
+
+return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the Node structure
+struct Node {
+    int data; // Data stored in the node
+    struct Node* next; // Pointer to the next node
+    struct Node* prev; // Pointer to the previous node
+};
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode =
+      (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+return newNode;
+}
+
+// Function to traverse the doubly linked list
+// in forward direction
+void forwardTraversal(struct Node* head) {
+
+    // Start traversal from the head of the list
+    struct Node* curr = head;
+
+// Continue until the current node is not
+    // null (end of list)
+    while (curr != NULL) {
+
+        // Output data of the current node
+        printf("%d ", curr->data);
+
+// Move to the next node
+        curr = curr->next;
+}
+
+    // Print newline after traversal
+    printf("\\n");
+}
+
+// Function to traverse the doubly linked list
+// in backward direction
+void backwardTraversal(struct Node* tail) {
+
+    // Start traversal from the tail of the list
+    struct Node* curr = tail;
+
+// Continue until the current node is not
+    // null (end of list)
+    while (curr != NULL) {
+
+        // Output data of the current node
+        printf("%d ", curr->data);
+
+// Move to the previous node
+        curr = curr->prev;
+}
+
+    // Print newline after traversal
+    printf("\\n");
+}
+
+int main() {
+
+    // Sample usage of the doubly linked list and
+    // traversal functions
+    struct Node* head = createNode(1);
+    struct Node* second = createNode(2);
+    struct Node* third = createNode(3);
+
+    head->next = second;
+second->prev = head;
+second->next = third;
+    third->prev = second;
+
+    printf("Forward Traversal:\\n");
+    forwardTraversal(head);
+
+    printf("Backward Traversal:\\n");
+    backwardTraversal(third);
+
+// Free memory allocated for nodes
+    free(head);
+    free(second);
+    free(third);
+
+return 0;
+}
+
+````
+
+Java
+````
+// Define the Node class
+class Node {
+    int data; // Data stored in the node
+    Node next; // Pointer to the next node
+    Node prev; // Pointer to the previous node
+
+    // Constructor to initialize the node with data
+    public Node(int data) {
+        this.data = data;
+        this.next = null;
+        this.prev = null;
+}
+}
+
+// Class to manage the doubly linked list
+class GfG {
+
+    // Function to traverse the doubly linked list
+    // in forward direction
+    static void forwardTraversal(Node head) {
+
+        // Start traversal from the head of the list
+        Node curr = head;
+
+// Continue until the current node is
+        // null (end of the list)
+        while (curr != null) {
+
+            // Output data of the current node
+            System.out.print(curr.data + " ");
+
+// Move to the next node
+            curr = curr.next;
+}
+
+        // Print newline after traversal
+        System.out.println();
+}
+
+    // Function to traverse the doubly linked list
+  	//in backward direction
+    static void backwardTraversal(Node tail) {
+
+        // Start traversal from the tail of the list
+        Node curr = tail;
+
+// Continue until the current node is
+        // null (end of the list)
+        while (curr != null) {
+
+            // Output data of the current node
+            System.out.print(curr.data + " ");
+
+// Move to the previous node
+            curr = curr.prev;
+}
+
+        // Print newline after traversal
+        System.out.println();
+}
+
+    public static void main(String[] args) {
+
+        // Sample usage of the doubly linked
+        // list and traversal functions
+        Node head = new Node(1);
+        Node second = new Node(2);
+        Node third = new Node(3);
+
+        head.next = second;
+second.prev = head;
+second.next = third;
+        third.prev = second;
+
+        System.out.println("Forward Traversal:");
+        forwardTraversal(head);
+
+        System.out.println("Backward Traversal:");
+        backwardTraversal(third);
+}
+}
+
+````
+
+Python
+````
+# Define the Node class
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+# Function to traverse the doubly linked list
+# in forward direction
+def forward_traversal(head):
+
+    # Start traversal from the head of the list
+    curr = head
+
+    # Continue until the current node is
+    # null (end of the list)
+    while curr is not None:
+
+        # Output data of the current node
+        print(curr.data, end=" ")
+
+        # Move to the next node
+        curr = curr.next
+
+    # Print newline after traversal
+    print()
+
+# Function to traverse the doubly linked
+# list in backward direction
+def backward_traversal(tail):
+
+    # Start traversal from the tail of the list
+    curr = tail
+
+    # Continue until the current node
+    # is null (end of the list)
+    while curr is not None:
+
+        # Output data of the current node
+        print(curr.data, end=" ")
+
+        # Move to the previous node
+        curr = curr.prev
+
+    # Print newline after traversal
+    print()
+
+# Sample usage of the doubly linked list
+# and traversal functions
+if __name__ == "__main__":
+
+    # Create a doubly linked list with 3 nodes
+    head = Node(1)
+    second = Node(2)
+    third = Node(3)
+
+    head.next = second
+    second.prev = head
+    second.next = third
+    third.prev = second
+
+    print("Forward Traversal:")
+    forward_traversal(head)
+
+    print("Backward Traversal:")
+    backward_traversal(third)
+
+````
+
+C#
+````
+using System;
+
+// Define the Node class
+class Node
+{
+    public int Data; // Data stored in the node
+    public Node Next; // Pointer to the next node
+    public Node Prev; // Pointer to the previous node
+
+    // Constructor to initialize the node with data
+    public Node(int data)
+    {
+        Data = data;
+Next = null;
+        Prev = null;
+}
+}
+
+// Class to manage the doubly linked list
+class GfG
+{
+    // Function to traverse the doubly linked list
+  	//in forward direction
+    static void ForwardTraversal(Node head)
+    {
+        // Start traversal from the head of the list
+        Node curr = head;
+
+// Continue until the current node is null
+      	//(end of the list)
+        while (curr != null)
+        {
+            // Output data of the current node
+            Console.Write(curr.Data + " ");
+
+// Move to the next node
+            curr = curr.Next;
+}
+
+        // Print newline after traversal
+        Console.WriteLine();
+}
+
+    // Function to traverse the doubly linked list
+  	//in backward direction
+    static void BackwardTraversal(Node tail)
+    {
+        // Start traversal from the tail of the list
+        Node curr = tail;
+
+// Continue until the current node is null
+      	//(end of the list)
+        while (curr != null)
+        {
+            // Output data of the current node
+            Console.Write(curr.Data + " ");
+
+// Move to the previous node
+            curr = curr.Prev;
+}
+
+        // Print newline after traversal
+        Console.WriteLine();
+}
+
+    public static void Main()
+    {
+        // Sample usage of the doubly linked list
+      	//and traversal functions
+        Node head = new Node(1);
+        Node second = new Node(2);
+        Node third = new Node(3);
+
+        head.Next = second;
+second.Prev = head;
+second.Next = third;
+        third.Prev = second;
+
+        Console.WriteLine("Forward Traversal:");
+        ForwardTraversal(head);
+
+        Console.WriteLine("Backward Traversal:");
+        BackwardTraversal(third);
+}
+}
+
+````
+
+JavaScript
+````
+// Define the Node class
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.prev = null;
+        this.next = null;
+}
+}
+
+// Function to traverse the doubly linked list
+// in forward direction
+function forwardTraversal(head) {
+
+    // Start traversal from the head of the list
+    let curr = head;
+
+// Continue until the current node is null
+    // (end of the list)
+    while (curr !== null) {
+
+        // Output data of the current node
+        console.log(curr.data + " ");
+
+// Move to the next node
+        curr = curr.next;
+}
+
+    // Print newline after traversal
+    console.log();
+}
+
+// Function to traverse the doubly linked list
+// in backward direction
+function backwardTraversal(tail) {
+
+    // Start traversal from the tail of the list
+    let curr = tail;
+
+// Continue until the current node is null
+    // (end of the list)
+    while (curr !== null) {
+
+        // Output data of the current node
+        console.log(curr.data + " ");
+
+// Move to the previous node
+        curr = curr.prev;
+}
+
+    // Print newline after traversal
+    console.log();
+}
+
+// Sample usage of the doubly linked list
+//and traversal functions
+// Create a doubly linked list with 3 nodes
+const head = new Node(1);
+const second = new Node(2);
+const third = new Node(3);
+
+head.next = second;
+second.prev = head;
+second.next = third;
+third.prev = second;
+
+console.log("Forward Traversal:");
+forwardTraversal(head);
+
+console.log("Backward Traversal:");
+backwardTraversal(third);
+
+````
+
+
+
+**Output**
+```
+
+Forward Traversal:
+1 2 3
+Backward Traversal:
+3 2 1
+
+```
+
+[Finding Length of Doubly Linked List](https://www.geeksforgeeks.org/program-find-size-doubly-linked-list/)
+-----------------------------------------------------------------------------------------------------------
+
+To find the length of doubly list, we can use the following
+steps:
+
+* Start at the head of the list.
+* Traverse through the list, counting each node visited.
+* Return the total count of nodes as the length of the list.
+
+Below are the implementation of the above approach:
+
+C++
+````
+#include <iostream>
+
+using namespace std;
+
+// Node structure for doubly linked list
+struct Node {
+    int data;
+    Node * prev;
+    Node * next;
+
+    Node(int val) {
+        data = val;
+        prev = next = nullptr;
+}
+};
+
+// Function to find the length of a doubly
+//linked list
+int findLength(Node * head) {
+    int count = 0;
+for (Node * cur = head; cur != nullptr; cur = cur -> next)
+        count++;
+return count;
+}
+
+int main() {
+
+    // Create a DLL with 3 nodes
+    Node * head = new Node(1);
+    Node * second = new Node(2);
+    Node * third = new Node(3);
+    head -> next = second;
+second -> prev = head;
+second -> next = third;
+    third -> prev = second;
+
+    cout << "Length of the doubly linked list: " <<
+        findLength(head) << endl;
+
+return 0;
+}
+
+````
+
+C
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for doubly linked list
+struct Node {
+    int data; // Data stored in the node
+    struct Node* prev; // Pointer to the previous node
+    struct Node* next; // Pointer to the next node
+};
+
+// Constructor function to create a new node
+struct Node* createNode(int val) {
+    struct Node* newNode =
+         (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+return newNode;
+}
+
+// Function to find the length of a doubly linked list
+int findLength(struct Node* head) {
+    int count = 0;
+for (struct Node* cur = head; cur != NULL; cur = cur->next)
+        count++;
+return count;
+}
+
+int main() {
+    // Create a DLL with 3 nodes
+    struct Node* head = createNode(1);
+    struct Node* second = createNode(2);
+    struct Node* third = createNode(3);
+
+    head->next = second;
+second->prev = head;
+second->next = third;
+    third->prev = second;
+
+    printf("Length of the doubly linked list: %d\\n",
+           findLength(head));
+
+return 0;
+}
+
+````
+
+Java
+````
+class Node {
+    int data;
+    Node prev;
+    Node next;
+
+// Constructor
+    public Node(int val) {
+        data = val;
+        prev = null;
+next = null;
+}
+}
+
+class GfG {
+
+    // Function to find the length of
+    // a doubly linked list
+    static int FindLength(Node head) {
+        int count = 0;
+for (Node cur = head; cur != null; cur = cur.next)
+            count++;
+return count;
+}
+
+    // Driver code
+    public static void main(String[] args) {
+
+        // Create a doubly linked list
+        // with 3 nodes
+        Node head = new Node(1);
+        Node second = new Node(2);
+        Node third = new Node(3);
+
+        head.next = second;
+second.prev = head;
+second.next = third;
+        third.prev = second;
+
+        System.out.println("Length of doubly linked list: "
+                           + FindLength(head));
+}
+}
+
+````
+
+Python
+````
+class Node:
+    def __init__(self, val):
+        self.data = val
+        self.prev = None
+        self.next = None
+
+# Function to find the length of
+# a doubly linked list
+def find_length(head):
+    count = 0
+    cur = head
+    while cur is not None:
+        count += 1
+        cur = cur.next
+    return count
+
+# Driver code
+if __name__ == "__main__":
+
+    # Create a doubly linked list
+    # with 3 nodes
+    head = Node(1)
+    second = Node(2)
+    third = Node(3)
+
+    head.next = second
+    second.prev = head
+    second.next = third
+    third.prev = second
+
+    print("Length of the doubly linked list: " +
+          str(find_length(head)))
+
+````
+
+C#
+````
+using System;
+
+class Node {
+    public int data;
+public Node prev;
+public Node next;
+
+// Constructor
+    public Node(int val) {
+        data = val;
+        prev = null;
+next = null;
+}
+}
+
+public class GfG {
+
+    // Function to find the length of
+    // a doubly linked list
+    static int FindLength(Node head) {
+        int count = 0;
+for (Node cur = head; cur != null; cur = cur.next)
+            count++;
+return count;
+}
+
+    // Driver code
+    public static void Main(string[] args) {
+
+        // Create a doubly linked list
+        // with 3 nodes
+        Node head = new Node(1);
+        Node second = new Node(2);
+        Node third = new Node(3);
+
+        head.next = second;
+second.prev = head;
+second.next = third;
+        third.prev = second;
+
+        Console.WriteLine("Length of doubly linked list: "
+                                 + FindLength(head));
+}
+}
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(val) {
+        this.data = val;
+        this.prev = null;
+        this.next = null;
+}
+}
+
+// Function to find the length of
+// a doubly linked list
+function findLength(head) {
+    let count = 0;
+    let cur = head;
+    while (cur !== null) {
+        count++;
+        cur = cur.next;
+}
+    return count;
+}
+
+// Create a doubly linked list with 3 nodes
+const head = new Node(1);
+const second = new Node(2);
+const third = new Node(3);
+
+head.next = second;
+second.prev = head;
+second.next = third;
+third.prev = second;
+
+console.log("Length of the doubly linked list: " +
+            findLength(head));
+
+````
+
+
+
+
+
+**Output**
+```
+
+Length of the doubly linked list: 3
+
+```
+
+[Insertion at the Beginning in Doubly Linked List](https://www.geeksforgeeks.org/insert-a-node-at-frontbeginning-of-doubly-linked-list/)
+----------------------------------------------------------------------------------------------------------------------------------------
+
+![Insertion-at-the-Beginning-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809123903/Insertion-at-the-Beginning-in-Doubly-Linked-List.webp)
+
+Insertion at the Beginning in Doubly Linked List
+
+
+To insert a new node at the beginning of the doubly list, we can use
+the following steps:
+
+* Create a new node, say ****new\\_node****with the given data and set its previous pointer to null, ****new\\_node->prev =**** ****NULL****.
+* Set the next pointer of new\\_node to current head, ****new\\_node->next = head.****
+* If the linked list is not empty, update the previous pointer of the
+                                                                                                                                                                                                                current head to new\\_node, ****head->prev = new\\_node****.
+                                                                                                                                                                                                                * Return new\\_node as the head of the updated linked list.
+
+                                                                                                                                                                                                                Below are the implementation of the above approach:
+
+                                                                                                                                                                                                                C++
+                                                                                                                                                                                                                ````
+                                                                                                                                                                                                                // C++ Program to insert a new node at the
+                                   // beginning of doubly linked list
+
+                                   #include <iostream>
+                                   using namespace std;
+
+// Node structure for the doubly linked list
+struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+
+    Node(int d) {
+      data = d;
+      prev = next = NULL;
+}
+};
+
+// Insert a node at the beginning
+Node* insertBegin(Node* head, int data) {
+
+    // Create a new node
+    Node* new_node = new Node(data);
+
+// Make next of it as head
+    new_node->next = head;
+
+// Set previous of head as new node
+    if (head != NULL) {
+        head->prev = new_node;
+}
+
+    // Return new node as new head
+    return new_node;
+}
+
+void printList(Node* head) {
+    Node* curr = head;
+    while (curr != NULL) {
+        cout << curr->data << " ";
+        curr = curr->next;
+}
+  	cout << "\\n";
+}
+
+int main() {
+
+    // Create a hardcoded linked list:
+  	// 2 <-> 3 <-> 4
+    Node* head = new Node(2);
+    Node* temp1 = new Node(3);
+    Node* temp2 = new Node(4);
+    head->next = temp1;
+    temp1->prev = head;
+    temp1->next = temp2;
+    temp2->prev = temp1;
+
+// Print the original list
+    cout << "Original Linked List: ";
+    printList(head);
+
+// Insert a new node at the front of the list
+    head = insertBegin(head, 1);
+
+// Print the updated list
+  	cout << "After inserting Node 1 at the front: ";
+    printList(head);
+
+return 0;
+}
+
+````
+
+C
+````
+// C Program to insert a node at the beginning
+//of doubly linked list
+
+
+#include <stdio.h>
+
+// Node structure for the doubly linked list
+struct Node {
+    int data;
+    struct Node* prev;
+    struct Node* next;
+};
+
+// Create a new node
+struct Node* createNode(int data) {
+    struct Node* new_node =
+      (struct Node*)malloc(sizeof(struct Node));
+    new_node->data = data;
+    new_node->prev = NULL;
+    new_node->next = NULL;
+return new_node;
+}
+
+// Insert a node at the beginning
+struct Node* insertBegin(struct Node* head, int data) {
+
+    // Create a new node
+    struct Node* new_node = createNode(data);
+
+// Make next of it as head
+    new_node->next = head;
+
+// Set previous of head as new node
+    if (head != NULL) {
+        head->prev = new_node;
+}
+
+    // Return new node as new head
+    return new_node;
+}
+
+// Print the doubly linked list
+void printList(struct Node* head) {
+    struct Node* curr = head;
+    while (curr != NULL) {
+        printf("%d ", curr->data);
+        curr = curr->next;
+}
+  	printf("\\n");
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 2 <-> 3 <-> 4
+    struct Node *head = createNode(2);
+    head->next = createNode(3);
+    head->next->prev = head;
+    head->next->next = createNode(4);
+    head->next->next->prev = head->next;
+
+// Print the original list
+    printf("Original Linked List: ");
+    printList(head);
+
+// Insert a new node at the front of the list
+    head = insertBegin(head, 1);
+
+// Print the updated list
+  	printf("After inserting Node 1 at the front: ");
+    printList(head);
+
+return 0;
+}
+
+````
+
+Java
+````
+// Java Program to insert a node at the beginning of a
+// doubly linked list
+
+class Node {
+    int data;
+    Node prev, next;
+
+// Node structure for the doubly linked list
+    Node(int d) {
+        data = d;
+        prev = null;
+next = null;
+}
+}
+
+class GfG {
+
+    // Insert a node at the beginning
+    static Node insertBegin(Node head, int data) {
+
+        // Create a new node
+        Node new_node = new Node(data);
+
+// Make next of it as head
+        new_node.next = head;
+
+// Set previous of head as new node
+        if (head != null) {
+            head.prev = new_node;
+}
+
+        // Return new node as new head
+        return new_node;
+}
+
+    // Print the doubly linked list
+    static void printList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            System.out.print(curr.data + " ");
+            curr = curr.next;
+}
+      	System.out.println();
+}
+
+    public static void main(String[] args) {
+
+        // Create a hardcoded doubly linked list:
+        // 2 <-> 3 <-> 4
+        Node head = new Node(2);
+        head.next = new Node(3);
+        head.next.prev = head;
+        head.next.next = new Node(4);
+        head.next.next.prev = head.next;
+
+// Print the original list
+        System.out.print("Original Linked List: ");
+        printList(head);
+
+// Insert a new node at the front of the list
+        head = insertBegin(head, 1);
+
+// Print the updated list
+      	System.out.print(
+            "After inserting Node 1 at the front: ");
+        printList(head);
+}
+}
+
+````
+
+Python
+````
+# Python Program to insert a node at the beginning
+#of doubly linked list
+
+# Node structure for the doubly linked list
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+# Insert a node at the beginning
+def insertBegin(head, data):
+
+    # Create a new node
+    new_node = Node(data)
+
+    # Make next of it as head
+    new_node.next = head
+
+    # Set previous of head as new node
+    if head is not None:
+        head.prev = new_node
+
+    # Return new node as new head
+    return new_node
+
+# Print the doubly linked list
+def printList(head):
+    curr = head
+    while curr is not None:
+        print(curr.data, end=" ")
+        curr = curr.next
+    print()
+
+if __name__ == "__main__":
+
+    # Create a hardcoded doubly linked list:
+    # 2 <-> 3 <-> 4
+    head = Node(2)
+    head.next = Node(3)
+    head.next.prev = head
+    head.next.next = Node(4)
+    head.next.next.prev = head.next
+
+    # Print the original list
+    print("Original Linked List:", end=\' \')
+    printList(head)
+
+    # Insert a new node at the front of the list
+    head = insertBegin(head, 1)
+
+    # Print the updated list
+    print("After inserting Node 1 at the front:", end=\' \')
+    printList(head)
+
+````
+
+C#
+````
+// C# Program to insert a node at the beginning of a
+// doubly linked list
+
+using System;
+
+// Node structure for the doubly linked list
+class Node {
+    public int data;
+public Node prev, next;
+
+// Constructor for creating a new node
+    public Node(int d) {
+        data = d;
+        prev = null;
+next = null;
+}
+}
+
+class GfG {
+
+    // Insert a node at the beginning
+    public static
+    Node insertBegin(Node head, int data) {
+
+        // Create a new node
+        Node new_node = new Node(data);
+
+// Make next of it as head
+        new_node.next = head;
+
+// Set previous of head as new node
+        if (head != null) {
+            head.prev = new_node;
+}
+
+        // Return new node as new head
+        return new_node;
+}
+
+    // Print the doubly linked list
+    public static void printList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            Console.Write(curr.data + " ");
+            curr = curr.next;
+}
+      	Console.WriteLine();
+}
+
+    public static void Main(string[] args) {
+
+        // Create a hardcoded doubly linked list:
+        // 2 <-> 3 <-> 4
+        Node head = new Node(2);
+        head.next = new Node(3);
+        head.next.prev = head;
+        head.next.next = new Node(4);
+        head.next.next.prev = head.next;
+
+// Print the original list
+        Console.Write("Original Linked List: ");
+        printList(head);
+
+// Insert a new node at the front of the list
+        head = insertBegin(head, 1);
+
+// Print the updated list
+      	Console.Write
+        ("After inserting Node 1 at the front: ");
+        printList(head);
+}
+}
+
+````
+
+JavaScript
+````
+// JavaScript Program to insert a node at the
+//beginning of doubly linked list
+
+// Node structure for the doubly linked list
+function Node(data) {
+    this.data = data;
+    this.prev = null;
+    this.next = null;
+}
+
+// Insert a node at the beginning
+function insertBegin(head, data) {
+
+    // Create a new node
+    const new_node = new Node(data);
+
+// Make next of it as head
+    new_node.next = head;
+
+// Set previous of head as new node
+    if (head !== null) {
+        head.prev = new_node;
+}
+
+    // Return new node as new head
+    return new_node;
+}
+
+// Print the doubly linked list
+function printList(head) {
+    let curr = head;
+    while (curr !== null) {
+        console.log(curr.data);
+        curr = curr.next;
+}
+}
+
+// Create a hardcoded doubly linked list:
+// 2 <-> 3 <-> 4
+let head = new Node(2);
+head.next = new Node(3);
+head.next.prev = head;
+head.next.next = new Node(4);
+head.next.next.prev = head.next;
+
+// Print the original list
+console.log("Original Linked List:");
+printList(head);
+
+// Insert a new node at the front of the list
+console.log
+("After inserting Node 1 at the front:");
+let data = 1;
+head = insertBegin(head, data);
+
+// Print the updated list
+printList(head);
+
+````
+
+
+
+
+
+
+
+
+**Output**
+```
+
+Original Linked List: 2 3 4
+After inserting Node 1 at the front: 1 2 3 4
+
+```
+
+[Insertion at the End of Doubly Linked List](https://www.geeksforgeeks.org/insert-a-node-at-the-end-of-doubly-linked-list/)
+---------------------------------------------------------------------------------------------------------------------------
+
+![Insertion-at-the-End-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809123955/Insertion-at-the-End-in-Doubly-Linked-List.webp)
+
+Insertion at the End in the Doubly Linked List
+
+
+To insert a new node at the end of the doubly linked list, we can use
+the following steps:
+
+* Allocate memory for a new node and assign the provided value to its
+  data field.
+* Initialize the next pointer of the new node to nullptr.
+* If the list is empty:
+  + Set the previous pointer of the new node to nullptr.
+  + Update the head pointer to point to the new node.
+                                                                                          * If the list is not empty:
+                                                                                          + Traverse the list starting from the head to reach the last
+                                                                                          node.
+                                                                                          + Set the next pointer of the last node to point to the new
+                                                                                          node.
+                                                                                          + Set the previous pointer of the new node to point to the last
+                                                                                          node.
+
+                                                                                          Below are the implementation of the above approach:
+
+                                                                                          C++
+                                                                                          ````
+                                                                                          // C++ Program to insert a node at the end of
+//doubly linked list
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int data;
+    Node *next, *prev;
+
+    Node(int new_data) {
+        data = new_data;
+next = prev = nullptr;
+}
+};
+
+// Function to insert a new node at the end of
+//doubly linked list
+Node *insertEnd(Node *head, int new_data) {
+
+    // Create a new node
+    Node *new_node = new Node(new_data);
+
+// If the linked list is empty, set the new
+  	//node as the head of linked list
+    if (head == NULL) {
+        head = new_node;
+}
+    else {
+          Node *curr = head;
+        while (curr->next != NULL) {
+            curr = curr->next;
+}
+
+        // Set the next of last node to new node
+        curr->next = new_node;
+
+// Set prev of new node to last node
+        new_node->prev = curr;
+}
+
+    // Return the head of the doubly linked list
+    return head;
+}
+
+void printList(Node *head) {
+    Node *curr = head;
+    while (curr != NULL) {
+        cout << curr->data << " ";
+        curr = curr->next;
+}
+    cout << endl;
+}
+
+int main() {
+
+    // Create a harcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    Node *head = new Node(1);
+    head->next = new Node(2);
+    head->next->prev = head;
+    head->next->next = new Node(3);
+    head->next->next->prev = head->next;
+
+// Print the original list
+    cout << "Original Linked List: ";
+    printList(head);
+
+// Insert a new node with data 4 at the end
+    cout << "Inserting Node with data 4 at the end: ";
+int data = 4;
+    head = insertEnd(head, data);
+
+// Print the updated list
+    printList(head);
+
+return 0;
+}
+
+````
+
+C
+````
+// C Program to insert a node at the end of
+//doubly linked list
+
+#include <stdio.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+    struct Node *prev;
+};
+
+// Function to create a new node with the given data
+struct Node *createNode(int new_data) {
+    struct Node *new_node =
+    (struct Node *)malloc(sizeof(struct Node));
+    new_node->data = new_data;
+    new_node->next = NULL;
+return new_node;
+}
+
+// Function to insert a new node at the end of the
+//doubly linked list
+struct Node* insertEnd(struct Node *head, int new_data) {
+    struct Node *new_node = createNode(new_data);
+
+// If the linked list is empty, set the
+ 	//new node as the head
+    if (head == NULL) {
+        head = new_node;
+} else {
+        struct Node *curr = head;
+        while (curr->next != NULL) {
+            curr = curr->next;
+}
+
+        // Set the next of last node to new node
+        curr->next = new_node;
+// Set prev of new node to last node
+        new_node->prev = curr;
+}
+
+    return head;
+}
+
+void printList(struct Node *head) {
+    struct Node *curr = head;
+    while (curr != NULL) {
+        printf("%d ", curr->data);
+        curr = curr->next;
+}
+    printf("\\n");
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    struct Node *head = createNode(1);
+    head->next = createNode(2);
+    head->next->prev = head;
+    head->next->next = createNode(3);
+    head->next->next->prev = head->next;
+
+// Print the original list
+    printf("Original Linked List: ");
+    printList(head);
+
+// Insert a new node with data 4 at the end
+    printf("Inserting Node with data 4 at the end: ");
+    head = insertEnd(head, 4);
+
+// Print the updated list
+    printList(head);
+
+return 0;
+}
+
+````
+
+Java
+````
+// Java Program to insert a node at the end of
+// doubly linked list
+
+class Node {
+    int data;
+    Node next, prev;
+
+    Node(int newData) {
+        data = newData;
+next = prev = null;
+}
+}
+
+class GFG {
+
+    // Function to insert a new node at the end of the
+    // doubly linked list
+    public static Node insertEnd(Node head, int newData) {
+
+        // Create a new node
+        Node newNode = new Node(newData);
+
+// If the linked list is empty, set the new node as
+        // the head
+        if (head == null) {
+            head = newNode;
+}
+        else {
+            Node curr = head;
+            while (curr.next != null) {
+                curr = curr.next;
+}
+
+            // Set the next of last node to the new node
+            curr.next = newNode;
+
+// Set the prev of new node to the last node
+            newNode.prev = curr;
+}
+
+        return head;
+}
+
+    // Function to print the doubly linked list
+    public static void printList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            System.out.print(curr.data + " ");
+            curr = curr.next;
+}
+        System.out.println();
+}
+
+    public static void main(String[] args) {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.next = new Node(2);
+        head.next.prev = head;
+        head.next.next = new Node(3);
+        head.next.next.prev = head.next;
+
+// Print the original list
+        System.out.println("Original Linked List: ");
+        printList(head);
+
+// Insert a new node with data 4 at the end
+        System.out.println(
+            "Inserting Node with data 4 at the end: ");
+int data = 4;
+        head = insertEnd(head, data);
+
+// Print the updated list
+        printList(head);
+}
+}
+
+````
+
+Python
+````
+# Python Program to insert a node at the end of
+#doubly linked list
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+        self.prev = None
+
+# Function to insert a new node at the end of the
+#doubly linked list
+def insert_end(head, new_data):
+
+    # Create a new node
+    new_node = Node(new_data)
+
+    # If the linked list is empty, set the new node
+    #as the head
+    if head is None:
+        head = new_node
+    else:
+        curr = head
+        while curr.next is not None:
+            curr = curr.next
+
+        # Set the next of the last node to the new node
+        curr.next = new_node
+
+        # Set the prev of the new node to the last node
+        new_node.prev = curr
+
+    return head
+
+def print_list(head):
+    curr = head
+    while curr is not None:
+        print(curr.data, end=" ")
+        curr = curr.next
+    print()
+
+if __name__ == "__main__":
+
+    # Create a hardcoded doubly linked list:
+    # 1 <-> 2 <-> 3
+    head = Node(1)
+    head.next = Node(2)
+    head.next.prev = head
+    head.next.next = Node(3)
+    head.next.next.prev = head.next
+
+    # Print the original list
+    print("Original Linked List: ", end="")
+    print_list(head)
+
+    # Insert a new node with data 4 at the end
+    print("Inserting Node with data 4 at the end: ", end="")
+    data = 4
+    head = insert_end(head, data)
+
+    # Print the updated list
+    print_list(head)
+
+````
+
+C#
+````
+// C# Program to insert a node at the end of
+//doubly linked list
+
+using System;
+
+class Node {
+    public int Data;
+public Node Next;
+public Node Prev;
+
+public Node(int data) {
+        Data = data;
+Next = null;
+        Prev = null;
+}
+}
+
+class GFG {
+
+    // Function to insert a new node at the end
+  	//of the doubly linked list
+    public static Node InsertEnd(Node head, int newData) {
+
+          // Create a new node
+        Node newNode = new Node(newData);
+
+// If the linked list is empty, set the
+      	//new node as the head
+        if (head == null) {
+            head = newNode;
+}
+        else {
+            Node curr = head;
+            while (curr.Next != null) {
+                curr = curr.Next;
+}
+
+            // Set the next of the last node to
+          	//the new node
+            curr.Next = newNode;
+
+// Set the prev of the new node to
+          	//the last node
+            newNode.Prev = curr;
+}
+
+        return head;
+}
+
+    // Function to print the doubly linked list
+    public static void PrintList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            Console.Write(curr.Data + " ");
+            curr = curr.Next;
+}
+        Console.WriteLine();
+}
+
+    static void Main() {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.Next = new Node(2);
+        head.Next.Prev = head;
+        head.Next.Next = new Node(3);
+        head.Next.Next.Prev = head.Next;
+
+// Print the original list
+        Console.Write("Original Linked List: ");
+        PrintList(head);
+
+// Insert a new node with data 4 at the end
+        Console.Write("Inserting Node with data 4 at the end: ");
+int data = 4;
+        head = InsertEnd(head, data);
+
+// Print the updated list
+        PrintList(head);
+}
+}
+
+````
+
+JavaScript
+````
+// Javascript Program to insert a node at the end of
+//doublylinked list
+
+class Node {
+    constructor(data)
+    {
+        this.data = data;
+        this.next = null;
+        this.prev = null;
+}
+}
+
+function insertEnd(head, newData) {
+
+    // Create a new node
+    const newNode = new Node(newData);
+
+// If the linked list is empty, set the
+    //new node as the head
+    if (head === null) {
+        head = newNode;
+}
+    else {
+        let curr = head;
+        while (curr.next !== null) {
+            curr = curr.next;
+}
+
+        // Set the next of the last node to the
+        //new node
+        curr.next = newNode;
+
+// Set the prev of the new node to the
+        //last node
+        newNode.prev = curr;
+}
+
+    return head;
+}
+
+function printList(head)
+{
+    let curr = head;
+    let result = "";
+    while (curr !== null) {
+        result += curr.data + " ";
+        curr = curr.next;
+}
+    console.log(result.trim());
+}
+
+// Create a hardcoded doubly linked list:
+// 1 <-> 2 <-> 3
+let head = new Node(1);
+head.next = new Node(2);
+head.next.prev = head;
+head.next.next = new Node(3);
+head.next.next.prev = head.next;
+
+// Print the original list
+console.log("Original Linked List: ");
+printList(head);
+
+// Insert a new node with data 4 at the end
+console.log("Inserting Node with data 4 at the end: ");
+const data = 4;
+head = insertEnd(head, data);
+
+// Print the updated list
+printList(head);
+
+````
+
+
+
+
+**Output**
+```
+
+Original Linked List: 1 2 3
+Inserting Node with data 4 at the end: 1 2 3 4
+
+```
+
+[Insertion at a Specific Position in Doubly Linked List](https://www.geeksforgeeks.org/insert-a-node-at-a-specific-position-in-doubly-linked-list/)
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+To insert a node at a specific Position in doubly linked list, we can
+use the following steps:
+
+![Insertion-at-a-Specific-Position-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124039/Insertion-at-a-Specific-Position-in-Doubly-Linked-List.webp)
+
+
+Insertion at a Specific Position in Doubly Linked List
+
+
+
+To insert a new node at a specific position,
+
+* If position = 1, create a new node and make it the head of the linked
+  list and return it.
+* Otherwise, traverse the list to reach the node at position – 1,
+  say ****curr****.
+* If the position is valid, create a new node with given data,
+  say ****new\\_node****.
+* Update the next pointer of new node to the next
+                                                                                                                                             of current node and prev pointer of new node to current
+                                                                                                                                             node, ****new\\_node->next = curr->next****and ****new\\_node->prev = curr.****
+                                                                                                                                             * Similarly, update next pointer of current node to
+                                                                                                                                                              thenew node, ****curr->next = new\\_node****.
+                                                                                                                                                              * If the new node is not the last node, update prev pointer of new
+                                                                                                                                                                                                          node’s next to the new node, ****new\\_node->next->prev = new\\_node.****
+
+                                                                                                                                                                                                          Below is the implementation of the above approach:
+
+                                                                                                                                                                                                          C++
+                                                                                                                                                                                                          ````
+                                                                                                                                                                                                          // C++ Program to insert a node at a given position
+
+                                                                                                                                                                                                      #include <bits/stdc++.h>
+                                                                                                                                                                                                      using namespace std;
+
+struct Node {
+    int data;
+    Node *next, *prev;
+
+    Node(int new_data) {
+        data = new_data;
+next = prev = nullptr;
+}
+};
+
+// Function to insert a new node at a given position
+Node *insertAtPosition(Node *head, int pos, int new_data) {
+
+    // Create a new node
+    Node *new_node = new Node(new_data);
+
+// Insertion at the beginning
+    if (pos == 1) {
+        new_node->next = head;
+
+// If the linked list is not empty, set the prev
+      	//of head to new node
+        if (head != NULL)
+            head->prev = new_node;
+
+// Set the new node as the head of linked list
+        head = new_node;
+return head;
+}
+
+    Node *curr = head;
+// Traverse the list to find the node before the
+    // insertion point
+    for (int i = 1; i < pos - 1 && curr != NULL; ++i) {
+        curr = curr->next;
+}
+
+    // If the position is out of bounds
+    if (curr == NULL) {
+        cout << "Position is out of bounds." << endl;
+        delete new_node;
+return head;
+}
+
+    // Set the prev of new node to curr
+    new_node->prev = curr;
+
+// Set the new of new node to next of curr
+    new_node->next = curr->next;
+
+// Update the next of current node to new node
+       curr->next = new_node;
+
+// If the new node is not the last node, update prev
+                                             //of next node to new node
+                                             if (new_node->next != NULL)
+                                             new_node->next->prev = new_node;
+
+// Return the head of the doubly linked list
+    return head;
+}
+
+void printList(Node *head) {
+    Node *curr = head;
+    while (curr != NULL) {
+        cout << curr->data << " ";
+        curr = curr->next;
+}
+    cout << endl;
+}
+
+int main() {
+
+    // Create a harcoded doubly linked list:
+    // 1 <-> 2 <-> 4
+    Node *head = new Node(1);
+    head->next = new Node(2);
+    head->next->prev = head;
+    head->next->next = new Node(4);
+    head->next->next->prev = head->next;
+
+// Print the original list
+    cout << "Original Linked List: ";
+    printList(head);
+
+// Insert new node with data 3 at position 3
+    cout << "Inserting Node with data 3 at position 3: ";
+int data = 3;
+int pos = 3;
+    head = insertAtPosition(head, pos, data);
+
+// Print the updated list
+    printList(head);
+
+return 0;
+}
+
+````
+
+C
+````
+// C Program to insert a node at a given position
+
+#include <stdio.h>
+
+struct Node {
+    int data;
+    struct Node * next;
+    struct Node * prev;
+};
+
+// Function to create a new node with the given data
+struct Node * createNode(int new_data) {
+    struct Node * new_node =
+        (struct Node * ) malloc(sizeof(struct Node));
+    new_node -> data = new_data;
+    new_node -> next = NULL;
+return new_node;
+}
+
+// Function to insert a new node at a given position
+struct Node * insertAtPosition(struct Node * head, int pos, int new_data) {
+    // Create a new node
+    struct Node * new_node = createNode(new_data);
+
+// Insertion at the beginning
+    if (pos == 1) {
+        new_node -> next = head;
+
+// If the linked list is not empty, set the
+      //prev of head to new node
+        if (head != NULL) {
+            head -> prev = new_node;
+}
+
+        // Set the new node as the head of linked list
+        head = new_node;
+return head;
+}
+
+    struct Node * curr = head;
+
+// Traverse the list to find the node before the insertion point
+    for (int i = 1; i < pos - 1 && curr != NULL; ++i) {
+        curr = curr -> next;
+}
+
+    // If the position is out of bounds
+    if (curr == NULL) {
+        printf("Position is out of bounds.\\n");
+        free(new_node);
+return head;
+}
+
+    // Set the prev of new node to curr
+    new_node -> prev = curr;
+
+// Set the next of new node to next of curr
+    new_node -> next = curr -> next;
+
+// Update the next of current node to new node
+       curr -> next = new_node;
+
+// If the new node is not the last node, update
+                                             //the prev of next node to new node
+                                             if (new_node -> next != NULL) {
+                                             new_node -> next -> prev = new_node;
+}
+
+    // Return the head of the doubly linked list
+    return head;
+}
+
+// Function to print the linked list
+void printList(struct Node * head) {
+    struct Node * curr = head;
+    while (curr != NULL) {
+        printf("%d ", curr -> data);
+        curr = curr -> next;
+}
+    printf("\\n");
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 4
+    struct Node * head = createNode(1);
+    head -> next = createNode(2);
+    head -> next -> prev = head;
+    head -> next -> next = createNode(4);
+    head -> next -> next -> prev = head -> next;
+
+// Print the original list
+    printf("Original Linked List: ");
+    printList(head);
+
+// Insert new node with data 3 at position 3
+    printf("Inserting Node with data 3 at position 3: ");
+int data = 3;
+int pos = 3;
+    head = insertAtPosition(head, pos, data);
+
+// Print the updated list
+    printList(head);
+
+return 0;
+}
+
+````
+
+Java
+````
+// Java Program to insert a node at a given position
+
+class Node {
+    int data;
+    Node next;
+    Node prev;
+
+    Node(int new_data) {
+        data = new_data;
+next = prev = null;
+}
+}
+
+class GFG {
+
+    // Function to insert a new node at a given position
+    public static Node insertAtPosition(Node head, int pos, int new_data) {
+        // Create a new node
+        Node new_node = new Node(new_data);
+
+// Insertion at the beginning
+        if (pos == 1) {
+            new_node.next = head;
+
+// If the linked list is not empty, set
+          	//the prev of head to new node
+            if (head != null) {
+                head.prev = new_node;
+}
+
+            // Set the new node as the head of linked list
+            head = new_node;
+return head;
+}
+
+        Node curr = head;
+
+// Traverse the list to find the node before
+      	//the insertion point
+        for (int i = 1; i < pos - 1 && curr != null; ++i) {
+            curr = curr.next;
+}
+
+        // If the position is out of bounds
+        if (curr == null) {
+            System.out.println("Position is out of bounds.");
+return head;
+}
+
+        // Set the prev of new node to curr
+        new_node.prev = curr;
+
+// Set the next of new node to next of curr
+        new_node.next = curr.next;
+
+// Update the next of current node to new node
+       curr.next = new_node;
+
+// If the new node is not the last node, update
+                                             //prev of next node to new node
+                                             if (new_node.next != null) {
+                                             new_node.next.prev = new_node;
+}
+
+        // Return the head of the doubly linked list
+        return head;
+}
+
+    // Function to print the linked list
+    public static void printList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            System.out.print(curr.data + " ");
+            curr = curr.next;
+}
+        System.out.println();
+}
+
+    public static void main(String[] args) {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 4
+        Node head = new Node(1);
+        head.next = new Node(2);
+        head.next.prev = head;
+        head.next.next = new Node(4);
+        head.next.next.prev = head.next;
+
+// Print the original list
+        System.out.print("Original Linked List: ");
+        printList(head);
+
+// Insert new node with data 3 at position 3
+        System.out.print("Inserting Node with data 3 at position 3: ");
+int data = 3;
+int pos = 3;
+        head = insertAtPosition(head, pos, data);
+
+// Print the updated list
+        printList(head);
+}
+}
+
+````
+
+Python
+````
+# Python Program to insert a node at a given position
+
+class Node:
+    def __init__(self, new_data):
+        self.data = new_data
+        self.next = None
+        self.prev = None
+
+def insert_at_position(head, pos, new_data):
+
+    # Create a new node
+    new_node = Node(new_data)
+
+    # Insertion at the beginning
+    if pos == 1:
+        new_node.next = head
+
+        # If the linked list is not empty, set the
+        #prev of head to new node
+        if head is not None:
+            head.prev = new_node
+
+        # Set the new node as the head of the linked list
+        head = new_node
+        return head
+
+    curr = head
+
+    # Traverse the list to find the node before the
+    #insertion point
+    for _ in range(1, pos - 1):
+        if curr is None:
+            print("Position is out of bounds.")
+            return head
+        curr = curr.next
+
+    # If the position is out of bounds
+    if curr is None:
+        print("Position is out of bounds.")
+        return head
+
+    # Set the prev of new node to curr
+    new_node.prev = curr
+
+    # Set the next of new node to next of curr
+    new_node.next = curr.next
+
+    # Update the next of current node to new node
+                       curr.next = new_node
+
+                       # If the new node is not the last node, update
+                                                                   #prev of next node to new node
+                                                                   if new_node.next is not None:
+                                                                   new_node.next.prev = new_node
+
+                                                                   return head
+
+                                                                   def print_list(head):
+                                                                   curr = head
+                                                                   while curr is not None:
+                                                                   print(curr.data, end=" ")
+                                                                   curr = curr.next
+                                                                   print()
+
+                                                                   if __name__ == "__main__":
+
+                                                                   # Create a hardcoded doubly linked list:
+    # 1 <-> 2 <-> 4
+    head = Node(1)
+    head.next = Node(2)
+    head.next.prev = head
+    head.next.next = Node(4)
+    head.next.next.prev = head.next
+
+    # Print the original list
+    print("Original Linked List: ", end="")
+    print_list(head)
+
+    # Insert new node with data 3 at position 3
+    print("Inserting Node with data 3 at position 3: ", end="")
+    data = 3
+    pos = 3
+    head = insert_at_position(head, pos, data)
+
+    # Print the updated list
+    print_list(head)
+
+````
+
+C#
+````
+// C# Program to insert a node at a given position
+
+using System;
+
+class Node {
+    public int Data;
+public Node Next;
+public Node Prev;
+
+public Node(int data) {
+        Data = data;
+Next = null;
+        Prev = null;
+}
+}
+
+class GFG {
+
+    // Function to insert a new node at a given position
+    static Node InsertAtPosition(Node head, int pos, int newData) {
+
+        // Create a new node
+        Node newNode = new Node(newData);
+
+// Insertion at the beginning
+        if (pos == 1) {
+            newNode.Next = head;
+            if (head != null)
+                head.Prev = newNode;
+            head = newNode;
+return head;
+}
+
+        Node curr = head;
+
+// Traverse the list to find the node
+      	 //before the insertion point
+        for (int i = 1; i < pos - 1 && curr != null; ++i) {
+            curr = curr.Next;
+}
+
+        // If the position is out of bounds
+        if (curr == null) {
+            Console.WriteLine("Position is out of bounds.");
+return head;
+}
+
+        // Set the prev of new node to curr
+        newNode.Prev = curr;
+
+// Set the next of new node to the next of curr
+        newNode.Next = curr.Next;
+
+// Update the next of current node to new node
+       curr.Next = newNode;
+
+// If the new node is not the last node, update
+                                             //prev of next node to new node
+                                             if (newNode.Next != null)
+                                             newNode.Next.Prev = newNode;
+
+return head;
+}
+
+    // Function to print the list
+    static void PrintList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            Console.Write(curr.Data + " ");
+            curr = curr.Next;
+}
+        Console.WriteLine();
+}
+
+    static void Main() {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 4
+        Node head = new Node(1);
+        head.Next = new Node(2);
+        head.Next.Prev = head;
+        head.Next.Next = new Node(4);
+        head.Next.Next.Prev = head.Next;
+
+// Print the original list
+        Console.WriteLine("Original Linked List: ");
+        PrintList(head);
+
+// Insert new node with data 3 at position 3
+        Console.WriteLine("Inserting Node with data 3 at position 3: ");
+        head = InsertAtPosition(head, 3, 3);
+
+// Print the updated list
+        PrintList(head);
+}
+}
+
+````
+
+JavaScript
+````
+// Javascript Program to insert a node at a given position
+
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+        this.prev = null;
+}
+}
+
+// Function to insert a new node at a given position
+function insertAtPosition(head, pos, newData) {
+
+    // Create a new node
+    let newNode = new Node(newData);
+
+// Insertion at the beginning
+    if (pos === 1) {
+        newNode.next = head;
+        if (head !== null) {
+            head.prev = newNode;
+}
+        head = newNode;
+return head;
+}
+
+    let curr = head;
+
+// Traverse the list to find the node
+    //before the insertion point
+    for (let i = 1; i < pos - 1 && curr !== null; ++i) {
+        curr = curr.next;
+}
+
+    // If the position is out of bounds
+    if (curr === null) {
+        console.log("Position is out of bounds.");
+return head;
+}
+
+    // Set the prev of new node to curr
+    newNode.prev = curr;
+
+// Set the next of new node to the next of curr
+    newNode.next = curr.next;
+
+// Update the next of current node to new node
+       curr.next = newNode;
+
+// If the new node is not the last node,
+    // update prev of next node to new node
+           if (newNode.next !== null) {
+           newNode.next.prev = newNode;
+}
+
+    return head;
+}
+
+// Function to print the list
+function printList(head) {
+    let curr = head;
+    while (curr !== null) {
+        console.log(curr.data + " ");
+        curr = curr.next;
+}
+    console.log();
+}
+
+// Create a hardcoded doubly linked list:
+// 1 <-> 2 <-> 4
+let head = new Node(1);
+head.next = new Node(2);
+head.next.prev = head;
+head.next.next = new Node(4);
+head.next.next.prev = head.next;
+
+// Print the original list
+console.log("Original Linked List:");
+printList(head);
+
+// Insert new node with data 3 at position 3
+console.log("Inserting Node with data 3 at position 3:");
+head = insertAtPosition(head, 3, 3);
+
+// Print the updated list
+printList(head);
+
+````
+
+
+
+
+
+**Output**
+```
+
+Original Linked List: 1 2 4
+Inserting Node with data 3 at position 3: 1 2 3 4
+
+```
+
+[Deletion at the Beginning of Doubly Linked List](https://www.geeksforgeeks.org/deletion-at-beginning-removal-of-first-node-in-a-doubly-linked-list/)
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+![Deletion-at-the-Beginning-of-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124112/Deletion-at-the-Beginning-of-Doubly-Linked-List.webp)
+
+Deletion at the Beginning of Doubly Linked List
+
+
+To delete a node at the beginning in doubly linked list, we can use the
+following steps:
+
+* Check if the list is empty, there is nothing to delete. Return.
+* Store the head pointer in a variable, say ****temp****.
+* Update the head of linked list to the node next to the current head, ****head = head->next****.
+                                                                        * If the new head is not NULL, update the previous pointer of new head
+                                                                                                           to NULL, ****head->prev = NULL****.
+
+                                                                                                           Below is the implementation of the above approach:
+
+                                                                                                           C++
+                                                                                                           ````
+                                                                                                           // C++ Program to delete a node from the
+// beginning of Doubly Linked List
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node{
+    int data;
+    Node *prev;
+    Node *next;
+    Node(int d) {
+      	data = d;
+      	prev = next = nullptr;
+}
+};
+
+// Deletes the first node (head) of the list
+// and returns the second node as new head
+Node *delHead(Node *head) {
+
+    // If empty, return
+    if (head == nullptr)
+        return nullptr;
+
+// Store in temp for deletion later
+    Node *temp = head;
+
+// Move head to the next node
+    head = head->next;
+
+// Set prev of the new head
+    if (head != nullptr)
+        head->prev = nullptr;
+
+// Free memory and return new head
+    delete temp;
+return head;
+}
+
+void printList(Node *head) {
+    for (Node *curr = head; curr != nullptr; curr = curr->next)
+        cout << curr->data << " ";
+    cout << endl;
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    struct Node *head = new Node(1);
+    head->next = new Node(2);
+    head->next->prev = head;
+    head->next->next = new Node(3);
+    head->next->next->prev = head->next;
+
+    printf("Original Linked List: ");
+    printList(head);
+
+    printf("After Deletion at the beginning: ");
+    head = delHead(head);
+
+    printList(head);
+
+return 0;
+}
+
+````
+
+C
+````
+// C Program to delete a node from the
+// beginning of Doubly Linked List
+
+#include <stdio.h>
+
+struct Node {
+    int data;
+    struct Node *prev;
+    struct Node *next;
+};
+
+// Function to create a new node
+struct Node *createNode(int data) {
+    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+return newNode;
+}
+
+// Function to delete the first node (head) of the list
+// and return the second node as the new head
+struct Node *delHead(struct Node *head) {
+    // If empty, return NULL
+    if (head == NULL)
+        return NULL;
+
+// Store in temp for deletion later
+    struct Node *temp = head;
+
+// Move head to the next node
+    head = head->next;
+
+// Set prev of the new head
+    if (head != NULL)
+        head->prev = NULL;
+
+// Free memory and return new head
+    free(temp);
+return head;
+}
+
+void printList(struct Node *head) {
+    struct Node *curr = head;
+    while (curr != NULL) {
+        printf("%d ", curr->data);
+        curr = curr->next;
+}
+    printf("\\n");
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    struct Node *head = createNode(1);
+    head->next = createNode(2);
+    head->next->prev = head;
+    head->next->next = createNode(3);
+    head->next->next->prev = head->next;
+
+    printf("Original Linked List: ");
+    printList(head);
+
+    printf("After Deletion at the beginning: ");
+    head = delHead(head);
+
+    printList(head);
+
+return 0;
+}
+
+````
+
+Java
+````
+// Java Program to delete a node from the
+// beginning of Doubly Linked List
+
+class Node {
+    int data;
+    Node prev;
+    Node next;
+
+    Node(int data) {
+        this.data = data;
+        this.prev = null;
+        this.next = null;
+}
+}
+
+class GFG {
+
+    // Function to delete the first node (head) of the list
+    // and return the second node as the new head
+    public static Node delHead(Node head) {
+        // If empty, return null
+        if (head == null) {
+            return null;
+}
+
+        // Store in temp for deletion later
+        Node temp = head;
+
+// Move head to the next node
+        head = head.next;
+
+// Set prev of the new head
+        if (head != null) {
+            head.prev = null;
+}
+
+        // Return new head
+        return head;
+}
+
+    public static void printList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            System.out.print(curr.data + " ");
+            curr = curr.next;
+}
+        System.out.println();
+}
+
+    public static void main(String[] args) {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.next = new Node(2);
+        head.next.prev = head;
+        head.next.next = new Node(3);
+        head.next.next.prev = head.next;
+
+        System.out.print("Original Linked List: ");
+        printList(head);
+
+        System.out.print("After Deletion at the beginning: ");
+        head = delHead(head);
+
+        printList(head);
+}
+}
+
+````
+
+Python
+````
+# Python Program to delete a node from the
+# beginning of Doubly Linked List
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+# Function to delete the first node (head) of the list
+# and return the second node as the new head
+def del_head(head):
+
+    # If empty, return None
+    if head is None:
+        return None
+
+    # Store in temp for deletion later
+    temp = head
+
+    # Move head to the next node
+    head = head.next
+
+    # Set prev of the new head
+    if head is not None:
+        head.prev = None
+
+    # Return new head
+    return head
+
+def print_list(head):
+    curr = head
+    while curr is not None:
+        print(curr.data, end=" ")
+        curr = curr.next
+    print()
+
+
+if __name__ == "__main__":
+
+	# Create a hardcoded doubly linked list:
+    # 1 <-> 2 <-> 3
+    head = Node(1)
+    head.next = Node(2)
+    head.next.prev = head
+    head.next.next = Node(3)
+    head.next.next.prev = head.next
+
+    print("Original Linked List: ", end="")
+    print_list(head)
+
+    print("After Deletion at the beginning: ", end="")
+    head = del_head(head)
+
+    print_list(head)
+
+````
+
+C#
+````
+// C# Program to delete a node from the
+// beginning of Doubly Linked List
+
+using System;
+
+class Node {
+    public int Data;
+public Node Prev;
+public Node Next;
+
+public Node(int data) {
+        Data = data;
+        Prev = null;
+Next = null;
+}
+}
+
+class GFG {
+
+    // Deletes the first node (head) of the list
+    // and returns the second node as the new head
+    public static Node DelHead(Node head) {
+
+        // If empty, return null
+        if (head == null)
+            return null;
+
+// Move head to the next node
+        head = head.Next;
+
+// Set prev of the new head
+        if (head != null)
+            head.Prev = null;
+
+// Return new head
+        return head;
+}
+
+    public static void PrintList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            Console.Write(curr.Data + " ");
+            curr = curr.Next;
+}
+        Console.WriteLine();
+}
+
+    static void Main() {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.Next = new Node(2);
+        head.Next.Prev = head;
+        head.Next.Next = new Node(3);
+        head.Next.Next.Prev = head.Next;
+
+        Console.Write("Original Linked List: ");
+        PrintList(head);
+
+        Console.Write("After Deletion at the beginning: ");
+        head = DelHead(head);
+
+        PrintList(head);
+}
+}
+
+````
+
+JavaScript
+````
+// JavaScript Program to delete a node from the
+// beginning of Doubly Linked List
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.prev = null;
+        this.next = null;
+}
+}
+
+// Deletes the first node (head) of the list and returns the second node as the new head
+function delHead(head) {
+    // If empty, return null
+    if (head === null) {
+        return null;
+}
+
+    // Store in temp for deletion later
+    let temp = head;
+
+// Move head to the next node
+    head = head.next;
+
+// Set prev of the new head
+    if (head !== null) {
+        head.prev = null;
+}
+
+    // Return new head
+    return head;
+}
+
+// Function to print the list
+function printList(head) {
+    let curr = head;
+    let output = \'\';
+    while (curr !== null) {
+        output += curr.data + \' \';
+        curr = curr.next;
+}
+    console.log(output.trim());
+}
+
+// Create a hardcoded doubly linked list:
+// 1 <-> 2 <-> 3
+let head = new Node(1);
+head.next = new Node(2);
+head.next.prev = head;
+head.next.next = new Node(3);
+head.next.next.prev = head.next;
+
+console.log("Original Linked List: ");
+printList(head);
+
+console.log("After Deletion at the beginning: ");
+head = delHead(head);
+
+printList(head);
+
+````
+
+
+
+**Output**
+```
+
+Original Linked List: 1 2 3
+After Deletion at the beginning: 2 3
+
+```
+
+[Deletion at the End of Doubly Linked List](https://www.geeksforgeeks.org/deletion-at-end-removal-of-last-node-in-a-doubly-linked-list/)
+----------------------------------------------------------------------------------------------------------------------------------------
+
+![Deletion-at-the-End-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124140/Deletion-at-the-End-in-Doubly-Linked-List.webp)
+
+Deletion at the End in Doubly Linked List
+
+
+To delete a node at the end in doubly linked list, we can use the
+following steps:
+
+* Check if the doubly linked list is empty. If it is empty, then there
+  is nothing to delete.
+* If the list is not empty, then move to the last node of the doubly
+  linked list, say ****curr****.
+* Update the second-to-last node\'s next pointer to NULL, ****curr->prev->next = NULL****.
+* Free the memory allocated for the node that was deleted.
+
+Below is the implementation of the above approach:
+
+C++
+````
+// C++ Program to delete a node from the end of
+//Doubly Linked List
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int data;
+    Node *prev;
+    Node *next;
+    Node(int d) {
+        data = d;
+        prev = NULL;
+        next = NULL;
+    }
+};
+
+// Function to delete the last node of the doubly
+// linked list
+Node *delLast(Node *head) {
+
+    // Corner cases
+    if (head == NULL)
+        return NULL;
+    if (head->next == NULL) {
+        delete head;
+        return NULL;
+    }
+
+    // Traverse to the last node
+    Node *curr = head;
+    while (curr->next != NULL)
+        curr = curr->next;
+
+    // Update the previous node\'s next pointer
+                                                                                         curr->prev->next = NULL;
+
+// Delete the last node
+    delete curr;
+
+// Return the updated head
+    return head;
+}
+
+void printList(Node *head) {
+    Node *curr = head;
+    while (curr != NULL) {
+        cout << curr->data << " ";
+        curr = curr->next;
+}
+    cout << endl;
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    struct Node *head = new Node(1);
+    head->next = new Node(2);
+    head->next->prev = head;
+    head->next->next = new Node(3);
+    head->next->next->prev = head->next;
+
+    printf("Original Linked List: ");
+    printList(head);
+
+    printf("After Deletion at the end: ");
+    head = delLast(head);
+
+    printList(head);
+
+return 0;
+}
+
+````
+
+C
+````
+// C Program to delete a node from the end of
+//Doubly Linked List
+
+#include <stdio.h>
+
+struct Node {
+    int data;
+    struct Node* prev;
+    struct Node* next;
+};
+
+// Function to delete the last node of the
+//doubly linked list
+struct Node* delLast(struct Node *head) {
+
+    // Corner cases
+    if (head == NULL)
+        return NULL;
+    if (head->next == NULL) {
+        free(head);
+return NULL;
+}
+
+    // Traverse to the last node
+    struct Node *curr = head;
+    while (curr->next != NULL)
+        curr = curr->next;
+
+// Update the previous node\'s next pointer
+    curr->prev->next = NULL;
+
+    // Delete the last node
+    free(curr);
+
+    // Return the updated head
+    return head;
+}
+
+// Function to print the list
+void printList(struct Node *head) {
+    struct Node *curr = head;
+    while (curr != NULL) {
+        printf("%d ", curr->data);
+        curr = curr->next;
+    }
+    printf("\\n");
+}
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node *newNode =
+      (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    return newNode;
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    struct Node *head = createNode(1);
+    head->next = createNode(2);
+    head->next->prev = head;
+    head->next->next = createNode(3);
+    head->next->next->prev = head->next;
+
+    printf("Original Linked List: ");
+    printList(head);
+
+    printf("After Deletion at the end: ");
+    head = delLast(head);
+
+    printList(head);
+
+    return 0;
+}
+
+````
+
+Java
+````
+// Java Program to delete a node from the end of
+//Doubly Linked List
+
+class Node {
+    int data;
+    Node prev;
+    Node next;
+
+    Node(int data) {
+        this.data = data;
+        this.prev = null;
+        this.next = null;
+    }
+}
+
+class GFG {
+
+    // Function to delete the last node of the
+  	//doubly linked list
+    public static Node delLast(Node head) {
+
+        // Corner cases
+        if (head == null) {
+            return null;
+        }
+        if (head.next == null) {
+            return null;
+        }
+
+        // Traverse to the last node
+        Node curr = head;
+        while (curr.next != null) {
+            curr = curr.next;
+        }
+
+        // Update the previous node\'s next pointer
+       if (curr.prev != null) {
+       curr.prev.next = null;
+}
+
+        // Return the updated head
+        return head;
+}
+
+    // Function to print the list
+    public static void printList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            System.out.print(curr.data + " ");
+            curr = curr.next;
+}
+        System.out.println();
+}
+
+    public static void main(String[] args) {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.next = new Node(2);
+        head.next.prev = head;
+        head.next.next = new Node(3);
+        head.next.next.prev = head.next;
+
+        System.out.print("Original Linked List: ");
+        printList(head);
+
+        System.out.print("After Deletion at the end: ");
+        head = delLast(head);
+
+        printList(head);
+}
+}
+
+````
+
+Python
+````
+# Python Program to delete a node from the end of
+#Doubly Linked List
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+def del_last(head):
+
+    # Corner cases
+    if head is None:
+        return None
+    if head.next is None:
+        return None
+
+    # Traverse to the last node
+    curr = head
+    while curr.next is not None:
+        curr = curr.next
+
+    # Update the previous node\'s next pointer
+    if curr.prev is not None:
+        curr.prev.next = None
+
+    # Return the updated head
+    return head
+
+def print_list(head):
+    curr = head
+    while curr is not None:
+        print(curr.data, end=" ")
+        curr = curr.next
+    print()
+
+if __name__ == "__main__":
+
+    # Create a hardcoded doubly linked list:
+    # 1 <-> 2 <-> 3
+    head = Node(1)
+    head.next = Node(2)
+    head.next.prev = head
+    head.next.next = Node(3)
+    head.next.next.prev = head.next
+
+    print("Original Linked List: ", end="")
+    print_list(head)
+
+    print("After Deletion at the end: ", end="")
+    head = del_last(head)
+
+    print_list(head)
+
+````
+
+C#
+````
+// C# Program to delete a node from the end of
+//Doubly Linked List
+
+using System;
+
+class Node {
+    public int Data;
+    public Node Prev;
+    public Node Next;
+
+    public Node(int data) {
+        Data = data;
+        Prev = null;
+        Next = null;
+    }
+}
+
+class GFG {
+
+    // Function to delete the last node of the
+  	//doubly linked list
+    static Node DelLast(Node head) {
+
+      	// Corner cases
+        if (head == null)
+            return null;
+        if (head.Next == null) {
+            return null;
+        }
+
+        // Traverse to the last node
+        Node curr = head;
+        while (curr.Next != null)
+            curr = curr.Next;
+
+        // Update the previous node\'s next pointer
+                                     if (curr.Prev != null)
+                                     curr.Prev.Next = null;
+
+// Delete the last node
+        curr = null;
+
+// Return the updated head
+        return head;
+}
+
+    // Function to print the list
+    static void PrintList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            Console.Write(curr.Data + " ");
+            curr = curr.Next;
+}
+        Console.WriteLine();
+}
+
+    static void Main() {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.Next = new Node(2);
+        head.Next.Prev = head;
+        head.Next.Next = new Node(3);
+        head.Next.Next.Prev = head.Next;
+
+        Console.Write("Original Linked List: ");
+        PrintList(head);
+
+        Console.Write("After Deletion at the end: ");
+        head = DelLast(head);
+
+        PrintList(head);
+}
+}
+
+````
+
+JavaScript
+````
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.prev = null;
+        this.next = null;
+}
+}
+
+// Function to delete the last node of the
+//doubly linked list
+function delLast(head) {
+    // Corner cases
+    if (head === null) return null;
+    if (head.next === null) {
+        // Only one node in the list
+        return null;
+}
+
+    // Traverse to the last node
+    let curr = head;
+    while (curr.next !== null) {
+        curr = curr.next;
+}
+
+    // Update the previous node\'s next pointer
+    if (curr.prev !== null) {
+        curr.prev.next = null;
+    }
+
+    // Node curr is now deleted (garbage collected in JS)
+    return head;
+}
+
+// Function to print the list
+function printList(head) {
+    let curr = head;
+    while (curr !== null) {
+        console.log(curr.data + " ");
+        curr = curr.next;
+    }
+}
+
+// Create a hardcoded doubly linked list:
+// 1 <-> 2 <-> 3
+let head = new Node(1);
+head.next = new Node(2);
+head.next.prev = head;
+head.next.next = new Node(3);
+head.next.next.prev = head.next;
+
+console.log("Original Linked List:");
+printList(head);
+
+console.log("After Deletion at the end:");
+head = delLast(head);
+
+printList(head);
+
+````
+
+
+
+
+**Output**
+```
+
+Original Linked List: 1 2 3
+After Deletion at the end: 1 2
+
+```
+
+[Deletion at a Specific Position in Doubly Linked List](https://www.geeksforgeeks.org/delete-doubly-linked-list-node-given-position)
+------------------------------------------------------------------------------------------------------------------------------------
+
+![Deletion-at-a-Specific-Position-in-Doubly-Linked-List](https://media.geeksforgeeks.org/wp-content/uploads/20240809124205/Deletion-at-a-Specific-Position-in-Doubly-Linked-List.webp)
+
+
+Deletion at a Specific Position in Doubly Linked List
+
+
+
+To delete a node at a specific position in doubly linked list, we can
+use the following steps:
+
+* Traverse to the node at the specified position, say ****curr****.
+* If the position is valid, adjust the pointers to skip the node to be
+  deleted.
+  + If curr is not the head of the linked list, update the next
+    pointer of the node before curr to point to the node after curr, ****curr->prev->next = curr-next****.
+  + If curr is not the last node of the linked list, update the
+    previous pointer of the node after curr to the node before curr, ****curr->next->prev = curr->prev****.
+* Free the memory allocated for the deleted node.
+
+Below is the implementation of the above approach:
+
+C++
+````
+// C++ Program to delete node at a specific position
+// in Doubly Linked List
+
+#include <iostream>
+
+using namespace std;
+
+struct Node {
+    int data;
+    Node * prev;
+    Node * next;
+    Node(int d) {
+        data = d;
+        prev = next = NULL;
+    }
+};
+
+// Function to delete a node at a specific position
+// in the doubly linked list
+Node * delPos(Node * head, int pos) {
+
+    // If the list is empty
+    if (!head)
+        return head;
+
+    Node * curr = head;
+
+    // Traverse to the node at the given position
+    for (int i = 1; curr && i < pos; ++i) {
+        curr = curr -> next;
+    }
+
+    // If the position is out of range
+    if (!curr)
+        return head;
+
+    // Update the previous node\'s next pointer
+           if (curr -> prev)
+           curr -> prev -> next = curr -> next;
+
+// Update the next node\'s prev pointer
+    if (curr -> next)
+        curr -> next -> prev = curr -> prev;
+
+    // If the node to be deleted is the head node
+    if (head == curr)
+        head = curr -> next;
+
+    // Deallocate memory for the deleted node
+    delete curr;
+    return head;
+}
+
+// Function to print the doubly linked list
+void printList(Node * head) {
+    Node * curr = head;
+    while (curr != nullptr) {
+        cout << curr -> data << " ";
+        curr = curr -> next;
+    }
+    cout << endl;
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    struct Node * head = new Node(1);
+    head -> next = new Node(2);
+    head -> next -> prev = head;
+    head -> next -> next = new Node(3);
+    head -> next -> next -> prev = head -> next;
+
+    cout << "Original Linked List: ";
+    printList(head);
+
+    cout << "After Deletion at the position 2: ";
+    head = delPos(head, 2);
+
+    printList(head);
+
+    return 0;
+}
+
+````
+
+C
+````
+// C Program to delete node at a specific position
+//in Doubly Linked List
+
+#include <stdio.h>
+
+struct Node {
+    int data;
+    struct Node * prev;
+    struct Node * next;
+};
+
+struct Node * createNode(int data) {
+    struct Node * newNode = (struct Node * )
+    malloc(sizeof(struct Node));
+    newNode -> data = data;
+    newNode -> prev = NULL;
+    newNode -> next = NULL;
+    return newNode;
+}
+
+// Function to delete a node at a specific
+//position in the doubly linked list
+struct Node * delPos(struct Node * head, int pos) {
+
+    // If the list is empty
+    if (head == NULL)
+        return head;
+
+    struct Node * curr = head;
+
+    // Traverse to the node at the given position
+    for (int i = 1; curr && i < pos; ++i) {
+        curr = curr -> next;
+    }
+
+    // If the position is out of range
+    if (curr == NULL)
+        return head;
+
+    // Update the previous node\'s next pointer
+       if (curr -> prev)
+       curr -> prev -> next = curr -> next;
+
+// Update the next node\'s prev pointer
+    if (curr -> next)
+        curr -> next -> prev = curr -> prev;
+
+    // If the node to be deleted is the head node
+    if (head == curr)
+        head = curr -> next;
+
+    // Deallocate memory for the deleted node
+    free(curr);
+    return head;
+}
+
+// Function to print the doubly linked list
+void printList(struct Node * head) {
+    struct Node * curr = head;
+    while (curr != NULL) {
+        printf("%d ", curr -> data);
+        curr = curr -> next;
+    }
+    printf("\\n");
+}
+
+int main() {
+
+    // Create a hardcoded doubly linked list:
+    // 1 <-> 2 <-> 3
+    struct Node * head = createNode(1);
+    struct Node * temp1 = createNode(2);
+    struct Node * temp2 = createNode(3);
+
+    // Link the nodes together
+    head -> next = temp1;
+    temp1 -> prev = head;
+    temp1 -> next = temp2;
+    temp2 -> prev = temp1;
+
+    printf("Original Linked List: ");
+    printList(head);
+
+    // Delete node at position 2
+    head = delPos(head, 2);
+
+    printf("After Deletion at position 2: ");
+    printList(head);
+
+    return 0;
+}
+
+````
+
+Java
+````
+// Java Program to delete node at a specific position in Doubly Linked List
+
+class Node {
+    int data;
+    Node prev;
+    Node next;
+
+    Node(int d) {
+        data = d;
+        prev = null;
+        next = null;
+    }
+}
+
+class GFG {
+
+    // Function to delete a node at a
+  	//specific position in the doubly linked list
+    public static Node delPos(Node head, int pos) {
+
+        // If the list is empty
+        if (head == null) {
+            return head;
+        }
+
+        Node curr = head;
+
+        // Traverse to the node at the given position
+        for (int i = 1; curr != null && i < pos; ++i) {
+            curr = curr.next;
+        }
+
+        // If the position is out of range
+        if (curr == null) {
+            return head;
+        }
+
+        // Update the previous node\'s next pointer
+       if (curr.prev != null) {
+       curr.prev.next = curr.next;
+}
+
+        // Update the next node\'s prev pointer
+        if (curr.next != null) {
+            curr.next.prev = curr.prev;
+        }
+
+        // If the node to be deleted is the head node
+        if (head == curr) {
+            head = curr.next;
+        }
+
+        // Return the updated head
+        return head;
+    }
+
+    // Function to print the doubly linked list
+    public static void printList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            System.out.print(curr.data + " ");
+            curr = curr.next;
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.next = new Node(2);
+        head.next.prev = head;
+        head.next.next = new Node(3);
+        head.next.next.prev = head.next;
+
+        System.out.print("Original Linked List: ");
+        printList(head);
+
+        System.out.print("After Deletion at position 2: ");
+        head = delPos(head, 2);
+
+        printList(head);
+    }
+}
+
+````
+
+Python
+````
+# Python Program to delete node at a specific position
+#in Doubly Linked List
+
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+
+# Function to delete a node at a specific position
+#in the doubly linked list
+def del_pos(head, pos):
+    # If the list is empty
+    if head is None:
+        return head
+
+    curr = head
+
+    # Traverse to the node at the given position
+    for i in range(1, pos):
+        if curr is None:
+            return head
+        curr = curr.next
+
+    # If the position is out of range
+    if curr is None:
+        return head
+
+    # Update the previous node\'s next pointer
+               if curr.prev is not None:
+               curr.prev.next = curr.next
+
+               # Update the next node\'s prev pointer
+    if curr.next is not None:
+        curr.next.prev = curr.prev
+
+    # If the node to be deleted is the head node
+    if head == curr:
+        head = curr.next
+
+    # Return the updated head
+    return head
+
+
+def print_list(head):
+    curr = head
+    while curr is not None:
+        print(curr.data, end=" ")
+        curr = curr.next
+    print()
+
+
+if __name__ == "__main__":
+
+    # Create a hardcoded doubly linked list:
+    # 1 <-> 2 <-> 3
+    head = Node(1)
+    head.next = Node(2)
+    head.next.prev = head
+    head.next.next = Node(3)
+    head.next.next.prev = head.next
+
+    print("Original Linked List: ", end="")
+    print_list(head)
+
+    print("After Deletion at the position 2: ", end="")
+    head = del_pos(head, 2)
+
+    print_list(head)
+
+````
+
+C#
+````
+// C# Program to delete node at a specific position
+//in Doubly Linked List
+
+using System;
+
+class Node {
+    public int Data;
+    public Node Prev;
+    public Node Next;
+
+    public Node(int data) {
+        Data = data;
+        Prev = null;
+        Next = null;
+    }
+}
+
+class Program {
+    // Function to delete a node at a specific position
+    // in the doubly linked list
+    static Node DelPos(Node head, int pos) {
+        // If the list is empty
+        if (head == null)
+            return head;
+
+        Node curr = head;
+
+        // Traverse to the node at the given position
+        for (int i = 1; curr != null && i < pos; ++i) {
+            curr = curr.Next;
+        }
+
+        // If the position is out of range
+        if (curr == null)
+            return head;
+
+        // Update the previous node\'s next pointer
+                     if (curr.Prev != null)
+                     curr.Prev.Next = curr.Next;
+
+// Update the next node\'s prev pointer
+        if (curr.Next != null)
+            curr.Next.Prev = curr.Prev;
+
+        // If the node to be deleted is the head node
+        if (head == curr)
+            head = curr.Next;
+
+        // Deallocate memory for the deleted node
+        // In C#, garbage collection will handle this
+      	//automatically
+
+        return head;
+    }
+
+    // Function to print the doubly linked list
+    static void PrintList(Node head) {
+        Node curr = head;
+        while (curr != null) {
+            Console.Write(curr.Data + " ");
+            curr = curr.Next;
+        }
+        Console.WriteLine();
+    }
+
+    static void Main() {
+
+        // Create a hardcoded doubly linked list:
+        // 1 <-> 2 <-> 3
+        Node head = new Node(1);
+        head.Next = new Node(2);
+        head.Next.Prev = head;
+        head.Next.Next = new Node(3);
+        head.Next.Next.Prev = head.Next;
+
+        Console.Write("Original Linked List: ");
+        PrintList(head);
+
+        Console.Write("After Deletion at position 2: ");
+        head = DelPos(head, 2);
+
+        PrintList(head);
+    }
+}
+
+````
+
+JavaScript
+````
+class Node {
+	constructor(data) {
+		this.data = data;
+		this.prev = null;
+		this.next = null;
+	}
+}
+
+// Function to delete a node at a specific position
+// in the doubly linked list
+function delPos(head, pos) {
+	// If the list is empty
+	if (head === null) return head;
+
+	let curr = head;
+
+	// Traverse to the node at the given position
+	for (let i = 1; curr && i < pos; ++i) {
+		curr = curr.next;
+	}
+
+	// If the position is out of range
+	if (curr === null) return head;
+
+	// Update the previous node\'s next pointer
+       if (curr.prev) {
+       curr.prev.next = curr.next;
+}
+
+	// Update the next node\'s prev pointer
+	if (curr.next) {
+		curr.next.prev = curr.prev;
+	}
+
+	// If the node to be deleted is the head node
+	if (head === curr) {
+		head = curr.next;
+	}
+
+	// Deallocate memory for the deleted node
+	// In JavaScript, garbage collection handles
+    //this automatically
+
+	return head;
+}
+
+// Function to print the doubly linked list
+function printList(head) {
+	let curr = head;
+	let result = [];
+	while (curr !== null) {
+		result.push(curr.data);
+		curr = curr.next;
+	}
+	console.log(result.join(\' \'));
+}
+
+
+// Create a hardcoded doubly linked list:
+// 1 <-> 2 <-> 3
+let head = new Node(1);
+head.next = new Node(2);
+head.next.prev = head;
+head.next.next = new Node(3);
+head.next.next.prev = head.next;
+
+console.log("Original Linked List:");
+printList(head);
+
+console.log("After Deletion at the position 2:");
+head = delPos(head, 2);
+
+printList(head);
+
+````
+
+
+**Output**
+```
+
+Original Linked List: 1 2 3
+After Deletion at the position 2: 1 3
+
+```
+
+Advantages of Doubly Linked List
+--------------------------------
+
+* ****Efficient traversal in both directions:**** Doubly linked lists allow for efficient traversal of the list in both
+  directions, making it suitable for applications where frequent
+  insertions and deletions are required.
+* ****Easy insertion and deletion of nodes:**** The presence of pointers to both the previous and next nodes makes it
+  easy to insert or delete nodes from the list, without having to
+  traverse the entire list.
+* ****Can be used to implement a stack or queue:**** Doubly linked lists can be used to implement both stacks and queues,
+  which are common data structures used in programming.
+
+Disadvantages of Doubly Linked List
+-----------------------------------
+
+* ****More complex than singly linked lists:****
+  Doubly linked lists are more complex than singly linked lists, as they
+  require additional pointers for each node.
+* ****More memory overhead:**** Doubly linked lists require more memory overhead than singly linked
+  lists, as each node stores two pointers instead of one.', e'A doubly linked list
+is a more complex data structure than a singly linked list, but it
+offers several advantages. The main advantage of a doubly linked list is
+that it allows for efficient traversal of the list in both directions.
+This is because each node in the list contains a pointer to the previous
+node and a pointer to the next node. This allows for quick and easy
+insertion and deletion of nodes from the list, as well as efficient
+traversal of the list in both directions.', 'Doubly Linked List Tutorial', 13, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 
 
 
