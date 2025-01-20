@@ -38,3 +38,5 @@ out/
 identity-service/src/main/resources/private-key.json
 .env
 docker.env
+*.txt
+*.md

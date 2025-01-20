@@ -4,10 +4,12 @@ import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
+import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.service.ProblemService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import com.example.problemservice.service.SolutionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +31,7 @@ import java.util.UUID;
 @Tag(name = "Problem")
 public class ProblemController {
     private final ProblemService problemService;
+    private final SolutionService solutionService;
 
     @Operation(
             summary = "Create problem"
@@ -100,4 +103,13 @@ public class ProblemController {
         return ResponseEntity.ok(problemService.updateProblem(problemId, request));
     }
 
+    @Operation(
+            summary = "Get all solution of a problem"
+    )
+    @GetMapping("/{problemId}/solutions")
+    public ApiResponse<List<DetailsSolutionResponse>> getSolutionByProblemId(@PathVariable UUID problemId) {
+        return ApiResponse.<List<DetailsSolutionResponse>>builder()
+                .result(solutionService.getSolutionByProblemId(problemId))
+                .build();
+    }
 }
