@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface ProblemRepository extends JpaRepository<Problem, UUID> {
     @NotNull
     @Override
-    Page<Problem> findAll(Pageable pageable);
+    Page<Problem> findAll(@NotNull Pageable pageable);
 
     Page<Problem> findAllByProblemNameContainingIgnoreCase(String searchTerm, Pageable pageable);
 }

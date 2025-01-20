@@ -1,7 +1,6 @@
 package com.example.courseservice.repository;
 
 import com.example.courseservice.model.LearningLesson;
-import com.example.courseservice.repository.custom.LearningLessonRepositoryCustom;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -19,6 +18,11 @@ public interface LearningLessonRepository extends JpaRepository<LearningLesson, 
     void deleteByLesson_LessonId(UUID lessonId);
     Optional<LearningLesson> findByLesson_LessonIdAndUserId(UUID lessonId, UUID userId);
     List<LearningLesson> findAllByUserIdAndLesson_Course_CourseId(UUID userId, UUID courseId);
+
+    int countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(UUID userUid, UUID courseId, boolean isDoneTheory);
+
+    List<LearningLesson> findByUserIdAndLesson_Course_CourseIdAndStatus(UUID userId, UUID courseId, String aNew);
+
     // @Query(value = "SELECT * FROM get_lessons_and_learning_progress(:studentId, :courseId)", nativeQuery = true)
     // List<LessonProgressResponse> getLessonsAndLearningProgress(
     //         @Param("studentId") UUID studentId,
