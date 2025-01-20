@@ -10719,7 +10719,7 @@ Below are some applications of arrays.
   Fixed size and limited type support make arrays less adaptable than
   structures like linked lists or trees.', e'Array is a linear data structure that is a collection of data elements of same
 types. Arrays are stored in contiguous memory locations. It is a static
-data structure with a fixed size.', 'Applications, Advantages and Disadvantages of Array', 2, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+data structure with a fixed size.', 'Applications, Advantages and Disadvantages of Array', 2, '73c532f9-4d55-4737-ae19-3006e02864cc', 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('96fc2a66-d810-48cb-9c86-1f28415e1e5b', e'
 Given the radius of a circle, find the area of that circle.
 
@@ -40437,7 +40437,7 @@ Complexity Analysis of Operations on Array
 | ****Searching**** | θ(1) | θ(1) | θ(1) |
 ', e'Array is a collection of items of the same variable type that are stored at
 contiguous memory locations. It is one of the most popular and simple
-data structures used in programming.', 'Getting Started with Array Data Structure', 1, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '73a96fec-0145-4ffd-b7c0-ee6d6ff34aef');
+data structures used in programming.', 'Getting Started with Array Data Structure', 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '73a96fec-0145-4ffd-b7c0-ee6d6ff34aef');
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('9d3e7774-66e8-4f47-8589-0f78ccd0f6ea', e'Given a
 
 [matrix](https://www.geeksforgeeks.org/matrix/)

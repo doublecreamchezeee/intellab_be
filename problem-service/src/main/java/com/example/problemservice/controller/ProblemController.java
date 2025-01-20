@@ -8,6 +8,7 @@ import com.example.problemservice.model.Problem;
 import com.example.problemservice.service.ProblemService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,8 +61,23 @@ public class ProblemController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<ProblemRowResponse>> getProblems(@RequestParam(required = false) String category,
+                                                             @RequestHeader(required = false, name = "X-UserID") String userUId,
                                                              @ParameterObject Pageable pageable,
                                                              @RequestParam(required = false) String keyword) {
+        if (userUId != null) {
+            userUId = userUId.split(",")[0];
+            UUID userId = ParseUUID.normalizeUID(userUId);
+            System.out.println("here!!!");
+            if(keyword != null) {
+                System.out.println("here!!");
+                return ApiResponse.<Page<ProblemRowResponse>>builder()
+                        .result(problemService.searchProblems(pageable,keyword, userId)).build();
+            }
+
+            return ApiResponse.<Page<ProblemRowResponse>>builder()
+                    .result(problemService.getAllProblems(category, pageable)).build();
+        }
+        System.out.println("here!!!!");
         if(keyword != null) {
             return ApiResponse.<Page<ProblemRowResponse>>builder()
                     .result(problemService.searchProblems(pageable,keyword)).build();

@@ -12,5 +12,7 @@ import java.util.UUID;
 @Repository
 public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmission, UUID> {
     Optional<List<ProblemSubmission>> findProblemSubmissionByProblemAndUserUid(Problem problem, UUID userUid);
+
+    List<ProblemSubmission> findProblemSubmissionByUserUidAndProblem_ProblemId(UUID userUid, UUID problemId);
 }
 //findProblemSubmissionByProblem_Problem_idAndUserUid

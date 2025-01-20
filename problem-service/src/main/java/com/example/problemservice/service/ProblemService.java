@@ -7,7 +7,10 @@ import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.model.Problem;
+import com.example.problemservice.model.ProblemSubmission;
+import com.example.problemservice.model.TestCase_Output;
 import com.example.problemservice.repository.ProblemRepository;
+import com.example.problemservice.repository.ProblemSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,7 @@ public class ProblemService {
     private final ProblemRepository problemRepository;
     private final ProblemMapper problemMapper;
     private final MarkdownService markdownService;
+    private final ProblemSubmissionRepository problemSubmissionRepository;
 
     public ProblemCreationResponse createProblem(ProblemCreationRequest problem) {
         Problem savedProblem =  problemRepository.save(problemMapper.toProblem(problem));
@@ -44,6 +48,33 @@ public class ProblemService {
     public Page<ProblemRowResponse> searchProblems(Pageable pageable, String keyword) {
         Page<Problem> problems = problemRepository.findAllByProblemNameContainingIgnoreCase(keyword, pageable);
         return problems.map(problemMapper::toProblemRowResponse);
+    }
+
+    public Page<ProblemRowResponse> searchProblems(Pageable pageable, String keyword, UUID userId) {
+        Page<Problem> problems = problemRepository.findAllByProblemNameContainingIgnoreCase(keyword, pageable);
+
+        Page<ProblemRowResponse> results = problems.map(problemMapper::toProblemRowResponse);
+
+        results.forEach(problemRowResponse -> {
+            problemRowResponse.setDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
+        });
+        return results;
+    }
+
+    public boolean isDoneProblem(UUID problemId, UUID userId) {
+        List<ProblemSubmission> submissions = problemSubmissionRepository.findProblemSubmissionByUserUidAndProblem_ProblemId(userId, problemId);
+        if (submissions.isEmpty() || submissions == null) {
+            return false;
+        }
+        for(ProblemSubmission submission:submissions)
+        {
+            List<TestCase_Output> testcaseOutputs = submission.getTestCases_output();
+            for (TestCase_Output testcase : testcaseOutputs) {
+                if (!testcase.getResult_status().equals("ACCEPTED"))
+                    return false;
+            }
+        }
+        return true;
     }
 
     public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable) {

@@ -1,7 +1,6 @@
 package com.example.courseservice.model;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,7 +39,7 @@ public class Category {
 
     String language;
     Boolean isFeatured = false;
-    String Type;
+    String type;
 
     @JsonIgnore
     @ManyToMany(mappedBy = "categories")
