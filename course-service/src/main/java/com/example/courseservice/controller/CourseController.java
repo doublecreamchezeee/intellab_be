@@ -4,6 +4,7 @@ import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
+import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
@@ -76,12 +77,14 @@ public class CourseController {
     @Operation(
             summary = "Get all lessons and progress of learning lessons in a course (using when user has enrolled in course)"
     )
-    @GetMapping("/{courseId}/lessons/me")
+    @GetMapping("/{courseId}/lessons/me/{userUid}") ///{userUid}
     ApiResponse<Page<LessonProgressResponse>> getLessonProgressByCourseIdAndUserUid(
             @PathVariable("courseId") String courseId,
-            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("userUid") String userUid,
+            //@RequestHeader("X-UserId") String userUid,
             @ParameterObject Pageable pageable) {
-        userUid = userUid.split(",")[0];
+       // userUid = userUid.split(",")[0];
+        log.info("UserUid: " + ParseUUID.normalizeUID(userUid));
         return ApiResponse.<Page<LessonProgressResponse>>builder()
                 .result(lessonService.getLessonProgress(
                             ParseUUID.normalizeUID(userUid),
@@ -273,5 +276,12 @@ public class CourseController {
         return ApiResponse.<Page<DetailsReviewResponse>>builder()
                 .result(reviewService.getAllReviewsByCourseId(courseId, pageable))
                 .build();
+    }
+
+    @GetMapping("categories")
+    public ApiResponse<List<CategoryResponse>> getCategories(@RequestParam String type) {
+
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(courseService.getCategories(type)).build();
     }
 }

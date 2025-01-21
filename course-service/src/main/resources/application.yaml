@@ -1,6 +1,8 @@
 spring:
   application:
     name: course-service
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -14,7 +16,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 #        generate_statistics: true
-    show-sql: true
+    #show-sql: true
 server:
   port: 8002
   servlet:

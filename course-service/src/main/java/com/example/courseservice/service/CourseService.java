@@ -3,11 +3,13 @@ package com.example.courseservice.service;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
+import com.example.courseservice.mapper.CategoryMapper;
 import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.Category;
 import com.example.courseservice.model.Course;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +41,7 @@ public class CourseService {
     LessonRepository lessonRepository;
     LearningLessonRepository learningLessonRepository;
     CategoryRepository categoryRepository;
+    CategoryMapper categoryMapper;
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
         Page<Course> courses = courseRepository.findAll(pageable);
@@ -358,5 +362,10 @@ public class CourseService {
         });*/
     }
 
+    public List<CategoryResponse> getCategories(String Type) {
+        List<Category> categories = categoryRepository.findAllByType(Type);
+
+        return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
+    }
 
 }
