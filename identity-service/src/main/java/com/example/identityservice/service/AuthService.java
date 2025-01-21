@@ -118,6 +118,8 @@ public class AuthService {
             return ValidatedTokenResponse.builder()
                     .isValidated(true)
                     .userId(decodeToken.getUid())
+                    .name(decodeToken.getName())
+                    .email(decodeToken.getEmail())
                     .message("Token validation successful.")
                     .build();
         } catch (FirebaseAuthException e) {
