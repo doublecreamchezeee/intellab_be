@@ -16,6 +16,9 @@ public interface LessonRepository extends JpaRepository<Lesson, UUID> {
     List<Lesson> findAllByCourse_CourseIdOrderByLessonOrderDesc(UUID courseId);
     void deleteAllByCourse_CourseId(UUID courseId);
     Optional<Lesson> findByLessonOrder(int lessonOrder);
-    Optional<Lesson> findByLessonOrderAndCourse_CourseId( int lessonOrder, UUID courseId);
+    Optional<Lesson> findByLessonOrderAndCourse_CourseId(int lessonOrder, UUID courseId);
     int countByCourse_CourseId(UUID courseId);
+
+    List<Lesson> findByCourse_CourseId(UUID courseId);
+    Page<Lesson> findByCourse_CourseId(UUID courseId, Pageable pageable);
 }
