@@ -29,9 +29,6 @@ public class Judge0Client {
     private static final Map<String, Integer> languageIdMap = new HashMap<>();
 
     static {
-        languageIdMap.put("Assembly (NASM 2.14.02)", 45);
-        languageIdMap.put("Bash (5.0.0)", 46);
-        languageIdMap.put("Basic (FBC 1.07.1)", 47);
         languageIdMap.put("C (GCC 7.4.0)", 48);
         languageIdMap.put("C++ (GCC 7.4.0)", 52);
         languageIdMap.put("C (GCC 8.3.0)", 49);
@@ -39,26 +36,9 @@ public class Judge0Client {
         languageIdMap.put("C (GCC 9.2.0)", 50);
         languageIdMap.put("C++ (GCC 9.2.0)", 54);
         languageIdMap.put("C# (Mono 6.6.0.161)", 51);
-        languageIdMap.put("Common Lisp (SBCL 2.0.0)", 55);
-        languageIdMap.put("D (DMD 2.089.1)", 56);
-        languageIdMap.put("Elixir (1.9.4)", 57);
-        languageIdMap.put("Erlang (OTP 22.2)", 58);
-        languageIdMap.put("Fortran (GFortran 9.2.0)", 59);
-        languageIdMap.put("Go (1.13.5)", 60);
-        languageIdMap.put("Haskell (GHC 8.8.1)", 61);
         languageIdMap.put("Java (OpenJDK 13.0.1)", 62);
         languageIdMap.put("JavaScript (Node.js 12.14.0)", 63);
-        languageIdMap.put("Lua (5.3.5)", 64);
-        languageIdMap.put("OCaml (4.09.0)", 65);
-        languageIdMap.put("Octave (5.1.0)", 66);
-        languageIdMap.put("Pascal (FPC 3.0.4)", 67);
-        languageIdMap.put("PHP (7.4.1)", 68);
-        languageIdMap.put("Plain Text", 43);
-        languageIdMap.put("Prolog (GNU Prolog 1.4.5)", 69);
-        languageIdMap.put("Python (2.7.17)", 70);
         languageIdMap.put("Python (3.8.1)", 71);
-        languageIdMap.put("Ruby (2.7.0)", 72);
-        languageIdMap.put("Rust (1.40.0)", 73);
         languageIdMap.put("TypeScript (3.7.4)", 74);
     }
 
@@ -79,6 +59,7 @@ public class Judge0Client {
         if (languageId == null) {
             throw new IllegalArgumentException("Invalid programming language: " + language);
         }
+//        String boilerplateCode = boilerplateClient.enrich(code, languageId);
 
         // Extract input and expected output from the TestCase
         String input = testCase.getInput();
