@@ -22,7 +22,7 @@ server:
 
 judge0:
   api:
-    url: http://localhost:2358
+    url: ${JUDGE0_URL}
 
 springdoc:
   swagger-ui:
