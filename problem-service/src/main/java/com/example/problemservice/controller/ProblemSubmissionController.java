@@ -1,7 +1,9 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemSubmission;
+import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.service.ProblemSubmissionService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
@@ -13,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/problem-submissions")
@@ -21,6 +25,7 @@ import java.util.UUID;
 @Tag(name = "Submission")
 public class ProblemSubmissionController {
     private final ProblemSubmissionService problemSubmissionService;
+    private final ProblemSubmissionRepository problemSubmissionRepository;
 
     @Operation(
             summary = "Create submission"
@@ -34,6 +39,18 @@ public class ProblemSubmissionController {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
         }
+    }
+
+    @Operation(
+            summary = "Callback update submission by id"
+    )
+    @PutMapping("/update/submission/callback")
+    public ResponseEntity<Object> callbackUpdateSubmission(@RequestBody SubmissionCallbackResponse request) {
+        System.out.println("Callback update submission by id: " + request);
+        ProblemSubmission submission = problemSubmissionService.callbackUpdate(request);
+        // Here you can implement further logic like saving to the database or processing the response
+
+        return ResponseEntity.ok(request);
     }
 
     @Operation(

@@ -20,7 +20,7 @@ public class TestCase_Output {
     @EmbeddedId
     testCaseOutputId testCaseOutputID;
 
-    UUID Token;
+    UUID token;
 
     @Column(columnDefinition = "REAL")
     Float runtime;

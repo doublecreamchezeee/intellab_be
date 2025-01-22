@@ -50,4 +50,12 @@ public class TestCaseService {
                         ErrorCode.TESTCASE_NOT_EXIST)
                 );
     }
+
+    public List<TestCase> getAllTestCases() {
+        return testCaseRepository.findAll();
+    }
+
+    public List<TestCase> getTestCasesByProblemId(UUID problemId) {
+        return testCaseRepository.findAllByProblem_ProblemId(problemId);
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.problemservice.service;
 
 import com.example.problemservice.client.Judge0Client;
+import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
@@ -30,7 +31,6 @@ public class ProblemSubmissionService {
     private final TestCaseOutputRepository testCaseOutputRepository;
     private final Judge0Client judge0Client;
     private final ProblemSubmissionMapper problemSubmissionMapper;
-
     public ProblemSubmission submitProblem(ProblemSubmission submission) {
         // Lấy Problem
         Problem problem = problemRepository.findById(submission.getProblem().getProblemId()).orElseThrow(
@@ -75,6 +75,19 @@ public class ProblemSubmissionService {
 
         // Lưu lại ProblemSubmission
         return problemSubmissionRepository.save(submission);
+    }
+
+    public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request){
+        TestCase_Output output = testCaseOutputRepository.findByToken(UUID.fromString(request.getToken())).orElseThrow(
+                () -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION)
+        );
+
+        output.setRuntime(Float.valueOf(request.getTime()));
+        output.setSubmission_output(request.getStdout());
+        output.setResult_status(request.getStatus().getDescription());
+        testCaseOutputRepository.save(output);
+
+        return output.getSubmission();
     }
 
     public ProblemSubmission updateSubmissionResult(UUID submissionId) {
@@ -134,5 +147,7 @@ public class ProblemSubmissionService {
                 .map(problemSubmissionMapper::toDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
                 .collect(Collectors.toList());
     }
+
+
 }
 

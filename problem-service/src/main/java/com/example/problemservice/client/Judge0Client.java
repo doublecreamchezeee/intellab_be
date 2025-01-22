@@ -25,6 +25,8 @@ public class Judge0Client {
     @Value("${judge0.api.url}")
     private String JUDGE0_BASE_URL;
 
+    @Value("${judge0.api.callback_url}")
+    private String CALLBACK_BASE_URL;
     // Map to hold language name to language_id mappings
     private static final Map<String, Integer> languageIdMap = new HashMap<>();
 
@@ -71,7 +73,7 @@ public class Judge0Client {
         requestBody.put("language_id", languageId);
         requestBody.put("stdin", input);
         requestBody.put("expected_output", expectedOutput);
-
+        requestBody.put("callback_url", CALLBACK_BASE_URL);
         // Convert the request body to JSON
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonRequestBody;

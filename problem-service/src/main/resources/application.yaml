@@ -12,7 +12,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        generate_statistics: true
+#        generate_statistics: true
 
     show-sql: true
 server:
@@ -23,6 +23,7 @@ server:
 judge0:
   api:
     url: ${JUDGE0_URL}
+    callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
 
 springdoc:
   swagger-ui:
