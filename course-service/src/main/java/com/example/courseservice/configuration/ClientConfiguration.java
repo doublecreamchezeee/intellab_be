@@ -22,32 +22,6 @@ public class ClientConfiguration {
                 .build();
     }
 
-    //    @Bean
-    CorsWebFilter corsWebFilter(){
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String hostname = DotenvConfig.get("HOST_NAME");
-        String identityPort = DotenvConfig.get("DOCKER_IDENTITY_PORT");
-        String coursePort = DotenvConfig.get("DOCKER_COURSE_PORT");
-        String apiGatewayPort = DotenvConfig.get("DOCKER_API_GATEWAY_PORT");
-        String fePort = DotenvConfig.get("DOCKER_FRONTEND_PORT");
-
-        System.out.println(hostname + fePort);
-        corsConfiguration.setAllowedOrigins(List.of(
-                "http://" + hostname + ":" + identityPort,
-                "http://" + hostname + ":" + coursePort,
-                "http://" + hostname + ":" + apiGatewayPort,
-                "http://" + hostname + ":" + fePort
-        ));
-//        corsConfiguration.setAllowedOrigins(List.of("*"));
-        corsConfiguration.setAllowedHeaders(List.of("*"));
-        corsConfiguration.setAllowedMethods(List.of("*"));
-        corsConfiguration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-
-        return new CorsWebFilter(urlBasedCorsConfigurationSource);
-    }
-
     @Bean
     ProblemClient problemClient(WebClient webClient){
         HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory

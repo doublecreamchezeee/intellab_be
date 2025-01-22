@@ -12,9 +12,6 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-#              - "http://${DOCKER_HOST_NAME}:${DOCKER_API_GATEWAY_PORT}"
-#              - "http://${DOCKER_HOST_NAME}:${DOCKER_IDENTITY_PORT}"
-#              - "http://${DOCKER_HOST_NAME}:${DOCKER_COURSE_PORT}"
               - "http://localhost:3000"
             allowedMethods:
               - "*"
