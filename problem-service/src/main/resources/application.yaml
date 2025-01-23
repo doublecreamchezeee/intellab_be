@@ -22,7 +22,7 @@ server:
 
 judge0:
   api:
-    url: ${JUDGE0_URL}
+    url: http://localhost:2358 #${JUDGE0_URL}
     callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
 
 
