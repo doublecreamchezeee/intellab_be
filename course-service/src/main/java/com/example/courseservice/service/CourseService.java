@@ -306,7 +306,7 @@ public class CourseService {
                                 .userId(userUid)
                                 .status("NEW")
                                 .assignments(new ArrayList<>())
-                                .isDoneTheory(false)
+                                .isDoneTheory(null)
                                 .isDonePractice(false)
                                 .build();
                         learningLessonRepository.save(learningLesson);
