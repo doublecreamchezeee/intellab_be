@@ -22,17 +22,12 @@ server:
   servlet:
     context-path: /course
 
-com:
-  example:
-    firebase:
-      web-api-key: AIzaSyDsRZMGfdM_zZEUmaaBG1E2BqlIAOem5rM
-      private-key: private-key.json
-
 #logging:
 #  level:
 #    org.hibernate.SQL: DEBUG
 #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 # Swagger
+
 springdoc:
   swagger-ui:
     use-root-path: true

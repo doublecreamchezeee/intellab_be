@@ -57,7 +57,7 @@ public class LessonController {
     ApiResponse<DetailsLessonResponse> getLessonById(@PathVariable("lessonId") String lessonId, @PathVariable("userId") String userId){
         return ApiResponse.<DetailsLessonResponse>builder()
                 .result(lessonService.getLessonById(
-                        lessonId,
+                        UUID.fromString(lessonId),
                         ParseUUID.normalizeUID(userId))
                 )
                 .build();

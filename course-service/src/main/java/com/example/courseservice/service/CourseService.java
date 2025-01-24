@@ -3,11 +3,13 @@ package com.example.courseservice.service;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
+import com.example.courseservice.mapper.CategoryMapper;
 import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.Category;
 import com.example.courseservice.model.Course;
@@ -15,7 +17,6 @@ import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
-import com.example.courseservice.repository.impl.DetailsCourseRepositoryCustomImpl;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +40,8 @@ public class CourseService {
     UserCoursesRepository userCoursesRepository;
     LessonRepository lessonRepository;
     LearningLessonRepository learningLessonRepository;
-    DetailsCourseRepositoryCustomImpl detailsCourseRepositoryCustom;
     CategoryRepository categoryRepository;
+    CategoryMapper categoryMapper;
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
         Page<Course> courses = courseRepository.findAll(pageable);
@@ -59,9 +61,8 @@ public class CourseService {
         return new PageImpl<>(subList, pageable, list.size());
     }
 
-    public Page<CourseCreationResponse> getAllByCategory(String categoryName, Pageable pageable)
-    {
-        Boolean isFeature = true;
+    public Page<CourseCreationResponse> getAllByCategory(String categoryName, Pageable pageable) {
+        boolean isFeature = true;
         List<Category> categories = categoryRepository.findAllByNameAndIsFeatured(categoryName,isFeature);
 
         if (categories.isEmpty())
@@ -151,36 +152,18 @@ public class CourseService {
         if(price != null) {
             if (price)
             {
-                Iterator<Course> courseIterator = coursesByKey.iterator();
-                while (courseIterator.hasNext()) {
-                    Course course = courseIterator.next();
-                    if(course.getPrice() == 0){
-                        courseIterator.remove();
-                    }
-                }
+                coursesByKey.removeIf(course -> course.getPrice() == 0);
             }
             else
             {
-                Iterator<Course> courseIterator = coursesByKey.iterator();
-                while (courseIterator.hasNext()) {
-                    Course course = courseIterator.next();
-                    if(course.getPrice() > 0){
-                        courseIterator.remove();
-                    }
-                }
+                coursesByKey.removeIf(course -> course.getPrice() > 0);
             }
 
         }
 
         if (rating != null)
         {
-            Iterator<Course> courseIterator = coursesByKey.iterator();
-            while (courseIterator.hasNext()) {
-                Course course = courseIterator.next();
-                if(course.getAverageRating() < rating){
-                    courseIterator.remove();
-                }
-            }
+            coursesByKey.removeIf(course -> course.getAverageRating() < rating);
         }
 
         if (categories != null && !categories.isEmpty()) {
@@ -216,40 +199,62 @@ public class CourseService {
     }
 
     public DetailCourseResponse getCourseById(UUID courseId, UUID userUid) {
-        // Check if a userUid is provided
-        /*if (userUid != null) {
-            // Find UserCourses by composite key (userUid and courseId)
-            UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+        // Fetch the course by ID or throw an exception if it doesn't exist
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        // Count the number of lessons in the course
+        int lessonCount = lessonRepository.countByCourse_CourseId(courseId);
+
+        // Calculate the average rating for the course
+        double averageRating = course.getReviews().stream()
+                .mapToDouble(review -> Optional.of(review.getRating()).orElse(0))
+                .average()
+                .orElse(0.0);
+
+        // Count the number of reviews for the course
+        int reviewCount = course.getReviews().size();
+
+        // Check if the user is enrolled in the course
+        boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId);
+
+        // Get the latest lesson ID for the user (if enrolled)
+        UUID latestLessonId = null;
+        if (isUserEnrolled) {
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
                     .orElse(null);
-
-            // If user is not enrolled in the course, fetch course details without enrollment flag
-            if (userCourses == null) {
-                return courseMapper.toDetailCourseResponse(
-                        courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED)),
-                        false // User is not enrolled
-                );
-            }
-
-            // If user is enrolled in the course, fetch course details
-            return courseMapper.toDetailCourseResponse(
-                    courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED)),
-                    true // Mark that the user is enrolled
-            );
+            latestLessonId = (userCourse != null) ? userCourse.getLatestLessonId() : null;
         }
 
-        // If userUid is null, fetch course details without enrollment flag
-        return courseMapper.toDetailCourseResponse(
-                courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED)),
-                false // User is not enrolled
-        );*/
+        // Calculate the completion ratio for the user
+        float completionRatio = 0.0f;
+        if (isUserEnrolled) {
+            int totalLessons = lessonRepository.countByCourse_CourseId(courseId);
+            int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
 
-        DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
-                .getDetailsCourse(courseId, userUid)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-        return detailCourseResponse;
+            if (totalLessons > 0) {
+                completionRatio = (completedLessons / (float) totalLessons) * 100;
+            }
+        }
 
-
+        // Map course details to the response DTO
+        return DetailCourseResponse.builder()
+                .courseId(course.getCourseId())
+                .courseName(course.getCourseName())
+                .description(course.getDescription())
+                .level(course.getLevel())
+                .price(course.getPrice())
+                .unitPrice(course.getUnitPrice())
+                .userUid(course.getUserUid())
+                .lessonCount(lessonCount)
+                .averageRating((float) averageRating)
+                .reviewCount(reviewCount)
+                .isUserEnrolled(isUserEnrolled)
+                .latestLessonId(latestLessonId)
+                .progressPercent(completionRatio)
+                .build();
     }
+
 
     public List<DetailCourseResponse> getDetailsOfCourses(List<UUID> courseIds, UUID userUid) {
         if (courseIds == null || courseIds.isEmpty()) {
@@ -347,9 +352,7 @@ public class CourseService {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
-        Page<UserCourses> userCourses = userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
-
-        return userCourses;
+        return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
         /*return userCourses.map(userCourse -> {
             DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
                     .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUid)
@@ -359,5 +362,10 @@ public class CourseService {
         });*/
     }
 
+    public List<CategoryResponse> getCategories(String Type) {
+        List<Category> categories = categoryRepository.findAllByType(Type);
+
+        return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
+    }
 
 }

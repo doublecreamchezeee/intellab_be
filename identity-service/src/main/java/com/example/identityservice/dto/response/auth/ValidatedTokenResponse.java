@@ -11,4 +11,6 @@ public class ValidatedTokenResponse {
     boolean isValidated;
     String message;
     String userId;
+    String email;
+    String name;
 }

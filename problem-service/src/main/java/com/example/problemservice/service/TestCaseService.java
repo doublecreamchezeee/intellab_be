@@ -55,6 +55,14 @@ public class TestCaseService {
                 );
     }
 
+    public List<TestCase> getAllTestCases() {
+        return testCaseRepository.findAll();
+    }
+
+    public List<TestCase> getTestCasesByProblemId(UUID problemId) {
+        return testCaseRepository.findAllByProblem_ProblemId(problemId);
+    }
+
     public List<TestCase> createMultipleTestCases(TestCaseMultipleCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));

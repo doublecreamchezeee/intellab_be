@@ -55,7 +55,7 @@ public class AssignmentService {
 //    }
     @Transactional
     public Float submitAssignment(UUID lessonID, UUID userId, SubmitAssignmentRequest request) {
-        LearningLesson learningLesson = learningLessonRepository.findByLesson_LessonIdAndUserId(lessonID, userId)
+        LearningLesson learningLesson = learningLessonRepository.findById(request.getLearningId())
                 .orElseThrow(() -> new AppException(ErrorCode.LEARNING_LESSON_NOT_FOUND));
 
         Assignment assignment = assignmentMapper.toAssignment(request);

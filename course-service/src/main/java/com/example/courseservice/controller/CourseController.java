@@ -4,6 +4,7 @@ import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
+import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
@@ -275,5 +276,12 @@ public class CourseController {
         return ApiResponse.<Page<DetailsReviewResponse>>builder()
                 .result(reviewService.getAllReviewsByCourseId(courseId, pageable))
                 .build();
+    }
+
+    @GetMapping("categories")
+    public ApiResponse<List<CategoryResponse>> getCategories(@RequestParam String type) {
+
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(courseService.getCategories(type)).build();
     }
 }

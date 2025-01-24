@@ -60,6 +60,7 @@ public class Problem {
 
     @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference("problem-submissions")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 //    @JsonBackReference("submissions-problem")
     List<ProblemSubmission> submissions;
 

@@ -29,10 +29,10 @@ public class ClientConfiguration {
     CorsWebFilter corsWebFilter(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String hostname = DotenvConfig.get("HOST_NAME");
-        String identityPort = DotenvConfig.get("DOCKER_IDENTITY_PORT");
-        String coursePort = DotenvConfig.get("DOCKER_COURSE_PORT");
-        String apiGatewayPort = DotenvConfig.get("DOCKER_API_GATEWAY_PORT");
-        String fePort = DotenvConfig.get("DOCKER_FRONTEND_PORT");
+        String identityPort = DotenvConfig.get("IDENTITY_PORT");
+        String coursePort = DotenvConfig.get("COURSE_PORT");
+        String apiGatewayPort = DotenvConfig.get("API_GATEWAY_PORT");
+        String fePort = DotenvConfig.get("FRONTEND_PORT");
 
         System.out.println(hostname + fePort);
         corsConfiguration.setAllowedOrigins(List.of(
@@ -41,7 +41,6 @@ public class ClientConfiguration {
                 "http://" + hostname + ":" + apiGatewayPort,
                 "http://" + hostname + ":" + fePort
         ));
-//        corsConfiguration.setAllowedOrigins(List.of("*"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowedMethods(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
