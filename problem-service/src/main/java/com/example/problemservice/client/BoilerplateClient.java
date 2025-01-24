@@ -15,7 +15,6 @@ public class BoilerplateClient {
     @Component
     @AllArgsConstructor
     @NoArgsConstructor
-    @Builder
     @Data
     public class FullProblemDefinitionParser{
         private String problemName;

@@ -9,7 +9,8 @@ create table if not exists public.problems
     problem_name    varchar(255),
     score           integer,
     is_available     boolean       default false,
-    is_published    boolean       default false
+    is_published    boolean       default false,
+    solution_structure text
     );
 
 alter table public.problems
@@ -28,6 +29,49 @@ create table if not exists public.solutions
 
 alter table public.solutions
     owner to postgres;
+
+create table hints
+(
+    level      integer not null,
+    content    text,
+    problem_id uuid    not null
+        constraint fks7m1vov834a6stk5o5gg70ask
+            references problems,
+    primary key (level, problem_id)
+);
+
+alter table hints
+    owner to postgres;
+
+
+create table programming_language
+(
+    programming_language_id integer not null
+        primary key,
+    long_name               varchar(50),
+    short_name              varchar(20)
+);
+
+alter table programming_language
+    owner to postgres;
+
+create table default_code
+(
+    code        text,
+    language_id integer not null
+        constraint fka8c6jrkgcbeexifxoaa7w80h2
+            references programming_language,
+    problem_id  uuid    not null
+        constraint fkcxolaif2yhkurw5v9lrbkty4u
+            references problems,
+    primary key (language_id, problem_id)
+);
+
+alter table default_code
+    owner to postgres;
+
+
+
 
 create table if not exists public.problem_submissions
 (
@@ -58868,3 +58912,16 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, 
 9', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 4);
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4 6 10 2
 12', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 5);
+
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (48, 'C (GCC 7.4.0)', 'C');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (52, 'C++ (GCC 7.4.0)', 'C++');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (49, 'C (GCC 8.3.0)', 'C');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (53, 'C++ (GCC 8.3.0)', 'C++');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (50, 'C (GCC 9.2.0)', 'C');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (54, 'C++ (GCC 9.2.0)', 'C++');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (51, 'C# (Mono 6.6.0.161)', 'C#');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (62, 'Java (JDK 17.0.6)', 'Java');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (63, 'JavaScript (Node.js 12.14.0)', 'JavaScript');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (71, 'Python (3.8.1)', 'Python');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
+
