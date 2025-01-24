@@ -20,6 +20,8 @@ public interface ProblemMapper {
     @Mapping(target = "level", source = "problemLevel")
     @Mapping(target = "acceptanceRate", source = "acceptanceRate")
     @Mapping(target = "hintCount", expression = "java(problem.getHints().size())")
+    @Mapping(target = "isDone", ignore = true)
+    @Mapping(target = "categories", ignore = true)
     ProblemRowResponse toProblemRowResponse(Problem problem);
 
     @Mapping(target = "problemStructure", ignore = true)

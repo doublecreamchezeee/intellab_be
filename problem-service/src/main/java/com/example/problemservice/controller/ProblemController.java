@@ -1,7 +1,10 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.dto.request.DefaultCodeRequest;
+import com.example.problemservice.dto.request.problem.EnrichCodeRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
+import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
@@ -117,6 +120,34 @@ public class ProblemController {
     @PutMapping("/{problemId}")
     public ResponseEntity<ProblemCreationResponse> updateProblem(@PathVariable UUID problemId, @RequestBody ProblemCreationRequest request) {
         return ResponseEntity.ok(problemService.updateProblem(problemId, request));
+    }
+
+    @PostMapping("/boilerplateGenerate")
+    public ApiResponse<List<DefaultCodeResponse>> generateBoilerPlate(@RequestBody DefaultCodeRequest request) {
+        return ApiResponse.<List<DefaultCodeResponse>>builder()
+                .result(problemService.generateDefaultCodes(request.getProblemId(),request.getStructure()))
+                .build();
+
+    }
+
+    // api để test code
+    @GetMapping("/enrichCode")
+    public ApiResponse<String> enrichCode(@RequestBody EnrichCodeRequest request) {
+        // để test
+        request.setStructure("Problem Name: \"Sum of Two Numbers\"\n" +
+                "Function Name: sum\n" +
+                "Input Structure:\n" +
+                "Input Field: int num1\n" +
+                "Input Field: int num2\n" +
+                "Output Structure:\n" +
+                "Output Field: int result");
+        return ApiResponse.<String>builder()
+                .result(problemService.enrichCode(
+                        request.getStructure(),
+                        request.getCode(),
+                        request.getLanguageId()
+                ))
+                .build();
     }
 
     @Operation(
