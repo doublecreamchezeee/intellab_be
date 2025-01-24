@@ -16,7 +16,7 @@ public class BoilerplateClient {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public class FullProblemDefinitionParser{
+    public static class FullProblemDefinitionParser{
         private String problemName;
         private String functionName;
         private List<Field> inputFields;
