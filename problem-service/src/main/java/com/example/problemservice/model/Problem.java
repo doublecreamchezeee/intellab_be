@@ -78,4 +78,9 @@ public class Problem {
     @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
     List<Hint> hints;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    List<DefaultCode> defaultCodes;
+
+
 }
