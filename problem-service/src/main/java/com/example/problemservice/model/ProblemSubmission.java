@@ -31,6 +31,9 @@ public class ProblemSubmission {
     String programming_language;
     Integer score_achieved;
 
+    @Column(name = "is_solved")
+    boolean isSolved = false;
+
 //    @CreationTimestamp
 //    Instant submit_date;
 
