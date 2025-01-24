@@ -22,17 +22,12 @@ public interface ProblemMapper {
     @Mapping(target = "hintCount", expression = "java(problem.getHints().size())")
     ProblemRowResponse toProblemRowResponse(Problem problem);
 
+    @Mapping(target = "problemStructure", ignore = true)
     Problem toProblem(ProblemCreationRequest problemCreationRequest);
+
+    @Mapping(target = "problemStructure", ignore = true)
     ProblemCreationResponse toProblemCreationResponse(Problem problem);
+
+    @Mapping(target = "problemStructure", ignore = true)
     void updateProblemFromRequest(ProblemCreationRequest request, @MappingTarget Problem problem);
 }
-
-
-//ProblemRowResponse {
-//    UUID problemId;
-//    String problemName;
-//    String level;
-//    boolean isDone;
-//    Float acceptanceRate;
-//    List<CategoryRessponse> categories;
-//}

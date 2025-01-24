@@ -112,4 +112,21 @@ public class ProblemController {
                 .result(solutionService.getSolutionByProblemId(problemId))
                 .build();
     }
+
+    @Operation(
+            summary = "Get problem by id in file (testing only)"
+    )
+    @GetMapping("/{problemId}/2")
+    public ResponseEntity<Problem> getProblem2(@PathVariable UUID problemId) {
+        try {
+            Problem problem = null;
+                    problemService.getProblemById(problemId);
+            return ResponseEntity.ok(problem); // Return the problem if found
+        } catch (AppException e) {
+            if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if problem not found
+            }
+            throw e;
+        }
+    }
 }

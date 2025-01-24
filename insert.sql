@@ -7797,7 +7797,7 @@ To insert a new node at the end of the doubly linked list, we can use
 the following steps:
 
 * Allocate memory for a new node and assign the provided value to its
-  data field.
+  data dataField.
 * Initialize the next pointer of the new node to nullptr.
 * If the list is empty:
   + Set the previous pointer of the new node to nullptr.
@@ -30474,7 +30474,7 @@ To insert a new node at the end of the doubly linked list, we can use
 the following steps:
 
 * Allocate memory for a new node and assign the provided value to its
-  data field.
+  data dataField.
 * Initialize the next pointer of the new node to nullptr.
 * If the list is empty:
   + Set the previous pointer of the new node to nullptr.
@@ -55051,7 +55051,7 @@ class Node {
 
 
 
-In this example, the Node class contains an integer data field (****data****) to store the information and a pointer to another Node (****next****) to establish the link to the next node in the list.
+In this example, the Node class contains an integer data dataField (****data****) to store the information and a pointer to another Node (****next****) to establish the link to the next node in the list.
 
 Operations on Singly Linked List
 --------------------------------
@@ -56133,7 +56133,7 @@ function removeFirstNode(head) {
 ### b. [Deletion at the End of Singly Linked List:](https://www.geeksforgeeks.org/remove-last-node-of-the-linked-list)
 
 To delete the last node, traverse the list until the second-to-last
-node and update its next field to None.
+node and update its next dataField to None.
 
 ![Deletion-At-End](https://media.geeksforgeeks.org/wp-content/uploads/20241022164030481275/Deletion-At-End.webp)
 
@@ -56536,7 +56536,7 @@ function deleteAtPosition(head, position) {
 ````
 
 
-', e'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data field and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient
+', e'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data dataField and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient
 insertion and deletion operations.', 'Singly Linked List Tutorial', 1, 'ae72c88c-0355-423b-9023-c2ad25695ed0', '853e7ebc-48f7-4f47-aa0f-7cd103b4e503', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, course_id, exercise_id, problem_id) VALUES ('237c88d5-987b-4fc0-8bd1-d27a07cd1aa9', e'Understanding Node Structure
 ----------------------------
@@ -56635,7 +56635,7 @@ class Node {
 
 
 
-In this example, the Node class contains an integer data field (****data****) to store the information and a pointer to another Node (****next****) to establish the link to the next node in the list.
+In this example, the Node class contains an integer data dataField (****data****) to store the information and a pointer to another Node (****next****) to establish the link to the next node in the list.
 
 Operations on Singly Linked List
 --------------------------------
@@ -57717,7 +57717,7 @@ function removeFirstNode(head) {
 ### b. [Deletion at the End of Singly Linked List:](https://www.geeksforgeeks.org/remove-last-node-of-the-linked-list)
 
 To delete the last node, traverse the list until the second-to-last
-node and update its next field to None.
+node and update its next dataField to None.
 
 ![Deletion-At-End](https://media.geeksforgeeks.org/wp-content/uploads/20241022164030481275/Deletion-At-End.webp)
 
@@ -58120,7 +58120,7 @@ function deleteAtPosition(head, position) {
 ````
 
 
-', 'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data field and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient insertion and deletion operations.', 'Singly Linked List Tutorial', 1, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', 'e73a74e2-29d5-4617-aa46-84c970dbba55', null);
+', 'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data dataField and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient insertion and deletion operations.', 'Singly Linked List Tutorial', 1, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', 'e73a74e2-29d5-4617-aa46-84c970dbba55', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, course_id, exercise_id, problem_id) VALUES ('e9c94003-0430-44e0-ac55-fda3101baf00', e'Given two integers ****a**** and ****b**** (b != 0), the task is to return the fraction ****a/b**** in string format. If the fractional part is repeating, enclose the repeating part in parentheses.****Examples:****
 
 

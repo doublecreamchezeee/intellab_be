@@ -12,6 +12,8 @@ ENV PORT=$PORT
 # Copy the already built JAR file from your local machine
 COPY ./build/libs/*.jar app.jar
 
+COPY ./../problems /app/problems
+
 EXPOSE $PORT
 
 # Set the entrypoint to run the application

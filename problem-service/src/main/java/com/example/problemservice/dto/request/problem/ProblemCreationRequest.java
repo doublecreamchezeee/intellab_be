@@ -1,5 +1,6 @@
 package com.example.problemservice.dto.request.problem;
 
+import com.example.problemservice.core.ProblemStructure;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,5 +17,5 @@ public class ProblemCreationRequest {
     Float acceptanceRate;
     Boolean isAvailable;
     Boolean isPublished;
-    String solutionStructure;
+    ProblemStructure problemStructure;
 }

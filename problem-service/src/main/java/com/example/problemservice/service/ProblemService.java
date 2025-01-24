@@ -1,5 +1,7 @@
 package com.example.problemservice.service;
 
+import com.example.problemservice.converter.ProblemStructureConverter;
+import com.example.problemservice.core.ProblemStructure;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
@@ -8,28 +10,47 @@ import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.repository.ProblemRepository;
+import com.example.problemservice.utils.MarkdownUtility;
+import com.example.problemservice.utils.TestCaseFileReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProblemService {
     private final ProblemRepository problemRepository;
     private final ProblemMapper problemMapper;
-    private final MarkdownService markdownService;
 
-    public ProblemCreationResponse createProblem(ProblemCreationRequest problem) {
-        Problem savedProblem =  problemRepository.save(problemMapper.toProblem(problem));
-        markdownService.saveProblemAsMarkdown(savedProblem);
-        return problemMapper.toProblemCreationResponse(savedProblem);
+    public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
+        Problem problem = problemMapper.toProblem(request);
+
+        problem.setProblemStructure(
+                ProblemStructureConverter.convertObjectToString(
+                        request.getProblemStructure()
+                )
+        );
+
+        Problem savedProblem =  problemRepository.save(problem);
+
+        MarkdownUtility.saveProblemAsMarkdown(savedProblem);
+
+        //return response
+        ProblemCreationResponse response = problemMapper
+                .toProblemCreationResponse(savedProblem);
+
+        response.setProblemStructure(
+                request.getProblemStructure()
+        );
+
+        return response;
     }
 
     public Problem getProblem(UUID problemId) {
@@ -37,6 +58,7 @@ public class ProblemService {
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
     }
+    
     public List<Problem> getAllProblems() {
         return problemRepository.findAll();
     }
@@ -55,7 +77,7 @@ public class ProblemService {
         Problem problem = problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
-        markdownService.deleteProblemFolder(problem.getProblemName());
+        MarkdownUtility.deleteProblemFolder(problem.getProblemName());
         problemRepository.deleteById(problemId);
     }
 
@@ -64,12 +86,40 @@ public class ProblemService {
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
 
+        String problemStructure = ProblemStructureConverter.convertObjectToString(
+                request.getProblemStructure()
+        );
+
+        existingProblem.setProblemStructure(problemStructure);
+
         problemMapper.updateProblemFromRequest(request, existingProblem);
         Problem updatedProblem = problemRepository.save(existingProblem);
 
         // Update the Markdown files
-        markdownService.saveProblemAsMarkdown(updatedProblem);
+        MarkdownUtility.saveProblemAsMarkdown(updatedProblem);
 
         return problemMapper.toProblemCreationResponse(updatedProblem);
+    }
+
+    public void getProblemById(UUID problemId) {
+        Problem problem =  problemRepository.findById(problemId).orElseThrow(
+                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+        );
+
+        String problemContent = MarkdownUtility.readMarkdownFromFile(
+                problem.getProblemName(), "Problem.md");
+
+        List<String> inputs = TestCaseFileReader.getProblemTestCases(
+                problem.getProblemName(), TestCaseFileReader.INPUT);
+
+        List<String> outputs = TestCaseFileReader.getProblemTestCases(
+                problem.getProblemName(), TestCaseFileReader.OUTPUT);
+
+        log.info("Problem Content: {}", problemContent);
+        log.info("Inputs: {}", inputs);
+        log.info("Outputs: {}", outputs);
+
+        return;
+        
     }
 }

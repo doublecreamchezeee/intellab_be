@@ -1,7 +1,5 @@
 package com.example.problemservice.model;
 
-import com.example.problemservice.model.course.Lesson;
-import com.example.problemservice.model.course.Topic;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,8 +44,8 @@ public class Problem {
     @Column(name = "is_published")
     Boolean isPublished;
 
-    @Column(name = "solution_structure", columnDefinition = "TEXT", nullable = true)
-    String solutionStructure;
+    @Column(name = "problem_structure", columnDefinition = "TEXT", nullable = true)
+    String problemStructure;
 
 //    List<Lesson> lessons;
 //
