@@ -136,16 +136,22 @@ public class CourseService {
 
     public Page<CourseCreationResponse> searchCoursesWithFilter(String keyword,
                                                                 Float rating,
-                                                                String level,
+                                                                List<String> levels,
                                                                 Boolean price,
                                                                 List<String> categories,
                                                                 Pageable pageable) {
 
         List<Course> coursesByKey = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword,keyword);
 
-        if(level != null) {
-            List<Course> coursesByKeyAndLevel = courseRepository
-                    .findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndLevel(keyword, keyword, level);
+        if(levels != null && !levels.isEmpty() ) {
+            List<Course> coursesByKeyAndLevel = new ArrayList<>();
+            for (String level : levels) {
+                coursesByKeyAndLevel.addAll(courseRepository
+                        .findAllByCourseNameContainingIgnoreCaseAndLevel(keyword, level));
+                coursesByKeyAndLevel.addAll(courseRepository
+                        .findAllByDescriptionContainingIgnoreCaseAndLevel(keyword,level));
+            }
+
             coursesByKey.retainAll(coursesByKeyAndLevel);
         }
 
@@ -163,7 +169,8 @@ public class CourseService {
 
         if (rating != null)
         {
-            coursesByKey.removeIf(course -> course.getAverageRating() < rating);
+            coursesByKey.removeIf(course -> course.getAverageRating() == null ||
+                    course.getAverageRating().floatValue() < rating);
         }
 
         if (categories != null && !categories.isEmpty()) {
