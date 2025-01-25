@@ -14,13 +14,11 @@ import com.example.problemservice.model.composite.testCaseOutputId;
 import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.repository.TestCaseOutputRepository;
+import com.example.problemservice.utils.Base64Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,7 +81,8 @@ public class ProblemSubmissionService {
         );
 
         output.setRuntime(Float.valueOf(request.getTime()));
-        output.setSubmission_output(request.getStdout());
+//        output.setSubmission_output(request.getStdout());
+        output.setSubmission_output(new String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+", ""))));
         output.setResult_status(request.getStatus().getDescription());
         testCaseOutputRepository.save(output);
 
@@ -127,7 +126,7 @@ public class ProblemSubmissionService {
 
         // Check if all associated test cases have result_status as "Accepted"
         boolean allAccepted = submission.getTestCases_output().stream()
-                .allMatch(testCaseOutput -> "accepted".equalsIgnoreCase(testCaseOutput.getResult_status()));
+                .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
 
         if (allAccepted) {
             submission.setSolved(true);
