@@ -174,19 +174,12 @@ public class CourseService {
         }
 
         if (categories != null && !categories.isEmpty()) {
+            List<Course> coursesByKeyAndCategory = new ArrayList<>();
             for (String category : categories) {
-                List<Course> coursesByNameAndCategory = courseRepository.findAllByCourseNameContainingIgnoreCaseAndCategories_Name(keyword, category);
-
-                List<Course> coursesByDescriptionAndCategory = courseRepository.findAllByDescriptionContainingIgnoreCaseAndCategories_Name(keyword,category);
-
-
-                // union 2 list lại
-                List<Course> coursesByKeyAndCategory = new ArrayList<>(coursesByNameAndCategory);
-                coursesByKeyAndCategory.addAll(coursesByDescriptionAndCategory);
-
-
-                coursesByKey.retainAll(coursesByKeyAndCategory);
+                coursesByKeyAndCategory.addAll(courseRepository.findAllByCourseNameContainingIgnoreCaseAndCategories_Name(keyword, category));
+                coursesByKeyAndCategory.addAll(courseRepository.findAllByDescriptionContainingIgnoreCaseAndCategories_Name(keyword,category));
             }
+            coursesByKey.retainAll(coursesByKeyAndCategory);
         }
         Page<Course> result = convertListToPage(coursesByKey, pageable);
 
