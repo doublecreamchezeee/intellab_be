@@ -38,7 +38,7 @@ public class Judge0Client {
         languageIdMap.put("C (GCC 9.2.0)", 50);
         languageIdMap.put("C++ (GCC 9.2.0)", 54);
         languageIdMap.put("C# (Mono 6.6.0.161)", 51);
-        languageIdMap.put("Java (OpenJDK 13.0.1)", 62);
+        languageIdMap.put("Java (JDK 17.0.6)", 62);
         languageIdMap.put("JavaScript (Node.js 12.14.0)", 63);
         languageIdMap.put("Python (3.8.1)", 71);
         languageIdMap.put("TypeScript (3.7.4)", 74);

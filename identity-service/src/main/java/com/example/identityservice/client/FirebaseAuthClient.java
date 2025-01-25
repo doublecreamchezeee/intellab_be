@@ -19,6 +19,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -94,7 +95,7 @@ public class FirebaseAuthClient {
 
 
             return RefreshTokenSuccessResponse.builder()
-                    .id_token(response.getId_token())
+                    .id_token(Objects.requireNonNull(response).getId_token())
                     .refresh_token(response.getRefresh_token())
                     .expires_in(response.getExpires_in())
                     .build();

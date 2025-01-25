@@ -121,10 +121,20 @@ public class ProblemSubmissionService {
     }
 
     public ProblemSubmission getSubmission(UUID submissionId) {
-        return problemSubmissionRepository.findById(submissionId)
-                .orElseThrow(() -> new AppException(
-                        ErrorCode.SUBMISSION_NOT_EXIST)
-                );
+        // Fetch the submission
+        ProblemSubmission submission = problemSubmissionRepository.findById(submissionId)
+                .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
+
+        // Check if all associated test cases have result_status as "Accepted"
+        boolean allAccepted = submission.getTestCases_output().stream()
+                .allMatch(testCaseOutput -> "accepted".equalsIgnoreCase(testCaseOutput.getResult_status()));
+
+        if (allAccepted) {
+            submission.setSolved(true);
+            problemSubmissionRepository.save(submission);
+        }
+
+        return submission;
     }
 
     public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {

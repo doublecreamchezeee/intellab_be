@@ -7,6 +7,7 @@ import com.example.courseservice.dto.request.learningLesson.LearningLessonCreati
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.response.Option.OptionResponse;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
@@ -16,10 +17,7 @@ import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
-import com.example.courseservice.mapper.AssignmentDetailMapper;
-import com.example.courseservice.mapper.LearningLessonMapper;
-import com.example.courseservice.mapper.LessonMapper;
-import com.example.courseservice.mapper.QuestionMapper;
+import com.example.courseservice.mapper.*;
 import com.example.courseservice.model.*;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.utils.ParseUUID;
@@ -52,6 +50,7 @@ public class LessonService {
     UserCoursesRepository userCoursesRepository;
 
     AssignmentDetailMapper assignmentDetailMapper;
+    OptionMapper optionMapper;
 
 
     //@Qualifier("learningLessonRepositoryCustomImpl")
@@ -172,7 +171,14 @@ public class LessonService {
 
         List<AssignmentDetail> assignmentDetails = lastEdited.getAssignment_details();
         return assignmentDetails.stream()
-                .map(assignmentDetailMapper::toQuestionResponse)
+                .map(assignmentDetail -> {
+                    QuestionResponse response = assignmentDetailMapper.toQuestionResponse(assignmentDetail);
+                    Question question = assignmentDetail.getQuestion();
+                    List<OptionResponse> options = question.getOptions().stream().map(optionMapper::toResponse).toList();
+                    response.setOptions(options);
+
+                    return response;
+                })
                 .collect(Collectors.toList());
 
     }
