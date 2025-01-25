@@ -58810,7 +58810,7 @@ and peek. There are two ways to implement a stack –
 | top() or  ****pee****k() | O(1) | O(1) |
 | isEmpty() | O(1) | O(1) |
 | isFull() | O(1) | O(1) |'', e''Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
-both insertion and deletion operations happen at one end only.'', ''What is Stack Data Structure? A Complete Tutorial'', null, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
+both insertion and deletion operations happen at one end only.'', ''What is Stack Data Structure? A Complete Tutorial'', 1, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES (''63ddc11b-1888-48d8-afe0-f7153a56cc65'', e''Implement Stack using Array:
 ----------------------------
 
@@ -59808,7 +59808,7 @@ Disadvantages of Array Implementation:
 * The total size of the stack must be defined beforehand.'', e''Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
 Arrays. In Array-based approach, all stack-related operations are
 executed using arrays. Let’s see how we can implement each operation on
-the stack utilizing the Array Data Structure.'', ''Implement Stack using Array'', null, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
+the stack utilizing the Array Data Structure.'', ''Implement Stack using Array'', 2, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES (''cf945f38-3396-48d8-815b-81e37df21182'', e''****Stack Operations:****
 -------------------------
 
@@ -60595,7 +60595,7 @@ In summary, stacks are widely used in many applications where LIFO
 functionality is required, such as function calls, undo/redo operations,
 browser history, expression evaluation, and recursive function
 calls.
-'', ''To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.'', ''Implement a stack using singly linked list'', null, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
+'', ''To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.'', ''Implement a stack using singly linked list'', 3, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES (''a3e9b26a-8405-4132-a638-8fa5b1a3731e'', e''Applications of Stacks:
 -----------------------
 
@@ -60646,7 +60646,7 @@ Disadvantages of Stacks:
   variable.
 '', e''A stack is a linear data structure
 in which the insertion of a new element and removal of an existing
-element takes place at the same end represented as the top of the stack.'', ''Applications, Advantages and Disadvantages of Stack'', null, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
+element takes place at the same end represented as the top of the stack.'', ''Applications, Advantages and Disadvantages of Stack'', 4, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
 
 
 
