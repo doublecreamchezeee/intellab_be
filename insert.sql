@@ -58687,7 +58687,7 @@ node and a pointer to the next node. This allows for quick and easy
 insertion and deletion of nodes from the list, as well as efficient
 traversal of the list in both directions.', 'Doubly Linked List Tutorial', 13, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
 
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES (''451c319e-a0a3-48e5-baca-ece2737e6010'', e''Representation of Stack Data Structure:
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('451c319e-a0a3-48e5-baca-ece2737e6010', e'Representation of Stack Data Structure:
 ---------------------------------------
 
 Stack follows LIFO (Last In First Out) Principle so the element which
@@ -58699,13 +58699,13 @@ is pushed last is popped first.
 ****Types of Stack:****
 -----------------------
 
-* ****Fixed Size Stack****
+* ****Fixed Size Stack**** 
   : As the name suggests, a fixed size stack has a fixed size and cannot
   grow or shrink dynamically. If the stack is full and an attempt is
   made to add an element to it, an overflow error occurs. If the stack
   is empty and an attempt is made to remove an element from it, an
   underflow error occurs.
-* ****Dynamic Size Stack****
+* ****Dynamic Size Stack**** 
   : A dynamic size stack can grow or shrink dynamically. When the stack
   is full, it automatically increases its size to accommodate the new
   element, and when the stack is empty, it decreases its size. This type
@@ -58731,9 +58731,9 @@ item.
 ### ****Push Operation on Stack****
 
 Adds an item to the stack. If the stack is full, then it is said to be
-an  ****Overflow condition.****
+an  ****Overflow condition.**** 
 
- ****Algorithm for Push Operation:****
+ ****Algorithm for Push Operation:**** 
 
 * Before pushing the element to the stack, we check if the stack is  ****full****  .
 * If the stack is full  ****(top == capacity-1)****  , then  ****Stack Overflows****  and we cannot insert the element to the stack.
@@ -58745,9 +58745,9 @@ an  ****Overflow condition.****
 
 Removes an item from the stack. The items are popped in the reversed
 order in which they are pushed. If the stack is empty, then it is said
-to be an  ****Underflow condition.****
+to be an  ****Underflow condition.**** 
 
-****Algorithm for Pop Operation:****
+****Algorithm for Pop Operation:**** 
 
 * Before popping the element from the stack, we check if the stack is  ****empty****  .
 * If the stack is empty (top == -1), then  ****Stack Underflows****  and we cannot remove any element from the stack.
@@ -58756,9 +58756,9 @@ to be an  ****Underflow condition.****
 ![Pop-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180943/Pop-Operation-in-Stack-(1).webp)
 ### ****Top or Peek Operation on Stack****
 
-Returns the top element of the stack.
+Returns the top element of the stack. 
 
-****Algorithm for Top Operation:****
+****Algorithm for Top Operation:**** 
 
 * Before returning the top element from the stack, we check if the
   stack is empty.
@@ -58768,9 +58768,9 @@ Returns the top element of the stack.
 ![Top-or-Peek-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181023/Top-or-Peek-Operation-in-Stack-(1).webp)
 ### ****isEmpty Operation in Stack Data Structure:****
 
-Returns true if the stack is empty, else false.
+Returns true if the stack is empty, else false. 
 
-****Algorithm for isEmpty Operation****:
+****Algorithm for isEmpty Operation****: 
 
 * Check for the value of  ****top****  in stack.
 * If  ****(top == -1)****, then the stack is  ****empty****  so return  ****true****  .
@@ -58779,9 +58779,9 @@ Returns true if the stack is empty, else false.
 ![isEmpty-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181101/isEmpty-Operation-in-Stack-(1).webp)
 ### isFull ****Operation in Stack**** ****Data Structure****:
 
-Returns true if the stack is full, else false.
+Returns true if the stack is full, else false. 
 
-****Algorithm for isFull Operation:****
+****Algorithm for isFull Operation:**** 
 
 * Check for the value of  ****top****  in stack.
 * If  ****(top == capacity-1),****  then the stack is  ****full****  so return  ****true****.
@@ -58809,9 +58809,9 @@ and peek. There are two ways to implement a stack –
 | ****pop()**** | O(1) | O(1) |
 | top() or  ****pee****k() | O(1) | O(1) |
 | isEmpty() | O(1) | O(1) |
-| isFull() | O(1) | O(1) |'', e''Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
-both insertion and deletion operations happen at one end only.'', ''What is Stack Data Structure? A Complete Tutorial'', 1, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES (''63ddc11b-1888-48d8-afe0-f7153a56cc65'', e''Implement Stack using Array:
+| isFull() | O(1) | O(1) |', e'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
+both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 1, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('63ddc11b-1888-48d8-afe0-f7153a56cc65', e'Implement Stack using Array:
 ----------------------------
 
 > To implement a stack using an array, initialize an array and treat
@@ -58928,7 +58928,7 @@ Next
 
 1 / 6
 
-
+  
 
 
 ### ****Top or Peek Operation in Stack:****
@@ -58967,440 +58967,440 @@ Below is the implementation of the above approach:
 
 C++
 ````
-/* C++ program to implement basic stack
+/* C++ program to implement basic stack 
 operations */
-#include <bits/stdc++.h>
+#include <bits/stdc++.h> 
 
-using namespace std;
+using namespace std; 
 
-#define MAX 1000
+#define MAX 1000 
 
-class Stack {
-    int top;
+class Stack { 
+    int top; 
 
-public:
-    int a[MAX]; // Maximum size of Stack
+public: 
+    int a[MAX]; // Maximum size of Stack 
 
-    Stack() { top = -1; }
-    bool push(int x);
-    int pop();
-    int peek();
-    bool isEmpty();
-};
+    Stack() { top = -1; } 
+    bool push(int x); 
+    int pop(); 
+    int peek(); 
+    bool isEmpty(); 
+}; 
 
-bool Stack::push(int x)
-{
-    if (top >= (MAX - 1)) {
-        cout << "Stack Overflow";
-        return false;
-    }
-    else {
-        a[++top] = x;
-        cout << x << " pushed into stack\\n";
-        return true;
-    }
-}
+bool Stack::push(int x) 
+{ 
+    if (top >= (MAX - 1)) { 
+        cout << "Stack Overflow"; 
+        return false; 
+    } 
+    else { 
+        a[++top] = x; 
+        cout << x << " pushed into stack\\n"; 
+        return true; 
+    } 
+} 
 
-int Stack::pop()
-{
-    if (top < 0) {
-        cout << "Stack Underflow";
-        return 0;
-    }
-    else {
-        int x = a[top--];
-        return x;
-    }
-}
-int Stack::peek()
-{
-    if (top < 0) {
-        cout << "Stack is Empty";
-        return 0;
-    }
-    else {
-        int x = a[top];
-        return x;
-    }
-}
+int Stack::pop() 
+{ 
+    if (top < 0) { 
+        cout << "Stack Underflow"; 
+        return 0; 
+    } 
+    else { 
+        int x = a[top--]; 
+        return x; 
+    } 
+} 
+int Stack::peek() 
+{ 
+    if (top < 0) { 
+        cout << "Stack is Empty"; 
+        return 0; 
+    } 
+    else { 
+        int x = a[top]; 
+        return x; 
+    } 
+} 
 
-bool Stack::isEmpty()
-{
-    return (top < 0);
-}
+bool Stack::isEmpty() 
+{ 
+    return (top < 0); 
+} 
 
-// Driver program to test above functions
-int main()
-{
-    class Stack s;
-    s.push(10);
-    s.push(20);
-    s.push(30);
-    cout << s.pop() << " Popped from stack\\n";
+// Driver program to test above functions 
+int main() 
+{ 
+    class Stack s; 
+    s.push(10); 
+    s.push(20); 
+    s.push(30); 
+    cout << s.pop() << " Popped from stack\\n"; 
+    
+    //print top element of stack after popping 
+    cout << "Top element is : " << s.peek() << endl; 
+    
+    //print all elements in stack : 
+    cout <<"Elements present in stack : "; 
+    while(!s.isEmpty()) 
+    { 
+        // print top element in stack 
+        cout << s.peek() <<" "; 
+        // remove top element in stack 
+        s.pop(); 
+    } 
 
-    //print top element of stack after popping
-    cout << "Top element is : " << s.peek() << endl;
-
-    //print all elements in stack :
-    cout <<"Elements present in stack : ";
-    while(!s.isEmpty())
-    {
-        // print top element in stack
-        cout << s.peek() <<" ";
-        // remove top element in stack
-        s.pop();
-    }
-
-    return 0;
+    return 0; 
 }
 
 ````
 
 C
 ````
-// C program for array implementation of stack
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
+// C program for array implementation of stack 
+#include <limits.h> 
+#include <stdio.h> 
+#include <stdlib.h> 
 
-// A structure to represent a stack
-struct Stack {
-    int top;
-    unsigned capacity;
-    int* array;
-};
+// A structure to represent a stack 
+struct Stack { 
+    int top; 
+    unsigned capacity; 
+    int* array; 
+}; 
 
-// function to create a stack of given capacity. It initializes size of
-// stack as 0
-struct Stack* createStack(unsigned capacity)
-{
-    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
-    stack->capacity = capacity;
-    stack->top = -1;
-    stack->array = (int*)malloc(stack->capacity * sizeof(int));
-    return stack;
-}
+// function to create a stack of given capacity. It initializes size of 
+// stack as 0 
+struct Stack* createStack(unsigned capacity) 
+{ 
+    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack)); 
+    stack->capacity = capacity; 
+    stack->top = -1; 
+    stack->array = (int*)malloc(stack->capacity * sizeof(int)); 
+    return stack; 
+} 
 
-// Stack is full when top is equal to the last index
-int isFull(struct Stack* stack)
-{
-    return stack->top == stack->capacity - 1;
-}
+// Stack is full when top is equal to the last index 
+int isFull(struct Stack* stack) 
+{ 
+    return stack->top == stack->capacity - 1; 
+} 
 
-// Stack is empty when top is equal to -1
-int isEmpty(struct Stack* stack)
-{
-    return stack->top == -1;
-}
+// Stack is empty when top is equal to -1 
+int isEmpty(struct Stack* stack) 
+{ 
+    return stack->top == -1; 
+} 
 
-// Function to add an item to stack. It increases top by 1
-void push(struct Stack* stack, int item)
-{
-    if (isFull(stack))
-        return;
-    stack->array[++stack->top] = item;
-    printf("%d pushed to stack\\n", item);
-}
+// Function to add an item to stack. It increases top by 1 
+void push(struct Stack* stack, int item) 
+{ 
+    if (isFull(stack)) 
+        return; 
+    stack->array[++stack->top] = item; 
+    printf("%d pushed to stack\\n", item); 
+} 
 
-// Function to remove an item from stack. It decreases top by 1
-int pop(struct Stack* stack)
-{
-    if (isEmpty(stack))
-        return INT_MIN;
-    return stack->array[stack->top--];
-}
+// Function to remove an item from stack. It decreases top by 1 
+int pop(struct Stack* stack) 
+{ 
+    if (isEmpty(stack)) 
+        return INT_MIN; 
+    return stack->array[stack->top--]; 
+} 
 
-// Function to return the top from stack without removing it
-int peek(struct Stack* stack)
-{
-    if (isEmpty(stack))
-        return INT_MIN;
-    return stack->array[stack->top];
-}
+// Function to return the top from stack without removing it 
+int peek(struct Stack* stack) 
+{ 
+    if (isEmpty(stack)) 
+        return INT_MIN; 
+    return stack->array[stack->top]; 
+} 
 
-// Driver program to test above functions
-int main()
-{
-    struct Stack* stack = createStack(100);
+// Driver program to test above functions 
+int main() 
+{ 
+    struct Stack* stack = createStack(100); 
 
-    push(stack, 10);
-    push(stack, 20);
-    push(stack, 30);
+    push(stack, 10); 
+    push(stack, 20); 
+    push(stack, 30); 
 
-    printf("%d popped from stack\\n", pop(stack));
+    printf("%d popped from stack\\n", pop(stack)); 
 
-    return 0;
-}
+    return 0; 
+} 
 
 ````
 
 Java
 ````
-/* Java program to implement basic stack
+/* Java program to implement basic stack 
 operations */
-class Stack {
-    static final int MAX = 1000;
-    int top;
-    int a[] = new int[MAX]; // Maximum size of Stack
+class Stack { 
+    static final int MAX = 1000; 
+    int top; 
+    int a[] = new int[MAX]; // Maximum size of Stack 
 
-    boolean isEmpty()
-    {
-        return (top < 0);
-    }
-    Stack()
-    {
-        top = -1;
-    }
+    boolean isEmpty() 
+    { 
+        return (top < 0); 
+    } 
+    Stack() 
+    { 
+        top = -1; 
+    } 
 
-    boolean push(int x)
-    {
-        if (top >= (MAX - 1)) {
-            System.out.println("Stack Overflow");
-            return false;
-        }
-        else {
-            a[++top] = x;
-            System.out.println(x + " pushed into stack");
-            return true;
-        }
-    }
+    boolean push(int x) 
+    { 
+        if (top >= (MAX - 1)) { 
+            System.out.println("Stack Overflow"); 
+            return false; 
+        } 
+        else { 
+            a[++top] = x; 
+            System.out.println(x + " pushed into stack"); 
+            return true; 
+        } 
+    } 
 
-    int pop()
-    {
-        if (top < 0) {
-            System.out.println("Stack Underflow");
-            return 0;
-        }
-        else {
-            int x = a[top--];
-            return x;
-        }
-    }
+    int pop() 
+    { 
+        if (top < 0) { 
+            System.out.println("Stack Underflow"); 
+            return 0; 
+        } 
+        else { 
+            int x = a[top--]; 
+            return x; 
+        } 
+    } 
 
-    int peek()
-    {
-        if (top < 0) {
-            System.out.println("Stack Underflow");
-            return 0;
-        }
-        else {
-            int x = a[top];
-            return x;
-        }
-    }
+    int peek() 
+    { 
+        if (top < 0) { 
+            System.out.println("Stack Underflow"); 
+            return 0; 
+        } 
+        else { 
+            int x = a[top]; 
+            return x; 
+        } 
+    } 
+    
+    void print(){ 
+    for(int i = top;i>-1;i--){ 
+    System.out.print(" "+ a[i]); 
+    } 
+} 
+} 
 
-    void print(){
-    for(int i = top;i>-1;i--){
-    System.out.print(" "+ a[i]);
-    }
-}
-}
-
-// Driver code
-class Main {
-    public static void main(String args[])
-    {
-        Stack s = new Stack();
-        s.push(10);
-        s.push(20);
-        s.push(30);
-        System.out.println(s.pop() + " Popped from stack");
-        System.out.println("Top element is :" + s.peek());
-        System.out.print("Elements present in stack :");
-        s.print();
-    }
-}
+// Driver code 
+class Main { 
+    public static void main(String args[]) 
+    { 
+        Stack s = new Stack(); 
+        s.push(10); 
+        s.push(20); 
+        s.push(30); 
+        System.out.println(s.pop() + " Popped from stack"); 
+        System.out.println("Top element is :" + s.peek()); 
+        System.out.print("Elements present in stack :"); 
+        s.print(); 
+    } 
+} 
 
 ````
 
 Python3
 ````
-# Python program for implementation of stack
+# Python program for implementation of stack 
 
-# import maxsize from sys module
-# Used to return -infinite when stack is empty
-from sys import maxsize
+# import maxsize from sys module 
+# Used to return -infinite when stack is empty 
+from sys import maxsize 
 
-# Function to create a stack. It initializes size of stack as 0
-def createStack():
-    stack = []
-    return stack
+# Function to create a stack. It initializes size of stack as 0 
+def createStack(): 
+    stack = [] 
+    return stack 
 
-# Stack is empty when stack size is 0
-def isEmpty(stack):
+# Stack is empty when stack size is 0 
+def isEmpty(stack): 
     return len(stack) == 0
 
-# Function to add an item to stack. It increases size by 1
-def push(stack, item):
-    stack.append(item)
-    print(item + " pushed to stack ")
+# Function to add an item to stack. It increases size by 1 
+def push(stack, item): 
+    stack.append(item) 
+    print(item + " pushed to stack ") 
+    
+# Function to remove an item from stack. It decreases size by 1 
+def pop(stack): 
+    if (isEmpty(stack)): 
+        return str(-maxsize -1) # return minus infinite 
+    
+    return stack.pop() 
 
-# Function to remove an item from stack. It decreases size by 1
-def pop(stack):
-    if (isEmpty(stack)):
-        return str(-maxsize -1) # return minus infinite
+# Function to return the top from stack without removing it 
+def peek(stack): 
+    if (isEmpty(stack)): 
+        return str(-maxsize -1) # return minus infinite 
+    return stack[len(stack) - 1] 
 
-    return stack.pop()
-
-# Function to return the top from stack without removing it
-def peek(stack):
-    if (isEmpty(stack)):
-        return str(-maxsize -1) # return minus infinite
-    return stack[len(stack) - 1]
-
-# Driver program to test above functions
-stack = createStack()
-push(stack, str(10))
-push(stack, str(20))
-push(stack, str(30))
-print(pop(stack) + " popped from stack")
+# Driver program to test above functions     
+stack = createStack() 
+push(stack, str(10)) 
+push(stack, str(20)) 
+push(stack, str(30)) 
+print(pop(stack) + " popped from stack") 
 
 ````
 
 C#
 ````
-// C# program to implement basic stack
-// operations
-using System;
+// C# program to implement basic stack 
+// operations 
+using System; 
 
-namespace ImplementStack {
-class Stack {
-    private int[] ele;
-    private int top;
-    private int max;
-    public Stack(int size)
-    {
-        ele = new int[size]; // Maximum size of Stack
-        top = -1;
-        max = size;
-    }
+namespace ImplementStack { 
+class Stack { 
+    private int[] ele; 
+    private int top; 
+    private int max; 
+    public Stack(int size) 
+    { 
+        ele = new int[size]; // Maximum size of Stack 
+        top = -1; 
+        max = size; 
+    } 
 
-    public void push(int item)
-    {
-        if (top == max - 1) {
-            Console.WriteLine("Stack Overflow");
-            return;
-        }
-        else {
-            ele[++top] = item;
-        }
-    }
+    public void push(int item) 
+    { 
+        if (top == max - 1) { 
+            Console.WriteLine("Stack Overflow"); 
+            return; 
+        } 
+        else { 
+            ele[++top] = item; 
+        } 
+    } 
 
-    public int pop()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return -1;
-        }
-        else {
-            Console.WriteLine("{0} popped from stack ", ele[top]);
-            return ele[top--];
-        }
-    }
+    public int pop() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return -1; 
+        } 
+        else { 
+            Console.WriteLine("{0} popped from stack ", ele[top]); 
+            return ele[top--]; 
+        } 
+    } 
 
-    public int peek()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return -1;
-        }
-        else {
-            Console.WriteLine("{0} popped from stack ", ele[top]);
-            return ele[top];
-        }
-    }
+    public int peek() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return -1; 
+        } 
+        else { 
+            Console.WriteLine("{0} popped from stack ", ele[top]); 
+            return ele[top]; 
+        } 
+    } 
 
-    public void printStack()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return;
-        }
-        else {
-            for (int i = 0; i <= top; i++) {
-                Console.WriteLine("{0} pushed into stack", ele[i]);
-            }
-        }
-    }
-}
+    public void printStack() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return; 
+        } 
+        else { 
+            for (int i = 0; i <= top; i++) { 
+                Console.WriteLine("{0} pushed into stack", ele[i]); 
+            } 
+        } 
+    } 
+} 
 
-// Driver program to test above functions
-class Program {
-    static void Main()
-    {
-        Stack p = new Stack(5);
+// Driver program to test above functions 
+class Program { 
+    static void Main() 
+    { 
+        Stack p = new Stack(5); 
 
-        p.push(10);
-        p.push(20);
-        p.push(30);
-        p.printStack();
-        p.pop();
-    }
-}
-}
+        p.push(10); 
+        p.push(20); 
+        p.push(30); 
+        p.printStack(); 
+        p.pop(); 
+    } 
+} 
+} 
 
 ````
 
 JavaScript
 ````
-/* javascript program to implement basic stack
-operations
+/* javascript program to implement basic stack 
+operations 
 */
-var t = -1;
-    var MAX = 1000;
-    var a = Array(MAX).fill(0); // Maximum size of Stack
+var t = -1; 
+    var MAX = 1000; 
+    var a = Array(MAX).fill(0); // Maximum size of Stack 
 
-    function isEmpty() {
-        return (t < 0);
-    }
+    function isEmpty() { 
+        return (t < 0); 
+    } 
 
-    function push(x) {
-        if (t >= (MAX - 1)) {
-            console.log("Stack Overflow");
-            return false;
-        } else {
-        t+=1;
-            a[t] = x;
+    function push(x) { 
+        if (t >= (MAX - 1)) { 
+            console.log("Stack Overflow"); 
+            return false; 
+        } else { 
+        t+=1; 
+            a[t] = x; 
+            
+            console.log(x + " pushed into stack<br/>"); 
+            return true; 
+        } 
+    } 
 
-            console.log(x + " pushed into stack<br/>");
-            return true;
-        }
-    }
+    function pop() { 
+        if (t < 0) { 
+            console.log("Stack Underflow"); 
+            return 0; 
+        } else { 
+            var x = a[t]; 
+            t-=1; 
+            return x; 
+        } 
+    } 
 
-    function pop() {
-        if (t < 0) {
-            console.log("Stack Underflow");
-            return 0;
-        } else {
-            var x = a[t];
-            t-=1;
-            return x;
-        }
-    }
+    function peek() { 
+        if (t < 0) { 
+            console.log("Stack Underflow"); 
+            return 0; 
+        } else { 
+            var x = a[t]; 
+            return x; 
+        } 
+    } 
 
-    function peek() {
-        if (t < 0) {
-            console.log("Stack Underflow");
-            return 0;
-        } else {
-            var x = a[t];
-            return x;
-        }
-    }
+    function print() { 
+        for (i = t; i > -1; i--) { 
+            console.log(" " + a[i]); 
+        } 
+    } 
 
-    function print() {
-        for (i = t; i > -1; i--) {
-            console.log(" " + a[i]);
-        }
-    }
-
-        push(10);
-        push(20);
-        push(30);
-        console.log(pop() + " Popped from stack");
-        console.log("<br/>Top element is :" + peek());
-        console.log("<br/>Elements present in stack : ");
-        print();
+        push(10); 
+        push(20); 
+        push(30); 
+        console.log(pop() + " Popped from stack"); 
+        console.log("<br/>Top element is :" + peek()); 
+        console.log("<br/>Elements present in stack : "); 
+        print(); 
 
 ````
 
@@ -59417,13 +59417,13 @@ var t = -1;
 1
 
 ```
-/* javascript program to implement basic stack
+/* javascript program to implement basic stack 
 ```
 
 2
 
 ```
-operations
+operations 
 ```
 
 3
@@ -59435,20 +59435,19 @@ operations
 4
 
 ```
-var t = -1;
+var t = -1; 
 ```
 
 5
 
 ```
-var MAX = 1000;
+    var MAX = 1000; 
 ```
 
 6
 
 ```
-var a = Array(MAX).fill(0);
-// Maximum size of Stack
+    var a = Array(MAX).fill(0); // Maximum size of Stack 
 ```
 
 7
@@ -59460,19 +59459,19 @@ var a = Array(MAX).fill(0);
 8
 
 ```
-    function isEmpty() {
+    function isEmpty() { 
 ```
 
 9
 
 ```
-        return (t < 0);
+        return (t < 0); 
 ```
 
 10
 
 ```
-}
+    } 
 ```
 
 11
@@ -59484,73 +59483,73 @@ var a = Array(MAX).fill(0);
 12
 
 ```
-    function push(x) {
+    function push(x) { 
 ```
 
 13
 
 ```
-        if (t >= (MAX - 1)) {
+        if (t >= (MAX - 1)) { 
 ```
 
 14
 
 ```
-            console.log("Stack Overflow");
+            console.log("Stack Overflow"); 
 ```
 
 15
 
 ```
-return false;
+            return false; 
 ```
 
 16
 
 ```
-} else {
+        } else { 
 ```
 
 17
 
 ```
-        t+=1;
+        t+=1; 
 ```
 
 18
 
 ```
-a[t] = x;
+            a[t] = x; 
 ```
 
 19
 
 ```
-
+            
 ```
 
 20
 
 ```
-            console.log(x + " pushed into stack<br/>");
+            console.log(x + " pushed into stack<br/>"); 
 ```
 
 21
 
 ```
-return true;
+            return true; 
 ```
 
 22
 
 ```
-}
+        } 
 ```
 
 23
 
 ```
-    }
+    } 
 ```
 
 24
@@ -59562,61 +59561,61 @@ return true;
 25
 
 ```
-    function pop() {
+    function pop() { 
 ```
 
 26
 
 ```
-        if (t < 0) {
+        if (t < 0) { 
 ```
 
 27
 
 ```
-            console.log("Stack Underflow");
+            console.log("Stack Underflow"); 
 ```
 
 28
 
 ```
-return 0;
+            return 0; 
 ```
 
 29
 
 ```
-} else {
+        } else { 
 ```
 
 30
 
 ```
-            var x = a[t];
+            var x = a[t]; 
 ```
 
 31
 
 ```
-t-=1;
+            t-=1; 
 ```
 
 32
 
 ```
-return x;
+            return x; 
 ```
 
 33
 
 ```
-}
+        } 
 ```
 
 34
 
 ```
-    }
+    } 
 ```
 
 35
@@ -59628,55 +59627,55 @@ return x;
 36
 
 ```
-    function peek() {
+    function peek() { 
 ```
 
 37
 
 ```
-        if (t < 0) {
+        if (t < 0) { 
 ```
 
 38
 
 ```
-            console.log("Stack Underflow");
+            console.log("Stack Underflow"); 
 ```
 
 39
 
 ```
-return 0;
+            return 0; 
 ```
 
 40
 
 ```
-} else {
+        } else { 
 ```
 
 41
 
 ```
-            var x = a[t];
+            var x = a[t]; 
 ```
 
 42
 
 ```
-return x;
+            return x; 
 ```
 
 43
 
 ```
-}
+        } 
 ```
 
 44
 
 ```
-    }
+    } 
 ```
 
 45
@@ -59688,31 +59687,31 @@ return x;
 46
 
 ```
-    function print() {
+    function print() { 
 ```
 
 47
 
 ```
-        for (i = t; i > -1; i--) {
+        for (i = t; i > -1; i--) { 
 ```
 
 48
 
 ```
-            console.log(" " + a[i]);
+            console.log(" " + a[i]); 
 ```
 
 49
 
 ```
-        }
+        } 
 ```
 
 50
 
 ```
-    }
+    } 
 ```
 
 51
@@ -59724,37 +59723,37 @@ return x;
 52
 
 ```
-        push(10);
+        push(10); 
 ```
 
 53
 
 ```
-        push(20);
+        push(20); 
 ```
 
 54
 
 ```
-        push(30);
+        push(30); 
 ```
 
 55
 
 ```
-        console.log(pop() + " Popped from stack");
+        console.log(pop() + " Popped from stack"); 
 ```
 
 56
 
 ```
-        console.log("<br/>Top element is :" + peek());
+        console.log("<br/>Top element is :" + peek()); 
 ```
 
 57
 
 ```
-        console.log("<br/>Elements present in stack : ");
+        console.log("<br/>Elements present in stack : "); 
 ```
 
 58
@@ -59771,7 +59770,7 @@ return x;
 
 
 
-
+  
 **Output**
 ```
 
@@ -59780,7 +59779,7 @@ return x;
 30 pushed into stack
 30 Popped from stack
 Top element is : 20
-Elements present in stack : 20 10
+Elements present in stack : 20 10 
 ```
 ### Complexity Analysis:
 
@@ -59805,11 +59804,11 @@ Disadvantages of Array Implementation:
   at runtime. [But in case of dynamic sized arrays like vector in C++,
   list in Python, ArrayList in Java, stacks can grow and shrink with
   array implementation as well].
-* The total size of the stack must be defined beforehand.'', e''Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
+* The total size of the stack must be defined beforehand.', e'Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
 Arrays. In Array-based approach, all stack-related operations are
 executed using arrays. Let’s see how we can implement each operation on
-the stack utilizing the Array Data Structure.'', ''Implement Stack using Array'', 2, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES (''cf945f38-3396-48d8-815b-81e37df21182'', e''****Stack Operations:****
+the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 2, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('cf945f38-3396-48d8-815b-81e37df21182', e'****Stack Operations:****
 -------------------------
 
 * [****push()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
@@ -59851,9 +59850,9 @@ Display Operation:
 > * Now start traversing temp till it encounters NULL
 > * Simultaneously print the value of the temp node
 
+ 
 
-
-Below is the implementation of the above operations
+Below is the implementation of the above operations 
 
 C++
 ````
@@ -59884,14 +59883,14 @@ public:
 
     // Function to check if the stack is empty
     bool isEmpty() {
-
+      
         // If head is nullptr, the stack is empty
         return head == nullptr;
     }
 
     // Function to push an element onto the stack
     void push(int new_data) {
-
+      
         // Create a new node with given data
         Node* new_node = new Node(new_data);
 
@@ -59997,14 +59996,14 @@ void initializeStack(Stack* stack) { stack->head = NULL; }
 
 // Function to check if the stack is empty
 int isEmpty(Stack* stack) {
-
+  
     // If head is NULL, the stack is empty
     return stack->head == NULL;
 }
 
 // Function to push an element onto the stack
 void push(Stack* stack, int new_data) {
-
+  
     // Create a new node with given data
     Node* new_node = createNode(new_data);
 
@@ -60023,14 +60022,14 @@ void push(Stack* stack, int new_data) {
 
 // Function to remove the top element from the stack
 void pop(Stack* stack) {
-
+  
     // Check for stack underflow
     if (isEmpty(stack)) {
         printf("\\nStack Underflow\\n");
         return;
     }
     else {
-
+      
         // Assign the current top to a temporary variable
         Node* temp = stack->head;
 
@@ -60044,7 +60043,7 @@ void pop(Stack* stack) {
 
 // Function to return the top element of the stack
 int peek(Stack* stack) {
-
+  
     // If stack is not empty, return the top element
     if (!isEmpty(stack))
         return stack->head->data;
@@ -60056,7 +60055,7 @@ int peek(Stack* stack) {
 
 // Driver program to test the stack implementation
 int main() {
-
+  
     // Creating a stack
     Stack stack;
     initializeStack(&stack);
@@ -60070,7 +60069,7 @@ int main() {
     // Print top element of the stack
     printf("Top element is %d\\n", peek(&stack));
 
-
+  
       // removing two elemements from the top
       printf("Removing two elements...\\n");
     pop(&stack);
@@ -60110,14 +60109,14 @@ class Stack {
 
     // Function to check if the stack is empty
     boolean isEmpty() {
-
+      
         // If head is null, the stack is empty
         return head == null;
     }
 
     // Function to push an element onto the stack
     void push(int new_data) {
-
+      
         // Create a new node with given data
         Node new_node = new Node(new_data);
 
@@ -60137,14 +60136,14 @@ class Stack {
 
     // Function to remove the top element from the stack
     void pop() {
-
+      
         // Check for stack underflow
         if (isEmpty()) {
             System.out.println("\\nStack Underflow");
             return;
         }
         else {
-
+          
             // Assign the current top to a temporary
             // variable
             Node temp = head;
@@ -60159,7 +60158,7 @@ class Stack {
 
     // Function to return the top element of the stack
     int peek() {
-
+      
         // If stack is not empty, return the top element
         if (!isEmpty())
             return head.data;
@@ -60264,7 +60263,7 @@ class Stack:
             return self.head.data
         else:
             print("\\nStack is empty")
-            return float(\''-inf\'')
+            return float(\'-inf\')
 
 
 # Creating a stack
@@ -60424,14 +60423,14 @@ class Stack {
 
     // Function to check if the stack is empty
     isEmpty() {
-
+    
         // If head is null, the stack is empty
         return this.head === null;
     }
 
     // Function to push an element onto the stack
     push(new_data) {
-
+    
         // Create a new node with given data
         const new_node = new Node(new_data);
 
@@ -60451,13 +60450,13 @@ class Stack {
 
     // Function to remove the top element from the stack
     pop() {
-
+    
         // Check for stack underflow
         if (this.isEmpty()) {
             console.log("\\nStack Underflow");
         }
         else {
-
+        
             // Assign the current top to a temporary
             // variable
             let temp = this.head;
@@ -60472,7 +60471,7 @@ class Stack {
 
     // Function to return the top element of the stack
     peek() {
-
+    
         // If stack is not empty, return the top element
         if (!this.isEmpty())
             return this.head.data;
@@ -60505,7 +60504,7 @@ console.log("Top element is " + st.peek());
 
 ````
 
-
+  
 **Output**
 ```
 
@@ -60517,7 +60516,7 @@ Top element is 22
 ****Time Complexity:****
 O(1), for all push(), pop(), and peek(), as we are not performing any
 kind of traversal over the list. We perform all the operations through
-the current pointer only.
+the current pointer only.  
 ****Auxiliary Space:**** O(N), where N is the size of the stack
 
 
@@ -60595,8 +60594,8 @@ In summary, stacks are widely used in many applications where LIFO
 functionality is required, such as function calls, undo/redo operations,
 browser history, expression evaluation, and recursive function
 calls.
-'', ''To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.'', ''Implement a stack using singly linked list'', 3, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES (''a3e9b26a-8405-4132-a638-8fa5b1a3731e'', e''Applications of Stacks:
+', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 3, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('a3e9b26a-8405-4132-a638-8fa5b1a3731e', e'Applications of Stacks:
 -----------------------
 
 * ****Function calls:****
@@ -60644,9 +60643,9 @@ Disadvantages of Stacks:
   Stacks have a fixed capacity, which can be a limitation if the number
   of elements that need to be stored is unknown or highly
   variable.
-'', e''A stack is a linear data structure
+', e'A stack is a linear data structure
 in which the insertion of a new element and removal of an existing
-element takes place at the same end represented as the top of the stack.'', ''Applications, Advantages and Disadvantages of Stack'', 4, null, ''95713603-63d1-4b75-8a89-1acdc0977459'', null);
+element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
 
 
 
