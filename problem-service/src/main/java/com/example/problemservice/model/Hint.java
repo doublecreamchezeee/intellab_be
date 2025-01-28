@@ -4,7 +4,7 @@ package com.example.problemservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import com.example.problemservice.model.composite.hintID;
+import com.example.problemservice.model.composite.HintID;
 
 @Data
 @Builder
@@ -16,12 +16,12 @@ import com.example.problemservice.model.composite.hintID;
 public class Hint {
     @Id
     @EmbeddedId
-    private hintID hintId;
+    private HintID hintId;
 
     @Column(columnDefinition = "TEXT")
     String content;
 
-    @MapsId("problem_id")
+    @MapsId("problemId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id")
     Problem problem;

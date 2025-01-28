@@ -2,14 +2,13 @@ package com.example.courseservice.model;
 
 
 
-import com.example.courseservice.model.compositeKey.notificationID;
+import com.example.courseservice.model.compositeKey.NotificationID;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -20,7 +19,7 @@ import java.util.UUID;
 @Table(name = "\"notifications\"")
 public class Notification {
     @EmbeddedId
-    notificationID notification_id;
+    NotificationID notificationId;
 
     String title;
 
@@ -28,6 +27,7 @@ public class Notification {
     String content;
 
     @CreationTimestamp
-    Instant notified_date;
+    @Column(name = "notified_date")
+    Instant notifiedDate;
 
 }

@@ -18,7 +18,7 @@ import java.util.UUID;
 @Table(name = "\"other_object_reports\"")
 public class OtherObjectReport {
     @EmbeddedId
-    ReportID report_id;
+    ReportID reportId;
 
     @Column(columnDefinition = "TEXT")
     String content;
@@ -27,17 +27,17 @@ public class OtherObjectReport {
     @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
+    @MapsId("reportOptionId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("report_option_id")
     @JoinColumn(name = "report_option_id")
-    ReportOption report_option;
+    ReportOption reportOption;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("destination_id")
+    @MapsId("destinationId")
     @JoinColumn(name = "destination_id")
     Topic destination;
 
-    @MapsId("owner_id")
+    @MapsId("ownerId")
     @JoinColumn(name = "owner_id")
-    UUID user_id;
+    UUID userId;
 }

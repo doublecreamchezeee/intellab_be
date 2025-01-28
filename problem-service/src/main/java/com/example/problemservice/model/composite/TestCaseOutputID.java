@@ -14,22 +14,22 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Embeddable
-public class testCaseOutputId implements Serializable {
-    UUID submission_id;
-    UUID testcase_id;
+public class TestCaseOutputID implements Serializable {
+    UUID submissionId;
+    UUID testcaseId;
 
     // Override equals and hashCode for proper comparison in composite keys
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        testCaseOutputId that = (testCaseOutputId) o;
-        return Objects.equals(submission_id, that.submission_id) &&
-                Objects.equals(testcase_id, that.testcase_id);
+        TestCaseOutputID that = (TestCaseOutputID) o;
+        return Objects.equals(submissionId, that.submissionId) &&
+                Objects.equals(testcaseId, that.testcaseId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(submission_id, testcase_id);
+        return Objects.hash(submissionId, testcaseId);
     }
 }

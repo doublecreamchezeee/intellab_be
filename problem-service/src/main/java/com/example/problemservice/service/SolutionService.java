@@ -3,7 +3,7 @@ package com.example.problemservice.service;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.model.Solution;
-import com.example.problemservice.model.composite.solutionID;
+import com.example.problemservice.model.composite.SolutionID;
 import com.example.problemservice.repository.SolutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class SolutionService {
         return solutionRepository.save(solution);
     }
 
-    public Solution getSolution(solutionID solutionId) {
+    public Solution getSolution(SolutionID solutionId) {
         return solutionRepository.findById(solutionId)
                 .orElseThrow(() -> new AppException(
                         ErrorCode.SOLUTION_NOT_EXIST)

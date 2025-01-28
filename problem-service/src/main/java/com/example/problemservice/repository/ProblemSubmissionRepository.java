@@ -13,15 +13,15 @@ import java.util.UUID;
 
 @Repository
 public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmission, UUID> {
-    Optional<List<ProblemSubmission>> findProblemSubmissionByProblemAndUserUid(Problem problem, UUID userUid);
+    Optional<List<ProblemSubmission>> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
 
-    List<ProblemSubmission> findProblemSubmissionByUserUidAndProblem_ProblemId(UUID userUid, UUID problemId);
+    List<ProblemSubmission> findProblemSubmissionByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
 
     @Query("SELECT COUNT(ps) " +
             "FROM ProblemSubmission ps " +
             "WHERE ps.problem.problemLevel = :problemLevel " +
             "AND ps.isSolved = TRUE " +
-            "AND ps.userUid = :userId")
+            "AND ps.userId = :userId")
     long countSolvedProblemsByLevelAndUser(@Param("problemLevel") String problemLevel,
                                            @Param("userId") UUID userId);
 

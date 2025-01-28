@@ -25,7 +25,7 @@ public class Review {
     String comment;
 
     @JoinColumn(name = "user_id", nullable = false)
-    UUID userUid;
+    UUID userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)

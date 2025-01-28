@@ -105,7 +105,7 @@ public class CourseService {
     public CourseCreationResponse createCourse(UUID userUid, CourseCreationRequest request) {
         Course course = courseMapper.toCourse(request);
 
-        course.setUserUid(userUid);
+        course.setUserId(userUid);
         course.setLessons(new ArrayList<>());
         course.setReviews(new ArrayList<>());
         course.setEnrollCourses(new ArrayList<>());
@@ -125,7 +125,7 @@ public class CourseService {
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
         courseMapper.updateCourse(course, request);
-        course.setUserUid(ParseUUID.normalizeUID(request.getUserUid()));
+        course.setUserId(ParseUUID.normalizeUID(request.getUserUid()));
 
         /*List<Lesson> lessons = lessonRepository.findAllByCourseId(courseId);
         course.setLessons(lessons);*/
@@ -245,7 +245,7 @@ public class CourseService {
                 .level(course.getLevel())
                 .price(course.getPrice())
                 .unitPrice(course.getUnitPrice())
-                .userUid(course.getUserUid())
+                .userUid(course.getUserId())
                 .lessonCount(lessonCount)
                 .averageRating((float) averageRating)
                 .reviewCount(reviewCount)

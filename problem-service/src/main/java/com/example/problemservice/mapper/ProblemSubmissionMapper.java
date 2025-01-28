@@ -7,12 +7,12 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ProblemSubmissionMapper {
-    @Mapping(target = "submissionId", source = "submission_id")
-    @Mapping(target = "submissionOrder", source = "submit_order")
+    @Mapping(target = "submissionId", source = "submissionId")
+    @Mapping(target = "submissionOrder", source = "submitOrder")
     @Mapping(target = "code", source = "code")
-    @Mapping(target = "programmingLanguage", source = "programming_language")
-    @Mapping(target = "scoreAchieved", source = "score_achieved")
+    @Mapping(target = "programmingLanguage", source = "programmingLanguage")
+    @Mapping(target = "scoreAchieved", source = "scoreAchieved")
     @Mapping(target = "problemId", source = "problem.problemId")
-    @Mapping(target = "userUid", source = "userUid")
+    @Mapping(target = "userUid", source = "userId")
     DetailsProblemSubmissionResponse toDetailsProblemSubmissionResponse(ProblemSubmission problemSubmission);
 }

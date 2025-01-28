@@ -1,7 +1,6 @@
 package com.example.courseservice.service;
 
 
-import com.example.courseservice.dto.request.Assignment.AssignmentCreationRequest;
 import com.example.courseservice.dto.request.Assignment.AssignmentDetailRequest;
 import com.example.courseservice.dto.request.Assignment.SubmitAssignmentRequest;
 import com.example.courseservice.dto.response.Assignment.AssignmentDetailResponse;
@@ -12,7 +11,7 @@ import com.example.courseservice.mapper.AssignmentDetailMapper;
 import com.example.courseservice.mapper.AssignmentMapper;
 import com.example.courseservice.model.*;
 import com.example.courseservice.repository.*;
-import com.example.courseservice.model.compositeKey.assignmentDetailID;
+import com.example.courseservice.model.compositeKey.AssignmentDetailID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -71,7 +70,7 @@ public class AssignmentService {
 
         List<AssignmentDetailRequest> detailRequests = request.getAssignmentDetailRequests();
 
-        addDetail(result.getAssignment_id(), detailRequests);
+        addDetail(result.getAssignmentId(), detailRequests);
 
         if(request.getScore() != null) {
             if(request.getScore() >= 8) {
@@ -97,11 +96,11 @@ public class AssignmentService {
         detailRequests.forEach(detailRequest -> {
             //parse float fail unit score
             AssignmentDetail assignmentDetail = assignmentDetailMapper.toAssignmentDetail(detailRequest);
-            assignmentDetailID id = new assignmentDetailID();
-            id.setAssignment_id(assignmentId);
-            id.setSubmit_order(detailRequests.indexOf(detailRequest)+1);
-            //id.setSubmit_order(null);
-            assignmentDetail.setAssignmentDetail_id(id);
+            AssignmentDetailID id = new AssignmentDetailID();
+            id.setAssignmentId(assignmentId);
+            id.setSubmitOrder(detailRequests.indexOf(detailRequest)+1);
+            //id.setSubmitOrder(null);
+            assignmentDetail.setAssignmentDetailId(id);
 
             Question question = questionRepository.findById(detailRequest.getQuestionId()).orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
             assignmentDetail.setQuestion(question);
@@ -118,7 +117,7 @@ public class AssignmentService {
     public List<AssignmentDetailResponse> getAssignmentDetail(UUID assignmentId) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 
-        List<AssignmentDetail> assignmentDetails = assignment.getAssignment_details();
+        List<AssignmentDetail> assignmentDetails = assignment.getAssignmentDetails();
         return assignmentDetails.stream().map(assignmentDetailMapper::toResponse).collect(Collectors.toList());
     }
 }

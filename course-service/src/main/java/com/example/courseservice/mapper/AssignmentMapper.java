@@ -23,16 +23,16 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface AssignmentMapper {
 
-    @Mapping(target = "assignmentId", source = "assignment_id")
+    @Mapping(target = "assignmentId", source = "assignmentId")
     @Mapping(target = "score", source = "score")
-    @Mapping(target = "submitOrder", source = "submit_order")
-    @Mapping(target = "submitDate", source = "submit_date")
+    @Mapping(target = "submitOrder", source = "submitOrder")
+    @Mapping(target = "submitDate", source = "submitDate")
     @Mapping(target = "learningLessonId", source = "learningLesson.learningId")
     AssignmentResponse toAssignmentResponse(Assignment assignment);
 
-    @Mapping(target = "assignment_id", ignore = true)
+    @Mapping(target = "assignmentId", ignore = true)
     @Mapping(target = "score", source = "score")
-    @Mapping(target = "submit_order", ignore = true)
+    @Mapping(target = "submitOrder", ignore = true)
     Assignment toAssignment(SubmitAssignmentRequest request);
 }
 //--------------------------------

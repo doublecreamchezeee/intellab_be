@@ -4,40 +4,32 @@ package com.example.courseservice.mapper;
 import com.example.courseservice.dto.request.Assignment.AssignmentDetailRequest;
 import com.example.courseservice.dto.response.Assignment.AssignmentDetailResponse;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
-import com.example.courseservice.model.Assignment;
 import com.example.courseservice.model.AssignmentDetail;
-import com.example.courseservice.model.Question;
-import com.example.courseservice.model.compositeKey.assignmentDetailID;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.UUID;
-
 @Mapper( componentModel = "spring", uses = QuestionMapper.class)
 public interface AssignmentDetailMapper {
-    @Mapping(target = "order",source = "assignmentDetail_id.submit_order")
+    @Mapping(target = "order",source = "assignmentDetailId.submitOrder")
     @Mapping(target = "answer", source = "answer")
-    @Mapping(target = "unitScore", source = "unit_score")
+    @Mapping(target = "unitScore", source = "unitScore")
     @Mapping(target = "question",source = "question")
     AssignmentDetailResponse toResponse(AssignmentDetail assignmentDetail);
 
 
-    @Mapping(target = "order",source = "assignmentDetail_id.submit_order")
+    @Mapping(target = "order",source = "assignmentDetailId.submitOrder")
     @Mapping(target = "answer", source = "answer")
-    @Mapping(target = "unitScore", source = "unit_score")
-    @Mapping(source = "question.question_id", target = "questionId")
+    @Mapping(target = "unitScore", source = "unitScore")
+    @Mapping(source = "question.questionId", target = "questionId")
     @Mapping(source = "question.questionContent", target = "questionContent")
-    @Mapping(source = "question.correct_answer", target = "correctAnswer")
+    @Mapping(source = "question.correctAnswer", target = "correctAnswer")
     @Mapping(source = "question.status", target = "status")
-    @Mapping(source = "question.question_type", target = "questionType")
+    @Mapping(source = "question.questionType", target = "questionType")
     @Mapping(source = "question.options", target = "options")
     QuestionResponse toQuestionResponse(AssignmentDetail assignmentDetail);
 
     @Mapping(target = "answer", source = "answer")
-    @Mapping(target = "unit_score", source = "unitScore")
+    @Mapping(target = "unitScore", source = "unitScore")
     AssignmentDetail toAssignmentDetail(AssignmentDetailRequest assignmentDetailRequest);
 }
 
@@ -50,7 +42,7 @@ public interface AssignmentDetailMapper {
 //----------------------------
 
 //-----------entity-----------
-//assignmentDetailID assignmentDetail_id;
+//AssignmentDetailID assignmentDetail_id;
 //{     UUID assignment_id;
 //      Integer submit_order;
 //}

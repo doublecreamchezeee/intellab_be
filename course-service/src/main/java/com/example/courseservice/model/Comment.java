@@ -20,36 +20,40 @@ import java.util.UUID;
 @Table(name = "\"comments\"")
 public class Comment {
     @Id
+    @Column(name = "comment_id")
     @GeneratedValue
-    UUID comment_id;
+    UUID commentId;
 
     @Column(columnDefinition = "TEXT")
     String content;
 
-    Integer reply_level;
-    Long number_of_likes;
+    @Column(name = "reply_level")
+    Integer replyLevel;
+
+    @Column(name = "number_of_likes")
+    Long numberOfLikes;
 
     @CreationTimestamp
     Instant created;
 
+    @Column(name = "last_modified")
     @UpdateTimestamp
-    Instant last_modified;
+    Instant lastModified;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
     Topic topic;
 
-    @JoinColumn(name = "owner_id")
-    UUID user_id;
+    @JoinColumn(name = "user_id")
+    UUID userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
-    Comment parent_comment;
+    Comment parentComment;
 
-    @OneToMany(mappedBy = "parent_comment", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, orphanRemoval = true)
     List<Comment> comments;
 
     @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
-    List<CommentReport> comment_reports;
-
+    List<CommentReport> commentReports;
 }
