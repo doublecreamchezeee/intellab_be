@@ -37,7 +37,4 @@ public class OtherObjectReport {
     @JoinColumn(name = "destination_id")
     Topic destination;
 
-    @MapsId("ownerId")
-    @JoinColumn(name = "owner_id")
-    UUID userId;
 }

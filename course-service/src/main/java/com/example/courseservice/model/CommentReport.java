@@ -34,8 +34,4 @@ public class CommentReport {
     @JoinColumn(name = "destination_id")
     Comment destination;
 
-    @MapsId("ownerId")
-    @JoinColumn(name = "owner_id")
-    UUID userId;
-
 }

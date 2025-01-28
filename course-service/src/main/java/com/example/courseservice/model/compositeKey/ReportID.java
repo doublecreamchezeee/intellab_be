@@ -5,6 +5,7 @@ package com.example.courseservice.model.compositeKey;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.JoinColumn;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,6 +22,6 @@ public class ReportID {
     UUID reportOptionId;
     @Column(name = "destination_id")
     UUID destinationId;
-    @Column(name = "owner_id")
+    @JoinColumn(name = "owner_id")
     UUID ownerId;
 }
