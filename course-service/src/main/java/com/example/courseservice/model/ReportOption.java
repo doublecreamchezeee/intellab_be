@@ -26,13 +26,15 @@ public class ReportOption {
     @Column(columnDefinition = "VARCHAR(20)")
     String type;
 
+    @Column(name = "report_reason")
+    String reportReason;
 
-    String report_reason;
-    String handle_action;
+    @Column(name = "handle_action")
+    String handleAction;
 
     @OneToMany(mappedBy = "reportOption", fetch = FetchType.LAZY)
-    List<CommentReport> comment_reports;
+    List<CommentReport> commentReports;
 
     @OneToMany(mappedBy = "reportOption", fetch = FetchType.LAZY)
-    List<OtherObjectReport> other_object_reports;
+    List<OtherObjectReport> otherObjectReports;
 }
