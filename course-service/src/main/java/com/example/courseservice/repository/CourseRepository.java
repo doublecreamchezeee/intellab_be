@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,5 +29,9 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     @Query("SELECT c FROM Course c WHERE c.courseId NOT IN (SELECT uc.enrollId.courseId FROM UserCourses uc WHERE uc.enrollId.userUid = :userId)")
     Page<Course> findAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable);
+
+    List<Course> findAllByCourseNameContainingIgnoreCaseAndLevel(String keyword, String level);
+
+    List<Course> findAllByDescriptionContainingIgnoreCaseAndLevel(String description, String level);
 
 }

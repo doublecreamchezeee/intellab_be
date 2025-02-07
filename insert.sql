@@ -9,7 +9,8 @@ create table if not exists public.problems
     problem_name    varchar(255),
     score           integer,
     is_available     boolean       default false,
-    is_published    boolean       default false
+    is_published    boolean       default false,
+    solution_structure text
     );
 
 alter table public.problems
@@ -28,6 +29,49 @@ create table if not exists public.solutions
 
 alter table public.solutions
     owner to postgres;
+
+create table hints
+(
+    level      integer not null,
+    content    text,
+    problem_id uuid    not null
+        constraint fks7m1vov834a6stk5o5gg70ask
+            references problems,
+    primary key (level, problem_id)
+);
+
+alter table hints
+    owner to postgres;
+
+
+create table programming_language
+(
+    programming_language_id integer not null
+        primary key,
+    long_name               varchar(50),
+    short_name              varchar(20)
+);
+
+alter table programming_language
+    owner to postgres;
+
+create table default_code
+(
+    code        text,
+    language_id integer not null
+        constraint fka8c6jrkgcbeexifxoaa7w80h2
+            references programming_language,
+    problem_id  uuid    not null
+        constraint fkcxolaif2yhkurw5v9lrbkty4u
+            references problems,
+    primary key (language_id, problem_id)
+);
+
+alter table default_code
+    owner to postgres;
+
+
+
 
 create table if not exists public.problem_submissions
 (
@@ -498,6 +542,8 @@ INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('a926fe6d-ded3-4127-9558-599fa430e1f6', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', null, null, 'Guide on Greedy Algorithms', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('0a489a2f-a622-4ba9-a94d-70d5624e1309', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', null, null, 'Dynamic Programming Guide', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('95795791-8e54-4cce-8272-c06c15df68fc', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', null, null, 'Bitwise Algorithms Guide', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('d9fbda58-f71b-4567-affe-4fbab0933feb', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
+
 
 
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'The Logic Building Problems', 'Logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', 'Beginner', 0.00, 'VND', null, '5fe612b4-3998-44c7-85b2-2e4e973a38a7', null, null);
@@ -512,6 +558,7 @@ INSERT INTO public.courses (course_id, course_name, description, level, price, u
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', e'Introduction to DSA I
 ', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'dbfea360-dda9-46a5-9487-ea624080bb60', null, null);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'Introduction to DSA II', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 'Stack', 'The Stack lesson series offers a comprehensive introduction to one of the fundamental data structures in programming. You''ll explore how a Stack operates based on the LIFO (Last In, First Out) principle, perform core operations such as push, pop, and peek, and apply these concepts to real-world problems like validating parentheses, converting expressions, or building a browser''s backtracking system. This series is ideal for beginners and those looking to strengthen their understanding of data structures.', 'Beginner', 0.00, 'VND', null, 'd9fbda58-f71b-4567-affe-4fbab0933feb', null, null);
 
 
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '', 'Stack');
@@ -58868,3 +58915,16 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, 
 9', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 4);
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4 6 10 2
 12', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 5);
+
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (48, 'C (GCC 7.4.0)', 'C');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (52, 'C++ (GCC 7.4.0)', 'C++');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (49, 'C (GCC 8.3.0)', 'C');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (53, 'C++ (GCC 8.3.0)', 'C++');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (50, 'C (GCC 9.2.0)', 'C');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (54, 'C++ (GCC 9.2.0)', 'C++');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (51, 'C# (Mono 6.6.0.161)', 'C#');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (62, 'Java (JDK 17.0.6)', 'Java');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (63, 'JavaScript (Node.js 12.14.0)', 'JavaScript');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (71, 'Python (3.8.1)', 'Python');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
+

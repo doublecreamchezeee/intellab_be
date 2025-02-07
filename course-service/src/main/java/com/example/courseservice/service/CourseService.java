@@ -136,16 +136,22 @@ public class CourseService {
 
     public Page<CourseCreationResponse> searchCoursesWithFilter(String keyword,
                                                                 Float rating,
-                                                                String level,
+                                                                List<String> levels,
                                                                 Boolean price,
                                                                 List<String> categories,
                                                                 Pageable pageable) {
 
         List<Course> coursesByKey = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword,keyword);
 
-        if(level != null) {
-            List<Course> coursesByKeyAndLevel = courseRepository
-                    .findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndLevel(keyword, keyword, level);
+        if(levels != null && !levels.isEmpty() ) {
+            List<Course> coursesByKeyAndLevel = new ArrayList<>();
+            for (String level : levels) {
+                coursesByKeyAndLevel.addAll(courseRepository
+                        .findAllByCourseNameContainingIgnoreCaseAndLevel(keyword, level));
+                coursesByKeyAndLevel.addAll(courseRepository
+                        .findAllByDescriptionContainingIgnoreCaseAndLevel(keyword,level));
+            }
+
             coursesByKey.retainAll(coursesByKeyAndLevel);
         }
 
@@ -163,23 +169,17 @@ public class CourseService {
 
         if (rating != null)
         {
-            coursesByKey.removeIf(course -> course.getAverageRating() < rating);
+            coursesByKey.removeIf(course -> course.getAverageRating() == null ||
+                    course.getAverageRating().floatValue() < rating);
         }
 
         if (categories != null && !categories.isEmpty()) {
+            List<Course> coursesByKeyAndCategory = new ArrayList<>();
             for (String category : categories) {
-                List<Course> coursesByNameAndCategory = courseRepository.findAllByCourseNameContainingIgnoreCaseAndCategories_Name(keyword, category);
-
-                List<Course> coursesByDescriptionAndCategory = courseRepository.findAllByDescriptionContainingIgnoreCaseAndCategories_Name(keyword,category);
-
-
-                // union 2 list lại
-                List<Course> coursesByKeyAndCategory = new ArrayList<>(coursesByNameAndCategory);
-                coursesByKeyAndCategory.addAll(coursesByDescriptionAndCategory);
-
-
-                coursesByKey.retainAll(coursesByKeyAndCategory);
+                coursesByKeyAndCategory.addAll(courseRepository.findAllByCourseNameContainingIgnoreCaseAndCategories_Name(keyword, category));
+                coursesByKeyAndCategory.addAll(courseRepository.findAllByDescriptionContainingIgnoreCaseAndCategories_Name(keyword,category));
             }
+            coursesByKey.retainAll(coursesByKeyAndCategory);
         }
         Page<Course> result = convertListToPage(coursesByKey, pageable);
 
@@ -306,7 +306,7 @@ public class CourseService {
                                 .userId(userUid)
                                 .status("NEW")
                                 .assignments(new ArrayList<>())
-                                .isDoneTheory(false)
+                                .isDoneTheory(null)
                                 .isDonePractice(false)
                                 .build();
                         learningLessonRepository.save(learningLesson);
