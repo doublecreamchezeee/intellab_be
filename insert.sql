@@ -7,6 +7,7 @@ create table if not exists public.problems
     description     text,
     problem_level   varchar(20),
     problem_name    varchar(255),
+    problem_structure text,
     score           integer,
     is_available     boolean       default false,
     is_published    boolean       default false

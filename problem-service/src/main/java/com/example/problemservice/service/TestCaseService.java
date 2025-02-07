@@ -45,7 +45,15 @@ public class TestCaseService {
             problem.setTestCases(newListTestCase);
         }
 
-        return testCaseRepository.save(testCase);
+        testCase = testCaseRepository.save(testCase);
+
+        TestCaseFileReader.saveOneTestCase(
+                problem.getProblemName(),
+                testCase.getInput(),
+                testCase.getOutput()
+        );
+
+        return testCase;
     }
 
     public TestCase getTestCase(UUID testCaseId) {

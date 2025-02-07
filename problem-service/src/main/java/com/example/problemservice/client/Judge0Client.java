@@ -7,6 +7,7 @@ import com.example.problemservice.model.composite.testCaseOutputId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class Judge0Client {
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
@@ -82,6 +84,9 @@ public class Judge0Client {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize request body", e);
         }
+
+        log.info("Request body: {}", jsonRequestBody);
+        //return null;
 
         // Set headers
         HttpHeaders headers = new HttpHeaders();

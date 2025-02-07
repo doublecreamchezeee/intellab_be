@@ -1,5 +1,6 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemSubmission;
@@ -25,7 +26,6 @@ import java.util.logging.Logger;
 @Tag(name = "Submission")
 public class ProblemSubmissionController {
     private final ProblemSubmissionService problemSubmissionService;
-    private final ProblemSubmissionRepository problemSubmissionRepository;
 
     @Operation(
             summary = "Create submission"
@@ -92,5 +92,19 @@ public class ProblemSubmissionController {
                 /*UUID.fromString(problemId),
                 UUID.fromString(userId)*/
         );
+    }
+
+    @Operation(
+            summary = "Create submission with partial boilerplate"
+    )
+    @PostMapping("/partial-boilerplate")
+    public ResponseEntity<ProblemSubmission> createSubmissionWithPartialBoilerplate(@RequestBody DetailsProblemSubmissionRequest submission) {
+        try {
+            ProblemSubmission createdSubmission = problemSubmissionService.submitProblemWithPartialBoilerplate(submission);
+            return ResponseEntity.ok(createdSubmission); // HTTP 200 OK
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
+        }
     }
 }

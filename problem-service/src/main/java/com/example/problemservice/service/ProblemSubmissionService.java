@@ -1,36 +1,38 @@
 package com.example.problemservice.service;
 
+import com.example.problemservice.client.BoilerplateClient;
 import com.example.problemservice.client.Judge0Client;
+import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.ProblemSubmissionMapper;
-import com.example.problemservice.model.Problem;
-import com.example.problemservice.model.ProblemSubmission;
-import com.example.problemservice.model.TestCase;
-import com.example.problemservice.model.TestCase_Output;
+import com.example.problemservice.model.*;
 import com.example.problemservice.model.composite.testCaseOutputId;
-import com.example.problemservice.repository.ProblemRepository;
-import com.example.problemservice.repository.ProblemSubmissionRepository;
-import com.example.problemservice.repository.TestCaseOutputRepository;
+import com.example.problemservice.repository.*;
+import com.example.problemservice.utils.ParseUUID;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProblemSubmissionService {
+    private static final Logger log = LoggerFactory.getLogger(ProblemSubmissionService.class);
     private final ProblemSubmissionRepository problemSubmissionRepository;
     private final ProblemRepository problemRepository;
     private final TestCaseOutputRepository testCaseOutputRepository;
     private final Judge0Client judge0Client;
     private final ProblemSubmissionMapper problemSubmissionMapper;
+    private final BoilerplateClient boilerplateClient;
+    private final ProgrammingLanguageRepository programmingLanguageRepository;
+    private final TestCaseRepository testCaseRepository;
+
     public ProblemSubmission submitProblem(ProblemSubmission submission) {
         // Lấy Problem
         Problem problem = problemRepository.findById(submission.getProblem().getProblemId()).orElseThrow(
@@ -132,6 +134,8 @@ public class ProblemSubmissionService {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
+        log.info("User UID: {}", userUid);
+
         // Tìm kiếm submission
         List<ProblemSubmission> submissions = problemSubmissionRepository
                 .findProblemSubmissionByProblemAndUserUid(problem, userUid)
@@ -142,12 +146,101 @@ public class ProblemSubmissionService {
             return Collections.emptyList(); // Trả về danh sách rỗng nếu không có submission nào
         }
 
+        log.info("Submissions length: {}", submissions.size());
+
         // Chuyển đổi submissions thành response
         return submissions.stream()
                 .map(problemSubmissionMapper::toDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
                 .collect(Collectors.toList());
     }
 
+    public ProblemSubmission submitProblemWithPartialBoilerplate(DetailsProblemSubmissionRequest request) {
+        Problem problem = problemRepository.findById(request.getProblemId())
+                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+
+        ProgrammingLanguage language = programmingLanguageRepository.findById(request.getLanguageId())
+                .orElseThrow(() -> new AppException(ErrorCode.PROGRAMMING_LANGUAGE_NOT_EXIST));
+
+
+        UUID userUid = ParseUUID.normalizeUID(request.getUserUid());
+            //UUID.fromString("4d0c8d27-4509-402b-cf6f-58686cd47319");
+
+        List<DetailsProblemSubmissionResponse> submissions = getSubmissionDetailsByProblemIdAndUserUid(
+                request.getProblemId(),
+                userUid
+        );
+
+        ProblemSubmission submission = problemSubmissionMapper.toProblemSubmission(request);
+
+        submission.setUserUid(userUid);
+
+        submission.setProblem(problem);
+
+        submission.setCode(
+            boilerplateClient.enrich(
+                    submission.getCode(),
+                    request.getLanguageId(),
+                    problem.getProblemStructure()
+            )
+        );
+
+        submission.setProgramming_language(language.getLongName());
+
+        submissions.sort(Comparator.comparingInt(DetailsProblemSubmissionResponse::getSubmissionOrder));
+
+        submission.setScore_achieved(0);
+
+        if (submissions.isEmpty()) {
+            submission.setSubmit_order(0);
+        } else {
+            submission.setSubmit_order(
+                submissions.get(submissions.size()-1) // Lấy submission cuối cùng
+                        .getSubmissionOrder() + 1
+            );
+        }
+
+        submission.setTestCases_output(new ArrayList<>());
+
+        submission = problemSubmissionRepository.save(submission);
+
+
+        List<TestCase> testCases = testCaseRepository.findAllByProblem_ProblemId(
+                request.getProblemId()
+        ); // problem.getTestCases();
+
+        log.info("Test cases: {}", testCases.size());
+
+        List<TestCase_Output> outputs = new ArrayList<>();
+
+        for (TestCase testCase : testCases) {
+            // Gửi mã nguồn và test case đến Judge0
+            TestCase_Output output = judge0Client.submitCode(submission, testCase);
+
+            // Khởi tạo composite ID
+            testCaseOutputId outputId = new testCaseOutputId();
+            outputId.setSubmission_id(submission.getSubmission_id());
+            outputId.setTestcase_id(testCase.getTestcaseId());
+
+            // Gán composite ID và liên kết với ProblemSubmission
+            output.setTestCaseOutputID(outputId);
+            output.setTestcase(testCase);
+            output.setSubmission(submission);
+
+            // Lưu TestCase_Output
+            output = testCaseOutputRepository.save(output);
+
+            // Thêm vào danh sách kết quả
+            outputs.add(output);
+        }
+
+        // Gắn danh sách kết quả vào submission
+        submission.setTestCases_output(outputs);
+
+        // Lưu lại ProblemSubmission
+        submission = problemSubmissionRepository.save(submission);
+
+        return submission;
+    }
 
 }
 

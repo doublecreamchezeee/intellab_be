@@ -12,7 +12,9 @@ ENV PORT=$PORT
 # Copy the already built JAR file from your local machine
 COPY ./build/libs/*.jar app.jar
 
-COPY ./../problems /app/problems
+RUN mkdir -p /app/problems
+# Adjust the path to correctly reference the problems directory
+COPY ./src/main/resources/problems/ /app/problems
 
 EXPOSE $PORT
 

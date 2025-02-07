@@ -7,9 +7,14 @@ public class ProblemStructureConverter {
     public static String convertObjectToString(ProblemStructure object) {
         StringBuilder sb = new StringBuilder();
 
+        sb.append("Problem Name: ");
+        sb.append(object.getProblemName());
+        sb.append("\n");
+
         sb.append("Function Name: ");
         sb.append(object.getFunctionName());
         sb.append("\n");
+
         sb.append("Input Structure: ");
         sb.append("\n");
 

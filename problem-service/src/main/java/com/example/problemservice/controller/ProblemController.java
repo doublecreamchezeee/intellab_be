@@ -5,6 +5,7 @@ import com.example.problemservice.dto.request.problem.EnrichCodeRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
+import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
@@ -130,8 +131,19 @@ public class ProblemController {
 
     }
 
+    @PostMapping("/generateBoilerplate")
+    public ApiResponse<Boolean> generateBoilerPlate() {
+        problemService.generateBoilerplate();
+        return ApiResponse.<Boolean>builder()
+                .result(true)
+                .build();
+    }
+
     // api để test code
-    @GetMapping("/enrichCode")
+    @Operation(
+            summary = "(testing only) Enrich code"
+    )
+    @PostMapping("/enrichCode")
     public ApiResponse<String> enrichCode(@RequestBody EnrichCodeRequest request) {
         // để test
         request.setStructure("Problem Name: \"Sum of Two Numbers\"\n" +
@@ -161,7 +173,7 @@ public class ProblemController {
     }
 
     @Operation(
-            summary = "Get problem by id in file (testing only)"
+            summary = "(testing only) Get problem by id in file"
     )
     @GetMapping("/{problemId}/2")
     public ResponseEntity<Problem> getProblem2(@PathVariable UUID problemId) {
@@ -175,5 +187,15 @@ public class ProblemController {
             }
             throw e;
         }
+    }
+
+    @Operation(
+            summary = "Get partial boilerplate of problem by id"
+    )
+    @GetMapping("/{problemId}/partial-boilerplate")
+    public ApiResponse<List<PartialBoilerplateResponse>> getPartialBoilerplate(@PathVariable UUID problemId) {
+        return ApiResponse.<List<PartialBoilerplateResponse>>builder()
+                .result(problemService.getPartialBoilerplateOfProblem(problemId))
+                .build();
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProblemStructure {
+    String problemName;
     String functionName;
     List<DataField> inputStructure;
     List<DataField> outputStructure;

@@ -1,5 +1,11 @@
 package com.example.problemservice.utils;
 
+import com.example.problemservice.configuration.AppConfig;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,14 +17,28 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Component
 public class TestCaseFileReader {
     public static final String INPUT = "inputs";
     public static final String OUTPUT = "outputs";
-    private static final String MOUNT_PATH = "problems";
+
+    /*@Value("${mount_path}")
+    public static String MOUNT_PATH; // = "problems";*/
+
+    private static AppConfig appConfig;
+
+    @Autowired
+    public TestCaseFileReader(AppConfig appConfig) {
+        TestCaseFileReader.appConfig = appConfig;
+    }
 
     public static List<String> getProblemTestCases(String problemId, String testType) {
         try {
-            List<Path> files = Files.list(Paths.get(MOUNT_PATH, slugify(problemId), "tests", testType))
+            List<Path> files = Files.list(Paths.get(
+                            appConfig.getMountPath(),
+                            slugify(problemId),
+                            "tests", testType))
                     .collect(Collectors.toList());
             return files.stream()
                     .map(file -> {
@@ -37,7 +57,11 @@ public class TestCaseFileReader {
     public static CompletableFuture<List<String>> getProblemInputs(String problemId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                List<Path> files = Files.list(Paths.get(MOUNT_PATH, problemId, "tests", "inputs"))
+                List<Path> files = Files.list(Paths.get(
+                                appConfig.getMountPath(),
+                                problemId,
+                                "tests",
+                                "inputs"))
                         .collect(Collectors.toList());
                 List<CompletableFuture<String>> futures = new ArrayList<>();
                 for (Path file : files) {
@@ -61,7 +85,11 @@ public class TestCaseFileReader {
     public static CompletableFuture<List<String>> getProblemOutputs(String problemId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                List<Path> files = Files.list(Paths.get(MOUNT_PATH, problemId, "tests", "outputs"))
+                List<Path> files = Files.list(Paths.get(
+                        appConfig.getMountPath(),
+                                problemId,
+                                "tests",
+                                "outputs"))
                         .collect(Collectors.toList());
                 List<CompletableFuture<String>> futures = new ArrayList<>();
                 for (Path file : files) {
@@ -88,7 +116,10 @@ public class TestCaseFileReader {
         }
 
         try {
-            Path testsDir = Paths.get(MOUNT_PATH, slugify(problemId), "tests");
+            Path testsDir = Paths.get(
+                    appConfig.getMountPath(),
+                    slugify(problemId),
+                    "tests");
             Path inputDir = testsDir.resolve(INPUT);
             Path outputDir = testsDir.resolve(OUTPUT);
 
@@ -114,4 +145,33 @@ public class TestCaseFileReader {
         String slug = normalized.replaceAll("[^\\w-]", "").toLowerCase(Locale.ENGLISH);
         return slug;
     }
+
+    public static void saveOneTestCase(String problemId, String input, String output) {
+        try {
+            Path testsDir = Paths.get(
+                    appConfig.getMountPath(),
+                    slugify(problemId),
+                    "tests");
+            Path inputDir = testsDir.resolve(INPUT);
+            Path outputDir = testsDir.resolve(OUTPUT);
+
+            Files.createDirectories(testsDir);
+            Files.createDirectories(inputDir);
+            Files.createDirectories(outputDir);
+
+            long inputCount = Files.list(inputDir).count();
+            long outputCount = Files.list(outputDir).count();
+
+            long newIndex = Math.max(inputCount, outputCount);
+
+            Path inputPath = inputDir.resolve(newIndex + ".txt");
+            Path outputPath = outputDir.resolve(newIndex + ".txt");
+
+            Files.writeString(inputPath, input);
+            Files.writeString(outputPath, output);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save one test case", e);
+        }
+    }
+
 }

@@ -1,7 +1,12 @@
 package com.example.problemservice.utils;
 
+import com.example.problemservice.configuration.AppConfig;
 import com.example.problemservice.model.Problem;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,9 +16,18 @@ import java.text.Normalizer;
 import java.util.Locale;
 
 @Slf4j
+@Component
 public class MarkdownUtility {
 
-    public static final String MOUNT_PATH = "problems";
+   /* @Value("${mount_path}")
+    public static String MOUNT_PATH; // = "problems";*/
+
+    private static AppConfig appConfig;
+
+    @Autowired
+    public MarkdownUtility(AppConfig appConfig) {
+        MarkdownUtility.appConfig = appConfig;
+    }
 
     public static void saveProblemAsMarkdown(Problem problem) {
 
@@ -49,7 +63,9 @@ public class MarkdownUtility {
     }
 
     private static void saveMarkdownToFile(String problemName, String markdownContent, String filename) throws IOException {
-        Path path = Paths.get(MOUNT_PATH, slugify(problemName), filename);
+        log.info("Mount Path: " + appConfig.getMountPath());
+        Path path = Paths.get(appConfig.getMountPath(), slugify(problemName), filename);
+        log.info("Saving markdown to file: " + path.toAbsolutePath());
         Files.createDirectories(path.getParent());
         try (FileWriter writer = new FileWriter(path.toFile())) {
             writer.write(markdownContent);
@@ -60,7 +76,7 @@ public class MarkdownUtility {
     }
 
     public static void deleteProblemFolder(String problemName) {
-        Path path = Paths.get(MOUNT_PATH, slugify(problemName));
+        Path path = Paths.get(appConfig.getMountPath(), slugify(problemName));
         try {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
@@ -82,7 +98,7 @@ public class MarkdownUtility {
     }
 
     public static String readMarkdownFromFile(String problemName, String filename) {
-        Path path = Paths.get(MOUNT_PATH, slugify(problemName), filename);
+        Path path = Paths.get(appConfig.getMountPath(), slugify(problemName), filename);
         try {
             return Files.readString(path);
         } catch (IOException e) {

@@ -22,7 +22,7 @@ server:
 
 judge0:
   api:
-    url: http://localhost:2358 #${JUDGE0_URL} #
+    url: ${JUDGE0_URL} #http://localhost:2358 #
     callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
 
 
@@ -30,3 +30,5 @@ springdoc:
   swagger-ui:
     use-root-path: true
     enabled: true
+
+mount_path: ${MOUNT_PATH}

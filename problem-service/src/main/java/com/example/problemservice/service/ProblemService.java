@@ -1,15 +1,15 @@
 package com.example.problemservice.service;
 
 import com.example.problemservice.converter.ProblemStructureConverter;
-import com.example.problemservice.core.ProblemStructure;
 import com.example.problemservice.client.BoilerplateClient;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
+import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
-import com.example.problemservice.mapper.DefaultCodemapper;
+import com.example.problemservice.mapper.DefaultCodeMapper;
 import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.composite.DefaultCodeId;
@@ -25,16 +25,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +38,7 @@ public class ProblemService {
     private final BoilerplateClient boilerplateClient;
     private final DefaultCodeRepository defaultCodeRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
-    private final DefaultCodemapper defaultCodemapper;
+    private final DefaultCodeMapper defaultCodeMapper;
 
     public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
         Problem problem = problemMapper.toProblem(request);
@@ -68,6 +60,11 @@ public class ProblemService {
 
         response.setProblemStructure(
                 request.getProblemStructure()
+        );
+
+        generateDefaultCodes(
+                savedProblem.getProblemId(),
+                savedProblem.getProblemStructure()
         );
 
         return response;
@@ -152,17 +149,6 @@ public class ProblemService {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(()-> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
-        // Đọc file từ đường dẫn: D:\sources\Github\intellab_be\problems\two-sum\Structure.md
-
-//        structure = "Problem Name: \"Sum of Two Numbers\"\n" +
-//                "Function Name: sum\n" +
-//                "Input Structure:\n" +
-//                "Input Field: int num1\n" +
-//                "Input Field: int num2\n" +
-//                "Output Structure:\n" +
-//                "Output Field: int result";
-
-
         List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepository.findAll();
 
         for (ProgrammingLanguage programmingLanguage : programmingLanguages) {
@@ -177,7 +163,7 @@ public class ProblemService {
             defaultCodeRepository.save(new_defaultCode);
         }
         List<DefaultCode> defaultCodes = defaultCodeRepository.findByProblem(problem);
-        return defaultCodes.stream().map(defaultCodemapper::toResponse).toList();
+        return defaultCodes.stream().map(defaultCodeMapper::toResponse).toList();
     }
 
     public String enrichCode(String structure, String code, Integer languageId) {
@@ -205,5 +191,25 @@ public class ProblemService {
 
         return;
 
+    }
+
+    public List<PartialBoilerplateResponse> getPartialBoilerplateOfProblem(UUID problemId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(
+                        () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+                );
+
+        List<DefaultCode> listFunctionBoilerplate = defaultCodeRepository.findByProblem(problem);
+
+        return listFunctionBoilerplate.stream().map(defaultCodeMapper::toPartialBoilerplateResponse).toList();
+    }
+
+    public void generateBoilerplate() {
+        List<Problem> problems = problemRepository.findAll();
+        for (Problem problem : problems) {
+            String problemStructure = MarkdownUtility.readMarkdownFromFile(
+                    problem.getProblemName(), "Structure.md");
+            generateDefaultCodes(problem.getProblemId(), problemStructure);
+        }
     }
 }

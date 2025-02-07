@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,12 +16,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+
 public class BoilerplateClient {
+
+    private static final Logger log = LoggerFactory.getLogger(BoilerplateClient.class);
 
     @Component
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
+    @Slf4j
     public static class BoilerPlateGenerator {
         private String problemName;
         private String functionName;
@@ -100,7 +107,12 @@ public class BoilerplateClient {
         {
             String inputs = inputFields.stream()
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
-                    .collect(Collectors.joining(", "));
+                    .collect(Collectors.joining("; \n"));
+
+            inputs += ";\n";
+
+            log.info("inputs: {}", inputs);
+
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
@@ -128,9 +140,10 @@ int main() {
   %s
   %s
   %s
+  %s
   return 0;
 }
-        """.formatted(inputReads, functionCall, outputWrite);
+        """.formatted(inputs, inputReads, functionCall, outputWrite);
         }
 
         public String generateFunctionCpp(){
@@ -182,9 +195,10 @@ for (int i = 0; i < size_%1$s; i++) {
             return """
 import java.util.*;
 
-##USER_CODE_HERE##
-
 public class Main {
+
+    ##USER_CODE_HERE##
+    
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         %s
@@ -203,7 +217,7 @@ public class Main {
                     .map(field -> mapTypeToJava(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining(", "));
             String outputType = mapTypeToJava(outputFields.get(0).getType());
-            javaCode.append(String.format("public %s %s(%s) {\n", outputType, functionName, inputs));
+            javaCode.append(String.format("public static %s %s(%s) {\n", outputType, functionName, inputs));
             javaCode.append("    // Implementation goes here\n");
             javaCode.append("    return null;\n");
             javaCode.append("}\n");
@@ -249,7 +263,7 @@ size_%1$s = int(input())
                         } else {
                             return "%s = %s(input())".formatted(field.getName(), mapTypeToPython(field.getType()));
                         }
-                    }).collect(Collectors.joining("\n"));
+                    }).collect(Collectors.joining("\n    "));
 
             String functionCall = "result = %s(%s)".formatted(
                     functionName,
@@ -258,9 +272,10 @@ size_%1$s = int(input())
             String outputWrite = "print(result)";
 
             return """
+import sys
 ##USER_CODE_HERE##
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     %s
     %s
     %s
