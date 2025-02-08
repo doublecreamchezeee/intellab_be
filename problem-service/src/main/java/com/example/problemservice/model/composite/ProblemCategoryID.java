@@ -18,7 +18,7 @@ import java.util.UUID;
 @Embeddable
 public class ProblemCategoryID implements Serializable {
     @JoinColumn(name = "category_id",nullable = false)
-    UUID categoryId;
+    Integer categoryId;
 
     @Column(name = "problem_id")
     UUID problemId;

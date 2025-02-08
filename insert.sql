@@ -455,14 +455,10 @@ alter table user_courses
 
 create table categories
 (
-    category_id   uuid         not null default uuid_generate_v4()
+    category_id   integer      not null
         primary key,
-    type          varchar(255),
-    description   text,
-    is_featured   boolean,
-    language      varchar(255),
     category_name varchar(100) not null,
-    parent_id     uuid
+    parent_id     integer
         constraint fkcidcf2xf6eebpieowr7m02pg5
             references categories
 );
@@ -472,10 +468,10 @@ alter table categories
 
 create table course_category
 (
-    course_id   uuid not null
+    course_id   uuid    not null
         constraint fkl4r5vdloyu8rtqoh4ei49y2x2
             references courses,
-    category_id uuid not null
+    category_id integer not null
         constraint fky6fhus0rcvwiik7rk5l99j3j
             references categories
 );
@@ -485,10 +481,10 @@ alter table course_category
 
 create table question_category
 (
-    question_id uuid not null
+    question_id uuid    not null
         constraint fkssojn51nglg3ydh1lwbk62hyr
             references questions,
-    category_id uuid not null
+    category_id integer not null
         constraint fkpo1ya01k2p6b6b03b4elbvow6
             references categories
 );
@@ -496,10 +492,33 @@ create table question_category
 alter table question_category
     owner to postgres;
 
+create table sections
+(
+    section_id integer not null
+        primary key,
+    name       varchar(255)
+);
+
+alter table sections
+    owner to postgres;
+
+create table course_section
+(
+    course_id  uuid    not null
+        constraint fk61t4e9fdsniv4cui65oih8sr3
+            references courses,
+    section_id integer not null
+        constraint fkidr2cur1nxr2hy5pnf9rsplwi
+            references sections
+);
+
+alter table course_section
+    owner to postgres;
+
 create table problem_category
 (
-    category_id uuid not null,
-    problem_id  uuid not null
+    category_id integer not null,
+    problem_id  uuid    not null
         constraint fk2rg82j2evmwbfrglcpvhwpxfa
             references problems,
     primary key (category_id, problem_id)
@@ -507,6 +526,8 @@ create table problem_category
 
 alter table problem_category
     owner to postgres;
+
+
 
 create table course_summary
 (
@@ -63828,53 +63849,63 @@ Disadvantages of Stacks:
 in which the insertion of a new element and removal of an existing
 element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
 
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('88c42222-e777-498f-93c0-b6852576e275', 'course', 'Learn about Stack data structure', true, 'EN', 'Data Structure', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a162b1aa-4820-4c00-bf4e-e52d8b74f3d3', 'course', 'Learn about Queue data structure', true, 'EN', 'Algorithm', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a4876daa-5d46-403f-a6c7-617c597d7bec', 'section', 'Category for all free courses', true, 'EN', 'Free Courses', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a2490eb3-41ea-42fd-bf77-e46e049c7860', 'section', 'Category for all featured courses', true, 'EN', 'Featured Courses', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('8c180a6d-f3bc-45f4-9db9-1de05c4f259c', 'course', '', true, 'EN', 'Problem Solving', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('e2e5fc00-80e1-4019-8012-1aabaf76537e', 'course', '', true, 'EN', 'Array', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('2f342483-a619-4ea3-a6cb-0903ac16d015', 'course', '', true, 'EN', 'Queue', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('0d7730de-3172-4629-a872-5ddb65094458', 'course', '', true, 'EN', 'Recursive', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('ec16cda9-281f-4ecc-8326-e17c814796d5', 'course', '', true, 'EN', 'Dynamic Programming', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('9a6c29bc-62a2-4d7b-a14d-f7ad7d710806', 'course', '', true, 'EN', 'Matrix', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (1, 'Data Structure', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (2, 'Algorithm', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (5, 'Problem Solving', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (6, 'Array', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (7, 'Queue', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (8, 'Recursive', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (9, 'Dynamic Programming', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (10, 'Matrix', null);
 
 
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', '8c180a6d-f3bc-45f4-9db9-1de05c4f259c');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '2f342483-a619-4ea3-a6cb-0903ac16d015');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'e2e5fc00-80e1-4019-8012-1aabaf76537e');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', '0d7730de-3172-4629-a872-5ddb65094458');
+INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 5);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 7);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 6);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 8);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 9);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 10);
+
+INSERT INTO public.sections (section_id, name) VALUES (1, 'Free Courses');
+INSERT INTO public.sections (section_id, name) VALUES (2, 'Featured Courses');
+
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 2);
+
+
 
 INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
 
