@@ -12,6 +12,10 @@ import com.example.problemservice.model.*;
 import com.example.problemservice.model.composite.testCaseOutputId;
 import com.example.problemservice.repository.*;
 import com.example.problemservice.utils.ParseUUID;
+import com.example.problemservice.repository.ProblemRepository;
+import com.example.problemservice.repository.ProblemSubmissionRepository;
+import com.example.problemservice.repository.TestCaseOutputRepository;
+//import com.example.problemservice.utils.Base64Util;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +89,8 @@ public class ProblemSubmissionService {
         );
 
         output.setRuntime(Float.valueOf(request.getTime()));
-        output.setSubmission_output(request.getStdout());
+//        output.setSubmission_output(request.getStdout());
+        output.setSubmission_output(new String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+", ""))));
         output.setResult_status(request.getStatus().getDescription());
         testCaseOutputRepository.save(output);
 
@@ -123,18 +128,26 @@ public class ProblemSubmissionService {
     }
 
     public ProblemSubmission getSubmission(UUID submissionId) {
-        return problemSubmissionRepository.findById(submissionId)
-                .orElseThrow(() -> new AppException(
-                        ErrorCode.SUBMISSION_NOT_EXIST)
-                );
+        // Fetch the submission
+        ProblemSubmission submission = problemSubmissionRepository.findById(submissionId)
+                .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
+
+        // Check if all associated test cases have result_status as "Accepted"
+        boolean allAccepted = submission.getTestCases_output().stream()
+                .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
+
+        if (allAccepted) {
+            submission.setSolved(true);
+            problemSubmissionRepository.save(submission);
+        }
+
+        return submission;
     }
 
     public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {
         // Kiểm tra và lấy Problem từ repository
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
-
-        log.info("User UID: {}", userUid);
 
         // Tìm kiếm submission
         List<ProblemSubmission> submissions = problemSubmissionRepository

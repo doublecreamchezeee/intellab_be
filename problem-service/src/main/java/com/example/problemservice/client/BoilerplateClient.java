@@ -32,18 +32,18 @@ public class BoilerplateClient {
         private List<Field> inputFields;
         private List<Field> outputFields;
 
-        public void parse(String structure){
+        public void parse(String structure) {
             String[] lines = structure.split("\n");
             String currentSection = null;
             inputFields = new ArrayList<>();
             outputFields = new ArrayList<>();
 
-            for (String rawLine : lines){
+            for (String rawLine : lines) {
                 String line = rawLine.trim();
                 System.out.println(line.startsWith("Input Field:") && "input".equals(currentSection));
                 System.out.println("- " + line);
 
-                if (line.startsWith("Problem Name:")){
+                if (line.startsWith("Problem Name:")) {
                     this.problemName = extractQuoteValue(line);
                     System.out.println("extract problem name: " + problemName);
                 } else if (line.startsWith("Function Name:")) {
@@ -53,11 +53,10 @@ public class BoilerplateClient {
                 } else if (line.startsWith("Input Structure:")) {
                     currentSection = "input";
                     System.out.println("input section");
-                } else if (line.startsWith("Output Structure:")   ) {
+                } else if (line.startsWith("Output Structure:")) {
                     currentSection = "output";
                     System.out.println("output section");
-                }
-                else if (line.startsWith("Input Field:") && "input".equals(currentSection)) {
+                } else if (line.startsWith("Input Field:") && "input".equals(currentSection)) {
                     Field field = extractField(line);
                     if (field != null) {
                         inputFields.add(field);
@@ -77,14 +76,14 @@ public class BoilerplateClient {
             for (Field field : inputFields) {
                 System.out.println(field.getType() + " " + field.getName());
             }
-            for (Field field : outputFields){
+            for (Field field : outputFields) {
                 System.out.println(field.getType() + " " + field.getName());
             }
             System.out.println("--------------------");
 
         }
 
-        private String extractQuoteValue(String line){
+        private String extractQuoteValue(String line) {
             String regex = "Problem Name: \\\"(.*)\\\"$";
             return line.replaceAll(regex, "$1");
         }
@@ -102,9 +101,8 @@ public class BoilerplateClient {
             return null;
         }
 
-//=================================== C++ ===========================================
-        public String generateCpp()
-        {
+        //=================================== C++ ===========================================
+        public String generateCpp() {
             String inputs = inputFields.stream()
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining("; \n"));
@@ -130,23 +128,23 @@ public class BoilerplateClient {
             String outputWrite = "std::cout << result << std::endl;";
 
             return """
-#include <iostream>
-#include <vector>
-#include <string>
+                    #include <iostream>
+                    #include <vector>
+                    #include <string>
 
-##USER_CODE_HERE##
+                    ##USER_CODE_HERE##
 
-int main() {
-  %s
-  %s
-  %s
-  %s
-  return 0;
-}
-        """.formatted(inputs, inputReads, functionCall, outputWrite);
+                    int main() {
+                      %s
+                      %s
+                      %s
+                      %s
+                      return 0;
+                    }
+                            """.formatted(inputs, inputReads, functionCall, outputWrite);
         }
 
-        public String generateFunctionCpp(){
+        public String generateFunctionCpp() {
             String inputs = String.join(", ", inputFields.stream()
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .toArray(String[]::new));
@@ -168,18 +166,18 @@ int main() {
             };
         }
 
-//================================= Java =================================
+        //================================= Java =================================
         public String generateJava() {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
                             return """
-int size_%1$s = scanner.nextInt();
-List<%2$s> %1$s = new ArrayList<>();
-for (int i = 0; i < size_%1$s; i++) {
-    %1$s.add(scanner.next%3$s());
-}
-""".formatted(field.getName(), mapTypeToJava(field.getType()), mapScannerMethodForJava(field.getType()));
+                                    int size_%1$s = scanner.nextInt();
+                                    List<%2$s> %1$s = new ArrayList<>();
+                                    for (int i = 0; i < size_%1$s; i++) {
+                                        %1$s.add(scanner.next%3$s());
+                                    }
+                                    """.formatted(field.getName(), mapTypeToJava(field.getType()), mapScannerMethodForJava(field.getType()));
                         } else {
                             return "%s %s = scanner.next%s();".formatted(mapTypeToJava(field.getType()), field.getName(), mapScannerMethodForJava(field.getType()));
                         }
@@ -193,20 +191,20 @@ for (int i = 0; i < size_%1$s; i++) {
             String outputWrite = "System.out.println(result);";
 
             return """
-import java.util.*;
+                    import java.util.*;
 
-public class Main {
+                    public class Main {
 
-    ##USER_CODE_HERE##
-    
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        %s
-        %s
-        %s
-    }
-}
-        """.formatted(inputReads, functionCall, outputWrite);
+                        ##USER_CODE_HERE##
+                        
+                        public static void main(String[] args) {
+                            Scanner scanner = new Scanner(System.in);
+                            %s
+                            %s
+                            %s
+                        }
+                    }
+                            """.formatted(inputReads, functionCall, outputWrite);
         }
 
         public String generateFunctionJava() {
@@ -224,7 +222,6 @@ public class Main {
 
             return javaCode.toString();
         }
-
 
 
         private String mapTypeToJava(String type) {
@@ -251,15 +248,15 @@ public class Main {
             };
         }
 
-//=================================== Python ========================================
+        //=================================== Python ========================================
         public String generatePython() {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
                             return """
-size_%1$s = int(input())
-%1$s = list(map(%2$s, input().split()[:size_%1$s]))
-""".formatted(field.getName(), mapTypeToPython(field.getType()));
+                                    size_%1$s = int(input())
+                                    %1$s = list(map(%2$s, input().split()[:size_%1$s]))
+                                    """.formatted(field.getName(), mapTypeToPython(field.getType()));
                         } else {
                             return "%s = %s(input())".formatted(field.getName(), mapTypeToPython(field.getType()));
                         }
@@ -272,14 +269,14 @@ size_%1$s = int(input())
             String outputWrite = "print(result)";
 
             return """
-import sys
-##USER_CODE_HERE##
+                    import sys
+                    ##USER_CODE_HERE##
 
-if __name__ == '__main__':
-    %s
-    %s
-    %s
-        """.formatted(inputReads, functionCall, outputWrite);
+                    if __name__ == '__main__':
+                        %s
+                        %s
+                        %s
+                            """.formatted(inputReads, functionCall, outputWrite);
         }
 
         public String generateFunctionPython() {
@@ -306,15 +303,15 @@ if __name__ == '__main__':
             };
         }
 
-//============================== Java Script ==============================================
+        //============================== Java Script ==============================================
         public String generateJavaScript() {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
                             return """
-const size_%1$s = parseInt(input.shift());
-const %1$s = input.splice(0, size_%1$s).map(%2$s);
-""".formatted(field.getName(), mapTypeToJavaScript(field.getType()));
+                                    const size_%1$s = parseInt(input.shift());
+                                    const %1$s = input.splice(0, size_%1$s).map(%2$s);
+                                    """.formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         } else {
                             return "const %s = %s(input.shift());".formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         }
@@ -327,13 +324,13 @@ const %1$s = input.splice(0, size_%1$s).map(%2$s);
             String outputWrite = "console.log(result);";
 
             return """
-##USER_CODE_HERE##
+                    ##USER_CODE_HERE##
 
-const input = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n').join(' ').split(' ');
-%s
-%s
-%s
-        """.formatted(inputReads, functionCall, outputWrite);
+                    const input = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n').join(' ').split(' ');
+                    %s
+                    %s
+                    %s
+                            """.formatted(inputReads, functionCall, outputWrite);
         }
 
         public String generateFunctionJavaScript() {
@@ -360,15 +357,16 @@ const input = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n
                 default -> "String"; // Default for unknown types
             };
         }
-//================================ Type Script =================================
+
+        //================================ Type Script =================================
         public String generateTypeScript() {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
                             return """
-const size_%1$s: number = parseInt(input.shift() as string);
-const %1$s: %2$s[] = input.splice(0, size_%1$s).map(%3$s);
-""".formatted(field.getName(), mapTypeToTypeScript(field.getType()), mapTypeToTypeScript(field.getType()).toLowerCase());
+                                    const size_%1$s: number = parseInt(input.shift() as string);
+                                    const %1$s: %2$s[] = input.splice(0, size_%1$s).map(%3$s);
+                                    """.formatted(field.getName(), mapTypeToTypeScript(field.getType()), mapTypeToTypeScript(field.getType()).toLowerCase());
                         } else {
                             return "const %s: %s = %s(input.shift() as string);".formatted(
                                     field.getName(),
@@ -386,13 +384,13 @@ const %1$s: %2$s[] = input.splice(0, size_%1$s).map(%3$s);
             String outputWrite = "console.log(result);";
 
             return """
-##USER_CODE_HERE##
+                    ##USER_CODE_HERE##
 
-const input: string[] = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n').join(' ').split(' ');
-%s
-%s
-%s
-        """.formatted(inputReads, functionCall, outputWrite);
+                    const input: string[] = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n').join(' ').split(' ');
+                    %s
+                    %s
+                    %s
+                            """.formatted(inputReads, functionCall, outputWrite);
         }
 
         public String generateFunctionTypeScript() {
@@ -424,24 +422,25 @@ const input: string[] = require('fs').readFileSync('/dev/stdin', 'utf8').trim().
                 default -> "any"; // Default for unknown types
             };
         }
-//================================ C =====================================
+
+        //================================ C =====================================
         public String generateC() {
             StringBuilder inputReads = new StringBuilder();
             for (Field field : inputFields) {
                 if (field.getType().startsWith("list<")) {
                     inputReads.append("""
-int size_%1$s;
-scanf("%%d", &size_%1$s);
-int %1$s[size_%1$s];
-for (int i = 0; i < size_%1$s; ++i) {
-    scanf("%%d", &%1$s[i]);
-}
-""".formatted(field.getName()));
+                            int size_%1$s;
+                            scanf("%%d", &size_%1$s);
+                            int %1$s[size_%1$s];
+                            for (int i = 0; i < size_%1$s; ++i) {
+                                scanf("%%d", &%1$s[i]);
+                            }
+                            """.formatted(field.getName()));
                 } else {
                     inputReads.append("""
-%s %s;
-scanf("%%%s", &%s);
-""".formatted(mapTypeToC(field.getType()), field.getName(), mapSpecifierToC(field.getType()), field.getName()));
+                            %s %s;
+                            scanf("%%%s", &%s);
+                            """.formatted(mapTypeToC(field.getType()), field.getName(), mapSpecifierToC(field.getType()), field.getName()));
                 }
             }
 
@@ -452,21 +451,21 @@ scanf("%%%s", &%s);
             );
 
             String outputWrite = """
-printf("%%d\\n", result);
-""";
+                    printf("%%d\\n", result);
+                    """;
 
             return """
-#include <stdio.h>
+                    #include <stdio.h>
 
-##USER_CODE_HERE##
+                    ##USER_CODE_HERE##
 
-int main() {
-%s
-%s
-%s
-    return 0;
-}
-""".formatted(inputReads, functionCall, outputWrite);
+                    int main() {
+                    %s
+                    %s
+                    %s
+                        return 0;
+                    }
+                    """.formatted(inputReads, functionCall, outputWrite);
         }
 
         public String generateFunctionC() {
@@ -507,18 +506,18 @@ int main() {
             };
         }
 
-//=========================================== C# ====================================================
+        //=========================================== C# ====================================================
         public String generateCSharp() {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
                             return """
-int size_%1$s = int.Parse(Console.ReadLine());
-var %1$s = new List<%2$s>();
-for (int i = 0; i < size_%1$s; i++) {
-    %1$s.Add(%2$s.Parse(Console.ReadLine()));
-}
-""".formatted(field.getName(), mapTypeToCSharp(field.getType().replace("list<", "").replace(">", "")));
+                                    int size_%1$s = int.Parse(Console.ReadLine());
+                                    var %1$s = new List<%2$s>();
+                                    for (int i = 0; i < size_%1$s; i++) {
+                                        %1$s.Add(%2$s.Parse(Console.ReadLine()));
+                                    }
+                                    """.formatted(field.getName(), mapTypeToCSharp(field.getType().replace("list<", "").replace(">", "")));
                         } else {
                             return "%s %s = %s.Parse(Console.ReadLine());".formatted(
                                     mapTypeToCSharp(field.getType()),
@@ -537,19 +536,19 @@ for (int i = 0; i < size_%1$s; i++) {
             String outputWrite = "Console.WriteLine(result);";
 
             return """
-using System;
-using System.Collections.Generic;
+                    using System;
+                    using System.Collections.Generic;
 
-##USER_CODE_HERE##
+                    ##USER_CODE_HERE##
 
-class Program {
-    static void Main() {
-%s
-%s
-%s
-    }
-}
-""".formatted(inputReads, functionCall, outputWrite);
+                    class Program {
+                        static void Main() {
+                    %s
+                    %s
+                    %s
+                        }
+                    }
+                    """.formatted(inputReads, functionCall, outputWrite);
         }
 
         public String generateFunctionCSharp() {
@@ -582,6 +581,25 @@ class Program {
             };
         }
 
+        public String defaultCodeGenerator(String structure, int languageId) {
+            BoilerPlateGenerator parser = new BoilerPlateGenerator();
+            parser.parse(structure);
+            System.out.println(structure);
+            System.out.println(parser.functionName);
+            String defaultCode = switch (languageId) {
+                case 48, 49, 50 -> parser.generateFunctionC();
+                case 51 -> parser.generateFunctionCSharp();
+                case 52, 53, 54 -> parser.generateFunctionCpp();
+                case 62 -> parser.generateFunctionJava();
+                case 63 -> parser.generateFunctionJavaScript();
+                case 71 -> parser.generateFunctionPython();
+                case 74 -> parser.generateFunctionTypeScript();
+                default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
+            };
+            return defaultCode;
+        }
+
+
 
 
         @AllArgsConstructor
@@ -592,8 +610,8 @@ class Program {
             private String type;
             private String name;
         }
-
     }
+
 
     //
     public String enrich(String code, int languageId, String structure){
@@ -615,21 +633,27 @@ class Program {
 
     }
 
-    public String defaultCodeGenerator(String structure, int languageId) {
-        BoilerPlateGenerator parser = new BoilerPlateGenerator();
-        parser.parse(structure);
-        System.out.println(structure);
-        System.out.println(parser.functionName);
-        String defaultCode = switch (languageId) {
-            case 48, 49, 50 -> parser.generateFunctionC();
-            case 51 -> parser.generateFunctionCSharp();
-            case 52, 53, 54 -> parser.generateFunctionCpp();
-            case 62 -> parser.generateFunctionJava();
-            case 63 -> parser.generateFunctionJavaScript();
-            case 71 -> parser.generateFunctionPython();
-            case 74 -> parser.generateFunctionTypeScript();
-            default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
-        };
-        return defaultCode;
+
+
+
+
     }
-}
+    /*String enrich(String code, int languageId){
+        return code;
+    }*/
+
+/*String functionCall = "const result = %s(%s);".formatted(
+                    functionName,
+                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
+            );
+            String outputWrite = "console.log(result);";
+
+            return """
+##USER_CODE_HERE##
+
+const input = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n').join(' ').split(' ');
+%s
+%s
+%s
+        """.formatted(inputReads, functionCall, outputWrite);
+        */

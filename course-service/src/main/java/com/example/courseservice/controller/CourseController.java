@@ -206,15 +206,15 @@ public class CourseController {
             @RequestHeader(value = "X-UserID", required = false) String userUid,
             @RequestParam("keyword") String keyword,
             @RequestParam(required = false) Float ratings,
-            @RequestParam(required = false) String level,
+            @RequestParam(required = false) List<String> levels,
             @RequestParam(required = false) Boolean price,
             @RequestParam(required = false) List<String> categories,
             @ParameterObject Pageable pageable) {
         System.out.println(userUid);
-        if (ratings != null || level != null || price != null || categories != null) {
+        if (ratings != null || levels != null || price != null || categories != null) {
             return ApiResponse.<Page<CourseCreationResponse>>builder()
                     .result(courseService.searchCoursesWithFilter(
-                            keyword,ratings,level,price,categories, pageable
+                            keyword,ratings,levels,price,categories, pageable
                             )
                     ).build();
         }
