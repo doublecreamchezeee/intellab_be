@@ -61,16 +61,9 @@ public class CourseService {
         return new PageImpl<>(subList, pageable, list.size());
     }
 
-    public Page<CourseCreationResponse> getAllByCategory(String categoryName, Pageable pageable) {
-        boolean isFeature = true;
-        List<Category> categories = categoryRepository.findAllByNameAndIsFeatured(categoryName,isFeature);
+    public Page<CourseCreationResponse> getAllByCategory(Integer section, Pageable pageable) {
 
-        if (categories.isEmpty())
-        {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
-
-        Page<Course> result = courseRepository.findAllByCategories_Name(categoryName, pageable);
+        Page<Course> result = courseRepository.findAllBySections_Id(section, pageable);
 
         return result.map(
                 course -> {
@@ -138,7 +131,7 @@ public class CourseService {
                                                                 Float rating,
                                                                 List<String> levels,
                                                                 Boolean price,
-                                                                List<String> categories,
+                                                                List<Integer> categories,
                                                                 Pageable pageable) {
 
         List<Course> coursesByKey = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword,keyword);
@@ -175,9 +168,9 @@ public class CourseService {
 
         if (categories != null && !categories.isEmpty()) {
             List<Course> coursesByKeyAndCategory = new ArrayList<>();
-            for (String category : categories) {
-                coursesByKeyAndCategory.addAll(courseRepository.findAllByCourseNameContainingIgnoreCaseAndCategories_Name(keyword, category));
-                coursesByKeyAndCategory.addAll(courseRepository.findAllByDescriptionContainingIgnoreCaseAndCategories_Name(keyword,category));
+            for (Integer category : categories) {
+                coursesByKeyAndCategory.addAll(courseRepository.findAllByCourseNameContainingIgnoreCaseAndCategories_Id(keyword, category));
+                coursesByKeyAndCategory.addAll(courseRepository.findAllByDescriptionContainingIgnoreCaseAndCategories_Id(keyword,category));
             }
             coursesByKey.retainAll(coursesByKeyAndCategory);
         }
@@ -362,8 +355,8 @@ public class CourseService {
         });*/
     }
 
-    public List<CategoryResponse> getCategories(String Type) {
-        List<Category> categories = categoryRepository.findAllByType(Type);
+    public List<CategoryResponse> getCategories() {
+        List<Category> categories = categoryRepository.findAll();
 
         return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
     }

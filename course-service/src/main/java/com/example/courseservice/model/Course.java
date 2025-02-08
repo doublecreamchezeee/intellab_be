@@ -81,4 +81,13 @@ public class Course {
     )
     List<Category> categories;
 
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_section",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "section_id")
+    )
+    List<Section> sections;
+
 }
