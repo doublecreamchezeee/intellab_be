@@ -53,12 +53,17 @@ public class LessonController {
     @Operation(
             summary = "Get one lesson by id, provide userUid to check user has enrolled course or not, else 403"
     )
-    @GetMapping("/{lessonId}/{userId}")
-    ApiResponse<DetailsLessonResponse> getLessonById(@PathVariable("lessonId") String lessonId, @PathVariable("userId") String userId){
+    @GetMapping("/{lessonId}")
+    ApiResponse<DetailsLessonResponse> getLessonById(
+            @PathVariable("lessonId") String lessonId,
+            @RequestHeader ("X-UserId") String userUid
+            //@PathVariable("userId") String userId
+    ){
+        userUid = userUid.split(",")[0];
         return ApiResponse.<DetailsLessonResponse>builder()
                 .result(lessonService.getLessonById(
                         UUID.fromString(lessonId),
-                        ParseUUID.normalizeUID(userId))
+                        ParseUUID.normalizeUID(userUid))
                 )
                 .build();
     }
@@ -101,13 +106,14 @@ public class LessonController {
     @Operation(
             summary = "Update learning progress of lesson by id, status can be 'new', 'inprogress', 'completed' (call before fetch detail lesson)"
     )
-    @PutMapping("/{learningLessonId}/{courseId}/{userUid}/updateLearningProgress")
+    @PutMapping("/{learningLessonId}/{courseId}/updateLearningProgress")
     ApiResponse<LearningLessonResponse> updateLearningProgress(
             @PathVariable("learningLessonId") UUID learningLessonId,
             @PathVariable("courseId") UUID courseId,
-            @PathVariable("userUid") String userUid,
+            @RequestHeader("X-UserId") String userUid,
+            //@PathVariable("userUid") String userUid,
             @RequestBody LearningLessonUpdateRequest request) {
-
+        userUid = userUid.split(",")[0];
         return ApiResponse.<LearningLessonResponse>builder()
                 .result(lessonService.updateLearningLesson(learningLessonId, courseId, userUid, request))
                 .build();
@@ -163,11 +169,14 @@ public class LessonController {
     @Operation(
             summary = "Mark theory of lesson as done"
     )
-    @PutMapping("/{learningLessonId}/{courseId}/{userUid}/doneTheory")
+    @PutMapping("/{learningLessonId}/{courseId}/doneTheory")
     ApiResponse<Boolean> doneTheoryOfLesson(
             @PathVariable("learningLessonId") UUID learningLessonId,
             @PathVariable("courseId") UUID courseId,
-            @PathVariable("userUid") String userUid) {
+            @RequestHeader("X-UserId") String userUid
+            //@PathVariable("userUid") String userUid
+    ) {
+        userUid = userUid.split(",")[0];
 
         return ApiResponse.<Boolean>builder()
                 .result(lessonService.doneTheoryOfLesson(
@@ -182,17 +191,41 @@ public class LessonController {
     @Operation(
             summary = "Mark practice of lesson as done"
     )
-    @PutMapping("/{learningLessonId}/{courseId}/{userUid}/donePractice")
+    @PutMapping("/{learningLessonId}/{courseId}/donePractice")
     ApiResponse<Boolean> donePracticeOfLesson(
             @PathVariable("learningLessonId") UUID learningLessonId,
             @PathVariable("courseId") UUID courseId,
-            @PathVariable("userUid") String userUid) {
+            @RequestHeader("X-UserId") String userUid
+            //@PathVariable("userUid") String userUid
+    ) {
+        userUid = userUid.split(",")[0];
 
         return ApiResponse.<Boolean>builder()
                 .result(lessonService.donePracticeOfLesson(
                             learningLessonId,
                             courseId,
                             ParseUUID.normalizeUID(userUid)
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "(BE only) Mark practice of lesson as done by problem id"
+    )
+    @PutMapping("/{problemId}/{UserId}/donePracticeByProblemId")
+    ApiResponse<Boolean> donePracticeOfLessonByProblemId(
+            @PathVariable("problemId") UUID problemId,
+           // @RequestHeader("X-UserId") String userUid
+            @PathVariable("UserId") String userUid
+    ) {
+
+        //userUid = userUid.split(",")[0];
+        log.info("UserUid: " + UUID.fromString(userUid));
+        return ApiResponse.<Boolean>builder()
+                .result(lessonService.donePracticeOfLessonByProblemId(
+                            problemId,
+                            UUID.fromString(userUid)
                         )
                 )
                 .build();

@@ -14,6 +14,9 @@ import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.composite.DefaultCodeId;
 import com.example.problemservice.repository.DefaultCodeRepository;
+import com.example.problemservice.model.Problem;
+import com.example.problemservice.model.ProblemSubmission;
+import com.example.problemservice.model.TestCaseOutput;
 import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.utils.MarkdownUtility;
 import com.example.problemservice.utils.TestCaseFileReader;
@@ -97,15 +100,15 @@ public class ProblemService {
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
-        List<ProblemSubmission> submissions = problemSubmissionRepository.findProblemSubmissionByUserUidAndProblem_ProblemId(userId, problemId);
+        List<ProblemSubmission> submissions = problemSubmissionRepository.findProblemSubmissionByUserIdAndProblem_ProblemId(userId, problemId);
         if (submissions.isEmpty() || submissions == null) {
             return false;
         }
         for(ProblemSubmission submission:submissions)
         {
-            List<TestCase_Output> testcaseOutputs = submission.getTestCases_output();
-            for (TestCase_Output testcase : testcaseOutputs) {
-                if (!testcase.getResult_status().equals("ACCEPTED"))
+            List<TestCaseOutput> testcaseOutputs = submission.getTestCasesOutput();
+            for (TestCaseOutput testcase : testcaseOutputs) {
+                if (!testcase.getResult_status().equals("Accepted"))
                     return false;
             }
         }
@@ -152,7 +155,7 @@ public class ProblemService {
         List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepository.findAll();
 
         for (ProgrammingLanguage programmingLanguage : programmingLanguages) {
-            String defaultCode = boilerplateClient.defaultCodeGenerator(structure,programmingLanguage.getId());
+            String defaultCode = BoilerplateClient.BoilerPlateGenerator.defaultCodeGenerator(structure, programmingLanguage.getId());
             DefaultCodeId id = new DefaultCodeId(programmingLanguage.getId(), problemId);
 
             DefaultCode new_defaultCode = new DefaultCode();

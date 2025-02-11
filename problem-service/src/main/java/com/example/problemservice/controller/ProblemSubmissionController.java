@@ -1,6 +1,7 @@
 package com.example.problemservice.controller;
 
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
+import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemSubmission;
@@ -8,6 +9,7 @@ import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.service.ProblemSubmissionService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +44,7 @@ public class ProblemSubmissionController {
     }
 
     @Operation(
-            summary = "Callback update submission by id"
+            summary = "(BE only) Callback update submission by id"
     )
     @PutMapping("/update/submission/callback")
     public ResponseEntity<Object> callbackUpdateSubmission(@RequestBody SubmissionCallbackResponse request) {
@@ -82,25 +84,41 @@ public class ProblemSubmissionController {
     @Operation(
             summary = "Get submission details by problem id and user uid"
     )
-    @GetMapping("/details/{problemId}/{userId}")
-    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(
+    @GetMapping("/details/{problemId}")
+    public ApiResponse<List<DetailsProblemSubmissionResponse>>  getSubmissionDetailsByProblemIdAndUserUid(
             @PathVariable("problemId") UUID problemId,
-            @PathVariable("userId") UUID userUid) {
-        return problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(
-                problemId,
-                userUid
+            @RequestHeader("X-UserId") String userUid
+            //@PathVariable("userId") UUID userUid
+    ) {
+        userUid = userUid.split(",")[0];
+
+        return ApiResponse.<List<DetailsProblemSubmissionResponse>>builder()
+                .result(problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(
+                            problemId,
+                            ParseUUID.normalizeUID(userUid)
+                        )
+                )
+                .message("Submission details retrieved successfully")
+                .code(200)
+                .build();
                 /*UUID.fromString(problemId),
                 UUID.fromString(userId)*/
-        );
+
     }
 
     @Operation(
             summary = "Create submission with partial boilerplate"
     )
     @PostMapping("/partial-boilerplate")
-    public ResponseEntity<ProblemSubmission> createSubmissionWithPartialBoilerplate(@RequestBody DetailsProblemSubmissionRequest submission) {
+    public ResponseEntity<ProblemSubmission> createSubmissionWithPartialBoilerplate(
+            @RequestBody DetailsProblemSubmissionRequest submission,
+            @RequestHeader("X-UserId") String userUid
+    ) {
         try {
-            ProblemSubmission createdSubmission = problemSubmissionService.submitProblemWithPartialBoilerplate(submission);
+            userUid = userUid.split(",")[0];
+            ProblemSubmission createdSubmission = problemSubmissionService.submitProblemWithPartialBoilerplate(
+                    ParseUUID.normalizeUID(userUid),
+                    submission);
             return ResponseEntity.ok(createdSubmission); // HTTP 200 OK
         } catch (Exception e) {
             System.out.println(e);

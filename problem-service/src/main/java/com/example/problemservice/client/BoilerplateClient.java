@@ -21,6 +21,7 @@ public class BoilerplateClient {
 
     private static final Logger log = LoggerFactory.getLogger(BoilerplateClient.class);
 
+
     @Component
     @AllArgsConstructor
     @NoArgsConstructor
@@ -581,7 +582,7 @@ public class BoilerplateClient {
             };
         }
 
-        public String defaultCodeGenerator(String structure, int languageId) {
+        public static String defaultCodeGenerator(String structure, int languageId) {
             BoilerPlateGenerator parser = new BoilerPlateGenerator();
             parser.parse(structure);
             System.out.println(structure);

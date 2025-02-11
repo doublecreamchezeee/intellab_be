@@ -1,9 +1,6 @@
 package com.example.problemservice.client;
 
-import com.example.problemservice.model.ProblemSubmission;
-import com.example.problemservice.model.TestCase;
-import com.example.problemservice.model.TestCase_Output;
-import com.example.problemservice.model.composite.testCaseOutputId;
+import com.example.problemservice.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +26,9 @@ public class Judge0Client {
 
     @Value("${judge0.api.callback_url}")
     private String CALLBACK_BASE_URL;
+
+    @Value("${judge0.api.run_code_callback_url}")
+    private String RUN_CODE_CALLBACK_BASE_URL;
     // Map to hold language name to language_id mappings
     private static final Map<String, Integer> languageIdMap = new HashMap<>();
 
@@ -53,10 +53,10 @@ public class Judge0Client {
 
     // Submit code to Judge0 API and retrieve result
 // Submit code to Judge0 API and retrieve result
-    public TestCase_Output submitCode(ProblemSubmission submission, TestCase testCase) {
+    public TestCaseOutput submitCode(ProblemSubmission submission, TestCase testCase) {
         // Extract details from the submission
         String code = submission.getCode();
-        String language = submission.getProgramming_language();
+        String language = submission.getProgrammingLanguage();
 
         // Map the programming language to the corresponding language_id
         Integer languageId = languageIdMap.get(language);
@@ -104,7 +104,7 @@ public class Judge0Client {
             String submissionId = extractSubmissionId(Objects.requireNonNull(response.getBody()));
 
             // Call the status endpoint to get execution result
-            TestCase_Output result = getJudge0Result(submissionId, testCase);
+            TestCaseOutput result = getJudge0Result(submissionId, testCase);
             result.setToken(UUID.fromString(submissionId));
             return result;
         } else {
@@ -119,7 +119,7 @@ public class Judge0Client {
     }
 
     // Retrieve Judge0 result using submission ID
-    private TestCase_Output getJudge0Result(String submissionId, TestCase testCase) {
+    private TestCaseOutput getJudge0Result(String submissionId, TestCase testCase) {
         ResponseEntity<String> response = restTemplate.exchange(
                 JUDGE0_BASE_URL + "/submissions/" + submissionId, HttpMethod.GET, null, String.class
         );
@@ -132,8 +132,8 @@ public class Judge0Client {
         }
     }
 
-    // Retrieve Judge0 result and update TestCase_Output
-    public TestCase_Output getSubmissionResult(TestCase_Output testCaseOutput) {
+    // Retrieve Judge0 result and update TestCaseOutput
+    public TestCaseOutput getSubmissionResult(TestCaseOutput testCaseOutput) {
         String submissionId = String.valueOf(testCaseOutput.getToken());
 
         // Send GET request to Judge0 to retrieve result
@@ -154,7 +154,7 @@ public class Judge0Client {
                     return testCaseOutput;
                 }
 
-                // Update TestCase_Output fields based on the result
+                // Update TestCaseOutput fields based on the result
                 String submissionOutput = rootNode.path("stdout").asText();
                 Float runtime = (float) rootNode.path("time").asDouble();
 
@@ -177,8 +177,8 @@ public class Judge0Client {
         return responseBody.split("\"token\":\"")[1].split("\"")[0];
     }
 
-    // Parse the result from Judge0 response and populate the TestCase_Output object
-    public TestCase_Output parseJudge0Result(String responseBody, TestCase testCase) {
+    // Parse the result from Judge0 response and populate the TestCaseOutput object
+    public TestCaseOutput parseJudge0Result(String responseBody, TestCase testCase) {
         try {
             JsonNode rootNode = objectMapper.readTree(responseBody);
 
@@ -191,11 +191,114 @@ public class Judge0Client {
             // Extract runtime (time) from the response
             Float runtime = (float) rootNode.path("time").asDouble();
 
-            // Create and populate the TestCase_Output object
-            return TestCase_Output.builder()
+            // Create and populate the TestCaseOutput object
+            return TestCaseOutput.builder()
                     .runtime(runtime)
                     .submission_output(submissionOutput)
                     .result_status(resultStatus)
+                    .testcase(testCase)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing Judge0 response", e);
+        }
+    }
+
+    public TestCaseRunCodeOutput runCode(ProblemRunCode problemRunCode, TestCase testCase) {
+        // Extract details from the submission
+        String code = problemRunCode.getCode();
+        String language = problemRunCode.getProgrammingLanguage();
+
+        // Map the programming language to the corresponding language_id
+        Integer languageId = languageIdMap.get(language);
+        if (languageId == null) {
+            throw new IllegalArgumentException("Invalid programming language: " + language);
+        }
+
+        // Extract input and expected output from the TestCase
+        String input = testCase.getInput();
+        String expectedOutput = testCase.getOutput();
+
+        // Create the request body as a Map
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("source_code", code);
+        requestBody.put("language_id", languageId);
+        requestBody.put("stdin", input);
+        requestBody.put("expected_output", expectedOutput);
+        requestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL);
+
+        // Convert the request body to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequestBody;
+        try {
+            jsonRequestBody = objectMapper.writeValueAsString(requestBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize request body", e);
+        }
+
+        log.info("Request body: {}", jsonRequestBody);
+
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(jsonRequestBody, headers);
+
+        // Send POST request to Judge0 for code execution
+        ResponseEntity<String> response = restTemplate.exchange(
+                JUDGE0_BASE_URL + "/submissions", HttpMethod.POST, requestEntity, String.class
+        );
+
+
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            // Extract submission ID from the response body
+            String submissionId = extractSubmissionId(Objects.requireNonNull(response.getBody()));
+
+            // Call the status endpoint to get execution result
+            TestCaseRunCodeOutput result = getJudge0RunCodeResult(submissionId, testCase);
+            result.setToken(UUID.fromString(submissionId));
+            return result;
+        } else {
+            // Throw a meaningful error with status code and response body
+            String errorMessage = String.format(
+                    "Failed to submit code to Judge0. Status: %s, Body: %s",
+                    response.getStatusCode(),
+                    response.getBody()
+            );
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+    private TestCaseRunCodeOutput getJudge0RunCodeResult(String runCodeId, TestCase testCase) {
+        ResponseEntity<String> response = restTemplate.exchange(
+                JUDGE0_BASE_URL + "/submissions/" + runCodeId, HttpMethod.GET, null, String.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            // Parse the result from the response body
+            return parseJudge0RunCodeResult(response.getBody(), testCase);
+        } else {
+            throw new RuntimeException("Failed to fetch run code result from Judge0");
+        }
+    }
+
+    private TestCaseRunCodeOutput parseJudge0RunCodeResult(String responseBody, TestCase testCase) {
+        try {
+            JsonNode rootNode = objectMapper.readTree(responseBody);
+
+            // Extract the status description from the response
+            String resultStatus = rootNode.path("status").path("description").asText();
+
+            // Extract standard output (stdout) from the response
+            String submissionOutput = rootNode.path("stdout").asText();
+
+            // Extract runtime (time) from the response
+            Float runtime = (float) rootNode.path("time").asDouble();
+
+            // Create and populate the TestCaseOutput object
+            return TestCaseRunCodeOutput.builder()
+                    .runtime(runtime)
+                    .submissionOutput(submissionOutput)
+                    .resultStatus(resultStatus)
                     .testcase(testCase)
                     .build();
         } catch (Exception e) {

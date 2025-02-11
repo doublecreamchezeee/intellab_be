@@ -1,5 +1,6 @@
 package com.example.problemservice.model.composite;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;

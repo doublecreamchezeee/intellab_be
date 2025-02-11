@@ -23,7 +23,7 @@ import java.util.UUID;
 public class TestCaseService {
     private final TestCaseRepository testCaseRepository;
     private final ProblemRepository problemRepository;
-    public TestCase createTestCase(TestCaseCreationRequest request) {
+    public TestCase createTestCase(UUID userUid, TestCaseCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
@@ -31,7 +31,7 @@ public class TestCaseService {
                 .problem(problem)
                 .input(request.getInput())
                 .output(request.getOutput())
-                .userId(request.getUserId())
+                .userId(userUid)
                 .build();
 
         if (problem.getTestCases() != null){
@@ -71,7 +71,7 @@ public class TestCaseService {
         return testCaseRepository.findAllByProblem_ProblemId(problemId);
     }
 
-    public List<TestCase> createMultipleTestCases(TestCaseMultipleCreationRequest request) {
+    public List<TestCase> createMultipleTestCases(UUID userUid, TestCaseMultipleCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
@@ -85,7 +85,7 @@ public class TestCaseService {
                     .problem(problem)
                     .input(request.getInputs().get(i))
                     .output(request.getOutputs().get(i))
-                    .userId(request.getUserId())
+                    .userId(userUid)
                     .build();
             testCases.add(testCase);
         }

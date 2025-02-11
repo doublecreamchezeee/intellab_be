@@ -1,7 +1,6 @@
 package com.example.courseservice.model;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -24,8 +23,9 @@ import java.util.UUID;
 @Table(name = "\"questions\"")
 public class Question {
     @Id
+    @Column(name = "question_id")
     @GeneratedValue
-    UUID question_id;
+    UUID questionId;
 
     @Column(name = "question_content", columnDefinition = "TEXT")
     String questionContent;
@@ -34,16 +34,20 @@ public class Question {
     @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
-    String correct_answer;
+    @Column(name = "correct_answer")
+    String correctAnswer;
 
     // S: single-choice; M: multiple-choice
-    Character question_type;
+    @Column(name = "question_type")
+    Character questionType;
 
+    @Column(name = "created_at")
     @CreationTimestamp
-    Instant created_at;
+    Instant createdAt;
 
+    @Column(name = "updated_at")
     @UpdateTimestamp
-    Instant updated_at;
+    Instant updatedAt;
 
 
     @JsonManagedReference

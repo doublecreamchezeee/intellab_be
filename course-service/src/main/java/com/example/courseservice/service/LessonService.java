@@ -14,7 +14,6 @@ import com.example.courseservice.dto.response.learningLesson.LearningLessonRespo
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.lesson.DetailsLessonResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
-import com.example.courseservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.*;
@@ -25,7 +24,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -122,7 +120,7 @@ public class LessonService {
                 .lessonOrder(lesson.getLessonOrder())
                 .lessonName(lesson.getLessonName())
                 .courseId(lesson.getCourse().getCourseId())
-                .exerciseId(lesson.getExercise() != null ? lesson.getExercise().getExercise_id() : null) // Check if exercise is null
+                .exerciseId(lesson.getExercise() != null ? lesson.getExercise().getExerciseId() : null) // Check if exercise is null
                 .problemId(lesson.getProblemId())
                 .learningId(learningLesson.getLearningId())
                 .nextLessonId(nextLessonId)
@@ -169,7 +167,7 @@ public class LessonService {
                 lastEdited = assignment;
         }
 
-        List<AssignmentDetail> assignmentDetails = lastEdited.getAssignment_details();
+        List<AssignmentDetail> assignmentDetails = lastEdited.getAssignmentDetails();
         return assignmentDetails.stream()
                 .map(assignmentDetail -> {
                     QuestionResponse response = assignmentDetailMapper.toQuestionResponse(assignmentDetail);
@@ -244,7 +242,7 @@ public class LessonService {
         Exercise exercise = lesson.getExercise();
         if (exercise == null) {
             exercise = new Exercise();
-            exercise.setExercise_name(request.getName());
+            exercise.setExerciseName(request.getName());
             exercise.setDescription(request.getDescription());
             lesson.setExercise(exercise);
         }
@@ -344,7 +342,7 @@ public class LessonService {
                     .description(lesson.getDescription())
                     .content(lesson.getContent())
                     .problemId(lesson.getProblemId())
-                    .exerciseId(lesson.getExercise() != null ? lesson.getExercise().getExercise_id() : null)
+                    .exerciseId(lesson.getExercise() != null ? lesson.getExercise().getExerciseId() : null)
                     .status(learningLessonOpt.map(LearningLesson::getStatus).orElse("LEARNING"))
                     .lastAccessedDate(learningLessonOpt.map(LearningLesson::getLastAccessedDate).orElse(null))
                     .isDoneTheory(learningLessonOpt.map(LearningLesson::getIsDoneTheory).orElse(false))
@@ -415,6 +413,42 @@ public class LessonService {
         userCoursesRepository.save(userCourses);
 
         return true;
+    }
+
+    public Boolean donePracticeOfLessonByProblemId(UUID problemId, UUID userUid) {
+        List<Lesson> lessons = lessonRepository.findAllByProblemId(problemId);
+
+        for (Lesson lesson : lessons) {
+            Optional<LearningLesson> learningLessonOptional = learningLessonRepository.findByLesson_LessonIdAndUserId(lesson.getLessonId(), userUid);
+
+            if (!learningLessonOptional.isPresent()) {
+                continue;
+            }
+
+            LearningLesson learningLesson = learningLessonOptional.get();
+
+            UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(
+                    userUid,
+                    lesson.getCourse().getCourseId()
+            ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
+
+            learningLesson.setIsDonePractice(true);
+
+            if (learningLesson.getIsDoneTheory() != null
+                    && learningLesson.getIsDoneTheory()) {
+                learningLesson.setStatus(PredefinedLearningStatus.DONE);
+            }
+
+            learningLessonRepository.save(learningLesson);
+
+            DetailCourseResponse detailCourseResponse = courseService.getCourseById(lesson.getCourse().getCourseId(), userUid);
+
+            userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
+            userCoursesRepository.save(userCourses);
+        }
+
+        return true;
+
     }
 
 }

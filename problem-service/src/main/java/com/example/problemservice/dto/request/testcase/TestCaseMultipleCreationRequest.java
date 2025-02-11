@@ -14,7 +14,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TestCaseMultipleCreationRequest {
     UUID problemId;
-    UUID userId;
     List<String> inputs;
     List<String> outputs;
 }

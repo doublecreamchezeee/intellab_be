@@ -14,5 +14,4 @@ public class DetailsProblemSubmissionRequest {
     String code;
     Integer languageId;
     UUID problemId;
-    String userUid;
 }

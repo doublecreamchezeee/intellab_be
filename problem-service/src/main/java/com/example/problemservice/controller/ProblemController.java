@@ -93,6 +93,9 @@ public class ProblemController {
                 .result(problemService.getAllProblems(category, pageable)).build();
     }
 
+    @Operation(
+            summary = "Get all problems"
+    )
     @GetMapping("")
     public ResponseEntity<List<Problem>> getAllProblem() {
         try {
@@ -123,6 +126,10 @@ public class ProblemController {
         return ResponseEntity.ok(problemService.updateProblem(problemId, request));
     }
 
+
+    @Operation(
+            summary = "(testing only) Generate boilerplate code"
+    )
     @PostMapping("/boilerplateGenerate")
     public ApiResponse<List<DefaultCodeResponse>> generateBoilerPlate(@RequestBody DefaultCodeRequest request) {
         return ApiResponse.<List<DefaultCodeResponse>>builder()
@@ -131,6 +138,10 @@ public class ProblemController {
 
     }
 
+
+    @Operation(
+            summary = "Run in postman to generate boilerplate code"
+    )
     @PostMapping("/generateBoilerplate")
     public ApiResponse<Boolean> generateBoilerPlate() {
         problemService.generateBoilerplate();

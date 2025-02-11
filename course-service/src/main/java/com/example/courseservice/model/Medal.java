@@ -21,7 +21,8 @@ import java.util.UUID;
 public class Medal {
     @Id
     @GeneratedValue
-    UUID medal_id;
+    @Column(name = "medal_id")
+    UUID medalId;
 
     @Column(name = "medal_name", nullable = false)
     String name;
@@ -31,7 +32,8 @@ public class Medal {
 
     @Column(columnDefinition = "VARCHAR(20)")
     String type;
-    Integer bonus_score;
+    @Column(name = "bonus_score")
+    Integer bonusScore;
 
     @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
     Set<Leaderboard> leaderboards;

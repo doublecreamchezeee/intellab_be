@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,20 +17,24 @@ import java.util.UUID;
 @Table(name = "\"problem_submissions\"")
 public class ProblemSubmission {
     @Id
+    @Column(name = "submission_id")
     @GeneratedValue
-    UUID submission_id;
+    UUID submissionId;
 
-    Integer submit_order;
+    @Column(name = "submit_order")
+    Integer submitOrder;
 
     @Column(columnDefinition = "TEXT")
     String code;
 
-    @Column(columnDefinition = "VARCHAR(50)")
-    String programming_language;
-    Integer score_achieved;
+    @Column(columnDefinition = "VARCHAR(50)", name = "programming_language")
+    String programmingLanguage;
+
+    @Column(name = "score_achieved")
+    Integer scoreAchieved;
 
     @Column(name = "is_solved")
-    boolean isSolved = false;
+    Boolean isSolved = false;
 
 //    @CreationTimestamp
 //    Instant submit_date;
@@ -43,10 +45,10 @@ public class ProblemSubmission {
     Problem problem;
 
     @JoinColumn(name = "user_id")
-    UUID userUid;
+    UUID userId;
 
     @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference("submission-output")
-    List<TestCase_Output> testCases_output;
+    List<TestCaseOutput> testCasesOutput;
 
 }

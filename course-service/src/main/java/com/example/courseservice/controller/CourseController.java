@@ -251,11 +251,13 @@ public class CourseController {
     @Operation(
             summary = "Get all courses that a user has enrolled"
     )
-    @GetMapping("/{userUid}/enrolledCourses")
+    @GetMapping("/me/enrolledCourses")
     public ApiResponse<Page<UserCourses>> getEnrolledCoursesOfUser(
-            @PathVariable("userUid") String userUid,
+            //@PathVariable("userUid") String userUid,
+            @RequestHeader("X-UserId") String userUid,
             @ParameterObject Pageable pageable) {
 
+        userUid = userUid.split(",")[0];
         return ApiResponse.<Page<UserCourses>>builder()
                 .result(courseService.getEnrolledCoursesOfUser(
                             ParseUUID.normalizeUID(userUid),

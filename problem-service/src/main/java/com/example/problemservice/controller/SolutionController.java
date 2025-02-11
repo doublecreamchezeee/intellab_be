@@ -36,11 +36,15 @@ public class SolutionController {
     @Operation(
             summary = "Update solution by author id and problem id"
     )
-    @PutMapping("/update/{problemId}/{authorId}")
+    @PutMapping("/update/{problemId}/me")
     public ApiResponse<SolutionUpdateResponse> updateSolution(
             @PathVariable("problemId") String problemId,
-            @PathVariable("authorId") String authorId,
+            @RequestHeader("X-UserId") String userUid,
+            //@PathVariable("authorId") String authorId,
             SolutionUpdateRequest request) {
+
+        String authorId = userUid.split(",")[0];
+
         return ApiResponse.<SolutionUpdateResponse>builder()
                 .result(solutionService.updateSolution(problemId, authorId, request))
                 .message("Solution updated successfully")
@@ -66,11 +70,15 @@ public class SolutionController {
     @Operation(
             summary = "Delete solution by author id and problem id"
     )
-    @DeleteMapping("/{problemId}/{authorId}")
+    @DeleteMapping("/{problemId}/me")
     public ApiResponse<Boolean> deleteSolution(
             @PathVariable("problemId") String problemId,
-            @PathVariable("authorId") String authorId) {
-            solutionService.deleteSolution(problemId, authorId);
+            @RequestHeader("X-UserId") String userUid
+            //@PathVariable("authorId") String authorId
+    ) {
+        String authorId = userUid.split(",")[0];
+        solutionService.deleteSolution(problemId, authorId);
+
         return ApiResponse.<Boolean>builder()
                 .result(true)
                 .code(200)

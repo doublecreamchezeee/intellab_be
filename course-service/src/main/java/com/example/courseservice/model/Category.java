@@ -30,7 +30,7 @@ public class Category {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parentId")
+    @JoinColumn(name = "parent_id")
     Category parent;
 
     @JsonIgnore
@@ -38,6 +38,7 @@ public class Category {
     List<Category> children;
 
     String language;
+    @Column(name = "is_featured")
     Boolean isFeatured = false;
     String type;
 

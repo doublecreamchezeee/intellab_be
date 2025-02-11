@@ -13,6 +13,7 @@ import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.Solution;
 import com.example.problemservice.model.composite.SolutionID;
 import com.example.problemservice.repository.ProblemRepository;
+import com.example.problemservice.model.composite.SolutionID;
 import com.example.problemservice.repository.SolutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

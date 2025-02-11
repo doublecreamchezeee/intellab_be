@@ -3,7 +3,6 @@ package com.example.courseservice.model;
 
 import com.example.courseservice.model.compositeKey.OptionID;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,11 +16,11 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "\"options\"")
 public class Option {
     @EmbeddedId
-    OptionID option_id;
+    OptionID optionId;
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("question_id")
+    @MapsId("questionId")
     @JoinColumn(name = "question_id")
     Question question;
 

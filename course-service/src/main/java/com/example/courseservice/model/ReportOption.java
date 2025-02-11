@@ -19,19 +19,22 @@ import java.util.UUID;
 public class ReportOption {
     @Id
     @GeneratedValue
-    UUID report_option_id;
+    @Column(name = "report_option_id")
+    UUID reportOptionId;
 
     // có ràng buộc miền giá trị
     @Column(columnDefinition = "VARCHAR(20)")
     String type;
 
+    @Column(name = "report_reason")
+    String reportReason;
 
-    String report_reason;
-    String handle_action;
+    @Column(name = "handle_action")
+    String handleAction;
 
-    @OneToMany(mappedBy = "report_option", fetch = FetchType.LAZY)
-    List<CommentReport> comment_reports;
+    @OneToMany(mappedBy = "reportOption", fetch = FetchType.LAZY)
+    List<CommentReport> commentReports;
 
-    @OneToMany(mappedBy = "report_option", fetch = FetchType.LAZY)
-    List<OtherObjectReport> other_object_reports;
+    @OneToMany(mappedBy = "reportOption", fetch = FetchType.LAZY)
+    List<OtherObjectReport> otherObjectReports;
 }

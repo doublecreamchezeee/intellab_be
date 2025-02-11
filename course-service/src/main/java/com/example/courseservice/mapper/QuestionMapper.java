@@ -17,40 +17,39 @@ public interface QuestionMapper {
     @Mapping(target = "order",ignore = true)
     @Mapping(target = "answer", ignore = true)
     @Mapping(target = "unitScore", ignore = true)
-    @Mapping(source = "question_id", target = "questionId")
+    @Mapping(source = "questionId", target = "questionId")
     @Mapping(source = "questionContent", target = "questionContent")
-    @Mapping(source = "correct_answer", target = "correctAnswer")
+    @Mapping(source = "correctAnswer", target = "correctAnswer")
     @Mapping(source = "status", target = "status")
-    @Mapping(source = "question_type", target = "questionType")
+    @Mapping(source = "questionType", target = "questionType")
     @Mapping(source = "options", target = "options")
     QuestionResponse toQuestionResponse(Question question);
 
 
-    @Mapping(target = "question_id", ignore = true)
+    @Mapping(target = "questionId", ignore = true)
     @Mapping(target = "questionContent", source = "questionContent")
     //@Mapping(target = "correct_answer", source = "correctAnswer")
     @Mapping(target = "status", source = "status")
-    @Mapping(target = "question_type", source = "questionType")
-    @Mapping(target = "created_at", ignore = true)
-    @Mapping(target = "updated_at", ignore = true)
+    @Mapping(target = "questionType", source = "questionType")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Question toQuestion(QuestionUpdateRequest questionUpdateRequest);
 
-    @Mapping(target = "question_id", ignore = true)
+    @Mapping(target = "questionId", ignore = true)
     @Mapping(target = "questionContent", source = "questionContent")
     //@Mapping(target = "correct_answer", source = "correctAnswer")
     @Mapping(target = "status", source = "status")
-    @Mapping(target = "question_type", source = "questionType")
-    @Mapping(target = "created_at", ignore = true)
-    @Mapping(target = "updated_at", ignore = true)
+    @Mapping(target = "questionType", source = "questionType")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Question toQuestion(QuestionCreationRequest questionCreationRequest);
 
-    @Mapping(target = "question_id", ignore = true)
+    @Mapping(target = "questionId", ignore = true)
     @Mapping(target = "questionContent", source = "questionContent")
-    //@Mapping(target = "correct_answer", source = "correctAnswer")
     @Mapping(target = "status", source = "status")
-    @Mapping(target = "question_type", source = "questionType")
-    @Mapping(target = "created_at", ignore = true)
-    @Mapping(target = "updated_at", ignore = true)
+    @Mapping(target = "questionType", source = "questionType")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     void updateQuestion(@MappingTarget Question question, QuestionUpdateRequest questionUpdateRequest);
 
 
