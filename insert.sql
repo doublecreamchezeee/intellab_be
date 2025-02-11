@@ -1,33 +1,34 @@
-create table if not exists public.problems
-(
-    problem_id      uuid not null
-    primary key,
-    acceptance_rate numeric(5, 2)  default 0,
-    avarage_rating numeric(5,2) default 0,
-    description     text,
-    problem_level   varchar(20),
-    problem_name    varchar(255),
-    score           integer,
-    is_available     boolean       default false,
-    is_published    boolean       default false,
-    solution_structure text
-    );
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-alter table public.problems
+create table problems
+(
+    problem_id         uuid not null default uuid_generate_v4()
+        primary key,
+    acceptance_rate    numeric(5, 2) default 0,
+    avarage_rating     numeric(5, 2) default 0,
+    description        text,
+    problem_level      varchar(20),
+    problem_name       varchar(255),
+    score              integer,
+    is_available       boolean       default false,
+    is_published       boolean       default false,
+    solution_structure text
+);
+
+alter table problems
     owner to postgres;
 
-create table if not exists public.solutions
+create table solutions
 (
     author_id  uuid not null,
     content    text,
-    user_id    uuid,
     problem_id uuid not null
-    constraint fkrm3misp2p4syk4tcnefnqspbl
-    references public.problems,
+        constraint fkrm3misp2p4syk4tcnefnqspbl
+            references problems,
     primary key (author_id, problem_id)
-    );
+);
 
-alter table public.solutions
+alter table solutions
     owner to postgres;
 
 create table hints
@@ -42,7 +43,6 @@ create table hints
 
 alter table hints
     owner to postgres;
-
 
 create table programming_language
 (
@@ -70,405 +70,395 @@ create table default_code
 alter table default_code
     owner to postgres;
 
-
-
-
-create table if not exists public.problem_submissions
+create table problem_submissions
 (
-    submission_id        uuid not null
-    primary key,
+    submission_id        uuid not null default uuid_generate_v4()
+        primary key,
     code                 text,
     programming_language varchar(50),
     score_achieved       integer,
     submit_order         integer,
-    user_uid             uuid,
+    user_id              uuid,
     problem_id           uuid
-    constraint fkatyso4hx6mtu96ixk88g328er
-    references public.problems
-    );
-
-alter table public.problem_submissions
-    owner to postgres;
-
-create table if not exists public.test_cases
-(
-    testcase_id uuid not null
-    primary key,
-    input       text,
-    output      text,
-    user_id     uuid,
-    testcase_order integer,
-    problem_id  uuid not null
-    constraint fkk0300c33ccc0im12utqoxu0m6
-    references public.problems
+        constraint fkatyso4hx6mtu96ixk88g328er
+            references problems,
+    is_solved            boolean
 );
 
-alter table public.test_cases
+alter table problem_submissions
     owner to postgres;
 
-create table if not exists public.test_case_outputs
+create table test_cases
+(
+    testcase_id    uuid not null default uuid_generate_v4()
+        primary key,
+    input          text,
+    output         text,
+    user_id        uuid,
+    testcase_order integer,
+    problem_id     uuid not null
+        constraint fkk0300c33ccc0im12utqoxu0m6
+            references problems
+);
+
+alter table test_cases
+    owner to postgres;
+
+create table test_case_outputs
 (
     token             uuid,
     result_status     varchar(30),
     runtime           real,
     submission_output text,
     submission_id     uuid not null
-    constraint fkniol765wvj61q9t6lrlhhx091
-    references public.problem_submissions,
+        constraint fkniol765wvj61q9t6lrlhhx091
+            references problem_submissions,
     testcase_id       uuid not null
-    constraint fkawdt7u0ci9lvfrnphpho4p6xd
-    references public.test_cases,
+        constraint fkawdt7u0ci9lvfrnphpho4p6xd
+            references test_cases,
     primary key (submission_id, testcase_id)
-    );
+);
 
-alter table public.test_case_outputs
+alter table test_case_outputs
     owner to postgres;
 
-create table if not exists public.exercises
+create table exercises
 (
-    exercise_id   uuid not null
-    primary key,
+    exercise_id   uuid not null default uuid_generate_v4()
+        primary key,
     description   text,
     exercise_name varchar(255)
-    );
+);
 
-alter table public.exercises
+alter table exercises
     owner to postgres;
 
-create table if not exists public.medals
+create table medals
 (
-    medal_id    uuid         not null
-    primary key,
+    medal_id    uuid         not null default uuid_generate_v4()
+        primary key,
     bonus_score integer,
     image       text,
     medal_name  varchar(255) not null,
     type        varchar(20)
-    );
+);
 
-alter table public.medals
+alter table medals
     owner to postgres;
 
-create table if not exists public.achievements
+create table achievements
 (
     user_id       uuid not null,
     achieved_date timestamp(6) with time zone,
-                                   medal_id      uuid not null
-                                   constraint fkn3w49fym60qqsvsectfeeojck
-                                   references public.medals,
-                                   primary key (medal_id, user_id)
-    );
+    medal_id      uuid not null
+        constraint fkn3w49fym60qqsvsectfeeojck
+            references medals,
+    primary key (medal_id, user_id)
+);
 
-alter table public.achievements
+alter table achievements
     owner to postgres;
 
-create table if not exists public.leaderboard
+create table leaderboard
 (
     user_id   uuid not null
-    primary key,
+        primary key,
     score     bigint,
     hierarchy varchar(20),
     rank      integer,
     medal_id  uuid
-    constraint fkcclgfeq6toq7fanb1cgxy01m7
-    references public.medals
-    );
+        constraint fkcclgfeq6toq7fanb1cgxy01m7
+            references medals
+);
 
-alter table public.leaderboard
+alter table leaderboard
     owner to postgres;
 
-create table if not exists public.notifications
+create table notifications
 (
     notification_order bigint not null,
     user_id            uuid   not null,
     content            text,
     notified_date      timestamp(6) with time zone,
-                                        title              varchar(255),
+    title              varchar(255),
     primary key (notification_order, user_id)
-    );
+);
 
-alter table public.notifications
+alter table notifications
     owner to postgres;
 
-create table if not exists public.questions
+create table questions
 (
-    question_id      uuid not null
-    primary key,
+    question_id      uuid not null default uuid_generate_v4()
+        primary key,
     correct_answer   varchar(255),
     created_at       timestamp(6) with time zone,
-                                      question_content text,
-                                      question_type    char,
-                                      status           varchar(10),
+    question_content text,
+    question_type    char,
+    status           varchar(10),
     updated_at       timestamp(6) with time zone
-                                      );
+);
 
-alter table public.questions
+alter table questions
     owner to postgres;
 
-create table if not exists public.options
+create table options
 (
     option_order integer not null,
     content      varchar(255),
     question_id  uuid    not null
-    constraint fkjglnbyg0fqsplv75m2oi42ji1
-    references public.questions,
+        constraint fkjglnbyg0fqsplv75m2oi42ji1
+            references questions,
     primary key (option_order, question_id)
-    );
-
-alter table public.options
-    owner to postgres;
-
-create table if not exists public.question_list
-(
-    exercise_id uuid not null
-    constraint fki72qnw59jeo39x6v1uhe0wb51
-    references public.exercises,
-    question_id uuid not null
-    constraint fkabppvo14rfcil3brx1s9begg2
-    references public.questions
 );
 
-alter table public.question_list
+alter table options
     owner to postgres;
 
-create table if not exists public.report_options
+create table question_list
 (
-    report_option_id uuid not null
-    primary key,
+    exercise_id uuid not null default uuid_generate_v4()
+        constraint fki72qnw59jeo39x6v1uhe0wb51
+            references exercises,
+    question_id uuid not null
+        constraint fkabppvo14rfcil3brx1s9begg2
+            references questions
+);
+
+alter table question_list
+    owner to postgres;
+
+create table report_options
+(
+    report_option_id uuid not null default uuid_generate_v4()
+        primary key,
     handle_action    varchar(255),
     report_reason    varchar(255),
     type             varchar(20)
-    );
+);
 
-alter table public.report_options
+alter table report_options
     owner to postgres;
 
-create table if not exists public.streak_records
+create table streak_records
 (
     user_id      uuid not null
-    primary key,
+        primary key,
     last_access  timestamp(6) with time zone,
-                                  status       varchar(10),
+    status       varchar(10),
     streak_score integer,
     medal_id     uuid
-    constraint fkejivk072an77tukw69rx6vplu
-    references public.medals
-    );
+        constraint fkejivk072an77tukw69rx6vplu
+            references medals
+);
 
-alter table public.streak_records
+alter table streak_records
     owner to postgres;
 
-create table if not exists public.topics
+create table topics
 (
-    topic_id        uuid not null
-    primary key,
+    topic_id        uuid default uuid_generate_v4() not null
+        primary key,
     content         text,
     number_of_likes integer,
     post_reach      varchar(10),
     title           varchar(255),
-    user_uid        varchar(255)
-    );
+    user_id         varchar(255)
+);
 
-alter table public.topics
+alter table topics
     owner to postgres;
 
-create table if not exists public.comments
+create table comments
 (
-    comment_id        uuid not null
-    primary key,
+    comment_id        uuid not null default uuid_generate_v4()
+        primary key,
     content           text,
     created           timestamp(6) with time zone,
-                                       last_modified     timestamp(6) with time zone,
-                                       number_of_likes   bigint,
-                                       reply_level       integer,
-                                       user_id           uuid,
-                                       parent_comment_id uuid
-                                       constraint fkst79ninfcw8cbrihoedh118xk
-                                       references public.comments,
-                                       topic_id          uuid
-                                       constraint fkhanwncw4vn5t5syodhdma5sip
-                                       references public.topics
-                                       );
+    last_modified     timestamp(6) with time zone,
+    number_of_likes   bigint,
+    reply_level       integer,
+    user_id           uuid,
+    parent_comment_id uuid
+        constraint fkst79ninfcw8cbrihoedh118xk
+            references comments,
+    topic_id          uuid
+        constraint fkhanwncw4vn5t5syodhdma5sip
+            references topics
+);
 
-alter table public.comments
+alter table comments
     owner to postgres;
 
-create table if not exists public.comment_reports
+create table comment_reports
 (
     owner_id         uuid not null,
     content          text,
     status           varchar(10),
     user_id          uuid,
     destination_id   uuid not null
-    constraint fksscjqt1wyjomldmqvx7u6iqhy
-    references public.comments,
+        constraint fksscjqt1wyjomldmqvx7u6iqhy
+            references comments,
     report_option_id uuid not null
-    constraint fkfkwxdv8wp5h56wq69jnp5ux3g
-    references public.report_options,
+        constraint fkfkwxdv8wp5h56wq69jnp5ux3g
+            references report_options,
     primary key (destination_id, owner_id, report_option_id)
-    );
+);
 
-alter table public.comment_reports
+alter table comment_reports
     owner to postgres;
 
-create table if not exists public.courses
+create table courses
 (
-    course_id   uuid not null
-    primary key,
-    course_name varchar(255),
-    description text,
-    level       varchar(20),
-    price       numeric(11, 2),
-    unit_price  varchar(10),
-    user_uid    uuid,
-    topic_id    uuid
-
-    constraint uk23uffat5pnitvcg67ugi4kvck
-    unique
-    constraint fklljvfay1x0yv1gm2xmd6s7j9b
-    references public.topics,
-
-    average_rating numeric(5, 2),
+    course_id      uuid default uuid_generate_v4() not null
+        primary key,
+    course_name    varchar(255),
+    description    text,
+    level          varchar(20),
+    price          numeric(11, 2),
+    unit_price     varchar(10),
+    user_id        uuid,
+    topic_id       uuid
+        constraint uk23uffat5pnitvcg67ugi4kvck
+            unique
+        constraint fklljvfay1x0yv1gm2xmd6s7j9b
+            references topics,
+    average_rating double precision,
     review_count   integer
-    );
+);
 
-alter table public.courses
+alter table courses
     owner to postgres;
 
-create table if not exists public.lessons
+create table lessons
 (
-    lesson_id    uuid not null
-    primary key,
+    lesson_id    uuid default uuid_generate_v4() not null
+        primary key,
     content      text,
     description  text,
     lesson_name  varchar(255),
     lesson_order integer,
     problem_id   uuid,
-    course_id    uuid not null
-    constraint fk2uhy91p0gnptep0xxwaal7gnu
-    references public.courses,
+    course_id    uuid                            not null
+        constraint fk2uhy91p0gnptep0xxwaal7gnu
+            references courses,
     exercise_id  uuid
-    constraint uker6gswadtti4suc2pq8wbq94a
-    unique
-    constraint fkkm6c9l61pmyo1j6a8rpivr85m
-    references public.exercises
-    );
+        constraint uker6gswadtti4suc2pq8wbq94a
+            unique
+        constraint fkkm6c9l61pmyo1j6a8rpivr85m
+            references exercises
+);
 
-alter table public.lessons
+alter table lessons
     owner to postgres;
 
-create table if not exists public.learning_lesson
+create table learning_lesson
 (
-    learning_id        uuid not null
-    primary key,
+    learning_id        uuid not null default uuid_generate_v4()
+        primary key,
     is_done_practice   boolean,
     is_done_theory     boolean,
     last_accessed_date timestamp(6) with time zone,
-                                        status             varchar(10),
+    status             varchar(10),
     user_id            uuid,
     lesson_id          uuid
-    constraint fktl0duxtv32rt2myr59sv7d3r3
-    references public.lessons
-    );
+        constraint fktl0duxtv32rt2myr59sv7d3r3
+            references lessons
+);
 
-alter table public.learning_lesson
+alter table learning_lesson
     owner to postgres;
 
-create table if not exists public.assignments
+create table assignments
 (
-    assignment_id uuid not null
-    primary key,
+    assignment_id uuid not null default uuid_generate_v4()
+        primary key,
     score         numeric(4, 2),
     submit_date   timestamp(6) with time zone,
-                                   submit_order  integer,
-                                   exercise_id   uuid
-                                   constraint fkadkhyietaewgkc3cj0tr8kfon
-                                   references public.exercises,
-                                   learning_id   uuid not null
-                                   constraint fka5frurhonloarunth7ldi7ahb
-                                   references public.learning_lesson
-                                   );
+    submit_order  integer,
+    exercise_id   uuid
+        constraint fkadkhyietaewgkc3cj0tr8kfon
+            references exercises,
+    learning_id   uuid not null
+        constraint fka5frurhonloarunth7ldi7ahb
+            references learning_lesson
+);
 
-alter table public.assignments
+alter table assignments
     owner to postgres;
 
-create table if not exists public.assignment_details
+create table assignment_details
 (
     submit_order  integer not null,
     answer        varchar(20),
     unit_score    numeric(4, 2),
     assignment_id uuid    not null
-    constraint fkt8xkuef7x94oj86nfxgq85yg9
-    references public.assignments,
+        constraint fkt8xkuef7x94oj86nfxgq85yg9
+            references assignments,
     question_id   uuid    not null
-    constraint fk2ymomgwidfms2ucwbdqrevu9x
-    references public.questions,
+        constraint fk2ymomgwidfms2ucwbdqrevu9x
+            references questions,
     primary key (assignment_id, submit_order)
-    );
+);
 
-alter table public.assignment_details
+alter table assignment_details
     owner to postgres;
 
-create table if not exists public.other_object_reports
+create table other_object_reports
 (
     owner_id         uuid not null,
     content          text,
     status           varchar(10),
     user_id          uuid,
     destination_id   uuid not null
-    constraint fkg6fa7rtsqjtg9imov1j508ors
-    references public.topics,
+        constraint fkg6fa7rtsqjtg9imov1j508ors
+            references topics,
     report_option_id uuid not null
-    constraint fk9ajip7upweyynaymq36mt7mo4
-    references public.report_options,
+        constraint fk9ajip7upweyynaymq36mt7mo4
+            references report_options,
     primary key (destination_id, owner_id, report_option_id)
-    );
-
-alter table public.other_object_reports
-    owner to postgres;
-
-create table if not exists public.reviews
-(
-    review_id uuid    not null
-    primary key,
-    comment   text,
-    rating    integer not null,
-    user_uid  uuid,
-    course_id uuid    not null
-    constraint fkl9h49973yigjg39ov07a9mog6
-    references public.courses
 );
 
-alter table public.reviews
+alter table other_object_reports
     owner to postgres;
 
-create table if not exists public.user_courses
+create table reviews
+(
+    review_id uuid    not null default uuid_generate_v4()
+        primary key,
+    comment   text,
+    rating    integer not null,
+    user_id   uuid,
+    course_id uuid    not null
+        constraint fkl9h49973yigjg39ov07a9mog6
+            references courses
+);
+
+alter table reviews
+    owner to postgres;
+
+create table user_courses
 (
     user_uid           uuid not null,
     last_accessed_date timestamp(6) with time zone,
-                                        progress_percent   numeric(5, 2),
+    progress_percent   numeric(5, 2),
     status             varchar(10),
-    latest_lesson_id uuid,
+    latest_lesson_id   uuid,
     course_id          uuid not null
-    constraint fkcve18frw4nbxwrq0qh78dgipc
-    references public.courses,
+        constraint fkcve18frw4nbxwrq0qh78dgipc
+            references courses,
     primary key (course_id, user_uid)
-    );
+);
 
-alter table public.user_courses
+alter table user_courses
     owner to postgres;
-
-
 
 create table categories
 (
-    category_id   uuid         not null
+    category_id   integer      not null
         primary key,
-    type          varchar(255),
-    description   text,
-    is_featured   boolean,
-    language      varchar(255),
     category_name varchar(100) not null,
-    parent_id     uuid
+    parent_id     integer
         constraint fkcidcf2xf6eebpieowr7m02pg5
             references categories
 );
@@ -476,14 +466,12 @@ create table categories
 alter table categories
     owner to postgres;
 
-
-
 create table course_category
 (
-    course_id   uuid not null
+    course_id   uuid    not null
         constraint fkl4r5vdloyu8rtqoh4ei49y2x2
             references courses,
-    category_id uuid not null
+    category_id integer not null
         constraint fky6fhus0rcvwiik7rk5l99j3j
             references categories
 );
@@ -493,10 +481,10 @@ alter table course_category
 
 create table question_category
 (
-    question_id uuid not null
+    question_id uuid    not null
         constraint fkssojn51nglg3ydh1lwbk62hyr
             references questions,
-    category_id uuid not null
+    category_id integer not null
         constraint fkpo1ya01k2p6b6b03b4elbvow6
             references categories
 );
@@ -504,11 +492,33 @@ create table question_category
 alter table question_category
     owner to postgres;
 
+create table sections
+(
+    section_id integer not null
+        primary key,
+    name       varchar(255)
+);
+
+alter table sections
+    owner to postgres;
+
+create table course_section
+(
+    course_id  uuid    not null
+        constraint fk61t4e9fdsniv4cui65oih8sr3
+            references courses,
+    section_id integer not null
+        constraint fkidr2cur1nxr2hy5pnf9rsplwi
+            references sections
+);
+
+alter table course_section
+    owner to postgres;
 
 create table problem_category
 (
-    category_id uuid not null,
-    problem_id  uuid not null
+    category_id integer not null,
+    problem_id  uuid    not null
         constraint fk2rg82j2evmwbfrglcpvhwpxfa
             references problems,
     primary key (category_id, problem_id)
@@ -518,48 +528,49 @@ alter table problem_category
     owner to postgres;
 
 
-create table course_summary(
-    course_id UUID primary key,
-    course_name VARCHAR(255),
-    summary_content TEXT,
-    constraint fk_c_cs foreign key (course_id)
-       references courses(course_id)
+
+create table course_summary
+(
+    course_id       uuid not null
+        primary key
+        constraint fk_c_cs
+            references courses,
+    course_name     varchar(255),
+    summary_content text
 );
 
 alter table course_summary
     owner to postgres;
 
 
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('dbfea360-dda9-46a5-9487-ea624080bb60', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('5fe612b4-3998-44c7-85b2-2e4e973a38a7', 'The logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', null, null, 'Logic Building Problems', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', null, null, 'Introduction to DSA', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', null, null, 'Matrix Data Structure Guide', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('067b8270-f488-41b8-a741-9d118e9dc6c4', 'An in-depth guide to understanding and implementing linked lists. Explore concepts like singly, doubly, and circular linked lists, along with common operations such as insertion, deletion, traversal, and reversal. Ideal for mastering dynamic data organization and memory-efficient problem-solving.', null, null, 'Linked List Data Structure Guide', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('5df3554d-160e-45b9-989a-ebd58ee65235', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', null, null, 'Heap Data Structure Guide', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('f16f21af-1f53-4b7d-be4f-368c17574f02', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', null, null, 'Guide on Recursive Algorithms', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('dd29f271-a9df-4fcc-a742-127dd269f84b', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', null, null, 'Guide on Graph Algorithms', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('a926fe6d-ded3-4127-9558-599fa430e1f6', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', null, null, 'Guide on Greedy Algorithms', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('0a489a2f-a622-4ba9-a94d-70d5624e1309', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', null, null, 'Dynamic Programming Guide', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('95795791-8e54-4cce-8272-c06c15df68fc', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', null, null, 'Bitwise Algorithms Guide', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('01e7b3b3-a36a-4679-b082-14c2ad622628', 'Introduction to Queue Data Structure', null, null, 'Queue', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('d9fbda58-f71b-4567-affe-4fbab0933feb', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
 
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('dbfea360-dda9-46a5-9487-ea624080bb60', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('5fe612b4-3998-44c7-85b2-2e4e973a38a7', 'The logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', null, null, 'Logic Building Problems', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', null, null, 'Introduction to DSA', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', null, null, 'Matrix Data Structure Guide', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('067b8270-f488-41b8-a741-9d118e9dc6c4', 'An in-depth guide to understanding and implementing linked lists. Explore concepts like singly, doubly, and circular linked lists, along with common operations such as insertion, deletion, traversal, and reversal. Ideal for mastering dynamic data organization and memory-efficient problem-solving.', null, null, 'Linked List Data Structure Guide', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('5df3554d-160e-45b9-989a-ebd58ee65235', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', null, null, 'Heap Data Structure Guide', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('f16f21af-1f53-4b7d-be4f-368c17574f02', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', null, null, 'Guide on Recursive Algorithms', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('dd29f271-a9df-4fcc-a742-127dd269f84b', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', null, null, 'Guide on Graph Algorithms', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('a926fe6d-ded3-4127-9558-599fa430e1f6', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', null, null, 'Guide on Greedy Algorithms', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('0a489a2f-a622-4ba9-a94d-70d5624e1309', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', null, null, 'Dynamic Programming Guide', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('95795791-8e54-4cce-8272-c06c15df68fc', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', null, null, 'Bitwise Algorithms Guide', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_uid) VALUES ('d9fbda58-f71b-4567-affe-4fbab0933feb', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
-
-
-
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'The Logic Building Problems', 'Logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', 'Beginner', 0.00, 'VND', null, '5fe612b4-3998-44c7-85b2-2e4e973a38a7', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'Matrix Data Structure Guide', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', 'Beginner', 0.00, 'VND', null, 'ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'Linked List Data Structure Guide', 'An in-depth guide to understanding and implementing linked lists. Explore concepts like singly, doubly, and circular linked lists, along with common operations such as insertion, deletion, traversal, and reversal. Ideal for mastering dynamic data organization and memory-efficient problem-solving.', 'Beginner', 0.00, 'VND', null, '067b8270-f488-41b8-a741-9d118e9dc6c4', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'Heap Data Structure Guide', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', 'Beginner', 0.00, 'VND', null, '5df3554d-160e-45b9-989a-ebd58ee65235', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'Guide on Recursive Algorithms', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', 'Beginner', 0.00, 'VND', null, 'f16f21af-1f53-4b7d-be4f-368c17574f02', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'Guide on Graph Algorithms', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', 'Intermediate', 0.00, 'VND', null, 'dd29f271-a9df-4fcc-a742-127dd269f84b', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'Guide on Greedy Algorithms', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', 'Beginner', 0.00, 'VND', null, 'a926fe6d-ded3-4127-9558-599fa430e1f6', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'Dynamic Programming Guide', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', 'Advanced', 0.00, 'VND', null, '0a489a2f-a622-4ba9-a94d-70d5624e1309', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'Bitwise Algorithms Guide', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', 'Beginner', 0.00, 'VND', null, '95795791-8e54-4cce-8272-c06c15df68fc', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', e'Introduction to DSA I
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'The Logic Building Problems', 'Logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', 'Beginner', 0.00, 'VND', null, '5fe612b4-3998-44c7-85b2-2e4e973a38a7', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'Matrix Data Structure Guide', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', 'Beginner', 0.00, 'VND', null, 'ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'Linked List Data Structure Guide', 'An in-depth guide to understanding and implementing linked lists. Explore concepts like singly, doubly, and circular linked lists, along with common operations such as insertion, deletion, traversal, and reversal. Ideal for mastering dynamic data organization and memory-efficient problem-solving.', 'Beginner', 0.00, 'VND', null, '067b8270-f488-41b8-a741-9d118e9dc6c4', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'Heap Data Structure Guide', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', 'Beginner', 0.00, 'VND', null, '5df3554d-160e-45b9-989a-ebd58ee65235', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'Guide on Recursive Algorithms', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', 'Beginner', 0.00, 'VND', null, 'f16f21af-1f53-4b7d-be4f-368c17574f02', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'Guide on Graph Algorithms', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', 'Intermediate', 0.00, 'VND', null, 'dd29f271-a9df-4fcc-a742-127dd269f84b', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'Guide on Greedy Algorithms', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', 'Beginner', 0.00, 'VND', null, 'a926fe6d-ded3-4127-9558-599fa430e1f6', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'Dynamic Programming Guide', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', 'Advanced', 0.00, 'VND', null, '0a489a2f-a622-4ba9-a94d-70d5624e1309', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'Bitwise Algorithms Guide', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', 'Beginner', 0.00, 'VND', null, '95795791-8e54-4cce-8272-c06c15df68fc', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', e'Introduction to DSA I
 ', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'dbfea360-dda9-46a5-9487-ea624080bb60', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'Introduction to DSA II', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_uid, topic_id, average_rating, review_count) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 'Stack', 'The Stack lesson series offers a comprehensive introduction to one of the fundamental data structures in programming. You''ll explore how a Stack operates based on the LIFO (Last In, First Out) principle, perform core operations such as push, pop, and peek, and apply these concepts to real-world problems like validating parentheses, converting expressions, or building a browser''s backtracking system. This series is ideal for beginners and those looking to strengthen their understanding of data structures.', 'Beginner', 0.00, 'VND', null, 'd9fbda58-f71b-4567-affe-4fbab0933feb', null, null);
-
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'Introduction to DSA II', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 'Queue', 'The Queue lesson series dives into the mechanics of this fundamental data structure, which follows the FIFO (First In, First Out) principle. You’ll learn how to perform operations such as enqueue, dequeue, and peek, while also exploring its variations like Circular Queues and Priority Queues. Practical applications, including task scheduling, buffering, and breadth-first search algorithms, will help solidify your understanding. This series is perfect for beginners and anyone looking to master essential programming concepts.', 'Beginner', 0.00, 'VND', null, '01e7b3b3-a36a-4679-b082-14c2ad622628', null, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 'Stack', 'The Stack lesson series offers a comprehensive introduction to one of the fundamental data structures in programming. You''ll explore how a Stack operates based on the LIFO (Last In, First Out) principle, perform core operations such as push, pop, and peek, and apply these concepts to real-world problems like validating parentheses, converting expressions, or building a browser''s backtracking system. This series is ideal for beginners and those looking to strengthen their understanding of data structures.', 'Beginner', 0.00, 'VND', null, 'd9fbda58-f71b-4567-affe-4fbab0933feb', null, null);
 
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '', 'Stack');
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '', 'Queue');
@@ -575,7 +586,6 @@ INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('28239350-2d7a-4ab2-8f97-137146a725ca', '', 'Guide on Greedy Algorithms');
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('3dea63cf-4407-413b-82be-5cba86b4e6bc', '', 'Dynamic Programming Guide');
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('3de5e4c5-3fe6-4fa5-be9e-63966e2d63b7', '', 'Bitwise Algorithms Guide');
-
 
 INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('dfa51df3-225e-42c9-82b4-7ffd179ced23', '2', '2024-12-23 14:19:14.661456 +00:00', 'How are elements stored in an array?', 'S', 'active', null);
 INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('f2d6151a-0fba-4117-934f-9f0496ea456d', '1', '2024-12-23 16:05:33.703857 +00:00', 'What is the time complexity of accessing an element in an array?', 'S', 'active', null);
@@ -635,6 +645,7 @@ INSERT INTO public.questions (question_id, correct_answer, created_at, question_
 INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('7e482eb8-a094-48b3-97a6-6c253045b3e0', '1', '2025-01-16 12:58:46.979356 +00:00', 'Which of these is an application of stack?', 'S', 'active', null);
 INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('d04af04d-8330-4b16-be86-313bb1df0cac', '3', '2025-01-16 12:58:46.979356 +00:00', 'What is the time complexity of a stack push operation?', 'S', 'active', null);
 INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('f0a148ac-4c4e-4306-8957-d9de760351e8', '2', '2025-01-16 12:58:46.979356 +00:00', 'Which data structure can be used for undo operations in text editors?', 'S', 'active', null);
+
 
 
 INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'In arbitrary order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
@@ -870,6 +881,7 @@ INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Pop'
 INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Push', '720aea7e-824a-46cd-acae-627157c68c16');
 INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Traversal', '720aea7e-824a-46cd-acae-627157c68c16');
 
+
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', '707fc477-b79b-4065-b220-a79199e534ca');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', 'a6330516-d682-4807-90c0-5893c31a2a77');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
@@ -928,6 +940,7 @@ INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '720aea7e-824a-46cd-acae-627157c68c16');
+
 
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('bc7282ef-2185-47e3-acbc-5b5597cbbbfc', e'****Examples :****
 
@@ -13971,6 +13984,84 @@ echo findSum($n);
 15
 ```
 ', '', 'Program to find sum of first n natural numbers', 18, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0aeea379-45ac-4886-bc6e-ebee7abcae78', e'****Learn Basics of Singly Linked List:****
+-------------------------------------------
+
+1. [Basic Terminologies in Linked List](https://www.geeksforgeeks.org/what-is-linked-list/)
+2. [Singly Linked List Tutorial](https://www.geeksforgeeks.org/singly-linked-list-tutorial/)
+3. [Linked List vs Array](https://www.geeksforgeeks.org/linked-list-vs-array/)
+
+****Basic Operations of Singly Linked List:****
+-----------------------------------------------
+
+1. [Linked List Insertion](https://www.geeksforgeeks.org/linked-list-set-2-inserting-a-node/)
+2. [Search an element in a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/search-an-element-in-a-linked-list-iterative-and-recursive/)
+3. [Find Length of a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/find-length-of-a-linked-list-iterative-and-recursive/)
+4. [Reverse a linked list](https://www.geeksforgeeks.org/write-a-function-to-reverse-the-nodes-of-a-linked-list/)
+5. [Linked List Deletion (Deleting a given key)](https://www.geeksforgeeks.org/linked-list-set-3-deleting-node/)
+6. [Linked List Deletion (Deleting a key at given position)](https://www.geeksforgeeks.org/delete-a-linked-list-node-at-a-given-position/)
+7. [Write a function to delete a Linked List](https://www.geeksforgeeks.org/write-a-function-to-delete-a-linked-list/)
+
+****Easy Problems on Singly Linked List:****
+--------------------------------------------
+
+* [Identical Linked Lists](https://www.geeksforgeeks.org/identical-linked-lists/)
+* [Print the middle of a given linked list](https://www.geeksforgeeks.org/write-a-c-function-to-print-the-middle-of-the-linked-list/)
+* [Write a function to get Nth node in a Linked List](https://www.geeksforgeeks.org/write-a-function-to-get-nth-node-in-a-linked-list/)
+* [Nth node from the end of a Linked List](https://www.geeksforgeeks.org/nth-node-from-the-end-of-a-linked-list/)
+* [Move last element to front of a given Linked List](https://www.geeksforgeeks.org/move-last-element-to-front-of-a-given-linked-list/)
+* [Make middle node head in a linked list](https://www.geeksforgeeks.org/make-middle-node-head-linked-list/)
+* [Delete alternate nodes of a Linked List](https://www.geeksforgeeks.org/delete-alternate-nodes-of-a-linked-list/)
+* [Add 1 to a number represented as linked list](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
+* [Add two numbers represented by linked lists](https://www.geeksforgeeks.org/add-two-numbers-represented-by-linked-list/)
+* [Subtract Two Numbers represented as Linked Lists](https://www.geeksforgeeks.org/subtract-two-numbers-represented-as-linked-lists/)
+* [Find the sum of last n nodes of the given Linked List](https://www.geeksforgeeks.org/find-sum-last-n-nodes-given-linked-list/)
+* [Pairwise swap elements of a given linked list](https://www.geeksforgeeks.org/pairwise-swap-elements-of-a-given-linked-list/)
+* [Remove every k-th node of the linked list](https://www.geeksforgeeks.org/remove-every-k-th-node-linked-list/)
+* [Remove duplicates from a sorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-a-sorted-linked-list/)
+
+****Intermediate Problems on Singly Linked List:****
+----------------------------------------------------
+
+* [Detect loop in a linked list](https://www.geeksforgeeks.org/write-a-c-function-to-detect-loop-in-a-linked-list/)
+* [Find length of loop in linked list](https://www.geeksforgeeks.org/find-length-of-loop-in-linked-list/)
+* [Function to check if a singly linked list is palindrome](https://www.geeksforgeeks.org/function-to-check-if-a-singly-linked-list-is-palindrome/)
+* [Remove duplicates from an unsorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-an-unsorted-linked-list/)
+* [Remove all occurrences of duplicates from a sorted Linked List](https://www.geeksforgeeks.org/remove-occurrences-duplicates-sorted-linked-list/)
+* [Swap nodes in a linked list without swapping data](https://www.geeksforgeeks.org/swap-nodes-in-a-linked-list-without-swapping-data/)
+* [Intersection point of two Linked Lists.](https://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/)
+* [Iteratively Reverse a linked list using only 2 pointers (An Interesting Method)](https://www.geeksforgeeks.org/iteratively-reverse-a-linked-list-using-only-2-pointers/)
+* [Segregate even and odd nodes in a Linked List](https://www.geeksforgeeks.org/segregate-even-and-odd-elements-in-a-linked-list/)
+* [Alternate Odd and Even Nodes in a Singly Linked List](https://www.geeksforgeeks.org/alternate-odd-even-nodes-singly-linked-list/)
+* [Rearrange a Linked List in Zig-Zag fashion](https://www.geeksforgeeks.org/linked-list-in-zig-zag-fashion/)
+* [Adding two polynomials using Linked List](https://www.geeksforgeeks.org/adding-two-polynomials-using-linked-list/)
+* [Union and Intersection of two Linked Lists](https://www.geeksforgeeks.org/union-and-intersection-of-two-linked-lists/)
+* [Sort linked list which is already sorted on absolute values](https://www.geeksforgeeks.org/sort-linked-list-already-sorted-absolute-values/)
+
+****Hard Problems on Singly Linked List:****
+--------------------------------------------
+
+* [Reverse a Linked List in groups of given size](https://www.geeksforgeeks.org/reverse-a-list-in-groups-of-given-size/)
+* [Flattening a Linked List](https://www.geeksforgeeks.org/flattening-a-linked-list/)
+* [Reverse alternate K nodes in a Singly Linked List](https://www.geeksforgeeks.org/reverse-alternate-k-nodes-in-a-singly-linked-list/)
+* [Alternating split of a given Singly Linked List](https://www.geeksforgeeks.org/alternating-split-of-a-given-singly-linked-list/)
+* [Delete nodes which have a greater value on right side](https://www.geeksforgeeks.org/delete-nodes-which-have-a-greater-value-on-right-side/)
+* [Given a linked list of line segments, remove middle points](https://www.geeksforgeeks.org/given-linked-list-line-segments-remove-middle-points/)
+* [Clone a linked list with next and random pointer](https://www.geeksforgeeks.org/a-linked-list-with-next-and-arbit-pointer/)
+* [Rearrange a given linked list in-place.](https://www.geeksforgeeks.org/rearrange-a-given-linked-list-in-place/)
+* [Select a Random Node from a Singly Linked List](https://www.geeksforgeeks.org/select-a-random-node-from-a-singly-linked-list/)
+* [In-place Merge two linked lists without changing links of first list](https://www.geeksforgeeks.org/in-place-merge-two-linked-list-without-changing-links-of-first-list/)
+* [Length of longest palindrome list in a linked list using O(1) extra space](https://www.geeksforgeeks.org/length-longest-palindrome-list-linked-list-using-o1-extra-space/)
+* [Rotate Linked List block wise](https://www.geeksforgeeks.org/rotate-linked-list-block-wise/)
+* [Count rotations in sorted and rotated linked list](https://www.geeksforgeeks.org/count-rotations-sorted-rotated-linked-list/)
+
+****Quick Links:****
+--------------------
+
+* [\'Practice Problems\' on Linked List](https://www.geeksforgeeks.org/explore?page=2&category=Linked%20List&sortBy=difficulty&itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=practice_header)
+    * [\'Videos\' on Linked List](https://www.youtube.com/playlist?list=PLqM7alHXFySH41ZxzrPNj2pAYPOI8ITe7)
+* [\'Quizzes\' on Linked List](https://www.geeksforgeeks.org/data-structure-gq/linked-list-gq/)
+', 'Singly linked list is a linear data structure in which the elements are not stored in contiguous memory locations and each element is connected only to its next element using a pointer.', 'Singly Linked List Problems', 3, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ae34492a-cfab-417f-952f-ddb4957195e8', e'Given a number
 
 ****n****
@@ -17467,84 +17558,6 @@ Frequently Asked Questions (FAQs) on Divide and Conquer Algorithm:
 Divide and Conquer is a popular algorithmic technique in computer science that involves breaking down a problem into smaller sub-problems, solving each sub-problem independently, and then combining the solutions to the sub-problems to solve the original problem. The basic idea behind this technique is to divide a problem into smaller, more manageable sub-problems that can be solved more easily.
 
 ', 'Algorithm is a problem-solving technique used to solve problems by dividing the main problem into subproblems, solving them individually and then merging them to find solution to the original problem. In this article, we are going to discuss how Divide and Conquer Algorithm is helpful and how we can use it to solve problems.', 'Introduction to Divide and Conquer Algorithm', 2, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0aeea379-45ac-4886-bc6e-ebee7abcae78', e'****Learn Basics of Singly Linked List:****
--------------------------------------------
-
-1. [Basic Terminologies in Linked List](https://www.geeksforgeeks.org/what-is-linked-list/)
-2. [Singly Linked List Tutorial](https://www.geeksforgeeks.org/singly-linked-list-tutorial/)
-3. [Linked List vs Array](https://www.geeksforgeeks.org/linked-list-vs-array/)
-
-****Basic Operations of Singly Linked List:****
------------------------------------------------
-
-1. [Linked List Insertion](https://www.geeksforgeeks.org/linked-list-set-2-inserting-a-node/)
-2. [Search an element in a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/search-an-element-in-a-linked-list-iterative-and-recursive/)
-3. [Find Length of a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/find-length-of-a-linked-list-iterative-and-recursive/)
-4. [Reverse a linked list](https://www.geeksforgeeks.org/write-a-function-to-reverse-the-nodes-of-a-linked-list/)
-5. [Linked List Deletion (Deleting a given key)](https://www.geeksforgeeks.org/linked-list-set-3-deleting-node/)
-6. [Linked List Deletion (Deleting a key at given position)](https://www.geeksforgeeks.org/delete-a-linked-list-node-at-a-given-position/)
-7. [Write a function to delete a Linked List](https://www.geeksforgeeks.org/write-a-function-to-delete-a-linked-list/)
-
-****Easy Problems on Singly Linked List:****
---------------------------------------------
-
-* [Identical Linked Lists](https://www.geeksforgeeks.org/identical-linked-lists/)
-* [Print the middle of a given linked list](https://www.geeksforgeeks.org/write-a-c-function-to-print-the-middle-of-the-linked-list/)
-* [Write a function to get Nth node in a Linked List](https://www.geeksforgeeks.org/write-a-function-to-get-nth-node-in-a-linked-list/)
-* [Nth node from the end of a Linked List](https://www.geeksforgeeks.org/nth-node-from-the-end-of-a-linked-list/)
-* [Move last element to front of a given Linked List](https://www.geeksforgeeks.org/move-last-element-to-front-of-a-given-linked-list/)
-* [Make middle node head in a linked list](https://www.geeksforgeeks.org/make-middle-node-head-linked-list/)
-* [Delete alternate nodes of a Linked List](https://www.geeksforgeeks.org/delete-alternate-nodes-of-a-linked-list/)
-* [Add 1 to a number represented as linked list](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
-* [Add two numbers represented by linked lists](https://www.geeksforgeeks.org/add-two-numbers-represented-by-linked-list/)
-* [Subtract Two Numbers represented as Linked Lists](https://www.geeksforgeeks.org/subtract-two-numbers-represented-as-linked-lists/)
-* [Find the sum of last n nodes of the given Linked List](https://www.geeksforgeeks.org/find-sum-last-n-nodes-given-linked-list/)
-* [Pairwise swap elements of a given linked list](https://www.geeksforgeeks.org/pairwise-swap-elements-of-a-given-linked-list/)
-* [Remove every k-th node of the linked list](https://www.geeksforgeeks.org/remove-every-k-th-node-linked-list/)
-* [Remove duplicates from a sorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-a-sorted-linked-list/)
-
-****Intermediate Problems on Singly Linked List:****
-----------------------------------------------------
-
-* [Detect loop in a linked list](https://www.geeksforgeeks.org/write-a-c-function-to-detect-loop-in-a-linked-list/)
-* [Find length of loop in linked list](https://www.geeksforgeeks.org/find-length-of-loop-in-linked-list/)
-* [Function to check if a singly linked list is palindrome](https://www.geeksforgeeks.org/function-to-check-if-a-singly-linked-list-is-palindrome/)
-* [Remove duplicates from an unsorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-an-unsorted-linked-list/)
-* [Remove all occurrences of duplicates from a sorted Linked List](https://www.geeksforgeeks.org/remove-occurrences-duplicates-sorted-linked-list/)
-* [Swap nodes in a linked list without swapping data](https://www.geeksforgeeks.org/swap-nodes-in-a-linked-list-without-swapping-data/)
-* [Intersection point of two Linked Lists.](https://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/)
-* [Iteratively Reverse a linked list using only 2 pointers (An Interesting Method)](https://www.geeksforgeeks.org/iteratively-reverse-a-linked-list-using-only-2-pointers/)
-* [Segregate even and odd nodes in a Linked List](https://www.geeksforgeeks.org/segregate-even-and-odd-elements-in-a-linked-list/)
-* [Alternate Odd and Even Nodes in a Singly Linked List](https://www.geeksforgeeks.org/alternate-odd-even-nodes-singly-linked-list/)
-* [Rearrange a Linked List in Zig-Zag fashion](https://www.geeksforgeeks.org/linked-list-in-zig-zag-fashion/)
-* [Adding two polynomials using Linked List](https://www.geeksforgeeks.org/adding-two-polynomials-using-linked-list/)
-* [Union and Intersection of two Linked Lists](https://www.geeksforgeeks.org/union-and-intersection-of-two-linked-lists/)
-* [Sort linked list which is already sorted on absolute values](https://www.geeksforgeeks.org/sort-linked-list-already-sorted-absolute-values/)
-
-****Hard Problems on Singly Linked List:****
---------------------------------------------
-
-* [Reverse a Linked List in groups of given size](https://www.geeksforgeeks.org/reverse-a-list-in-groups-of-given-size/)
-* [Flattening a Linked List](https://www.geeksforgeeks.org/flattening-a-linked-list/)
-* [Reverse alternate K nodes in a Singly Linked List](https://www.geeksforgeeks.org/reverse-alternate-k-nodes-in-a-singly-linked-list/)
-* [Alternating split of a given Singly Linked List](https://www.geeksforgeeks.org/alternating-split-of-a-given-singly-linked-list/)
-* [Delete nodes which have a greater value on right side](https://www.geeksforgeeks.org/delete-nodes-which-have-a-greater-value-on-right-side/)
-* [Given a linked list of line segments, remove middle points](https://www.geeksforgeeks.org/given-linked-list-line-segments-remove-middle-points/)
-* [Clone a linked list with next and random pointer](https://www.geeksforgeeks.org/a-linked-list-with-next-and-arbit-pointer/)
-* [Rearrange a given linked list in-place.](https://www.geeksforgeeks.org/rearrange-a-given-linked-list-in-place/)
-* [Select a Random Node from a Singly Linked List](https://www.geeksforgeeks.org/select-a-random-node-from-a-singly-linked-list/)
-* [In-place Merge two linked lists without changing links of first list](https://www.geeksforgeeks.org/in-place-merge-two-linked-list-without-changing-links-of-first-list/)
-* [Length of longest palindrome list in a linked list using O(1) extra space](https://www.geeksforgeeks.org/length-longest-palindrome-list-linked-list-using-o1-extra-space/)
-* [Rotate Linked List block wise](https://www.geeksforgeeks.org/rotate-linked-list-block-wise/)
-* [Count rotations in sorted and rotated linked list](https://www.geeksforgeeks.org/count-rotations-sorted-rotated-linked-list/)
-
-****Quick Links:****
---------------------
-
-* [\'Practice Problems\' on Linked List](https://www.geeksforgeeks.org/explore?page=2&category=Linked%20List&sortBy=difficulty&itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=practice_header)
-    * [\'Videos\' on Linked List](https://www.youtube.com/playlist?list=PLqM7alHXFySH41ZxzrPNj2pAYPOI8ITe7)
-* [\'Quizzes\' on Linked List](https://www.geeksforgeeks.org/data-structure-gq/linked-list-gq/)
-', 'Singly linked list is a linear data structure in which the elements are not stored in contiguous memory locations and each element is connected only to its next element using a pointer.', 'Singly Linked List Problems', 3, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0a6a3db2-efff-45ec-8886-b5862fbb75e1', e'Basic Terminologies of Linked List
 ----------------------------------
 
@@ -58686,59 +58699,5215 @@ This is because each node in the list contains a pointer to the previous
 node and a pointer to the next node. This allows for quick and easy
 insertion and deletion of nodes from the list, as well as efficient
 traversal of the list in both directions.', 'Doubly Linked List Tutorial', 13, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('5579b7b8-f82f-4a7d-9fe5-7ec75bf66434', e'Basic Terminologies of Queue
+----------------------------
+
+* ****Front:**** Position of the entry in a queue ready to be served, that is, the
+  first entry that will be removed from the queue, is called the ****front**** of the queue. It is also referred as the ****head**** of the queue.
+* ****Rear:****
+  Position of the last entry in the queue, that is, the one most
+  recently added, is called the ****rear**** of the queue. It is also referred as the ****tail**** of the queue.
+* ****Size:**** Size refers to the ****current**** number of elements in the queue.
+* ****Capacity:**** Capacity refers to the ****maximum**** number of elements the queue can hold.
+
+****Representation of Queue****
+-------------------------------
+
+![Representation-of-Queue-Data-Structure](https://media.geeksforgeeks.org/wp-content/uploads/20241212130245410876/Representation-of-Queue-Data-Structure-768.webp)
+
+Operations on Queue
+-------------------
+
+### ****1. Enqueue:****
+
+Enqueue operation ****adds (or stores) an element to the end of the queue****. 
+
+****Steps:****
+
+1. Check if the ****queue is full****. If so, return an ****overflow**** error and exit.
+2. If the queue is ****not full****, increment the ****rear**** pointer to the next available position.
+3. Insert the element at the rear.
+
+
+![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)
+
+
+![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)
+
+
+![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)
+
+
+![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)
+
+
+![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)
+
+
+![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)
 
 
 
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('88c42222-e777-498f-93c0-b6852576e275', 'course', 'Learn about Stack data structure', true, 'EN', 'Data Structure', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a162b1aa-4820-4c00-bf4e-e52d8b74f3d3', 'course', 'Learn about Queue data structure', true, 'EN', 'Algorithm', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a4876daa-5d46-403f-a6c7-617c597d7bec', 'section', 'Category for all free courses', true, 'EN', 'Free Courses', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a2490eb3-41ea-42fd-bf77-e46e049c7860', 'section', 'Category for all featured courses', true, 'EN', 'Featured Courses', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('8c180a6d-f3bc-45f4-9db9-1de05c4f259c', 'course', '', true, 'EN', 'Problem Solving', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('e2e5fc00-80e1-4019-8012-1aabaf76537e', 'course', '', true, 'EN', 'Array', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('2f342483-a619-4ea3-a6cb-0903ac16d015', 'course', '', true, 'EN', 'Queue', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('0d7730de-3172-4629-a872-5ddb65094458', 'course', '', true, 'EN', 'Recursive', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('ec16cda9-281f-4ecc-8326-e17c814796d5', 'course', '', true, 'EN', 'Dynamic Programming', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('9a6c29bc-62a2-4d7b-a14d-f7ad7d710806', 'course', '', true, 'EN', 'Matrix', null);
+Previous
 
 
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', '8c180a6d-f3bc-45f4-9db9-1de05c4f259c');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '2f342483-a619-4ea3-a6cb-0903ac16d015');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'e2e5fc00-80e1-4019-8012-1aabaf76537e');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', '0d7730de-3172-4629-a872-5ddb65094458');
 
 
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
+
+Pause
+
+Next
+
+
+
+
+
+3 / 6
+
+
+
+### ****2. Dequeue:****
+
+Dequeue operation removes the element at the front of the queue. The
+following steps are taken to perform the dequeue operation:
+
+
+1. Check if the ****queue is empty****. If so, return an ****underflow**** error.
+2. Remove the element at the ****front****.
+3. ****Increment**** the ****front**** pointer to the next element.
+
+
+![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+
+Previous
+
+
+
+
+
+Play
+
+Next
+
+
+
+
+
+1 / 6
+
+
+
+### ****3. Peek or Front Operation:****
+
+This operation returns the element at the front end without removing
+it.
+
+### 4. Size Operation:
+
+This operation returns the numbers of elements present in the
+queue.
+
+### ****5. isEmpty Operation:****
+
+This operation returns a boolean value that indicates whether the queue
+is empty or not.
+
+### ****6. isFull Operation:****
+
+This operation returns a boolean value that indicates whether the queue
+is full or not.
+
+Implementation of Queue Data Structure
+--------------------------------------
+
+Queue can be implemented using following data structures:
+
+* [Implementation of Queue using Arrays](https://www.geeksforgeeks.org/introduction-and-array-implementation-of-queue)
+* [Implementation of Queue using Linked List](https://www.geeksforgeeks.org/queue-linked-list-implementation)
+
+Complexity Analysis of Operations on Queue
+------------------------------------------
+
+| ****Operations**** | ****Time Complexity**** | ****Space Complexity**** |
+| --- | --- | --- |
+| ****enqueue**** | O(1) | O(1) |
+| ****dequeue**** | O(1) | O(1) |
+| front | O(1) | O(1) |
+| size | O(1) | O(1) |
+| isEmpty | O(1) | O(1) |
+| isFull | O(1) | O(1) |
+
+****Types of Queues****
+-----------------------
+
+Queue data structure can be classified into 4 types:
+
+1. ****Simple Queue:**** Simple Queue simply follows ****FIFO**** Structure. We can only insert the element at the back and remove the
+   element from the front of the queue.
+2. [****Double-Ended Queue (Deque)****](https://www.geeksforgeeks.org/deque-set-1-introduction-applications)****:****
+   In a double-ended queue the insertion and deletion operations, both
+   can be performed from both ends. They are of two types:
+   * ****Input Restricted Queue:**** This is a simple queue. In this type of queue, the input can be
+     taken from only one end but deletion can be done from any of the
+     ends.
+   * ****Output Restricted Queue:****
+     This is also a simple queue. In this type of queue, the input can
+     be taken from both ends but deletion can be done from only one
+     end.
+3. [****Circular Queue:****](https://www.geeksforgeeks.org/introduction-to-circular-queue) This is a special type of queue where the last position is connected
+   back to the first position. Here also the operations are performed in
+   FIFO order.
+4. [****Priority Queue****](https://www.geeksforgeeks.org/priority-queue-set-1-introduction)****:****
+   A priority queue is a special queue where the elements are accessed
+   based on the priority assigned to them. They are of two types:
+   * ****Ascending Priority Queue:**** In Ascending Priority Queue, the elements are arranged in
+     increasing order of their priority values. Element with smallest
+     priority value is popped first.
+   * ****Descending Priority Queue:**** In Descending Priority Queue, the elements are arranged in
+     decreasing order of their priority values. Element with largest
+     priority is popped first.
+
+![Types-of-Queue](https://media.geeksforgeeks.org/wp-content/uploads/20241212125924381216/Types-of-Queue-660.webp)
+
+****Applications of Queue Data Structure****
+--------------------------------------------
+
+Application of queue is common. In a computer system, there may be
+queues of tasks waiting for the printer, for access to disk storage, or
+even in a time-sharing system, for use of the CPU. Within a single
+program, there may be multiple requests to be kept in a queue, or one
+task may create other tasks, which must be done in turn by keeping them
+in a queue.
+
+* A Queue is always used as a buffer when we have a speed mismatch
+  between a producer and consumer. For example keyboard and CPU.
+* Queue can be used where we have a single resource and multiple
+  consumers like a single CPU and multiple processes.
+* In a network, a queue is used in devices such as a router/switch and
+  mail queue.
+* Queue can be used in various algorithm techniques like Breadth First
+  Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
+', 'Introduction to Queue Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2a878929-d192-4a08-a92c-f93b22786c0f', e'**Types of Queues:**
+
+There are **five different types of queues** that are used in
+different scenarios. They are:
+
+1. Input Restricted Queue (this is a Simple Queue)
+2. Output Restricted Queue (this is also a Simple Queue)
+3. Circular Queue
+4. Double Ended Queue (Deque)
+5. Priority Queue
+   * Ascending Priority Queue
+   * Descending Priority Queue
+
+![Types of Queues](https://media.geeksforgeeks.org/wp-content/uploads/20220623134709/typesofqueues.jpg)
+
+Types of Queues
+
+**1.** [**Circular Queue**](https://www.geeksforgeeks.org/circular-queue-set-1-introduction-array-implementation/)**:** Circular Queue is a linear data structure in which the
+operations are performed based on FIFO (First In First Out) principle and
+the last position is connected back to the first position to make a
+circle. It is also called **‘Ring Buffer’**. This queue is
+primarily used in the following cases:
+
+1. **Memory Management:** The unused memory locations in the
+   case of ordinary queues can be utilized in circular queues.
+2. **Traffic system:** In a computer-controlled traffic
+   system, circular queues are used to switch on the traffic lights one by
+   one repeatedly as per the time set.
+3. **CPU Scheduling:** Operating systems often maintain a
+   queue of processes that are ready to execute or that are waiting for a
+   particular event to occur.
+
+The time complexity for the circular Queue is O(1).
+
+**2. Input restricted Queue:** In this type of Queue, the
+input can be taken from one side only(rear) and deletion of elements can
+be done from both sides(front and rear). This kind of Queue does not
+follow FIFO(first in first out).  This queue is used in cases where
+the consumption of the data needs to be in FIFO order but if there is a
+need to remove the recently inserted data for some reason and one such
+case can be irrelevant data, performance issue, etc.
+
+
+
+![Input Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131417/inputrestrictedqueue.jpg)
+
+Input Restricted Queue
+
+**Advantages of Input restricted Queue:**
+
+* Prevents overflow and overloading of the queue by limiting the number of
+  items added
+* Helps maintain stability and predictable performance of the system
+
+**Disadvantages of Input restricted Queue:**
+
+* May lead to resource wastage if the restriction is set too low and items
+  are frequently discarded
+* May lead to waiting or blocking if the restriction is set too high and
+  the queue is full, preventing new items from being added.
+
+**3. Output restricted Queue:** In this type of Queue, the
+input can be taken from both sides(rear and front) and the deletion of the
+element can be done from only one side(front).  This queue is used in
+the case where the inputs have some priority order to be executed and the
+input can be placed even in the first place so that it is executed
+first.
+
+![Output Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131455/outputrestrictedqueue.jpg)
+
+Output Restricted Queue
+
+**4.** [**Double ended Queue**](https://www.geeksforgeeks.org/deque-set-1-introduction-applications/)**:** Double Ended Queue is also a Queue data structure in
+which the insertion and deletion operations are performed at both the ends
+(front and rear). That means, we can insert at both front and rear
+positions and can delete from both front and rear positions.  Since
+Deque supports both stack and queue operations, it can be used as both.
+The Deque data structure supports clockwise and anticlockwise rotations in
+O(1) time which can be useful in certain applications. Also, the problems
+where elements need to be removed and or added both ends can be
+efficiently solved using Deque.
+
+![Double Ended Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131811/doubleended.jpg)
+
+Double Ended Queue
+
+**5.** [**Priority Queue**](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/)**:** A priority queue is a special type of queue in which
+each element is associated with a priority and is served according to its
+priority. There are two types of Priority Queues. They are:
+
+1. **Ascending Priority Queue:** Element can be inserted
+   arbitrarily but only smallest element can be removed. For example,
+   suppose there is an array having elements 4, 2, 8 in the same order. So,
+   while inserting the elements, the insertion will be in the same sequence
+   but while deleting, the order will be 2, 4, 8.
+2. **Descending priority Queue:** Element can be inserted
+   arbitrarily but only the largest element can be removed first from the
+   given Queue. For example, suppose there is an array having elements 4,
+   2, 8 in the same order. So, while inserting the elements, the insertion
+   will be in the same sequence but while deleting, the order will be 8, 4,
+   2.
+
+The time complexity of the Priority Queue is O(logn).
+
+[**Applications of a Queue:**](https://www.geeksforgeeks.org/applications-of-queue-data-structure/)
+
+The
+[queue](https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/)
+is used when things don’t have to be processed immediately, but have to be
+processed in First In First Out order like
+[Breadth First Search](https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/). This property of Queue makes it also useful in the following kind of
+scenarios.
+
+1. When a resource is shared among multiple consumers. Examples include
+   [CPU scheduling](https://www.geeksforgeeks.org/cpu-scheduling-in-operating-systems/),
+   [Disk Scheduling](https://www.geeksforgeeks.org/disk-scheduling-algorithms/).
+2. When data is transferred asynchronously (data not necessarily received
+   at the same rate as sent) between two processes. Examples include IO
+   Buffers,
+   [pipes](https://www.geeksforgeeks.org/piping-in-unix-or-linux/), file IO, etc.
+3. Linear Queue: A linear queue is a type of queue where data elements are
+   added to the end of the queue and removed from the front of the queue.
+   Linear queues are used in applications where data elements need to be
+   processed in the order in which they are received. Examples include
+   printer queues and message queues.
+4. Circular Queue: A circular queue is similar to a linear queue, but the
+   end of the queue is connected to the front of the queue. This allows for
+   efficient use of space in memory and can improve performance. Circular
+   queues are used in applications where the data elements need to be
+   processed in a circular fashion. Examples include CPU scheduling and
+   memory management.
+5. Priority Queue: A priority queue is a type of queue where each element
+   is assigned a priority level. Elements with higher priority levels are
+   processed before elements with lower priority levels. Priority queues
+   are used in applications where certain tasks or data elements need to be
+   processed with higher priority. Examples include operating system task
+   scheduling and network packet scheduling.
+6. Double-ended Queue: A double-ended queue, also known as a deque, is a
+   type of queue where elements can be added or removed from either end of
+   the queue. This allows for more flexibility in data processing and can
+   be used in applications where elements need to be processed in multiple
+   directions. Examples include job scheduling and searching algorithms.
+7. Concurrent Queue: A concurrent queue is a type of queue that is designed
+   to handle multiple threads accessing the queue simultaneously.
+   Concurrent queues are used in multi-threaded applications where data
+   needs to be shared between threads in a thread-safe manner. Examples
+   include database transactions and web server requests.
+
+**Issues of Queue :**
+
+Some common issues that can arise when using queues:
+
+1. Queue overflow: Queue overflow occurs when the queue reaches its maximum
+   capacity and is unable to accept any more elements. This can cause data
+   loss and can lead to application crashes.
+2. Queue underflow: Queue underflow occurs when an attempt is made to
+   remove an element from an empty queue. This can cause errors and
+   application crashes.
+3. Priority inversion: Priority inversion occurs in priority queues when a
+   low-priority task holds a resource that a high-priority task needs. This
+   can cause delays in processing and can impact system performance.
+4. Deadlocks: Deadlocks occur when multiple threads or processes are
+   waiting for each other to release resources, resulting in a situation
+   where none of the threads can proceed. This can happen when using
+   concurrent queues and can lead to system crashes.
+5. Performance issues: Queue performance can be impacted by various
+   factors, such as the size of the queue, the frequency of access, and the
+   type of operations performed on the queue. Poor queue performance can
+   lead to slower system performance and reduced user experience.
+6. Synchronization issues: Synchronization issues can arise when multiple
+   threads are accessing the same queue simultaneously. This can result in
+   data corruption, race conditions, and other errors.
+7. Memory management issues: Queues can use up significant amounts of
+   memory, especially when processing large data sets. Memory leaks and
+   other memory management issues can occur, leading to system crashes and
+   other errors.
+
+**Reference :**
+
+Some references for further reading on queues:
+
+1. “Data Structures and Algorithms in Java” by Robert Lafore – This book
+   provides an in-depth explanation of different types of queues and their
+   implementations in Java.
+2. “Introduction to Algorithms” by Thomas H. Cormen et al. – This textbook
+   covers the basic concepts of data structures and algorithms, including
+   queues and their various applications.
+3. “Concurrency in C# Cookbook” by Stephen Cleary – This book provides
+   practical examples of how to use concurrent queues in C# programming.
+4. “Queue (abstract data type)” on Wikipedia – This article provides an
+   overview of queues and their properties, as well as examples of their
+   applications.
+5. “The Art of Computer Programming, Volume 1: Fundamental Algorithms” by
+   Donald E. Knuth – This book includes a detailed analysis of different
+   queue algorithms and their performance.
+6. “Queues and the Producer-Consumer Problem” by Douglas C. Schmidt – This
+   paper discusses how queues can be used to solve the producer-consumer
+   problem in concurrent programming.', e'Queue is a linear structure that follows a particular order in which the
+operations are performed. The order is First In First Out (FIFO). A good
+example of a queue is any queue of consumers for a resource where the
+consumer that came first is served first. In this article, the different
+types of queues are discussed.', 'Different Types of Queues and its Applications', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('562940a2-1089-4c6d-a938-5fe36049bc5f', e'**Basic Operations on Queue:**
+------------------------------
+
+Some of the basic operations for Queue in Data Structure are:
+
+* **enqueue() –** Insertion of elements to the queue.
+* **dequeue() –** Removal of elements from the queue.
+* **peek() or front()-** Acquires the data element available
+  at the front node of the queue without deleting it.
+* **rear() –** This operation returns the element at the rear
+  end without removing it.
+* **isFull() –** Validates if the queue is full.
+* **isEmpty() –** Checks if the queue is empty.
+* **size():** This operation returns the size of the queue
+  i.e. the total number of elements it contains.
+
+![](https://media.geeksforgeeks.org/wp-content/uploads/20221209094646/Queue-768.png)
+
+Queue Data Structure
+
+### **Operation 1: enqueue()**
+
+Inserts an element at the end of the queue i.e. at the rear end.
+
+The following steps should be taken to enqueue (insert) data into a queue:
+
+* Check if the queue is full.
+* If the queue is full, return overflow error and exit.
+* If the queue is not full, increment the rear pointer to point to the
+  next empty space.
+* Add the data element to the queue location, where the rear is pointing.
+* return success.
+
+![Enqueue representation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122158/fifo1-660x371.png)
+
+Enqueue representation
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueEnqueue(``int` `data)`  `{`  `// Check queue is full or not`  `if` `(capacity == rear) {`  `printf``(``"\\nQueue is full\\n"``);`  `return``;`  `}`    `// Insert element at the rear`  `else` `{`  `queue[rear] = data;`  `rear++;`  `}`  `return``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueEnqueue(``int` `data)`  `{`  `// Check queue is full or not`  `if` `(capacity == rear) {`  `System.out.println(``"\\nQueue is full\\n"``);`  `return``;`  `}`    `// Insert element at the rear`  `else` `{`  `queue[rear] = data;`  `rear++;`  `}`  `return``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to add an item to the queue.`  `// It changes rear and size`  `void` `enqueue(``struct` `Queue* queue,` `int` `item)`  `{`  `if` `(isFull(queue))`  `return``;`  `queue->rear = (queue->rear + 1) % queue->capacity;`  `queue->array[queue->rear] = item;`  `queue->size = queue->size + 1;`  `printf``(``"%d enqueued to queue\\n"``, item);`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to add an item to the queue.`  `# It changes rear and size`  `def` `EnQueue(``self``, item):`  `if` `self``.isFull():`  `print``(``"Full"``)`  `return`  `self``.rear` `=` `(``self``.rear` `+` `1``)` `%` `(``self``.capacity)`  `self``.Q[``self``.rear]` `=` `item`  `self``.size` `=` `self``.size` `+` `1`  `print``(``"% s enqueued to queue"` `%` `str``(item))`  `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to add an item to the queue.`  `// It changes rear and size`  `public` `void` `enqueue(``int` `item)`  `{`  `if` `(rear == max - 1) {`  `Console.WriteLine(``"Queue Overflow"``);`  `return``;`  `}`  `else` `{`  `ele[++rear] = item;`  `}`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `enqueue(element){`  `// adding element to the queue`  `this``.items.push(element);`  `}`    `// This code is contributed by Susobhan Akhuli`  `</script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 2: dequeue()**
+
+This operation removes and returns an element that is at the front end of
+the queue.
+
+The following steps are taken to perform the dequeue operation:
+
+* Check if the queue is empty.
+* If the queue is empty, return the underflow error and exit.
+* If the queue is not empty, access the data where the front is pointing.
+* Increment the front pointer to point to the next available data element.
+* The Return success.
+
+![Dequeue operation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122625/fifo2-660x371.png)
+
+Dequeue operation
+
+Below is the Implementation of above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueDequeue()`  `{`  `// If queue is empty`  `if` `(front == rear) {`  `printf``(``"\\nQueue is empty\\n"``);`  `return``;`  `}`    `// Shift all the elements from index 2`  `// till rear to the left by one`  `else` `{`  `for` `(``int` `i = 0; i < rear - 1; i++) {`  `queue[i] = queue[i + 1];`  `}`    `// decrement rear`  `rear--;`  `}`  `return``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueDequeue()`  `{`  `// If queue is empty`  `if` `(front == rear) {`  `System.out.println(``"\\nQueue is empty\\n"``);`  `return``;`  `}`    `// Shift all the elements from index 2`  `// till rear to the left by one`  `else` `{`  `for` `(``int` `i =` `0``; i < rear -` `1``; i++) {`  `queue[i] = queue[i +` `1``];`  `}`    `// decrement rear`  `rear--;`  `}`  `return``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to remove an item from queue.`  `// It changes front and size`  `int` `dequeue(``struct` `Queue* queue)`  `{`  `if` `(isEmpty(queue)) {`  `printf``(``"\\nQueue is empty\\n"``);`  `return``;`  `}`  `int` `item = queue->array[queue->front];`  `queue->front = (queue->front + 1) % queue->capacity;`  `queue->size = queue->size - 1;`  `return` `item;`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to remove an item from queue.`  `# It changes front and size`      `def` `DeQueue(``self``):`  `if` `self``.isEmpty():`  `print``(``"Queue is empty"``)`  `return`    `print``(``"% s dequeued from queue"` `%` `str``(``self``.Q[``self``.front]))`  `self``.front` `=` `(``self``.front` `+` `1``)` `%` `(``self``.capacity)`  `self``.size` `=` `self``.size` `-` `1`  `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to remove an item from queue.`  `// It changes front and size`  `public` `int` `dequeue()`  `{`  `if` `(front == rear + 1) {`  `Console.WriteLine(``"Queue is Empty"``);`  `return` `-1;`  `}`  `else` `{`  `int` `p = ele[front++];`  `return` `p;`  `}`  `}`  `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `dequeue(){`  `// removing element from the queue`  `// returns underflow when called`  `// on empty queue`  `if``(``this``.isEmpty()){`  `document.write(``"<br>Queue is empty<br>"``);`  `return` `-1;`  `}`  `return` `this``.items.shift();`  `}`  `// This code is contributed by Susobhan Akhuli`  `</script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 3: front()**
+
+This operation returns the element at the front end without removing it.
+
+The following steps are taken to perform the front operation:
+
+* If the queue is empty return the most minimum value.
+* otherwise, return the front value.
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(Queue* queue)`  `{`  `if` `(isempty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->front];`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(Queue queue)`  `{`  `if` `(isempty(queue))`  `return` `Integer.MIN_VALUE;`  `return` `queue.arr[queue.front];`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(``struct` `Queue* queue)`  `{`  `if` `(isempty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->front];`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to get front of queue`  `def` `que_front(``self``):`  `if` `self``.isempty():`  `return` `"Queue is empty"`  `return` `self``.Q[``self``.front]`    `# This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `public` `int` `front()`  `{`  `if` `(isempty())`  `return` `INT_MIN;`  `return` `arr[front];`  `}`    `// This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `// Function to get front of queue`  `front(){`  `// returns the Front element of`  `// the queue without removing it.`  `if``(``this``.isEmpty())`  `return` `"No elements in Queue<br>"``;`  `return` `this``.items[0];`  `}`  `// This code is contributed By Susobhan Akhuli`  `<script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### Operation 4 : rear()
+
+This operation returns the element at the rear end without removing it.
+
+The following steps are taken to perform the rear operation:
+
+* If the queue is empty return the most minimum value.
+* otherwise, return the rear value.
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get rear of queue`  `int` `rear(Queue* queue)`  `{`  `if` `(isEmpty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->rear];`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get rear of queue`  `int` `rear(Queue queue)`  `{`  `if` `(isEmpty(queue))`  `return` `Integer.MIN_VALUE;`  `return` `queue.arr[queue.rear];`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(``struct` `Queue* queue)`  `{`  `if` `(isempty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->rear];`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to get rear of queue`  `def` `que_rear(``self``):`  `if` `self``.isEmpty():`  `return` `"Queue is empty"`  `return` `self``.Q[``self``.rear]`    `# This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `public` `int` `front()`  `{`  `if` `(isempty())`  `return` `INT_MIN;`  `return` `arr[rear];`  `}`    `// This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `rear(){`  `// returns the Rear element of`  `// the queue without removing it.`  `if``(``this``.isEmpty())`  `return` `"No elements in Queue<br>"``;`  `return` `this``.items[``this``.items.length-1];`  `}`  `// This code is contributed By Susobhan Akhuli`  `<script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 5: isEmpty():**
+
+This operation returns a boolean value that indicates whether the queue is
+empty or not.
+
+The following steps are taken to perform the Empty operation:
+
+* check if front value is equal to -1 or not, if yes then return true
+  means queue is empty.
+* Otherwise return false, means queue is not empty
+
+Below is the implementation of the above approach:
+
+* C++
+* Java
+* C#
+* C
+* Python3
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check whether`  `// the queue is empty or not:`  `bool` `isEmpty()`  `{`  `if` `(front == -1)`  `return` `true``;`  `else`  `return` `false``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check whether`  `// the queue is empty or not:`  `boolean` `isEmpty()`  `{`  `if` `(front == -``1``)`  `return` `true``;`  `else`  `return` `false``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check whether`  `// the queue is empty or not:`  `bool` `isEmpty()`  `{`  `if` `(front == -1)`  `return` `true``;`  `else`  `return` `false``;`  `}`    `// This code is contributed by lokeshmvs21.` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Queue is empty when size is 0`  `bool` `isEmpty(``struct` `Queue* queue)`  `{`  `return` `(queue->size == 0);`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Queue is empty when size is 0`  `def` `isEmpty(``self``):`  `return` `self``.size` `=``=` `0`  `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `</script>`  `isEmpty(){`  `// return true if the queue is empty.`  `return` `this``.items.length == 0;`  `}`  `// This code is contributed by Susobhan Akhuli`  `</script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 6 : isFull()**
+
+This operation returns a boolean value that indicates whether the queue is
+full or not.
+
+The following steps are taken to perform the isFull() operation:
+
+* Check if front value is equal to zero and rear is equal to the capacity
+  of queue if yes then return true.
+* otherwise return false
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* C#
+* Python3
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check`  `// whether the queue is full or not.`  `bool` `isFull()`  `{`  `if` `(front == 0 && rear == MAX_SIZE - 1) {`  `return` `true``;`  `}`  `return` `false``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check`  `// whether the queue is full or not.`  `boolean` `isFull()`  `{`  `if` `(front ==` `0` `&& rear == MAX_SIZE -` `1``) {`  `return` `true``;`  `}`  `return` `false``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Queue is full when size becomes`  `// equal to the capacity`  `bool` `isFull(``struct` `Queue* queue)`  `{`  `return` `(queue->size == queue->capacity);`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to add an item to the queue.`  `// It changes rear and size`  `public` `bool` `isFull(``int` `item) {` `return` `(rear == max - 1); }`  `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Queue is full when size becomes`  `# equal to the capacity`      `def` `isFull(``self``):`  `return` `self``.size` `=``=` `self``.capacity`    `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `function` `isFull() {`  `if` `(front == 0 && rear == MAX_SIZE - 1) {`  `return` `true``;`  `}`  `return` `false``;`  `}`    `// This code is contributed by aadityamaharshi21.` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### Operation 7: size()
+
+This operation returns the size of the queue i.e. the total number of
+elements it contains.
+
+```
+queuename.size()
+Parameters :
+No parameters are passed
+Returns :
+Number of elements in the container
+```
+
+* C++
+* Java
+* Python
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// CPP program to illustrate`  `// Implementation of size() function`  `#include <iostream>`  `#include <queue>`  `using` `namespace` `std;`    `int` `main()`  `{`  `int` `sum = 0;`  `queue<``int``> myqueue;`  `myqueue.push(1);`  `myqueue.push(8);`  `myqueue.push(3);`  `myqueue.push(6);`  `myqueue.push(2);`    `// Queue becomes 1, 8, 3, 6, 2`    `cout << myqueue.size();`    `return` `0;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Java program to illustrate implementation of size()`  `// function`    `import` `java.util.*;`    `public` `class` `Main {`  `public` `static` `void` `main(String[] args)`  `{`  `int` `sum =` `0``;`  `Queue<Integer> myqueue =` `new` `LinkedList<>();`  `myqueue.add(``1``);`  `myqueue.add(``8``);`  `myqueue.add(``3``);`  `myqueue.add(``6``);`  `myqueue.add(``2``);`    `// Queue becomes 1, 8, 3, 6, 2`    `System.out.println(myqueue.size());`  `}`  `}`    `// This code is contributed by lokesh.` |
+| --- |
+
+
+
+
+
+Python
+------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `from` `collections` `import` `deque`    `def` `main():`  `sum` `=` `0`  `myqueue` `=` `deque()`  `myqueue.append(``1``)`  `myqueue.append(``8``)`  `myqueue.append(``3``)`  `myqueue.append(``6``)`  `myqueue.append(``2``)`    `# Queue becomes 1, 8, 3, 6, 2`    `print``(``len``(myqueue))`    `main()`    `# This code is contributed by aadityamaharshi21.` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `using` `System;`  `using` `System.Collections.Generic;`    `namespace` `ConsoleApp1 {`  `class` `MainClass {`  `public` `static` `void` `Main(``string``[] args)`  `{`  `int` `sum = 0;`  `Queue<``int``> myqueue =` `new` `Queue<``int``>();`  `myqueue.Enqueue(1);`  `myqueue.Enqueue(8);`  `myqueue.Enqueue(3);`  `myqueue.Enqueue(6);`  `myqueue.Enqueue(2);`    `// Queue becomes 1, 8, 3, 6, 2`    `Console.WriteLine(myqueue.Count);`  `}`  `}`  `}`    `// This code is contributed by adityamaharshi21.` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Javascript code`  `let sum = 0;`  `let myqueue=[];`  `myqueue.push(1);`  `myqueue.push(8);`  `myqueue.push(3);`  `myqueue.push(6);`  `myqueue.push(2);`    `// Queue becomes 1, 8, 3, 6, 2`    `console.log(myqueue.length);` |
+| --- |
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+', '', 'Basic Operations for Queue in Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('6c6539f0-a9f9-4639-b197-d3fc89870e6a', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
+known as ****Dequeue.****It is important to know that we cannot insert an element if the size of
+the queue is full and cannot delete an element when the queue itself is
+empty. If we try to insert an element even after the queue is full, then
+such a condition is known as overflow whereas, if we try to delete an
+element even after the queue is empty then such a condition is known as
+underflow.
+
+****Primary Queue Operations:****
+
+* ****void enqueue(int Element):**** When this operation is performed, an element is inserted in the queue
+  at the end i.e. at the rear end. (Where T is Generic i.e we can define
+  Queue of any type of data structure.) This operation take ****constant time i.e O(1).****
+* ****int dequeue():****
+  When this operation is performed, an element is removed from the front
+  end and is returned. This operation take ****constant time i.e O(1).****
+
+****Auxiliary Queue Operations:****
+
+* ****int front():**** This operation will return the element at the front without removing
+  it and it take O(1) time.
+* ****int rear():**** This operation will return the element at the rear without removing
+  it, Its Time Complexity is O(1).
+* ****int isEmpty():**** This operation indicates whether the queue is empty or not. This
+  Operation also done in O(1).
+* ****int size():**** This operation will return the size of the queue i.e. the total
+  number of elements present in the queue and it’s time complexity is
+  O(1).
+
+****Types of Queues:****
+
+* ****Simple Queue:**** Simple queue also known as a linear queue is the most basic version
+  of a queue. Here, insertion of an element i.e. the Enqueue operation
+  takes place at the rear end and removal of an element i.e. the Dequeue
+  operation takes place at the front end.
+* ****Circular Queue:****This is mainly an efficient array implementation of Simple Queue. In
+  a circular queue, the element of the queue act as a circular ring. The
+  working of a circular queue is similar to the linear queue except for
+  the fact that the last element is connected to the first element. Its
+  advantage is that the memory is utilized in a better way. This is
+  because if there is an empty space i.e. if no element is present at a
+  certain position in the queue, then an element can be easily added at
+  that position.
+* ****Priority Queue:**** This queue is a special type of queue. Its specialty is that it
+  arranges the elements in a queue based on some priority. The priority
+  can be something where the element with the highest value has the
+  priority so it creates a queue with decreasing order of values. The
+  priority can also be such that the element with the lowest value gets
+  the highest priority so in turn it creates a queue with increasing
+  order of values.
+* ****Dequeue:**** Dequeue is also known as Double Ended Queue. As the name suggests
+  double ended, it means that an element can be inserted or removed from
+  both the ends of the queue unlike the other queues in which it can be
+  done only from one end. Because of this property it may not obey the
+  First In First Out property.
+
+****Implementation of Queue:****
+
+* ****Sequential allocation:**** A queue can be implemented using an array. It can organize a limited
+  number of elements.
+* ****Linked list allocation:****
+  A queue can be implemented using a linked list. It can organize an
+  unlimited number of elements.
+
+****Applications of Queue:****
+
+* ****Multi programming:**** Multi programming means when multiple programs are running in the
+  main memory. It is essential to organize these multiple programs and
+  these multiple programs are organized as queues.
+* ****Network:**** In a network, a queue is used in devices such as a router or a
+  switch. another application of a queue is a mail queue which is a
+  directory that stores data and controls files for mail messages.
+* ****Job Scheduling:**** The computer has a task to execute a particular number of jobs that
+  are scheduled to be executed one after another. These jobs are
+  assigned to the processor one by one which is organized using a
+  queue.
+* ****Shared resources:**** Queues are used as waiting lists for a single shared resource.
+
+****Real-time application of Queue:****
+
+* Working as a buffer between a slow and a fast device. For example
+  keyboard and CPU, and two devices on network.
+* ATM Booth Line
+* Ticket Counter Line
+* CPU task scheduling
+* Waiting time of each customer at call centers.
+
+****Advantages of Queue:****
+
+* A large amount of data can be managed efficiently with ease.
+* Operations such as insertion and deletion can be performed with ease
+  as it follows the first in first out rule.
+* Queues are useful when a particular service is used by multiple
+  consumers.
+* Queues are fast in speed for data inter-process communication.
+* Queues can be used in the implementation of other data
+  structures.
+
+****Disadvantages of Queue:****
+
+* The operations such as insertion and deletion of elements from the
+  middle are time consuming.
+* In a classical queue, a new element can only be inserted when the
+  existing elements are deleted from the queue.
+* Searching an element takes O(N) time.
+* Maximum size of a queue must be defined prior in case of array
+  implementation.', e'A Queue
+is a linear data structure. This data structure follows a particular
+order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('3126233c-3e02-455e-8152-6d095b943168', e'Basic Terminologies of Queue
+----------------------------
+
+* ****Front:**** Position of the entry in a queue ready to be served, that is, the
+  first entry that will be removed from the queue, is called the ****front**** of the queue. It is also referred as the ****head**** of the queue.
+* ****Rear:****
+  Position of the last entry in the queue, that is, the one most
+  recently added, is called the ****rear**** of the queue. It is also referred as the ****tail**** of the queue.
+* ****Size:**** Size refers to the ****current**** number of elements in the queue.
+* ****Capacity:**** Capacity refers to the ****maximum**** number of elements the queue can hold.
+
+****Representation of Queue****
+-------------------------------
+
+![Representation-of-Queue-Data-Structure](https://media.geeksforgeeks.org/wp-content/uploads/20241212130245410876/Representation-of-Queue-Data-Structure-768.webp)
+
+Operations on Queue
+-------------------
+
+### ****1. Enqueue:****
+
+Enqueue operation ****adds (or stores) an element to the end of the queue****. 
+
+****Steps:****
+
+1. Check if the ****queue is full****. If so, return an ****overflow**** error and exit.
+2. If the queue is ****not full****, increment the ****rear**** pointer to the next available position.
+3. Insert the element at the rear.
+
+
+![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)![Enqueue-Operation-in-Queue-01.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010297668/Enqueue-Operation-in-Queue-01.webp)
+
+
+![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)![Enqueue-Operation-in-Queue-02.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010180461/Enqueue-Operation-in-Queue-02.webp)
+
+
+![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)![Enqueue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125010068824/Enqueue-Operation-in-Queue-03.webp)
+
+
+![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)![Enqueue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009956179/Enqueue-Operation-in-Queue-04.webp)
+
+
+![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)![Enqueue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009838736/Enqueue-Operation-in-Queue-05.webp)
+
+
+![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)![Enqueue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125009700162/Enqueue-Operation-in-Queue-06.webp)
+
+
+
+Previous
+
+
+
+
+
+Pause
+
+Next
+
+
+
+
+
+3 / 6
+
+
+
+### ****2. Dequeue:****
+
+Dequeue operation removes the element at the front of the queue. The
+following steps are taken to perform the dequeue operation:
+
+
+1. Check if the ****queue is empty****. If so, return an ****underflow**** error.
+2. Remove the element at the ****front****.
+3. ****Increment**** the ****front**** pointer to the next element.
+
+
+![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-01-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-02-.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-03.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-04.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-05.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)![Dequeue-Operation-in-Queue-06.webp](https://media.geeksforgeeks.org/wp-content/uploads/20241212125307686242/Dequeue-Operation-in-Queue-01-.webp)
+
+
+
+Previous
+
+
+
+
+
+Play
+
+Next
+
+
+
+
+
+1 / 6
+
+
+
+### ****3. Peek or Front Operation:****
+
+This operation returns the element at the front end without removing
+it.
+
+### 4. Size Operation:
+
+This operation returns the numbers of elements present in the
+queue.
+
+### ****5. isEmpty Operation:****
+
+This operation returns a boolean value that indicates whether the queue
+is empty or not.
+
+### ****6. isFull Operation:****
+
+This operation returns a boolean value that indicates whether the queue
+is full or not.
+
+Implementation of Queue Data Structure
+--------------------------------------
+
+Queue can be implemented using following data structures:
+
+* [Implementation of Queue using Arrays](https://www.geeksforgeeks.org/introduction-and-array-implementation-of-queue)
+* [Implementation of Queue using Linked List](https://www.geeksforgeeks.org/queue-linked-list-implementation)
+
+Complexity Analysis of Operations on Queue
+------------------------------------------
+
+| ****Operations**** | ****Time Complexity**** | ****Space Complexity**** |
+| --- | --- | --- |
+| ****enqueue**** | O(1) | O(1) |
+| ****dequeue**** | O(1) | O(1) |
+| front | O(1) | O(1) |
+| size | O(1) | O(1) |
+| isEmpty | O(1) | O(1) |
+| isFull | O(1) | O(1) |
+
+****Types of Queues****
+-----------------------
+
+Queue data structure can be classified into 4 types:
+
+1. ****Simple Queue:**** Simple Queue simply follows ****FIFO**** Structure. We can only insert the element at the back and remove the
+   element from the front of the queue.
+2. [****Double-Ended Queue (Deque)****](https://www.geeksforgeeks.org/deque-set-1-introduction-applications)****:****
+   In a double-ended queue the insertion and deletion operations, both
+   can be performed from both ends. They are of two types:
+   * ****Input Restricted Queue:**** This is a simple queue. In this type of queue, the input can be
+     taken from only one end but deletion can be done from any of the
+     ends.
+   * ****Output Restricted Queue:****
+     This is also a simple queue. In this type of queue, the input can
+     be taken from both ends but deletion can be done from only one
+     end.
+3. [****Circular Queue:****](https://www.geeksforgeeks.org/introduction-to-circular-queue) This is a special type of queue where the last position is connected
+   back to the first position. Here also the operations are performed in
+   FIFO order.
+4. [****Priority Queue****](https://www.geeksforgeeks.org/priority-queue-set-1-introduction)****:****
+   A priority queue is a special queue where the elements are accessed
+   based on the priority assigned to them. They are of two types:
+   * ****Ascending Priority Queue:**** In Ascending Priority Queue, the elements are arranged in
+     increasing order of their priority values. Element with smallest
+     priority value is popped first.
+   * ****Descending Priority Queue:**** In Descending Priority Queue, the elements are arranged in
+     decreasing order of their priority values. Element with largest
+     priority is popped first.
+
+![Types-of-Queue](https://media.geeksforgeeks.org/wp-content/uploads/20241212125924381216/Types-of-Queue-660.webp)
+
+****Applications of Queue Data Structure****
+--------------------------------------------
+
+Application of queue is common. In a computer system, there may be
+queues of tasks waiting for the printer, for access to disk storage, or
+even in a time-sharing system, for use of the CPU. Within a single
+program, there may be multiple requests to be kept in a queue, or one
+task may create other tasks, which must be done in turn by keeping them
+in a queue.
+
+* A Queue is always used as a buffer when we have a speed mismatch
+  between a producer and consumer. For example keyboard and CPU.
+* Queue can be used where we have a single resource and multiple
+  consumers like a single CPU and multiple processes.
+* In a network, a queue is used in devices such as a router/switch and
+  mail queue.
+* Queue can be used in various algorithm techniques like Breadth First
+  Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
+', 'Introduction to Queue Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('8d4f2d0d-a9f3-49f5-a13e-9aa4fad99826', e'**Types of Queues:**
+
+There are **five different types of queues** that are used in
+different scenarios. They are:
+
+1. Input Restricted Queue (this is a Simple Queue)
+2. Output Restricted Queue (this is also a Simple Queue)
+3. Circular Queue
+4. Double Ended Queue (Deque)
+5. Priority Queue
+   * Ascending Priority Queue
+   * Descending Priority Queue
+
+![Types of Queues](https://media.geeksforgeeks.org/wp-content/uploads/20220623134709/typesofqueues.jpg)
+
+Types of Queues
+
+**1.** [**Circular Queue**](https://www.geeksforgeeks.org/circular-queue-set-1-introduction-array-implementation/)**:** Circular Queue is a linear data structure in which the
+operations are performed based on FIFO (First In First Out) principle and
+the last position is connected back to the first position to make a
+circle. It is also called **‘Ring Buffer’**. This queue is
+primarily used in the following cases:
+
+1. **Memory Management:** The unused memory locations in the
+   case of ordinary queues can be utilized in circular queues.
+2. **Traffic system:** In a computer-controlled traffic
+   system, circular queues are used to switch on the traffic lights one by
+   one repeatedly as per the time set.
+3. **CPU Scheduling:** Operating systems often maintain a
+   queue of processes that are ready to execute or that are waiting for a
+   particular event to occur.
+
+The time complexity for the circular Queue is O(1).
+
+**2. Input restricted Queue:** In this type of Queue, the
+input can be taken from one side only(rear) and deletion of elements can
+be done from both sides(front and rear). This kind of Queue does not
+follow FIFO(first in first out).  This queue is used in cases where
+the consumption of the data needs to be in FIFO order but if there is a
+need to remove the recently inserted data for some reason and one such
+case can be irrelevant data, performance issue, etc.
+
+
+
+![Input Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131417/inputrestrictedqueue.jpg)
+
+Input Restricted Queue
+
+**Advantages of Input restricted Queue:**
+
+* Prevents overflow and overloading of the queue by limiting the number of
+  items added
+* Helps maintain stability and predictable performance of the system
+
+**Disadvantages of Input restricted Queue:**
+
+* May lead to resource wastage if the restriction is set too low and items
+  are frequently discarded
+* May lead to waiting or blocking if the restriction is set too high and
+  the queue is full, preventing new items from being added.
+
+**3. Output restricted Queue:** In this type of Queue, the
+input can be taken from both sides(rear and front) and the deletion of the
+element can be done from only one side(front).  This queue is used in
+the case where the inputs have some priority order to be executed and the
+input can be placed even in the first place so that it is executed
+first.
+
+![Output Restricted Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131455/outputrestrictedqueue.jpg)
+
+Output Restricted Queue
+
+**4.** [**Double ended Queue**](https://www.geeksforgeeks.org/deque-set-1-introduction-applications/)**:** Double Ended Queue is also a Queue data structure in
+which the insertion and deletion operations are performed at both the ends
+(front and rear). That means, we can insert at both front and rear
+positions and can delete from both front and rear positions.  Since
+Deque supports both stack and queue operations, it can be used as both.
+The Deque data structure supports clockwise and anticlockwise rotations in
+O(1) time which can be useful in certain applications. Also, the problems
+where elements need to be removed and or added both ends can be
+efficiently solved using Deque.
+
+![Double Ended Queue](https://media.geeksforgeeks.org/wp-content/uploads/20220623131811/doubleended.jpg)
+
+Double Ended Queue
+
+**5.** [**Priority Queue**](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/)**:** A priority queue is a special type of queue in which
+each element is associated with a priority and is served according to its
+priority. There are two types of Priority Queues. They are:
+
+1. **Ascending Priority Queue:** Element can be inserted
+   arbitrarily but only smallest element can be removed. For example,
+   suppose there is an array having elements 4, 2, 8 in the same order. So,
+   while inserting the elements, the insertion will be in the same sequence
+   but while deleting, the order will be 2, 4, 8.
+2. **Descending priority Queue:** Element can be inserted
+   arbitrarily but only the largest element can be removed first from the
+   given Queue. For example, suppose there is an array having elements 4,
+   2, 8 in the same order. So, while inserting the elements, the insertion
+   will be in the same sequence but while deleting, the order will be 8, 4,
+   2.
+
+The time complexity of the Priority Queue is O(logn).
+
+[**Applications of a Queue:**](https://www.geeksforgeeks.org/applications-of-queue-data-structure/)
+
+The
+[queue](https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/)
+is used when things don’t have to be processed immediately, but have to be
+processed in First In First Out order like
+[Breadth First Search](https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/). This property of Queue makes it also useful in the following kind of
+scenarios.
+
+1. When a resource is shared among multiple consumers. Examples include
+   [CPU scheduling](https://www.geeksforgeeks.org/cpu-scheduling-in-operating-systems/),
+   [Disk Scheduling](https://www.geeksforgeeks.org/disk-scheduling-algorithms/).
+2. When data is transferred asynchronously (data not necessarily received
+   at the same rate as sent) between two processes. Examples include IO
+   Buffers,
+   [pipes](https://www.geeksforgeeks.org/piping-in-unix-or-linux/), file IO, etc.
+3. Linear Queue: A linear queue is a type of queue where data elements are
+   added to the end of the queue and removed from the front of the queue.
+   Linear queues are used in applications where data elements need to be
+   processed in the order in which they are received. Examples include
+   printer queues and message queues.
+4. Circular Queue: A circular queue is similar to a linear queue, but the
+   end of the queue is connected to the front of the queue. This allows for
+   efficient use of space in memory and can improve performance. Circular
+   queues are used in applications where the data elements need to be
+   processed in a circular fashion. Examples include CPU scheduling and
+   memory management.
+5. Priority Queue: A priority queue is a type of queue where each element
+   is assigned a priority level. Elements with higher priority levels are
+   processed before elements with lower priority levels. Priority queues
+   are used in applications where certain tasks or data elements need to be
+   processed with higher priority. Examples include operating system task
+   scheduling and network packet scheduling.
+6. Double-ended Queue: A double-ended queue, also known as a deque, is a
+   type of queue where elements can be added or removed from either end of
+   the queue. This allows for more flexibility in data processing and can
+   be used in applications where elements need to be processed in multiple
+   directions. Examples include job scheduling and searching algorithms.
+7. Concurrent Queue: A concurrent queue is a type of queue that is designed
+   to handle multiple threads accessing the queue simultaneously.
+   Concurrent queues are used in multi-threaded applications where data
+   needs to be shared between threads in a thread-safe manner. Examples
+   include database transactions and web server requests.
+
+**Issues of Queue :**
+
+Some common issues that can arise when using queues:
+
+1. Queue overflow: Queue overflow occurs when the queue reaches its maximum
+   capacity and is unable to accept any more elements. This can cause data
+   loss and can lead to application crashes.
+2. Queue underflow: Queue underflow occurs when an attempt is made to
+   remove an element from an empty queue. This can cause errors and
+   application crashes.
+3. Priority inversion: Priority inversion occurs in priority queues when a
+   low-priority task holds a resource that a high-priority task needs. This
+   can cause delays in processing and can impact system performance.
+4. Deadlocks: Deadlocks occur when multiple threads or processes are
+   waiting for each other to release resources, resulting in a situation
+   where none of the threads can proceed. This can happen when using
+   concurrent queues and can lead to system crashes.
+5. Performance issues: Queue performance can be impacted by various
+   factors, such as the size of the queue, the frequency of access, and the
+   type of operations performed on the queue. Poor queue performance can
+   lead to slower system performance and reduced user experience.
+6. Synchronization issues: Synchronization issues can arise when multiple
+   threads are accessing the same queue simultaneously. This can result in
+   data corruption, race conditions, and other errors.
+7. Memory management issues: Queues can use up significant amounts of
+   memory, especially when processing large data sets. Memory leaks and
+   other memory management issues can occur, leading to system crashes and
+   other errors.
+
+**Reference :**
+
+Some references for further reading on queues:
+
+1. “Data Structures and Algorithms in Java” by Robert Lafore – This book
+   provides an in-depth explanation of different types of queues and their
+   implementations in Java.
+2. “Introduction to Algorithms” by Thomas H. Cormen et al. – This textbook
+   covers the basic concepts of data structures and algorithms, including
+   queues and their various applications.
+3. “Concurrency in C# Cookbook” by Stephen Cleary – This book provides
+   practical examples of how to use concurrent queues in C# programming.
+4. “Queue (abstract data type)” on Wikipedia – This article provides an
+   overview of queues and their properties, as well as examples of their
+   applications.
+5. “The Art of Computer Programming, Volume 1: Fundamental Algorithms” by
+   Donald E. Knuth – This book includes a detailed analysis of different
+   queue algorithms and their performance.
+6. “Queues and the Producer-Consumer Problem” by Douglas C. Schmidt – This
+   paper discusses how queues can be used to solve the producer-consumer
+   problem in concurrent programming.', e'Queue is a linear structure that follows a particular order in which the
+operations are performed. The order is First In First Out (FIFO). A good
+example of a queue is any queue of consumers for a resource where the
+consumer that came first is served first. In this article, the different
+types of queues are discussed.', 'Different Types of Queues and its Applications', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('dd501d4c-f5c6-424f-9678-af343551671c', e'**Basic Operations on Queue:**
+------------------------------
+
+Some of the basic operations for Queue in Data Structure are:
+
+* **enqueue() –** Insertion of elements to the queue.
+* **dequeue() –** Removal of elements from the queue.
+* **peek() or front()-** Acquires the data element available
+  at the front node of the queue without deleting it.
+* **rear() –** This operation returns the element at the rear
+  end without removing it.
+* **isFull() –** Validates if the queue is full.
+* **isEmpty() –** Checks if the queue is empty.
+* **size():** This operation returns the size of the queue
+  i.e. the total number of elements it contains.
+
+![](https://media.geeksforgeeks.org/wp-content/uploads/20221209094646/Queue-768.png)
+
+Queue Data Structure
+
+### **Operation 1: enqueue()**
+
+Inserts an element at the end of the queue i.e. at the rear end.
+
+The following steps should be taken to enqueue (insert) data into a queue:
+
+* Check if the queue is full.
+* If the queue is full, return overflow error and exit.
+* If the queue is not full, increment the rear pointer to point to the
+  next empty space.
+* Add the data element to the queue location, where the rear is pointing.
+* return success.
+
+![Enqueue representation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122158/fifo1-660x371.png)
+
+Enqueue representation
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueEnqueue(``int` `data)`  `{`  `// Check queue is full or not`  `if` `(capacity == rear) {`  `printf``(``"\\nQueue is full\\n"``);`  `return``;`  `}`    `// Insert element at the rear`  `else` `{`  `queue[rear] = data;`  `rear++;`  `}`  `return``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueEnqueue(``int` `data)`  `{`  `// Check queue is full or not`  `if` `(capacity == rear) {`  `System.out.println(``"\\nQueue is full\\n"``);`  `return``;`  `}`    `// Insert element at the rear`  `else` `{`  `queue[rear] = data;`  `rear++;`  `}`  `return``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to add an item to the queue.`  `// It changes rear and size`  `void` `enqueue(``struct` `Queue* queue,` `int` `item)`  `{`  `if` `(isFull(queue))`  `return``;`  `queue->rear = (queue->rear + 1) % queue->capacity;`  `queue->array[queue->rear] = item;`  `queue->size = queue->size + 1;`  `printf``(``"%d enqueued to queue\\n"``, item);`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to add an item to the queue.`  `# It changes rear and size`  `def` `EnQueue(``self``, item):`  `if` `self``.isFull():`  `print``(``"Full"``)`  `return`  `self``.rear` `=` `(``self``.rear` `+` `1``)` `%` `(``self``.capacity)`  `self``.Q[``self``.rear]` `=` `item`  `self``.size` `=` `self``.size` `+` `1`  `print``(``"% s enqueued to queue"` `%` `str``(item))`  `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to add an item to the queue.`  `// It changes rear and size`  `public` `void` `enqueue(``int` `item)`  `{`  `if` `(rear == max - 1) {`  `Console.WriteLine(``"Queue Overflow"``);`  `return``;`  `}`  `else` `{`  `ele[++rear] = item;`  `}`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `enqueue(element){`  `// adding element to the queue`  `this``.items.push(element);`  `}`    `// This code is contributed by Susobhan Akhuli`  `</script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 2: dequeue()**
+
+This operation removes and returns an element that is at the front end of
+the queue.
+
+The following steps are taken to perform the dequeue operation:
+
+* Check if the queue is empty.
+* If the queue is empty, return the underflow error and exit.
+* If the queue is not empty, access the data where the front is pointing.
+* Increment the front pointer to point to the next available data element.
+* The Return success.
+
+![Dequeue operation](https://media.geeksforgeeks.org/wp-content/uploads/20220805122625/fifo2-660x371.png)
+
+Dequeue operation
+
+Below is the Implementation of above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueDequeue()`  `{`  `// If queue is empty`  `if` `(front == rear) {`  `printf``(``"\\nQueue is empty\\n"``);`  `return``;`  `}`    `// Shift all the elements from index 2`  `// till rear to the left by one`  `else` `{`  `for` `(``int` `i = 0; i < rear - 1; i++) {`  `queue[i] = queue[i + 1];`  `}`    `// decrement rear`  `rear--;`  `}`  `return``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `void` `queueDequeue()`  `{`  `// If queue is empty`  `if` `(front == rear) {`  `System.out.println(``"\\nQueue is empty\\n"``);`  `return``;`  `}`    `// Shift all the elements from index 2`  `// till rear to the left by one`  `else` `{`  `for` `(``int` `i =` `0``; i < rear -` `1``; i++) {`  `queue[i] = queue[i +` `1``];`  `}`    `// decrement rear`  `rear--;`  `}`  `return``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to remove an item from queue.`  `// It changes front and size`  `int` `dequeue(``struct` `Queue* queue)`  `{`  `if` `(isEmpty(queue)) {`  `printf``(``"\\nQueue is empty\\n"``);`  `return``;`  `}`  `int` `item = queue->array[queue->front];`  `queue->front = (queue->front + 1) % queue->capacity;`  `queue->size = queue->size - 1;`  `return` `item;`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to remove an item from queue.`  `# It changes front and size`      `def` `DeQueue(``self``):`  `if` `self``.isEmpty():`  `print``(``"Queue is empty"``)`  `return`    `print``(``"% s dequeued from queue"` `%` `str``(``self``.Q[``self``.front]))`  `self``.front` `=` `(``self``.front` `+` `1``)` `%` `(``self``.capacity)`  `self``.size` `=` `self``.size` `-` `1`  `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to remove an item from queue.`  `// It changes front and size`  `public` `int` `dequeue()`  `{`  `if` `(front == rear + 1) {`  `Console.WriteLine(``"Queue is Empty"``);`  `return` `-1;`  `}`  `else` `{`  `int` `p = ele[front++];`  `return` `p;`  `}`  `}`  `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `dequeue(){`  `// removing element from the queue`  `// returns underflow when called`  `// on empty queue`  `if``(``this``.isEmpty()){`  `document.write(``"<br>Queue is empty<br>"``);`  `return` `-1;`  `}`  `return` `this``.items.shift();`  `}`  `// This code is contributed by Susobhan Akhuli`  `</script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 3: front()**
+
+This operation returns the element at the front end without removing it.
+
+The following steps are taken to perform the front operation:
+
+* If the queue is empty return the most minimum value.
+* otherwise, return the front value.
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(Queue* queue)`  `{`  `if` `(isempty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->front];`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(Queue queue)`  `{`  `if` `(isempty(queue))`  `return` `Integer.MIN_VALUE;`  `return` `queue.arr[queue.front];`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(``struct` `Queue* queue)`  `{`  `if` `(isempty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->front];`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to get front of queue`  `def` `que_front(``self``):`  `if` `self``.isempty():`  `return` `"Queue is empty"`  `return` `self``.Q[``self``.front]`    `# This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `public` `int` `front()`  `{`  `if` `(isempty())`  `return` `INT_MIN;`  `return` `arr[front];`  `}`    `// This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `// Function to get front of queue`  `front(){`  `// returns the Front element of`  `// the queue without removing it.`  `if``(``this``.isEmpty())`  `return` `"No elements in Queue<br>"``;`  `return` `this``.items[0];`  `}`  `// This code is contributed By Susobhan Akhuli`  `<script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### Operation 4 : rear()
+
+This operation returns the element at the rear end without removing it.
+
+The following steps are taken to perform the rear operation:
+
+* If the queue is empty return the most minimum value.
+* otherwise, return the rear value.
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* Python3
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get rear of queue`  `int` `rear(Queue* queue)`  `{`  `if` `(isEmpty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->rear];`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get rear of queue`  `int` `rear(Queue queue)`  `{`  `if` `(isEmpty(queue))`  `return` `Integer.MIN_VALUE;`  `return` `queue.arr[queue.rear];`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `int` `front(``struct` `Queue* queue)`  `{`  `if` `(isempty(queue))`  `return` `INT_MIN;`  `return` `queue->arr[queue->rear];`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Function to get rear of queue`  `def` `que_rear(``self``):`  `if` `self``.isEmpty():`  `return` `"Queue is empty"`  `return` `self``.Q[``self``.rear]`    `# This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to get front of queue`  `public` `int` `front()`  `{`  `if` `(isempty())`  `return` `INT_MIN;`  `return` `arr[rear];`  `}`    `// This code is contributed By Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `<script>`  `rear(){`  `// returns the Rear element of`  `// the queue without removing it.`  `if``(``this``.isEmpty())`  `return` `"No elements in Queue<br>"``;`  `return` `this``.items[``this``.items.length-1];`  `}`  `// This code is contributed By Susobhan Akhuli`  `<script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 5: isEmpty():**
+
+This operation returns a boolean value that indicates whether the queue is
+empty or not.
+
+The following steps are taken to perform the Empty operation:
+
+* check if front value is equal to -1 or not, if yes then return true
+  means queue is empty.
+* Otherwise return false, means queue is not empty
+
+Below is the implementation of the above approach:
+
+* C++
+* Java
+* C#
+* C
+* Python3
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check whether`  `// the queue is empty or not:`  `bool` `isEmpty()`  `{`  `if` `(front == -1)`  `return` `true``;`  `else`  `return` `false``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check whether`  `// the queue is empty or not:`  `boolean` `isEmpty()`  `{`  `if` `(front == -``1``)`  `return` `true``;`  `else`  `return` `false``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check whether`  `// the queue is empty or not:`  `bool` `isEmpty()`  `{`  `if` `(front == -1)`  `return` `true``;`  `else`  `return` `false``;`  `}`    `// This code is contributed by lokeshmvs21.` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Queue is empty when size is 0`  `bool` `isEmpty(``struct` `Queue* queue)`  `{`  `return` `(queue->size == 0);`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Queue is empty when size is 0`  `def` `isEmpty(``self``):`  `return` `self``.size` `=``=` `0`  `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `</script>`  `isEmpty(){`  `// return true if the queue is empty.`  `return` `this``.items.length == 0;`  `}`  `// This code is contributed by Susobhan Akhuli`  `</script>` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### **Operation 6 : isFull()**
+
+This operation returns a boolean value that indicates whether the queue is
+full or not.
+
+The following steps are taken to perform the isFull() operation:
+
+* Check if front value is equal to zero and rear is equal to the capacity
+  of queue if yes then return true.
+* otherwise return false
+
+Below is the Implementation of the above approach:
+
+* C++
+* Java
+* C
+* C#
+* Python3
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check`  `// whether the queue is full or not.`  `bool` `isFull()`  `{`  `if` `(front == 0 && rear == MAX_SIZE - 1) {`  `return` `true``;`  `}`  `return` `false``;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// This function will check`  `// whether the queue is full or not.`  `boolean` `isFull()`  `{`  `if` `(front ==` `0` `&& rear == MAX_SIZE -` `1``) {`  `return` `true``;`  `}`  `return` `false``;`  `}`    `// This code is contributed by aadityapburujwale` |
+| --- |
+
+
+
+
+
+C
+-
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Queue is full when size becomes`  `// equal to the capacity`  `bool` `isFull(``struct` `Queue* queue)`  `{`  `return` `(queue->size == queue->capacity);`  `}`    `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Function to add an item to the queue.`  `// It changes rear and size`  `public` `bool` `isFull(``int` `item) {` `return` `(rear == max - 1); }`  `// This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Python3
+-------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `# Queue is full when size becomes`  `# equal to the capacity`      `def` `isFull(``self``):`  `return` `self``.size` `=``=` `self``.capacity`    `# This code is contributed by Susobhan Akhuli` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `function` `isFull() {`  `if` `(front == 0 && rear == MAX_SIZE - 1) {`  `return` `true``;`  `}`  `return` `false``;`  `}`    `// This code is contributed by aadityamaharshi21.` |
+| --- |
+
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+### Operation 7: size()
+
+This operation returns the size of the queue i.e. the total number of
+elements it contains.
+
+```
+queuename.size()
+Parameters :
+No parameters are passed
+Returns :
+Number of elements in the container
+```
+
+* C++
+* Java
+* Python
+* C#
+* Javascript
+
+C++
+---
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// CPP program to illustrate`  `// Implementation of size() function`  `#include <iostream>`  `#include <queue>`  `using` `namespace` `std;`    `int` `main()`  `{`  `int` `sum = 0;`  `queue<``int``> myqueue;`  `myqueue.push(1);`  `myqueue.push(8);`  `myqueue.push(3);`  `myqueue.push(6);`  `myqueue.push(2);`    `// Queue becomes 1, 8, 3, 6, 2`    `cout << myqueue.size();`    `return` `0;`  `}` |
+| --- |
+
+
+
+
+
+Java
+----
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Java program to illustrate implementation of size()`  `// function`    `import` `java.util.*;`    `public` `class` `Main {`  `public` `static` `void` `main(String[] args)`  `{`  `int` `sum =` `0``;`  `Queue<Integer> myqueue =` `new` `LinkedList<>();`  `myqueue.add(``1``);`  `myqueue.add(``8``);`  `myqueue.add(``3``);`  `myqueue.add(``6``);`  `myqueue.add(``2``);`    `// Queue becomes 1, 8, 3, 6, 2`    `System.out.println(myqueue.size());`  `}`  `}`    `// This code is contributed by lokesh.` |
+| --- |
+
+
+
+
+
+Python
+------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `from` `collections` `import` `deque`    `def` `main():`  `sum` `=` `0`  `myqueue` `=` `deque()`  `myqueue.append(``1``)`  `myqueue.append(``8``)`  `myqueue.append(``3``)`  `myqueue.append(``6``)`  `myqueue.append(``2``)`    `# Queue becomes 1, 8, 3, 6, 2`    `print``(``len``(myqueue))`    `main()`    `# This code is contributed by aadityamaharshi21.` |
+| --- |
+
+
+
+
+
+C#
+--
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `using` `System;`  `using` `System.Collections.Generic;`    `namespace` `ConsoleApp1 {`  `class` `MainClass {`  `public` `static` `void` `Main(``string``[] args)`  `{`  `int` `sum = 0;`  `Queue<``int``> myqueue =` `new` `Queue<``int``>();`  `myqueue.Enqueue(1);`  `myqueue.Enqueue(8);`  `myqueue.Enqueue(3);`  `myqueue.Enqueue(6);`  `myqueue.Enqueue(2);`    `// Queue becomes 1, 8, 3, 6, 2`    `Console.WriteLine(myqueue.Count);`  `}`  `}`  `}`    `// This code is contributed by adityamaharshi21.` |
+| --- |
+
+
+
+
+
+Javascript
+----------
+
+  
+
+
+
+  
+
+  
+
+
+
+
+| `// Javascript code`  `let sum = 0;`  `let myqueue=[];`  `myqueue.push(1);`  `myqueue.push(8);`  `myqueue.push(3);`  `myqueue.push(6);`  `myqueue.push(2);`    `// Queue becomes 1, 8, 3, 6, 2`    `console.log(myqueue.length);` |
+| --- |
+
+
+
+
+
+
+
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
+**Space Complexity:** O(N)
+
+', '', 'Basic Operations for Queue in Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('21135289-e645-4045-a26c-697c91f3873f', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
+known as ****Dequeue.****It is important to know that we cannot insert an element if the size of
+the queue is full and cannot delete an element when the queue itself is
+empty. If we try to insert an element even after the queue is full, then
+such a condition is known as overflow whereas, if we try to delete an
+element even after the queue is empty then such a condition is known as
+underflow.
+
+****Primary Queue Operations:****
+
+* ****void enqueue(int Element):**** When this operation is performed, an element is inserted in the queue
+  at the end i.e. at the rear end. (Where T is Generic i.e we can define
+  Queue of any type of data structure.) This operation take ****constant time i.e O(1).****
+* ****int dequeue():****
+  When this operation is performed, an element is removed from the front
+  end and is returned. This operation take ****constant time i.e O(1).****
+
+****Auxiliary Queue Operations:****
+
+* ****int front():**** This operation will return the element at the front without removing
+  it and it take O(1) time.
+* ****int rear():**** This operation will return the element at the rear without removing
+  it, Its Time Complexity is O(1).
+* ****int isEmpty():**** This operation indicates whether the queue is empty or not. This
+  Operation also done in O(1).
+* ****int size():**** This operation will return the size of the queue i.e. the total
+  number of elements present in the queue and it’s time complexity is
+  O(1).
+
+****Types of Queues:****
+
+* ****Simple Queue:**** Simple queue also known as a linear queue is the most basic version
+  of a queue. Here, insertion of an element i.e. the Enqueue operation
+  takes place at the rear end and removal of an element i.e. the Dequeue
+  operation takes place at the front end.
+* ****Circular Queue:****This is mainly an efficient array implementation of Simple Queue. In
+  a circular queue, the element of the queue act as a circular ring. The
+  working of a circular queue is similar to the linear queue except for
+  the fact that the last element is connected to the first element. Its
+  advantage is that the memory is utilized in a better way. This is
+  because if there is an empty space i.e. if no element is present at a
+  certain position in the queue, then an element can be easily added at
+  that position.
+* ****Priority Queue:**** This queue is a special type of queue. Its specialty is that it
+  arranges the elements in a queue based on some priority. The priority
+  can be something where the element with the highest value has the
+  priority so it creates a queue with decreasing order of values. The
+  priority can also be such that the element with the lowest value gets
+  the highest priority so in turn it creates a queue with increasing
+  order of values.
+* ****Dequeue:**** Dequeue is also known as Double Ended Queue. As the name suggests
+  double ended, it means that an element can be inserted or removed from
+  both the ends of the queue unlike the other queues in which it can be
+  done only from one end. Because of this property it may not obey the
+  First In First Out property.
+
+****Implementation of Queue:****
+
+* ****Sequential allocation:**** A queue can be implemented using an array. It can organize a limited
+  number of elements.
+* ****Linked list allocation:****
+  A queue can be implemented using a linked list. It can organize an
+  unlimited number of elements.
+
+****Applications of Queue:****
+
+* ****Multi programming:**** Multi programming means when multiple programs are running in the
+  main memory. It is essential to organize these multiple programs and
+  these multiple programs are organized as queues.
+* ****Network:**** In a network, a queue is used in devices such as a router or a
+  switch. another application of a queue is a mail queue which is a
+  directory that stores data and controls files for mail messages.
+* ****Job Scheduling:**** The computer has a task to execute a particular number of jobs that
+  are scheduled to be executed one after another. These jobs are
+  assigned to the processor one by one which is organized using a
+  queue.
+* ****Shared resources:**** Queues are used as waiting lists for a single shared resource.
+
+****Real-time application of Queue:****
+
+* Working as a buffer between a slow and a fast device. For example
+  keyboard and CPU, and two devices on network.
+* ATM Booth Line
+* Ticket Counter Line
+* CPU task scheduling
+* Waiting time of each customer at call centers.
+
+****Advantages of Queue:****
+
+* A large amount of data can be managed efficiently with ease.
+* Operations such as insertion and deletion can be performed with ease
+  as it follows the first in first out rule.
+* Queues are useful when a particular service is used by multiple
+  consumers.
+* Queues are fast in speed for data inter-process communication.
+* Queues can be used in the implementation of other data
+  structures.
+
+****Disadvantages of Queue:****
+
+* The operations such as insertion and deletion of elements from the
+  middle are time consuming.
+* In a classical queue, a new element can only be inserted when the
+  existing elements are deleted from the queue.
+* Searching an element takes O(N) time.
+* Maximum size of a queue must be defined prior in case of array
+  implementation.', e'A Queue
+is a linear data structure. This data structure follows a particular
+order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('451c319e-a0a3-48e5-baca-ece2737e6010', e'Representation of Stack Data Structure:
+---------------------------------------
+
+Stack follows LIFO (Last In First Out) Principle so the element which
+is pushed last is popped first.
+
+
+![Stack-representation-in-Data-Structures-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180735/Stack-representation-in-Data-Structures-(1).webp)
+
+****Types of Stack:****
+-----------------------
+
+* ****Fixed Size Stack**** 
+  : As the name suggests, a fixed size stack has a fixed size and cannot
+  grow or shrink dynamically. If the stack is full and an attempt is
+  made to add an element to it, an overflow error occurs. If the stack
+  is empty and an attempt is made to remove an element from it, an
+  underflow error occurs.
+* ****Dynamic Size Stack**** 
+  : A dynamic size stack can grow or shrink dynamically. When the stack
+  is full, it automatically increases its size to accommodate the new
+  element, and when the stack is empty, it decreases its size. This type
+  of stack is implemented using a linked list, as it allows for easy
+  resizing of the stack.
+
+Basic Operations on Stack:
+--------------------------
+
+In order to make manipulations in a stack, there are certain operations
+provided to us.
+
+
+* ****push()****  to insert an element into the stack
+* ****pop()****  to remove an element from the stack
+* ****top()****  Returns the top element of the stack.
+* ****isEmpty()****  returns true if stack is empty else false.
+* ****isFull()****  returns true if the stack is full else false.
+
+To implement stack, we need to maintain reference to the top
+item.
+
+### ****Push Operation on Stack****
+
+Adds an item to the stack. If the stack is full, then it is said to be
+an  ****Overflow condition.**** 
+
+ ****Algorithm for Push Operation:**** 
+
+* Before pushing the element to the stack, we check if the stack is  ****full****  .
+* If the stack is full  ****(top == capacity-1)****  , then  ****Stack Overflows****  and we cannot insert the element to the stack.
+* Otherwise, we increment the value of top by 1  ****(top = top + 1)****  and the new value is inserted at  ****top position****  .
+* The elements can be pushed into the stack till we reach the  ****capacity****  of the stack.
+
+![Push-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180844/Push-Operation-in-Stack-(1).webp)
+### ****Pop Operation in Stack****
+
+Removes an item from the stack. The items are popped in the reversed
+order in which they are pushed. If the stack is empty, then it is said
+to be an  ****Underflow condition.**** 
+
+****Algorithm for Pop Operation:**** 
+
+* Before popping the element from the stack, we check if the stack is  ****empty****  .
+* If the stack is empty (top == -1), then  ****Stack Underflows****  and we cannot remove any element from the stack.
+* Otherwise, we store the value at top, decrement the value of top by 1  ****(top = top – 1)****  and return the stored top value.
+
+![Pop-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180943/Pop-Operation-in-Stack-(1).webp)
+### ****Top or Peek Operation on Stack****
+
+Returns the top element of the stack. 
+
+****Algorithm for Top Operation:**** 
+
+* Before returning the top element from the stack, we check if the
+  stack is empty.
+* If the stack is empty (top == -1), we simply print “Stack is empty”.
+* Otherwise, we return the element stored at  ****index = top****  .
+
+![Top-or-Peek-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181023/Top-or-Peek-Operation-in-Stack-(1).webp)
+### ****isEmpty Operation in Stack Data Structure:****
+
+Returns true if the stack is empty, else false. 
+
+****Algorithm for isEmpty Operation****: 
+
+* Check for the value of  ****top****  in stack.
+* If  ****(top == -1)****, then the stack is  ****empty****  so return  ****true****  .
+* Otherwise, the stack is not empty so return  ****false****  .
+
+![isEmpty-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181101/isEmpty-Operation-in-Stack-(1).webp)
+### isFull ****Operation in Stack**** ****Data Structure****:
+
+Returns true if the stack is full, else false. 
+
+****Algorithm for isFull Operation:**** 
+
+* Check for the value of  ****top****  in stack.
+* If  ****(top == capacity-1),****  then the stack is  ****full****  so return  ****true****.
+* Otherwise, the stack is not full so return  ****false****.
+
+![isFull-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181147/isFull-Operation-in-Stack-(1).webp)
+
+Implementation of Stack
+-----------------------
+
+
+The basic operations that can be performed on a stack include push, pop,
+and peek. There are two ways to implement a stack –
+
+
+* [****Implementation of Stack using Array****](https://www.geeksforgeeks.org/implement-stack-using-array/)
+* [****Implementation of Stack using Linked List****](https://www.geeksforgeeks.org/implement-a-stack-using-singly-linked-list/)
+
+****Complexity Analysis of Operations on Stack Data Structure:****
+------------------------------------------------------------------
+
+| ****Operations**** | ****Time Complexity**** | ****Space Complexity**** |
+| --- | --- | --- |
+| ****push()**** | O(1) | O(1) |
+| ****pop()**** | O(1) | O(1) |
+| top() or  ****pee****k() | O(1) | O(1) |
+| isEmpty() | O(1) | O(1) |
+| isFull() | O(1) | O(1) |', e'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
+both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 1, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('63ddc11b-1888-48d8-afe0-f7153a56cc65', e'Implement Stack using Array:
+----------------------------
+
+> To implement a stack using an array, initialize an array and treat
+> its end as the stack’s top. Implement ****push**** (add to end), ****pop**** (remove from end), and ****peek**** (check end) operations, handling cases for an ****empty**** or f****ull stack****.
+
+****Step-by-step approach:****
+
+1. ****Initialize an array**** to represent the stack.
+2. Use the ****end of the array**** to represent the ****top of the stack****.
+3. Implement ****push**** (add to end), ****pop**** (remove from the end), and ****peek**** (check end) operations, ensuring to handle empty and full stack
+   conditions.
+
+Implement Stack Operations using Array:
+---------------------------------------
+
+
+Here are the following operations of implement stack using array:
+
+### ****Push Operation in Stack:****
+
+Adds an item to the stack. If the stack is full, then it is said to be
+an ****Overflow condition.****
+
+****Algorithm for Push Operation:****
+
+> * Before pushing the element to the stack, we check if the stack
+>   is ****full****.
+> * If the stack is full ****(top == capacity-1)****, then ****Stack Overflows****and we cannot insert the element to the stack.
+> * Otherwise, we increment the value of top by 1 ****(top = top + 1)****and the new value is inserted at ****top position****.
+> * The elements can be pushed into the stack till we reach
+>   the ****capacity****of the stack.
+
+![push-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114219/push-operation-in-stack-1.webp)![push-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114219/push-operation-in-stack-1.webp)
+
+
+![push-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114220/push-operation-in-stack-2.webp)![push-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114220/push-operation-in-stack-2.webp)
+
+
+![push-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114221/push-operation-in-stack-3.webp)![push-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114221/push-operation-in-stack-3.webp)
+
+
+![push-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-4.webp)![push-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-4.webp)
+
+
+![push-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-5.webp)![push-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114222/push-operation-in-stack-5.webp)
+
+
+![push-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114223/push-operation-in-stack-6.webp)![push-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415114223/push-operation-in-stack-6.webp)
+
+
+
+Previous
+
+
+
+
+
+Pause
+
+Next
+
+
+
+
+
+5 / 6
+
+### ****Pop Operation in Stack:****
+
+Removes an item from the stack. The items are popped in the reversed
+order in which they are pushed. If the stack is empty, then it is said
+to be an ****Underflow condition.****
+
+****Algorithm for Pop Operation:****
+
+> * Before popping the element from the stack, we check if the stack
+>   is ****empty****.
+> * If the stack is empty (top == -1), then ****Stack Underflows****and we cannot remove any element from the stack.
+> * Otherwise, we store the value at top, decrement the value of top by
+>   1 ****(top = top – 1)****and return the stored top value.
+
+![pop-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-1.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-2.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-3.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-4.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-5.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+![pop-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)![pop-operation-in-stack-6.webp](https://media.geeksforgeeks.org/wp-content/uploads/20240415123025/pop-operation-in-stack-1.webp)
+
+
+
+Previous
+
+
+
+
+
+Play
+
+Next
+
+
+
+
+
+1 / 6
+
+  
+
+
+### ****Top or Peek Operation in Stack:****
+
+Returns the top element of the stack.
+
+****Algorithm for Top Operation:****
+
+> * Before returning the top element from the stack, we check if the
+>   stack is empty.
+> * If the stack is empty (top == -1), we simply print “Stack is
+>   empty”.
+> * Otherwise, we return the element stored at ****index = top****.
+
+### ****isEmpty Operation in Stack:****
+
+Returns true if the stack is empty, else false.
+
+****Algorithm for isEmpty Operation****:
+
+> * Check for the value of ****top****in stack.
+> * If ****(top == -1)****, then the stack is ****empty****so return ****true****.
+> * Otherwise, the stack is not empty so return ****false****.
+
+### isFull ****Operation in Stack****:
+
+Returns true if the stack is full, else false.
+
+****Algorithm for isFull Operation:****
+
+> * Check for the value of ****top****in stack.
+> * If ****(top == capacity-1),****then the stack is ****full****so return ****true****.
+> * Otherwise, the stack is not full so return ****false.****
+
+Below is the implementation of the above approach:
+
+C++
+````
+/* C++ program to implement basic stack 
+operations */
+#include <bits/stdc++.h> 
+
+using namespace std; 
+
+#define MAX 1000 
+
+class Stack { 
+    int top; 
+
+public: 
+    int a[MAX]; // Maximum size of Stack 
+
+    Stack() { top = -1; } 
+    bool push(int x); 
+    int pop(); 
+    int peek(); 
+    bool isEmpty(); 
+}; 
+
+bool Stack::push(int x) 
+{ 
+    if (top >= (MAX - 1)) { 
+        cout << "Stack Overflow"; 
+        return false; 
+    } 
+    else { 
+        a[++top] = x; 
+        cout << x << " pushed into stack\\n"; 
+        return true; 
+    } 
+} 
+
+int Stack::pop() 
+{ 
+    if (top < 0) { 
+        cout << "Stack Underflow"; 
+        return 0; 
+    } 
+    else { 
+        int x = a[top--]; 
+        return x; 
+    } 
+} 
+int Stack::peek() 
+{ 
+    if (top < 0) { 
+        cout << "Stack is Empty"; 
+        return 0; 
+    } 
+    else { 
+        int x = a[top]; 
+        return x; 
+    } 
+} 
+
+bool Stack::isEmpty() 
+{ 
+    return (top < 0); 
+} 
+
+// Driver program to test above functions 
+int main() 
+{ 
+    class Stack s; 
+    s.push(10); 
+    s.push(20); 
+    s.push(30); 
+    cout << s.pop() << " Popped from stack\\n"; 
+    
+    //print top element of stack after popping 
+    cout << "Top element is : " << s.peek() << endl; 
+    
+    //print all elements in stack : 
+    cout <<"Elements present in stack : "; 
+    while(!s.isEmpty()) 
+    { 
+        // print top element in stack 
+        cout << s.peek() <<" "; 
+        // remove top element in stack 
+        s.pop(); 
+    } 
+
+    return 0; 
+}
+
+````
+
+C
+````
+// C program for array implementation of stack 
+#include <limits.h> 
+#include <stdio.h> 
+#include <stdlib.h> 
+
+// A structure to represent a stack 
+struct Stack { 
+    int top; 
+    unsigned capacity; 
+    int* array; 
+}; 
+
+// function to create a stack of given capacity. It initializes size of 
+// stack as 0 
+struct Stack* createStack(unsigned capacity) 
+{ 
+    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack)); 
+    stack->capacity = capacity; 
+    stack->top = -1; 
+    stack->array = (int*)malloc(stack->capacity * sizeof(int)); 
+    return stack; 
+} 
+
+// Stack is full when top is equal to the last index 
+int isFull(struct Stack* stack) 
+{ 
+    return stack->top == stack->capacity - 1; 
+} 
+
+// Stack is empty when top is equal to -1 
+int isEmpty(struct Stack* stack) 
+{ 
+    return stack->top == -1; 
+} 
+
+// Function to add an item to stack. It increases top by 1 
+void push(struct Stack* stack, int item) 
+{ 
+    if (isFull(stack)) 
+        return; 
+    stack->array[++stack->top] = item; 
+    printf("%d pushed to stack\\n", item); 
+} 
+
+// Function to remove an item from stack. It decreases top by 1 
+int pop(struct Stack* stack) 
+{ 
+    if (isEmpty(stack)) 
+        return INT_MIN; 
+    return stack->array[stack->top--]; 
+} 
+
+// Function to return the top from stack without removing it 
+int peek(struct Stack* stack) 
+{ 
+    if (isEmpty(stack)) 
+        return INT_MIN; 
+    return stack->array[stack->top]; 
+} 
+
+// Driver program to test above functions 
+int main() 
+{ 
+    struct Stack* stack = createStack(100); 
+
+    push(stack, 10); 
+    push(stack, 20); 
+    push(stack, 30); 
+
+    printf("%d popped from stack\\n", pop(stack)); 
+
+    return 0; 
+} 
+
+````
+
+Java
+````
+/* Java program to implement basic stack 
+operations */
+class Stack { 
+    static final int MAX = 1000; 
+    int top; 
+    int a[] = new int[MAX]; // Maximum size of Stack 
+
+    boolean isEmpty() 
+    { 
+        return (top < 0); 
+    } 
+    Stack() 
+    { 
+        top = -1; 
+    } 
+
+    boolean push(int x) 
+    { 
+        if (top >= (MAX - 1)) { 
+            System.out.println("Stack Overflow"); 
+            return false; 
+        } 
+        else { 
+            a[++top] = x; 
+            System.out.println(x + " pushed into stack"); 
+            return true; 
+        } 
+    } 
+
+    int pop() 
+    { 
+        if (top < 0) { 
+            System.out.println("Stack Underflow"); 
+            return 0; 
+        } 
+        else { 
+            int x = a[top--]; 
+            return x; 
+        } 
+    } 
+
+    int peek() 
+    { 
+        if (top < 0) { 
+            System.out.println("Stack Underflow"); 
+            return 0; 
+        } 
+        else { 
+            int x = a[top]; 
+            return x; 
+        } 
+    } 
+    
+    void print(){ 
+    for(int i = top;i>-1;i--){ 
+    System.out.print(" "+ a[i]); 
+    } 
+} 
+} 
+
+// Driver code 
+class Main { 
+    public static void main(String args[]) 
+    { 
+        Stack s = new Stack(); 
+        s.push(10); 
+        s.push(20); 
+        s.push(30); 
+        System.out.println(s.pop() + " Popped from stack"); 
+        System.out.println("Top element is :" + s.peek()); 
+        System.out.print("Elements present in stack :"); 
+        s.print(); 
+    } 
+} 
+
+````
+
+Python3
+````
+# Python program for implementation of stack 
+
+# import maxsize from sys module 
+# Used to return -infinite when stack is empty 
+from sys import maxsize 
+
+# Function to create a stack. It initializes size of stack as 0 
+def createStack(): 
+    stack = [] 
+    return stack 
+
+# Stack is empty when stack size is 0 
+def isEmpty(stack): 
+    return len(stack) == 0
+
+# Function to add an item to stack. It increases size by 1 
+def push(stack, item): 
+    stack.append(item) 
+    print(item + " pushed to stack ") 
+    
+# Function to remove an item from stack. It decreases size by 1 
+def pop(stack): 
+    if (isEmpty(stack)): 
+        return str(-maxsize -1) # return minus infinite 
+    
+    return stack.pop() 
+
+# Function to return the top from stack without removing it 
+def peek(stack): 
+    if (isEmpty(stack)): 
+        return str(-maxsize -1) # return minus infinite 
+    return stack[len(stack) - 1] 
+
+# Driver program to test above functions     
+stack = createStack() 
+push(stack, str(10)) 
+push(stack, str(20)) 
+push(stack, str(30)) 
+print(pop(stack) + " popped from stack") 
+
+````
+
+C#
+````
+// C# program to implement basic stack 
+// operations 
+using System; 
+
+namespace ImplementStack { 
+class Stack { 
+    private int[] ele; 
+    private int top; 
+    private int max; 
+    public Stack(int size) 
+    { 
+        ele = new int[size]; // Maximum size of Stack 
+        top = -1; 
+        max = size; 
+    } 
+
+    public void push(int item) 
+    { 
+        if (top == max - 1) { 
+            Console.WriteLine("Stack Overflow"); 
+            return; 
+        } 
+        else { 
+            ele[++top] = item; 
+        } 
+    } 
+
+    public int pop() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return -1; 
+        } 
+        else { 
+            Console.WriteLine("{0} popped from stack ", ele[top]); 
+            return ele[top--]; 
+        } 
+    } 
+
+    public int peek() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return -1; 
+        } 
+        else { 
+            Console.WriteLine("{0} popped from stack ", ele[top]); 
+            return ele[top]; 
+        } 
+    } 
+
+    public void printStack() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return; 
+        } 
+        else { 
+            for (int i = 0; i <= top; i++) { 
+                Console.WriteLine("{0} pushed into stack", ele[i]); 
+            } 
+        } 
+    } 
+} 
+
+// Driver program to test above functions 
+class Program { 
+    static void Main() 
+    { 
+        Stack p = new Stack(5); 
+
+        p.push(10); 
+        p.push(20); 
+        p.push(30); 
+        p.printStack(); 
+        p.pop(); 
+    } 
+} 
+} 
+
+````
+
+JavaScript
+````
+/* javascript program to implement basic stack 
+operations 
+*/
+var t = -1; 
+    var MAX = 1000; 
+    var a = Array(MAX).fill(0); // Maximum size of Stack 
+
+    function isEmpty() { 
+        return (t < 0); 
+    } 
+
+    function push(x) { 
+        if (t >= (MAX - 1)) { 
+            console.log("Stack Overflow"); 
+            return false; 
+        } else { 
+        t+=1; 
+            a[t] = x; 
+            
+            console.log(x + " pushed into stack<br/>"); 
+            return true; 
+        } 
+    } 
+
+    function pop() { 
+        if (t < 0) { 
+            console.log("Stack Underflow"); 
+            return 0; 
+        } else { 
+            var x = a[t]; 
+            t-=1; 
+            return x; 
+        } 
+    } 
+
+    function peek() { 
+        if (t < 0) { 
+            console.log("Stack Underflow"); 
+            return 0; 
+        } else { 
+            var x = a[t]; 
+            return x; 
+        } 
+    } 
+
+    function print() { 
+        for (i = t; i > -1; i--) { 
+            console.log(" " + a[i]); 
+        } 
+    } 
+
+        push(10); 
+        push(20); 
+        push(30); 
+        console.log(pop() + " Popped from stack"); 
+        console.log("<br/>Top element is :" + peek()); 
+        console.log("<br/>Elements present in stack : "); 
+        print(); 
+
+````
+
+
+
+
+
+58
+
+
+
+
+
+1
+
+```
+/* javascript program to implement basic stack 
+```
+
+2
+
+```
+operations 
+```
+
+3
+
+```
+*/
+```
+
+4
+
+```
+var t = -1; 
+```
+
+5
+
+```
+    var MAX = 1000; 
+```
+
+6
+
+```
+    var a = Array(MAX).fill(0); // Maximum size of Stack 
+```
+
+7
+
+```
+​
+```
+
+8
+
+```
+    function isEmpty() { 
+```
+
+9
+
+```
+        return (t < 0); 
+```
+
+10
+
+```
+    } 
+```
+
+11
+
+```
+​
+```
+
+12
+
+```
+    function push(x) { 
+```
+
+13
+
+```
+        if (t >= (MAX - 1)) { 
+```
+
+14
+
+```
+            console.log("Stack Overflow"); 
+```
+
+15
+
+```
+            return false; 
+```
+
+16
+
+```
+        } else { 
+```
+
+17
+
+```
+        t+=1; 
+```
+
+18
+
+```
+            a[t] = x; 
+```
+
+19
+
+```
+            
+```
+
+20
+
+```
+            console.log(x + " pushed into stack<br/>"); 
+```
+
+21
+
+```
+            return true; 
+```
+
+22
+
+```
+        } 
+```
+
+23
+
+```
+    } 
+```
+
+24
+
+```
+​
+```
+
+25
+
+```
+    function pop() { 
+```
+
+26
+
+```
+        if (t < 0) { 
+```
+
+27
+
+```
+            console.log("Stack Underflow"); 
+```
+
+28
+
+```
+            return 0; 
+```
+
+29
+
+```
+        } else { 
+```
+
+30
+
+```
+            var x = a[t]; 
+```
+
+31
+
+```
+            t-=1; 
+```
+
+32
+
+```
+            return x; 
+```
+
+33
+
+```
+        } 
+```
+
+34
+
+```
+    } 
+```
+
+35
+
+```
+​
+```
+
+36
+
+```
+    function peek() { 
+```
+
+37
+
+```
+        if (t < 0) { 
+```
+
+38
+
+```
+            console.log("Stack Underflow"); 
+```
+
+39
+
+```
+            return 0; 
+```
+
+40
+
+```
+        } else { 
+```
+
+41
+
+```
+            var x = a[t]; 
+```
+
+42
+
+```
+            return x; 
+```
+
+43
+
+```
+        } 
+```
+
+44
+
+```
+    } 
+```
+
+45
+
+```
+​
+```
+
+46
+
+```
+    function print() { 
+```
+
+47
+
+```
+        for (i = t; i > -1; i--) { 
+```
+
+48
+
+```
+            console.log(" " + a[i]); 
+```
+
+49
+
+```
+        } 
+```
+
+50
+
+```
+    } 
+```
+
+51
+
+```
+​
+```
+
+52
+
+```
+        push(10); 
+```
+
+53
+
+```
+        push(20); 
+```
+
+54
+
+```
+        push(30); 
+```
+
+55
+
+```
+        console.log(pop() + " Popped from stack"); 
+```
+
+56
+
+```
+        console.log("<br/>Top element is :" + peek()); 
+```
+
+57
+
+```
+        console.log("<br/>Elements present in stack : "); 
+```
+
+58
+
+```
+        print();
+```
+
+
+
+
+
+
+
+
+
+  
+**Output**
+```
+
+10 pushed into stack
+20 pushed into stack
+30 pushed into stack
+30 Popped from stack
+Top element is : 20
+Elements present in stack : 20 10 
+```
+### Complexity Analysis:
+
+* ****Time Complexity****:
+  + `push`: O(1)
+  + `pop`: O(1)
+  + `peek`: O(1)
+  + `is_empty`: O(1)
+  + is\\_full: O(1)
+* ****Auxiliary Space****: O(n), where n is the number of items in the stack.
+
+Advantages of Array Implementation:
+-----------------------------------
+
+* Easy to implement.
+* Memory is saved as pointers are not involved.
+
+Disadvantages of Array Implementation:
+--------------------------------------
+
+* It is not dynamic i.e., it doesn’t grow and shrink depending on needs
+  at runtime. [But in case of dynamic sized arrays like vector in C++,
+  list in Python, ArrayList in Java, stacks can grow and shrink with
+  array implementation as well].
+* The total size of the stack must be defined beforehand.', e'Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
+Arrays. In Array-based approach, all stack-related operations are
+executed using arrays. Let’s see how we can implement each operation on
+the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 2, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('cf945f38-3396-48d8-815b-81e37df21182', e'****Stack Operations:****
+-------------------------
+
+* [****push()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
+  Insert a new element into the stack i.e just insert a new element at
+  the beginning of the linked list.
+* [****pop()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
+  Return the top element of the Stack i.e simply delete the first
+  element from the linked list.
+* [****peek()****](https://www.geeksforgeeks.org/stack-peek-method-in-java/)****:**** Return the top element.
+* ****display():**** Print all elements in Stack.
+
+Push Operation:
+---------------
+
+> * Initialise a node
+> * Update the value of that node by data i.e. ****node->data = data****
+> * Now link this node to the top of the linked list
+> * And update top pointer to the current node
+
+Pop Operation:
+--------------
+
+> * First Check whether there is any node present in the linked list or
+>   not, if not then return
+> * Otherwise make pointer let say ****temp**** to the top node and move forward the top node by 1 step
+> * Now free this temp node
+
+Peek Operation:
+---------------
+
+> * Check if there is any node present or not, if not then
+>   return.
+> * Otherwise return the value of top node of the linked list
+
+Display Operation:
+------------------
+
+> * Take a ****temp**** node and initialize it with top pointer
+> * Now start traversing temp till it encounters NULL
+> * Simultaneously print the value of the temp node
+
+ 
+
+Below is the implementation of the above operations 
+
+C++
+````
+// C++ program to implement a stack using singly linked list
+#include <bits/stdc++.h>
+using namespace std;
+
+// Class representing a node in the linked list
+class Node {
+public:
+    int data;
+    Node* next;
+    Node(int new_data) {
+        this->data = new_data;
+        this->next = nullptr;
+    }
+};
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // head of the linked list
+    Node* head;
+
+public:
+    // Constructor to initialize the stack
+    Stack() { this->head = nullptr; }
+
+    // Function to check if the stack is empty
+    bool isEmpty() {
+      
+        // If head is nullptr, the stack is empty
+        return head == nullptr;
+    }
+
+    // Function to push an element onto the stack
+    void push(int new_data) {
+      
+        // Create a new node with given data
+        Node* new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (!new_node) {
+            cout << "\\nStack Overflow";
+        }
+
+        // Link the new node to the current top node
+        new_node->next = head;
+
+        // Update the top to the new node
+        head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    void pop() {
+
+        // Check for stack underflow
+        if (this->isEmpty()) {
+            cout << "\\nStack Underflow" << endl;
+        }
+        else {
+            // Assign the current top to a temporary
+            // variable
+            Node* temp = head;
+
+            // Update the top to the next node
+            head = head->next;
+
+            // Deallocate the memory of the old top node
+            delete temp;
+        }
+    }
+
+    // Function to return the top element of the stack
+    int peek() {
+
+        // If stack is not empty, return the top element
+        if (!isEmpty())
+            return head->data;
+        else {
+            cout << "\\nStack is empty";
+            return INT_MIN;
+        }
+    }
+};
+
+// Driver program to test the stack implementation
+int main() {
+    // Creating a stack
+    Stack st;
+
+    // Push elements onto the stack
+    st.push(11);
+    st.push(22);
+    st.push(33);
+    st.push(44);
+
+    // Print top element of the stack
+    cout << "Top element is " << st.peek() << endl;
+
+    // removing two elemements from the top
+      cout << "Removing two elements..." << endl;
+    st.pop();
+    st.pop();
+
+    // Print top element of the stack
+    cout << "Top element is " << st.peek() << endl;
+
+    return 0;
+}
+
+````
+
+C
+````
+// C program to implement a stack using singly linked list
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+// Struct representing a node in the linked list
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+Node* createNode(int new_data) {
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    new_node->data = new_data;
+    new_node->next = NULL;
+    return new_node;
+}
+
+// Struct to implement stack using a singly linked list
+typedef struct Stack {
+    Node* head;
+} Stack;
+
+// Constructor to initialize the stack
+void initializeStack(Stack* stack) { stack->head = NULL; }
+
+// Function to check if the stack is empty
+int isEmpty(Stack* stack) {
+  
+    // If head is NULL, the stack is empty
+    return stack->head == NULL;
+}
+
+// Function to push an element onto the stack
+void push(Stack* stack, int new_data) {
+  
+    // Create a new node with given data
+    Node* new_node = createNode(new_data);
+
+    // Check if memory allocation for the new node failed
+    if (!new_node) {
+        printf("\\nStack Overflow");
+        return;
+    }
+
+    // Link the new node to the current top node
+    new_node->next = stack->head;
+
+    // Update the top to the new node
+    stack->head = new_node;
+}
+
+// Function to remove the top element from the stack
+void pop(Stack* stack) {
+  
+    // Check for stack underflow
+    if (isEmpty(stack)) {
+        printf("\\nStack Underflow\\n");
+        return;
+    }
+    else {
+      
+        // Assign the current top to a temporary variable
+        Node* temp = stack->head;
+
+        // Update the top to the next node
+        stack->head = stack->head->next;
+
+        // Deallocate the memory of the old top node
+        free(temp);
+    }
+}
+
+// Function to return the top element of the stack
+int peek(Stack* stack) {
+  
+    // If stack is not empty, return the top element
+    if (!isEmpty(stack))
+        return stack->head->data;
+    else {
+        printf("\\nStack is empty");
+        return INT_MIN;
+    }
+}
+
+// Driver program to test the stack implementation
+int main() {
+  
+    // Creating a stack
+    Stack stack;
+    initializeStack(&stack);
+
+    // Push elements onto the stack
+    push(&stack, 11);
+    push(&stack, 22);
+    push(&stack, 33);
+    push(&stack, 44);
+
+    // Print top element of the stack
+    printf("Top element is %d\\n", peek(&stack));
+
+  
+      // removing two elemements from the top
+      printf("Removing two elements...\\n");
+    pop(&stack);
+    pop(&stack);
+
+    // Print top element of the stack
+    printf("Top element is %d\\n", peek(&stack));
+
+    return 0;
+}
+
+````
+
+Java
+````
+// Java program to implement a stack using singly linked
+// list
+
+// Class representing a node in the linked list
+class Node {
+    int data;
+    Node next;
+    Node(int new_data) {
+        this.data = new_data;
+        this.next = null;
+    }
+}
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // Head of the linked list
+    Node head;
+
+    // Constructor to initialize the stack
+    Stack() { this.head = null; }
+
+    // Function to check if the stack is empty
+    boolean isEmpty() {
+      
+        // If head is null, the stack is empty
+        return head == null;
+    }
+
+    // Function to push an element onto the stack
+    void push(int new_data) {
+      
+        // Create a new node with given data
+        Node new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (new_node == null) {
+            System.out.println("\\nStack Overflow");
+            return;
+        }
+
+        // Link the new node to the current top node
+        new_node.next = head;
+
+        // Update the top to the new node
+        head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    void pop() {
+      
+        // Check for stack underflow
+        if (isEmpty()) {
+            System.out.println("\\nStack Underflow");
+            return;
+        }
+        else {
+          
+            // Assign the current top to a temporary
+            // variable
+            Node temp = head;
+
+            // Update the top to the next node
+            head = head.next;
+
+            // Deallocate the memory of the old top node
+            temp = null;
+        }
+    }
+
+    // Function to return the top element of the stack
+    int peek() {
+      
+        // If stack is not empty, return the top element
+        if (!isEmpty())
+            return head.data;
+        else {
+            System.out.println("\\nStack is empty");
+            return Integer.MIN_VALUE;
+        }
+    }
+}
+
+// Driver code
+public class Main {
+    public static void main(String[] args)
+    {
+        // Creating a stack
+        Stack st = new Stack();
+
+        // Push elements onto the stack
+        st.push(11);
+        st.push(22);
+        st.push(33);
+        st.push(44);
+
+        // Print top element of the stack
+        System.out.println("Top element is " + st.peek());
+
+        // removing two elemements from the top
+          System.out.println("Removing two elements...");
+        st.pop();
+        st.pop();
+
+        // Print top element of the stack
+        System.out.println("Top element is " + st.peek());
+    }
+}
+
+````
+
+Python
+````
+# Java program to implement a stack using singly linked
+# list
+
+# Class representing a node in the linked list
+class Node:
+    def __init__(self, new_data):
+        self.data = new_data
+        self.next = None
+
+# Class to implement stack using a singly linked list
+class Stack:
+    def __init__(self):
+
+        # head of the linked list
+        self.head = None
+
+    # Function to check if the stack is empty
+    def is_empty(self):
+
+        # If head is None, the stack is empty
+        return self.head is None
+
+    # Function to push an element onto the stack
+    def push(self, new_data):
+
+        # Create a new node with given data
+        new_node = Node(new_data)
+
+        # Check if memory allocation for the new node failed
+        if not new_node:
+            print("\\nStack Overflow")
+            return
+
+        # Link the new node to the current top node
+        new_node.next = self.head
+
+        # Update the top to the new node
+        self.head = new_node
+
+    # Function to remove the top element from the stack
+    def pop(self):
+
+        # Check for stack underflow
+        if self.is_empty():
+            print("\\nStack Underflow")
+        else:
+
+            # Assign the current top to a temporary variable
+            temp = self.head
+
+            # Update the top to the next node
+            self.head = self.head.next
+
+            # Deallocate the memory of the old top node
+            del temp
+
+    # Function to return the top element of the stack
+    def peek(self):
+
+        # If stack is not empty, return the top element
+        if not self.is_empty():
+            return self.head.data
+        else:
+            print("\\nStack is empty")
+            return float(\'-inf\')
+
+
+# Creating a stack
+st = Stack()
+
+# Push elements onto the stack
+st.push(11)
+st.push(22)
+st.push(33)
+st.push(44)
+
+# Print top element of the stack
+print("Top element is", st.peek())
+
+# removing two elemements from the top
+print("Removing two elements...");
+st.pop()
+st.pop()
+
+# Print top element of the stack
+print("Top element is", st.peek())
+
+````
+
+C#
+````
+// C# program to implement a stack using singly linked list
+using System;
+
+// Class representing a node in the linked list
+class Node {
+    public int data;
+    public Node next;
+    public Node(int new_data)
+    {
+        this.data = new_data;
+        this.next = null;
+    }
+}
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // head of the linked list
+    private Node head;
+
+    // Constructor to initialize the stack
+    public Stack() { this.head = null; }
+
+    // Function to check if the stack is empty
+    public bool isEmpty()
+    {
+
+        // If head is null, the stack is empty
+        return head == null;
+    }
+
+    // Function to push an element onto the stack
+    public void push(int new_data)
+    {
+
+        // Create a new node with given data
+        Node new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (new_node == null) {
+            Console.WriteLine("\\nStack Overflow");
+            return;
+        }
+
+        // Link the new node to the current top node
+        new_node.next = head;
+
+        // Update the top to the new node
+        head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    public void pop()
+    {
+
+        // Check for stack underflow
+        if (this.isEmpty()) {
+            Console.WriteLine("\\nStack Underflow");
+        }
+        else {
+
+            // Update the top to the next node
+            head = head.next;
+            /* No need to manually free the memory of the
+             * old head in C# */
+        }
+    }
+
+    // Function to return the top element of the stack
+    public int peek()
+    {
+
+        // If stack is not empty, return the top element
+        if (!isEmpty())
+            return head.data;
+        else {
+            Console.WriteLine("\\nStack is empty");
+            return int.MinValue;
+        }
+    }
+}
+
+// Driver program to test the stack implementation
+class GfG {
+    static void Main(string[] args)
+    {
+
+        // Creating a stack
+        Stack st = new Stack();
+
+        // Push elements onto the stack
+        st.push(11);
+        st.push(22);
+        st.push(33);
+        st.push(44);
+
+        // Print top element of the stack
+        Console.WriteLine("Top element is " + st.peek());
+
+        // removing two elemements from the top
+          Console.WriteLine("Removing two elements...");
+        st.pop();
+        st.pop();
+
+        // Print top element of the stack
+        Console.WriteLine("Top element is " + st.peek());
+    }
+}
+
+````
+
+JavaScript
+````
+// Javascript program to implement a stack using singly
+// linked list
+
+// Class representing a node in the linked list
+class Node {
+    constructor(new_data) {
+        this.data = new_data;
+        this.next = null;
+    }
+}
+
+// Class to implement stack using a singly linked list
+class Stack {
+
+    // Constructor to initialize the stack
+    constructor() { this.head = null; }
+
+    // Function to check if the stack is empty
+    isEmpty() {
+    
+        // If head is null, the stack is empty
+        return this.head === null;
+    }
+
+    // Function to push an element onto the stack
+    push(new_data) {
+    
+        // Create a new node with given data
+        const new_node = new Node(new_data);
+
+        // Check if memory allocation for the new node
+        // failed
+        if (!new_node) {
+            console.log("\\nStack Overflow");
+            return;
+        }
+
+        // Link the new node to the current top node
+        new_node.next = this.head;
+
+        // Update the top to the new node
+        this.head = new_node;
+    }
+
+    // Function to remove the top element from the stack
+    pop() {
+    
+        // Check for stack underflow
+        if (this.isEmpty()) {
+            console.log("\\nStack Underflow");
+        }
+        else {
+        
+            // Assign the current top to a temporary
+            // variable
+            let temp = this.head;
+
+            // Update the top to the next node
+            this.head = this.head.next;
+
+            // Deallocate the memory of the old top node
+            temp = null;
+        }
+    }
+
+    // Function to return the top element of the stack
+    peek() {
+    
+        // If stack is not empty, return the top element
+        if (!this.isEmpty())
+            return this.head.data;
+        else {
+            console.log("\\nStack is empty");
+            return Number.MIN_VALUE;
+        }
+    }
+}
+
+// Driver program to test the stack implementation
+const st = new Stack();
+
+// Push elements onto the stack
+st.push(11);
+st.push(22);
+st.push(33);
+st.push(44);
+
+// Print top element of the stack
+console.log("Top element is " + st.peek());
+
+// removing two elemements from the top
+console.log("Removing two elements...");
+st.pop();
+st.pop();
+
+// Print top element of the stack
+console.log("Top element is " + st.peek());
+
+````
+
+  
+**Output**
+```
+
+Top element is 44
+Top element is 22
+
+```
+
+****Time Complexity:****
+O(1), for all push(), pop(), and peek(), as we are not performing any
+kind of traversal over the list. We perform all the operations through
+the current pointer only.  
+****Auxiliary Space:**** O(N), where N is the size of the stack
+
+
+In this implementation, we define a Node class that represents a node
+in the linked list, and a Stack class that uses this node class to
+implement the stack. The head attribute of the Stack class points to the
+top of the stack (i.e., the first node in the linked list).
+
+To push an item onto the stack, we create a new node with the given
+item and set its next pointer to the current head of the stack. We then
+set the head of the stack to the new node, effectively making it the new
+top of the stack.
+
+To pop an item from the stack, we simply remove the first node from the
+linked list by setting the head of the stack to the next node in the
+list (i.e., the node pointed to by the next pointer of the current
+head). We return the data stored in the original head node, which is the
+item that was removed from the top of the stack.
+
+### Benefits of implementing a stack using a singly linked list include:
+
+****Dynamic memory allocation****: The size of the stack can be increased or decreased dynamically by
+adding or removing nodes from the linked list, without the need to
+allocate a fixed amount of memory for the stack upfront.
+
+****Efficient memory usage:**** Since nodes in a singly linked list only have a next pointer and not a
+prev pointer, they use less memory than nodes in a doubly linked
+list.
+
+****Easy implementation****: Implementing a stack using a singly linked list is straightforward
+and can be done using just a few lines of code.
+
+****Versatile****: Singly linked lists can be used to implement other data structures
+such as queues, linked lists, and trees.
+
+In summary, implementing a stack using a singly linked list is a simple
+and efficient way to create a dynamic stack data structure in
+Python.
+
+### Real time examples of stack:
+
+Stacks are used in various real-world scenarios where a last-in,
+first-out (LIFO) data structure is required. Here are some examples of
+real-time applications of stacks:
+
+****Function call stack****: When a function is called in a program, the return address and all
+the function parameters are pushed onto the function call stack. The
+stack allows the function to execute and return to the caller function
+in the reverse order in which they were called.
+
+****Undo/Redo operations:****
+In many applications, such as text editors, image editors, or web
+browsers, the undo and redo functionalities are implemented using a
+stack. Every time an action is performed, it is pushed onto the stack.
+When the user wants to undo the last action, the top element of the
+stack is popped and the action is reversed.
+
+****Browser history:**** Web browsers use stacks to keep track of the pages visited by the user.
+Every time a new page is visited, its URL is pushed onto the stack. When
+the user clicks the “Back” button, the last visited URL is popped from
+the stack and the user is directed to the previous page.
+
+****Expression evaluation****: Stacks are used in compilers and interpreters to evaluate
+expressions. When an expression is parsed, it is converted into postfix
+notation and pushed onto a stack. The postfix expression is then
+evaluated using the stack.
+
+****Call stack in recursion:****
+When a recursive function is called, its call is pushed onto the stack.
+The function executes and calls itself, and each subsequent call is
+pushed onto the stack. When the recursion ends, the stack is popped, and
+the program returns to the previous function call.
+
+In summary, stacks are widely used in many applications where LIFO
+functionality is required, such as function calls, undo/redo operations,
+browser history, expression evaluation, and recursive function
+calls.
+', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 3, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('a3e9b26a-8405-4132-a638-8fa5b1a3731e', e'Applications of Stacks:
+-----------------------
+
+* ****Function calls:****
+  Stacks are used to keep track of the return addresses of function
+  calls, allowing the program to return to the correct location after a
+  function has finished executing.
+* ****Recursion:**** Stacks are used to store the local variables and return addresses of
+  recursive function calls, allowing the program to keep track of the
+  current state of the recursion.
+* ****Expression evaluation:**** Stacks are used to evaluate expressions in postfix notation (Reverse
+  Polish Notation).
+* ****Syntax parsing:**** Stacks are used to check the validity of syntax in programming
+  languages and other formal languages.
+* ****Memory management:**** Stacks are used to allocate and manage memory in some operating
+  systems and programming languages.
+* Used to solve popular problems like [Next Greater](https://www.geeksforgeeks.org/next-greater-element/), [Previous Greater](https://www.geeksforgeeks.org/previous-greater-element/), [Next Smaller](https://www.geeksforgeeks.org/next-smaller-element/), [Previous Smaller](https://www.geeksforgeeks.org/find-the-nearest-smaller-numbers-on-left-side-in-an-array/), [Largest Area in a Histogram](https://www.geeksforgeeks.org/largest-rectangular-area-in-a-histogram-using-stack/) and [Stock Span Problems](https://www.geeksforgeeks.org/the-stock-span-problem/).
+
+Advantages of Stacks:
+---------------------
+
+* ****Simplicity:**** Stacks are a simple and easy-to-understand data structure, making
+  them suitable for a wide range of applications.
+* ****Efficiency:**** Push and pop operations on a stack can be performed in constant time ****(O(1))****, providing efficient access to data.
+* ****Last-in, First-out (LIFO):****
+  Stacks follow the LIFO principle, ensuring that the last element added
+  to the stack is the first one removed. This behavior is useful in many
+  scenarios, such as function calls and expression evaluation.
+* ****Limited memory usage:**** Stacks only need to store the elements that have been pushed onto
+  them, making them memory-efficient compared to other data
+  structures.
+
+Disadvantages of Stacks:
+------------------------
+
+* ****Limited access:****
+  Elements in a stack can only be accessed from the top, making it
+  difficult to retrieve or modify elements in the middle of the
+  stack.
+* ****Potential for overflow:**** If more elements are pushed onto a stack than it can hold, an
+  overflow error will occur, resulting in a loss of data.
+* ****Not suitable for random access:**** Stacks do not allow for random access to elements, making them
+  unsuitable for applications where elements need to be accessed in a
+  specific order.
+* ****Limited capacity:****
+  Stacks have a fixed capacity, which can be a limitation if the number
+  of elements that need to be stored is unknown or highly
+  variable.
+', e'A stack is a linear data structure
+in which the insertion of a new element and removal of an existing
+element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
+
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (1, 'Data Structure', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (2, 'Algorithm', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (5, 'Problem Solving', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (6, 'Array', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (7, 'Queue', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (8, 'Recursive', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (9, 'Dynamic Programming', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (10, 'Matrix', null);
+
+
+INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 5);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 7);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 6);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 8);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 9);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 10);
+
+INSERT INTO public.sections (section_id, name) VALUES (1, 'Free Courses');
+INSERT INTO public.sections (section_id, name) VALUES (2, 'Featured Courses');
+
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 2);
+
+
+
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
 
 **Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
 
@@ -58763,8 +63932,8 @@ Output: [1]
 ```
 Input: nums1 = [0], m = 0, nums2 = [1], n = 1
 Output: [1]
-```', 'easy', 'Merge sorted array', 2, false, false);
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
+```', 'easy', 'Merge sorted array', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
 
 Increment the large integer by one and return the resulting array of digits.
 
@@ -58787,8 +63956,8 @@ Output: [4,3,2,2]
 ```
 Input: digits = [9]
 Output: [1,0]
-```', 'easy', 'Plus one', 2, false, false);
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+```', 'easy', 'Plus one', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
 
 You must write an algorithm with `O(log n)` runtime complexity.
 
@@ -58811,8 +63980,8 @@ Output: 1
 ```
 Input: nums = [1,3,5,6], target = 7
 Output: 4
-```', 'easy', 'Search Insert Position', 2, false, false);
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
+```', 'easy', 'Search Insert Position', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
 
 You must implement a solution with a linear runtime complexity and use only constant extra space.
 
@@ -58835,8 +64004,8 @@ Output: 4
 ```
 Input: nums = [1]
 Output: 1
-```', 'easy', 'Single Number', 2, false, false);
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
+```', 'easy', 'Single Number', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
 
 You may assume that each input would have exactly one solution, and you may not use the same element twice.
 
@@ -58861,60 +64030,62 @@ Output: [1,2]
 ```
 Input: nums = [3,3], target = 6
 Output: [0,1]
-```', 'easy', 'Two sum', 2, false, false);
+```', 'easy', 'Two sum', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('79751b4f-cad0-42ef-a592-f67298d08003', 0.00, 0.00, 'string', 'string', 'string', 0, true, true, 'string');
 
 
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
 1
 
-0', '1', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 1);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('eb1f21cf-b8fa-41cc-aea8-7224a85998c6', e'1 3 5 0 0 0 0
+0', '1', null, 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('eb1f21cf-b8fa-41cc-aea8-7224a85998c6', e'1 3 5 0 0 0 0
 3
 2 4 6 7
-4', '1 2 3 4 5 6 7', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 2);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('607a6878-899a-4f10-a3ff-106e36f6db7b', e'4 5 6 0 0 0
+4', '1 2 3 4 5 6 7', null, 2, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('607a6878-899a-4f10-a3ff-106e36f6db7b', e'4 5 6 0 0 0
 3
 1 2 3
-3', '1 2 3 4 5 6', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 3);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('285e81b0-b13c-4a30-b861-228edd8fa05a', e'0
+3', '1 2 3 4 5 6', null, 3, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('285e81b0-b13c-4a30-b861-228edd8fa05a', e'0
 0
 1
-1', '1', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 4);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('7d1d2398-47fd-480a-a662-b8bb892656a4', e'1 2 3 0 0 0
+1', '1', null, 4, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('7d1d2398-47fd-480a-a662-b8bb892656a4', e'1 2 3 0 0 0
 3
 2 5 6
-3', '1 2 2 3 5 6', null, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 5);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('0ccce6f3-b6f1-4184-b13d-0aec69dfc148', '9', '1 0', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 1);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('00222cc2-be0a-4b78-8e49-8a7572418dad', '4 3 2 1', '4 3 2 2', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 2);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('6fbb0344-0bc8-4df2-a64d-785fb373a9a7', '9 9 9', '1 0 0 0', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 3);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('8a85700f-ffb4-438b-8183-8f3aa1999c24', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 6', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 7', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 4);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('d725244d-31f7-4ddc-b494-dc54cab67964', '1 2 3', '1 2 4', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 5);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4a9c10f0-eb2a-4b19-8e19-9edf117e76d8', '1 0 0 0', '1 0 0 1', null, '73c532f9-4d55-4737-ae19-3006e02864cc', 6);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('21a234fc-adc3-4012-9802-63ab716fb8c4', e'1 3 5 6
-5', '2', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 1);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4703bfe2-5040-49f7-b728-bdea2b6c97e4', e'1 3 5 6
-7', '4', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 2);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('e8698f62-9051-49e0-8610-56c27a7dcb96', e'1 3 5 6
-4', '2', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 3);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('da031658-0ac7-4aae-99e5-6c01e2862b29', e'1 3 5 6
-0', '0', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 4);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('2becdcf8-1773-4d3a-b759-63fea450106c', e'1 3 5 6
-2', '1', null, '82978535-a8da-46e1-a39a-31a232e3fffc', 5);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('93cfd193-1620-4e60-8c84-983041d205f0', '0 1 0', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 1);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('fad6d724-b8ce-4b6b-a1fb-f5a1e8b7e003', '1', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 2);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('f8e22dda-b2cf-473e-b10f-ca1069fd5630', '4 1 2 1 2', '4', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 3);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('4343cfa0-4508-4157-b986-23e04fc60069', '3 3 7 8 8', '7', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 4);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('e15bef99-a6dd-46a1-bbb0-af5ed9d06e09', '2 2 1', '1', null, 'e608ebb7-07ef-4a2f-8081-92e5993e6118', 5);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('abf531db-e157-49e9-8310-beb37cffe58a', e'3 3
-6', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 1);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('78dd79f1-3691-42da-9fcf-37e7c96c439f', e'1 0 0 7
-8', '0 3', null, '591b3457-2157-4d61-b03d-d53f8666342c', 2);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('5aedba91-125d-4cdc-99f3-43fc3d431bad', e'3 2 4
-6', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 3);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('d915b2ea-eb2a-450b-aa28-e506bf55a856', e'2 7 11 15
-9', '0 1', null, '591b3457-2157-4d61-b03d-d53f8666342c', 4);
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, problem_id, testcase_order) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4 6 10 2
-12', '1 2', null, '591b3457-2157-4d61-b03d-d53f8666342c', 5);
+3', '1 2 2 3 5 6', null, 5, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('0ccce6f3-b6f1-4184-b13d-0aec69dfc148', '9', '1 0', null, 1, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('00222cc2-be0a-4b78-8e49-8a7572418dad', '4 3 2 1', '4 3 2 2', null, 2, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('6fbb0344-0bc8-4df2-a64d-785fb373a9a7', '9 9 9', '1 0 0 0', null, 3, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('8a85700f-ffb4-438b-8183-8f3aa1999c24', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 6', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 7', null, 4, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d725244d-31f7-4ddc-b494-dc54cab67964', '1 2 3', '1 2 4', null, 5, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4a9c10f0-eb2a-4b19-8e19-9edf117e76d8', '1 0 0 0', '1 0 0 1', null, 6, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('21a234fc-adc3-4012-9802-63ab716fb8c4', e'1 3 5 6
+5', '2', null, 1, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4703bfe2-5040-49f7-b728-bdea2b6c97e4', e'1 3 5 6
+7', '4', null, 2, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('e8698f62-9051-49e0-8610-56c27a7dcb96', e'1 3 5 6
+4', '2', null, 3, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('da031658-0ac7-4aae-99e5-6c01e2862b29', e'1 3 5 6
+0', '0', null, 4, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('2becdcf8-1773-4d3a-b759-63fea450106c', e'1 3 5 6
+2', '1', null, 5, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('93cfd193-1620-4e60-8c84-983041d205f0', '0 1 0', '1', null, 1, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('fad6d724-b8ce-4b6b-a1fb-f5a1e8b7e003', '1', '1', null, 2, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('f8e22dda-b2cf-473e-b10f-ca1069fd5630', '4 1 2 1 2', '4', null, 3, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4343cfa0-4508-4157-b986-23e04fc60069', '3 3 7 8 8', '7', null, 4, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('e15bef99-a6dd-46a1-bbb0-af5ed9d06e09', '2 2 1', '1', null, 5, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('abf531db-e157-49e9-8310-beb37cffe58a', e'3 3
+6', '0 1', null, 1, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('78dd79f1-3691-42da-9fcf-37e7c96c439f', e'1 0 0 7
+8', '0 3', null, 2, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('5aedba91-125d-4cdc-99f3-43fc3d431bad', e'3 2 4
+6', '1 2', null, 3, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d915b2ea-eb2a-450b-aa28-e506bf55a856', e'2 7 11 15
+9', '0 1', null, 4, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4 6 10 2
+12', '1 2', null, 5, '591b3457-2157-4d61-b03d-d53f8666342c');
+
 
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (48, 'C (GCC 7.4.0)', 'C');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (52, 'C++ (GCC 7.4.0)', 'C++');
@@ -58927,4 +64098,5 @@ INSERT INTO public.programming_language (programming_language_id, long_name, sho
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (63, 'JavaScript (Node.js 12.14.0)', 'JavaScript');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (71, 'Python (3.8.1)', 'Python');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
+
 

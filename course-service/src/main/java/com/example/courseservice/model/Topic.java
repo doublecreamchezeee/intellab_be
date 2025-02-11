@@ -1,13 +1,10 @@
 package com.example.courseservice.model;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Type;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,15 +30,15 @@ public class Topic {
     String content;
 
     @Column(name = "number_of_likes")
-    Integer number_of_likes;
+    Integer numberOfLikes;
 
     //Ràng buộc miền giá trị dưới DB
     //('Public', 'Unlisted', 'Private')
-    @Column(columnDefinition = "VARCHAR(10)")
-    String post_reach;
+    @Column(columnDefinition = "VARCHAR(10)", name = "post_reach")
+    String postReach;
 
     @JoinColumn(name = "user_id")
-    String userUid = null;
+    String userId = null;
 
     @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY, optional = true)
     @JsonIgnore

@@ -1,6 +1,7 @@
-package com.example.courseservice.model.compositeKey;
+package com.example.problemservice.model.composite;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +14,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Embeddable
-public class assignmentDetailID {
-    UUID assignment_id;
-    Integer submit_order;
+public class HintID {
+    @Column(name = "problem_id")
+    UUID problemId;
+
+    Integer level;
+
+
 }

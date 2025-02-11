@@ -42,7 +42,7 @@ public class ExerciseService {
     public ExerciseDetailResponse getExerciseById(UUID id) {
         Exercise exercise = exerciseRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
 
-        List<UUID> questionIds = exercise.getQuestionList().stream().map(Question::getQuestion_id).collect(Collectors.toList());
+        List<UUID> questionIds = exercise.getQuestionList().stream().map(Question::getQuestionId).collect(Collectors.toList());
 
         return new ExerciseDetailResponse(exercise,questionIds);
 

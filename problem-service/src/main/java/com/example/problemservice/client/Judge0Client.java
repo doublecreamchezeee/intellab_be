@@ -2,8 +2,7 @@ package com.example.problemservice.client;
 
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.model.TestCase;
-import com.example.problemservice.model.TestCase_Output;
-import com.example.problemservice.model.composite.testCaseOutputId;
+import com.example.problemservice.model.TestCaseOutput;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,10 +50,10 @@ public class Judge0Client {
 
     // Submit code to Judge0 API and retrieve result
 // Submit code to Judge0 API and retrieve result
-    public TestCase_Output submitCode(ProblemSubmission submission, TestCase testCase) {
+    public TestCaseOutput submitCode(ProblemSubmission submission, TestCase testCase) {
         // Extract details from the submission
         String code = submission.getCode();
-        String language = submission.getProgramming_language();
+        String language = submission.getProgrammingLanguage();
 
         // Map the programming language to the corresponding language_id
         Integer languageId = languageIdMap.get(language);
@@ -99,7 +98,7 @@ public class Judge0Client {
             String submissionId = extractSubmissionId(Objects.requireNonNull(response.getBody()));
 
             // Call the status endpoint to get execution result
-            TestCase_Output result = getJudge0Result(submissionId, testCase);
+            TestCaseOutput result = getJudge0Result(submissionId, testCase);
             result.setToken(UUID.fromString(submissionId));
             return result;
         } else {
@@ -114,7 +113,7 @@ public class Judge0Client {
     }
 
     // Retrieve Judge0 result using submission ID
-    private TestCase_Output getJudge0Result(String submissionId, TestCase testCase) {
+    private TestCaseOutput getJudge0Result(String submissionId, TestCase testCase) {
         ResponseEntity<String> response = restTemplate.exchange(
                 JUDGE0_BASE_URL + "/submissions/" + submissionId, HttpMethod.GET, null, String.class
         );
@@ -127,8 +126,8 @@ public class Judge0Client {
         }
     }
 
-    // Retrieve Judge0 result and update TestCase_Output
-    public TestCase_Output getSubmissionResult(TestCase_Output testCaseOutput) {
+    // Retrieve Judge0 result and update TestCaseOutput
+    public TestCaseOutput getSubmissionResult(TestCaseOutput testCaseOutput) {
         String submissionId = String.valueOf(testCaseOutput.getToken());
 
         // Send GET request to Judge0 to retrieve result
@@ -149,14 +148,14 @@ public class Judge0Client {
                     return testCaseOutput;
                 }
 
-                // Update TestCase_Output fields based on the result
+                // Update TestCaseOutput fields based on the result
                 String submissionOutput = rootNode.path("stdout").asText();
                 Float runtime = (float) rootNode.path("time").asDouble();
-
+                Float memory = (float) rootNode.path("memory").asDouble();
                 testCaseOutput.setResult_status(resultStatus);
                 testCaseOutput.setSubmission_output(submissionOutput);
                 testCaseOutput.setRuntime(runtime);
-
+                testCaseOutput.setMemory(memory);
                 return testCaseOutput;
             } catch (Exception e) {
                 throw new RuntimeException("Error parsing Judge0 response", e);
@@ -172,8 +171,8 @@ public class Judge0Client {
         return responseBody.split("\"token\":\"")[1].split("\"")[0];
     }
 
-    // Parse the result from Judge0 response and populate the TestCase_Output object
-    public TestCase_Output parseJudge0Result(String responseBody, TestCase testCase) {
+    // Parse the result from Judge0 response and populate the TestCaseOutput object
+    public TestCaseOutput parseJudge0Result(String responseBody, TestCase testCase) {
         try {
             JsonNode rootNode = objectMapper.readTree(responseBody);
 
@@ -186,9 +185,12 @@ public class Judge0Client {
             // Extract runtime (time) from the response
             Float runtime = (float) rootNode.path("time").asDouble();
 
-            // Create and populate the TestCase_Output object
-            return TestCase_Output.builder()
+            Float memory = (float) rootNode.path("memory").asDouble();
+
+            // Create and populate the TestCaseOutput object
+            return TestCaseOutput.builder()
                     .runtime(runtime)
+                    .memory(memory)
                     .submission_output(submissionOutput)
                     .result_status(resultStatus)
                     .testcase(testCase)

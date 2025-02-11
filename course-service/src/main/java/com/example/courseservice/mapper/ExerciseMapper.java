@@ -14,14 +14,14 @@ import java.util.UUID;
 @Mapper(componentModel = "spring", uses = QuestionMapper.class)
 public interface ExerciseMapper {
 
-    @Mapping(source = "exercise_id", target = "exerciseId")
-    @Mapping(source = "exercise_name", target = "exerciseName")
+    @Mapping(source = "exerciseId", target = "exerciseId")
+    @Mapping(source = "exerciseName", target = "exerciseName")
     @Mapping(source = "description", target = "exerciseDescription")
     //@Mapping(source = "questionList", target = "questionList")
     ExerciseResponse toExerciseResponse(Exercise exercise);
 
-    @Mapping(target = "exercise_id", ignore = true)
-    @Mapping(target = "exercise_name", source = "name")
+    @Mapping(target = "exerciseId", ignore = true)
+    @Mapping(target = "exerciseName", source = "name")
     @Mapping(target = "description", source = "description")
     Exercise toExercise(ExerciseCreationRequest exerciseCreationRequest);
 
