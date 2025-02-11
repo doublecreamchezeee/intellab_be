@@ -2,11 +2,13 @@ package com.example.problemservice.controller;
 
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
+import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.service.ProblemSubmissionService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,12 @@ public class ProblemSubmissionController {
         }
     }
 
+    @GetMapping("/{problemId}/{userId}")
+    public ResponseEntity<List<ProblemSubmissionResponse>> getSubmissions(@PathVariable String problemId, @PathVariable String userId) {
+        List<ProblemSubmissionResponse> submissions = problemSubmissionService.getSubmissionsByUserId(UUID.fromString(problemId), UUID.fromString(userId));
+        return ResponseEntity.ok(submissions);
+    }
+
     @Operation(
             summary = "Callback update submission by id"
     )
@@ -66,9 +74,9 @@ public class ProblemSubmissionController {
             summary = "Get submission by id"
     )
     @GetMapping("/{submissionId}")
-    public ResponseEntity<ProblemSubmission> getSubmission(@PathVariable UUID submissionId) {
+    public ResponseEntity<ProblemSubmission> getSubmission(@PathVariable String submissionId) {
         try {
-            ProblemSubmission submission = problemSubmissionService.getSubmission(submissionId);
+            ProblemSubmission submission = problemSubmissionService.getSubmission(UUID.fromString(submissionId));
             return ResponseEntity.ok(submission); // HTTP 200 OK
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.SUBMISSION_NOT_EXIST) {
@@ -93,4 +101,5 @@ public class ProblemSubmissionController {
                 UUID.fromString(userId)*/
         );
     }
+
 }

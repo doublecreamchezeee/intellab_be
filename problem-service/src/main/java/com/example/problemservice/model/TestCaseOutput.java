@@ -24,6 +24,9 @@ public class TestCaseOutput {
     @Column(columnDefinition = "REAL")
     Float runtime;
 
+    @Column(columnDefinition = "REAL")
+    Float memory;
+
     @Column(columnDefinition = "TEXT")
     String submission_output;
 

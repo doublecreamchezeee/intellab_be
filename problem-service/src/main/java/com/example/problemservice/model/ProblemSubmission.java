@@ -1,10 +1,12 @@
 package com.example.problemservice.model;
 
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.DatabindException;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,4 +53,5 @@ public class ProblemSubmission {
     @JsonManagedReference("submission-output")
     List<TestCaseOutput> testCasesOutput;
 
+    Date createdAt;
 }

@@ -3,6 +3,7 @@ package com.example.problemservice.service;
 import com.example.problemservice.client.Judge0Client;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
+import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.ProblemSubmissionMapper;
@@ -80,6 +81,7 @@ public class ProblemSubmissionService {
         );
 
         output.setRuntime(Float.valueOf(request.getTime()));
+        output.setMemory(request.getMemory());
 //        output.setSubmission_output(request.getStdout());
         output.setSubmission_output(new String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+", ""))));
         output.setResult_status(request.getStatus().getDescription());
@@ -116,6 +118,39 @@ public class ProblemSubmissionService {
 
         // Trả về submission đã cập nhật kết quả
         return submission;
+    }
+
+    public List<ProblemSubmissionResponse> getSubmissionsByUserId(UUID problemId, UUID userId) {
+        List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId, problemId);
+
+        List<ProblemSubmissionResponse> responses = new ArrayList<>();
+
+        for (ProblemSubmission submission : submissions) {
+            double totalRuntime = submission.getTestCasesOutput().stream()
+                    .mapToDouble(TestCaseOutput::getRuntime)
+                    .sum(); // Cộng tất cả runtime
+
+            double totalMemory = submission.getTestCasesOutput().stream()
+                    .mapToDouble(TestCaseOutput::getMemory)
+                    .sum(); // Cộng tất cả memory
+
+            boolean allAccepted = submission.getTestCasesOutput().stream()
+                    .allMatch(output -> "Accepted".equals(output.getResult_status())); // Kiểm tra nếu tất cả là Accepted
+
+            String status = allAccepted ? "Accepted" : "Failed";
+
+            ProblemSubmissionResponse submissionResponse = ProblemSubmissionResponse.builder()
+                    .submissionId(submission.getSubmissionId().toString())
+                    .programmingLanguage(submission.getProgrammingLanguage())
+                    .runtime(totalRuntime)
+                    .memory(totalMemory)
+                    .status(status)
+                    .build();
+
+            responses.add(submissionResponse);
+        }
+        return responses;
+
     }
 
     public ProblemSubmission getSubmission(UUID submissionId) {

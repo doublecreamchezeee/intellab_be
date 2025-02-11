@@ -6,7 +6,7 @@ import lombok.Data;
 public class SubmissionCallbackResponse {
     private String stdout;  // Base64 encoded string
     private String time;    // Time taken
-    private int memory;     // Memory usage
+    private float memory;     // Memory usage
     private String stderr;  // Standard error (nullable)
     private String token;   // Token for identifying the submission
     private String message; // Any additional messages

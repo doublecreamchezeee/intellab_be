@@ -151,11 +151,11 @@ public class Judge0Client {
                 // Update TestCaseOutput fields based on the result
                 String submissionOutput = rootNode.path("stdout").asText();
                 Float runtime = (float) rootNode.path("time").asDouble();
-
+                Float memory = (float) rootNode.path("memory").asDouble();
                 testCaseOutput.setResult_status(resultStatus);
                 testCaseOutput.setSubmission_output(submissionOutput);
                 testCaseOutput.setRuntime(runtime);
-
+                testCaseOutput.setMemory(memory);
                 return testCaseOutput;
             } catch (Exception e) {
                 throw new RuntimeException("Error parsing Judge0 response", e);
@@ -185,9 +185,12 @@ public class Judge0Client {
             // Extract runtime (time) from the response
             Float runtime = (float) rootNode.path("time").asDouble();
 
+            Float memory = (float) rootNode.path("memory").asDouble();
+
             // Create and populate the TestCaseOutput object
             return TestCaseOutput.builder()
                     .runtime(runtime)
+                    .memory(memory)
                     .submission_output(submissionOutput)
                     .result_status(resultStatus)
                     .testcase(testCase)
