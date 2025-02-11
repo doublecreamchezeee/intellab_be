@@ -57,7 +57,7 @@ public class ReviewService {
 
         Review review = reviewMapper.toReview(request);
         review.setCourse(course);
-        review.setUserUid(userUid);
+        review.setUserId(userUid);
 
         review = reviewRepository.save(review);
 

@@ -24,8 +24,8 @@ public class ExerciseDetailResponse {
 
     public ExerciseDetailResponse(Exercise exercise, List<UUID> questionIds)
     {
-        this.exerciseId = exercise.getExercise_id();
-        this.exerciseName = exercise.getExercise_name();
+        this.exerciseId = exercise.getExerciseId();
+        this.exerciseName = exercise.getExerciseName();
         this.exerciseDescription = exercise.getDescription();
         this.questionIds = questionIds;
     }

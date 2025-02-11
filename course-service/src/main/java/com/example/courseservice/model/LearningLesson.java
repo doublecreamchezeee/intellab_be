@@ -72,12 +72,12 @@ public class LearningLesson {
     @Column(name = "is_done_practice")
     Boolean isDonePractice;
 
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     UUID userId;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lessonId")
+    @JoinColumn(name = "lesson_id")
     Lesson lesson;
 
     @JsonIgnore

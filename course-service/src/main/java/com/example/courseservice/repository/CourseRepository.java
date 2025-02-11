@@ -15,17 +15,17 @@ import java.util.UUID;
 public interface CourseRepository extends JpaRepository<Course, UUID> {
     Page<Course> findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description, Pageable pageable);
 
-    Page<Course> findAllByCategories_Name(String name, Pageable pageable);
+    Page<Course> findAllBySections_Id(Integer sectionsId, Pageable pageable);
 
     List<Course> findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
 
     List<Course> findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndLevel(String courseName, String description, String level);
 
-    List<Course> findAllByDescriptionContainingIgnoreCaseAndCategories_Name(String description,
-                                                                            String categoryName);
+    List<Course> findAllByDescriptionContainingIgnoreCaseAndCategories_Id(String description,
+                                                                            Integer categoryName);
 
-    List<Course> findAllByCourseNameContainingIgnoreCaseAndCategories_Name(String name,
-                                                                           String categoryName);
+    List<Course> findAllByCourseNameContainingIgnoreCaseAndCategories_Id(String name,
+                                                                           Integer categoryId);
 
     @Query("SELECT c FROM Course c WHERE c.courseId NOT IN (SELECT uc.enrollId.courseId FROM UserCourses uc WHERE uc.enrollId.userUid = :userId)")
     Page<Course> findAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable);

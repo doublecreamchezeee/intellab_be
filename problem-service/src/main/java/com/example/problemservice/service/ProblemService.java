@@ -8,19 +8,16 @@ import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
-import com.example.problemservice.model.TestCase_Output;
+import com.example.problemservice.model.TestCaseOutput;
 import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.repository.ProblemSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,14 +59,14 @@ public class ProblemService {
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
-        List<ProblemSubmission> submissions = problemSubmissionRepository.findProblemSubmissionByUserUidAndProblem_ProblemId(userId, problemId);
+        List<ProblemSubmission> submissions = problemSubmissionRepository.findProblemSubmissionByUserIdAndProblem_ProblemId(userId, problemId);
         if (submissions.isEmpty() || submissions == null) {
             return false;
         }
         for(ProblemSubmission submission:submissions)
         {
-            List<TestCase_Output> testcaseOutputs = submission.getTestCases_output();
-            for (TestCase_Output testcase : testcaseOutputs) {
+            List<TestCaseOutput> testcaseOutputs = submission.getTestCasesOutput();
+            for (TestCaseOutput testcase : testcaseOutputs) {
                 if (!testcase.getResult_status().equals("ACCEPTED"))
                     return false;
             }

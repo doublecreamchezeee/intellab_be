@@ -47,8 +47,6 @@ public class Course {
     @Column(name = "unit_price", columnDefinition = "VARCHAR(10)")
     String unitPrice;
 
-
-
     @Column(name = "average_rating")
     Double averageRating;
 
@@ -62,9 +60,8 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<Review> reviews = new ArrayList<>();
 
-    @JoinColumn(name = "admin_id")
-    UUID userUid;
-
+    @JoinColumn(name = "user_id")
+    UUID userId;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
@@ -83,5 +80,14 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     List<Category> categories;
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_section",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "section_id")
+    )
+    List<Section> sections;
 
 }

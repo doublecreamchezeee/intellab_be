@@ -1,5 +1,6 @@
 package com.example.courseservice.model.compositeKey;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,12 +15,13 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Embeddable
 public class OptionID implements Serializable {
+    @Column(name = "question_id")
+    UUID questionId;
+    @Column(name = "option_order")
+    Integer optionOrder;
 
-    UUID question_id;
-    Integer option_order;
-
-    public OptionID(UUID question_id, int Option_Order) {
-        this.question_id = question_id;
-        this.option_order = Option_Order;
+    public OptionID(UUID questionId, int optionOrder) {
+        this.questionId = questionId;
+        this.optionOrder = optionOrder;
     }
 }

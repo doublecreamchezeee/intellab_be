@@ -2,9 +2,7 @@ package com.example.courseservice.model;
 
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,8 +20,11 @@ import java.util.UUID;
 public class Exercise {
     @Id
     @GeneratedValue
-    UUID exercise_id;
-    String exercise_name;
+    @Column(name = "exercise_id")
+    UUID exerciseId;
+
+    @Column(name = "exercise_name")
+    String exerciseName;
 
     @Column(columnDefinition = "TEXT")
     String description;

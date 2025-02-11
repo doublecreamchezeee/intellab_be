@@ -11,17 +11,17 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface OptionMapper {
 
-    @Mapping(target = "order",source = "option_id.option_order")
+    @Mapping(target = "order",source = "optionId.optionOrder")
     @Mapping(target = "content",source = "content")
     OptionResponse toResponse(Option option);
 
-    @Mapping(target = "option_id.question_id", ignore = true)
-    @Mapping(target = "option_id.option_order", source = "order")
+    @Mapping(target = "optionId.questionId", ignore = true)
+    @Mapping(target = "optionId.optionOrder", source = "order")
     @Mapping(target = "content", source = "content")
     Option toOption(OptionRequest optionRequest);
 
-    @Mapping(target = "option_id.question_id", ignore = true)
-    @Mapping(target = "option_id.option_order", ignore = true)
+    @Mapping(target = "optionId.questionId", ignore = true)
+    @Mapping(target = "optionId.optionOrder", ignore = true)
     @Mapping(target = "content", source = "content")
     void update(@MappingTarget Option option, OptionRequest optionRequest);
 

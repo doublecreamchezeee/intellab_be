@@ -2,7 +2,6 @@ package com.example.courseservice.model;
 
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -23,16 +22,19 @@ import java.util.UUID;
 @Table(name = "\"assignments\"")
 public class Assignment {
     @Id
+    @Column(name = "assignment_id")
     @GeneratedValue
-    UUID assignment_id;
+    UUID assignmentId;
 
-    Integer submit_order;
+    @Column(name = "submit_order")
+    Integer submitOrder;
 
     @Column(columnDefinition = "DECIMAL(4,2)")
     Float score;
 
     @CreationTimestamp
-    Instant submit_date;
+    @Column(name = "submit_date")
+    Instant submitDate;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -46,6 +48,6 @@ public class Assignment {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY)
-    List<AssignmentDetail> assignment_details;
+    List<AssignmentDetail> assignmentDetails;
 
 }

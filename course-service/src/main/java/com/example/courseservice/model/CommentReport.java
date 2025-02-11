@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(name = "\"comment_reports\"")
 public class CommentReport {
     @EmbeddedId
-    ReportID report_id;
+    ReportID reportId;
 
     @Column(columnDefinition = "TEXT")
     String content;
@@ -24,18 +24,14 @@ public class CommentReport {
     @Column(columnDefinition = "VARCHAR(10)")
     String status;
 
+    @MapsId("reportOptionId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("report_option_id")
     @JoinColumn(name = "report_option_id")
-    ReportOption report_option;
+    ReportOption reportOption;
 
+    @MapsId("destinationId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("destination_id")
     @JoinColumn(name = "destination_id")
     Comment destination;
-
-    @MapsId("owner_id")
-    @JoinColumn(name = "owner_id")
-    UUID user_id;
 
 }

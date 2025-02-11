@@ -2,14 +2,13 @@ package com.example.courseservice.model;
 
 
 
-import com.example.courseservice.model.compositeKey.achivievementID;
+import com.example.courseservice.model.compositeKey.AchievementID;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -20,13 +19,14 @@ import java.util.UUID;
 @Table(name = "achievements")
 public class Achievement {
     @EmbeddedId
-    achivievementID achievement_id;
+    AchievementID achievementId;
 
     @CreationTimestamp
-    Instant achieved_date;
+    @Column(name = "achieved_date")
+    Instant achievedDate;
 
 
-    @MapsId("medal_id")
+    @MapsId("medalId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medal_id")
     Medal medal;

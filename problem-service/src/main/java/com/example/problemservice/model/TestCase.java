@@ -39,11 +39,11 @@ public class TestCase {
     @Column(name = "testcase_order")
     Integer order;
 
-    @JoinColumn(name = "source_id")
+    @JoinColumn(name = "user_id")
     UUID userId;
 
     @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY)
     @JsonManagedReference("testcase-output")
-    List<TestCase_Output> submitOutputs;
+    List<TestCaseOutput> submitOutputs;
 
 }
