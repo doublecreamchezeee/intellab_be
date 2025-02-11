@@ -32,7 +32,7 @@ public class ProblemSubmission {
     Integer score_achieved;
 
     @Column(name = "is_solved")
-    boolean isSolved = false;
+    Boolean isSolved;
 
 //    @CreationTimestamp
 //    Instant submit_date;

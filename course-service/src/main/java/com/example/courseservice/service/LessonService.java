@@ -105,8 +105,8 @@ public class LessonService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
         // Check if theory and practice are done
-        boolean isDoneTheory = learningLesson.getIsDoneTheory() != null && learningLesson.getIsDoneTheory();
-        boolean isDonePractice = learningLesson.getIsDonePractice() != null && learningLesson.getIsDonePractice();
+        Boolean isDoneTheory = learningLesson.getIsDoneTheory();
+        Boolean isDonePractice = learningLesson.getIsDonePractice();
 
         // Get the next lesson ID and lesson name
         Lesson nextLesson =  getNextLessonId(lesson.getCourse().getCourseId(), userId);

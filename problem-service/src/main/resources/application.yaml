@@ -7,14 +7,16 @@ spring:
     password: ${DB_PASSWORD} #htht01225923050
     driver-class-name: org.postgresql.Driver
   jpa:
+#    show-sql: true
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-#        generate_statistics: true
+        generate_statistics: true
+#        format_sql: true
+#        use_sql_comments: true
 
-    show-sql: true
 server:
   servlet:
     context-path: /problem
@@ -25,6 +27,14 @@ judge0:
     url: ${JUDGE0_URL}
     callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
 
+#logging:
+#  level:
+#    root: TRACE
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#  pattern:
+#    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
+#
 
 springdoc:
   swagger-ui:

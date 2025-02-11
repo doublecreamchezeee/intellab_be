@@ -14,7 +14,6 @@ import com.example.problemservice.model.composite.testCaseOutputId;
 import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.repository.TestCaseOutputRepository;
-import com.example.problemservice.utils.Base64Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -129,7 +128,7 @@ public class ProblemSubmissionService {
                 .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
 
         if (allAccepted) {
-            submission.setSolved(true);
+            submission.setIsSolved(true);
             problemSubmissionRepository.save(submission);
         }
 

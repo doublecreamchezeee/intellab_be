@@ -20,9 +20,12 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
     @Query("SELECT COUNT(ps) " +
             "FROM ProblemSubmission ps " +
             "WHERE ps.problem.problemLevel = :problemLevel " +
-            "AND ps.isSolved = TRUE " +
-            "AND ps.userUid = :userId")
-    long countSolvedProblemsByLevelAndUser(@Param("problemLevel") String problemLevel,
-                                           @Param("userId") UUID userId);
+            "AND ps.isSolved = true " +
+            "AND ps.userUid = :userUid")
+    long countSolvedProblemsByLevelAndUser(
+            @Param("problemLevel") String problemLevel,
+            @Param("userUid") UUID userUid
+    );
+
 
 }

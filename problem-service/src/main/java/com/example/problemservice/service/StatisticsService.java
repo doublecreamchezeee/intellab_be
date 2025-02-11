@@ -16,11 +16,12 @@ public class StatisticsService {
 
     public ProgressResponse getProgress(UUID userId) {
         int totalProblems = (int) problemRepository.count();
+        System.out.println("check" + userId);
 
         // Count problems solved by the user for each level
-        long easySolved = problemSubmissionRepository.countSolvedProblemsByLevelAndUser("EASY", userId);
-        long mediumSolved = problemSubmissionRepository.countSolvedProblemsByLevelAndUser("MEDIUM", userId);
-        long hardSolved = problemSubmissionRepository.countSolvedProblemsByLevelAndUser("HARD", userId);
+        long easySolved = problemSubmissionRepository.countSolvedProblemsByLevelAndUser("easy", userId);
+        long mediumSolved = problemSubmissionRepository.countSolvedProblemsByLevelAndUser("medium", userId);
+        long hardSolved = problemSubmissionRepository.countSolvedProblemsByLevelAndUser("hard", userId);
 
         // Count total problems for each level
         long easyTotal = problemRepository.countByProblemLevel("easy");
