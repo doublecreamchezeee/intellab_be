@@ -35,6 +35,9 @@ public class TestCaseRunCodeOutput {
     @Column(name = "result_status", columnDefinition = "VARCHAR(30)")
     String resultStatus;
 
+    @Column(name = "status_id", columnDefinition = "INTEGER", nullable = true)
+    Integer statusId;
+
     @Column(name = "error", columnDefinition = "TEXT", nullable = true)
     String error;
 

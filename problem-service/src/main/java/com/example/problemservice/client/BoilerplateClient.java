@@ -585,8 +585,8 @@ public class BoilerplateClient {
         public static String defaultCodeGenerator(String structure, int languageId) {
             BoilerPlateGenerator parser = new BoilerPlateGenerator();
             parser.parse(structure);
-            System.out.println(structure);
-            System.out.println(parser.functionName);
+            //System.out.println(structure);
+            //System.out.println(parser.functionName);
             String defaultCode = switch (languageId) {
                 case 48, 49, 50 -> parser.generateFunctionC();
                 case 51 -> parser.generateFunctionCSharp();

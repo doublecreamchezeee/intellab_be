@@ -17,5 +17,6 @@ public interface TestCaseRunCodeOutputMapper {
     @Mapping(target = "memoryUsage", source = "memoryUsage")
     @Mapping(target = "error", source = "error")
     @Mapping(target = "compileOutput", source = "compileOutput")
+    @Mapping(target = "statusId", source = "statusId")
     DetailsTestCaseRunCodeOutput toDetailsTestCaseRunCodeOutput(TestCaseRunCodeOutput testCaseRunCodeOutput);
 }

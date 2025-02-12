@@ -13,6 +13,7 @@ public class DetailsTestCaseRunCodeOutput {
     String expectedOutput;
     String actualOutput;
     String status;
+    Integer statusId;
     String message;
     String time;
     String memoryUsage;

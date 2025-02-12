@@ -45,7 +45,7 @@ public class ProblemRunCodeController {
     )
     @PutMapping("/update/run-code/callback")
     public ApiResponse<Object> callbackUpdateRunCode(@RequestBody SubmissionCallbackResponse request) {
-        System.out.println("Callback update run code by id: " + request);
+        //System.out.println("Callback update run code by id: " + request);
         problemRunCodeService.callbackUpdate(request);
 
         return ApiResponse.<Object>builder()

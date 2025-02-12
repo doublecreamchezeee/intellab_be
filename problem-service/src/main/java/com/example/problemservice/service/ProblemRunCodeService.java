@@ -158,6 +158,11 @@ public class ProblemRunCodeService {
                         .getDescription()
         );
 
+        output.setStatusId(
+                request.getStatus()
+                        .getId()
+        );
+
         if (request.getStderr() != null) {
             output.setError(
                     new String(
