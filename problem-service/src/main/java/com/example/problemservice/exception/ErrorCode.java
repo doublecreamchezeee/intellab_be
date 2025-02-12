@@ -9,10 +9,15 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(600,"Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR),
-    PROBLEM_NOT_EXIST(404,"Problem not exist", HttpStatus.BAD_REQUEST),
-    SUBMISSION_NOT_EXIST(404,"Submission not exist", HttpStatus.BAD_REQUEST),
-    SOLUTION_NOT_EXIST(404,"Solution not exist", HttpStatus.BAD_REQUEST),
-    TESTCASE_NOT_EXIST(404,"Test case not exist", HttpStatus.BAD_REQUEST),
+    PROBLEM_NOT_EXIST(404,"Problem not exist", HttpStatus.NOT_FOUND),
+    SUBMISSION_NOT_EXIST(404,"Submission not exist", HttpStatus.NOT_FOUND),
+    SOLUTION_NOT_EXIST(404,"Solution not exist", HttpStatus.NOT_FOUND),
+    TESTCASE_NOT_EXIST(404,"Test case not exist", HttpStatus.NOT_FOUND),
+    INVALID_PROGRAMMING_LANGUAGE(404,"Invalid programming language", HttpStatus.BAD_REQUEST),
+    PROGRAMMING_LANGUAGE_NOT_EXIST(404,"Programming language not exist", HttpStatus.NOT_FOUND),
+    TEST_CASE_OUTPUT_NOT_EXIST(404,"Test case output not exist", HttpStatus.NOT_FOUND),
+    TEST_CASE_RUN_CODE_OUTPUT_NOT_EXIST(404,"Test case run code output not exist", HttpStatus.NOT_FOUND),
+    RUN_CODE_NOT_EXISTED(404,"Run code not existed", HttpStatus.NOT_FOUND),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

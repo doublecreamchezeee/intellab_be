@@ -1,5 +1,7 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
+import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
@@ -27,7 +29,6 @@ import java.util.logging.Logger;
 @Tag(name = "Submission")
 public class ProblemSubmissionController {
     private final ProblemSubmissionService problemSubmissionService;
-    private final ProblemSubmissionRepository problemSubmissionRepository;
 
     @Operation(
             summary = "Create submission"
@@ -50,7 +51,7 @@ public class ProblemSubmissionController {
     }
 
     @Operation(
-            summary = "Callback update submission by id"
+            summary = "(BE only) Callback update submission by id"
     )
     @PutMapping("/update/submission/callback")
     public ResponseEntity<Object> callbackUpdateSubmission(@RequestBody SubmissionCallbackResponse request) {
@@ -90,16 +91,46 @@ public class ProblemSubmissionController {
     @Operation(
             summary = "Get submission details by problem id and user uid"
     )
-    @GetMapping("/details/{problemId}/{userId}")
-    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(
+    @GetMapping("/details/{problemId}")
+    public ApiResponse<List<DetailsProblemSubmissionResponse>>  getSubmissionDetailsByProblemIdAndUserUid(
             @PathVariable("problemId") UUID problemId,
-            @PathVariable("userId") UUID userUid) {
-        return problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(
-                problemId,
-                userUid
+            @RequestHeader("X-UserId") String userUid
+            //@PathVariable("userId") UUID userUid
+    ) {
+        userUid = userUid.split(",")[0];
+
+        return ApiResponse.<List<DetailsProblemSubmissionResponse>>builder()
+                .result(problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(
+                            problemId,
+                            ParseUUID.normalizeUID(userUid)
+                        )
+                )
+                .message("Submission details retrieved successfully")
+                .code(200)
+                .build();
                 /*UUID.fromString(problemId),
                 UUID.fromString(userId)*/
-        );
+
+    }
+
+    @Operation(
+            summary = "Create submission with partial boilerplate"
+    )
+    @PostMapping("/partial-boilerplate")
+    public ResponseEntity<ProblemSubmission> createSubmissionWithPartialBoilerplate(
+            @RequestBody DetailsProblemSubmissionRequest submission,
+            @RequestHeader("X-UserId") String userUid
+    ) {
+        try {
+            userUid = userUid.split(",")[0];
+            ProblemSubmission createdSubmission = problemSubmissionService.submitProblemWithPartialBoilerplate(
+                    ParseUUID.normalizeUID(userUid),
+                    submission);
+            return ResponseEntity.ok(createdSubmission); // HTTP 200 OK
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
+        }
     }
 
 }

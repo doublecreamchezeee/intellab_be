@@ -29,8 +29,6 @@ public class TestCase {
     @Column(columnDefinition = "TEXT")
     String output;
 
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     @JsonBackReference("problem-testcase")
@@ -46,4 +44,7 @@ public class TestCase {
     @JsonManagedReference("testcase-output")
     List<TestCaseOutput> submitOutputs;
 
+    @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY)
+    @JsonManagedReference("runCode-output")
+    List<TestCaseRunCodeOutput> runCodeOutputs;
 }

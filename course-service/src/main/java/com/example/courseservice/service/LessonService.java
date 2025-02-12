@@ -415,6 +415,42 @@ public class LessonService {
         return true;
     }
 
+    public Boolean donePracticeOfLessonByProblemId(UUID problemId, UUID userUid) {
+        List<Lesson> lessons = lessonRepository.findAllByProblemId(problemId);
+
+        for (Lesson lesson : lessons) {
+            Optional<LearningLesson> learningLessonOptional = learningLessonRepository.findByLesson_LessonIdAndUserId(lesson.getLessonId(), userUid);
+
+            if (!learningLessonOptional.isPresent()) {
+                continue;
+            }
+
+            LearningLesson learningLesson = learningLessonOptional.get();
+
+            UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(
+                    userUid,
+                    lesson.getCourse().getCourseId()
+            ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
+
+            learningLesson.setIsDonePractice(true);
+
+            if (learningLesson.getIsDoneTheory() != null
+                    && learningLesson.getIsDoneTheory()) {
+                learningLesson.setStatus(PredefinedLearningStatus.DONE);
+            }
+
+            learningLessonRepository.save(learningLesson);
+
+            DetailCourseResponse detailCourseResponse = courseService.getCourseById(lesson.getCourse().getCourseId(), userUid);
+
+            userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
+            userCoursesRepository.save(userCourses);
+        }
+
+        return true;
+
+    }
+
 }
 
 

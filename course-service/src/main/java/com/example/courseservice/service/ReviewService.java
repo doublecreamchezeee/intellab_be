@@ -84,13 +84,26 @@ public class ReviewService {
 
         Course course = review.getCourse();
 
+        Integer reviewCount = course.getReviewCount();
+        if (reviewCount == null) {
+            reviewCount = 0;
+        }
+
+        Double averageRating = course.getAverageRating();
+        if (averageRating == null) {
+            averageRating = 0.0;
+        }
+
+        course.setAverageRating(
+                (averageRating * (reviewCount) //old average rating
+                        - review.getRating() + request.getRating() ) //add new rating and subtract old rating
+                        / course.getReviewCount()
+        );
+
         review.setRating(request.getRating());
         review.setComment(request.getComment());
 
         review = reviewRepository.save(review);
-
-        //update course average rating and review count of course
-        updateReviewCountAndAverageRating(course, review);
 
         return reviewMapper.toDetailsReviewResponse(review);
     }

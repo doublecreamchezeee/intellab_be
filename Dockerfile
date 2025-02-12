@@ -1,4 +1,5 @@
-FROM postgres:latest
+FROM postgres:16.2
+#latest
 
 # Sao chép file insert.sql vào thư mục init script của PostgreSQL
 COPY insert.sql /docker-entrypoint-initdb.d/

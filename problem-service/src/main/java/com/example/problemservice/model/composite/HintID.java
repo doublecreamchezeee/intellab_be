@@ -14,11 +14,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Embeddable
+
 public class HintID {
     @Column(name = "problem_id")
     UUID problemId;
-
     Integer level;
-
 
 }

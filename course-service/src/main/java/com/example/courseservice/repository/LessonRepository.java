@@ -21,4 +21,5 @@ public interface LessonRepository extends JpaRepository<Lesson, UUID> {
 
     List<Lesson> findByCourse_CourseId(UUID courseId);
     Page<Lesson> findByCourse_CourseId(UUID courseId, Pageable pageable);
+    List<Lesson> findAllByProblemId(UUID problemId);
 }
