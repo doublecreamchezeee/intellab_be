@@ -100,7 +100,7 @@ public class ProblemService {
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
-        List<ProblemSubmission> submissions = problemSubmissionRepository.findProblemSubmissionByUserIdAndProblem_ProblemId(userId, problemId);
+        List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId, problemId);
         if (submissions.isEmpty() || submissions == null) {
             return false;
         }

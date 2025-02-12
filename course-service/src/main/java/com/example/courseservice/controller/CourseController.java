@@ -116,12 +116,12 @@ public class CourseController {
     @GetMapping("")
     ApiResponse<Page<CourseCreationResponse>> getAllCourse(
             @ParameterObject Pageable pageable,
-            @RequestParam(required = false) String category) {
-        if (category != null)
+            @RequestParam(required = false) Integer Section) {
+        if (Section != null)
         {
             return ApiResponse.<Page<CourseCreationResponse>>builder()
                     .result(courseService.getAllByCategory(
-                            category,
+                            Section,
                             pageable
                             )
                     )
@@ -208,7 +208,7 @@ public class CourseController {
             @RequestParam(required = false) Float ratings,
             @RequestParam(required = false) List<String> levels,
             @RequestParam(required = false) Boolean price,
-            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) List<Integer> categories,
             @ParameterObject Pageable pageable) {
         System.out.println(userUid);
         if (ratings != null || levels != null || price != null || categories != null) {
@@ -281,9 +281,9 @@ public class CourseController {
     }
 
     @GetMapping("categories")
-    public ApiResponse<List<CategoryResponse>> getCategories(@RequestParam String type) {
+    public ApiResponse<List<CategoryResponse>> getCategories() {
 
         return ApiResponse.<List<CategoryResponse>>builder()
-                .result(courseService.getCategories(type)).build();
+                .result(courseService.getCategories()).build();
     }
 }

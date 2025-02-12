@@ -1,32 +1,34 @@
-create table if not exists public.problems
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+create table problems
 (
-    problem_id      uuid not null
-    primary key,
-    acceptance_rate numeric(5, 2)  default 0,
-    avarage_rating numeric(5,2) default 0,
-    description     text,
-    problem_level   varchar(20),
-    problem_name    varchar(255),
-    problem_structure text,
-    score           integer,
-    is_available     boolean       default false,
-    is_published    boolean       default false,
+    problem_id         uuid not null default uuid_generate_v4()
+        primary key,
+    acceptance_rate    numeric(5, 2) default 0,
+    avarage_rating     numeric(5, 2) default 0,
+    description        text,
+    problem_level      varchar(20),
+    problem_name       varchar(255),
+    score              integer,
+    is_available       boolean       default false,
+    is_published       boolean       default false,
+    solution_structure text
 );
 
-alter table public.problems
+alter table problems
     owner to postgres;
 
-create table if not exists public.solutions
+create table solutions
 (
     author_id  uuid not null,
     content    text,
     problem_id uuid not null
-    constraint fkrm3misp2p4syk4tcnefnqspbl
-    references public.problems,
+        constraint fkrm3misp2p4syk4tcnefnqspbl
+            references problems,
     primary key (author_id, problem_id)
-    );
+);
 
-alter table public.solutions
+alter table solutions
     owner to postgres;
 
 create table hints
@@ -68,10 +70,7 @@ create table default_code
 alter table default_code
     owner to postgres;
 
-
-
-
-create table if not exists public.problem_submissions
+create table problem_submissions
 (
     submission_id        uuid not null default uuid_generate_v4()
         primary key,
@@ -79,51 +78,51 @@ create table if not exists public.problem_submissions
     programming_language varchar(50),
     score_achieved       integer,
     submit_order         integer,
-    user_uid             uuid,
+    user_id              uuid,
     problem_id           uuid
-    constraint fkatyso4hx6mtu96ixk88g328er
-    references public.problems,
+        constraint fkatyso4hx6mtu96ixk88g328er
+            references problems,
     is_solved            boolean
-    );
-
-alter table public.problem_submissions
-    owner to postgres;
-
-create table if not exists public.test_cases
-(
-    testcase_id uuid not null
-    primary key,
-    input       text,
-    output      text,
-    user_id     uuid,
-    testcase_order integer,
-    problem_id  uuid not null
-    constraint fkk0300c33ccc0im12utqoxu0m6
-    references public.problems
 );
 
-alter table public.test_cases
+alter table problem_submissions
     owner to postgres;
 
-create table if not exists public.test_case_outputs
+create table test_cases
+(
+    testcase_id    uuid not null default uuid_generate_v4()
+        primary key,
+    input          text,
+    output         text,
+    user_id        uuid,
+    testcase_order integer,
+    problem_id     uuid not null
+        constraint fkk0300c33ccc0im12utqoxu0m6
+            references problems
+);
+
+alter table test_cases
+    owner to postgres;
+
+create table test_case_outputs
 (
     token             uuid,
     result_status     varchar(30),
     runtime           real,
     submission_output text,
     submission_id     uuid not null
-    constraint fkniol765wvj61q9t6lrlhhx091
-    references public.problem_submissions,
+        constraint fkniol765wvj61q9t6lrlhhx091
+            references problem_submissions,
     testcase_id       uuid not null
-    constraint fkawdt7u0ci9lvfrnphpho4p6xd
-    references public.test_cases,
+        constraint fkawdt7u0ci9lvfrnphpho4p6xd
+            references test_cases,
     primary key (submission_id, testcase_id)
-    );
+);
 
-alter table public.test_case_outputs
+alter table test_case_outputs
     owner to postgres;
 
-create table if not exists public.exercises
+create table exercises
 (
     exercise_id   uuid not null default uuid_generate_v4()
         primary key,
@@ -131,10 +130,10 @@ create table if not exists public.exercises
     exercise_name varchar(255)
 );
 
-alter table public.exercises
+alter table exercises
     owner to postgres;
 
-create table if not exists public.medals
+create table medals
 (
     medal_id    uuid         not null default uuid_generate_v4()
         primary key,
@@ -144,10 +143,10 @@ create table if not exists public.medals
     type        varchar(20)
 );
 
-alter table public.medals
+alter table medals
     owner to postgres;
 
-create table if not exists public.achievements
+create table achievements
 (
     user_id       uuid not null,
     achieved_date timestamp(6) with time zone,
@@ -157,10 +156,10 @@ create table if not exists public.achievements
     primary key (medal_id, user_id)
 );
 
-alter table public.achievements
+alter table achievements
     owner to postgres;
 
-create table if not exists public.leaderboard
+create table leaderboard
 (
     user_id   uuid not null
         primary key,
@@ -168,14 +167,14 @@ create table if not exists public.leaderboard
     hierarchy varchar(20),
     rank      integer,
     medal_id  uuid
-    constraint fkcclgfeq6toq7fanb1cgxy01m7
-    references public.medals
+        constraint fkcclgfeq6toq7fanb1cgxy01m7
+            references medals
 );
 
-alter table public.leaderboard
+alter table leaderboard
     owner to postgres;
 
-create table if not exists public.notifications
+create table notifications
 (
     notification_order bigint not null,
     user_id            uuid   not null,
@@ -185,10 +184,10 @@ create table if not exists public.notifications
     primary key (notification_order, user_id)
 );
 
-alter table public.notifications
+alter table notifications
     owner to postgres;
 
-create table if not exists public.questions
+create table questions
 (
     question_id      uuid not null default uuid_generate_v4()
         primary key,
@@ -200,36 +199,36 @@ create table if not exists public.questions
     updated_at       timestamp(6) with time zone
 );
 
-alter table public.questions
+alter table questions
     owner to postgres;
 
-create table if not exists public.options
+create table options
 (
     option_order integer not null,
     content      varchar(255),
     question_id  uuid    not null
-    constraint fkjglnbyg0fqsplv75m2oi42ji1
-    references public.questions,
+        constraint fkjglnbyg0fqsplv75m2oi42ji1
+            references questions,
     primary key (option_order, question_id)
 );
 
-alter table public.options
+alter table options
     owner to postgres;
 
-create table if not exists public.question_list
+create table question_list
 (
     exercise_id uuid not null default uuid_generate_v4()
         constraint fki72qnw59jeo39x6v1uhe0wb51
-            references public.exercises,
+            references exercises,
     question_id uuid not null
-    constraint fkabppvo14rfcil3brx1s9begg2
-    references public.questions
+        constraint fkabppvo14rfcil3brx1s9begg2
+            references questions
 );
 
-alter table public.question_list
+alter table question_list
     owner to postgres;
 
-create table if not exists public.report_options
+create table report_options
 (
     report_option_id uuid not null default uuid_generate_v4()
         primary key,
@@ -238,10 +237,10 @@ create table if not exists public.report_options
     type             varchar(20)
 );
 
-alter table public.report_options
+alter table report_options
     owner to postgres;
 
-create table if not exists public.streak_records
+create table streak_records
 (
     user_id      uuid not null
         primary key,
@@ -249,14 +248,14 @@ create table if not exists public.streak_records
     status       varchar(10),
     streak_score integer,
     medal_id     uuid
-    constraint fkejivk072an77tukw69rx6vplu
-    references public.medals
+        constraint fkejivk072an77tukw69rx6vplu
+            references medals
 );
 
-alter table public.streak_records
+alter table streak_records
     owner to postgres;
 
-create table if not exists public.topics
+create table topics
 (
     topic_id        uuid default uuid_generate_v4() not null
         primary key,
@@ -264,16 +263,16 @@ create table if not exists public.topics
     number_of_likes integer,
     post_reach      varchar(10),
     title           varchar(255),
-    user_uid        varchar(255)
+    user_id         varchar(255)
 );
 
-alter table public.topics
+alter table topics
     owner to postgres;
 
-create table if not exists public.comments
+create table comments
 (
-    comment_id        uuid not null
-    primary key,
+    comment_id        uuid not null default uuid_generate_v4()
+        primary key,
     content           text,
     created           timestamp(6) with time zone,
     last_modified     timestamp(6) with time zone,
@@ -288,28 +287,28 @@ create table if not exists public.comments
             references topics
 );
 
-alter table public.comments
+alter table comments
     owner to postgres;
 
-create table if not exists public.comment_reports
+create table comment_reports
 (
     owner_id         uuid not null,
     content          text,
     status           varchar(10),
     user_id          uuid,
     destination_id   uuid not null
-    constraint fksscjqt1wyjomldmqvx7u6iqhy
-    references public.comments,
+        constraint fksscjqt1wyjomldmqvx7u6iqhy
+            references comments,
     report_option_id uuid not null
-    constraint fkfkwxdv8wp5h56wq69jnp5ux3g
-    references public.report_options,
+        constraint fkfkwxdv8wp5h56wq69jnp5ux3g
+            references report_options,
     primary key (destination_id, owner_id, report_option_id)
 );
 
-alter table public.comment_reports
+alter table comment_reports
     owner to postgres;
 
-create table if not exists public.courses
+create table courses
 (
     course_id      uuid default uuid_generate_v4() not null
         primary key,
@@ -328,10 +327,10 @@ create table if not exists public.courses
     review_count   integer
 );
 
-alter table public.courses
+alter table courses
     owner to postgres;
 
-create table if not exists public.lessons
+create table lessons
 (
     lesson_id    uuid default uuid_generate_v4() not null
         primary key,
@@ -340,37 +339,37 @@ create table if not exists public.lessons
     lesson_name  varchar(255),
     lesson_order integer,
     problem_id   uuid,
-    course_id    uuid not null
-    constraint fk2uhy91p0gnptep0xxwaal7gnu
-    references public.courses,
+    course_id    uuid                            not null
+        constraint fk2uhy91p0gnptep0xxwaal7gnu
+            references courses,
     exercise_id  uuid
-    constraint uker6gswadtti4suc2pq8wbq94a
-    unique
-    constraint fkkm6c9l61pmyo1j6a8rpivr85m
-    references public.exercises
-    );
+        constraint uker6gswadtti4suc2pq8wbq94a
+            unique
+        constraint fkkm6c9l61pmyo1j6a8rpivr85m
+            references exercises
+);
 
-alter table public.lessons
+alter table lessons
     owner to postgres;
 
-create table if not exists public.learning_lesson
+create table learning_lesson
 (
-    learning_id        uuid not null
-    primary key,
+    learning_id        uuid not null default uuid_generate_v4()
+        primary key,
     is_done_practice   boolean,
     is_done_theory     boolean,
     last_accessed_date timestamp(6) with time zone,
     status             varchar(10),
     user_id            uuid,
     lesson_id          uuid
-    constraint fktl0duxtv32rt2myr59sv7d3r3
-    references public.lessons
+        constraint fktl0duxtv32rt2myr59sv7d3r3
+            references lessons
 );
 
-alter table public.learning_lesson
+alter table learning_lesson
     owner to postgres;
 
-create table if not exists public.assignments
+create table assignments
 (
     assignment_id uuid not null default uuid_generate_v4()
         primary key,
@@ -385,45 +384,45 @@ create table if not exists public.assignments
             references learning_lesson
 );
 
-alter table public.assignments
+alter table assignments
     owner to postgres;
 
-create table if not exists public.assignment_details
+create table assignment_details
 (
     submit_order  integer not null,
     answer        varchar(20),
     unit_score    numeric(4, 2),
     assignment_id uuid    not null
-    constraint fkt8xkuef7x94oj86nfxgq85yg9
-    references public.assignments,
+        constraint fkt8xkuef7x94oj86nfxgq85yg9
+            references assignments,
     question_id   uuid    not null
-    constraint fk2ymomgwidfms2ucwbdqrevu9x
-    references public.questions,
+        constraint fk2ymomgwidfms2ucwbdqrevu9x
+            references questions,
     primary key (assignment_id, submit_order)
 );
 
-alter table public.assignment_details
+alter table assignment_details
     owner to postgres;
 
-create table if not exists public.other_object_reports
+create table other_object_reports
 (
     owner_id         uuid not null,
     content          text,
     status           varchar(10),
     user_id          uuid,
     destination_id   uuid not null
-    constraint fkg6fa7rtsqjtg9imov1j508ors
-    references public.topics,
+        constraint fkg6fa7rtsqjtg9imov1j508ors
+            references topics,
     report_option_id uuid not null
-    constraint fk9ajip7upweyynaymq36mt7mo4
-    references public.report_options,
+        constraint fk9ajip7upweyynaymq36mt7mo4
+            references report_options,
     primary key (destination_id, owner_id, report_option_id)
 );
 
-alter table public.other_object_reports
+alter table other_object_reports
     owner to postgres;
 
-create table if not exists public.reviews
+create table reviews
 (
     review_id uuid    not null default uuid_generate_v4()
         primary key,
@@ -431,14 +430,14 @@ create table if not exists public.reviews
     rating    integer not null,
     user_id   uuid,
     course_id uuid    not null
-    constraint fkl9h49973yigjg39ov07a9mog6
-    references public.courses
+        constraint fkl9h49973yigjg39ov07a9mog6
+            references courses
 );
 
-alter table public.reviews
+alter table reviews
     owner to postgres;
 
-create table if not exists public.user_courses
+create table user_courses
 (
     user_uid           uuid not null,
     last_accessed_date timestamp(6) with time zone,
@@ -446,24 +445,20 @@ create table if not exists public.user_courses
     status             varchar(10),
     latest_lesson_id   uuid,
     course_id          uuid not null
-    constraint fkcve18frw4nbxwrq0qh78dgipc
-    references public.courses,
+        constraint fkcve18frw4nbxwrq0qh78dgipc
+            references courses,
     primary key (course_id, user_uid)
 );
 
-alter table public.user_courses
+alter table user_courses
     owner to postgres;
 
 create table categories
 (
-    category_id   uuid         not null default uuid_generate_v4()
+    category_id   integer      not null
         primary key,
-    type          varchar(255),
-    description   text,
-    is_featured   boolean,
-    language      varchar(255),
     category_name varchar(100) not null,
-    parent_id     uuid
+    parent_id     integer
         constraint fkcidcf2xf6eebpieowr7m02pg5
             references categories
 );
@@ -473,10 +468,10 @@ alter table categories
 
 create table course_category
 (
-    course_id   uuid not null
+    course_id   uuid    not null
         constraint fkl4r5vdloyu8rtqoh4ei49y2x2
             references courses,
-    category_id uuid not null
+    category_id integer not null
         constraint fky6fhus0rcvwiik7rk5l99j3j
             references categories
 );
@@ -486,10 +481,10 @@ alter table course_category
 
 create table question_category
 (
-    question_id uuid not null
+    question_id uuid    not null
         constraint fkssojn51nglg3ydh1lwbk62hyr
             references questions,
-    category_id uuid not null
+    category_id integer not null
         constraint fkpo1ya01k2p6b6b03b4elbvow6
             references categories
 );
@@ -497,11 +492,33 @@ create table question_category
 alter table question_category
     owner to postgres;
 
+create table sections
+(
+    section_id integer not null
+        primary key,
+    name       varchar(255)
+);
+
+alter table sections
+    owner to postgres;
+
+create table course_section
+(
+    course_id  uuid    not null
+        constraint fk61t4e9fdsniv4cui65oih8sr3
+            references courses,
+    section_id integer not null
+        constraint fkidr2cur1nxr2hy5pnf9rsplwi
+            references sections
+);
+
+alter table course_section
+    owner to postgres;
 
 create table problem_category
 (
-    category_id uuid not null,
-    problem_id  uuid not null
+    category_id integer not null,
+    problem_id  uuid    not null
         constraint fk2rg82j2evmwbfrglcpvhwpxfa
             references problems,
     primary key (category_id, problem_id)
@@ -509,6 +526,8 @@ create table problem_category
 
 alter table problem_category
     owner to postgres;
+
+
 
 create table course_summary
 (
@@ -862,6 +881,7 @@ INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Pop'
 INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Push', '720aea7e-824a-46cd-acae-627157c68c16');
 INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Traversal', '720aea7e-824a-46cd-acae-627157c68c16');
 
+
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', '707fc477-b79b-4065-b220-a79199e534ca');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', 'a6330516-d682-4807-90c0-5893c31a2a77');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
@@ -920,6 +940,7 @@ INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
 INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '720aea7e-824a-46cd-acae-627157c68c16');
+
 
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('bc7282ef-2185-47e3-acbc-5b5597cbbbfc', e'****Examples :****
 
@@ -13963,6 +13984,84 @@ echo findSum($n);
 15
 ```
 ', '', 'Program to find sum of first n natural numbers', 18, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0aeea379-45ac-4886-bc6e-ebee7abcae78', e'****Learn Basics of Singly Linked List:****
+-------------------------------------------
+
+1. [Basic Terminologies in Linked List](https://www.geeksforgeeks.org/what-is-linked-list/)
+2. [Singly Linked List Tutorial](https://www.geeksforgeeks.org/singly-linked-list-tutorial/)
+3. [Linked List vs Array](https://www.geeksforgeeks.org/linked-list-vs-array/)
+
+****Basic Operations of Singly Linked List:****
+-----------------------------------------------
+
+1. [Linked List Insertion](https://www.geeksforgeeks.org/linked-list-set-2-inserting-a-node/)
+2. [Search an element in a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/search-an-element-in-a-linked-list-iterative-and-recursive/)
+3. [Find Length of a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/find-length-of-a-linked-list-iterative-and-recursive/)
+4. [Reverse a linked list](https://www.geeksforgeeks.org/write-a-function-to-reverse-the-nodes-of-a-linked-list/)
+5. [Linked List Deletion (Deleting a given key)](https://www.geeksforgeeks.org/linked-list-set-3-deleting-node/)
+6. [Linked List Deletion (Deleting a key at given position)](https://www.geeksforgeeks.org/delete-a-linked-list-node-at-a-given-position/)
+7. [Write a function to delete a Linked List](https://www.geeksforgeeks.org/write-a-function-to-delete-a-linked-list/)
+
+****Easy Problems on Singly Linked List:****
+--------------------------------------------
+
+* [Identical Linked Lists](https://www.geeksforgeeks.org/identical-linked-lists/)
+* [Print the middle of a given linked list](https://www.geeksforgeeks.org/write-a-c-function-to-print-the-middle-of-the-linked-list/)
+* [Write a function to get Nth node in a Linked List](https://www.geeksforgeeks.org/write-a-function-to-get-nth-node-in-a-linked-list/)
+* [Nth node from the end of a Linked List](https://www.geeksforgeeks.org/nth-node-from-the-end-of-a-linked-list/)
+* [Move last element to front of a given Linked List](https://www.geeksforgeeks.org/move-last-element-to-front-of-a-given-linked-list/)
+* [Make middle node head in a linked list](https://www.geeksforgeeks.org/make-middle-node-head-linked-list/)
+* [Delete alternate nodes of a Linked List](https://www.geeksforgeeks.org/delete-alternate-nodes-of-a-linked-list/)
+* [Add 1 to a number represented as linked list](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
+* [Add two numbers represented by linked lists](https://www.geeksforgeeks.org/add-two-numbers-represented-by-linked-list/)
+* [Subtract Two Numbers represented as Linked Lists](https://www.geeksforgeeks.org/subtract-two-numbers-represented-as-linked-lists/)
+* [Find the sum of last n nodes of the given Linked List](https://www.geeksforgeeks.org/find-sum-last-n-nodes-given-linked-list/)
+* [Pairwise swap elements of a given linked list](https://www.geeksforgeeks.org/pairwise-swap-elements-of-a-given-linked-list/)
+* [Remove every k-th node of the linked list](https://www.geeksforgeeks.org/remove-every-k-th-node-linked-list/)
+* [Remove duplicates from a sorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-a-sorted-linked-list/)
+
+****Intermediate Problems on Singly Linked List:****
+----------------------------------------------------
+
+* [Detect loop in a linked list](https://www.geeksforgeeks.org/write-a-c-function-to-detect-loop-in-a-linked-list/)
+* [Find length of loop in linked list](https://www.geeksforgeeks.org/find-length-of-loop-in-linked-list/)
+* [Function to check if a singly linked list is palindrome](https://www.geeksforgeeks.org/function-to-check-if-a-singly-linked-list-is-palindrome/)
+* [Remove duplicates from an unsorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-an-unsorted-linked-list/)
+* [Remove all occurrences of duplicates from a sorted Linked List](https://www.geeksforgeeks.org/remove-occurrences-duplicates-sorted-linked-list/)
+* [Swap nodes in a linked list without swapping data](https://www.geeksforgeeks.org/swap-nodes-in-a-linked-list-without-swapping-data/)
+* [Intersection point of two Linked Lists.](https://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/)
+* [Iteratively Reverse a linked list using only 2 pointers (An Interesting Method)](https://www.geeksforgeeks.org/iteratively-reverse-a-linked-list-using-only-2-pointers/)
+* [Segregate even and odd nodes in a Linked List](https://www.geeksforgeeks.org/segregate-even-and-odd-elements-in-a-linked-list/)
+* [Alternate Odd and Even Nodes in a Singly Linked List](https://www.geeksforgeeks.org/alternate-odd-even-nodes-singly-linked-list/)
+* [Rearrange a Linked List in Zig-Zag fashion](https://www.geeksforgeeks.org/linked-list-in-zig-zag-fashion/)
+* [Adding two polynomials using Linked List](https://www.geeksforgeeks.org/adding-two-polynomials-using-linked-list/)
+* [Union and Intersection of two Linked Lists](https://www.geeksforgeeks.org/union-and-intersection-of-two-linked-lists/)
+* [Sort linked list which is already sorted on absolute values](https://www.geeksforgeeks.org/sort-linked-list-already-sorted-absolute-values/)
+
+****Hard Problems on Singly Linked List:****
+--------------------------------------------
+
+* [Reverse a Linked List in groups of given size](https://www.geeksforgeeks.org/reverse-a-list-in-groups-of-given-size/)
+* [Flattening a Linked List](https://www.geeksforgeeks.org/flattening-a-linked-list/)
+* [Reverse alternate K nodes in a Singly Linked List](https://www.geeksforgeeks.org/reverse-alternate-k-nodes-in-a-singly-linked-list/)
+* [Alternating split of a given Singly Linked List](https://www.geeksforgeeks.org/alternating-split-of-a-given-singly-linked-list/)
+* [Delete nodes which have a greater value on right side](https://www.geeksforgeeks.org/delete-nodes-which-have-a-greater-value-on-right-side/)
+* [Given a linked list of line segments, remove middle points](https://www.geeksforgeeks.org/given-linked-list-line-segments-remove-middle-points/)
+* [Clone a linked list with next and random pointer](https://www.geeksforgeeks.org/a-linked-list-with-next-and-arbit-pointer/)
+* [Rearrange a given linked list in-place.](https://www.geeksforgeeks.org/rearrange-a-given-linked-list-in-place/)
+* [Select a Random Node from a Singly Linked List](https://www.geeksforgeeks.org/select-a-random-node-from-a-singly-linked-list/)
+* [In-place Merge two linked lists without changing links of first list](https://www.geeksforgeeks.org/in-place-merge-two-linked-list-without-changing-links-of-first-list/)
+* [Length of longest palindrome list in a linked list using O(1) extra space](https://www.geeksforgeeks.org/length-longest-palindrome-list-linked-list-using-o1-extra-space/)
+* [Rotate Linked List block wise](https://www.geeksforgeeks.org/rotate-linked-list-block-wise/)
+* [Count rotations in sorted and rotated linked list](https://www.geeksforgeeks.org/count-rotations-sorted-rotated-linked-list/)
+
+****Quick Links:****
+--------------------
+
+* [\'Practice Problems\' on Linked List](https://www.geeksforgeeks.org/explore?page=2&category=Linked%20List&sortBy=difficulty&itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=practice_header)
+    * [\'Videos\' on Linked List](https://www.youtube.com/playlist?list=PLqM7alHXFySH41ZxzrPNj2pAYPOI8ITe7)
+* [\'Quizzes\' on Linked List](https://www.geeksforgeeks.org/data-structure-gq/linked-list-gq/)
+', 'Singly linked list is a linear data structure in which the elements are not stored in contiguous memory locations and each element is connected only to its next element using a pointer.', 'Singly Linked List Problems', 3, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ae34492a-cfab-417f-952f-ddb4957195e8', e'Given a number
 
 ****n****
@@ -17459,84 +17558,6 @@ Frequently Asked Questions (FAQs) on Divide and Conquer Algorithm:
 Divide and Conquer is a popular algorithmic technique in computer science that involves breaking down a problem into smaller sub-problems, solving each sub-problem independently, and then combining the solutions to the sub-problems to solve the original problem. The basic idea behind this technique is to divide a problem into smaller, more manageable sub-problems that can be solved more easily.
 
 ', 'Algorithm is a problem-solving technique used to solve problems by dividing the main problem into subproblems, solving them individually and then merging them to find solution to the original problem. In this article, we are going to discuss how Divide and Conquer Algorithm is helpful and how we can use it to solve problems.', 'Introduction to Divide and Conquer Algorithm', 2, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0aeea379-45ac-4886-bc6e-ebee7abcae78', e'****Learn Basics of Singly Linked List:****
--------------------------------------------
-
-1. [Basic Terminologies in Linked List](https://www.geeksforgeeks.org/what-is-linked-list/)
-2. [Singly Linked List Tutorial](https://www.geeksforgeeks.org/singly-linked-list-tutorial/)
-3. [Linked List vs Array](https://www.geeksforgeeks.org/linked-list-vs-array/)
-
-****Basic Operations of Singly Linked List:****
------------------------------------------------
-
-1. [Linked List Insertion](https://www.geeksforgeeks.org/linked-list-set-2-inserting-a-node/)
-2. [Search an element in a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/search-an-element-in-a-linked-list-iterative-and-recursive/)
-3. [Find Length of a Linked List (Iterative and Recursive)](https://www.geeksforgeeks.org/find-length-of-a-linked-list-iterative-and-recursive/)
-4. [Reverse a linked list](https://www.geeksforgeeks.org/write-a-function-to-reverse-the-nodes-of-a-linked-list/)
-5. [Linked List Deletion (Deleting a given key)](https://www.geeksforgeeks.org/linked-list-set-3-deleting-node/)
-6. [Linked List Deletion (Deleting a key at given position)](https://www.geeksforgeeks.org/delete-a-linked-list-node-at-a-given-position/)
-7. [Write a function to delete a Linked List](https://www.geeksforgeeks.org/write-a-function-to-delete-a-linked-list/)
-
-****Easy Problems on Singly Linked List:****
---------------------------------------------
-
-* [Identical Linked Lists](https://www.geeksforgeeks.org/identical-linked-lists/)
-* [Print the middle of a given linked list](https://www.geeksforgeeks.org/write-a-c-function-to-print-the-middle-of-the-linked-list/)
-* [Write a function to get Nth node in a Linked List](https://www.geeksforgeeks.org/write-a-function-to-get-nth-node-in-a-linked-list/)
-* [Nth node from the end of a Linked List](https://www.geeksforgeeks.org/nth-node-from-the-end-of-a-linked-list/)
-* [Move last element to front of a given Linked List](https://www.geeksforgeeks.org/move-last-element-to-front-of-a-given-linked-list/)
-* [Make middle node head in a linked list](https://www.geeksforgeeks.org/make-middle-node-head-linked-list/)
-* [Delete alternate nodes of a Linked List](https://www.geeksforgeeks.org/delete-alternate-nodes-of-a-linked-list/)
-* [Add 1 to a number represented as linked list](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
-* [Add two numbers represented by linked lists](https://www.geeksforgeeks.org/add-two-numbers-represented-by-linked-list/)
-* [Subtract Two Numbers represented as Linked Lists](https://www.geeksforgeeks.org/subtract-two-numbers-represented-as-linked-lists/)
-* [Find the sum of last n nodes of the given Linked List](https://www.geeksforgeeks.org/find-sum-last-n-nodes-given-linked-list/)
-* [Pairwise swap elements of a given linked list](https://www.geeksforgeeks.org/pairwise-swap-elements-of-a-given-linked-list/)
-* [Remove every k-th node of the linked list](https://www.geeksforgeeks.org/remove-every-k-th-node-linked-list/)
-* [Remove duplicates from a sorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-a-sorted-linked-list/)
-
-****Intermediate Problems on Singly Linked List:****
-----------------------------------------------------
-
-* [Detect loop in a linked list](https://www.geeksforgeeks.org/write-a-c-function-to-detect-loop-in-a-linked-list/)
-* [Find length of loop in linked list](https://www.geeksforgeeks.org/find-length-of-loop-in-linked-list/)
-* [Function to check if a singly linked list is palindrome](https://www.geeksforgeeks.org/function-to-check-if-a-singly-linked-list-is-palindrome/)
-* [Remove duplicates from an unsorted linked list](https://www.geeksforgeeks.org/remove-duplicates-from-an-unsorted-linked-list/)
-* [Remove all occurrences of duplicates from a sorted Linked List](https://www.geeksforgeeks.org/remove-occurrences-duplicates-sorted-linked-list/)
-* [Swap nodes in a linked list without swapping data](https://www.geeksforgeeks.org/swap-nodes-in-a-linked-list-without-swapping-data/)
-* [Intersection point of two Linked Lists.](https://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/)
-* [Iteratively Reverse a linked list using only 2 pointers (An Interesting Method)](https://www.geeksforgeeks.org/iteratively-reverse-a-linked-list-using-only-2-pointers/)
-* [Segregate even and odd nodes in a Linked List](https://www.geeksforgeeks.org/segregate-even-and-odd-elements-in-a-linked-list/)
-* [Alternate Odd and Even Nodes in a Singly Linked List](https://www.geeksforgeeks.org/alternate-odd-even-nodes-singly-linked-list/)
-* [Rearrange a Linked List in Zig-Zag fashion](https://www.geeksforgeeks.org/linked-list-in-zig-zag-fashion/)
-* [Adding two polynomials using Linked List](https://www.geeksforgeeks.org/adding-two-polynomials-using-linked-list/)
-* [Union and Intersection of two Linked Lists](https://www.geeksforgeeks.org/union-and-intersection-of-two-linked-lists/)
-* [Sort linked list which is already sorted on absolute values](https://www.geeksforgeeks.org/sort-linked-list-already-sorted-absolute-values/)
-
-****Hard Problems on Singly Linked List:****
---------------------------------------------
-
-* [Reverse a Linked List in groups of given size](https://www.geeksforgeeks.org/reverse-a-list-in-groups-of-given-size/)
-* [Flattening a Linked List](https://www.geeksforgeeks.org/flattening-a-linked-list/)
-* [Reverse alternate K nodes in a Singly Linked List](https://www.geeksforgeeks.org/reverse-alternate-k-nodes-in-a-singly-linked-list/)
-* [Alternating split of a given Singly Linked List](https://www.geeksforgeeks.org/alternating-split-of-a-given-singly-linked-list/)
-* [Delete nodes which have a greater value on right side](https://www.geeksforgeeks.org/delete-nodes-which-have-a-greater-value-on-right-side/)
-* [Given a linked list of line segments, remove middle points](https://www.geeksforgeeks.org/given-linked-list-line-segments-remove-middle-points/)
-* [Clone a linked list with next and random pointer](https://www.geeksforgeeks.org/a-linked-list-with-next-and-arbit-pointer/)
-* [Rearrange a given linked list in-place.](https://www.geeksforgeeks.org/rearrange-a-given-linked-list-in-place/)
-* [Select a Random Node from a Singly Linked List](https://www.geeksforgeeks.org/select-a-random-node-from-a-singly-linked-list/)
-* [In-place Merge two linked lists without changing links of first list](https://www.geeksforgeeks.org/in-place-merge-two-linked-list-without-changing-links-of-first-list/)
-* [Length of longest palindrome list in a linked list using O(1) extra space](https://www.geeksforgeeks.org/length-longest-palindrome-list-linked-list-using-o1-extra-space/)
-* [Rotate Linked List block wise](https://www.geeksforgeeks.org/rotate-linked-list-block-wise/)
-* [Count rotations in sorted and rotated linked list](https://www.geeksforgeeks.org/count-rotations-sorted-rotated-linked-list/)
-
-****Quick Links:****
---------------------
-
-* [\'Practice Problems\' on Linked List](https://www.geeksforgeeks.org/explore?page=2&category=Linked%20List&sortBy=difficulty&itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=practice_header)
-    * [\'Videos\' on Linked List](https://www.youtube.com/playlist?list=PLqM7alHXFySH41ZxzrPNj2pAYPOI8ITe7)
-* [\'Quizzes\' on Linked List](https://www.geeksforgeeks.org/data-structure-gq/linked-list-gq/)
-', 'Singly linked list is a linear data structure in which the elements are not stored in contiguous memory locations and each element is connected only to its next element using a pointer.', 'Singly Linked List Problems', 3, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0a6a3db2-efff-45ec-8886-b5862fbb75e1', e'Basic Terminologies of Linked List
 ----------------------------------
 
@@ -58699,7 +58720,7 @@ Operations on Queue
 
 ### ****1. Enqueue:****
 
-Enqueue operation ****adds (or stores) an element to the end of the queue****.
+Enqueue operation ****adds (or stores) an element to the end of the queue****. 
 
 ****Steps:****
 
@@ -59135,13 +59156,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59156,13 +59177,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59177,13 +59198,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59198,13 +59219,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59219,13 +59240,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59240,13 +59261,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59261,8 +59282,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 2: dequeue()**
@@ -59294,13 +59315,13 @@ Below is the Implementation of above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59315,13 +59336,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59336,13 +59357,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59357,13 +59378,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59378,13 +59399,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59399,13 +59420,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59420,8 +59441,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 3: front()**
@@ -59445,13 +59466,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59466,13 +59487,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59487,13 +59508,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59508,13 +59529,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59529,13 +59550,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59550,13 +59571,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59571,8 +59592,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### Operation 4 : rear()
@@ -59596,13 +59617,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59617,13 +59638,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59638,13 +59659,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59659,13 +59680,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59680,13 +59701,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59701,13 +59722,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59722,8 +59743,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 5: isEmpty():**
@@ -59749,13 +59770,13 @@ Below is the implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59770,13 +59791,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59791,13 +59812,13 @@ Java
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59812,13 +59833,13 @@ C#
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59833,13 +59854,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59854,13 +59875,13 @@ Python3
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59875,8 +59896,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 6 : isFull()**
@@ -59902,13 +59923,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59923,13 +59944,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59944,13 +59965,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59965,13 +59986,13 @@ C
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -59986,13 +60007,13 @@ C#
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60007,13 +60028,13 @@ Python3
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60028,8 +60049,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### Operation 7: size()
@@ -60054,13 +60075,13 @@ Number of elements in the container
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60075,13 +60096,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60096,13 +60117,13 @@ Java
 Python
 ------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60117,13 +60138,13 @@ Python
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60138,13 +60159,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60158,8 +60179,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ', '', 'Basic Operations for Queue in Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
@@ -60294,7 +60315,7 @@ Operations on Queue
 
 ### ****1. Enqueue:****
 
-Enqueue operation ****adds (or stores) an element to the end of the queue****.
+Enqueue operation ****adds (or stores) an element to the end of the queue****. 
 
 ****Steps:****
 
@@ -60730,13 +60751,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60751,13 +60772,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60772,13 +60793,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60793,13 +60814,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60814,13 +60835,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60835,13 +60856,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60856,8 +60877,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 2: dequeue()**
@@ -60889,13 +60910,13 @@ Below is the Implementation of above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60910,13 +60931,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60931,13 +60952,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60952,13 +60973,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60973,13 +60994,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -60994,13 +61015,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61015,8 +61036,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 3: front()**
@@ -61040,13 +61061,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61061,13 +61082,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61082,13 +61103,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61103,13 +61124,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61124,13 +61145,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61145,13 +61166,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61166,8 +61187,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### Operation 4 : rear()
@@ -61191,13 +61212,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61212,13 +61233,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61233,13 +61254,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61254,13 +61275,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61275,13 +61296,13 @@ Python3
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61296,13 +61317,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61317,8 +61338,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 5: isEmpty():**
@@ -61344,13 +61365,13 @@ Below is the implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61365,13 +61386,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61386,13 +61407,13 @@ Java
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61407,13 +61428,13 @@ C#
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61428,13 +61449,13 @@ C
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61449,13 +61470,13 @@ Python3
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61470,8 +61491,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### **Operation 6 : isFull()**
@@ -61497,13 +61518,13 @@ Below is the Implementation of the above approach:
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61518,13 +61539,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61539,13 +61560,13 @@ Java
 C
 -
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61560,13 +61581,13 @@ C
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61581,13 +61602,13 @@ C#
 Python3
 -------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61602,13 +61623,13 @@ Python3
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61623,8 +61644,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ### Operation 7: size()
@@ -61649,13 +61670,13 @@ Number of elements in the container
 C++
 ---
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61670,13 +61691,13 @@ C++
 Java
 ----
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61691,13 +61712,13 @@ Java
 Python
 ------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61712,13 +61733,13 @@ Python
 C#
 --
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61733,13 +61754,13 @@ C#
 Javascript
 ----------
 
+  
 
 
 
+  
 
-
-
-
+  
 
 
 
@@ -61753,8 +61774,8 @@ Javascript
 
 
 
-**Complexity Analysis:**
-**Time Complexity:** O(1)
+**Complexity Analysis:**  
+**Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
 ', '', 'Basic Operations for Queue in Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
@@ -61880,13 +61901,13 @@ is pushed last is popped first.
 ****Types of Stack:****
 -----------------------
 
-* ****Fixed Size Stack****
+* ****Fixed Size Stack**** 
   : As the name suggests, a fixed size stack has a fixed size and cannot
   grow or shrink dynamically. If the stack is full and an attempt is
   made to add an element to it, an overflow error occurs. If the stack
   is empty and an attempt is made to remove an element from it, an
   underflow error occurs.
-* ****Dynamic Size Stack****
+* ****Dynamic Size Stack**** 
   : A dynamic size stack can grow or shrink dynamically. When the stack
   is full, it automatically increases its size to accommodate the new
   element, and when the stack is empty, it decreases its size. This type
@@ -61912,9 +61933,9 @@ item.
 ### ****Push Operation on Stack****
 
 Adds an item to the stack. If the stack is full, then it is said to be
-an  ****Overflow condition.****
+an  ****Overflow condition.**** 
 
- ****Algorithm for Push Operation:****
+ ****Algorithm for Push Operation:**** 
 
 * Before pushing the element to the stack, we check if the stack is  ****full****  .
 * If the stack is full  ****(top == capacity-1)****  , then  ****Stack Overflows****  and we cannot insert the element to the stack.
@@ -61926,9 +61947,9 @@ an  ****Overflow condition.****
 
 Removes an item from the stack. The items are popped in the reversed
 order in which they are pushed. If the stack is empty, then it is said
-to be an  ****Underflow condition.****
+to be an  ****Underflow condition.**** 
 
-****Algorithm for Pop Operation:****
+****Algorithm for Pop Operation:**** 
 
 * Before popping the element from the stack, we check if the stack is  ****empty****  .
 * If the stack is empty (top == -1), then  ****Stack Underflows****  and we cannot remove any element from the stack.
@@ -61937,9 +61958,9 @@ to be an  ****Underflow condition.****
 ![Pop-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606180943/Pop-Operation-in-Stack-(1).webp)
 ### ****Top or Peek Operation on Stack****
 
-Returns the top element of the stack.
+Returns the top element of the stack. 
 
-****Algorithm for Top Operation:****
+****Algorithm for Top Operation:**** 
 
 * Before returning the top element from the stack, we check if the
   stack is empty.
@@ -61949,9 +61970,9 @@ Returns the top element of the stack.
 ![Top-or-Peek-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181023/Top-or-Peek-Operation-in-Stack-(1).webp)
 ### ****isEmpty Operation in Stack Data Structure:****
 
-Returns true if the stack is empty, else false.
+Returns true if the stack is empty, else false. 
 
-****Algorithm for isEmpty Operation****:
+****Algorithm for isEmpty Operation****: 
 
 * Check for the value of  ****top****  in stack.
 * If  ****(top == -1)****, then the stack is  ****empty****  so return  ****true****  .
@@ -61960,9 +61981,9 @@ Returns true if the stack is empty, else false.
 ![isEmpty-Operation-in-Stack-(1)](https://media.geeksforgeeks.org/wp-content/uploads/20240606181101/isEmpty-Operation-in-Stack-(1).webp)
 ### isFull ****Operation in Stack**** ****Data Structure****:
 
-Returns true if the stack is full, else false.
+Returns true if the stack is full, else false. 
 
-****Algorithm for isFull Operation:****
+****Algorithm for isFull Operation:**** 
 
 * Check for the value of  ****top****  in stack.
 * If  ****(top == capacity-1),****  then the stack is  ****full****  so return  ****true****.
@@ -62109,7 +62130,7 @@ Next
 
 1 / 6
 
-
+  
 
 
 ### ****Top or Peek Operation in Stack:****
@@ -62148,440 +62169,440 @@ Below is the implementation of the above approach:
 
 C++
 ````
-/* C++ program to implement basic stack
+/* C++ program to implement basic stack 
 operations */
-#include <bits/stdc++.h>
+#include <bits/stdc++.h> 
 
-using namespace std;
+using namespace std; 
 
-#define MAX 1000
+#define MAX 1000 
 
-class Stack {
-    int top;
+class Stack { 
+    int top; 
 
-public:
-    int a[MAX]; // Maximum size of Stack
+public: 
+    int a[MAX]; // Maximum size of Stack 
 
-    Stack() { top = -1; }
-    bool push(int x);
-    int pop();
-    int peek();
-    bool isEmpty();
-};
+    Stack() { top = -1; } 
+    bool push(int x); 
+    int pop(); 
+    int peek(); 
+    bool isEmpty(); 
+}; 
 
-bool Stack::push(int x)
-{
-    if (top >= (MAX - 1)) {
-        cout << "Stack Overflow";
-        return false;
-    }
-    else {
-        a[++top] = x;
-        cout << x << " pushed into stack\\n";
-        return true;
-    }
-}
+bool Stack::push(int x) 
+{ 
+    if (top >= (MAX - 1)) { 
+        cout << "Stack Overflow"; 
+        return false; 
+    } 
+    else { 
+        a[++top] = x; 
+        cout << x << " pushed into stack\\n"; 
+        return true; 
+    } 
+} 
 
-int Stack::pop()
-{
-    if (top < 0) {
-        cout << "Stack Underflow";
-        return 0;
-    }
-    else {
-        int x = a[top--];
-        return x;
-    }
-}
-int Stack::peek()
-{
-    if (top < 0) {
-        cout << "Stack is Empty";
-        return 0;
-    }
-    else {
-        int x = a[top];
-        return x;
-    }
-}
+int Stack::pop() 
+{ 
+    if (top < 0) { 
+        cout << "Stack Underflow"; 
+        return 0; 
+    } 
+    else { 
+        int x = a[top--]; 
+        return x; 
+    } 
+} 
+int Stack::peek() 
+{ 
+    if (top < 0) { 
+        cout << "Stack is Empty"; 
+        return 0; 
+    } 
+    else { 
+        int x = a[top]; 
+        return x; 
+    } 
+} 
 
-bool Stack::isEmpty()
-{
-    return (top < 0);
-}
+bool Stack::isEmpty() 
+{ 
+    return (top < 0); 
+} 
 
-// Driver program to test above functions
-int main()
-{
-    class Stack s;
-    s.push(10);
-    s.push(20);
-    s.push(30);
-    cout << s.pop() << " Popped from stack\\n";
+// Driver program to test above functions 
+int main() 
+{ 
+    class Stack s; 
+    s.push(10); 
+    s.push(20); 
+    s.push(30); 
+    cout << s.pop() << " Popped from stack\\n"; 
+    
+    //print top element of stack after popping 
+    cout << "Top element is : " << s.peek() << endl; 
+    
+    //print all elements in stack : 
+    cout <<"Elements present in stack : "; 
+    while(!s.isEmpty()) 
+    { 
+        // print top element in stack 
+        cout << s.peek() <<" "; 
+        // remove top element in stack 
+        s.pop(); 
+    } 
 
-    //print top element of stack after popping
-    cout << "Top element is : " << s.peek() << endl;
-
-    //print all elements in stack :
-    cout <<"Elements present in stack : ";
-    while(!s.isEmpty())
-    {
-        // print top element in stack
-        cout << s.peek() <<" ";
-        // remove top element in stack
-        s.pop();
-    }
-
-    return 0;
+    return 0; 
 }
 
 ````
 
 C
 ````
-// C program for array implementation of stack
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
+// C program for array implementation of stack 
+#include <limits.h> 
+#include <stdio.h> 
+#include <stdlib.h> 
 
-// A structure to represent a stack
-struct Stack {
-    int top;
-    unsigned capacity;
-    int* array;
-};
+// A structure to represent a stack 
+struct Stack { 
+    int top; 
+    unsigned capacity; 
+    int* array; 
+}; 
 
-// function to create a stack of given capacity. It initializes size of
-// stack as 0
-struct Stack* createStack(unsigned capacity)
-{
-    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
-    stack->capacity = capacity;
-    stack->top = -1;
-    stack->array = (int*)malloc(stack->capacity * sizeof(int));
-    return stack;
-}
+// function to create a stack of given capacity. It initializes size of 
+// stack as 0 
+struct Stack* createStack(unsigned capacity) 
+{ 
+    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack)); 
+    stack->capacity = capacity; 
+    stack->top = -1; 
+    stack->array = (int*)malloc(stack->capacity * sizeof(int)); 
+    return stack; 
+} 
 
-// Stack is full when top is equal to the last index
-int isFull(struct Stack* stack)
-{
-    return stack->top == stack->capacity - 1;
-}
+// Stack is full when top is equal to the last index 
+int isFull(struct Stack* stack) 
+{ 
+    return stack->top == stack->capacity - 1; 
+} 
 
-// Stack is empty when top is equal to -1
-int isEmpty(struct Stack* stack)
-{
-    return stack->top == -1;
-}
+// Stack is empty when top is equal to -1 
+int isEmpty(struct Stack* stack) 
+{ 
+    return stack->top == -1; 
+} 
 
-// Function to add an item to stack. It increases top by 1
-void push(struct Stack* stack, int item)
-{
-    if (isFull(stack))
-        return;
-    stack->array[++stack->top] = item;
-    printf("%d pushed to stack\\n", item);
-}
+// Function to add an item to stack. It increases top by 1 
+void push(struct Stack* stack, int item) 
+{ 
+    if (isFull(stack)) 
+        return; 
+    stack->array[++stack->top] = item; 
+    printf("%d pushed to stack\\n", item); 
+} 
 
-// Function to remove an item from stack. It decreases top by 1
-int pop(struct Stack* stack)
-{
-    if (isEmpty(stack))
-        return INT_MIN;
-    return stack->array[stack->top--];
-}
+// Function to remove an item from stack. It decreases top by 1 
+int pop(struct Stack* stack) 
+{ 
+    if (isEmpty(stack)) 
+        return INT_MIN; 
+    return stack->array[stack->top--]; 
+} 
 
-// Function to return the top from stack without removing it
-int peek(struct Stack* stack)
-{
-    if (isEmpty(stack))
-        return INT_MIN;
-    return stack->array[stack->top];
-}
+// Function to return the top from stack without removing it 
+int peek(struct Stack* stack) 
+{ 
+    if (isEmpty(stack)) 
+        return INT_MIN; 
+    return stack->array[stack->top]; 
+} 
 
-// Driver program to test above functions
-int main()
-{
-    struct Stack* stack = createStack(100);
+// Driver program to test above functions 
+int main() 
+{ 
+    struct Stack* stack = createStack(100); 
 
-    push(stack, 10);
-    push(stack, 20);
-    push(stack, 30);
+    push(stack, 10); 
+    push(stack, 20); 
+    push(stack, 30); 
 
-    printf("%d popped from stack\\n", pop(stack));
+    printf("%d popped from stack\\n", pop(stack)); 
 
-    return 0;
-}
+    return 0; 
+} 
 
 ````
 
 Java
 ````
-/* Java program to implement basic stack
+/* Java program to implement basic stack 
 operations */
-class Stack {
-    static final int MAX = 1000;
-    int top;
-    int a[] = new int[MAX]; // Maximum size of Stack
+class Stack { 
+    static final int MAX = 1000; 
+    int top; 
+    int a[] = new int[MAX]; // Maximum size of Stack 
 
-    boolean isEmpty()
-    {
-        return (top < 0);
-    }
-    Stack()
-    {
-        top = -1;
-    }
+    boolean isEmpty() 
+    { 
+        return (top < 0); 
+    } 
+    Stack() 
+    { 
+        top = -1; 
+    } 
 
-    boolean push(int x)
-    {
-        if (top >= (MAX - 1)) {
-            System.out.println("Stack Overflow");
-            return false;
-        }
-        else {
-            a[++top] = x;
-            System.out.println(x + " pushed into stack");
-            return true;
-        }
-    }
+    boolean push(int x) 
+    { 
+        if (top >= (MAX - 1)) { 
+            System.out.println("Stack Overflow"); 
+            return false; 
+        } 
+        else { 
+            a[++top] = x; 
+            System.out.println(x + " pushed into stack"); 
+            return true; 
+        } 
+    } 
 
-    int pop()
-    {
-        if (top < 0) {
-            System.out.println("Stack Underflow");
-            return 0;
-        }
-        else {
-            int x = a[top--];
-            return x;
-        }
-    }
+    int pop() 
+    { 
+        if (top < 0) { 
+            System.out.println("Stack Underflow"); 
+            return 0; 
+        } 
+        else { 
+            int x = a[top--]; 
+            return x; 
+        } 
+    } 
 
-    int peek()
-    {
-        if (top < 0) {
-            System.out.println("Stack Underflow");
-            return 0;
-        }
-        else {
-            int x = a[top];
-            return x;
-        }
-    }
+    int peek() 
+    { 
+        if (top < 0) { 
+            System.out.println("Stack Underflow"); 
+            return 0; 
+        } 
+        else { 
+            int x = a[top]; 
+            return x; 
+        } 
+    } 
+    
+    void print(){ 
+    for(int i = top;i>-1;i--){ 
+    System.out.print(" "+ a[i]); 
+    } 
+} 
+} 
 
-    void print(){
-    for(int i = top;i>-1;i--){
-    System.out.print(" "+ a[i]);
-    }
-}
-}
-
-// Driver code
-class Main {
-    public static void main(String args[])
-    {
-        Stack s = new Stack();
-        s.push(10);
-        s.push(20);
-        s.push(30);
-        System.out.println(s.pop() + " Popped from stack");
-        System.out.println("Top element is :" + s.peek());
-        System.out.print("Elements present in stack :");
-        s.print();
-    }
-}
+// Driver code 
+class Main { 
+    public static void main(String args[]) 
+    { 
+        Stack s = new Stack(); 
+        s.push(10); 
+        s.push(20); 
+        s.push(30); 
+        System.out.println(s.pop() + " Popped from stack"); 
+        System.out.println("Top element is :" + s.peek()); 
+        System.out.print("Elements present in stack :"); 
+        s.print(); 
+    } 
+} 
 
 ````
 
 Python3
 ````
-# Python program for implementation of stack
+# Python program for implementation of stack 
 
-# import maxsize from sys module
-# Used to return -infinite when stack is empty
-from sys import maxsize
+# import maxsize from sys module 
+# Used to return -infinite when stack is empty 
+from sys import maxsize 
 
-# Function to create a stack. It initializes size of stack as 0
-def createStack():
-    stack = []
-    return stack
+# Function to create a stack. It initializes size of stack as 0 
+def createStack(): 
+    stack = [] 
+    return stack 
 
-# Stack is empty when stack size is 0
-def isEmpty(stack):
+# Stack is empty when stack size is 0 
+def isEmpty(stack): 
     return len(stack) == 0
 
-# Function to add an item to stack. It increases size by 1
-def push(stack, item):
-    stack.append(item)
-    print(item + " pushed to stack ")
+# Function to add an item to stack. It increases size by 1 
+def push(stack, item): 
+    stack.append(item) 
+    print(item + " pushed to stack ") 
+    
+# Function to remove an item from stack. It decreases size by 1 
+def pop(stack): 
+    if (isEmpty(stack)): 
+        return str(-maxsize -1) # return minus infinite 
+    
+    return stack.pop() 
 
-# Function to remove an item from stack. It decreases size by 1
-def pop(stack):
-    if (isEmpty(stack)):
-        return str(-maxsize -1) # return minus infinite
+# Function to return the top from stack without removing it 
+def peek(stack): 
+    if (isEmpty(stack)): 
+        return str(-maxsize -1) # return minus infinite 
+    return stack[len(stack) - 1] 
 
-    return stack.pop()
-
-# Function to return the top from stack without removing it
-def peek(stack):
-    if (isEmpty(stack)):
-        return str(-maxsize -1) # return minus infinite
-    return stack[len(stack) - 1]
-
-# Driver program to test above functions
-stack = createStack()
-push(stack, str(10))
-push(stack, str(20))
-push(stack, str(30))
-print(pop(stack) + " popped from stack")
+# Driver program to test above functions     
+stack = createStack() 
+push(stack, str(10)) 
+push(stack, str(20)) 
+push(stack, str(30)) 
+print(pop(stack) + " popped from stack") 
 
 ````
 
 C#
 ````
-// C# program to implement basic stack
-// operations
-using System;
+// C# program to implement basic stack 
+// operations 
+using System; 
 
-namespace ImplementStack {
-class Stack {
-    private int[] ele;
-    private int top;
-    private int max;
-    public Stack(int size)
-    {
-        ele = new int[size]; // Maximum size of Stack
-        top = -1;
-        max = size;
-    }
+namespace ImplementStack { 
+class Stack { 
+    private int[] ele; 
+    private int top; 
+    private int max; 
+    public Stack(int size) 
+    { 
+        ele = new int[size]; // Maximum size of Stack 
+        top = -1; 
+        max = size; 
+    } 
 
-    public void push(int item)
-    {
-        if (top == max - 1) {
-            Console.WriteLine("Stack Overflow");
-            return;
-        }
-        else {
-            ele[++top] = item;
-        }
-    }
+    public void push(int item) 
+    { 
+        if (top == max - 1) { 
+            Console.WriteLine("Stack Overflow"); 
+            return; 
+        } 
+        else { 
+            ele[++top] = item; 
+        } 
+    } 
 
-    public int pop()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return -1;
-        }
-        else {
-            Console.WriteLine("{0} popped from stack ", ele[top]);
-            return ele[top--];
-        }
-    }
+    public int pop() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return -1; 
+        } 
+        else { 
+            Console.WriteLine("{0} popped from stack ", ele[top]); 
+            return ele[top--]; 
+        } 
+    } 
 
-    public int peek()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return -1;
-        }
-        else {
-            Console.WriteLine("{0} popped from stack ", ele[top]);
-            return ele[top];
-        }
-    }
+    public int peek() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return -1; 
+        } 
+        else { 
+            Console.WriteLine("{0} popped from stack ", ele[top]); 
+            return ele[top]; 
+        } 
+    } 
 
-    public void printStack()
-    {
-        if (top == -1) {
-            Console.WriteLine("Stack is Empty");
-            return;
-        }
-        else {
-            for (int i = 0; i <= top; i++) {
-                Console.WriteLine("{0} pushed into stack", ele[i]);
-            }
-        }
-    }
-}
+    public void printStack() 
+    { 
+        if (top == -1) { 
+            Console.WriteLine("Stack is Empty"); 
+            return; 
+        } 
+        else { 
+            for (int i = 0; i <= top; i++) { 
+                Console.WriteLine("{0} pushed into stack", ele[i]); 
+            } 
+        } 
+    } 
+} 
 
-// Driver program to test above functions
-class Program {
-    static void Main()
-    {
-        Stack p = new Stack(5);
+// Driver program to test above functions 
+class Program { 
+    static void Main() 
+    { 
+        Stack p = new Stack(5); 
 
-        p.push(10);
-        p.push(20);
-        p.push(30);
-        p.printStack();
-        p.pop();
-    }
-}
-}
+        p.push(10); 
+        p.push(20); 
+        p.push(30); 
+        p.printStack(); 
+        p.pop(); 
+    } 
+} 
+} 
 
 ````
 
 JavaScript
 ````
-/* javascript program to implement basic stack
-operations
+/* javascript program to implement basic stack 
+operations 
 */
-var t = -1;
-    var MAX = 1000;
-    var a = Array(MAX).fill(0); // Maximum size of Stack
+var t = -1; 
+    var MAX = 1000; 
+    var a = Array(MAX).fill(0); // Maximum size of Stack 
 
-    function isEmpty() {
-        return (t < 0);
-    }
+    function isEmpty() { 
+        return (t < 0); 
+    } 
 
-    function push(x) {
-        if (t >= (MAX - 1)) {
-            console.log("Stack Overflow");
-            return false;
-        } else {
-        t+=1;
-            a[t] = x;
+    function push(x) { 
+        if (t >= (MAX - 1)) { 
+            console.log("Stack Overflow"); 
+            return false; 
+        } else { 
+        t+=1; 
+            a[t] = x; 
+            
+            console.log(x + " pushed into stack<br/>"); 
+            return true; 
+        } 
+    } 
 
-            console.log(x + " pushed into stack<br/>");
-            return true;
-        }
-    }
+    function pop() { 
+        if (t < 0) { 
+            console.log("Stack Underflow"); 
+            return 0; 
+        } else { 
+            var x = a[t]; 
+            t-=1; 
+            return x; 
+        } 
+    } 
 
-    function pop() {
-        if (t < 0) {
-            console.log("Stack Underflow");
-            return 0;
-        } else {
-            var x = a[t];
-            t-=1;
-            return x;
-        }
-    }
+    function peek() { 
+        if (t < 0) { 
+            console.log("Stack Underflow"); 
+            return 0; 
+        } else { 
+            var x = a[t]; 
+            return x; 
+        } 
+    } 
 
-    function peek() {
-        if (t < 0) {
-            console.log("Stack Underflow");
-            return 0;
-        } else {
-            var x = a[t];
-            return x;
-        }
-    }
+    function print() { 
+        for (i = t; i > -1; i--) { 
+            console.log(" " + a[i]); 
+        } 
+    } 
 
-    function print() {
-        for (i = t; i > -1; i--) {
-            console.log(" " + a[i]);
-        }
-    }
-
-        push(10);
-        push(20);
-        push(30);
-        console.log(pop() + " Popped from stack");
-        console.log("<br/>Top element is :" + peek());
-        console.log("<br/>Elements present in stack : ");
-        print();
+        push(10); 
+        push(20); 
+        push(30); 
+        console.log(pop() + " Popped from stack"); 
+        console.log("<br/>Top element is :" + peek()); 
+        console.log("<br/>Elements present in stack : "); 
+        print(); 
 
 ````
 
@@ -62598,13 +62619,13 @@ var t = -1;
 1
 
 ```
-/* javascript program to implement basic stack
+/* javascript program to implement basic stack 
 ```
 
 2
 
 ```
-operations
+operations 
 ```
 
 3
@@ -62616,19 +62637,19 @@ operations
 4
 
 ```
-var t = -1;
+var t = -1; 
 ```
 
 5
 
 ```
-    var MAX = 1000;
+    var MAX = 1000; 
 ```
 
 6
 
 ```
-    var a = Array(MAX).fill(0); // Maximum size of Stack
+    var a = Array(MAX).fill(0); // Maximum size of Stack 
 ```
 
 7
@@ -62640,19 +62661,19 @@ var t = -1;
 8
 
 ```
-    function isEmpty() {
+    function isEmpty() { 
 ```
 
 9
 
 ```
-        return (t < 0);
+        return (t < 0); 
 ```
 
 10
 
 ```
-    }
+    } 
 ```
 
 11
@@ -62664,73 +62685,73 @@ var t = -1;
 12
 
 ```
-    function push(x) {
+    function push(x) { 
 ```
 
 13
 
 ```
-        if (t >= (MAX - 1)) {
+        if (t >= (MAX - 1)) { 
 ```
 
 14
 
 ```
-            console.log("Stack Overflow");
+            console.log("Stack Overflow"); 
 ```
 
 15
 
 ```
-            return false;
+            return false; 
 ```
 
 16
 
 ```
-        } else {
+        } else { 
 ```
 
 17
 
 ```
-        t+=1;
+        t+=1; 
 ```
 
 18
 
 ```
-            a[t] = x;
+            a[t] = x; 
 ```
 
 19
 
 ```
-
+            
 ```
 
 20
 
 ```
-            console.log(x + " pushed into stack<br/>");
+            console.log(x + " pushed into stack<br/>"); 
 ```
 
 21
 
 ```
-            return true;
+            return true; 
 ```
 
 22
 
 ```
-        }
+        } 
 ```
 
 23
 
 ```
-    }
+    } 
 ```
 
 24
@@ -62742,61 +62763,61 @@ var t = -1;
 25
 
 ```
-    function pop() {
+    function pop() { 
 ```
 
 26
 
 ```
-        if (t < 0) {
+        if (t < 0) { 
 ```
 
 27
 
 ```
-            console.log("Stack Underflow");
+            console.log("Stack Underflow"); 
 ```
 
 28
 
 ```
-            return 0;
+            return 0; 
 ```
 
 29
 
 ```
-        } else {
+        } else { 
 ```
 
 30
 
 ```
-            var x = a[t];
+            var x = a[t]; 
 ```
 
 31
 
 ```
-            t-=1;
+            t-=1; 
 ```
 
 32
 
 ```
-            return x;
+            return x; 
 ```
 
 33
 
 ```
-        }
+        } 
 ```
 
 34
 
 ```
-    }
+    } 
 ```
 
 35
@@ -62808,55 +62829,55 @@ var t = -1;
 36
 
 ```
-    function peek() {
+    function peek() { 
 ```
 
 37
 
 ```
-        if (t < 0) {
+        if (t < 0) { 
 ```
 
 38
 
 ```
-            console.log("Stack Underflow");
+            console.log("Stack Underflow"); 
 ```
 
 39
 
 ```
-            return 0;
+            return 0; 
 ```
 
 40
 
 ```
-        } else {
+        } else { 
 ```
 
 41
 
 ```
-            var x = a[t];
+            var x = a[t]; 
 ```
 
 42
 
 ```
-            return x;
+            return x; 
 ```
 
 43
 
 ```
-        }
+        } 
 ```
 
 44
 
 ```
-    }
+    } 
 ```
 
 45
@@ -62868,31 +62889,31 @@ var t = -1;
 46
 
 ```
-    function print() {
+    function print() { 
 ```
 
 47
 
 ```
-        for (i = t; i > -1; i--) {
+        for (i = t; i > -1; i--) { 
 ```
 
 48
 
 ```
-            console.log(" " + a[i]);
+            console.log(" " + a[i]); 
 ```
 
 49
 
 ```
-        }
+        } 
 ```
 
 50
 
 ```
-    }
+    } 
 ```
 
 51
@@ -62904,37 +62925,37 @@ var t = -1;
 52
 
 ```
-        push(10);
+        push(10); 
 ```
 
 53
 
 ```
-        push(20);
+        push(20); 
 ```
 
 54
 
 ```
-        push(30);
+        push(30); 
 ```
 
 55
 
 ```
-        console.log(pop() + " Popped from stack");
+        console.log(pop() + " Popped from stack"); 
 ```
 
 56
 
 ```
-        console.log("<br/>Top element is :" + peek());
+        console.log("<br/>Top element is :" + peek()); 
 ```
 
 57
 
 ```
-        console.log("<br/>Elements present in stack : ");
+        console.log("<br/>Elements present in stack : "); 
 ```
 
 58
@@ -62951,7 +62972,7 @@ var t = -1;
 
 
 
-
+  
 **Output**
 ```
 
@@ -62960,7 +62981,7 @@ var t = -1;
 30 pushed into stack
 30 Popped from stack
 Top element is : 20
-Elements present in stack : 20 10
+Elements present in stack : 20 10 
 ```
 ### Complexity Analysis:
 
@@ -63031,9 +63052,9 @@ Display Operation:
 > * Now start traversing temp till it encounters NULL
 > * Simultaneously print the value of the temp node
 
+ 
 
-
-Below is the implementation of the above operations
+Below is the implementation of the above operations 
 
 C++
 ````
@@ -63064,14 +63085,14 @@ public:
 
     // Function to check if the stack is empty
     bool isEmpty() {
-
+      
         // If head is nullptr, the stack is empty
         return head == nullptr;
     }
 
     // Function to push an element onto the stack
     void push(int new_data) {
-
+      
         // Create a new node with given data
         Node* new_node = new Node(new_data);
 
@@ -63177,14 +63198,14 @@ void initializeStack(Stack* stack) { stack->head = NULL; }
 
 // Function to check if the stack is empty
 int isEmpty(Stack* stack) {
-
+  
     // If head is NULL, the stack is empty
     return stack->head == NULL;
 }
 
 // Function to push an element onto the stack
 void push(Stack* stack, int new_data) {
-
+  
     // Create a new node with given data
     Node* new_node = createNode(new_data);
 
@@ -63203,14 +63224,14 @@ void push(Stack* stack, int new_data) {
 
 // Function to remove the top element from the stack
 void pop(Stack* stack) {
-
+  
     // Check for stack underflow
     if (isEmpty(stack)) {
         printf("\\nStack Underflow\\n");
         return;
     }
     else {
-
+      
         // Assign the current top to a temporary variable
         Node* temp = stack->head;
 
@@ -63224,7 +63245,7 @@ void pop(Stack* stack) {
 
 // Function to return the top element of the stack
 int peek(Stack* stack) {
-
+  
     // If stack is not empty, return the top element
     if (!isEmpty(stack))
         return stack->head->data;
@@ -63236,7 +63257,7 @@ int peek(Stack* stack) {
 
 // Driver program to test the stack implementation
 int main() {
-
+  
     // Creating a stack
     Stack stack;
     initializeStack(&stack);
@@ -63250,7 +63271,7 @@ int main() {
     // Print top element of the stack
     printf("Top element is %d\\n", peek(&stack));
 
-
+  
       // removing two elemements from the top
       printf("Removing two elements...\\n");
     pop(&stack);
@@ -63290,14 +63311,14 @@ class Stack {
 
     // Function to check if the stack is empty
     boolean isEmpty() {
-
+      
         // If head is null, the stack is empty
         return head == null;
     }
 
     // Function to push an element onto the stack
     void push(int new_data) {
-
+      
         // Create a new node with given data
         Node new_node = new Node(new_data);
 
@@ -63317,14 +63338,14 @@ class Stack {
 
     // Function to remove the top element from the stack
     void pop() {
-
+      
         // Check for stack underflow
         if (isEmpty()) {
             System.out.println("\\nStack Underflow");
             return;
         }
         else {
-
+          
             // Assign the current top to a temporary
             // variable
             Node temp = head;
@@ -63339,7 +63360,7 @@ class Stack {
 
     // Function to return the top element of the stack
     int peek() {
-
+      
         // If stack is not empty, return the top element
         if (!isEmpty())
             return head.data;
@@ -63604,14 +63625,14 @@ class Stack {
 
     // Function to check if the stack is empty
     isEmpty() {
-
+    
         // If head is null, the stack is empty
         return this.head === null;
     }
 
     // Function to push an element onto the stack
     push(new_data) {
-
+    
         // Create a new node with given data
         const new_node = new Node(new_data);
 
@@ -63631,13 +63652,13 @@ class Stack {
 
     // Function to remove the top element from the stack
     pop() {
-
+    
         // Check for stack underflow
         if (this.isEmpty()) {
             console.log("\\nStack Underflow");
         }
         else {
-
+        
             // Assign the current top to a temporary
             // variable
             let temp = this.head;
@@ -63652,7 +63673,7 @@ class Stack {
 
     // Function to return the top element of the stack
     peek() {
-
+    
         // If stack is not empty, return the top element
         if (!this.isEmpty())
             return this.head.data;
@@ -63685,7 +63706,7 @@ console.log("Top element is " + st.peek());
 
 ````
 
-
+  
 **Output**
 ```
 
@@ -63697,7 +63718,7 @@ Top element is 22
 ****Time Complexity:****
 O(1), for all push(), pop(), and peek(), as we are not performing any
 kind of traversal over the list. We perform all the operations through
-the current pointer only.
+the current pointer only.  
 ****Auxiliary Space:**** O(N), where N is the size of the stack
 
 
@@ -63828,56 +63849,65 @@ Disadvantages of Stacks:
 in which the insertion of a new element and removal of an existing
 element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
 
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('88c42222-e777-498f-93c0-b6852576e275', 'course', 'Learn about Stack data structure', true, 'EN', 'Data Structure', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a162b1aa-4820-4c00-bf4e-e52d8b74f3d3', 'course', 'Learn about Queue data structure', true, 'EN', 'Algorithm', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a4876daa-5d46-403f-a6c7-617c597d7bec', 'section', 'Category for all free courses', true, 'EN', 'Free Courses', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('a2490eb3-41ea-42fd-bf77-e46e049c7860', 'section', 'Category for all featured courses', true, 'EN', 'Featured Courses', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('8c180a6d-f3bc-45f4-9db9-1de05c4f259c', 'course', '', true, 'EN', 'Problem Solving', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('e2e5fc00-80e1-4019-8012-1aabaf76537e', 'course', '', true, 'EN', 'Array', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('2f342483-a619-4ea3-a6cb-0903ac16d015', 'course', '', true, 'EN', 'Queue', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('0d7730de-3172-4629-a872-5ddb65094458', 'course', '', true, 'EN', 'Recursive', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('ec16cda9-281f-4ecc-8326-e17c814796d5', 'course', '', true, 'EN', 'Dynamic Programming', null);
-INSERT INTO public.categories (category_id, type, description, is_featured, language, category_name, parent_id) VALUES ('9a6c29bc-62a2-4d7b-a14d-f7ad7d710806', 'course', '', true, 'EN', 'Matrix', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (1, 'Data Structure', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (2, 'Algorithm', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (5, 'Problem Solving', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (6, 'Array', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (7, 'Queue', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (8, 'Recursive', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (9, 'Dynamic Programming', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (10, 'Matrix', null);
 
 
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'a4876daa-5d46-403f-a6c7-617c597d7bec');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'a2490eb3-41ea-42fd-bf77-e46e049c7860');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', '8c180a6d-f3bc-45f4-9db9-1de05c4f259c');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 'a162b1aa-4820-4c00-bf4e-e52d8b74f3d3');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', '88c42222-e777-498f-93c0-b6852576e275');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '2f342483-a619-4ea3-a6cb-0903ac16d015');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 'e2e5fc00-80e1-4019-8012-1aabaf76537e');
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', '0d7730de-3172-4629-a872-5ddb65094458');
+INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 5);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 7);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 6);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 8);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 9);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 10);
+
+INSERT INTO public.sections (section_id, name) VALUES (1, 'Free Courses');
+INSERT INTO public.sections (section_id, name) VALUES (2, 'Featured Courses');
+
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 2);
 
 
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
+
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
 
 **Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
 
@@ -63902,8 +63932,8 @@ Output: [1]
 ```
 Input: nums1 = [0], m = 0, nums2 = [1], n = 1
 Output: [1]
-```', 'easy', 'Merge sorted array', 2, false, false);
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
+```', 'easy', 'Merge sorted array', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
 
 Increment the large integer by one and return the resulting array of digits.
 
@@ -63926,8 +63956,8 @@ Output: [4,3,2,2]
 ```
 Input: digits = [9]
 Output: [1,0]
-```', 'easy', 'Plus one', 2, false, false);
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+```', 'easy', 'Plus one', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
 
 You must write an algorithm with `O(log n)` runtime complexity.
 
@@ -63950,8 +63980,8 @@ Output: 1
 ```
 Input: nums = [1,3,5,6], target = 7
 Output: 4
-```', 'easy', 'Search Insert Position', 2, false, false);
-INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
+```', 'easy', 'Search Insert Position', 2, false, false, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, avarage_rating, description, problem_level, problem_name, score, is_available, is_published, solution_structure) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
 
 You must implement a solution with a linear runtime complexity and use only constant extra space.
 

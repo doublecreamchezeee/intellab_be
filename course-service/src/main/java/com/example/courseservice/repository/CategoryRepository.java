@@ -11,7 +11,6 @@ import java.util.UUID;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
-    List<Category> findAllByNameAndIsFeatured(String name, boolean featured);
+    List<Category> findAllByName(String name);
 
-    List<Category> findAllByType(String type);
 }

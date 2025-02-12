@@ -11,6 +11,6 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryResponse {
-    UUID categoryId;
+    Integer categoryId;
     String name;
 }

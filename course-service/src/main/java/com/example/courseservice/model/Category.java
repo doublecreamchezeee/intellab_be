@@ -20,13 +20,11 @@ public class Category {
     @Id
     @Column(name = "Category_id")
     @GeneratedValue
-    UUID id;
+    Integer id;
 
     @Column(name = "Category_name", nullable = false, columnDefinition = "VARCHAR(100)")
     String name;
 
-    @Column(columnDefinition = "TEXT")
-    String description;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,10 +35,8 @@ public class Category {
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     List<Category> children;
 
-    String language;
-    @Column(name = "is_featured")
-    Boolean isFeatured = false;
-    String type;
+
+
 
     @JsonIgnore
     @ManyToMany(mappedBy = "categories")

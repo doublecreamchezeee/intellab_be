@@ -4,6 +4,7 @@ import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSu
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
+import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.service.ProblemSubmissionService;
@@ -43,6 +44,12 @@ public class ProblemSubmissionController {
         }
     }
 
+    @GetMapping("/{problemId}/{userId}")
+    public ResponseEntity<List<ProblemSubmissionResponse>> getSubmissions(@PathVariable String problemId, @PathVariable String userId) {
+        List<ProblemSubmissionResponse> submissions = problemSubmissionService.getSubmissionsByUserId(UUID.fromString(problemId), UUID.fromString(userId));
+        return ResponseEntity.ok(submissions);
+    }
+
     @Operation(
             summary = "(BE only) Callback update submission by id"
     )
@@ -68,9 +75,9 @@ public class ProblemSubmissionController {
             summary = "Get submission by id"
     )
     @GetMapping("/{submissionId}")
-    public ResponseEntity<ProblemSubmission> getSubmission(@PathVariable UUID submissionId) {
+    public ResponseEntity<ProblemSubmission> getSubmission(@PathVariable String submissionId) {
         try {
-            ProblemSubmission submission = problemSubmissionService.getSubmission(submissionId);
+            ProblemSubmission submission = problemSubmissionService.getSubmission(UUID.fromString(submissionId));
             return ResponseEntity.ok(submission); // HTTP 200 OK
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.SUBMISSION_NOT_EXIST) {
@@ -125,4 +132,5 @@ public class ProblemSubmissionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
         }
     }
+
 }
