@@ -41,38 +41,38 @@ public class BoilerplateClient {
 
             for (String rawLine : lines) {
                 String line = rawLine.trim();
-                System.out.println(line.startsWith("Input Field:") && "input".equals(currentSection));
+                //System.out.println(line.startsWith("Input Field:") && "input".equals(currentSection));
                 System.out.println("- " + line);
 
                 if (line.startsWith("Problem Name:")) {
                     this.problemName = extractQuoteValue(line);
-                    System.out.println("extract problem name: " + problemName);
+                    //System.out.println("extract problem name: " + problemName);
                 } else if (line.startsWith("Function Name:")) {
                     this.functionName = extractValue(line);
-                    System.out.println("extract function name: " + functionName);
+                    //System.out.println("extract function name: " + functionName);
 
                 } else if (line.startsWith("Input Structure:")) {
                     currentSection = "input";
-                    System.out.println("input section");
+                    //System.out.println("input section");
                 } else if (line.startsWith("Output Structure:")) {
                     currentSection = "output";
-                    System.out.println("output section");
+                    //System.out.println("output section");
                 } else if (line.startsWith("Input Field:") && "input".equals(currentSection)) {
                     Field field = extractField(line);
                     if (field != null) {
                         inputFields.add(field);
-                        System.out.println("extract input: " + field.type + field.name);
+                        //System.out.println("extract input: " + field.type + field.name);
                     }
                 } else if (line.startsWith("Output Field:") && "output".equals(currentSection)) {
                     Field field = extractField(line);
                     if (field != null) {
                         outputFields.add(field);
-                        System.out.println("extract output: " + field.type + field.name);
+                        //System.out.println("extract output: " + field.type + field.name);
                     }
                 }
             }
 
-            System.out.println("--------------------");
+            /*System.out.println("--------------------");
 
             for (Field field : inputFields) {
                 System.out.println(field.getType() + " " + field.getName());
@@ -80,7 +80,7 @@ public class BoilerplateClient {
             for (Field field : outputFields) {
                 System.out.println(field.getType() + " " + field.getName());
             }
-            System.out.println("--------------------");
+            System.out.println("--------------------");*/
 
         }
 
@@ -105,12 +105,13 @@ public class BoilerplateClient {
         //=================================== C++ ===========================================
         public String generateCpp() {
             String inputs = inputFields.stream()
+                    .filter(field -> !field.getType().startsWith("list<"))
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining("; \n"));
 
             inputs += ";\n";
 
-            log.info("inputs: {}", inputs);
+            //log.info("inputs: {}", inputs);
 
             String inputReads = inputFields.stream()
                     .map(field -> {
@@ -126,7 +127,13 @@ public class BoilerplateClient {
             String outputType = mapTypeToCpp(outputFields.get(0).getType());
             String functionCall = outputType + " result = " + functionName + "(" +
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", ")) + ");";
-            String outputWrite = "std::cout << result << std::endl;";
+
+            String outputWrite =  null;
+            if (outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "for (const auto &item : result) std::cout << item << ' ';\nstd::cout << std::endl;";
+            } else {
+                outputWrite = "std::cout << result << std::endl;";
+            }
 
             return """
                     #include <iostream>

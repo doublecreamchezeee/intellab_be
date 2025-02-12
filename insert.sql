@@ -63947,7 +63947,7 @@ INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1
 
 
 
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
 
 **Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
 
@@ -63975,16 +63975,14 @@ Output: [1]
 ```', 'easy', e'Merge sorted array', 2, false, false, e'Problem Name: Merge Sorted Array
 Function Name: mergeSortedArray
 Input Structure:
-Input Field: int arrayLength1
 Input Field: list<int> num1
 Input Field: int m
-Input Field: int arrayLength2
 Input Field: list<int> num2
 Input Field: int n
 Output Structure:
 Output Field: list<int> result');
 
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
 
 Increment the large integer by one and return the resulting array of digits.
 
@@ -64010,11 +64008,10 @@ Output: [1,0]
 ```', 'easy', 'Plus one', 2, false, false, e'Problem Name: Plus One
 Function Name: plusOne
 Input Structure:
-Input Field: int arrayLength
 Input Field: list<int> digits
 Output Structure:
 Output Field: list<int> result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
 
 You must write an algorithm with `O(log n)` runtime complexity.
 
@@ -64040,13 +64037,12 @@ Output: 4
 ```', 'easy', 'Search Insert Position', 2, false, false, e'Problem Name: Search Insert Position
 Function Name: searchInsertPosition
 Input Structure:
-Input Field: int arrayLength
 Input Field: list<int> nums
 Input Field: int target
 Output Structure:
 Output Field: int result
 ');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
 
 You must implement a solution with a linear runtime complexity and use only constant extra space.
 
@@ -64072,11 +64068,10 @@ Output: 1
 ```', 'easy', 'Single Number', 2, false, false, e'Problem Name: Single Number
 Function Name: singleNumber
 Input Structure:
-Input Field: int arrayLength
 Input Field: list<int> nums
 Output Structure:
 Output Field: int result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
+INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
 
 You may assume that each input would have exactly one solution, and you may not use the same element twice.
 
@@ -64103,23 +64098,29 @@ Input: nums = [3,3], target = 6
 Output: [0,1]
 ```', 'easy', 'Two sum', 2, false, false, e'Function Name: twoSum
 Input Structure:
-Input Field: int arrayLength
 Input Field: list<int> nums
 Input Field: int target
 Output Structure:
 Output Field: list<int> result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('79751b4f-cad0-42ef-a592-f67298d08003', 0.00, 0.00, 'string', 'string', 'string', 0, true, true, 'string');
+
+--INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('79751b4f-cad0-42ef-a592-f67298d08003', 0.00, 'string', 'string', 'string', 0, true, true, 'string');
 
 
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
 1
-
+1
+0
+																										
 0', '1', null, 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('eb1f21cf-b8fa-41cc-aea8-7224a85998c6', e'1 3 5 0 0 0 0
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('eb1f21cf-b8fa-41cc-aea8-7224a85998c6', e'7
+1 3 5 0 0 0 0
 3
+4
 2 4 6 7
 4', '1 2 3 4 5 6 7', null, 2, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('607a6878-899a-4f10-a3ff-106e36f6db7b', e'4 5 6 0 0 0
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('607a6878-899a-4f10-a3ff-106e36f6db7b', e'6
+4 5 6 0 0 0
+3
 3
 1 2 3
 3', '1 2 3 4 5 6', null, 3, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
@@ -64127,7 +64128,9 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_ord
 0
 1
 1', '1', null, 4, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('7d1d2398-47fd-480a-a662-b8bb892656a4', e'1 2 3 0 0 0
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('7d1d2398-47fd-480a-a662-b8bb892656a4', e'6
+1 2 3 0 0 0
+3
 3
 2 5 6
 3', '1 2 2 3 5 6', null, 5, '7328995b-6079-4bd9-8be0-7c9152d5a73b');

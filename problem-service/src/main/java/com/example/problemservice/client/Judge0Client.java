@@ -221,6 +221,8 @@ public class Judge0Client {
         String input = testCase.getInput();
         String expectedOutput = testCase.getOutput();
 
+        log.info("Request body: {}", code);
+
         // Create the request body as a Map
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("source_code", code);

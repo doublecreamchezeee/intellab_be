@@ -210,9 +210,9 @@ public class ProblemService {
     public void generateBoilerplate() {
         List<Problem> problems = problemRepository.findAll();
         for (Problem problem : problems) {
-            String problemStructure = MarkdownUtility.readMarkdownFromFile(
-                    problem.getProblemName(), "Structure.md");
-            generateDefaultCodes(problem.getProblemId(), problemStructure);
+            /*String problemStructure = MarkdownUtility.readMarkdownFromFile(
+                    problem.getProblemName(), "Structure.md");*/
+            generateDefaultCodes(problem.getProblemId(), problem.getProblemStructure());
         }
     }
 }

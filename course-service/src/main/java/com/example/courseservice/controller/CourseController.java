@@ -258,6 +258,7 @@ public class CourseController {
             @ParameterObject Pageable pageable) {
 
         userUid = userUid.split(",")[0];
+        log.info("UserUid: " + ParseUUID.normalizeUID(userUid));
         return ApiResponse.<Page<UserCourses>>builder()
                 .result(courseService.getEnrolledCoursesOfUser(
                             ParseUUID.normalizeUID(userUid),

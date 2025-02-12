@@ -266,7 +266,6 @@ public class ProblemSubmissionService {
 
         submission = problemSubmissionRepository.save(submission);
 
-
         List<TestCase> testCases = testCaseRepository.findAllByProblem_ProblemId(
                 request.getProblemId()
         ); // problem.getTestCases();
