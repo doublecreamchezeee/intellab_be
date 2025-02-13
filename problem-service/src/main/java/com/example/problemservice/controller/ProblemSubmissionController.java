@@ -43,10 +43,16 @@ public class ProblemSubmissionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
         }
     }
+    @Operation(
+            summary = "Create submission"
+    )
+    @GetMapping("/submitList/{problemId}")
+    public ResponseEntity<List<ProblemSubmissionResponse>> getSubmissions(@PathVariable String problemId, @RequestHeader("X-UserId") String userId) {
+        userId = userId.split(",")[0];
 
-    @GetMapping("/{problemId}/{userId}")
-    public ResponseEntity<List<ProblemSubmissionResponse>> getSubmissions(@PathVariable String problemId, @PathVariable String userId) {
-        List<ProblemSubmissionResponse> submissions = problemSubmissionService.getSubmissionsByUserId(UUID.fromString(problemId), UUID.fromString(userId));
+        System.out.println(userId);
+        System.out.println(ParseUUID.normalizeUID(userId));
+        List<ProblemSubmissionResponse> submissions = problemSubmissionService.getSubmissionsByUserId(UUID.fromString(problemId), ParseUUID.normalizeUID(userId));
         return ResponseEntity.ok(submissions);
     }
 

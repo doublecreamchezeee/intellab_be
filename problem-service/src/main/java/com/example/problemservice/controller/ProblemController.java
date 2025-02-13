@@ -68,15 +68,14 @@ public class ProblemController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<ProblemRowResponse>> getProblems(@RequestParam(required = false) String category,
-                                                             @RequestHeader(required = false, name = "X-UserID") String userUId,
+                                                             @RequestHeader(required = false, name = "X-UserId") String userUId,
                                                              @ParameterObject Pageable pageable,
                                                              @RequestParam(required = false) String keyword) {
+        userUId = userUId.split(",")[0];
         if (userUId != null) {
-            userUId = userUId.split(",")[0];
             UUID userId = ParseUUID.normalizeUID(userUId);
-            System.out.println("here!!!");
+            System.out.println("user id: " + userId);
             if(keyword != null) {
-                System.out.println("here!!");
                 return ApiResponse.<Page<ProblemRowResponse>>builder()
                         .result(problemService.searchProblems(pageable,keyword, userId)).build();
             }
@@ -84,7 +83,6 @@ public class ProblemController {
             return ApiResponse.<Page<ProblemRowResponse>>builder()
                     .result(problemService.getAllProblems(category, pageable)).build();
         }
-        System.out.println("here!!!!");
         if(keyword != null) {
             return ApiResponse.<Page<ProblemRowResponse>>builder()
                     .result(problemService.searchProblems(pageable,keyword)).build();
