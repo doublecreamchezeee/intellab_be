@@ -11,8 +11,8 @@ import com.example.courseservice.dto.response.learningLesson.LessonProgressRespo
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.dto.response.rerview.CourseReviewsStatisticsResponse;
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
+import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
-import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
@@ -288,6 +287,46 @@ public class CourseController {
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(courseService.getCategories()).build();
     }
+    @Operation(
+            summary = "Khi nào học xong bài cuối, tức là progress = 100 thì gọi api này để cập nhật completedDate và certificateUrl"
+    )
+    @PostMapping("{courseId}/certificate")
+    public ApiResponse<CertificateCreationResponse> generateCertificate(
+            @PathVariable UUID courseId,
+            @RequestHeader (value = "X-UserId") String userUid,
+            @RequestBody String token
+            ) throws Exception {
+        System.out.println("userUid:" + userUid);
+
+        String userName = courseService.getUserName(token);
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+
+        CertificateCreationResponse result = courseService.createCertificate(courseId, userId, userName);
+
+
+        return ApiResponse.<CertificateCreationResponse>builder()
+                .result(result).build();
+    }
+
+    @GetMapping("{courseId}/certificate")
+    public ApiResponse<Object> getCertificate(
+            @PathVariable UUID courseId,
+            @RequestHeader (value = "X-UserId") String userUid,
+            @RequestBody String token
+    )
+    {
+
+        System.out.println("userUid:" + userUid);
+
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        String userName = courseService.getUserName(token);
+        return ApiResponse.builder()
+                .result(courseService.getCertificate(courseId,userId,userName)).build();
+    }
+
 
     @Operation(
             summary = "Get review statistics of course by course id"

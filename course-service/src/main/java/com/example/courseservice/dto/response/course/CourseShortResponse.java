@@ -1,7 +1,6 @@
 package com.example.courseservice.dto.response.course;
 
 import com.example.courseservice.dto.response.category.CategoryResponse;
-import com.example.courseservice.model.Section;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,18 +12,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CourseCreationResponse {
-    UUID courseId;
-    String courseName;
-    String description;
-    String level;
-    float price;
-    String unitPrice;
-    UUID userUid;
+public class CourseShortResponse {
+    UUID id;
+    String name;
+    Double rating;
     Integer reviewCount;
-    Double averageRating;
-    int lessonCount;
-
     List<CategoryResponse> categories;
-    List<Section> sections;
 }

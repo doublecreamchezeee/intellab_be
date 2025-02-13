@@ -84,12 +84,11 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Refresh token"
+            summary = "Refresh token, re"
     )
     @PublicEndpoint
     @PostMapping(value = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TokenSuccessResponse> refreshToken(@RequestBody Map<String, String> body) {
-        String refreshToken = body.get("refreshToken");
+    public ResponseEntity<TokenSuccessResponse> refreshToken(@RequestBody String refreshToken) {
         RefreshTokenSuccessResponse refreshTokenResponse = authService.refreshAccessToken(refreshToken);
         TokenSuccessResponse response = TokenSuccessResponse.builder()
                 .accessToken(refreshTokenResponse.getId_token())

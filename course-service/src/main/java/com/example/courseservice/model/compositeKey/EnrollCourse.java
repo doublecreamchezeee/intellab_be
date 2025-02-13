@@ -17,7 +17,7 @@ import java.util.UUID;
 @Embeddable
 public class EnrollCourse implements Serializable {
 
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_uid", nullable = false)
     UUID userUid;
 
     @JoinColumn(name = "course_id", nullable = false)

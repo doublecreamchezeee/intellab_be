@@ -1,6 +1,7 @@
 package com.example.courseservice.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,6 +23,7 @@ public class Section {
 
     String name;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "sections")
     List<Course> courses;
 

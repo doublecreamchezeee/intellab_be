@@ -25,7 +25,6 @@ public class Category {
     @Column(name = "Category_name", nullable = false, columnDefinition = "VARCHAR(100)")
     String name;
 
-
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -34,9 +33,6 @@ public class Category {
     @JsonIgnore
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     List<Category> children;
-
-
-
 
     @JsonIgnore
     @ManyToMany(mappedBy = "categories")

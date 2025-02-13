@@ -76,20 +76,8 @@ public class LessonService {
     }
 
 
-    public Lesson getNextLessonId(UUID courseId, UUID userId) {
-        // Query the lessons for the course, where the user has a lesson marked as "NEW"
-        List<LearningLesson> learningLessons = learningLessonRepository.findByUserIdAndLesson_Course_CourseIdAndStatus(userId, courseId, "NEW");
-
-        // Check if there are any lessons marked as "NEW"
-        if (learningLessons.isEmpty()) {
-            return null; // No "NEW" lessons found
-        }
-
-        // Sort the lessons by their order to find the next lesson
-        learningLessons.sort(Comparator.comparingInt(ll -> ll.getLesson().getLessonOrder()));
-
-        // Return the next lesson ID
-        return learningLessons.get(0).getLesson();
+    public Lesson getNextLessonId(Lesson lesson) {
+        return lessonRepository.findByLessonOrderAndCourse_CourseId(lesson.getLessonOrder()+1, lesson.getCourse().getCourseId()).orElse(null);
     }
 
 
@@ -107,7 +95,7 @@ public class LessonService {
         Boolean isDonePractice = learningLesson.getIsDonePractice();
 
         // Get the next lesson ID and lesson name
-        Lesson nextLesson =  getNextLessonId(lesson.getCourse().getCourseId(), userId);
+        Lesson nextLesson =  getNextLessonId(lesson);
         UUID nextLessonId = (nextLesson != null) ? nextLesson.getLessonId() : null;
         String nextLessonName = (nextLesson != null) ? nextLesson.getLessonName() : null;
 

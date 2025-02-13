@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.*;
 public class StatisticsController {
     StatisticsService statisticsService;
     @GetMapping("/progress")
-    public ResponseEntity<ProgressResponse> getProgress(@RequestParam String userId) {
+    public ResponseEntity<ProgressResponse> getProgress(@RequestHeader("X-UserId") String userId) {
+        userId = userId.split(",")[0];
         ProgressResponse response = statisticsService.getProgress(ParseUUID.normalizeUID(userId));
         return ResponseEntity.ok(response);
     }
