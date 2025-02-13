@@ -13,6 +13,9 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -22,6 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Tag(name = "Review")
+@Slf4j
 public class ReviewController {
     ReviewService reviewService;
 
@@ -29,7 +33,23 @@ public class ReviewController {
             summary = "Create review"
     )
     @PostMapping
-    public ApiResponse<ReviewCreationResponse> createReview(@RequestBody @Valid ReviewCreationRequest request) {
+    public ApiResponse<ReviewCreationResponse> createReview(
+            @RequestBody @Valid ReviewCreationRequest request,
+            BindingResult bindingResult
+    ) {
+        log.info("rating: {}", request.getRating());
+
+        if (bindingResult.hasErrors()) {
+            log.error("Error in creating review: {}", bindingResult.getAllErrors());
+
+            StringBuilder errorMessage = new StringBuilder();
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                errorMessage.append(error.getDefaultMessage());
+            }
+
+            throw new IllegalArgumentException(errorMessage.toString());
+        }
+
         return ApiResponse.<ReviewCreationResponse>builder()
                 .result(reviewService.createReview(
                             request,

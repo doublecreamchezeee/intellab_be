@@ -39,7 +39,7 @@ public class ProblemRunCodeService {
     private final TestCaseRunCodeOutputMapper testCaseRunCodeOutputMapper;
     private final int NUMBER_OF_TEST_CASE = 3;
 
-    public CreationProblemRunCodeResponse runCode(UUID userId, DetailsProblemRunCodeRequest request) {
+    public CreationProblemRunCodeResponse runCode(UUID userId, DetailsProblemRunCodeRequest request, Boolean base64) {
         // Get problem by problemId
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
@@ -63,6 +63,17 @@ public class ProblemRunCodeService {
 
         problemRunCode.setUserId(userId);
         problemRunCode.setProblem(problem);
+
+        if (base64!=null && base64) {
+            Base64.Decoder decoder = Base64.getDecoder();
+            problemRunCode.setCode(
+                    new String(
+                            decoder.decode(
+                                    problemRunCode.getCode()
+                            )
+                    )
+            );
+        }
 
         problemRunCode.setCode(
                 boilerplateClient.enrich(

@@ -27,12 +27,18 @@ public class ProblemRunCodeController {
     @PostMapping
     public ApiResponse<CreationProblemRunCodeResponse> createRunCode(
             @RequestBody DetailsProblemRunCodeRequest request,
-            @RequestHeader("X-UserId") String userUid
+            @RequestHeader("X-UserId") String userUid,
+            @RequestParam(value = "base64", required = false) Boolean base64
     ) {
+        if (base64 == null) {
+            base64 = false;
+        }
+
         userUid = userUid.split(",")[0];
         CreationProblemRunCodeResponse response = problemRunCodeService.runCode(
                 ParseUUID.normalizeUID(userUid),
-                request);
+                request,
+                base64);
 
         return ApiResponse.<CreationProblemRunCodeResponse>builder()
                     .message("Submits to run code successfully")

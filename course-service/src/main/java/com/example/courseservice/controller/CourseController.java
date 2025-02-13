@@ -9,6 +9,7 @@ import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.dto.response.rerview.CourseReviewsStatisticsResponse;
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.model.Course;
@@ -286,5 +287,16 @@ public class CourseController {
 
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(courseService.getCategories()).build();
+    }
+
+    @Operation(
+            summary = "Get review statistics of course by course id"
+    )
+    @GetMapping("/{courseId}/reviews-stats")
+    public ApiResponse<CourseReviewsStatisticsResponse> getReviewStatisticsByCourseId(
+            @PathVariable("courseId") UUID courseId) {
+        return ApiResponse.<CourseReviewsStatisticsResponse>builder()
+                .result(reviewService.getCourseReviewsStatisticsByCourseId(courseId))
+                .build();
     }
 }
