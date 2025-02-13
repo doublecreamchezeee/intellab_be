@@ -4,10 +4,14 @@ import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.service.annotation.PostExchange;
+import reactor.core.publisher.Mono;
 
-@FeignClient(name = "identity-service", url = "${IDENTITY_SERVICE_URL}")
 public interface IdentityClient {
-    @PostMapping(value = "/auth/validateToken", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ValidatedTokenResponse validateToken(String token);
+    @PostExchange(url = "/auth/validateToken", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<ValidatedTokenResponse>> validateToken(@RequestBody String token);
+
 }

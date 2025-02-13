@@ -16,6 +16,10 @@ dependencies {
     implementation("org.hibernate:hibernate-core:6.2.10.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.cloudinary:cloudinary-http5:2.0.0")
+    implementation("com.cloudinary:cloudinary-taglib:2.0.0")
+    implementation("io.github.cdimascio:dotenv-java:2.2.4")
+
 }
 
 tasks.withType<BootJar> {

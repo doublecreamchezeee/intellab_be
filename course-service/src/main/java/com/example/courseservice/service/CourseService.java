@@ -1,11 +1,16 @@
 package com.example.courseservice.service;
 
+import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
+import com.example.courseservice.dto.response.course.CertificateResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
+import com.example.courseservice.dto.response.course.CourseShortResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
+import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
@@ -14,7 +19,9 @@ import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.*;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
+import com.example.courseservice.utils.CertificateTemplate;
 import com.example.courseservice.utils.ParseUUID;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,9 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
+import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +51,8 @@ public class CourseService {
     LearningLessonRepository learningLessonRepository;
     CategoryRepository categoryRepository;
     CategoryMapper categoryMapper;
+    private final IdentityClient identityClient;
+
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
         Page<Course> courses = courseRepository.findAll(pageable);
@@ -374,5 +388,115 @@ public class CourseService {
 
         return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
     }
+
+    public String testCer() throws Exception {
+        Date completionDate = new Date();
+
+        completionDate.getTime();
+
+        String courseName = "course name";
+        String userName = "user name";
+        String directorName = "[To be discussed]";
+        Image sign = null;
+
+
+        byte[] certificateImage = CertificateTemplate.createCertificate(completionDate.toString(),userName,courseName,sign,directorName);
+
+        Map upload = CertificateTemplate.uploadCertificateImage(certificateImage, "test 1");
+
+        return upload.get("secure_url").toString();
+
+    }
+
+    public String getUserName(String token) {
+        if (token == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        ResponseEntity<ValidatedTokenResponse> tokenResponse = identityClient.validateToken(token).block();
+
+        assert tokenResponse != null;
+        if(!tokenResponse.getBody().isValidated())
+            throw new AppException(ErrorCode.BAD_REQUEST);
+
+        return tokenResponse.getBody().getName();
+    }
+
+
+    public CertificateCreationResponse createCertificate(UUID courseId, UUID userId, String userName) throws Exception {
+        System.out.println("userid: " + userId + "\n" +
+                "courseId: " + courseId + "\n" + userName);
+
+
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_COURSE_NOT_EXISTED));
+
+        Instant completedDate = Instant.now();
+
+//        Instant completedDate = userCourses.getCompletedDate();
+//
+//        if (completedDate == null) {
+//            completedDate = Instant.now();
+//        }
+
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        String courseName = course.getCourseName();
+//        String directorName = course.getAuthorName();
+        String directorName = "[To be discussed...]";
+        Image sign = null;
+        try
+        {
+            byte[] certificateImage = CertificateTemplate.createCertificate(completedDate.toString()
+                    ,userName,courseName,sign,directorName);
+            String fileName = courseId + "_" + userId.toString();
+            Map upload = CertificateTemplate.uploadCertificateImage(certificateImage, fileName);
+
+            String url = (String) upload.get("secure_url");
+            userCourses.setCertificateUrl(url);
+            userCourses.setCompletedDate(completedDate);
+
+            userCoursesRepository.save(userCourses);
+
+            CertificateCreationResponse certificateCreationResponse = new CertificateCreationResponse();
+
+            certificateCreationResponse.setUrl(url);
+            certificateCreationResponse.setCourseId(courseId);
+            certificateCreationResponse.setUserId(userId);
+
+            return certificateCreationResponse;
+
+        }
+        catch(Exception ex)
+        {
+            String msg = "Error creating certificate";
+            log.error(msg, ex);
+            throw ex;
+        }
+    }
+
+    public CertificateResponse getCertificate(UUID courseId, UUID userId, String userName) {
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        CertificateResponse certificateResponse = new CertificateResponse();
+
+        Course course = courseRepository.findById(courseId).orElseThrow(()-> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        CourseShortResponse courseShortResponse = courseMapper.toCourseShortResponse(course);
+        courseShortResponse.setReviewCount(course.getReviews().size());
+        certificateResponse.setCourse(courseShortResponse);
+
+        certificateResponse.setCertificateLink(userCourses.getCertificateUrl());
+        certificateResponse.setCompleteDate(userCourses.getCompletedDate());
+        certificateResponse.setUsername(userName);
+
+        return certificateResponse;
+
+    }
+
+//    public Map createCertificate(UUID userId, UUID courseId) {
+//        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
+//                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+//
+//    }
 
 }
