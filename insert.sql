@@ -82,7 +82,8 @@ create table problem_submissions
     problem_id           uuid
         constraint fkatyso4hx6mtu96ixk88g328er
             references problems,
-    is_solved            boolean
+    is_solved            boolean,
+    created_at           timestamp(6)
 );
 
 alter table problem_submissions
@@ -487,6 +488,8 @@ create table user_courses
     course_id          uuid not null
         constraint fkcve18frw4nbxwrq0qh78dgipc
             references courses,
+    certificate_url    text,
+    completed_date     timestamp(6),
     primary key (course_id, user_uid)
 );
 
