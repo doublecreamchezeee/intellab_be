@@ -127,6 +127,7 @@ create table test_case_outputs
     result_status     varchar(30),
     runtime           real,
     submission_output text,
+    memory            real,
     submission_id     uuid not null
         constraint fkniol765wvj61q9t6lrlhhx091
             references problem_submissions,
@@ -365,7 +366,8 @@ create table courses
         constraint fklljvfay1x0yv1gm2xmd6s7j9b
             references topics,
     average_rating double precision,
-    review_count   integer
+    review_count   integer,
+    author_name varchar(255)
 );
 
 alter table courses

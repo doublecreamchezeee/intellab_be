@@ -29,7 +29,4 @@ public class Solution {
     @JsonBackReference("problem-solution")
     Problem problem;
 
-    @MapsId("user_id")
-    @JoinColumn(name = "user_id")
-    UUID userId;
 }
