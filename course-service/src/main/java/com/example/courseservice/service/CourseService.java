@@ -11,10 +11,7 @@ import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CategoryMapper;
 import com.example.courseservice.mapper.CourseMapper;
-import com.example.courseservice.model.Category;
-import com.example.courseservice.model.Course;
-import com.example.courseservice.model.LearningLesson;
-import com.example.courseservice.model.UserCourses;
+import com.example.courseservice.model.*;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.utils.ParseUUID;
@@ -48,8 +45,10 @@ public class CourseService {
 
         return courses.map(course -> {
             int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            List<Section> sections = course.getSections();
             CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
             response.setLessonCount(lessonCount);
+            response.setSections(sections);
             return response;
         });
     }
@@ -68,8 +67,10 @@ public class CourseService {
         return result.map(
                 course -> {
                     int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+                    List<Section> sections = course.getSections();
                     CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
                     response.setLessonCount(lessonCount);
+                    response.setSections(sections);
                     return response;
                 }
         );
@@ -87,6 +88,9 @@ public class CourseService {
             int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
             CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
             response.setLessonCount(lessonCount);
+
+            List<Section> sections = course.getSections();
+            response.setSections(sections);
             return response;
         });
     }
@@ -181,6 +185,9 @@ public class CourseService {
             int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
             CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
             response.setLessonCount(lessonCount);
+
+            List<Section> sections = course.getSections();
+            response.setSections(sections);
             return response;
         });
     }
@@ -188,7 +195,14 @@ public class CourseService {
     public Page<CourseCreationResponse> searchCourses(String keyword, Pageable pageable) {
 
         Page<Course>  courses = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
-        return courses.map(courseMapper::toCourseCreationResponse);
+        return courses.map(course -> {
+            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            response.setLessonCount(lessonCount);
+
+            List<Section> sections = course.getSections();
+            response.setSections(sections);
+            return response;        });
     }
 
     public DetailCourseResponse getCourseById(UUID courseId, UUID userUid) {

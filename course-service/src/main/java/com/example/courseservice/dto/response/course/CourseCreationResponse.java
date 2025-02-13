@@ -1,6 +1,7 @@
 package com.example.courseservice.dto.response.course;
 
 import com.example.courseservice.dto.response.category.CategoryResponse;
+import com.example.courseservice.model.Section;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -25,4 +26,5 @@ public class CourseCreationResponse {
     int lessonCount;
 
     List<CategoryResponse> categories;
+    List<Section> sections;
 }
