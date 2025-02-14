@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -288,43 +289,34 @@ public class CourseController {
                 .result(courseService.getCategories()).build();
     }
     @Operation(
-            summary = "Khi nào học xong bài cuối, tức là progress = 100 thì gọi api này để cập nhật completedDate và certificateUrl"
+            summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
     )
     @PostMapping("{courseId}/certificate")
     public ApiResponse<CertificateCreationResponse> generateCertificate(
             @PathVariable UUID courseId,
-            @RequestHeader (value = "X-UserId") String userUid,
-            @RequestBody String token
+            @RequestHeader (value = "X-UserId") String userUid
             ) throws Exception {
         System.out.println("userUid:" + userUid);
 
-        String userName = courseService.getUserName(token);
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
 
-        CertificateCreationResponse result = courseService.createCertificate(courseId, userId, userName);
+        CertificateCreationResponse result = courseService.createCertificate(courseId, userId);
 
 
         return ApiResponse.<CertificateCreationResponse>builder()
                 .result(result).build();
     }
 
-    @GetMapping("{courseId}/certificate")
+    @GetMapping("{certificateId}/certificate")
     public ApiResponse<Object> getCertificate(
-            @PathVariable UUID courseId,
-            @RequestHeader (value = "X-UserId") String userUid,
-            @RequestBody String token
-    )
-    {
+            @PathVariable UUID certificateId
+    ) throws ExecutionException, InterruptedException {
 
-        System.out.println("userUid:" + userUid);
 
-        userUid = userUid.split(",")[0];
-        UUID userId = ParseUUID.normalizeUID(userUid);
-        String userName = courseService.getUserName(token);
         return ApiResponse.builder()
-                .result(courseService.getCertificate(courseId,userId,userName)).build();
+                .result(courseService.getCertificate(certificateId)).build();
     }
 
 

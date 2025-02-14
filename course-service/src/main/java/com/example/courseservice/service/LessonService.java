@@ -343,7 +343,7 @@ public class LessonService {
 
     public Boolean doneTheoryOfLesson(UUID learningLessonId,
                                       UUID courseId,
-                                      UUID userUid) {
+                                      UUID userUid) throws Exception {
         LearningLesson learningLesson = learningLessonRepository.findById(learningLessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LEARNING_LESSON_NOT_FOUND));
 
@@ -368,14 +368,16 @@ public class LessonService {
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
         userCoursesRepository.save(userCourses);
 
+        if (userCourses.getProgressPercent()-100 <= 1e-6f)
+        {
+            courseService.createCertificate(courseId,userUid);
+        }
         return true;
-
-
     }
 
     public Boolean donePracticeOfLesson(UUID learningLessonId,
                                         UUID courseId,
-                                        UUID userUid) {
+                                        UUID userUid) throws Exception {
         LearningLesson learningLesson = learningLessonRepository.findById(learningLessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LEARNING_LESSON_NOT_FOUND));
 
@@ -399,11 +401,15 @@ public class LessonService {
 
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
         userCoursesRepository.save(userCourses);
+        if (userCourses.getProgressPercent()-100 <= 1e-6f)
+        {
+            courseService.createCertificate(courseId,userUid);
+        }
 
         return true;
     }
 
-    public Boolean donePracticeOfLessonByProblemId(UUID problemId, UUID userUid) {
+    public Boolean donePracticeOfLessonByProblemId(UUID problemId, UUID userUid) throws Exception {
         List<Lesson> lessons = lessonRepository.findAllByProblemId(problemId);
 
         for (Lesson lesson : lessons) {
@@ -433,6 +439,11 @@ public class LessonService {
 
             userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
             userCoursesRepository.save(userCourses);
+
+            if (userCourses.getProgressPercent()-100 <= 1e-6f)
+            {
+                courseService.createCertificate(userCourses.getEnrollId().getCourseId(),userUid);
+            }
         }
 
         return true;
@@ -472,6 +483,12 @@ public class LessonService {
 
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
         userCourses.setStatus("Done");
+
+        /*try {
+            courseService.createCertificate(courseId, userUid);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
 
         userCoursesRepository.save(userCourses);
 

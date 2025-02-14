@@ -16,6 +16,7 @@ public enum ErrorCode {
     PASSWORD_INVALID(400,"Password is invalid", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(500,"Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(501,"Dont have permission", HttpStatus.FORBIDDEN),
+    CERTIFICATE_NOT_FOUND(404, "Certificate not found", HttpStatus.NOT_FOUND),
     COURSE_NOT_EXISTED(404, "Course not existed", HttpStatus.NOT_FOUND),
     USER_COURSE_NOT_EXISTED(404, "User course not existed", HttpStatus.NOT_FOUND),
     LESSON_NOT_FOUND(404, "Lesson not found", HttpStatus.NOT_FOUND),

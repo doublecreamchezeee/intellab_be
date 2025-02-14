@@ -175,7 +175,7 @@ public class LessonController {
             @PathVariable("courseId") UUID courseId,
             @RequestHeader("X-UserId") String userUid
             //@PathVariable("userUid") String userUid
-    ) {
+    ) throws Exception {
         userUid = userUid.split(",")[0];
 
         return ApiResponse.<Boolean>builder()
@@ -197,7 +197,7 @@ public class LessonController {
             @PathVariable("courseId") UUID courseId,
             @RequestHeader("X-UserId") String userUid
             //@PathVariable("userUid") String userUid
-    ) {
+    ) throws Exception {
         userUid = userUid.split(",")[0];
 
         return ApiResponse.<Boolean>builder()
@@ -218,7 +218,7 @@ public class LessonController {
             @PathVariable("problemId") UUID problemId,
            // @RequestHeader("X-UserId") String userUid
             @PathVariable("UserId") String userUid
-    ) {
+    ) throws Exception {
 
         //userUid = userUid.split(",")[0];
         log.info("UserUid: " + UUID.fromString(userUid));

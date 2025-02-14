@@ -82,7 +82,8 @@ create table problem_submissions
     problem_id           uuid
         constraint fkatyso4hx6mtu96ixk88g328er
             references problems,
-    is_solved            boolean
+    is_solved            boolean,
+    created_at           timestamp(6)
 );
 
 alter table problem_submissions
@@ -126,6 +127,7 @@ create table test_case_outputs
     result_status     varchar(30),
     runtime           real,
     submission_output text,
+    memory            real,
     submission_id     uuid not null
         constraint fkniol765wvj61q9t6lrlhhx091
             references problem_submissions,
@@ -468,13 +470,26 @@ create table reviews
         primary key,
     comment   text,
     rating    integer not null,
-    user_id   uuid,
+    user_uuid   uuid,
+    user_uid varchar,
+    create_at timestamp(6) with time zone,
+    last_modified_at timestamp(6) with time zone,
     course_id uuid    not null
         constraint fkl9h49973yigjg39ov07a9mog6
             references courses
 );
 
 alter table reviews
+    owner to postgres;
+create table certificates
+(
+    certificate_id  uuid not null
+        primary key,
+    certificate_url text,
+    completed_date  timestamp(6) with time zone
+);
+
+alter table certificates
     owner to postgres;
 
 create table user_courses
@@ -487,6 +502,11 @@ create table user_courses
     course_id          uuid not null
         constraint fkcve18frw4nbxwrq0qh78dgipc
             references courses,
+    certificate_id     uuid
+        constraint ukc837lk3wvu491io9pfiauof89
+            unique
+        constraint fk44luvbgh95mw3c0yarrbpfv9t
+            references certificates,
     primary key (course_id, user_uid)
 );
 

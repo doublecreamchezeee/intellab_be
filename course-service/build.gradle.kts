@@ -19,6 +19,7 @@ dependencies {
     implementation("com.cloudinary:cloudinary-http5:2.0.0")
     implementation("com.cloudinary:cloudinary-taglib:2.0.0")
     implementation("io.github.cdimascio:dotenv-java:2.2.4")
+    implementation ("com.google.firebase:firebase-admin:9.2.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 

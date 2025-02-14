@@ -63,8 +63,6 @@ public class Course {
     @JoinColumn(name = "user_id")
     UUID userId;
 
-    @Column(name = "author_name")
-    String authorName;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)

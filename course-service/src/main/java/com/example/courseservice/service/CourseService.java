@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +53,8 @@ public class CourseService {
     CategoryRepository categoryRepository;
     CategoryMapper categoryMapper;
     private final IdentityClient identityClient;
+    CertificateRepository certificateRepository;
+    private final FirestoreService firestoreService;
 
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
@@ -389,26 +392,7 @@ public class CourseService {
         return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
     }
 
-    public String testCer() throws Exception {
-        Date completionDate = new Date();
-
-        completionDate.getTime();
-
-        String courseName = "course name";
-        String userName = "user name";
-        String directorName = "[To be discussed]";
-        Image sign = null;
-
-
-        byte[] certificateImage = CertificateTemplate.createCertificate(completionDate.toString(),userName,courseName,sign,directorName);
-
-        Map upload = CertificateTemplate.uploadCertificateImage(certificateImage, "test 1");
-
-        return upload.get("secure_url").toString();
-
-    }
-
-    public String getUserName(String token) {
+    public String getUserNameFromToken(String token) {
         if (token == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
@@ -423,9 +407,9 @@ public class CourseService {
     }
 
 
-    public CertificateCreationResponse createCertificate(UUID courseId, UUID userId, String userName) throws Exception {
+    public CertificateCreationResponse createCertificate(UUID courseId, UUID userId) throws Exception {
         System.out.println("userid: " + userId + "\n" +
-                "courseId: " + courseId + "\n" + userName);
+                "courseId: " + courseId);
 
 
         UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
@@ -433,15 +417,13 @@ public class CourseService {
 
         Instant completedDate = Instant.now();
 
-//        Instant completedDate = userCourses.getCompletedDate();
-//
-//        if (completedDate == null) {
-//            completedDate = Instant.now();
-//        }
+        String userName = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
+                + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
+
 
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
         String courseName = course.getCourseName();
-//        String directorName = course.getAuthorName();
+
         String directorName = "[To be discussed...]";
         Image sign = null;
         try
@@ -452,14 +434,20 @@ public class CourseService {
             Map upload = CertificateTemplate.uploadCertificateImage(certificateImage, fileName);
 
             String url = (String) upload.get("secure_url");
-            userCourses.setCertificateUrl(url);
-            userCourses.setCompletedDate(completedDate);
+            Certificate newCertificate = new Certificate();
 
+            newCertificate.setCertificateUrl(url);
+            newCertificate.setCompletedDate(completedDate);
+
+            Certificate certificate = certificateRepository.save(newCertificate);
+
+            userCourses.setCertificate(certificate);
             userCoursesRepository.save(userCourses);
+
 
             CertificateCreationResponse certificateCreationResponse = new CertificateCreationResponse();
 
-            certificateCreationResponse.setUrl(url);
+            certificateCreationResponse.setUrl(certificate.getCertificateUrl());
             certificateCreationResponse.setCourseId(courseId);
             certificateCreationResponse.setUserId(userId);
 
@@ -474,29 +462,28 @@ public class CourseService {
         }
     }
 
-    public CertificateResponse getCertificate(UUID courseId, UUID userId, String userName) {
-        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-
+    public CertificateResponse getCertificate(UUID certificateId) throws ExecutionException, InterruptedException {
+        Certificate certificate = certificateRepository.findById(certificateId)
+                .orElseThrow(() -> new AppException(ErrorCode.CERTIFICATE_NOT_FOUND));
         CertificateResponse certificateResponse = new CertificateResponse();
+        UserCourses userCourses = certificate.getUserCourses();
 
-        Course course = courseRepository.findById(courseId).orElseThrow(()-> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        Course course = userCourses.getCourse();
         CourseShortResponse courseShortResponse = courseMapper.toCourseShortResponse(course);
         courseShortResponse.setReviewCount(course.getReviews().size());
         certificateResponse.setCourse(courseShortResponse);
 
-        certificateResponse.setCertificateLink(userCourses.getCertificateUrl());
-        certificateResponse.setCompleteDate(userCourses.getCompletedDate());
-        certificateResponse.setUsername(userName);
+        certificateResponse.setCertificateLink(certificate.getCertificateUrl());
+        certificateResponse.setCompleteDate(certificate.getCompletedDate());
+        String username = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
+                + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
+
+        certificateResponse.setUsername(username);
 
         return certificateResponse;
 
     }
 
-//    public Map createCertificate(UUID userId, UUID courseId) {
-//        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
-//                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-//
-//    }
+
 
 }
