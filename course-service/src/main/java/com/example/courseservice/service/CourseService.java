@@ -418,7 +418,7 @@ public class CourseService {
         Instant completedDate = Instant.now();
 
         String userName = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
-                + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
+                + " " + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
 
 
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
@@ -430,7 +430,7 @@ public class CourseService {
         {
             byte[] certificateImage = CertificateTemplate.createCertificate(completedDate.toString()
                     ,userName,courseName,sign,directorName);
-            String fileName = courseId + "_" + userId.toString();
+            String fileName = courseId + "-" + userId.toString();
             Map upload = CertificateTemplate.uploadCertificateImage(certificateImage, fileName);
 
             String url = (String) upload.get("secure_url");
@@ -476,7 +476,7 @@ public class CourseService {
         certificateResponse.setCertificateLink(certificate.getCertificateUrl());
         certificateResponse.setCompleteDate(certificate.getCompletedDate());
         String username = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
-                + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
+                + " " + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
 
         certificateResponse.setUsername(username);
 
