@@ -6,18 +6,25 @@ import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.response.auth.FirebaseSignInResponse;
 import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
+import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.services.people.v1.PeopleService;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.UserCredentials;
+import com.google.firebase.auth.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -33,6 +40,12 @@ public class FirebaseAuthClient {
     private static final String INVALID_CREDENTIALS_ERROR = "INVALID_LOGIN_CREDENTIALS";
     private static final String REFRESH_TOKEN_URL = "https://securetoken.googleapis.com/v1/token";
     private final FirebaseAuth firebaseAuth;
+
+    @Value("${domain.auth.reset-password-callback-url}")
+    private String RESET_PASSWORD_CALLBACK_URL;
+
+    @Value("${domain.auth.email-verification-callback-url}")
+    private String EMAIL_VERIFICATION_CALLBACK_URL;
 
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) {
         final var requestBody = prepareRequestBody(userLoginRequest);
@@ -102,6 +115,73 @@ public class FirebaseAuthClient {
         } catch (HttpClientErrorException exception) {
             System.err.println("Error refreshing token: " + exception.getResponseBodyAsString());
             throw new InvalidLoginCredentialsException("Failed to refresh token.", exception);
+        }
+    }
+
+    public String generateEmailVerification(@NonNull final String email) {
+        try {
+            ActionCodeSettings actionCodeSettings = ActionCodeSettings.builder()
+                    .setUrl(EMAIL_VERIFICATION_CALLBACK_URL)
+                    .setHandleCodeInApp(true)
+                    .setIosBundleId("com.example.ios")
+                    .setAndroidPackageName("com.example.android")
+                    .setAndroidInstallApp(true)
+                    .setAndroidMinimumVersion("12")
+                    .setDynamicLinkDomain("example.page.link")
+                    .build();
+
+            return firebaseAuth.generateEmailVerificationLink(email);
+        } catch (Exception e) {
+            throw new FirebaseAuthenticationException();
+        }
+    }
+
+    public String generatePasswordResetLink(@NonNull final String email) {
+        try {
+            ActionCodeSettings actionCodeSettings = ActionCodeSettings.builder()
+                    .setUrl(RESET_PASSWORD_CALLBACK_URL)
+                    .setHandleCodeInApp(true)
+                    .setIosBundleId("com.example.ios")
+                    .setAndroidPackageName("com.example.android")
+                    .setAndroidInstallApp(true)
+                    .setAndroidMinimumVersion("12")
+                    .setDynamicLinkDomain("example.page.link")
+                    .build();
+
+            return firebaseAuth.generatePasswordResetLink(email);
+        } catch (Exception e) {
+            throw new FirebaseAuthenticationException();
+        }
+    }
+
+    public void updateUserProfilePicture(String uid, String photoUrl) throws FirebaseAuthException {
+        UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(uid)
+                .setPhotoUrl(photoUrl);
+
+        firebaseAuth.updateUser(request);
+    }
+
+    public Boolean isEmailVerified(String email) {
+        try {
+            UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+            //UserRecord userRecord = firebaseAuth.getUser(uid);
+            return userRecord.isEmailVerified();
+        } catch (FirebaseAuthException e) {
+            throw new FirebaseAuthenticationException();
+        }
+    }
+
+    public void setVerifiedListEmails(List<String> emails) {
+        for (String email : emails) {
+            try {
+                UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+
+                UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(userRecord.getUid())
+                        .setEmailVerified(true);
+                firebaseAuth.updateUser(request);
+            } catch (FirebaseAuthException e) {
+                throw new FirebaseAuthenticationException();
+            }
         }
     }
 }

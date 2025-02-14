@@ -20,8 +20,5 @@ public class ReviewCreationRequest {
 
     String comment;
 
-    @NotBlank
-    String userUid;
-
     UUID courseId;
 }

@@ -13,20 +13,30 @@ public interface ReviewMapper {
     @Mapping(target = "rating", source = "rating")
     @Mapping(target = "comment", source = "comment")
    // @Mapping(target = "courseId", source = "courseId")
-    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "userUid", ignore = true)
+    @Mapping(target = "userUuid", ignore = true)
     Review toReview(ReviewCreationRequest request);
 
     @Mapping(target = "reviewId", source = "reviewId")
     @Mapping(target = "rating", source = "rating")
     @Mapping(target = "comment", source = "comment")
-    @Mapping(target = "userUid", source = "userId")
+    @Mapping(target = "userUid", source = "userUid")
+    @Mapping(target = "userUuid", source = "userUuid")
     @Mapping(target = "courseId", source = "course.courseId")
+    @Mapping(target = "createAt", source = "createAt")
+    @Mapping(target = "lastModifiedAt", source = "lastModifiedAt")
     ReviewCreationResponse toReviewCreationResponse(Review review);
 
     @Mapping(target = "reviewId", source = "reviewId")
     @Mapping(target = "rating", source = "rating")
     @Mapping(target = "comment", source = "comment")
-    @Mapping(target = "userUid", source = "userId")
+    @Mapping(target = "userUid", source = "userUid")
+    @Mapping(target = "userUuid", source = "userUuid")
     @Mapping(target = "courseId", source = "course.courseId")
+    @Mapping(target = "createAt", source = "createAt")
+    @Mapping(target = "lastModifiedAt", source = "lastModifiedAt")
+    @Mapping(target = "displayName", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "photoUrl", ignore = true)
     DetailsReviewResponse toDetailsReviewResponse(Review review);
 }

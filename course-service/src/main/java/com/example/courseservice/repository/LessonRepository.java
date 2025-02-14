@@ -19,7 +19,7 @@ public interface LessonRepository extends JpaRepository<Lesson, UUID> {
     Optional<Lesson> findByLessonOrderAndCourse_CourseId(int lessonOrder, UUID courseId);
     int countByCourse_CourseId(UUID courseId);
 
-    List<Lesson> findByCourse_CourseId(UUID courseId);
+    List<Lesson> findAllByCourse_CourseId(UUID courseId);
     Page<Lesson> findByCourse_CourseId(UUID courseId, Pageable pageable);
     List<Lesson> findAllByProblemId(UUID problemId);
 }

@@ -81,6 +81,28 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(NotVerifiedEmailException.class)
+    public ResponseEntity<ApiResponse> handleNotVerifiedEmailException(NotVerifiedEmailException ex) {
+        log.error("Email is not verified: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ApiResponse.builder()
+                        .code(ErrorCode.NOT_VERIFIED_EMAIL.getCode())
+                        .message(ex.getMessage())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(FirebaseAuthenticationException.class)
+    public ResponseEntity<ApiResponse> handleFirebaseAuthenticationException(FirebaseAuthenticationException ex) {
+        log.error("Authentication failure: Token missing, invalid or expired: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ApiResponse.builder()
+                        .code(ErrorCode.FIREBASE_AUTHENTICATION_FAILURE.getCode())
+                        .message(ex.getMessage())
+                        .build()
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleGenericExceptions(Exception ex) {
         log.error("An unexpected error occurred: {}", ex.getMessage(), ex);

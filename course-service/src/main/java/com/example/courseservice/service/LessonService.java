@@ -439,6 +439,79 @@ public class LessonService {
 
     }
 
+    public Boolean completeAllLessonByCourseId(
+            UUID courseId,
+            UUID userUid
+    ) {
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(
+                userUid,
+                courseId
+        ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
+
+        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseId(courseId);
+
+        for (Lesson lesson : lessons) {
+
+            Optional<LearningLesson> learningLessonOptional = learningLessonRepository.findByLesson_LessonIdAndUserId(lesson.getLessonId(), userUid);
+
+            if (learningLessonOptional.isEmpty()) {
+                continue;
+            }
+
+            LearningLesson learningLesson = learningLessonOptional.get();
+
+            learningLesson.setIsDonePractice(true);
+            learningLesson.setIsDoneTheory(true);
+            learningLesson.setStatus(PredefinedLearningStatus.DONE);
+
+            learningLessonRepository.save(learningLesson);
+
+        }
+
+        DetailCourseResponse detailCourseResponse = courseService.getCourseById(courseId, userUid);
+
+        userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
+        userCourses.setStatus("Done");
+
+        userCoursesRepository.save(userCourses);
+
+        return true;
+    }
+
+    public Boolean restartAllLessonByCourseId(
+            UUID courseId,
+            UUID userUid
+    ) {
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(
+                userUid,
+                courseId
+        ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
+
+        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseId(courseId);
+
+        for (Lesson lesson : lessons) {
+            Optional<LearningLesson> learningLessonOptional = learningLessonRepository.findByLesson_LessonIdAndUserId(lesson.getLessonId(), userUid);
+
+            if (learningLessonOptional.isEmpty()) {
+                continue;
+            }
+
+            LearningLesson learningLesson = learningLessonOptional.get();
+
+            learningLesson.setIsDonePractice(false);
+            learningLesson.setIsDoneTheory(false);
+            learningLesson.setStatus(PredefinedLearningStatus.LEARNING);
+
+            learningLessonRepository.save(learningLesson);
+        }
+
+        userCourses.setProgressPercent(0.0F);
+        userCourses.setStatus("Learning");
+
+        userCoursesRepository.save(userCourses);
+
+        return true;
+    }
 }
 
 

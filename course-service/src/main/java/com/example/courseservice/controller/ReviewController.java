@@ -35,9 +35,10 @@ public class ReviewController {
     @PostMapping
     public ApiResponse<ReviewCreationResponse> createReview(
             @RequestBody @Valid ReviewCreationRequest request,
+            @RequestHeader("X-UserId") String userUid,
             BindingResult bindingResult
     ) {
-        log.info("rating: {}", request.getRating());
+        userUid = userUid.split(",")[0];
 
         if (bindingResult.hasErrors()) {
             log.error("Error in creating review: {}", bindingResult.getAllErrors());
@@ -53,7 +54,8 @@ public class ReviewController {
         return ApiResponse.<ReviewCreationResponse>builder()
                 .result(reviewService.createReview(
                             request,
-                            ParseUUID.normalizeUID(request.getUserUid())
+                            ParseUUID.normalizeUID(userUid),
+                            userUid
                         )
                 )
                 .build();
@@ -78,11 +80,24 @@ public class ReviewController {
             summary = "Update review by id"
     )
     @PutMapping("/{reviewId}")
-    public ApiResponse<DetailsReviewResponse> updateReviewById(
+    public ApiResponse<ReviewCreationResponse> updateReviewById(
             @PathVariable("reviewId") UUID reviewId,
-            @RequestBody @Valid ReviewUpdateRequest request) {
+            @RequestBody @Valid ReviewUpdateRequest request,
+            BindingResult bindingResult
+    ) {
 
-        return ApiResponse.<DetailsReviewResponse>builder()
+        if (bindingResult.hasErrors()) {
+            log.error("Error in updating review: {}", bindingResult.getAllErrors());
+
+            StringBuilder errorMessage = new StringBuilder();
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                errorMessage.append(error.getDefaultMessage());
+            }
+
+            throw new IllegalArgumentException(errorMessage.toString());
+        }
+
+        return ApiResponse.<ReviewCreationResponse>builder()
                 .result(
                         reviewService.updateReviewById(
                                 reviewId,

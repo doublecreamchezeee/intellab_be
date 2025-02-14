@@ -1,6 +1,11 @@
 package com.example.courseservice.client;
 
+import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.profile.MultipleProfileInformationRequest;
+import com.example.courseservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
+import com.example.courseservice.dto.response.profile.MultipleProfileInformationResponse;
+import com.example.courseservice.dto.response.profile.SingleProfileInformationResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -14,4 +19,11 @@ public interface IdentityClient {
     @PostExchange(url = "/auth/validateToken", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ResponseEntity<ValidatedTokenResponse>> validateToken(@RequestBody String token);
 
+    @PostExchange(url = "/profile/single", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ApiResponse<SingleProfileInformationResponse>> getSingleProfileInformation(
+            @RequestBody SingleProfileInformationRequest request);
+
+    @PostExchange(url = "/profile/multiple", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ApiResponse<MultipleProfileInformationResponse>> getMultipleProfileInformation(
+            @RequestBody MultipleProfileInformationRequest request);
 }

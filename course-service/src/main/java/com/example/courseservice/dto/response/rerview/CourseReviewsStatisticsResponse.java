@@ -19,4 +19,9 @@ public class CourseReviewsStatisticsResponse {
     Integer twoStar;
     Integer oneStar;
     UUID courseId;
+    Double percentageFiveStar;
+    Double percentageFourStar;
+    Double percentageThreeStar;
+    Double percentageTwoStar;
+    Double percentageOneStar;
 }

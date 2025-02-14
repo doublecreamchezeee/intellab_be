@@ -338,4 +338,38 @@ public class CourseController {
                 .result(reviewService.getCourseReviewsStatisticsByCourseId(courseId))
                 .build();
     }
+
+    @Operation(
+            summary = "(testing only) complete all lesson of course by course id"
+    )
+    @PostMapping("/{courseId}/completeAllLessons")
+    public ApiResponse<String> completeAllLessonsOfCourse(@PathVariable("courseId") UUID courseId,
+                                                          @RequestHeader("X-UserId") String userUid) {
+        userUid = userUid.split(",")[0];
+        lessonService.completeAllLessonByCourseId(
+                courseId,
+                ParseUUID.normalizeUID(userUid)
+        );
+
+        return ApiResponse.<String>builder()
+                .result("All lessons of course have been completed")
+                .build();
+    }
+
+    @Operation(
+            summary = "(testing only) restart all lessons of course by course id"
+    )
+    @PostMapping("/{courseId}/restartAllLessons")
+    public ApiResponse<String> restartAllLessonsOfCourse(@PathVariable("courseId") UUID courseId,
+                                                          @RequestHeader("X-UserId") String userUid) {
+        userUid = userUid.split(",")[0];
+        lessonService.restartAllLessonByCourseId(
+                courseId,
+                ParseUUID.normalizeUID(userUid)
+        );
+
+        return ApiResponse.<String>builder()
+                .result("All lessons of course have been restarted")
+                .build();
+    }
 }

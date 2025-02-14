@@ -4,11 +4,18 @@ import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
+import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
+import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInResponse;
 import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
+import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
+import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
+import com.example.identityservice.exception.FirebaseAuthenticationException;
+import com.example.identityservice.exception.NotVerifiedEmailException;
+import com.example.identityservice.exception.SendingEmailFailedException;
 import com.google.common.base.Strings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -20,6 +27,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,6 +36,7 @@ public class AuthService {
 
     private final FirebaseAuth firebaseAuth;
     private final FirebaseAuthClient firebaseAuthClient;
+    private final EmailService emailService;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -35,7 +45,8 @@ public class AuthService {
                 .setEmail(userCreationRequest.getEmail())
                 .setPassword(userCreationRequest.getPassword())
                 .setEmailVerified(Boolean.TRUE)
-                .setDisplayName(userCreationRequest.getDisplayName());
+                .setDisplayName(userCreationRequest.getDisplayName())
+                .setEmailVerified(Boolean.FALSE);
                 //.setPhoneNumber(userCreationRequest.getPhoneNumber());
                 //.setPhotoUrl(userCreationRequest.getPhotoUrl());
 
@@ -44,8 +55,12 @@ public class AuthService {
         }*/
 
         try {
-            firebaseAuth.createUser(request);
+            UserRecord userRecord = firebaseAuth.createUser(request);
             log.info("User successfully created: {}", userCreationRequest.getEmail());
+
+            firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
+            sendEmailVerification(userRecord.getUid());
+
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
                 throw new AccountAlreadyExistsException("Account with provided email already exists");
@@ -58,6 +73,11 @@ public class AuthService {
     }
 
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) {
+        boolean isEmailVerified = false;
+        isEmailVerified = firebaseAuthClient.isEmailVerified(userLoginRequest.getEmail());
+        if (!isEmailVerified) {
+            throw new NotVerifiedEmailException();
+        }
         return firebaseAuthClient.login(userLoginRequest);
     }
 
@@ -132,6 +152,45 @@ public class AuthService {
                     .isValidated(false)
                     .message("An unexpected error occurred: " + e.getMessage())
                     .build();
+        }
+    }
+
+    public void sendEmailVerification(String uid) {
+        try {
+            UserRecord userRecord = firebaseAuth.getUser(uid);
+            String email = userRecord.getEmail();
+
+            if (email != null) {
+                String link = firebaseAuthClient.generateEmailVerification(email);
+                System.out.println("generate email to " + email + " with link: " + link);
+                emailService.sendMail(
+                        email,
+                        "Verify your email in Intellab website",
+                        "Congrats on sending your confirmation link: " + link);
+            }
+        } catch (Exception e) {
+            throw new SendingEmailFailedException();
+        }
+    }
+
+    public void sendPasswordResetLink(String email) {
+        try {
+            String link = firebaseAuthClient.generatePasswordResetLink(email);
+
+            emailService.sendMail(
+                    email,
+                    "Reset your password in Intellab website",
+                    "Congrats on sending your password reset link: " + link);
+        } catch (Exception e) {
+            throw new SendingEmailFailedException();
+        }
+    }
+
+    public void setVerifiedListEmails(List<String> email) {
+        try {
+            firebaseAuthClient.setVerifiedListEmails(email);
+        } catch (Exception e) {
+            throw new RuntimeException("Error verifying email: " + e.getMessage(), e);
         }
     }
 }

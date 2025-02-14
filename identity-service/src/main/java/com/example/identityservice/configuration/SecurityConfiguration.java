@@ -45,6 +45,11 @@ public class SecurityConfiguration {
 
                             .anyRequest().authenticated();
                 })
+                /*.oauth2Login(oauth2 -> oauth2
+                        .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
+                                .baseUri("/oauth2/callback") // Important: Matches redirect URI
+                        )
+                )*/
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
