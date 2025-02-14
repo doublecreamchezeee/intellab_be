@@ -366,8 +366,7 @@ create table courses
         constraint fklljvfay1x0yv1gm2xmd6s7j9b
             references topics,
     average_rating double precision,
-    review_count   integer,
-    author_name varchar(255)
+    review_count   integer
 );
 
 alter table courses
@@ -479,6 +478,16 @@ create table reviews
 
 alter table reviews
     owner to postgres;
+create table certificates
+(
+    certificate_id  uuid not null
+        primary key,
+    certificate_url text,
+    completed_date  timestamp(6) with time zone
+);
+
+alter table certificates
+    owner to postgres;
 
 create table user_courses
 (
@@ -490,8 +499,11 @@ create table user_courses
     course_id          uuid not null
         constraint fkcve18frw4nbxwrq0qh78dgipc
             references courses,
-    certificate_url    text,
-    completed_date     timestamp(6),
+    certificate_id     uuid
+        constraint ukc837lk3wvu491io9pfiauof89
+            unique
+        constraint fk44luvbgh95mw3c0yarrbpfv9t
+            references certificates,
     primary key (course_id, user_uid)
 );
 

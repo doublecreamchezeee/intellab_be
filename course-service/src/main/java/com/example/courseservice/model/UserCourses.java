@@ -25,10 +25,11 @@ public class UserCourses {
     @EmbeddedId
     EnrollCourse enrollId;
 
+
     @ManyToOne
+    @JsonIgnore
     @MapsId("courseId")
     @JoinColumn(name = "course_id",nullable = false)
-    @JsonBackReference
     Course course;
 
     @Column(name = "progress_percent", columnDefinition = "DECIMAL(5,2)")
@@ -45,10 +46,10 @@ public class UserCourses {
     @Column(name = "latest_lesson_id", nullable = true)
     UUID latestLessonId;
 
-    @Column(name = "completed_date")
-    Instant completedDate;
 
-    @Column(name = "certificate_url", columnDefinition = "TEXT")
-    String certificateUrl;
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "certificate_id")
+    Certificate certificate;
 
 }
