@@ -32,6 +32,9 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -475,7 +478,13 @@ public class CourseService {
         UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_COURSE_NOT_EXISTED));
 
-        Instant completedDate = Instant.now();
+        Instant instant = Instant.now();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy");
+
+        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault()); // Lấy múi giờ hệ thống
+
+        String completedDate = zonedDateTime.format(formatter);
 
         String userName = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
                 + " " + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
@@ -488,7 +497,7 @@ public class CourseService {
         Image sign = null;
         try
         {
-            byte[] certificateImage = CertificateTemplate.createCertificate(completedDate.toString()
+            byte[] certificateImage = CertificateTemplate.createCertificate(completedDate
                     ,userName,courseName,sign,directorName);
             String fileName = courseId + "-" + userId.toString();
             Map upload = CertificateTemplate.uploadCertificateImage(certificateImage, fileName);
@@ -497,7 +506,7 @@ public class CourseService {
             Certificate newCertificate = new Certificate();
 
             newCertificate.setCertificateUrl(url);
-            newCertificate.setCompletedDate(completedDate);
+            newCertificate.setCompletedDate(instant);
 
             Certificate certificate = certificateRepository.save(newCertificate);
 

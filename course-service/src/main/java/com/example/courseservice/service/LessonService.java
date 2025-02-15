@@ -370,6 +370,8 @@ public class LessonService {
 
         if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
         {
+            System.out.println("createCertificate");
+            System.out.println(userCourses.getCertificate());
             courseService.createCertificate(courseId,userUid);
         }
         return true;
@@ -403,6 +405,8 @@ public class LessonService {
         userCoursesRepository.save(userCourses);
         if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
         {
+            System.out.println("createCertificate");
+            System.out.println(userCourses.getCertificate());
             courseService.createCertificate(courseId,userUid);
         }
 
@@ -442,6 +446,8 @@ public class LessonService {
 
             if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
             {
+                System.out.println("createCertificate");
+                System.out.println(userCourses.getCertificate());
                 courseService.createCertificate(userCourses.getEnrollId().getCourseId(),userUid);
             }
         }
