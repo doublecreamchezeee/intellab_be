@@ -368,7 +368,7 @@ public class LessonService {
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
         userCoursesRepository.save(userCourses);
 
-        if (userCourses.getProgressPercent()-100 <= 1e-6f)
+        if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
         {
             courseService.createCertificate(courseId,userUid);
         }
@@ -401,7 +401,7 @@ public class LessonService {
 
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
         userCoursesRepository.save(userCourses);
-        if (userCourses.getProgressPercent()-100 <= 1e-6f)
+        if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
         {
             courseService.createCertificate(courseId,userUid);
         }
@@ -440,7 +440,7 @@ public class LessonService {
             userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
             userCoursesRepository.save(userCourses);
 
-            if (userCourses.getProgressPercent()-100 <= 1e-6f)
+            if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
             {
                 courseService.createCertificate(userCourses.getEnrollId().getCourseId(),userUid);
             }
