@@ -138,7 +138,7 @@ public class ProblemController {
 
 
     @Operation(
-            summary = "Run in postman to generate boilerplate code"
+            summary = "(testing only) Generate boilerplate code"
     )
     @PostMapping("/generateBoilerplate")
     public ApiResponse<Boolean> generateBoilerPlate() {

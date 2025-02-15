@@ -52,4 +52,12 @@ public class GlobalExceptionHandler {
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         return ResponseEntity.badRequest().body(apiResponse);
     }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    ResponseEntity<ApiResponse> handlingIllegalArgumentException(IllegalArgumentException e) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage(e.getMessage());
+        apiResponse.setCode(ErrorCode.BAD_REQUEST.getCode());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
 }

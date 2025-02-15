@@ -21,6 +21,9 @@ public enum ErrorCode {
     INVALID_LOGIN_CREDENTIALS(401, "Invalid login credentials", HttpStatus.UNAUTHORIZED),
     TOKEN_VERIFICATION_FAILURE(401, "Authentication failure: Token missing, invalid or expired", HttpStatus.UNAUTHORIZED),
     ACCOUNT_ALREADY_EXISTS(409, "Account already exists", HttpStatus.CONFLICT),
+    FIREBASE_AUTHENTICATION_FAILURE(401, "Firebase Authentication error", HttpStatus.UNAUTHORIZED),
+    SENDING_EMAIL_FAILED(500, "Sending email failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    NOT_VERIFIED_EMAIL(401, "Email is not verified", HttpStatus.UNAUTHORIZED),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

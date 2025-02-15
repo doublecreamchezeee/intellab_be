@@ -1,5 +1,6 @@
 package com.example.courseservice.utils;
 
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.UUID;
 

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.identityservice.configuration.PublicEndpoint;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ApiEndpointSecurityInspector {
 
     private final RequestMappingHandlerMapping requestHandlerMapping;
@@ -39,7 +41,6 @@ public class ApiEndpointSecurityInspector {
             if (handlerMethod.hasMethodAnnotation(PublicEndpoint.class)) {
                 final var httpMethod = requestInfo.getMethodsCondition().getMethods().iterator().next().asHttpMethod();
                 final var apiPaths = requestInfo.getPathPatternsCondition().getPatternValues();
-
                 if (httpMethod.equals(GET)) {
                     publicGetEndpoints.addAll(apiPaths);
                 } else if (httpMethod.equals(POST)) {
@@ -47,6 +48,9 @@ public class ApiEndpointSecurityInspector {
                 }
             }
         });
+
+        log.info("Public GET endpoints: {}", publicGetEndpoints);
+        log.info("Public POST endpoints: {}", publicPostEndpoints);
 
         // Add swagger-ui to public GET endpoints
         /*publicGetEndpoints.add("/swagger-ui/**");

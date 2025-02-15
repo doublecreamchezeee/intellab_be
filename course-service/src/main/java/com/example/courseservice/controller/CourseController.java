@@ -9,6 +9,7 @@ import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
+import com.example.courseservice.dto.response.rerview.CourseReviewsStatisticsResponse;
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
@@ -318,4 +319,49 @@ public class CourseController {
                 .result(courseService.getCertificate(certificateId)).build();
     }
 
+
+    @Operation(
+            summary = "Get review statistics of course by course id"
+    )
+    @GetMapping("/{courseId}/reviews-stats")
+    public ApiResponse<CourseReviewsStatisticsResponse> getReviewStatisticsByCourseId(
+            @PathVariable("courseId") UUID courseId) {
+        return ApiResponse.<CourseReviewsStatisticsResponse>builder()
+                .result(reviewService.getCourseReviewsStatisticsByCourseId(courseId))
+                .build();
+    }
+
+    @Operation(
+            summary = "(testing only) complete all lesson of course by course id"
+    )
+    @PostMapping("/{courseId}/completeAllLessons")
+    public ApiResponse<String> completeAllLessonsOfCourse(@PathVariable("courseId") UUID courseId,
+                                                          @RequestHeader("X-UserId") String userUid) {
+        userUid = userUid.split(",")[0];
+        lessonService.completeAllLessonByCourseId(
+                courseId,
+                ParseUUID.normalizeUID(userUid)
+        );
+
+        return ApiResponse.<String>builder()
+                .result("All lessons of course have been completed")
+                .build();
+    }
+
+    @Operation(
+            summary = "(testing only) restart all lessons of course by course id"
+    )
+    @PostMapping("/{courseId}/restartAllLessons")
+    public ApiResponse<String> restartAllLessonsOfCourse(@PathVariable("courseId") UUID courseId,
+                                                          @RequestHeader("X-UserId") String userUid) {
+        userUid = userUid.split(",")[0];
+        lessonService.restartAllLessonByCourseId(
+                courseId,
+                ParseUUID.normalizeUID(userUid)
+        );
+
+        return ApiResponse.<String>builder()
+                .result("All lessons of course have been restarted")
+                .build();
+    }
 }

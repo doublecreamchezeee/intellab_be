@@ -14,15 +14,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReviewCreationRequest {
-    @Min(1)
-    @Max(5)
+    @Min(value = 1, message = "Rating must be at least 1")
+    @Max(value = 5, message = "Rating must be at most 5")
     int rating;
 
     String comment;
 
-    @NotBlank
-    String userUid;
-
-    @NotBlank
     UUID courseId;
 }

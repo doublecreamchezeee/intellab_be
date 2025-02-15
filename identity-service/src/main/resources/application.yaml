@@ -1,6 +1,17 @@
 spring:
   application:
     name: identity-service
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   port: 8001
   servlet:
@@ -16,3 +27,12 @@ springdoc:
   swagger-ui:
     use-root-path: true
     enabled: true
+
+domain:
+  auth:
+    reset-password-callback-url: ${DOMAIN_AUTH_RESET_PASSWORD_CALLBACK_URL}
+    email-verification-callback-url: ${DOMAIN_AUTH_EMAIL_VERIFICATION_CALLBACK_URL}
+google:
+  credentials:
+    file:
+      path: google-credentials.json

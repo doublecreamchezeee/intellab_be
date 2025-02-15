@@ -470,7 +470,10 @@ create table reviews
         primary key,
     comment   text,
     rating    integer not null,
-    user_id   uuid,
+    user_uuid   uuid,
+    user_uid varchar,
+    create_at timestamp(6) with time zone,
+    last_modified_at timestamp(6) with time zone,
     course_id uuid    not null
         constraint fkl9h49973yigjg39ov07a9mog6
             references courses
@@ -58961,7 +58964,7 @@ in a queue.
   mail queue.
 * Queue can be used in various algorithm techniques like Breadth First
   Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
-', 'Introduction to Queue Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+', 'Introduction to Queue Data Structure', 1, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2a878929-d192-4a08-a92c-f93b22786c0f', e'**Types of Queues:**
 
 There are **five different types of queues** that are used in
@@ -59163,7 +59166,7 @@ Some references for further reading on queues:
 operations are performed. The order is First In First Out (FIFO). A good
 example of a queue is any queue of consumers for a resource where the
 consumer that came first is served first. In this article, the different
-types of queues are discussed.', 'Different Types of Queues and its Applications', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+types of queues are discussed.', 'Different Types of Queues and its Applications', 2, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('562940a2-1089-4c6d-a938-5fe36049bc5f', e'**Basic Operations on Queue:**
 ------------------------------
 
@@ -60240,7 +60243,7 @@ Javascript
 **Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
-', '', 'Basic Operations for Queue in Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+', '', 'Basic Operations for Queue in Data Structure', 3, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('6c6539f0-a9f9-4639-b197-d3fc89870e6a', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
 known as ****Dequeue.****It is important to know that we cannot insert an element if the size of
 the queue is full and cannot delete an element when the queue itself is
@@ -60350,7 +60353,7 @@ underflow.
   implementation.', e'A Queue
 is a linear data structure. This data structure follows a particular
 order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
-come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 4, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('3126233c-3e02-455e-8152-6d095b943168', e'Basic Terminologies of Queue
 ----------------------------
 
@@ -60556,7 +60559,7 @@ in a queue.
   mail queue.
 * Queue can be used in various algorithm techniques like Breadth First
   Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
-', 'Introduction to Queue Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+', 'Introduction to Queue Data Structure', 5, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('8d4f2d0d-a9f3-49f5-a13e-9aa4fad99826', e'**Types of Queues:**
 
 There are **five different types of queues** that are used in
@@ -60758,7 +60761,7 @@ Some references for further reading on queues:
 operations are performed. The order is First In First Out (FIFO). A good
 example of a queue is any queue of consumers for a resource where the
 consumer that came first is served first. In this article, the different
-types of queues are discussed.', 'Different Types of Queues and its Applications', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+types of queues are discussed.', 'Different Types of Queues and its Applications', 6, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('dd501d4c-f5c6-424f-9678-af343551671c', e'**Basic Operations on Queue:**
 ------------------------------
 
@@ -61835,7 +61838,7 @@ Javascript
 **Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
-', '', 'Basic Operations for Queue in Data Structure', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+', '', 'Basic Operations for Queue in Data Structure', 7, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('21135289-e645-4045-a26c-697c91f3873f', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
 known as ****Dequeue.****It is important to know that we cannot insert an element if the size of
 the queue is full and cannot delete an element when the queue itself is
@@ -61945,7 +61948,7 @@ underflow.
   implementation.', e'A Queue
 is a linear data structure. This data structure follows a particular
 order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
-come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', null, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 8, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('451c319e-a0a3-48e5-baca-ece2737e6010', e'Representation of Stack Data Structure:
 ---------------------------------------
 
@@ -64151,36 +64154,57 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_ord
 3
 2 5 6
 3', '1 2 2 3 5 6', null, 5, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('0ccce6f3-b6f1-4184-b13d-0aec69dfc148', '9', '1 0', null, 1, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('00222cc2-be0a-4b78-8e49-8a7572418dad', '4 3 2 1', '4 3 2 2', null, 2, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('6fbb0344-0bc8-4df2-a64d-785fb373a9a7', '9 9 9', '1 0 0 0', null, 3, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('8a85700f-ffb4-438b-8183-8f3aa1999c24', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 6', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 7', null, 4, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d725244d-31f7-4ddc-b494-dc54cab67964', '1 2 3', '1 2 4', null, 5, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4a9c10f0-eb2a-4b19-8e19-9edf117e76d8', '1 0 0 0', '1 0 0 1', null, 6, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('21a234fc-adc3-4012-9802-63ab716fb8c4', e'1 3 5 6
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('0ccce6f3-b6f1-4184-b13d-0aec69dfc148', '1
+9', '1 0', null, 1, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('00222cc2-be0a-4b78-8e49-8a7572418dad', '4
+4 3 2 1', '4 3 2 2', null, 2, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('6fbb0344-0bc8-4df2-a64d-785fb373a9a7', '3
+9 9 9', '1 0 0 0', null, 3, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('8a85700f-ffb4-438b-8183-8f3aa1999c24', '39
+7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 6', '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 7', null, 4, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d725244d-31f7-4ddc-b494-dc54cab67964', '3
+1 2 3', '1 2 4', null, 5, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4a9c10f0-eb2a-4b19-8e19-9edf117e76d8', '4
+1 0 0 0', '1 0 0 1', null, 6, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('21a234fc-adc3-4012-9802-63ab716fb8c4', e'4
+1 3 5 6
 5', '2', null, 1, '82978535-a8da-46e1-a39a-31a232e3fffc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4703bfe2-5040-49f7-b728-bdea2b6c97e4', e'1 3 5 6
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4703bfe2-5040-49f7-b728-bdea2b6c97e4', e'4
+1 3 5 6
 7', '4', null, 2, '82978535-a8da-46e1-a39a-31a232e3fffc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('e8698f62-9051-49e0-8610-56c27a7dcb96', e'1 3 5 6
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('e8698f62-9051-49e0-8610-56c27a7dcb96', e'4
+1 3 5 6
 4', '2', null, 3, '82978535-a8da-46e1-a39a-31a232e3fffc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('da031658-0ac7-4aae-99e5-6c01e2862b29', e'1 3 5 6
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('da031658-0ac7-4aae-99e5-6c01e2862b29', e'4
+1 3 5 6
 0', '0', null, 4, '82978535-a8da-46e1-a39a-31a232e3fffc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('2becdcf8-1773-4d3a-b759-63fea450106c', e'1 3 5 6
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('2becdcf8-1773-4d3a-b759-63fea450106c', e'4
+1 3 5 6
 2', '1', null, 5, '82978535-a8da-46e1-a39a-31a232e3fffc');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('93cfd193-1620-4e60-8c84-983041d205f0', '0 1 0', '1', null, 1, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('fad6d724-b8ce-4b6b-a1fb-f5a1e8b7e003', '1', '1', null, 2, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('f8e22dda-b2cf-473e-b10f-ca1069fd5630', '4 1 2 1 2', '4', null, 3, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4343cfa0-4508-4157-b986-23e04fc60069', '3 3 7 8 8', '7', null, 4, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('e15bef99-a6dd-46a1-bbb0-af5ed9d06e09', '2 2 1', '1', null, 5, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('abf531db-e157-49e9-8310-beb37cffe58a', e'3 3
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('93cfd193-1620-4e60-8c84-983041d205f0', '3
+0 1 0', '1', null, 1, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('fad6d724-b8ce-4b6b-a1fb-f5a1e8b7e003', '1
+1', '1', null, 2, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('f8e22dda-b2cf-473e-b10f-ca1069fd5630', '5
+4 1 2 1 2', '4', null, 3, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('4343cfa0-4508-4157-b986-23e04fc60069', '5
+3 3 7 8 8', '7', null, 4, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('e15bef99-a6dd-46a1-bbb0-af5ed9d06e09', '3
+2 2 1', '1', null, 5, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('abf531db-e157-49e9-8310-beb37cffe58a', e'2
+3 3
 6', '0 1', null, 1, '591b3457-2157-4d61-b03d-d53f8666342c');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('78dd79f1-3691-42da-9fcf-37e7c96c439f', e'1 0 0 7
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('78dd79f1-3691-42da-9fcf-37e7c96c439f', e'4
+1 0 0 7
 8', '0 3', null, 2, '591b3457-2157-4d61-b03d-d53f8666342c');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('5aedba91-125d-4cdc-99f3-43fc3d431bad', e'3 2 4
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('5aedba91-125d-4cdc-99f3-43fc3d431bad', e'3
+3 2 4
 6', '1 2', null, 3, '591b3457-2157-4d61-b03d-d53f8666342c');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d915b2ea-eb2a-450b-aa28-e506bf55a856', e'2 7 11 15
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d915b2ea-eb2a-450b-aa28-e506bf55a856', e'4
+2 7 11 15
 9', '0 1', null, 4, '591b3457-2157-4d61-b03d-d53f8666342c');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4 6 10 2
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('ddd22af2-0e71-4768-ad6c-b7307395c108', e'4
+4 6 10 2
 12', '1 2', null, 5, '591b3457-2157-4d61-b03d-d53f8666342c');
 
 

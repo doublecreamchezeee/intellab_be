@@ -42,7 +42,7 @@ public class BoilerplateClient {
             for (String rawLine : lines) {
                 String line = rawLine.trim();
                 //System.out.println(line.startsWith("Input Field:") && "input".equals(currentSection));
-                System.out.println("- " + line);
+                //System.out.println("- " + line);
 
                 if (line.startsWith("Problem Name:")) {
                     this.problemName = extractQuoteValue(line);
@@ -263,7 +263,7 @@ public class BoilerplateClient {
                         if (field.getType().startsWith("list<")) {
                             return """
                                     size_%1$s = int(input())
-                                    %1$s = list(map(%2$s, input().split()[:size_%1$s]))
+                                        %1$s = list(map(%2$s, input().split()[:size_%1$s]))
                                     """.formatted(field.getName(), mapTypeToPython(field.getType()));
                         } else {
                             return "%s = %s(input())".formatted(field.getName(), mapTypeToPython(field.getType()));
@@ -274,7 +274,12 @@ public class BoilerplateClient {
                     functionName,
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
             );
-            String outputWrite = "print(result)";
+            String outputWrite = null;
+            if (outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "print(' '.join(map(str, result)))";
+            } else {
+                outputWrite = "print(result)";
+            }
 
             return """
                     import sys
@@ -329,7 +334,13 @@ public class BoilerplateClient {
                     functionName,
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
             );
-            String outputWrite = "console.log(result);";
+            String outputWrite = null;// "console.log(result);";
+
+            if (outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "console.log(result.join(' '));";
+            } else {
+                outputWrite = "console.log(result);";
+            }
 
             return """
                     ##USER_CODE_HERE##

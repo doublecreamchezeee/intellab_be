@@ -11,8 +11,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReviewUpdateRequest {
-    @Min(1)
-    @Max(5)
+    @Min(value = 1)
+    @Max(value = 5)
     int rating;
     String comment;
 

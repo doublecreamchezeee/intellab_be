@@ -1,5 +1,6 @@
 package com.example.identityservice.controller;
 
+import com.example.identityservice.dto.request.auth.ListEmailsRequest;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
@@ -105,5 +106,25 @@ public class AuthController {
     public ResponseEntity<ValidatedTokenResponse> validateToken(@RequestBody String token) {
         ValidatedTokenResponse response = authService.validateToken(token);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Send password reset link"
+    )
+    @PublicEndpoint
+    @PostMapping("/reset-password")
+    public ResponseEntity<HttpStatus> sendPasswordResetLink(@RequestBody String email) {
+        authService.sendPasswordResetLink(email);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(
+            summary = "(testing only) set verified email"
+    )
+    @PublicEndpoint
+    @PostMapping("/set-verified-email")
+    public ResponseEntity<HttpStatus> setVerifiedEmail(@RequestBody ListEmailsRequest request) {
+        authService.setVerifiedListEmails(request.getEmails());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
