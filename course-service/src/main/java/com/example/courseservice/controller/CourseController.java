@@ -6,6 +6,7 @@ import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
+import com.example.courseservice.dto.response.course.CourseSearchResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
 import com.example.courseservice.dto.response.learningLesson.LessonProgressResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
@@ -203,7 +204,7 @@ public class CourseController {
             summary = "Get all courses that contain keyword in title or description"
     )
     @GetMapping("/search")
-    public ApiResponse<Page<CourseCreationResponse>> searchCourses(
+    public ApiResponse<Page<CourseSearchResponse>> searchCourses(
             @RequestHeader(value = "X-UserID", required = false) String userUid,
             @RequestParam("keyword") String keyword,
             @RequestParam(required = false) Float ratings,
@@ -211,17 +212,26 @@ public class CourseController {
             @RequestParam(required = false) Boolean price,
             @RequestParam(required = false) List<Integer> categories,
             @ParameterObject Pageable pageable) {
+
+        UUID normalizedUserId = null;
+        if (userUid != null) {
+            userUid = userUid.split(",")[0];
+            normalizedUserId = ParseUUID.normalizeUID(userUid);
+        }
+
         System.out.println(userUid);
         if (ratings != null || levels != null || price != null || categories != null) {
-            return ApiResponse.<Page<CourseCreationResponse>>builder()
+            return ApiResponse.<Page<CourseSearchResponse>>builder()
                     .result(courseService.searchCoursesWithFilter(
+                            normalizedUserId,
                             keyword,ratings,levels,price,categories, pageable
                             )
                     ).build();
         }
 
-        return ApiResponse.<Page<CourseCreationResponse>>builder()
+        return ApiResponse.<Page<CourseSearchResponse>>builder()
                 .result(courseService.searchCourses(
+                            normalizedUserId,
                             keyword, pageable
                         )
                 )

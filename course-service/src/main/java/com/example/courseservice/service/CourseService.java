@@ -6,10 +6,7 @@ import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
-import com.example.courseservice.dto.response.course.CertificateResponse;
-import com.example.courseservice.dto.response.course.CourseCreationResponse;
-import com.example.courseservice.dto.response.course.CourseShortResponse;
-import com.example.courseservice.dto.response.course.DetailCourseResponse;
+import com.example.courseservice.dto.response.course.*;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
@@ -148,7 +145,7 @@ public class CourseService {
         return courseMapper.toCourseCreationResponse(course);
     }
 
-    public Page<CourseCreationResponse> searchCoursesWithFilter(String keyword,
+    public Page<CourseSearchResponse> searchCoursesWithFilter(UUID userUid, String keyword,
                                                                 Float rating,
                                                                 List<String> levels,
                                                                 Boolean price,
@@ -200,25 +197,75 @@ public class CourseService {
 
         return result.map(course -> {
             int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
-            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
             response.setLessonCount(lessonCount);
 
             List<Section> sections = course.getSections();
             response.setSections(sections);
+
+            // Check if the user is enrolled in the course
+            response.setCertificateId(null);
+            response.setCertificateUrl(null);
+
+            if (userUid == null) {
+                return response;
+            }
+
+            // Check if the user is enrolled in the course
+            boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId());
+
+            String certificateUrl = null;
+            String certificateId = null;
+
+            if (isUserEnrolled) {
+                UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId())
+                        .orElse(null);
+
+                certificateId = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+                certificateUrl = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateUrl() : null;
+            }
+
+            response.setCertificateUrl(certificateUrl);
+            response.setCertificateId(certificateId);
             return response;
         });
     }
 
-    public Page<CourseCreationResponse> searchCourses(String keyword, Pageable pageable) {
+    public Page<CourseSearchResponse> searchCourses(UUID userUid, String keyword, Pageable pageable) {
 
         Page<Course>  courses = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
         return courses.map(course -> {
             int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
-            CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
+            CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
             response.setLessonCount(lessonCount);
-
             List<Section> sections = course.getSections();
             response.setSections(sections);
+
+            // Check if the user is enrolled in the course
+            response.setCertificateId(null);
+            response.setCertificateUrl(null);
+
+            if (userUid == null) {
+                return response;
+            }
+
+            // Check if the user is enrolled in the course
+            boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId());
+
+            String certificateUrl = null;
+            String certificateId = null;
+
+            if (isUserEnrolled) {
+                UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId())
+                        .orElse(null);
+
+                certificateId = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+                certificateUrl = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateUrl() : null;
+            }
+
+            response.setCertificateUrl(certificateUrl);
+            response.setCertificateId(certificateId);
+
             return response;        });
     }
 
@@ -261,6 +308,17 @@ public class CourseService {
             }
         }
 
+        String certificateUrl = null;
+        String certificateId = null;
+
+        if (isUserEnrolled) {
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+                    .orElse(null);
+
+            certificateId = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+            certificateUrl = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateUrl() : null;
+        }
+
         // Map course details to the response DTO
         return DetailCourseResponse.builder()
                 .courseId(course.getCourseId())
@@ -276,6 +334,8 @@ public class CourseService {
                 .isUserEnrolled(isUserEnrolled)
                 .latestLessonId(latestLessonId)
                 .progressPercent(completionRatio)
+                .certificateUrl(certificateUrl)
+                .certificateId(certificateId)
                 .build();
     }
 

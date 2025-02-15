@@ -32,4 +32,6 @@ public class DetailCourseResponse {
     boolean isUserEnrolled;
     UUID latestLessonId;
     Float progressPercent;
+    String certificateUrl;
+    String certificateId;
 }

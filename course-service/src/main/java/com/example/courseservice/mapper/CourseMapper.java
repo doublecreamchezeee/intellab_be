@@ -2,10 +2,7 @@ package com.example.courseservice.mapper;
 
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
-import com.example.courseservice.dto.response.course.CourseCreationResponse;
-import com.example.courseservice.dto.response.course.CourseResponse;
-import com.example.courseservice.dto.response.course.CourseShortResponse;
-import com.example.courseservice.dto.response.course.DetailCourseResponse;
+import com.example.courseservice.dto.response.course.*;
 import com.example.courseservice.model.Course;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -40,6 +37,9 @@ public interface CourseMapper {
 
     @Mapping(target = "categories",source = "categories")
     CourseCreationResponse toCourseCreationResponse(Course course);
+
+    @Mapping(target = "categories",source = "categories")
+    CourseSearchResponse toCourseSearchResponse(Course course);
 
     @Mapping(target = "categories",source = "categories")
     @Mapping(target = "id", source = "courseId")
