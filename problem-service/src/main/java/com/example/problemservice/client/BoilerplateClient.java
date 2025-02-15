@@ -262,8 +262,8 @@ public class BoilerplateClient {
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
                             return """
-                                    size_%1$s = int(input())
-                                    %1$s = list(map(%2$s, input().split()[:size_%1$s]))
+                                    size%1$s = int(input())
+                                        %1$s = list(map(%2$s, input().split()[:size%1$s]))
                                     """.formatted(field.getName(), mapTypeToPython(field.getType()));
                         } else {
                             return "%s = %s(input())".formatted(field.getName(), mapTypeToPython(field.getType()));

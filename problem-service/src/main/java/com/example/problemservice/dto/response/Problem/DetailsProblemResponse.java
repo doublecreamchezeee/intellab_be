@@ -22,7 +22,7 @@ public class DetailsProblemResponse {
     Float acceptanceRate;
     Boolean isAvailable;
     Boolean isPublished;
-//    List<TestCase> testCases;
+    List<TestCase> testCases;
     List<Solution> solutions;
     List<ProblemCategory> categories;
     List<Hint> hints;

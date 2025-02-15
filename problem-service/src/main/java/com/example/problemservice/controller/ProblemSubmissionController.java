@@ -35,9 +35,9 @@ public class ProblemSubmissionController {
             summary = "Create submission (Submit code)"
     )
     @PostMapping
-    public ResponseEntity<ProblemSubmission> createSubmission(@RequestBody SubmitCodeRequest request) {
+    public ResponseEntity<DetailsProblemSubmissionResponse> createSubmission(@RequestBody SubmitCodeRequest request) {
         try {
-            ProblemSubmission createdSubmission = problemSubmissionService.submitProblem(request);
+            DetailsProblemSubmissionResponse createdSubmission = problemSubmissionService.submitProblem(request);
             return ResponseEntity.ok(createdSubmission); // HTTP 200 OK
         } catch (Exception e) {
             System.out.println(e);
@@ -82,9 +82,9 @@ public class ProblemSubmissionController {
             summary = "Get submission by id, call after submit code to set the isSolved is true if accepted"
     )
     @GetMapping("/{submissionId}")
-    public ResponseEntity<ProblemSubmission> getSubmission(@PathVariable String submissionId) {
+    public ResponseEntity<DetailsProblemSubmissionResponse> getSubmission(@PathVariable String submissionId) {
         try {
-            ProblemSubmission submission = problemSubmissionService.getSubmission(UUID.fromString(submissionId));
+            DetailsProblemSubmissionResponse submission = problemSubmissionService.getSubmission(UUID.fromString(submissionId));
             return ResponseEntity.ok(submission); // HTTP 200 OK
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.SUBMISSION_NOT_EXIST) {
