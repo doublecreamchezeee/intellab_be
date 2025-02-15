@@ -5,6 +5,7 @@ import com.example.problemservice.client.BoilerplateClient;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
+import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.exception.AppException;
@@ -77,10 +78,10 @@ public class ProblemService {
         return response;
     }
 
-    public Problem getProblem(UUID problemId) {
-        return problemRepository.findById(problemId).orElseThrow(
+    public DetailsProblemResponse getProblem(UUID problemId) {
+        return problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
-        );
+        ));
     }
 
     public List<Problem> getAllProblems() {
