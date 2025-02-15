@@ -127,6 +127,12 @@ public class ProblemService {
         return result;
     }
 
+    public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable) {
+        Page<Problem> problems = problemRepository.findAll(pageable);
+
+        return problems.map(problemMapper::toProblemRowResponse);
+    }
+
     public void deleteProblem(UUID problemId) {
         Problem problem = problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
