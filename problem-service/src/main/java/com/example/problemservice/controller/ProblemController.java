@@ -71,8 +71,8 @@ public class ProblemController {
                                                              @RequestHeader(required = false, name = "X-UserId") String userUId,
                                                              @ParameterObject Pageable pageable,
                                                              @RequestParam(required = false) String keyword) {
-        userUId = userUId.split(",")[0];
         if (userUId != null) {
+            userUId = userUId.split(",")[0];
             UUID userId = ParseUUID.normalizeUID(userUId);
             System.out.println("user id: " + userId);
             if(keyword != null) {
@@ -81,7 +81,7 @@ public class ProblemController {
             }
 
             return ApiResponse.<Page<ProblemRowResponse>>builder()
-                    .result(problemService.getAllProblems(category, pageable)).build();
+                    .result(problemService.getAllProblems(category, pageable, userId)).build();
         }
         if(keyword != null) {
             return ApiResponse.<Page<ProblemRowResponse>>builder()

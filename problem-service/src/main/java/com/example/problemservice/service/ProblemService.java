@@ -105,23 +105,26 @@ public class ProblemService {
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
         List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId, problemId);
-        if (submissions.isEmpty() || submissions == null) {
+        if (submissions == null || submissions.isEmpty()) {
             return false;
         }
         for(ProblemSubmission submission:submissions)
         {
-            List<TestCaseOutput> testcaseOutputs = submission.getTestCasesOutput();
-            for (TestCaseOutput testcase : testcaseOutputs) {
-                if (!testcase.getResult_status().equals("Accepted"))
-                    return false;
-            }
+            if (submission.getIsSolved())
+                return true;
         }
-        return true;
+        return false;
     }
 
-    public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable) {
+    public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable, UUID userId) {
         Page<Problem> problems = problemRepository.findAll(pageable);
-        return problems.map(problemMapper::toProblemRowResponse);
+
+        Page<ProblemRowResponse>  result = problems.map(problemMapper::toProblemRowResponse);
+
+        result.forEach(problemRowResponse -> {
+            problemRowResponse.setDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
+        });
+        return result;
     }
 
     public void deleteProblem(UUID problemId) {
