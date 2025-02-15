@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+spec:
+  resources:
+    requests:
+      storage: 256Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis-container
+          image: redis:5.0
+          command:
+            - "bash"
+            - "-c"
+            - "docker-entrypoint.sh --appendonly yes --requirepass $REDIS_PASSWORD"
+          envFrom:
+            - configMapRef:
+                name: judge0-config
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: judge0-config
+                  key: REDIS_PASSWORD
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-data-volume
+              mountPath: /data
+      volumes:
+        - name: redis-data-volume
+          persistentVolumeClaim:
+            claimName: redis-pvc
