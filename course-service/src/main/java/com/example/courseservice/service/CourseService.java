@@ -305,6 +305,8 @@ public class CourseService {
         if (isUserEnrolled) {
             int totalLessons = lessonRepository.countByCourse_CourseId(courseId);
             int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
+            int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUid, courseId, true);
+            completedLessons += completedPractices;
 
             if (totalLessons > 0) {
                 completionRatio = (completedLessons / (float) totalLessons) * 100;
@@ -469,6 +471,9 @@ public class CourseService {
         return tokenResponse.getBody().getName();
     }
 
+    private static String getDaySuffix(int day) {
+        return (day >= 11 && day <= 13) ? "th" : new String[]{"th", "st", "nd", "rd"}[(day % 10 < 4) ? day % 10 : 0];
+    }
 
     public CertificateCreationResponse createCertificate(UUID courseId, UUID userId) throws Exception {
         System.out.println("userid: " + userId + "\n" +
@@ -480,11 +485,15 @@ public class CourseService {
 
         Instant instant = Instant.now();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy");
-
         ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault()); // Lấy múi giờ hệ thống
 
-        String completedDate = zonedDateTime.format(formatter);
+        String completedDate = String.format("%d%s %s",
+                zonedDateTime.getDayOfMonth(),
+                getDaySuffix(zonedDateTime.getDayOfMonth()),
+                zonedDateTime.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+        );
+
+
 
         String userName = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
                 + " " + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
