@@ -6,6 +6,7 @@ import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
+import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +52,9 @@ public class ProblemController {
             summary = "Get problem by id"
     )
     @GetMapping("/{problemId}")
-    public ResponseEntity<Problem> getProblem(@PathVariable UUID problemId) {
+    public ResponseEntity<DetailsProblemResponse> getProblem(@PathVariable UUID problemId) {
         try {
-            Problem problem = problemService.getProblem(problemId);
+            DetailsProblemResponse problem = problemService.getProblem(problemId);
             return ResponseEntity.ok(problem); // Return the problem if found
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
@@ -95,13 +97,19 @@ public class ProblemController {
             summary = "Get all problems"
     )
     @GetMapping("")
-    public ResponseEntity<List<Problem>> getAllProblem() {
+    public ApiResponse<Page<ProblemRowResponse>> getAllProblem() {
+        Pageable pageable = PageRequest.of(0, 1000);
         try {
-            List<Problem> response = problemService.getAllProblems();
-            return ResponseEntity.ok(response);
+            Page<ProblemRowResponse> response = problemService.getAllProblems("", pageable);
+            return ApiResponse.<Page<ProblemRowResponse>>builder()
+                    .result(problemService.getAllProblems("", pageable)).build();
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if problem not found
+                ApiResponse.<Page<ProblemRowResponse>>builder()
+                        .result(null)
+                        .code(ErrorCode.PROBLEM_NOT_EXIST.getCode())
+                        .message(String.valueOf(ErrorCode.PROBLEM_NOT_EXIST))
+                        .build();
             }
             throw e;
         }

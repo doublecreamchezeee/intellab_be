@@ -15,6 +15,7 @@ public interface ProblemSubmissionMapper {
     @Mapping(target = "scoreAchieved", source = "scoreAchieved")
     @Mapping(target = "problemId", source = "problem.problemId")
     @Mapping(target = "userUid", source = "userId")
+    @Mapping(target = "testCasesOutput", source = "testCasesOutput")
     DetailsProblemSubmissionResponse toDetailsProblemSubmissionResponse(ProblemSubmission problemSubmission);
 
     @Mapping(target = "programmingLanguage", ignore = true)

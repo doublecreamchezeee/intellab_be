@@ -2,6 +2,7 @@ package com.example.problemservice.mapper;
 
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.Problem.CategoryRessponse;
+import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.model.Problem;
@@ -29,6 +30,8 @@ public interface ProblemMapper {
 
     @Mapping(target = "problemStructure", ignore = true)
     ProblemCreationResponse toProblemCreationResponse(Problem problem);
+
+    DetailsProblemResponse toProblemDetailsResponse(Problem problem);
 
     @Mapping(target = "problemStructure", ignore = true)
     void updateProblemFromRequest(ProblemCreationRequest request, @MappingTarget Problem problem);
