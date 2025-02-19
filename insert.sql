@@ -64221,3 +64221,14 @@ INSERT INTO public.programming_language (programming_language_id, long_name, sho
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
 
 
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (5, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '591b3457-2157-4d61-b03d-d53f8666342c');
