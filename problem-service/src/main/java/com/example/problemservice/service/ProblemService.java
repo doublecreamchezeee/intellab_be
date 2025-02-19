@@ -99,7 +99,7 @@ public class ProblemService {
         Page<ProblemRowResponse> results = problems.map(problemMapper::toProblemRowResponse);
 
         results.forEach(problemRowResponse -> {
-            problemRowResponse.setDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
+            problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
         });
         return results;
     }
@@ -109,7 +109,7 @@ public class ProblemService {
         if (submissions == null || submissions.isEmpty()) {
             return false;
         }
-        for(ProblemSubmission submission:submissions)
+        for (ProblemSubmission submission:submissions)
         {
             if (submission.getIsSolved())
                 return true;

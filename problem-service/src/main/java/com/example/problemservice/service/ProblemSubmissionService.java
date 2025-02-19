@@ -119,8 +119,30 @@ public class ProblemSubmissionService {
 
         output.setRuntime(Float.valueOf(request.getTime()));
         output.setMemory(request.getMemory());
-//        output.setSubmission_output(request.getStdout());
-        output.setSubmission_output(new String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+", ""))));
+        Base64.Decoder decoder = Base64.getDecoder();
+
+        if (request.getStdout()!= null) {
+
+            output.setSubmission_output(
+                    new String(
+                            decoder.decode(
+                                    request.getStdout()
+                                            .trim()
+                                            .replaceAll(
+                                                    "\\s+",
+                                                    ""
+                                            )
+                            )
+                    ).replace(
+                            "\n",
+                            ""
+                    ) // remove newline character
+            );
+
+        } else {
+            output.setSubmission_output(null);
+        }
+//        output.setSubmission_output(new String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+", ""))));
         output.setResult_status(request.getStatus().getDescription());
         testCaseOutputRepository.save(output);
 
