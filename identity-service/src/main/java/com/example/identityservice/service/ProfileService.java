@@ -2,9 +2,11 @@ package com.example.identityservice.service;
 
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.client.GooglePeopleApiClient;
+import com.example.identityservice.client.ProblemClient;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
+import com.example.identityservice.dto.response.profile.ProgressResponse;
 import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -23,7 +25,7 @@ import java.io.IOException;
 public class ProfileService {
     private final FirebaseAuth firebaseAuth;
     private final GooglePeopleApiClient googlePeopleApiClient;
-
+    private final ProblemClient problemClient;
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userId
     ) {
@@ -73,6 +75,7 @@ public class ProfileService {
             throw new RuntimeException("Error finding users: " + e.getMessage(), e);
         }
     }
+
     public String uploadProfilePicture(String userId, MultipartFile multipartFile) {
         try {
             return googlePeopleApiClient.uploadProfilePicture(userId,multipartFile);
@@ -91,4 +94,7 @@ public class ProfileService {
         }
     }
 
+    public ProgressResponse getProgress() {
+        return problemClient.getProgress().block();
+    }
 }

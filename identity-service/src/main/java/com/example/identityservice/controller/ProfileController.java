@@ -6,6 +6,7 @@ import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
+import com.example.identityservice.dto.response.profile.ProgressResponse;
 import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.identityservice.service.AuthService;
 import com.example.identityservice.service.ProfileService;
@@ -95,6 +96,12 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
+    @Operation(
+            summary = "Statistic by getting progress"
+    )
+    @GetMapping("/statistic/progress")
+    public ResponseEntity<ProgressResponse> getProgress() {
+        return ResponseEntity.ok(profileService.getProgress());
+    }
 
 }
