@@ -27,6 +27,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -42,6 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String USER_ID_CLAIM = "user_id";
+    private static final String USER_EMAIL = "email";
 
     @Override
     @SneakyThrows
@@ -64,10 +68,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // Extract user ID from claims (or throw an exception if it's missing)
                     final var userId = Optional.ofNullable(firebaseToken.getClaims().get(USER_ID_CLAIM))
                             .orElseThrow(() -> new IllegalStateException("User ID claim missing"));
+                    final var email = Optional.ofNullable(firebaseToken.getClaims().get(USER_EMAIL));
+                    Map<String, Object> userDetails = Map.of(
+                            "email", email
+                    );
 
                     // Set the authentication in the SecurityContext
-                    final var authentication = new UsernamePasswordAuthenticationToken(userId, null, null);
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    final var authentication = new UsernamePasswordAuthenticationToken(userId, email, Collections.emptyList());
+                    authentication.setDetails(userDetails);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (FirebaseAuthException e){
                     // Log the error and respond with a 401 Unauthorized status

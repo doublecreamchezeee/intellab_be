@@ -13,6 +13,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -24,11 +25,11 @@ public class ProfileService {
     private final GooglePeopleApiClient googlePeopleApiClient;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
-            @NonNull final SingleProfileInformationRequest request
+            @NonNull String userId
     ) {
         try {
             UserRecord userRecord = firebaseAuth.getUser(
-                    request.getUserId()
+                    userId
             );
 
             return SingleProfileInformationResponse.builder()
@@ -72,10 +73,17 @@ public class ProfileService {
             throw new RuntimeException("Error finding users: " + e.getMessage(), e);
         }
     }
+    public String uploadProfilePicture(String userId, MultipartFile multipartFile) {
+        try {
+            return googlePeopleApiClient.uploadProfilePicture(userId,multipartFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public String getProfilePictureUrlByEmail(String userId) {
         try {
-            return googlePeopleApiClient.getProfilePictureUrlByEmail(userId);
+            return googlePeopleApiClient.getProfilePictureUrl(userId);
         } catch (IOException e) {
             throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
         } catch (Exception e) {

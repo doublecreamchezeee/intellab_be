@@ -75,14 +75,14 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(
-            summary = "Update user by email"
-    )
-    @PutMapping("/update")
-    public ResponseEntity<HttpStatus> updateUserByEmail(@RequestParam("email") String email, @Validated @RequestBody UserUpdateRequest userUpdateRequest) {
-        authService.updateByEmail(email, userUpdateRequest);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
+//    @Operation(
+//            summary = "Update user by email"
+//    )
+//    @PutMapping("/update")
+//    public ResponseEntity<HttpStatus> updateUserByEmail(@RequestParam("email") String email, @Validated @RequestBody UserUpdateRequest userUpdateRequest) {
+//        authService.updateByEmail(email, userUpdateRequest);
+//        return ResponseEntity.status(HttpStatus.OK).build();
+//    }
 
     @Operation(
             summary = "Refresh token, re"

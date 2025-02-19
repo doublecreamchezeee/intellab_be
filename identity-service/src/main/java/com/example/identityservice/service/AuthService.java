@@ -47,12 +47,6 @@ public class AuthService {
                 .setEmailVerified(Boolean.TRUE)
                 .setDisplayName(userCreationRequest.getDisplayName())
                 .setEmailVerified(Boolean.FALSE);
-                //.setPhoneNumber(userCreationRequest.getPhoneNumber());
-                //.setPhotoUrl(userCreationRequest.getPhotoUrl());
-
-        /*if (!Strings.isNullOrEmpty(userCreationRequest.getPhotoUrl())) {
-            request.setPhotoUrl(userCreationRequest.getPhotoUrl());
-        }*/
 
         try {
             UserRecord userRecord = firebaseAuth.createUser(request);
@@ -107,23 +101,9 @@ public class AuthService {
     public void update(@NonNull String uid, @NonNull UserUpdateRequest userUpdateRequest) {
         final var request = new UserRecord.UpdateRequest(uid);
 
-        if (userUpdateRequest.getEmail() != null) {
-            request.setEmail(userUpdateRequest.getEmail());
-        }
         if (userUpdateRequest.getDisplayName() != null) {
             request.setDisplayName(userUpdateRequest.getDisplayName());
         }
-        /*if (userUpdateRequest.getPhoneNumber() != null) {
-            request.setPhoneNumber(userUpdateRequest.getPhoneNumber());
-        }
-        if (userUpdateRequest.getPhotoUrl() != null
-                && !Strings.isNullOrEmpty(userUpdateRequest.getPhotoUrl())) {
-            request.setPhotoUrl(userUpdateRequest.getPhotoUrl());
-        }*/
-        if (userUpdateRequest.getPassword() != null) {
-            request.setPassword(userUpdateRequest.getPassword());
-        }
-
         try {
             firebaseAuth.updateUser(request);
         } catch (final Exception exception) {

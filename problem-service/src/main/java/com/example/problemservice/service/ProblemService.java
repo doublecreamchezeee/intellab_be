@@ -123,7 +123,7 @@ public class ProblemService {
         Page<ProblemRowResponse>  result = problems.map(problemMapper::toProblemRowResponse);
 
         result.forEach(problemRowResponse -> {
-            problemRowResponse.setDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
+            problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
         });
         return result;
     }
