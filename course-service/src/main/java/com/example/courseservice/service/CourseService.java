@@ -455,6 +455,19 @@ public class CourseService {
         return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
     }
 
+    public List<CategoryResponse> getListCategory(List<Integer> ids) {
+        List<Category> categories = new ArrayList<>();
+        categories = categoryRepository.findAllById(ids);
+        return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
+    }
+
+    public CategoryResponse getCategory(Integer categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(()-> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        return categoryMapper.categoryToCategoryResponse(category);
+    }
+
     public String getUserNameFromToken(String token) {
         if (token == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);

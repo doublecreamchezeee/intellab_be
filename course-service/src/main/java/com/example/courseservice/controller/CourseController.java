@@ -292,12 +292,33 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get all categories"
+    )
     @GetMapping("categories")
     public ApiResponse<List<CategoryResponse>> getCategories() {
 
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(courseService.getCategories()).build();
     }
+
+    @Operation(summary = "Get category by Id")
+    @GetMapping("/category/{categoryId}")
+    public ApiResponse<CategoryResponse> getCategoryById(
+            @PathVariable Integer categoryId )
+    {
+        return ApiResponse.<CategoryResponse>builder()
+                .result(courseService.getCategory(categoryId)).build();
+    }
+
+    @Operation(summary = "Get category by list of id")
+    @PostMapping("/category")
+    public ApiResponse<List<CategoryResponse>> getCategoryByListOfId(@RequestBody List<Integer> listOfId) {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(courseService.getListCategory(listOfId)).build();
+    }
+
+
     @Operation(
             summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
     )

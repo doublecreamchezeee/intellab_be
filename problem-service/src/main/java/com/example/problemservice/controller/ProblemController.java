@@ -1,5 +1,6 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.dto.request.DefaultCodeRequest;
 import com.example.problemservice.dto.request.problem.EnrichCodeRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
@@ -11,6 +12,7 @@ import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
 import com.example.problemservice.model.Problem;
+import com.example.problemservice.model.course.Category;
 import com.example.problemservice.service.ProblemService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
@@ -47,6 +49,8 @@ public class ProblemController {
     public ResponseEntity<ProblemCreationResponse> createProblem(@RequestBody ProblemCreationRequest problem) {
         return ResponseEntity.ok(problemService.createProblem(problem));
     }
+
+
 
     @Operation(
             summary = "Get problem by id"

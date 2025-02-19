@@ -17,7 +17,7 @@ public class ProblemRowResponse {
     String problemName;
     String level;
     Float acceptanceRate;
-    boolean isDone;
+    Boolean isDone;
     Integer hintCount;
-    List<CategoryRessponse> categories;
+    List<CategoryResponse> categories;
 }
