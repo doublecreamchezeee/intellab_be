@@ -4,6 +4,7 @@ import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
+import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseSearchResponse;
@@ -14,7 +15,9 @@ import com.example.courseservice.dto.response.rerview.CourseReviewsStatisticsRes
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.UserCourses;
+import com.example.courseservice.service.CommentService;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
 import com.example.courseservice.service.ReviewService;
@@ -48,6 +51,7 @@ public class CourseController {
     CourseService courseService;
     LessonService lessonService;
     ReviewService reviewService;
+    private final CommentService commentService;
 
     @Operation(
             summary = "Create course"
@@ -393,6 +397,13 @@ public class CourseController {
 
         return ApiResponse.<String>builder()
                 .result("All lessons of course have been restarted")
+                .build();
+    }
+
+    @GetMapping("/{courseId}/comments")
+    public ApiResponse<List<CommentResponse>> getCommentsByCourseId(@PathVariable("courseId") UUID courseId) throws ExecutionException, InterruptedException {
+        return ApiResponse.<List<CommentResponse>>builder()
+                .result(commentService.getComments(courseId))
                 .build();
     }
 }
