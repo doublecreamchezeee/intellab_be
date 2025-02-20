@@ -1,6 +1,7 @@
 package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
@@ -401,9 +402,19 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/comments")
-    public ApiResponse<List<CommentResponse>> getCommentsByCourseId(@PathVariable("courseId") UUID courseId) throws ExecutionException, InterruptedException {
+    public ApiResponse<List<CommentResponse>> getCommentsByCourseId(@PathVariable("courseId") UUID courseId) {
         return ApiResponse.<List<CommentResponse>>builder()
                 .result(commentService.getComments(courseId))
                 .build();
     }
+
+    @PostMapping("/{courseId}/comments")
+    public ApiResponse<CommentResponse> addComment(
+            @PathVariable("courseId") UUID courseId,
+            @RequestBody CommentCreationRequest creationRequest ){
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.addComment(courseId, creationRequest)).build();
+    }
+
+
 }

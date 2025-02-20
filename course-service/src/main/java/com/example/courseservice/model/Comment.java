@@ -34,7 +34,7 @@ public class Comment {
     Integer replyLevel;
 
     @Column(name = "number_of_likes")
-    Long numberOfLikes;
+    Long numberOfLikes = 0L;
 
     @CreationTimestamp
     Instant created;

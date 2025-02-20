@@ -302,7 +302,7 @@ create table topics
     topic_id        uuid default uuid_generate_v4() not null
         primary key,
     content         text,
-    number_of_likes integer,
+    number_of_likes bigint default 0,
     post_reach      varchar(10),
     title           varchar(255),
     user_id         varchar(255)
@@ -318,7 +318,7 @@ create table comments
     content           text,
     created           timestamp(6) with time zone,
     last_modified     timestamp(6) with time zone,
-    number_of_likes   bigint,
+    number_of_likes   bigint default 0,
     reply_level       integer,
     user_id           uuid,
     parent_comment_id uuid
