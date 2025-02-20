@@ -38,12 +38,14 @@ public class CommentService {
         return comments.stream().map(commentMapper::toResponse).collect(Collectors.toList());
     }
 
-    public CommentResponse addComment(UUID courseId, CommentCreationRequest request) {
+    public CommentResponse addComment(UUID courseId, CommentCreationRequest request, UUID userId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(()-> new AppException(ErrorCode.COURSE_NOT_EXISTED));
         Comment comment = new Comment();
         comment.setTopic(course.getTopic());
         comment.setContent(request.getContent());
+        comment.setUserId(userId);
+
         if (request.getReplyTo() != null) {
         Comment parentComment = commentRepository.findById(request.getReplyTo())
                 .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));

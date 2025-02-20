@@ -411,9 +411,13 @@ public class CourseController {
     @PostMapping("/{courseId}/comments")
     public ApiResponse<CommentResponse> addComment(
             @PathVariable("courseId") UUID courseId,
+            @RequestHeader("X-UserId") String userUid,
             @RequestBody CommentCreationRequest creationRequest ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
         return ApiResponse.<CommentResponse>builder()
-                .result(commentService.addComment(courseId, creationRequest)).build();
+                .result(commentService.addComment(courseId, creationRequest, userId)).build();
     }
 
 
