@@ -11,8 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommentCreationRequest {
+public class CommentModifyRequest {
+    UUID commentId;
     String content;
-    UUID repliedCommentId;
-    UUID parentCommentId;
 }

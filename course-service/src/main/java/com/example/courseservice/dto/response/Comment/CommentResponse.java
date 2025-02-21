@@ -1,7 +1,6 @@
 package com.example.courseservice.dto.response.Comment;
 
 
-import com.example.courseservice.model.Comment;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -19,9 +18,14 @@ public class CommentResponse {
     String content;
     Long numberOfLikes;
     Instant created;
+    Instant lastModified;
     UUID userId;
     String userName;
     String avatarUrl;
+    UUID repliedCommentId;
+    UUID parentCommentId;
+    Boolean isModified;
+    Boolean isUpVoted;
 
     List<CommentResponse> comments;
 }

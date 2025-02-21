@@ -11,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,11 +31,6 @@ public class Comment {
     @Column(columnDefinition = "TEXT")
     String content;
 
-    @Column(name = "reply_level")
-    Integer replyLevel;
-
-    @Column(name = "number_of_likes")
-    Long numberOfLikes = 0L;
 
     @CreationTimestamp
     Instant created;
@@ -57,10 +53,25 @@ public class Comment {
     Comment parentComment;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, orphanRemoval = true)
-    List<Comment> comments;
+    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    List<Comment> comments = new ArrayList<>();
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replied_comment_id")
+    Comment repliedComment;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "repliedComment", fetch = FetchType.LAZY, orphanRemoval = true)
+    List<Comment> replyingComments = new ArrayList<>();
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
-    List<CommentReport> commentReports;
+    List<CommentReport> commentReports = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    List<Reaction> reactions = new ArrayList<>();
+
 }

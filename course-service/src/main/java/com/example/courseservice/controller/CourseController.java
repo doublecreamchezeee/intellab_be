@@ -2,6 +2,7 @@ package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.comment.CommentCreationRequest;
+import com.example.courseservice.dto.request.comment.CommentModifyRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
@@ -410,14 +411,56 @@ public class CourseController {
 
     @PostMapping("/{courseId}/comments")
     public ApiResponse<CommentResponse> addComment(
-            @PathVariable("courseId") UUID courseId,
             @RequestHeader("X-UserId") String userUid,
+            @PathVariable("courseId") UUID courseId,
             @RequestBody CommentCreationRequest creationRequest ){
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
         return ApiResponse.<CommentResponse>builder()
                 .result(commentService.addComment(courseId, creationRequest, userId)).build();
+    }
+
+    @PutMapping("/comments/{commentId}/upvote")
+    public ApiResponse<CommentResponse> upVoteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.upvoteComment(userId, commentId)).build();
+    }
+
+    @PutMapping("/comments/{commentId}/cancelUpvote")
+    public ApiResponse<CommentResponse> cancelUpvoteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId ) {
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.cancelUpvoteComment(userId, commentId)).build();
+    }
+
+    @PutMapping("/comments/modify")
+    public ApiResponse<CommentResponse> modifyComment(
+            @RequestHeader("X-UserId") String userUid,
+            @RequestBody CommentModifyRequest modifyRequest ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.ModifyComment(userId, modifyRequest)).build();
+    }
+
+    @DeleteMapping("/comments/{commentId}/delete")
+    public ApiResponse<Boolean> deleteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        return ApiResponse.<Boolean>builder()
+                .result(commentService.removeComment(commentId, userId)).build();
     }
 
 

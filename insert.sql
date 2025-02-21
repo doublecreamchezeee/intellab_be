@@ -313,24 +313,38 @@ alter table topics
 
 create table comments
 (
-    comment_id        uuid not null default uuid_generate_v4()
+    comment_id         uuid not null
         primary key,
-    content           text,
-    created           timestamp(6) with time zone,
-    last_modified     timestamp(6) with time zone,
-    number_of_likes   bigint default 0,
-    reply_level       integer,
-    user_id           uuid,
-    parent_comment_id uuid
+    content            text,
+    created            timestamp(6) with time zone,
+    last_modified      timestamp(6) with time zone,
+    user_id            uuid,
+    parent_comment_id  uuid
         constraint fkst79ninfcw8cbrihoedh118xk
             references comments,
-    topic_id          uuid
+    replied_comment_id uuid
+        constraint fkbd3tl8jha2ib2812q9p9yxcmo
+            references comments,
+    topic_id           uuid
         constraint fkhanwncw4vn5t5syodhdma5sip
             references topics
 );
 
 alter table comments
     owner to postgres;
+
+create table comment_reactions
+(
+    user_id            uuid not null,
+    comment_comment_id uuid not null
+        constraint fkq6o8wtr8e4nhe4ya9yhnm4mli
+            references comments,
+    primary key (comment_comment_id, user_id)
+);
+
+alter table comment_reactions
+    owner to postgres;
+
 
 create table comment_reports
 (
