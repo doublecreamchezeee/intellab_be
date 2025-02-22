@@ -184,4 +184,19 @@ public class FirebaseAuthClient {
             }
         }
     }
+
+    public GetUsersResult getUsersByIds(List<String> userIds) {
+        try {
+            // Convert userIds into Firebase UidIdentifiers
+            List<UserIdentifier> identifiers = userIds.stream()
+                    .map(id -> (UserIdentifier) new UidIdentifier(id))  // Use EmailIdentifier(email) if querying by email
+                    .toList();
+
+            return firebaseAuth.getUsers(identifiers);
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error finding users by ids: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error finding users by ids: " + e.getMessage(), e);
+        }
+    }
 }

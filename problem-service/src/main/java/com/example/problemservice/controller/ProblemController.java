@@ -1,5 +1,6 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.core.DoublePageable;
 import com.example.problemservice.dto.request.DefaultCodeRequest;
 import com.example.problemservice.dto.request.problem.EnrichCodeRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
@@ -8,8 +9,11 @@ import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
+import com.example.problemservice.dto.response.problemComment.DetailsProblemCommentResponse;
 import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
 import com.example.problemservice.model.Problem;
+import com.example.problemservice.model.ProblemComment;
+import com.example.problemservice.service.ProblemCommentService;
 import com.example.problemservice.service.ProblemService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
@@ -20,8 +24,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +44,7 @@ import java.util.UUID;
 public class ProblemController {
     private final ProblemService problemService;
     private final SolutionService solutionService;
+    private final ProblemCommentService problemCommentService;
 
     @Operation(
             summary = "Create problem"
@@ -205,6 +213,48 @@ public class ProblemController {
     public ApiResponse<List<PartialBoilerplateResponse>> getPartialBoilerplate(@PathVariable UUID problemId) {
         return ApiResponse.<List<PartialBoilerplateResponse>>builder()
                 .result(problemService.getPartialBoilerplateOfProblem(problemId))
+                .build();
+    }
+
+    @Operation(
+            summary = "Get all problem comment by problem id"
+    )
+    @GetMapping("/{problemId}/comments")
+    public ApiResponse<Page<DetailsProblemCommentResponse>> getAllProblemCommentByProblemId(
+            @PathVariable UUID problemId,
+            @ParameterObject Pageable pageable,
+            @RequestParam(name = "childrenPage", required = false, defaultValue = "0") Integer childrenPage,
+            @RequestParam(name = "childrenSize", required = false, defaultValue = "20") Integer childrenSize,
+            @RequestParam(defaultValue = "lastModifiedAt", required = false) String childrenSortBy,
+            @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder
+        /*     @Qualifier("pageable")  @ParameterObject DoublePageable doublePageable
+            @Qualifier("childrenPageable") @ParameterObject Pageable childrenPageable*/
+    ) {
+        if (childrenPage == null) {
+            childrenPage = 0;
+        }
+
+        if (childrenSize == null) {
+            childrenSize = 20;
+        }
+
+        Sort sort = childrenSortOrder.equalsIgnoreCase("desc")
+                        ? Sort.by(childrenSortBy).descending()
+                        : Sort.by(childrenSortBy).ascending();
+
+        Pageable childrenPageable = PageRequest.of(childrenPage, childrenSize, sort);
+                //Sort.by("lastModifiedAt").ascending());
+
+        //Pageable.ofSize(childrenSize).withPage(childrenPage);
+
+        return ApiResponse.<Page<DetailsProblemCommentResponse>>builder()
+                .result(
+                        problemCommentService.getAllProblemCommentByProblemId(
+                                problemId,
+                                pageable,
+                                childrenPageable
+                        )
+                )
                 .build();
     }
 }
