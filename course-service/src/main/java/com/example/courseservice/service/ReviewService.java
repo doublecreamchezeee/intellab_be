@@ -219,8 +219,18 @@ public class ReviewService {
 
         CourseReviewsStatisticsResponse response = new CourseReviewsStatisticsResponse();
 
-        response.setTotalReviews(course.getReviewCount());
-        response.setAverageRating(course.getAverageRating());
+        if (course.getReviewCount() != null) {
+            response.setTotalReviews(course.getReviewCount());
+        } else {
+            response.setTotalReviews(0);
+        }
+
+        if (course.getAverageRating() != null) {
+            response.setAverageRating(course.getAverageRating());
+        } else {
+            response.setAverageRating(0.0);
+        }
+
         response.setCourseId(courseId);
 
         int fiveStar = 0;

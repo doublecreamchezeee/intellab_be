@@ -20,7 +20,7 @@ public interface LearningLessonRepository extends JpaRepository<LearningLesson, 
     List<LearningLesson> findAllByUserIdAndLesson_Course_CourseId(UUID userId, UUID courseId);
 
     int countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(UUID userUid, UUID courseId, boolean isDoneTheory);
-
+    int countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(UUID userUid, UUID courseId, boolean isDonePractice);
     List<LearningLesson> findByUserIdAndLesson_Course_CourseIdAndStatus(UUID userId, UUID courseId, String aNew);
 
     // @Query(value = "SELECT * FROM get_lessons_and_learning_progress(:studentId, :courseId)", nativeQuery = true)

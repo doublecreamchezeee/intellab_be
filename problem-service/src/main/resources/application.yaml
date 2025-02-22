@@ -13,6 +13,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        type:
+          json_format_mapper: com.example.problemservice.mapper.JacksonJsonFormatMapperCustom #CustomJacksonJsonFormatMapper
+            #descriptor:
+               # sql:
+               # use:
+                   # sql-comments: true
 #        generate_statistics: true
 #        format_sql: true
 #        use_sql_comments: true

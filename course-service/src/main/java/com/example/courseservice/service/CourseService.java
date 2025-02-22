@@ -305,6 +305,8 @@ public class CourseService {
         if (isUserEnrolled) {
             int totalLessons = lessonRepository.countByCourse_CourseId(courseId);
             int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
+            int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUid, courseId, true);
+            completedLessons += completedPractices;
 
             if (totalLessons > 0) {
                 completionRatio = (completedLessons / (float) totalLessons) * 100;
