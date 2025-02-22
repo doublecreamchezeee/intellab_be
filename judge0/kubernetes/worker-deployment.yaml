@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: workers
+spec:
+  selector:
+    app: workers
+  ports:
+    - port: 2358
+      targetPort: 2358
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workers
+  template:
+    metadata:
+      labels:
+        app: workers
+    spec:
+      containers:
+        - name: workers-container
+          image: judge0/judge0:1.13.0
+          securityContext:
+            privileged: true
+          envFrom:
+            - configMapRef:
+                name: judge0-config
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "./scripts/workers"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /judge0.conf
+              readOnly: true
+          resources:
+            limits:
+              memory: "1Gi"  # Set memory limit to 32GB
+              cpu: "500m"   # Set CPU limit to 10 cores
+          #          requests:
+          #            memory: "32Gi"   # Set memory request to 4GB
+          #            cpu: "1000m"    # Set CPU request to 1 core
+          ports:
+            - containerPort: 2358
+      volumes:
+        - name: config-volume
+          hostPath:
+            path: /judge0.conf

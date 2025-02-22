@@ -9,7 +9,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
 
 @Mapper(componentModel = "spring", uses = OptionMapper.class)
 public interface QuestionMapper {

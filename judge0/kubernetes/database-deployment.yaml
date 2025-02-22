@@ -1,0 +1,64 @@
+# database-deployment.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pvc
+spec:
+  resources:
+    requests:
+      storage: 256Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    app: db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db-container
+          image: postgres:13.0
+          env:
+            - name: POSTGRES_HOST
+              value: "db"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "judge0"
+            - name: POSTGRES_USER
+              value: "judge0"
+            - name: POSTGRES_PASSWORD
+              value: "htht01225923050"
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-data-volume
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-data-volume
+          persistentVolumeClaim:
+            claimName: db-pvc

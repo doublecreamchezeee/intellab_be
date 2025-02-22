@@ -1,9 +1,12 @@
 package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.comment.CommentCreationRequest;
+import com.example.courseservice.dto.request.comment.CommentModifyRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
+import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseSearchResponse;
@@ -14,7 +17,9 @@ import com.example.courseservice.dto.response.rerview.CourseReviewsStatisticsRes
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.UserCourses;
+import com.example.courseservice.service.CommentService;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
 import com.example.courseservice.service.ReviewService;
@@ -48,6 +53,7 @@ public class CourseController {
     CourseService courseService;
     LessonService lessonService;
     ReviewService reviewService;
+    private final CommentService commentService;
 
     @Operation(
             summary = "Create course"
@@ -292,12 +298,33 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get all categories"
+    )
     @GetMapping("categories")
     public ApiResponse<List<CategoryResponse>> getCategories() {
 
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(courseService.getCategories()).build();
     }
+
+    @Operation(summary = "Get category by Id")
+    @GetMapping("/category/{categoryId}")
+    public ApiResponse<CategoryResponse> getCategoryById(
+            @PathVariable Integer categoryId )
+    {
+        return ApiResponse.<CategoryResponse>builder()
+                .result(courseService.getCategory(categoryId)).build();
+    }
+
+    @Operation(summary = "Get category by list of id")
+    @PostMapping("/category")
+    public ApiResponse<List<CategoryResponse>> getCategoryByListOfId(@RequestBody List<Integer> listOfId) {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(courseService.getListCategory(listOfId)).build();
+    }
+
+
     @Operation(
             summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
     )
@@ -374,4 +401,67 @@ public class CourseController {
                 .result("All lessons of course have been restarted")
                 .build();
     }
+
+    @GetMapping("/{courseId}/comments")
+    public ApiResponse<List<CommentResponse>> getCommentsByCourseId(@PathVariable("courseId") UUID courseId) {
+        return ApiResponse.<List<CommentResponse>>builder()
+                .result(commentService.getComments(courseId))
+                .build();
+    }
+
+    @PostMapping("/{courseId}/comments")
+    public ApiResponse<CommentResponse> addComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("courseId") UUID courseId,
+            @RequestBody CommentCreationRequest creationRequest ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.addComment(courseId, creationRequest, userId)).build();
+    }
+
+    @PutMapping("/comments/{commentId}/upvote")
+    public ApiResponse<CommentResponse> upVoteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.upvoteComment(userId, commentId)).build();
+    }
+
+    @PutMapping("/comments/{commentId}/cancelUpvote")
+    public ApiResponse<CommentResponse> cancelUpvoteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId ) {
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.cancelUpvoteComment(userId, commentId)).build();
+    }
+
+    @PutMapping("/comments/modify")
+    public ApiResponse<CommentResponse> modifyComment(
+            @RequestHeader("X-UserId") String userUid,
+            @RequestBody CommentModifyRequest modifyRequest ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.ModifyComment(userId, modifyRequest)).build();
+    }
+
+    @DeleteMapping("/comments/{commentId}/delete")
+    public ApiResponse<Boolean> deleteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        return ApiResponse.<Boolean>builder()
+                .result(commentService.removeComment(commentId, userId)).build();
+    }
+
+
 }

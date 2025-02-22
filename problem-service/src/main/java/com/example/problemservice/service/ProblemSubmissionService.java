@@ -4,6 +4,7 @@ import com.example.problemservice.client.BoilerplateClient;
 import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.client.Judge0Client;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
+import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
 import com.example.problemservice.dto.request.lesson.DonePracticeRequest;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
@@ -47,11 +48,29 @@ public class ProblemSubmissionService {
     private final TestCaseRepository testCaseRepository;
     private final CourseClient courseClient;
 
-    public ProblemSubmission submitProblem(ProblemSubmission submission) {
+    public DetailsProblemSubmissionResponse submitProblem(SubmitCodeRequest request) {
+
         // Lấy Problem
-        Problem problem = problemRepository.findById(submission.getProblem().getProblemId()).orElseThrow(
+        Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
+
+        ProgrammingLanguage language = programmingLanguageRepository.findByLongName(request.getProgrammingLanguage())
+                .orElseThrow(() -> new AppException(ErrorCode.PROGRAMMING_LANGUAGE_NOT_EXIST));
+
+        ProblemSubmission submission = ProblemSubmission.builder()
+                .code(boilerplateClient.enrich(
+                        request.getCode(),
+                        language.getId(),
+                        problem.getProblemStructure()
+                ))
+                .createdAt(new Date())
+                .isSolved(false)
+                .programmingLanguage(request.getProgrammingLanguage())
+                .submitOrder(request.getSubmitOrder())
+                .userId(ParseUUID.normalizeUID(request.getUserId()))
+                .build();
+
         submission.setProblem(problem);
 
         // Lưu ProblemSubmission trước để đảm bảo có ID
@@ -90,7 +109,7 @@ public class ProblemSubmissionService {
         submission.setTestCasesOutput(outputs);
 
         // Lưu lại ProblemSubmission
-        return problemSubmissionRepository.save(submission);
+        return problemSubmissionMapper.toDetailsProblemSubmissionResponse(problemSubmissionRepository.save(submission));
     }
 
     public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request){
@@ -171,7 +190,7 @@ public class ProblemSubmissionService {
 
     }
 
-    public ProblemSubmission getSubmission(UUID submissionId) {
+    public DetailsProblemSubmissionResponse getSubmission(UUID submissionId) {
         // Fetch the submission
         ProblemSubmission submission = problemSubmissionRepository.findById(submissionId)
                 .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
@@ -195,7 +214,7 @@ public class ProblemSubmissionService {
 
         }
 
-        return submission;
+        return problemSubmissionMapper.toDetailsProblemSubmissionResponse(submission);
     }
 
     public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {

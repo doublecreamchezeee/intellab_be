@@ -1,12 +1,14 @@
 package com.example.problemservice.controller;
 
 import com.example.problemservice.core.DoublePageable;
+import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.dto.request.DefaultCodeRequest;
 import com.example.problemservice.dto.request.problem.EnrichCodeRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
+import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.problemComment.DetailsProblemCommentResponse;
@@ -14,6 +16,7 @@ import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemComment;
 import com.example.problemservice.service.ProblemCommentService;
+import com.example.problemservice.model.course.Category;
 import com.example.problemservice.service.ProblemService;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
@@ -54,13 +57,15 @@ public class ProblemController {
         return ResponseEntity.ok(problemService.createProblem(problem));
     }
 
+
+
     @Operation(
             summary = "Get problem by id"
     )
     @GetMapping("/{problemId}")
-    public ResponseEntity<Problem> getProblem(@PathVariable UUID problemId) {
+    public ResponseEntity<DetailsProblemResponse> getProblem(@PathVariable UUID problemId) {
         try {
-            Problem problem = problemService.getProblem(problemId);
+            DetailsProblemResponse problem = problemService.getProblem(problemId);
             return ResponseEntity.ok(problem); // Return the problem if found
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
@@ -103,13 +108,19 @@ public class ProblemController {
             summary = "Get all problems"
     )
     @GetMapping("")
-    public ResponseEntity<List<Problem>> getAllProblem() {
+    public ApiResponse<Page<ProblemRowResponse>> getAllProblem() {
+        Pageable pageable = PageRequest.of(0, 1000);
         try {
-            List<Problem> response = problemService.getAllProblems();
-            return ResponseEntity.ok(response);
+            Page<ProblemRowResponse> response = problemService.getAllProblems("", pageable);
+            return ApiResponse.<Page<ProblemRowResponse>>builder()
+                    .result(problemService.getAllProblems("", pageable)).build();
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if problem not found
+                ApiResponse.<Page<ProblemRowResponse>>builder()
+                        .result(null)
+                        .code(ErrorCode.PROBLEM_NOT_EXIST.getCode())
+                        .message(String.valueOf(ErrorCode.PROBLEM_NOT_EXIST))
+                        .build();
             }
             throw e;
         }

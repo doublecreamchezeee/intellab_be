@@ -1,18 +1,23 @@
 package com.example.problemservice.service;
 
+import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.converter.ProblemStructureConverter;
 import com.example.problemservice.client.BoilerplateClient;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
+import com.example.problemservice.dto.response.Problem.CategoryResponse;
+import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.DefaultCodeMapper;
 import com.example.problemservice.mapper.ProblemMapper;
+import com.example.problemservice.mapper.ProblemcategoryMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.composite.DefaultCodeId;
+import com.example.problemservice.model.course.Category;
 import com.example.problemservice.repository.DefaultCodeRepository;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
@@ -25,6 +30,7 @@ import com.example.problemservice.repository.ProgrammingLanguageRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -32,8 +38,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +52,8 @@ public class ProblemService {
     private final DefaultCodeRepository defaultCodeRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
     private final DefaultCodeMapper defaultCodeMapper;
+    private final ProblemcategoryMapper problemcategoryMapper;
+    private final CourseClient courseClient;
 
     public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
         Problem problem = problemMapper.toProblem(request);
@@ -77,10 +85,10 @@ public class ProblemService {
         return response;
     }
 
-    public Problem getProblem(UUID problemId) {
-        return problemRepository.findById(problemId).orElseThrow(
+    public DetailsProblemResponse getProblem(UUID problemId) {
+        return problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
-        );
+        ));
     }
 
     public List<Problem> getAllProblems() {
@@ -89,18 +97,15 @@ public class ProblemService {
 
     public Page<ProblemRowResponse> searchProblems(Pageable pageable, String keyword) {
         Page<Problem> problems = problemRepository.findAllByProblemNameContainingIgnoreCase(keyword, pageable);
-        return problems.map(problemMapper::toProblemRowResponse);
+
+        return getProblemRowResponses(problems);
     }
 
     public Page<ProblemRowResponse> searchProblems(Pageable pageable, String keyword, UUID userId) {
         Page<Problem> problems = problemRepository.findAllByProblemNameContainingIgnoreCase(keyword, pageable);
 
-        Page<ProblemRowResponse> results = problems.map(problemMapper::toProblemRowResponse);
+        return getProblemRowResponses(userId, problems);
 
-        results.forEach(problemRowResponse -> {
-            problemRowResponse.setDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
-        });
-        return results;
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
@@ -119,18 +124,47 @@ public class ProblemService {
     public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable, UUID userId) {
         Page<Problem> problems = problemRepository.findAll(pageable);
 
-        Page<ProblemRowResponse>  result = problems.map(problemMapper::toProblemRowResponse);
+        return getProblemRowResponses(userId, problems);
+    }
 
-        result.forEach(problemRowResponse -> {
-            problemRowResponse.setDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
+    @NotNull
+    private Page<ProblemRowResponse> getProblemRowResponses(UUID userId, Page<Problem> problems) {
+        return problems.map(problem -> {
+            ProblemRowResponse response = problemMapper.toProblemRowResponse(problem);
+            List<ProblemCategory> problemCategories = problem.getCategories();
+
+            List<CategoryResponse> categories = problemCategories.stream()
+                    .map(p-> courseClient.categories(p.getProblemCategoryID().getCategoryId()).getResult())
+                    .toList();
+
+            response.setCategories(categories);
+
+            response.setIsDone(isDoneProblem(response.getProblemId(),userId));
+
+            return response;
         });
-        return result;
     }
 
     public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable) {
         Page<Problem> problems = problemRepository.findAll(pageable);
 
-        return problems.map(problemMapper::toProblemRowResponse);
+        return getProblemRowResponses(problems);
+    }
+
+    @NotNull
+    private Page<ProblemRowResponse> getProblemRowResponses(Page<Problem> problems) {
+        return problems.map(problem -> {
+            ProblemRowResponse response = problemMapper.toProblemRowResponse(problem);
+            List<ProblemCategory> problemCategories = problem.getCategories();
+
+            List<CategoryResponse> categories = problemCategories.stream()
+                    .map(p-> courseClient.categories(p.getProblemCategoryID().getCategoryId()).getResult())
+                    .toList();
+
+            response.setCategories(categories);
+
+            return response;
+        });
     }
 
     public void deleteProblem(UUID problemId) {

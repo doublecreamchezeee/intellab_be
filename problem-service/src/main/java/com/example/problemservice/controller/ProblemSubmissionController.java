@@ -1,6 +1,7 @@
 package com.example.problemservice.controller;
 
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
+import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
@@ -31,12 +32,12 @@ public class ProblemSubmissionController {
     private final ProblemSubmissionService problemSubmissionService;
 
     @Operation(
-            summary = "Create submission"
+            summary = "Create submission (Submit code)"
     )
     @PostMapping
-    public ResponseEntity<ProblemSubmission> createSubmission(@RequestBody ProblemSubmission submission) {
+    public ResponseEntity<DetailsProblemSubmissionResponse> createSubmission(@RequestBody SubmitCodeRequest request) {
         try {
-            ProblemSubmission createdSubmission = problemSubmissionService.submitProblem(submission);
+            DetailsProblemSubmissionResponse createdSubmission = problemSubmissionService.submitProblem(request);
             return ResponseEntity.ok(createdSubmission); // HTTP 200 OK
         } catch (Exception e) {
             System.out.println(e);
@@ -44,7 +45,7 @@ public class ProblemSubmissionController {
         }
     }
     @Operation(
-            summary = "Create submission"
+            summary = "List submission by userid & problemId (Show the problem submission in submission tab)"
     )
     @GetMapping("/submitList/{problemId}")
     public ResponseEntity<List<ProblemSubmissionResponse>> getSubmissions(@PathVariable String problemId, @RequestHeader("X-UserId") String userId) {
@@ -69,7 +70,7 @@ public class ProblemSubmissionController {
     }
 
     @Operation(
-            summary = "Update submission by id"
+            summary = "Update submission by id (Unused api-call)"
     )
     @PostMapping("/update/{submissionId}")
     public ResponseEntity<ProblemSubmission> updateSubmission(@PathVariable UUID submissionId) {
@@ -78,12 +79,12 @@ public class ProblemSubmissionController {
     }
 
     @Operation(
-            summary = "Get submission by id"
+            summary = "Get submission by id, call after submit code to set the isSolved is true if accepted"
     )
     @GetMapping("/{submissionId}")
-    public ResponseEntity<ProblemSubmission> getSubmission(@PathVariable String submissionId) {
+    public ResponseEntity<DetailsProblemSubmissionResponse> getSubmission(@PathVariable String submissionId) {
         try {
-            ProblemSubmission submission = problemSubmissionService.getSubmission(UUID.fromString(submissionId));
+            DetailsProblemSubmissionResponse submission = problemSubmissionService.getSubmission(UUID.fromString(submissionId));
             return ResponseEntity.ok(submission); // HTTP 200 OK
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.SUBMISSION_NOT_EXIST) {
@@ -95,7 +96,7 @@ public class ProblemSubmissionController {
     }
 
     @Operation(
-            summary = "Get submission details by problem id and user uid"
+            summary = "Get submission details by problem id and user uid (to see all submission of user in a problem)"
     )
     @GetMapping("/details/{problemId}")
     public ApiResponse<List<DetailsProblemSubmissionResponse>>  getSubmissionDetailsByProblemIdAndUserUid(

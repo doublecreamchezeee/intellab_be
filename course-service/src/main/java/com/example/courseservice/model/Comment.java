@@ -1,6 +1,9 @@
 package com.example.courseservice.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,11 +31,6 @@ public class Comment {
     @Column(columnDefinition = "TEXT")
     String content;
 
-    @Column(name = "reply_level")
-    Integer replyLevel;
-
-    @Column(name = "number_of_likes")
-    Long numberOfLikes;
 
     @CreationTimestamp
     Instant created;
@@ -40,6 +39,7 @@ public class Comment {
     @UpdateTimestamp
     Instant lastModified;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
     Topic topic;
@@ -47,13 +47,31 @@ public class Comment {
     @JoinColumn(name = "user_id")
     UUID userId;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     Comment parentComment;
 
-    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, orphanRemoval = true)
-    List<Comment> comments;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    List<Comment> comments = new ArrayList<>();
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replied_comment_id")
+    Comment repliedComment;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "repliedComment", fetch = FetchType.LAZY, orphanRemoval = true)
+    List<Comment> replyingComments = new ArrayList<>();
+
+
+    @JsonIgnore
     @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
-    List<CommentReport> commentReports;
+    List<CommentReport> commentReports = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    List<Reaction> reactions = new ArrayList<>();
+
 }
