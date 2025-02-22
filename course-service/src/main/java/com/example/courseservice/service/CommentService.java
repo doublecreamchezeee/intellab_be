@@ -62,6 +62,18 @@ public class CommentService {
             }
             comment.setParentComment(parentComment);
         }
+        else
+        {
+            if (request.getRepliedCommentId() != null) {
+                Comment repliedComment = commentRepository.findById(request.getRepliedCommentId())
+                        .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+                Comment parentComment = repliedComment;
+                while (parentComment.getParentComment() != null) {
+                    parentComment = parentComment.getParentComment();
+                }
+                comment.setParentComment(parentComment);
+            }
+        }
 
         Comment result = commentRepository.save(comment);
 
