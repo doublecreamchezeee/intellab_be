@@ -40,4 +40,6 @@ public class SingleProblemCommentResponse {
     String userEmail;
 
     Boolean isModified;
+
+    Boolean isUpVoted;
 }

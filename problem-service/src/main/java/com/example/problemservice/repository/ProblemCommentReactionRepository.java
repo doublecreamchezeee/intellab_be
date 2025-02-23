@@ -2,6 +2,8 @@ package com.example.problemservice.repository;
 
 import com.example.problemservice.model.ProblemCommentReaction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +20,7 @@ public interface ProblemCommentReactionRepository extends JpaRepository<ProblemC
     void deleteByReactionId_UserUuid(UUID reactionId_userUuid);
     Optional<ProblemCommentReaction> findByProblemComment_CommentIdAndReactionId_UserUuid(UUID problemComment_commentId, UUID reactionId_userUuid);
     Boolean existsByProblemComment_CommentIdAndReactionId_UserUuid(UUID problemComment_commentId, UUID reactionId_userUuid);
+
+    @Query("SELECT pcr FROM ProblemCommentReaction pcr WHERE pcr.problemComment.commentId IN :commentIds AND pcr.reactionId.userUuid = :userUuid")
+    List<ProblemCommentReaction> findAllByCommentIdsAndUserUuid(@Param("commentIds") List<UUID> commentIds, @Param("userUuid") UUID userUuid);
 }

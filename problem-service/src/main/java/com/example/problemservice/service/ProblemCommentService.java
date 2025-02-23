@@ -194,7 +194,7 @@ public class ProblemCommentService {
         problemCommentRepository.save(problemComment);
     }
 
-    public SingleProblemCommentResponse getOneProblemCommentById(String commentId) {
+    public SingleProblemCommentResponse getOneProblemCommentById(String commentId, UUID requestUserUuid) {
         ProblemComment problemComment = problemCommentRepository.findById(
                 UUID.fromString(
                         commentId
@@ -213,6 +213,19 @@ public class ProblemCommentService {
             response.setUsername(profileInformation.getDisplayName());
             response.setUserEmail(profileInformation.getEmail());
             response.setUserAvatar(profileInformation.getPhotoUrl());
+        } else {
+            response.setUsername(null);
+            response.setUserEmail(null);
+            response.setUserAvatar(null);
+        }
+
+        if (requestUserUuid != null) {
+            Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuid(
+                    problemComment.getCommentId(),
+                    requestUserUuid
+            );
+
+            response.setIsUpVoted(isReactionExisted);
         }
 
         return response;
@@ -220,6 +233,7 @@ public class ProblemCommentService {
 
     public Page<DetailsProblemCommentResponse> getAllProblemCommentByProblemId(
             UUID problemId,
+            UUID requestUserUuid,
             Pageable pageable,
             Pageable childrenPageable
     ) {
@@ -264,14 +278,37 @@ public class ProblemCommentService {
             return responses;
         }
 
-        return customProblemCommentMapper.
+        // mapping profile information to response
+        responses = customProblemCommentMapper.
                 mappingProfileInformationToPageProblemComments(
                         responses,
                         profileInformation
                 );
+
+        if (requestUserUuid == null) {
+            return responses;
+        }
+
+        // get all comment ids to get reaction information
+        List<UUID> commentIds = extractProblemCommentIdFrom2DArrayProblemComments(
+                responses.getContent()
+        );
+
+        // get all reaction information
+        List<ProblemCommentReaction> reactions = problemCommentReactionRepository.findAllByCommentIdsAndUserUuid(
+                commentIds,
+                requestUserUuid
+        );
+
+
+        return mappingReactionToPageProblemComments(
+                responses,
+                reactions
+        );
+
     }
 
-    public DetailsProblemCommentResponse getOneProblemCommentAndItsChildrenById(String commentId, Pageable pageable) {
+    public DetailsProblemCommentResponse getOneProblemCommentAndItsChildrenById(String commentId, UUID requestUserUuid, Pageable pageable) {
         ProblemComment problemComment = problemCommentRepository.findById(
                 UUID.fromString(
                         commentId
@@ -300,14 +337,34 @@ public class ProblemCommentService {
             return response;
         }
 
-        return customProblemCommentMapper
+        response = customProblemCommentMapper
                 .mappingProfileInformationToOneProblemComments(
                         response,
                         profileInformation
                 );
+
+        if (requestUserUuid == null) {
+            return response;
+        }
+
+        List<UUID> commentIds = extractProblemCommentIdFrom2DArrayProblemComments(
+                List.of(
+                        response
+                )
+        );
+
+        List<ProblemCommentReaction> reactions = problemCommentReactionRepository.findAllByCommentIdsAndUserUuid(
+                commentIds,
+                requestUserUuid
+        );
+
+        return mappingReactionToPageProblemComments(
+                new PageImpl<>(List.of(response), pageable, 1),
+                reactions
+        ).getContent().get(0);
     }
 
-    public Page<DetailsProblemCommentResponse> getChildrenCommentOfProblemCommentById(UUID commentId, Pageable pageable) {
+    public Page<DetailsProblemCommentResponse> getChildrenCommentOfProblemCommentById(UUID commentId, UUID requestUserUuid, Pageable pageable) {
         ProblemComment problemComment = problemCommentRepository.findById(
                 commentId
         ).orElseThrow(
@@ -341,17 +398,35 @@ public class ProblemCommentService {
             return responses;
         }
 
-        return customProblemCommentMapper
+        responses = customProblemCommentMapper
                 .mappingProfileInformationToChildrenProblemComments(
                         responses,
                         profileInformation
                 );
 
+        if (requestUserUuid == null) {
+            return responses;
+        }
+
+        List<UUID> commentIds = extractProblemCommentIdFrom2DArrayProblemComments(
+                responses.getContent()
+        );
+
+        List<ProblemCommentReaction> reactions = problemCommentReactionRepository.findAllByCommentIdsAndUserUuid(
+                commentIds,
+                requestUserUuid
+        );
+
+        return mappingReactionToPageProblemComments(
+                responses,
+                reactions
+        );
+
     }
 
     private List<String> extractUserUidFrom2DArrayProblemComments(
             List<DetailsProblemCommentResponse> problemComments) {
-        Set<String> userUids = new HashSet<>();
+        Set<String> userUids = new HashSet<>(); // use set to remove duplicate user uid
 
         for (DetailsProblemCommentResponse problemComment : problemComments) {
             userUids.add(problemComment.getUserUid());
@@ -371,6 +446,23 @@ public class ProblemCommentService {
         }
 
         return List.copyOf(userUids);
+    }
+
+    private List<UUID> extractProblemCommentIdFrom2DArrayProblemComments(
+            List<DetailsProblemCommentResponse> problemComments) {
+        List<UUID> commentIds = new ArrayList<>(); // don't need to use set because comment id is unique
+
+        for (DetailsProblemCommentResponse problemComment : problemComments) {
+            commentIds.add(problemComment.getCommentId());
+            if (problemComment.getChildrenComments() != null) {
+                // 2d array
+                for (DetailsProblemCommentResponse childComment : problemComment.getChildrenComments().getContent()) {
+                    commentIds.add(childComment.getCommentId());
+                }
+            }
+        }
+
+        return commentIds;
     }
 
     private List<String> extractUserUidFrom1DArrayProblemComments(
@@ -466,6 +558,49 @@ public class ProblemCommentService {
 
         return problemComment.getReactions().size();
     }
+
+    public List<ProblemCommentReaction> getListProblemCommentReactionByListCommentAndUserUuid(List<UUID> commentIds, UUID userUuid) {
+        return problemCommentReactionRepository.findAllByCommentIdsAndUserUuid(
+                commentIds,
+                userUuid
+        );
+    }
+
+    public Page<DetailsProblemCommentResponse> mappingReactionToPageProblemComments(
+            Page<DetailsProblemCommentResponse> problemComments,
+            List<ProblemCommentReaction> reactions
+    ) {
+        Map<UUID, ProblemCommentReaction> reactionMap = new HashMap<>();
+
+        for (ProblemCommentReaction reaction : reactions) {
+            reactionMap.put(
+                    reaction.getReactionId().getCommentId(),
+                    reaction
+            );
+        }
+
+        for (DetailsProblemCommentResponse problemComment : problemComments) {
+            ProblemCommentReaction reaction = reactionMap.get(problemComment.getCommentId());
+
+            problemComment.setIsUpVoted(reaction != null);
+
+            if (problemComment.getChildrenComments() != null
+                    && !problemComment.getChildrenComments().isEmpty()
+            ) {
+
+                for (DetailsProblemCommentResponse childComment : problemComment.getChildrenComments().getContent()) {
+                    ProblemCommentReaction childReaction = reactionMap.get(childComment.getCommentId());
+
+                    childComment.setIsUpVoted(childReaction != null);
+                }
+            }
+
+
+        }
+
+        return problemComments;
+    }
+
 
 
 }
