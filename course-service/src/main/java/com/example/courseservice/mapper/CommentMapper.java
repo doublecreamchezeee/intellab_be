@@ -20,32 +20,20 @@ public class CommentMapper {
 
     @SneakyThrows
     public CommentResponse toResponse(Comment comment) {
-        if (comment == null) {
-            return null;
-        }
-
-        Boolean isUpVoted = false;
         Boolean isModified = !comment.getCreated().equals(comment.getLastModified());
-        Long upvote = (long) comment.getReactions().size();
+
 
         return CommentResponse.builder()
                 .commentId(comment.getCommentId())
                 .content(comment.getContent())
-                .numberOfLikes(upvote)
+                .numberOfLikes(comment.getNumberOfLikes())
                 .created(comment.getCreated())
                 .lastModified(comment.getLastModified())
                 .userId(comment.getUserId())
                 .repliedCommentId(comment.getRepliedComment() == null ? null : comment.getRepliedComment().getCommentId())
                 .parentCommentId(comment.getParentComment() == null ? null : comment.getParentComment().getCommentId())
-                .isUpVoted(isUpVoted)
                 .isModified(isModified)
                 .userName(getUserName(comment.getUserId()))
-                // Ánh xạ đệ quy cho danh sách comments con
-                .comments(comment.getComments() != null
-                        ? comment.getComments().stream()
-                        .map(this::toResponse)
-                        .collect(Collectors.toList())
-                        : null)
                 .build();
     }
 

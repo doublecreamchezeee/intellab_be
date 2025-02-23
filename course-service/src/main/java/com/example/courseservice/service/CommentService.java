@@ -14,14 +14,16 @@ import com.example.courseservice.model.compositeKey.ReactionID;
 import com.example.courseservice.repository.CommentRepository;
 import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.ReactionRepository;
+import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,11 +34,38 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final ReactionRepository reactionRepository;
 
-    public List<CommentResponse> getComments(UUID courseId) {
+    public Page<CommentResponse> getComments(UUID courseId, UUID userId, Pageable pageable, Pageable childrenPageable) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(()-> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-        List<Comment> comments = commentRepository.findByTopicAndParentCommentIsNull(course.getTopic());
-        return comments.stream().map(commentMapper::toResponse).collect(Collectors.toList());
+        Page<Comment> comments = commentRepository.findByTopicAndParentCommentIsNull(course.getTopic(), pageable);
+
+
+        System.out.println(userId);
+
+        return comments.map( comment -> {
+            CommentResponse commentResponse = commentMapper.toResponse(comment);
+
+            Page<Comment> childrenComments = commentRepository.findByParentComment(comment, childrenPageable);
+
+            commentResponse.setComments(childrenComments.map(childrenComment-> {
+
+                CommentResponse childrenCommentResponse = commentMapper.toResponse(childrenComment);
+
+                childrenCommentResponse.setIsOwner(userId != null ? childrenComment.getUserId().equals(userId) : false);
+
+                childrenCommentResponse.setIsUpvoted(childrenComment.getReactions()
+                        .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+
+                return childrenCommentResponse;
+            }));
+
+            commentResponse.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
+
+            commentResponse.setIsUpvoted(comment.getReactions()
+                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+
+            return commentResponse;
+                });
     }
 
     public CommentResponse addComment(UUID courseId, CommentCreationRequest request, UUID userId) {
@@ -65,9 +94,8 @@ public class CommentService {
         else
         {
             if (request.getRepliedCommentId() != null) {
-                Comment repliedComment = commentRepository.findById(request.getRepliedCommentId())
+                Comment parentComment = commentRepository.findById(request.getRepliedCommentId())
                         .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
-                Comment parentComment = repliedComment;
                 while (parentComment.getParentComment() != null) {
                     parentComment = parentComment.getParentComment();
                 }
@@ -86,6 +114,8 @@ public class CommentService {
             throw new AppException(ErrorCode.INVALID_COMMENT);
         }
         comment.setContent(request.getContent());
+        comment.setLastModified(Instant.now());
+
         comment = commentRepository.save(comment);
 
         return commentMapper.toResponse(comment);
@@ -94,14 +124,16 @@ public class CommentService {
     public CommentResponse upvoteComment(UUID userId, UUID commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
-        if (!comment.getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.INVALID_COMMENT);
-        }
+
 
         ReactionID id = new ReactionID(userId,commentId);
         Reaction reactions = new Reaction(id,comment);
 
         comment.getReactions().add(reactions);
+
+        comment = commentRepository.save(comment);
+
+        comment.setNumberOfLikes((long) comment.getReactions().size());
 
         comment = commentRepository.save(comment);
 
@@ -112,13 +144,17 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
             .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
 
-        if (!comment.getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.INVALID_COMMENT);
+        if (comment.getReactions().stream().noneMatch(reaction -> reaction.getReactionID().getUserId().equals(userId))) {
+            throw new AppException(ErrorCode.INVALID_USER);
         }
 
         Reaction reactions = reactionRepository.findByReactionID_UserIdAndComment(userId,comment);
 
         comment.getReactions().remove(reactions);
+
+        comment = commentRepository.save(comment);
+
+        comment.setNumberOfLikes((long) comment.getReactions().size());
 
         comment = commentRepository.save(comment);
 
@@ -134,7 +170,50 @@ public class CommentService {
 
         commentRepository.delete(comment);
         commentRepository.flush();
+
         return true;
+    }
+
+    public Page<CommentResponse> getChildrenComments(UUID commentId, UUID userId, Pageable pageable) {
+        Comment parent = commentRepository.findById(commentId)
+                .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
+        Page<Comment> children = commentRepository.findByParentComment(parent, pageable);
+
+        return children.map(childrenComment-> {
+
+            CommentResponse childrenCommentResponse = commentMapper.toResponse(childrenComment);
+
+            childrenCommentResponse.setIsOwner(userId != null ? childrenComment.getUserId().equals(userId) : false);
+
+            childrenCommentResponse.setIsUpvoted(childrenComment.getReactions()
+                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+
+            return childrenCommentResponse;
+        });
+    }
+
+    public CommentResponse getComment(UUID commentId, UUID userId, Pageable pageable) {
+        Comment parent = commentRepository.findById(commentId)
+                .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
+        Page<Comment> children = commentRepository.findByParentComment(parent, pageable);
+
+        CommentResponse result = commentMapper.toResponse(parent);
+
+        result.setComments(children.map(childrenComment-> {
+
+            CommentResponse childrenCommentResponse = commentMapper.toResponse(childrenComment);
+
+            childrenCommentResponse.setIsOwner(userId != null ? childrenComment.getUserId().equals(userId) : false);
+
+            childrenCommentResponse.setIsUpvoted(childrenComment.getReactions()
+                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+
+            return childrenCommentResponse;
+        }));
+
+        return result;
     }
 
 }

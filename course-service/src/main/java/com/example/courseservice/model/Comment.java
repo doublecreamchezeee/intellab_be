@@ -36,8 +36,10 @@ public class Comment {
     Instant created;
 
     @Column(name = "last_modified")
-    @UpdateTimestamp
     Instant lastModified;
+
+    @Column(name = "number_of_likes")
+    Long numberOfLikes;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -51,6 +53,7 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     Comment parentComment;
+
 
     @JsonManagedReference
     @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
