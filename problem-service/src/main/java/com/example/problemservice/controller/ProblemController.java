@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,7 @@ import java.util.UUID;
 @RequestMapping("/problems")
 @RequiredArgsConstructor
 @Tag(name = "Problem")
+@Slf4j
 public class ProblemController {
     private final ProblemService problemService;
     private final SolutionService solutionService;
@@ -237,10 +239,12 @@ public class ProblemController {
             @RequestParam(name = "childrenPage", required = false, defaultValue = "0") Integer childrenPage,
             @RequestParam(name = "childrenSize", required = false, defaultValue = "20") Integer childrenSize,
             @RequestParam(defaultValue = "lastModifiedAt", required = false) String childrenSortBy,
-            @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder
+            @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder,
+            @RequestParam(name = "userId", value = "userId", required = false) String userUid
         /*     @Qualifier("pageable")  @ParameterObject DoublePageable doublePageable
             @Qualifier("childrenPageable") @ParameterObject Pageable childrenPageable*/
     ) {
+        //log.info("userUid: {}", userUid);
         if (childrenPage == null) {
             childrenPage = 0;
         }
@@ -258,10 +262,20 @@ public class ProblemController {
 
         //Pageable.ofSize(childrenSize).withPage(childrenPage);
 
+        UUID userUuid = null;
+
+        if (userUid != null) {
+            userUid = userUid.split(",")[0];
+            userUuid = ParseUUID.normalizeUID(
+                    userUid
+            );
+        }
+
         return ApiResponse.<Page<DetailsProblemCommentResponse>>builder()
                 .result(
                         problemCommentService.getAllProblemCommentByProblemId(
                                 problemId,
+                                userUuid,
                                 pageable,
                                 childrenPageable
                         )

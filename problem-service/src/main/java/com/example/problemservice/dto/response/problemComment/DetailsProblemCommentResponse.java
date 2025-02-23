@@ -42,5 +42,7 @@ public class DetailsProblemCommentResponse {
 
     Boolean isModified;
 
+    Boolean isUpVoted;
+
     Page<DetailsProblemCommentResponse> childrenComments;
 }

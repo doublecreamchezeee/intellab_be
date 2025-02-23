@@ -115,12 +115,25 @@ public class ProblemCommentController {
     )
     @GetMapping("/{commentId}")
     public ApiResponse<SingleProblemCommentResponse> getProblemComment(
-            @PathVariable String commentId
+            @PathVariable String commentId,
+            @RequestParam(name = "userId", required = false) String userUid
     ) {
+        UUID userUuid = null;
 
+        if (userUid != null) {
+            userUid = userUid.split(",")[0];
+            userUuid = ParseUUID.normalizeUID(
+                    userUid
+            );
+        }
         return ApiResponse.<SingleProblemCommentResponse>builder()
                 .message("Problem comment retrieved successfully")
-                .result(problemCommentService.getOneProblemCommentById(commentId))
+                .result(
+                        problemCommentService.getOneProblemCommentById(
+                            commentId,
+                            userUuid
+                        )
+                )
                 .build();
     }
 
@@ -130,14 +143,24 @@ public class ProblemCommentController {
     @GetMapping("/{parentCommentId}/root-and-children")
     public ApiResponse<DetailsProblemCommentResponse> getProblemCommentAndChildren(
             @PathVariable String parentCommentId,
+            @RequestParam(name = "userId", required = false) String userUid,
             @ParameterObject Pageable pageable
     ) {
+        UUID userUuid = null;
+
+        if (userUid != null) {
+            userUid = userUid.split(",")[0];
+            userUuid = ParseUUID.normalizeUID(
+                    userUid
+            );
+        }
 
         return ApiResponse.<DetailsProblemCommentResponse>builder()
                 .message("Problem comment retrieved successfully")
                 .result(
                         problemCommentService.getOneProblemCommentAndItsChildrenById(
                                 parentCommentId,
+                                userUuid,
                                 pageable
                         )
                 )
@@ -150,8 +173,17 @@ public class ProblemCommentController {
     @GetMapping("/{parentCommentId}/children")
     public ApiResponse<Page<DetailsProblemCommentResponse>> getChildrenCommentsOfParentComment(
             @PathVariable String parentCommentId,
+            @RequestParam(name = "userId", required = false) String userUid,
             @ParameterObject Pageable pageable
     ) {
+        UUID userUuid = null;
+
+        if (userUid != null) {
+            userUid = userUid.split(",")[0];
+            userUuid = ParseUUID.normalizeUID(
+                    userUid
+            );
+        }
 
         UUID commentId = UUID.fromString(
                 parentCommentId
@@ -161,6 +193,7 @@ public class ProblemCommentController {
                 .result(
                         problemCommentService.getChildrenCommentOfProblemCommentById(
                                 commentId,
+                                userUuid,
                                 pageable
                         )
                 )

@@ -120,6 +120,10 @@ public class CustomProblemCommentMapper {
                 )
                 .createdAt(problemComment.getCreatedAt())
                 .lastModifiedAt(problemComment.getLastModifiedAt())
+                .username(null)
+                .userAvatar(null)
+                .userEmail(null)
+                .isUpVoted(false)
                 .childrenComments(
                         childrenProblemComments != null
                                 && !childrenProblemComments.isEmpty() // don't need to check paginatedChildren
