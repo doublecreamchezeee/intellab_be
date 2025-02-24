@@ -20,6 +20,7 @@ public class CommentResponse {
     Instant created;
     Instant lastModified;
     UUID userId;
+    String userUid;
     String userName;
     String avatarUrl;
     UUID repliedCommentId;
