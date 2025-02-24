@@ -39,7 +39,7 @@ public class Comment {
     Instant lastModified;
 
     @Column(name = "number_of_likes")
-    Long numberOfLikes;
+    Long numberOfLikes = 0L;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
