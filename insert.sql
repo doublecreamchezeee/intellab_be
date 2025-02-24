@@ -316,6 +316,7 @@ create table comments
     comment_id         uuid not null
         primary key,
     content            text,
+    number_of_likes bigint default 0,
     created            timestamp(6) with time zone,
     last_modified      timestamp(6) with time zone,
     user_id            uuid,
