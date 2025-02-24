@@ -13,4 +13,5 @@ public class ValidatedTokenResponse {
     String userId;
     String email;
     String name;
+    String role;
 }

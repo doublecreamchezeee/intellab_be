@@ -3,15 +3,15 @@ package com.example.identityservice.client;
 import com.example.identityservice.configuration.firebase.FirebaseConfigurationProperties;
 import com.example.identityservice.dto.request.auth.FirebaseSignInRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
-import com.example.identityservice.dto.response.auth.FirebaseSignInResponse;
-import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
-import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
+import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
+import com.example.identityservice.mapper.UserMapper;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.services.people.v1.PeopleService;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.UserCredentials;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.firebase.auth.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +24,11 @@ import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 @Component
 @RequiredArgsConstructor
@@ -56,8 +58,32 @@ public class FirebaseAuthClient {
                 .build();
     }
 
-    public FirebaseToken verifyToken(@NonNull final String idToken) throws FirebaseAuthException {
-        return firebaseAuth.verifyIdToken(idToken);
+    public ValidatedTokenResponse verifyToken(@NonNull final String token) {
+        try {
+            FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
+
+            String userId = decodeToken.getUid(); // Correct way to get user ID
+            String role = (String) decodeToken.getClaims().getOrDefault("role", "USER"); // Default to "USER" if missing
+            String email = decodeToken.getEmail(); // Get email if available
+
+            return ValidatedTokenResponse.builder()
+                    .userId(userId)
+                    .role(role)
+                    .email(email) // Ensure email is included
+                    .isValidated(true)
+                    .message("Token validation successful.")
+                    .build();
+        } catch (FirebaseAuthException e) {
+            return ValidatedTokenResponse.builder()
+                    .isValidated(false)
+                    .message("Invalid token: " + e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            return ValidatedTokenResponse.builder()
+                    .isValidated(false)
+                    .message("An unexpected error occurred: " + e.getMessage())
+                    .build();
+        }
     }
 
     private FirebaseSignInResponse sendSignInRequest(@NonNull final FirebaseSignInRequest request) {
@@ -182,6 +208,23 @@ public class FirebaseAuthClient {
             } catch (FirebaseAuthException e) {
                 throw new FirebaseAuthenticationException();
             }
+        }
+    }
+
+    public UserInfoResponse getUserInfo(String userId, String email) {
+        try {
+            UserRecord userRecord;
+            if (userId != null) {
+                userRecord = firebaseAuth.getUser(userId);
+            } else if (email != null) {
+                userRecord = firebaseAuth.getUserByEmail(email);
+            } else {
+                throw new IllegalArgumentException("Either userId or email must be provided.");
+            }
+            return UserMapper.INSTANCE.fromRecordToResponse(userRecord);
+
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error retrieving user information: " + e.getMessage(), e);
         }
     }
 }

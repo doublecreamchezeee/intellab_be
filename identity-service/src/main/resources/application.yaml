@@ -28,6 +28,9 @@ springdoc:
     use-root-path: true
     enabled: true
 
+cloudinary:
+  url: cloudinary://${CLOUDINARY_KEY}:${CLOUDINARY_SECRET}@${CLOUDINARY_NAME}
+
 domain:
   auth:
     reset-password-callback-url: ${DOMAIN_AUTH_RESET_PASSWORD_CALLBACK_URL}

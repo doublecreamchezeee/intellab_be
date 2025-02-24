@@ -76,10 +76,10 @@ public class AuthService {
     }
 
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
-        FirebaseToken firebaseToken = firebaseAuthClient.verifyToken(idToken);
+        ValidatedTokenResponse firebaseToken = firebaseAuthClient.verifyToken(idToken);
 
         return FirebaseGoogleSignInResponse.builder()
-                .uid(firebaseToken.getUid())
+                .uid(firebaseToken.getUserId())
                 .email(firebaseToken.getEmail())
                 .build();
     }

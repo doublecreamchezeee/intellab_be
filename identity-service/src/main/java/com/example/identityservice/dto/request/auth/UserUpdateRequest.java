@@ -13,4 +13,7 @@ import lombok.*;
 public class UserUpdateRequest {
     @Size(max = 50, message = "Display name length must not exceed 50 characters")
     private String displayName;
+
+    @Size(max = 255, message = "Photo URL length must not exceed 255 characters")
+    private String photoUrl;
 }
