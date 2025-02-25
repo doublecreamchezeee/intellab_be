@@ -1,6 +1,7 @@
 package com.example.problemservice.controller;
 
-import com.example.problemservice.dto.response.ProgressResponse;
+import com.example.problemservice.dto.response.ProgressLanguageResponse;
+import com.example.problemservice.dto.response.ProgressLevelResponse;
 import com.example.problemservice.service.StatisticsService;
 import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,16 +20,18 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Statistics")
 public class StatisticsController {
     StatisticsService statisticsService;
-    @GetMapping("/progress")
-    public ResponseEntity<ProgressResponse> getProgress(@RequestHeader("X-UserId") String userId) {
+
+    @GetMapping("/progress/level")
+    public ResponseEntity<ProgressLevelResponse> getProgressLevel(@RequestHeader("X-UserId") String userId) {
         userId = userId.split(",")[0];
-        ProgressResponse response = statisticsService.getProgress(ParseUUID.normalizeUID(userId));
+        ProgressLevelResponse response = statisticsService.getProgressLevel(ParseUUID.normalizeUID(userId));
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/languages")
-//    public ResponseEntity<ProgressResponse> getStatisticsLanguage(@RequestParam String userId) {
-//        ProgressResponse response = statisticsService.getProgress(ParseUUID.normalizeUID(userId));
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/progress/language")
+    public ResponseEntity<ProgressLanguageResponse> getProgressLanguage(@RequestHeader("X-UserId") String userId) {
+        userId = userId.split(",")[0];
+        ProgressLanguageResponse response = statisticsService.getProgressLanguage(ParseUUID.normalizeUID(userId));
+        return ResponseEntity.ok(response);
+    }
 }

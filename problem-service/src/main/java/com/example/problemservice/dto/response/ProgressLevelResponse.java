@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class ProgressResponse {
+public class ProgressLevelResponse {
     private int totalProblems;
     private DifficultyStatistics easy;
     private DifficultyStatistics medium;

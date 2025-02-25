@@ -27,5 +27,13 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
             @Param("userUid") UUID userUid
     );
 
+    @Query("SELECT ps.programmingLanguage, COUNT(ps) " +
+            "FROM ProblemSubmission ps " +
+            "WHERE ps.isSolved = true " +
+            "AND ps.userId = :userUid " +
+            "GROUP BY ps.programmingLanguage " +
+            "ORDER BY COUNT(ps) DESC " +
+            "LIMIT 3")
+    List<Object[]> findTop3LanguagesBySolvedCount(@Param("userUid") UUID userUid);
 
 }
