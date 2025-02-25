@@ -9,18 +9,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class ProgressResponse {
-    private int totalProblems;
-    private DifficultyStatistics easy;
-    private DifficultyStatistics medium;
-    private DifficultyStatistics hard;
+public class ProgressLanguageResponse {
+    private ProgressLanguageResponse.LanguageStatistics top1;
+    private ProgressLanguageResponse.LanguageStatistics top2;
+    private ProgressLanguageResponse.LanguageStatistics top3;
     @Data
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class DifficultyStatistics {
+    public static class LanguageStatistics {
         private int solved;
-        private int max;
+        private String name;
     }
 }

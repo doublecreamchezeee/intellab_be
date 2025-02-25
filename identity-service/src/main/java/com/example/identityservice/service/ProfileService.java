@@ -8,7 +8,8 @@ import com.example.identityservice.dto.request.profile.MultipleProfileInformatio
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
-import com.example.identityservice.dto.response.profile.ProgressResponse;
+import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
+import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
 import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
@@ -122,7 +123,11 @@ public class ProfileService {
 
     }
 
-    public ProgressResponse getProgress() {
-        return problemClient.getProgress().block();
+    public ProgressLevelResponse getProgressLevel() {
+        return problemClient.getProgressLevel().block();
+    }
+
+    public ProgressLanguageResponse getProgressLanguage() {
+        return problemClient.getProgressLanguage().block();
     }
 }

@@ -5,10 +5,11 @@ import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
+import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
+import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
 import org.springframework.security.core.GrantedAuthority;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
-import com.example.identityservice.dto.response.profile.ProgressResponse;
 import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.identityservice.service.AuthService;
 import com.example.identityservice.service.ProfileService;
@@ -78,17 +79,20 @@ public class ProfileController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(
-            summary = "get profile photo url"
-    )
-    @GetMapping(value = "/photo")
-    public ApiResponse<String> getProfilePictureUrl(Authentication authentication) {
-        String userId = (String) authentication.getPrincipal();
-        return ApiResponse.<String>builder()
-                .result(profileService.getProfilePictureUrlByEmail(userId))
-                .build();
-    }
+//    @Operation(
+//            summary = "get profile photo url"
+//    )
+//    @GetMapping(value = "/photo")
+//    public ApiResponse<String> getProfilePictureUrl(Authentication authentication) {
+//        String userId = (String) authentication.getPrincipal();
+//        return ApiResponse.<String>builder()
+//                .result(profileService.getProfilePictureUrlByEmail(userId))
+//                .build();
+//    }
 
+    @Operation(
+            summary = "Upload profile photo url"
+    )
     @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<String> uploadProfilePicture(Authentication authentication, @RequestPart(value = "file", required = true) MultipartFile file) throws FirebaseAuthException {
         System.out.println("Received file: " + file.getOriginalFilename() +  file.getSize());
@@ -105,7 +109,7 @@ public class ProfileController {
     }
 
     @Operation(
-            summary = "Update user by email"
+            summary = "Update user"
     )
     @PutMapping("/update")
     public ResponseEntity<HttpStatus> updateUserByEmail(Authentication authentication, @Validated @RequestBody UserUpdateRequest userUpdateRequest) {
@@ -115,11 +119,20 @@ public class ProfileController {
     }
 
     @Operation(
+            summary = "Statistic by getting progress level"
+    )
+    @GetMapping("/statistics/progress/level")
+    public ResponseEntity<ProgressLevelResponse> getProgressLevel() {
+        return ResponseEntity.ok(profileService.getProgressLevel());
+    }
+
+    @Operation(
             summary = "Statistic by getting progress"
     )
-    @GetMapping("/statistic/progress")
-    public ResponseEntity<ProgressResponse> getProgress() {
-        return ResponseEntity.ok(profileService.getProgress());
+    @GetMapping("/statistics/progress/language")
+    public ResponseEntity<ProgressLanguageResponse> getProgressLanguage() {
+        return ResponseEntity.ok(profileService.getProgressLanguage());
     }
+
 
 }
