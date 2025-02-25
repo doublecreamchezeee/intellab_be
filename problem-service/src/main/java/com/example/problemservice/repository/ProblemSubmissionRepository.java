@@ -27,7 +27,7 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
             @Param("userUid") UUID userUid
     );
 
-    @Query("SELECT ps.programmingLanguage, COUNT(ps) " +
+    @Query("SELECT ps.programmingLanguage, COUNT(distinct ps.problem.problemId) " +
             "FROM ProblemSubmission ps " +
             "WHERE ps.isSolved = true " +
             "AND ps.userId = :userUid " +

@@ -105,11 +105,6 @@ public class ProblemService {
         Page<Problem> problems = problemRepository.findAllByProblemNameContainingIgnoreCase(keyword, pageable);
 
         return getProblemRowResponses(userId, problems);
-
-        results.forEach(problemRowResponse -> {
-            problemRowResponse.setDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
-        });
-        return results;
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
@@ -265,8 +260,8 @@ public class ProblemService {
 
         List<Problem> problems = problemRepository.findAll();
         for (Problem problem : problems) {
-            /*String problemStructure = MarkdownUtility.readMarkdownFromFile(
-                    problem.getProblemName(), "Structure.md");*/
+//            String problemStructure = MarkdownUtility.readMarkdownFromFile(
+//                    problem.getProblemName(), "Structure.md");
             generateDefaultCodes(problem.getProblemId(), problem.getProblemStructure());
         }
     }

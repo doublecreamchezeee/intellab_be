@@ -36,7 +36,6 @@ public class ProfileService {
     private final GooglePeopleApiClient googlePeopleApiClient;
     private final ProblemClient problemClient;
     private final CloudinaryService cloudinaryService;
-    private final FirebaseAuthClient firebaseAuthClient;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userId
@@ -101,37 +100,6 @@ public class ProfileService {
         }
     }
 
-
-    /*public MultipleProfileInformationResponse getMultipleProfileInformation(
-            @NonNull final MultipleProfileInformationRequest request
-    ) {
-        try {
-            return MultipleProfileInformationResponse.builder()
-                    .profiles(
-                            request.getUserIds().stream()
-                                    .map(userId -> {
-                                        try {
-                                            UserRecord userRecord = firebaseAuth.getUser(userId);
-
-                                            return SingleProfileInformationResponse.builder()
-                                                    .userId(userRecord.getUid())
-                                                    .displayName(userRecord.getDisplayName())
-                                                    .email(userRecord.getEmail())
-                                                    .phoneNumber(userRecord.getPhoneNumber())
-                                                    .photoUrl(userRecord.getPhotoUrl())
-                                                    .build();
-                                        } catch (FirebaseAuthException e) {
-                                            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
-                                        }
-                                    })
-                                    .toList()
-                    )
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding users: " + e.getMessage(), e);
-        }
-    }
-
     public UserInfoResponse getUserInfo(String userId, String email) {
         return firebaseAuthClient.getUserInfo(userId, email);
     }
@@ -152,16 +120,6 @@ public class ProfileService {
         }
         firebaseAuthClient.updateUserProfilePicture(userId, newPhotoUrl);
 
-    }
-
-    public String getProfilePictureUrlByEmail(String userId) {
-        try {
-            return googlePeopleApiClient.getProfilePictureUrl(userId);
-        } catch (IOException e) {
-            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
-        }
     }
 
     public ProgressResponse getProgress() {

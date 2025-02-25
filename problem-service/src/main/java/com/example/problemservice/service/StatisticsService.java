@@ -80,4 +80,3 @@ public class StatisticsService {
         return new ProgressLanguageResponse(top1, top2, top3);
     }
 }
-}
