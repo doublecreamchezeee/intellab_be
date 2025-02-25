@@ -9,7 +9,7 @@ import java.rmi.server.UID;
 @Setter
 @Getter
 public class User {
-    UID userId;
+    String uid;
     String firstName;
     String lastName;
     String role;

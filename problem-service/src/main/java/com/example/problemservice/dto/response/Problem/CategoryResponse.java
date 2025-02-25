@@ -10,7 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryRessponse {
-    UUID categoryId;
+public class CategoryResponse {
+    Integer categoryId;
     String name;
 }

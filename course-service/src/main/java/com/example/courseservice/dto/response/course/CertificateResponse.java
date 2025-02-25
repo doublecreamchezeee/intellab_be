@@ -13,6 +13,7 @@ import java.time.Instant;
 public class CertificateResponse {
     CourseShortResponse course;
     Instant completeDate;
+    String userUid;
     String username;
     String certificateLink;
 }

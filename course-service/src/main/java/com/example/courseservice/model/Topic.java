@@ -30,7 +30,7 @@ public class Topic {
     String content;
 
     @Column(name = "number_of_likes")
-    Integer numberOfLikes;
+    Long numberOfLikes = 0L;
 
     //Ràng buộc miền giá trị dưới DB
     //('Public', 'Unlisted', 'Private')

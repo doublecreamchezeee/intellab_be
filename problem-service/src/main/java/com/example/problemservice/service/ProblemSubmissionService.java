@@ -224,13 +224,14 @@ public class ProblemSubmissionService {
         if (allAccepted) {
             submission.setIsSolved(true);
             problemSubmissionRepository.save(submission);
+
             try {
                 courseClient.donePracticeByProblemId(
                         submission.getProblem().getProblemId(),
                         submission.getUserId()
                 );
-            } catch (AppException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                log.error("Error while calling course service: {}", e.getMessage());
             }
 
         }

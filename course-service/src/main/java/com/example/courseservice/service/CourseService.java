@@ -14,6 +14,7 @@ import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CategoryMapper;
 import com.example.courseservice.mapper.CourseMapper;
 import com.example.courseservice.model.*;
+import com.example.courseservice.model.Firestore.User;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.utils.CertificateTemplate;
@@ -30,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -305,6 +305,8 @@ public class CourseService {
         if (isUserEnrolled) {
             int totalLessons = lessonRepository.countByCourse_CourseId(courseId);
             int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
+            int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUid, courseId, true);
+            completedLessons += completedPractices;
 
             if (totalLessons > 0) {
                 completionRatio = (completedLessons / (float) totalLessons) * 100;
@@ -455,6 +457,19 @@ public class CourseService {
         return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
     }
 
+    public List<CategoryResponse> getListCategory(List<Integer> ids) {
+        List<Category> categories = new ArrayList<>();
+        categories = categoryRepository.findAllById(ids);
+        return categories.stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList());
+    }
+
+    public CategoryResponse getCategory(Integer categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(()-> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        return categoryMapper.categoryToCategoryResponse(category);
+    }
+
     public String getUserNameFromToken(String token) {
         if (token == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
@@ -493,9 +508,12 @@ public class CourseService {
 
 
 
-        String userName = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
-                + " " + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
-
+        User user = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString());
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        String userName = user.getLastName()
+                + " " + user.getFirstName();
 
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
         String courseName = course.getCourseName();
@@ -551,8 +569,14 @@ public class CourseService {
 
         certificateResponse.setCertificateLink(certificate.getCertificateUrl());
         certificateResponse.setCompleteDate(certificate.getCompletedDate());
-        String username = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getLastName()
-                + " " + firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString()).getFirstName();
+        User user = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString());
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        String username = user.getLastName()
+                + " " + user.getFirstName();
+
+        certificateResponse.setUserUid(user.getUid());
 
         certificateResponse.setUsername(username);
 

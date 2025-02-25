@@ -19,5 +19,5 @@ public class ProblemRowResponse {
     Float acceptanceRate;
     Boolean isDone;
     Integer hintCount;
-    List<CategoryRessponse> categories;
+    List<CategoryResponse> categories;
 }

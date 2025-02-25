@@ -16,6 +16,7 @@ import com.example.identityservice.utility.CloudinaryUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
+import com.google.firebase.auth.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -33,6 +36,7 @@ public class ProfileService {
     private final GooglePeopleApiClient googlePeopleApiClient;
     private final ProblemClient problemClient;
     private final CloudinaryService cloudinaryService;
+    private final FirebaseAuthClient firebaseAuthClient;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userId
@@ -54,7 +58,51 @@ public class ProfileService {
         }
     }
 
+    public String getProfilePictureUrlByEmail(String userId) {
+        try {
+            return googlePeopleApiClient.getProfilePictureUrlByEmail(userId);
+        } catch (IOException e) {
+            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
+        }
+    }
+
     public MultipleProfileInformationResponse getMultipleProfileInformation(
+            @NonNull final MultipleProfileInformationRequest request
+    ) {
+        try {
+            GetUsersResult usersResult = firebaseAuthClient.getUsersByIds(request.getUserIds());
+
+            Set<UserRecord> setUserRecord = usersResult.getUsers();
+
+            List<SingleProfileInformationResponse> listUserInformation = setUserRecord
+                    .stream()
+                    .map(
+                            userRecord -> {
+                                 return SingleProfileInformationResponse.builder()
+                                        .userId(userRecord.getUid())
+                                        .displayName(userRecord.getDisplayName())
+                                        .email(userRecord.getEmail())
+                                        .phoneNumber(userRecord.getPhoneNumber())
+                                        .photoUrl(userRecord.getPhotoUrl())
+                                        .build();
+                            }
+                    )
+                    .toList();
+
+            return MultipleProfileInformationResponse.builder()
+                    .profiles(
+                            listUserInformation
+                    )
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Error finding users: " + e.getMessage(), e);
+        }
+    }
+
+
+    /*public MultipleProfileInformationResponse getMultipleProfileInformation(
             @NonNull final MultipleProfileInformationRequest request
     ) {
         try {
