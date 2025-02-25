@@ -67,23 +67,33 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/enrollCourses/.*",
     };
 
+    @NonFinal
+    private String[] hybridEndpoints = {
+            "/course/enrollCourses/.*",
+    };
+
     @Value("${app.api-prefix}")
     @NonFinal
     private String apiPrefix;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if (isPublicEndpoint(exchange.getRequest())) {
+        ServerHttpRequest request = exchange.getRequest();
+
+        if (isPublicEndpoint(request) || isExploredEndpoint(request)) {
             return chain.filter(exchange);
         }
 
-        if (isExploredEndpoint(exchange.getRequest())) {
-            return chain.filter(exchange);
-        }
+        List<String> authHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
+        boolean isHybrid = isHybridEndpoint(request);
 
-        List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if (CollectionUtils.isEmpty(authHeader))
-            return unauthenticated(exchange.getResponse());
+        if (CollectionUtils.isEmpty(authHeader)) {
+            if (isHybrid) { // ko có token -> hybrid -> đi tiếp
+                return chain.filter(exchange);
+            } else {
+                return unauthenticated(exchange.getResponse());
+            }
+        }
 
         String token = authHeader.get(0).replace("Bearer ", "");
 
@@ -94,13 +104,21 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                         .build();
 
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
-            } else
+            } else if (isHybrid) { // sai token -> hybrid -> đi tiếp
+                return chain.filter(exchange);
+            } else {
                 return unauthenticated(exchange.getResponse());
-        }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
+            }
+        }).onErrorResume(throwable -> isHybrid ? chain.filter(exchange) : unauthenticated(exchange.getResponse()));
     }
 
     private boolean isPublicEndpoint(ServerHttpRequest request) {
         return Arrays.stream(publicEndpoints)
+                .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
+    }
+
+    private boolean isHybridEndpoint(ServerHttpRequest request) {
+        return Arrays.stream(hybridEndpoints)
                 .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
     }
 
