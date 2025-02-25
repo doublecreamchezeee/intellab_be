@@ -97,7 +97,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         String token = authHeader.get(0).replace("Bearer ", "");
 
-        return identityService.validateToken(token).flatMap(response -> {
+        return identityService.validateToken(token).flatMap( response -> {
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
