@@ -37,6 +37,7 @@ public class AuthService {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseAuthClient firebaseAuthClient;
     private final EmailService emailService;
+    private final FirestoreService firestoreService;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -105,6 +106,7 @@ public class AuthService {
             request.setDisplayName(userUpdateRequest.getDisplayName());
         }
         try {
+            firestoreService.updateUserById(uid, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName());
             firebaseAuth.updateUser(request);
         } catch (final Exception exception) {
             throw new RuntimeException("Error updating user: " + exception.getMessage(), exception);
