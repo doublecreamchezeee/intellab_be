@@ -31,4 +31,15 @@ public class ProblemCommentCreationResponse {
     Instant createdAt;
     Instant lastModifiedAt;
     Boolean isModified;
+
+    @Nullable
+    String username;
+
+    @Nullable
+    String userAvatar;
+
+    @Nullable
+    String userEmail;
+
+    Boolean isUpVoted;
 }
