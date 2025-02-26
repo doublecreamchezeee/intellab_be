@@ -3,9 +3,9 @@ package com.example.courseservice.dto.response.Comment;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -20,12 +20,14 @@ public class CommentResponse {
     Instant created;
     Instant lastModified;
     UUID userId;
+    String userUid;
     String userName;
     String avatarUrl;
     UUID repliedCommentId;
     UUID parentCommentId;
     Boolean isModified;
-    Boolean isUpVoted;
+    Boolean isUpvoted;
+    Boolean isOwner;
 
-    List<CommentResponse> comments;
+    Page<CommentResponse> comments;
 }

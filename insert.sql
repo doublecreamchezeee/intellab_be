@@ -316,6 +316,7 @@ create table comments
     comment_id         uuid not null
         primary key,
     content            text,
+    number_of_likes bigint default 0,
     created            timestamp(6) with time zone,
     last_modified      timestamp(6) with time zone,
     user_id            uuid,
@@ -64259,17 +64260,14 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_ord
 12', '1 2', null, 5, '591b3457-2157-4d61-b03d-d53f8666342c');
 
 
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (48, 'C (GCC 7.4.0)', 'C');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (52, 'C++ (GCC 7.4.0)', 'C++');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (49, 'C (GCC 8.3.0)', 'C');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (53, 'C++ (GCC 8.3.0)', 'C++');
+
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (50, 'C (GCC 9.2.0)', 'C');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (54, 'C++ (GCC 9.2.0)', 'C++');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (51, 'C# (Mono 6.6.0.161)', 'C#');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (62, 'Java (JDK 17.0.6)', 'Java');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (63, 'JavaScript (Node.js 12.14.0)', 'JavaScript');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (71, 'Python (3.8.1)', 'Python');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (91, 'Java (JDK 17.0.6)', 'Java');
 
 
 INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
