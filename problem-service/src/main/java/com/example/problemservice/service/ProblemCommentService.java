@@ -137,7 +137,25 @@ public class ProblemCommentService {
 
         problemComment = problemCommentRepository.save(problemComment);
 
-        return problemCommentMapper.toProblemCommentCreationResponse(problemComment);
+        ProblemCommentCreationResponse response = problemCommentMapper.toProblemCommentCreationResponse(problemComment);
+
+        SingleProfileInformationResponse profileInformation = profileService.getSingleProfileInformation(
+                problemComment.getUserUid()
+        );
+
+        if (profileInformation != null) {
+            response.setUsername(profileInformation.getDisplayName());
+            response.setUserEmail(profileInformation.getEmail());
+            response.setUserAvatar(profileInformation.getPhotoUrl());
+        } else {
+            response.setUsername(null);
+            response.setUserEmail(null);
+            response.setUserAvatar(null);
+        }
+
+        response.setIsUpVoted(false);
+
+        return response;
     }
 
     public ProblemCommentUpdateResponse updateProblemComment(String userUid, UUID problemCommentId,ProblemCommentUpdateRequest request) {
@@ -157,7 +175,34 @@ public class ProblemCommentService {
 
         problemComment = problemCommentRepository.save(problemComment);
 
-        return problemCommentMapper.toProblemCommentUpdateResponse(problemComment);
+        ProblemCommentUpdateResponse response =  problemCommentMapper.toProblemCommentUpdateResponse(problemComment);
+
+        SingleProfileInformationResponse profileInformation = profileService.getSingleProfileInformation(
+                problemComment.getUserUid()
+        );
+
+        if (profileInformation != null) {
+            response.setUsername(profileInformation.getDisplayName());
+            response.setUserEmail(profileInformation.getEmail());
+            response.setUserAvatar(profileInformation.getPhotoUrl());
+        } else {
+            response.setUsername(null);
+            response.setUserEmail(null);
+            response.setUserAvatar(null);
+        }
+
+        // check if user upvoted his own comment
+        if (userUid != null) {
+            Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuid(
+                    problemComment.getCommentId(),
+                    ParseUUID.normalizeUID(userUid)
+            );
+
+            response.setIsUpVoted(isReactionExisted);
+        }
+
+        return response;
+
     }
 
     @Transactional
