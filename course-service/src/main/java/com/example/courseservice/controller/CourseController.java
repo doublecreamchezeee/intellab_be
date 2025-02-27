@@ -294,10 +294,11 @@ public class CourseController {
     @GetMapping("/{courseId}/reviews")
     public ApiResponse<Page<DetailsReviewResponse>> getReviewsByCourseId(
             @PathVariable("courseId") UUID courseId,
+            @RequestParam(required = false) Integer rating,
             @ParameterObject Pageable pageable) {
 
         return ApiResponse.<Page<DetailsReviewResponse>>builder()
-                .result(reviewService.getAllReviewsByCourseId(courseId, pageable))
+                .result(reviewService.getAllReviewsByCourseId(courseId, rating, pageable))
                 .build();
     }
 
