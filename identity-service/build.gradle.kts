@@ -7,6 +7,7 @@ dependencies {
     implementation("com.google.firebase:firebase-admin:8.1.0")
     implementation("io.github.cdimascio:dotenv-java:3.0.0")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("com.cloudinary:cloudinary-http44:1.35.0")
     implementation("com.nimbusds:nimbus-jose-jwt:9.15.2")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     compileOnly("org.projectlombok:lombok")
@@ -14,7 +15,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
-
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
     implementation("org.springframework.boot:spring-boot-starter-mail")

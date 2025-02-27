@@ -20,5 +20,6 @@ public class DetailsProblemSubmissionResponse {
     Integer scoreAchieved;
     UUID problemId;
     UUID userUid;
+    Boolean isSolved;
     List<TestCaseOutput> testCasesOutput;
 }

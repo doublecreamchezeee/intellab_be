@@ -12,10 +12,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.people.v1.PeopleService;
 import com.google.api.services.people.v1.PeopleServiceScopes;
-import com.google.api.services.people.v1.model.Person;
-import com.google.api.services.people.v1.model.Photo;
-import com.google.api.services.people.v1.model.SearchResponse;
-import com.google.api.services.people.v1.model.SearchResult;
+import com.google.api.services.people.v1.model.*;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.UserCredentials;
@@ -24,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -76,6 +75,21 @@ public class GooglePeopleApiClient {
         }
 
         return null;
+    }
+
+    public String uploadProfilePicture(String userId, MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is emty");
+        }
+
+        String base64Photo = Base64.getEncoder().encodeToString(file.getBytes());
+        UpdateContactPhotoRequest request = new UpdateContactPhotoRequest();
+        request.setPhotoBytes(base64Photo);
+
+        UpdateContactPhotoResponse response = peopleService.people()
+                .updateContactPhoto("people/" + userId, request)
+                .execute();
+        return response.getPerson().getPhotos().get(0).getUrl();
     }
 
     public String getProfilePictureUrlByEmail(String email) throws IOException, InterruptedException {

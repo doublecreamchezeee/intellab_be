@@ -1,4 +1,4 @@
-package com.example.problemservice.dto.response;
+package com.example.identityservice.dto.response.profile;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class ProgressResponse {
+public class ProgressLevelResponse {
     private int totalProblems;
     private DifficultyStatistics easy;
     private DifficultyStatistics medium;

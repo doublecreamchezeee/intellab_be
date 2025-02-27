@@ -16,13 +16,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-
 public class BoilerplateClient {
 
     private static final Logger log = LoggerFactory.getLogger(BoilerplateClient.class);
 
 
-    @Component
+//    @Component
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
@@ -602,9 +601,9 @@ public class BoilerplateClient {
         public static String defaultCodeGenerator(String structure, int languageId) {
             BoilerPlateGenerator parser = new BoilerPlateGenerator();
             parser.parse(structure);
-            //System.out.println(structure);
-            //System.out.println(parser.functionName);
-            String defaultCode = switch (languageId) {
+//            System.out.println(structure);
+//            System.out.println(parser.functionName);
+            return switch (languageId) {
                 case 48, 49, 50 -> parser.generateFunctionC();
                 case 51 -> parser.generateFunctionCSharp();
                 case 52, 53, 54 -> parser.generateFunctionCpp();
@@ -614,7 +613,7 @@ public class BoilerplateClient {
                 case 74 -> parser.generateFunctionTypeScript();
                 default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
             };
-            return defaultCode;
+            //return defaultCode;
         }
 
 

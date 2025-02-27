@@ -19,7 +19,7 @@ public interface IdentityClient {
     @PostExchange(url = "/auth/validateToken", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ResponseEntity<ValidatedTokenResponse>> validateToken(@RequestBody String token);
 
-    @PostExchange(url = "/profile/single", contentType = MediaType.APPLICATION_JSON_VALUE)
+    @PostExchange(url = "/profile/single/public", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<SingleProfileInformationResponse>> getSingleProfileInformation(
             @RequestBody SingleProfileInformationRequest request);
 

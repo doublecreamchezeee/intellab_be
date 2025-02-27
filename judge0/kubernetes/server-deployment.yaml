@@ -9,8 +9,7 @@ spec:
     - protocol: TCP
       port: 2358
       targetPort: 2358
-      nodePort: 32358  # Exposes on 32358 for external access
-  type: NodePort  # Change LoadBalancer to NodePort for local Kubernetes
+  type: LoadBalancer  # Use LoadBalancer to get an external IP in GKE
 
 ---
 apiVersion: apps/v1
@@ -27,7 +26,6 @@ spec:
       labels:
         app: server
     spec:
-      restartPolicy: Always  # Ensures it restarts if it crashes
       containers:
         - name: server-container
           image: judge0/judge0:1.13.0
@@ -42,7 +40,19 @@ spec:
           resources:
             limits:
               memory: "256Mi"
-              cpu: "1000m"
+              cpu: "500m"
           ports:
             - containerPort: 2358
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 2358
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 2358
+            initialDelaySeconds: 5
+            periodSeconds: 10

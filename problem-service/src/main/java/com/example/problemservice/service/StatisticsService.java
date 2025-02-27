@@ -1,11 +1,13 @@
 package com.example.problemservice.service;
 
-import com.example.problemservice.dto.response.ProgressResponse;
+import com.example.problemservice.dto.response.ProgressLanguageResponse;
+import com.example.problemservice.dto.response.ProgressLevelResponse;
 import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.repository.ProblemSubmissionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -14,7 +16,7 @@ public class StatisticsService {
     private final ProblemRepository problemRepository;
     private final ProblemSubmissionRepository problemSubmissionRepository;
 
-    public ProgressResponse getProgress(UUID userId) {
+    public ProgressLevelResponse getProgressLevel(UUID userId) {
         int totalProblems = (int) problemRepository.count();
         System.out.println("check" + userId);
 
@@ -29,20 +31,52 @@ public class StatisticsService {
         long hardTotal = problemRepository.countByProblemLevel("hard");
 
         // Build the response
-        return ProgressResponse.builder()
+        return ProgressLevelResponse.builder()
                 .totalProblems(totalProblems)
-                .easy(ProgressResponse.DifficultyStatistics.builder()
+                .easy(ProgressLevelResponse.DifficultyStatistics.builder()
                         .solved((int) easySolved)
                         .max((int) easyTotal)
                         .build())
-                .medium(ProgressResponse.DifficultyStatistics.builder()
+                .medium(ProgressLevelResponse.DifficultyStatistics.builder()
                         .solved((int) mediumSolved)
                         .max((int) mediumTotal)
                         .build())
-                .hard(ProgressResponse.DifficultyStatistics.builder()
+                .hard(ProgressLevelResponse.DifficultyStatistics.builder()
                         .solved((int) hardSolved)
                         .max((int) hardTotal)
                         .build())
                 .build();
+    }
+
+    public ProgressLanguageResponse getProgressLanguage(UUID userId) {
+        System.out.println("check " + userId);
+
+        List<Object[]> results = problemSubmissionRepository.findTop3LanguagesBySolvedCount(userId);
+
+        ProgressLanguageResponse.LanguageStatistics top1 = null;
+        ProgressLanguageResponse.LanguageStatistics top2 = null;
+        ProgressLanguageResponse.LanguageStatistics top3 = null;
+
+        if (results.size() > 0) {
+            top1 = new ProgressLanguageResponse.LanguageStatistics(
+                    ((Long) results.get(0)[1]).intValue(),
+                    (String) results.get(0)[0]
+            );
+        }
+        if (results.size() > 1) {
+            top2 = new ProgressLanguageResponse.LanguageStatistics(
+                    ((Long) results.get(1)[1]).intValue(),
+                    (String) results.get(1)[0]
+            );
+        }
+        if (results.size() > 2) {
+            top3 = new ProgressLanguageResponse.LanguageStatistics(
+                    ((Long) results.get(2)[1]).intValue(),
+                    (String) results.get(2)[0]
+            );
+        }
+
+        // Trả về kết quả
+        return new ProgressLanguageResponse(top1, top2, top3);
     }
 }

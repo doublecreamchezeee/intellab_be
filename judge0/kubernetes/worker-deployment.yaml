@@ -36,19 +36,17 @@ spec:
             - "-c"
             - "./scripts/workers"
           volumeMounts:
-            - name: config-volume
+            - name: judge0-config-volume
               mountPath: /judge0.conf
+              subPath: judge0.conf
               readOnly: true
           resources:
             limits:
-              memory: "1Gi"  # Set memory limit to 32GB
-              cpu: "500m"   # Set CPU limit to 10 cores
-          #          requests:
-          #            memory: "32Gi"   # Set memory request to 4GB
-          #            cpu: "1000m"    # Set CPU request to 1 core
+              memory: "1Gi"
+              cpu: "500m"
           ports:
             - containerPort: 2358
       volumes:
-        - name: config-volume
-          hostPath:
-            path: /judge0.conf
+        - name: judge0-config-volume
+          configMap:
+            name: judge0-config
