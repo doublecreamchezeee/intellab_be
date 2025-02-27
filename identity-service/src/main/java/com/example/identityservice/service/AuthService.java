@@ -37,6 +37,7 @@ public class AuthService {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseAuthClient firebaseAuthClient;
     private final EmailService emailService;
+    private final FirestoreService firestoreService;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -47,12 +48,6 @@ public class AuthService {
                 .setEmailVerified(Boolean.TRUE)
                 .setDisplayName(userCreationRequest.getDisplayName())
                 .setEmailVerified(Boolean.FALSE);
-                //.setPhoneNumber(userCreationRequest.getPhoneNumber());
-                //.setPhotoUrl(userCreationRequest.getPhotoUrl());
-
-        /*if (!Strings.isNullOrEmpty(userCreationRequest.getPhotoUrl())) {
-            request.setPhotoUrl(userCreationRequest.getPhotoUrl());
-        }*/
 
         try {
             UserRecord userRecord = firebaseAuth.createUser(request);
@@ -82,10 +77,10 @@ public class AuthService {
     }
 
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
-        FirebaseToken firebaseToken = firebaseAuthClient.verifyToken(idToken);
+        ValidatedTokenResponse firebaseToken = firebaseAuthClient.verifyToken(idToken);
 
         return FirebaseGoogleSignInResponse.builder()
-                .uid(firebaseToken.getUid())
+                .uid(firebaseToken.getUserId())
                 .email(firebaseToken.getEmail())
                 .build();
     }
@@ -107,24 +102,11 @@ public class AuthService {
     public void update(@NonNull String uid, @NonNull UserUpdateRequest userUpdateRequest) {
         final var request = new UserRecord.UpdateRequest(uid);
 
-        if (userUpdateRequest.getEmail() != null) {
-            request.setEmail(userUpdateRequest.getEmail());
-        }
         if (userUpdateRequest.getDisplayName() != null) {
             request.setDisplayName(userUpdateRequest.getDisplayName());
         }
-        /*if (userUpdateRequest.getPhoneNumber() != null) {
-            request.setPhoneNumber(userUpdateRequest.getPhoneNumber());
-        }
-        if (userUpdateRequest.getPhotoUrl() != null
-                && !Strings.isNullOrEmpty(userUpdateRequest.getPhotoUrl())) {
-            request.setPhotoUrl(userUpdateRequest.getPhotoUrl());
-        }*/
-        if (userUpdateRequest.getPassword() != null) {
-            request.setPassword(userUpdateRequest.getPassword());
-        }
-
         try {
+            firestoreService.updateUserById(uid, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName());
             firebaseAuth.updateUser(request);
         } catch (final Exception exception) {
             throw new RuntimeException("Error updating user: " + exception.getMessage(), exception);

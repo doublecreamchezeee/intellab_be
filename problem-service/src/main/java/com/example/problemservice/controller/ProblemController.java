@@ -89,7 +89,6 @@ public class ProblemController {
                                                              @ParameterObject Pageable pageable,
                                                              @RequestParam(required = false) String keyword) {
         if (userUId != null) {
-            userUId = userUId.split(",")[0];
             UUID userId = ParseUUID.normalizeUID(userUId);
             System.out.println("user id: " + userId);
             if(keyword != null) {

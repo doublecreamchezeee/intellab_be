@@ -122,6 +122,13 @@ public class ProblemService {
 
         return getProblemRowResponses(userId, problems);
 
+<<<<<<<<< Temporary merge branch 1
+        results.forEach(problemRowResponse -> {
+            problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
+        });
+        return results;
+=========
+>>>>>>>>> Temporary merge branch 2
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
@@ -293,8 +300,8 @@ public class ProblemService {
 
         List<Problem> problems = problemRepository.findAll();
         for (Problem problem : problems) {
-            /*String problemStructure = MarkdownUtility.readMarkdownFromFile(
-                    problem.getProblemName(), "Structure.md");*/
+//            String problemStructure = MarkdownUtility.readMarkdownFromFile(
+//                    problem.getProblemName(), "Structure.md");
             generateDefaultCodes(problem.getProblemId(), problem.getProblemStructure());
         }
     }
