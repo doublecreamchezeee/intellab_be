@@ -302,7 +302,7 @@ create table topics
     topic_id        uuid default uuid_generate_v4() not null
         primary key,
     content         text,
-    number_of_likes integer,
+    number_of_likes bigint default 0,
     post_reach      varchar(10),
     title           varchar(255),
     user_id         varchar(255)
@@ -313,24 +313,39 @@ alter table topics
 
 create table comments
 (
-    comment_id        uuid not null default uuid_generate_v4()
+    comment_id         uuid not null
         primary key,
-    content           text,
-    created           timestamp(6) with time zone,
-    last_modified     timestamp(6) with time zone,
-    number_of_likes   bigint,
-    reply_level       integer,
-    user_id           uuid,
-    parent_comment_id uuid
+    content            text,
+    number_of_likes bigint default 0,
+    created            timestamp(6) with time zone,
+    last_modified      timestamp(6) with time zone,
+    user_id            uuid,
+    parent_comment_id  uuid
         constraint fkst79ninfcw8cbrihoedh118xk
             references comments,
-    topic_id          uuid
+    replied_comment_id uuid
+        constraint fkbd3tl8jha2ib2812q9p9yxcmo
+            references comments,
+    topic_id           uuid
         constraint fkhanwncw4vn5t5syodhdma5sip
             references topics
 );
 
 alter table comments
     owner to postgres;
+
+create table comment_reactions
+(
+    user_id            uuid not null,
+    comment_comment_id uuid not null
+        constraint fkq6o8wtr8e4nhe4ya9yhnm4mli
+            references comments,
+    primary key (comment_comment_id, user_id)
+);
+
+alter table comment_reactions
+    owner to postgres;
+
 
 create table comment_reports
 (
@@ -600,6 +615,43 @@ create table course_summary
 );
 
 alter table course_summary
+    owner to postgres;
+
+create table problem_comments
+(
+    comment_id          uuid not null default uuid_generate_v4()
+        primary key,
+    content               text,
+    is_modified         boolean,
+    number_of_likes     INTEGER,
+    created_at          timestamp(6) with time zone,
+    last_modified_at    timestamp(6) with time zone,
+    user_uuid           uuid,
+    user_uid            varchar,
+    problem_id  uuid    not null
+        constraint fkju03qoqky593eka4s5okbssn5
+            references problems,
+    parent_comment_id   uuid
+        constraint fkfppcc9srw5ppiweo0qjvbls6a
+            references problem_comments,
+    replied_comment_id  uuid
+        constraint fk9rxtnbox2bfnt1582r6apsnls
+            references problem_comments
+);
+
+alter table problem_comments
+    owner to postgres;
+
+create table problem_comment_reactions
+(
+    user_uuid uuid not null,
+    problem_comment_comment_id uuid not null
+        constraint fka45m53xgm1j7twrchtcvg5cax
+            references problem_comments,
+    primary key (user_uuid, problem_comment_comment_id)
+);
+
+alter table problem_comment_reactions
     owner to postgres;
 
 
@@ -64208,16 +64260,61 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_ord
 12', '1 2', null, 5, '591b3457-2157-4d61-b03d-d53f8666342c');
 
 
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (48, 'C (GCC 7.4.0)', 'C');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (52, 'C++ (GCC 7.4.0)', 'C++');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (49, 'C (GCC 8.3.0)', 'C');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (53, 'C++ (GCC 8.3.0)', 'C++');
+
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (50, 'C (GCC 9.2.0)', 'C');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (54, 'C++ (GCC 9.2.0)', 'C++');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (51, 'C# (Mono 6.6.0.161)', 'C#');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (62, 'Java (JDK 17.0.6)', 'Java');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (63, 'JavaScript (Node.js 12.14.0)', 'JavaScript');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (71, 'Python (3.8.1)', 'Python');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (91, 'Java (JDK 17.0.6)', 'Java');
 
 
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (5, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '591b3457-2157-4d61-b03d-d53f8666342c');
+
+INSERT INTO public.problem_comments(
+    comment_id, content, created_at, last_modified_at, user_uid, user_uuid,
+    parent_comment_id, problem_id, replied_comment_id, number_of_likes, is_modified
+) VALUES
+('3177f55e-8fca-459c-96d4-90e51dae4588', 'i run now 7',
+ '2025-02-21 16:43:00.683279+07', '2025-02-22 15:13:23.367305+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
+
+('0dc0dfa1-cca9-42b4-bfad-f9379fdd139e', 'i run now 5',
+ '2025-02-22 16:13:31.790966+07', '2025-02-22 16:13:58.301744+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
+
+('1db65ea6-4237-4219-86ad-1f8bcee67e29', 'i run now 8',
+ '2025-02-21 16:46:37.991912+07', '2025-02-22 13:07:38.136802+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', 0, NULL),
+
+('9be6a2bc-e4b1-4b56-ac5d-77c06ac1b6df', 'i run now 3',
+ '2025-02-21 22:02:03.547642+07', '2025-02-21 22:02:03.547642+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
+
+('5ddd3184-4713-419c-8611-9cfd5e984c96', 'i run now 4',
+ '2025-02-21 16:45:50.394167+07', '2025-02-22 17:56:49.763188+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', 0, NULL),
+
+('c3265443-b55a-4f3b-b9b5-f00886ae409a', 'i run now 2',
+ '2025-02-21 16:46:08.087696+07', '2025-02-22 18:11:22.526227+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
+ '5ddd3184-4713-419c-8611-9cfd5e984c96', 0, NULL);

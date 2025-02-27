@@ -1,9 +1,12 @@
 package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.comment.CommentCreationRequest;
+import com.example.courseservice.dto.request.comment.CommentModifyRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
+import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseSearchResponse;
@@ -14,7 +17,9 @@ import com.example.courseservice.dto.response.rerview.CourseReviewsStatisticsRes
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.UserCourses;
+import com.example.courseservice.service.CommentService;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
 import com.example.courseservice.service.ReviewService;
@@ -28,8 +33,11 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,6 +56,7 @@ public class CourseController {
     CourseService courseService;
     LessonService lessonService;
     ReviewService reviewService;
+    private final CommentService commentService;
 
     @Operation(
             summary = "Create course"
@@ -292,12 +301,33 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get all categories"
+    )
     @GetMapping("categories")
     public ApiResponse<List<CategoryResponse>> getCategories() {
 
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(courseService.getCategories()).build();
     }
+
+    @Operation(summary = "Get category by Id")
+    @GetMapping("/category/{categoryId}")
+    public ApiResponse<CategoryResponse> getCategoryById(
+            @PathVariable Integer categoryId )
+    {
+        return ApiResponse.<CategoryResponse>builder()
+                .result(courseService.getCategory(categoryId)).build();
+    }
+
+    @Operation(summary = "Get category by list of id")
+    @PostMapping("/category")
+    public ApiResponse<List<CategoryResponse>> getCategoryByListOfId(@RequestBody List<Integer> listOfId) {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(courseService.getListCategory(listOfId)).build();
+    }
+
+
     @Operation(
             summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
     )
@@ -374,4 +404,188 @@ public class CourseController {
                 .result("All lessons of course have been restarted")
                 .build();
     }
+
+    @Operation(
+            summary = """
+                    cách truyền params sort outer: sort=properties,order\s
+                    order : gồm có asc, desc
+                    
+                    properties gồm có:\s
+                    numberOfLikes: số upvote
+                    lastModified: thời gian cập nhật
+                    created: thời gian tạo
+                    
+                    ví dụ
+                    sort=numberOfLikes,asc&sort=lastModified,desc
+                    
+                    cách truyền params sort inner:
+                    childrenSortBy=property&childrenSortOrder=order\
+                    
+                    kích thước mặt định (size): default của outer = 20, default inter là 5"""
+    )
+    @GetMapping("/{courseId}/comments")
+    public ApiResponse<Page<CommentResponse>> getCommentsByCourseId(
+            @PathVariable("courseId") UUID courseId,
+            @RequestParam(required = false) String userUid,
+            @ParameterObject Pageable pageable,
+
+            @RequestParam(name = "childrenPage", required = false, defaultValue = "0") Integer childrenPage,
+            @RequestParam(name = "childrenSize", required = false, defaultValue = "5") Integer childrenSize,
+            @RequestParam(defaultValue = "lastModified", required = false) String childrenSortBy,
+            @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder
+    ) {
+        UUID userId = null;
+
+        if (userUid != null)
+        {
+            userUid = userUid.split(",")[0];
+            userId = ParseUUID.normalizeUID(userUid);
+        }
+
+        if (childrenPage == null) {
+            childrenPage = 0;
+        }
+
+        if (childrenSize == null) {
+            childrenSize = 20;
+        }
+
+        Sort sort = childrenSortOrder.equalsIgnoreCase("desc")
+                ? Sort.by(childrenSortBy).descending()
+                : Sort.by(childrenSortBy).ascending();
+
+        Pageable childrenPageable = PageRequest.of(childrenPage, childrenSize, sort);
+
+        return ApiResponse.<Page<CommentResponse>>builder()
+                .result(commentService.getComments(courseId, userId, pageable, childrenPageable))
+                .build();
+    }
+    @Operation(
+            summary = """
+                    Lấy comment theo commentId với số lượng children comment được truyền vào tùy ý (size = ?) default 20
+                    cách truyền params sort: sort=properties,order\s
+                    order : gồm có asc, desc
+                    
+                    properties gồm có:\s
+                    numberOfLikes: số upvote
+                    lastModified: thời gian cập nhật
+                    created: thời gian tạo
+                    
+                    ví dụ
+                    sort=numberOfLikes,asc&sort=lastModified,desc
+                    """
+    )
+    @GetMapping("/comments/{commentId}")
+    public ApiResponse<CommentResponse> getComment(
+            @PathVariable("commentId") UUID commentId,
+            @RequestParam(required = false) String userUid,
+            @ParameterObject Pageable pageable
+    )
+    {
+        UUID userId = null;
+
+        if (userUid != null)
+        {
+            userUid = userUid.split(",")[0];
+            userId = ParseUUID.normalizeUID(userUid);
+        }
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.getComment(commentId, userId, pageable))
+                .build();
+    }
+
+
+    @Operation(
+            summary = """
+                    Lấy page comment con theo commentId với số lượng được truyền vào tùy ý (size = ?) default 20
+                    cách truyền params sort: sort=properties,order\s
+                    order : gồm có asc, desc
+                    
+                    properties gồm có:\s
+                    numberOfLikes: số upvote
+                    lastModified: thời gian cập nhật
+                    created: thời gian tạo
+                    
+                    ví dụ
+                    sort=numberOfLikes,asc&sort=lastModified,desc
+                    """
+    )
+    @GetMapping("/comments/{commentId}/children")
+    public ApiResponse<Page<CommentResponse>> getChildrenComments(
+            @PathVariable("commentId") UUID commentId,
+            @RequestParam(required = false) String userUid,
+            @ParameterObject Pageable pageable
+    )
+    {
+        UUID userId = null;
+
+        if (userUid != null)
+        {
+            userUid = userUid.split(",")[0];
+            userId = ParseUUID.normalizeUID(userUid);
+        }
+        return ApiResponse.<Page<CommentResponse>>builder()
+                .result(commentService.getChildrenComments(commentId, userId, pageable))
+                .build();
+    }
+
+
+    @PostMapping("/{courseId}/comments")
+    public ApiResponse<CommentResponse> addComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("courseId") UUID courseId,
+            @RequestBody CommentCreationRequest creationRequest ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.addComment(courseId, creationRequest, userId)).build();
+    }
+
+    @PutMapping("/comments/{commentId}/upvote")
+    public ApiResponse<CommentResponse> upVoteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.upvoteComment(userId, commentId)).build();
+    }
+
+
+    @PutMapping("/comments/{commentId}/cancelUpvote")
+    public ApiResponse<CommentResponse> cancelUpvoteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId ) {
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.cancelUpvoteComment(userId, commentId)).build();
+    }
+
+    @PutMapping("/comments/modify")
+    public ApiResponse<CommentResponse> modifyComment(
+            @RequestHeader("X-UserId") String userUid,
+            @RequestBody CommentModifyRequest modifyRequest ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        return ApiResponse.<CommentResponse>builder()
+                .result(commentService.ModifyComment(userId, modifyRequest)).build();
+    }
+
+    @DeleteMapping("/comments/{commentId}/delete")
+    public ApiResponse<Boolean> deleteComment(
+            @RequestHeader("X-UserId") String userUid,
+            @PathVariable("commentId") UUID commentId ){
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        return ApiResponse.<Boolean>builder()
+                .result(commentService.removeComment(commentId, userId)).build();
+    }
+
+
+
+
 }

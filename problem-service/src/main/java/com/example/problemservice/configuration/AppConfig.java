@@ -14,10 +14,10 @@ public class AppConfig {
         return new RestTemplate();
     }
 
-    @Bean
+    /*@Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
-    }
+    }*/
 
     @Value("${mount_path}")
     public String mountPath;

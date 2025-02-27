@@ -225,10 +225,14 @@ public class ProblemSubmissionService {
             submission.setIsSolved(true);
             problemSubmissionRepository.save(submission);
 
-            courseClient.donePracticeByProblemId(
-                    submission.getProblem().getProblemId(),
-                    submission.getUserId()
-            );
+            try {
+                courseClient.donePracticeByProblemId(
+                        submission.getProblem().getProblemId(),
+                        submission.getUserId()
+                );
+            } catch (Exception e) {
+                log.error("Error while calling course service: {}", e.getMessage());
+            }
 
         }
 
