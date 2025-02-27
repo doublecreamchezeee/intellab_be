@@ -13,6 +13,7 @@ import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
 import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
+import com.example.identityservice.model.User;
 import com.example.identityservice.utility.CloudinaryUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -37,6 +39,7 @@ public class ProfileService {
     private final GooglePeopleApiClient googlePeopleApiClient;
     private final ProblemClient problemClient;
     private final CloudinaryService cloudinaryService;
+    private final FirestoreService firestoreService;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userId
@@ -102,7 +105,16 @@ public class ProfileService {
     }
 
     public UserInfoResponse getUserInfo(String userId, String email) {
-        return firebaseAuthClient.getUserInfo(userId, email);
+        UserInfoResponse userInfoResponse = firebaseAuthClient.getUserInfo(userId, email);
+        try {
+            User userFirestore = firestoreService.getUserById(userId);
+            userInfoResponse.setFirstName(userFirestore.getFirstName());
+            userInfoResponse.setLastName(userFirestore.getLastName());
+
+            return userInfoResponse;
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void uploadProfilePicture(String userId, MultipartFile file) throws FirebaseAuthException {
