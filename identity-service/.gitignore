@@ -40,3 +40,4 @@ private-key.json
 firebase-config.json
 ./.env
 **/google-credentials.json
+**/firebase-config.json

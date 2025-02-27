@@ -12,7 +12,7 @@ import org.springframework.web.service.annotation.PostExchange;
 import reactor.core.publisher.Mono;
 
 public interface IdentityClient {
-    @PostExchange(url = "/profile/single", contentType = MediaType.APPLICATION_JSON_VALUE)
+    @PostExchange(url = "/profile/single/public", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<SingleProfileInformationResponse>> getSingleProfileInformation(
             @RequestBody SingleProfileInformationRequest request);
 
