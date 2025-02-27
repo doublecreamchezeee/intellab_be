@@ -120,15 +120,13 @@ public class ProblemService {
 
         Page<Problem> problems = problemRepository.findAll(specification,pageable);
 
-        return getProblemRowResponses(userId, problems);
+        Page<ProblemRowResponse> results = getProblemRowResponses(userId, problems);
 
-<<<<<<<<< Temporary merge branch 1
         results.forEach(problemRowResponse -> {
             problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
         });
         return results;
-=========
->>>>>>>>> Temporary merge branch 2
+
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
