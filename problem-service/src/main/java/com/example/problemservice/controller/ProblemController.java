@@ -241,7 +241,7 @@ public class ProblemController {
             @RequestParam(name = "childrenSize", required = false, defaultValue = "20") Integer childrenSize,
             @RequestParam(defaultValue = "lastModifiedAt", required = false) String childrenSortBy,
             @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder,
-            @RequestParam(name = "userId", value = "userId", required = false) String userUid
+            @RequestHeader(required = false, name = "X-UserId") String userUid
         /*     @Qualifier("pageable")  @ParameterObject DoublePageable doublePageable
             @Qualifier("childrenPageable") @ParameterObject Pageable childrenPageable*/
     ) {

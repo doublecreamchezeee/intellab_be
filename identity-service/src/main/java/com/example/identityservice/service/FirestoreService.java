@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class FirestoreService {
 
-    @Autowired
     private Firestore firestore;
 
     public User getUserById(String id) throws ExecutionException, InterruptedException {
