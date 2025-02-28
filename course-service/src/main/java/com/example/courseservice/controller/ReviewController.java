@@ -119,5 +119,27 @@ public class ReviewController {
                 .build();
     }
 
+    @Operation(
+            summary = "Check if user already review course by userUid and courseId"
+    )
+    @GetMapping("/check-user-already-review-course")
+    public ApiResponse<Boolean> checkUserAlreadyReviewCourse(
+            @RequestParam("courseId") UUID courseId,
+            @RequestHeader("X-UserId") String userUid
+    ) {
+
+        userUid = userUid.split(",")[0];
+
+        return ApiResponse.<Boolean>builder()
+                .result(
+                        reviewService.checkIfUserAlreadyReviewCourse(
+                                courseId,
+                                userUid
+                        )
+                )
+                .build();
+    }
+
+
 
 }
