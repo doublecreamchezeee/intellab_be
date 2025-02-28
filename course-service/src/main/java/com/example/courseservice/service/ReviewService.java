@@ -67,6 +67,10 @@ public class ReviewService {
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
+        if (checkIfUserAlreadyReviewCourse(course.getCourseId(), userUid)) {
+            throw new AppException(ErrorCode.USER_ALREADY_REVIEW_COURSE);
+        }
+
         Review review = reviewMapper.toReview(request);
         review.setCourse(course);
         review.setUserUid(userUid);
@@ -284,6 +288,10 @@ public class ReviewService {
         response.setPercentageOneStar(((double) oneStar / course.getReviewCount() * 100));
 
         return response;
+    }
+
+    public Boolean checkIfUserAlreadyReviewCourse(UUID courseId, String userUid) {
+        return reviewRepository.existsByUserUidAndCourse_CourseId(userUid, courseId);
     }
 
 

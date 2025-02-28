@@ -113,8 +113,12 @@ public class CourseController {
     ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId,
                                                     @RequestHeader(required = false, name = "X-UserId") String userUid
     ){
+        log.info("UserUid: " + userUid);
+
         UUID userUUID = null;
         if (userUid != null) {
+
+            userUid = userUid.split(",")[0];
             userUUID = ParseUUID.normalizeUID(userUid);
         }
         return ApiResponse.<DetailCourseResponse>builder()
@@ -158,6 +162,7 @@ public class CourseController {
 
         UUID userUUID = null;
         if (userUid != null) {
+            userUid = userUid.split(",")[0];
             userUUID = ParseUUID.normalizeUID(userUid);
         }
 
@@ -182,9 +187,17 @@ public class CourseController {
     ApiResponse<Page<CourseCreationResponse>> getAllCourseExceptEnrolledByUser(
             @RequestHeader(required = false, name = "X-UserId") String userUid,
             @ParameterObject Pageable pageable) {
+
+        UUID userUUID = null;
+
+        if (userUid != null) {
+            userUid = userUid.split(",")[0];
+            userUUID = ParseUUID.normalizeUID(userUid);
+        }
+
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCoursesExceptEnrolledByUser(
-                        userUid == null ? null : ParseUUID.normalizeUID(userUid),
+                        userUUID,
                         pageable
                 ))
                 .build();
