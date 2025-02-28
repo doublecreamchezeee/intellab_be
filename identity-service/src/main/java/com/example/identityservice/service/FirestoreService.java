@@ -16,6 +16,18 @@ public class FirestoreService {
 
     private Firestore firestore;
 
+    public void createUserById(String id, String firstName, String lastName) throws ExecutionException, InterruptedException {
+        DocumentReference documentRef = firestore.collection("users").document(id);
+
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("firstName", firstName);
+        userData.put("lastName", lastName);
+
+        documentRef.set(userData).get();
+    }
+
+
+
     public User getUserById(String id) throws ExecutionException, InterruptedException {
         DocumentSnapshot document = firestore.collection("users").document(id).get().get();
         if (document.exists()) {

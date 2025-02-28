@@ -16,6 +16,7 @@ import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
+import com.example.identityservice.model.User;
 import com.google.common.base.Strings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -52,7 +54,7 @@ public class AuthService {
         try {
             UserRecord userRecord = firebaseAuth.createUser(request);
             log.info("User successfully created: {}", userCreationRequest.getEmail());
-
+            firestoreService.createUserById(userRecord.getUid(), "User", userRecord.getUid());
             firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
             sendEmailVerification(userRecord.getUid());
 
@@ -76,13 +78,22 @@ public class AuthService {
         return firebaseAuthClient.login(userLoginRequest);
     }
 
+
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
         ValidatedTokenResponse firebaseToken = firebaseAuthClient.verifyToken(idToken);
+        try {
+            User user = firestoreService.getUserById(firebaseToken.getUserId());
+            if (user == null) {
+                firestoreService.createUserById(firebaseToken.getUserId(), "User", firebaseToken.getUserId());
+            }
+            return FirebaseGoogleSignInResponse.builder()
+                    .uid(firebaseToken.getUserId())
+                    .email(firebaseToken.getEmail())
+                    .build();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        return FirebaseGoogleSignInResponse.builder()
-                .uid(firebaseToken.getUserId())
-                .email(firebaseToken.getEmail())
-                .build();
     }
 
     public RefreshTokenSuccessResponse refreshAccessToken(@NonNull final String refreshToken) {
