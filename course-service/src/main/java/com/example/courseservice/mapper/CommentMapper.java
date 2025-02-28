@@ -45,7 +45,7 @@ public class CommentMapper {
                         ).block();
 
             } catch (Exception e) {
-                log.error("Error when getting user info", e);
+                log.error("Error when getting user info {}", uid, e);
             }
 
             if (userResponse != null) {

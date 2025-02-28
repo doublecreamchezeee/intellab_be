@@ -111,7 +111,8 @@ public class CourseController {
     )
     @GetMapping("/{courseId}")
     ApiResponse<DetailCourseResponse> getCourseById(@PathVariable("courseId") UUID courseId,
-         @RequestParam(name = "userUid", value = "userUid", required = false) String userUid) {
+                                                    @RequestHeader(required = false, name = "X-UserId") String userUid
+    ){
         UUID userUUID = null;
         if (userUid != null) {
             userUUID = ParseUUID.normalizeUID(userUid);
@@ -153,7 +154,7 @@ public class CourseController {
     @PostMapping("/details")
     ApiResponse<List<DetailCourseResponse>> getDetailsOfMultipleCourses(
             @RequestBody Map<String, List<String>> requestBody,
-            @RequestParam(name = "userUid", required = false) String userUid) {
+            @RequestHeader(required = false, name = "X-UserId") String userUid) {
 
         UUID userUUID = null;
         if (userUid != null) {
@@ -179,7 +180,8 @@ public class CourseController {
     )
     @GetMapping("/exceptEnrolled")
     ApiResponse<Page<CourseCreationResponse>> getAllCourseExceptEnrolledByUser(
-            @RequestParam(name = "userUid", value = "userUid", required = false) String userUid, @ParameterObject Pageable pageable) {
+            @RequestHeader(required = false, name = "X-UserId") String userUid,
+            @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCoursesExceptEnrolledByUser(
                         userUid == null ? null : ParseUUID.normalizeUID(userUid),
@@ -427,9 +429,8 @@ public class CourseController {
     @GetMapping("/{courseId}/comments")
     public ApiResponse<Page<CommentResponse>> getCommentsByCourseId(
             @PathVariable("courseId") UUID courseId,
-            @RequestParam(required = false) String userUid,
+            @RequestHeader(required = false, name = "X-UserId") String userUid,
             @ParameterObject Pageable pageable,
-
             @RequestParam(name = "childrenPage", required = false, defaultValue = "0") Integer childrenPage,
             @RequestParam(name = "childrenSize", required = false, defaultValue = "5") Integer childrenSize,
             @RequestParam(defaultValue = "lastModified", required = false) String childrenSortBy,
@@ -457,6 +458,7 @@ public class CourseController {
 
         Pageable childrenPageable = PageRequest.of(childrenPage, childrenSize, sort);
 
+
         return ApiResponse.<Page<CommentResponse>>builder()
                 .result(commentService.getComments(courseId, userId, pageable, childrenPageable))
                 .build();
@@ -479,7 +481,7 @@ public class CourseController {
     @GetMapping("/comments/{commentId}")
     public ApiResponse<CommentResponse> getComment(
             @PathVariable("commentId") UUID commentId,
-            @RequestParam(required = false) String userUid,
+            @RequestHeader(required = false, name = "X-UserId") String userUid,
             @ParameterObject Pageable pageable
     )
     {
@@ -514,7 +516,7 @@ public class CourseController {
     @GetMapping("/comments/{commentId}/children")
     public ApiResponse<Page<CommentResponse>> getChildrenComments(
             @PathVariable("commentId") UUID commentId,
-            @RequestParam(required = false) String userUid,
+            @RequestHeader(required = false, name = "X-UserId") String userUid,
             @ParameterObject Pageable pageable
     )
     {

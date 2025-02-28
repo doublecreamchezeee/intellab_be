@@ -639,7 +639,7 @@ public class BoilerplateClient {
             case 48, 49, 50 -> parser.generateC();
             case 51 -> parser.generateCSharp();
             case 52, 53, 54 -> parser.generateCpp();
-            case 62 -> parser.generateJava();
+            case 62, 91 -> parser.generateJava();
             case 63 -> parser.generateJavaScript();
             case 71 -> parser.generatePython();
             case 74 -> parser.generateTypeScript();
