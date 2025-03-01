@@ -262,6 +262,17 @@ public class ProblemSubmissionService {
                 .collect(Collectors.toList());
     }
 
+    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByUserUid(UUID userUid) {
+        // Tìm kiếm submission
+        List<ProblemSubmission> submissions = problemSubmissionRepository
+                .findProblemSubmissionByUserId(userUid);
+
+        // Chuyển đổi submissions thành response
+        return submissions.stream()
+                .map(problemSubmissionMapper::toDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
+                .collect(Collectors.toList());
+    }
+
     public ProblemSubmission submitProblemWithPartialBoilerplate(UUID userUid, DetailsProblemSubmissionRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId())
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));

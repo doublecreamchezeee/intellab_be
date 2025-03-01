@@ -3,9 +3,7 @@ package com.example.identityservice.service;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.client.GooglePeopleApiClient;
 import com.example.identityservice.client.ProblemClient;
-import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
-import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
@@ -107,7 +105,7 @@ public class ProfileService {
     public UserInfoResponse getUserInfo(String userId, String email) {
         UserInfoResponse userInfoResponse = firebaseAuthClient.getUserInfo(userId, email);
         try {
-            User userFirestore = firestoreService.getUserById(userId);
+            User userFirestore = firestoreService.getUserByUid(userId);
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
 
