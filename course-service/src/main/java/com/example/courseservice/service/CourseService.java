@@ -512,6 +512,7 @@ public class CourseService {
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
+
         String userName = user.getLastName()
                 + " " + user.getFirstName();
 

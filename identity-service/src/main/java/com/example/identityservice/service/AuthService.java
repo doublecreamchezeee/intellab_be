@@ -16,6 +16,7 @@ import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
+import com.example.identityservice.utility.ParseUUID;
 import com.google.common.base.Strings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -56,6 +57,14 @@ public class AuthService {
             firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
             sendEmailVerification(userRecord.getUid());
 
+            try{
+                firestoreService.createUser(userRecord.getUid(),"user");
+            }
+            catch (Exception e)
+            {
+                log.error("Error creating user's firestore document: {}", e.getMessage(), e);
+            }
+
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
                 throw new AccountAlreadyExistsException("Account with provided email already exists");
@@ -65,6 +74,7 @@ public class AuthService {
             }
             throw new RuntimeException("Error creating user: " + exception.getMessage(), exception);
         }
+
     }
 
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) {
@@ -106,7 +116,7 @@ public class AuthService {
             request.setDisplayName(userUpdateRequest.getDisplayName());
         }
         try {
-            firestoreService.updateUserById(uid, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName());
+            firestoreService.updateUserById(ParseUUID.normalizeUID(uid).toString(), userUpdateRequest.getFirstName(), userUpdateRequest.getLastName());
             firebaseAuth.updateUser(request);
         } catch (final Exception exception) {
             throw new RuntimeException("Error updating user: " + exception.getMessage(), exception);
