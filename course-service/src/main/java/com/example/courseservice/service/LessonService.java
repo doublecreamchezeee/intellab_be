@@ -368,11 +368,14 @@ public class LessonService {
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
         userCoursesRepository.save(userCourses);
 
-        if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
-        {
-            System.out.println("createCertificate");
-            System.out.println(userCourses.getCertificate());
-            courseService.createCertificate(courseId,userUid);
+        if (userCourses.getProgressPercent()-100 <= 1e-6f ) {
+            userCourses.setStatus(PredefinedLearningStatus.DONE);
+            userCoursesRepository.save(userCourses);
+            if (userCourses.getCertificate() == null) {
+                System.out.println("createCertificate");
+                System.out.println(userCourses.getCertificate());
+                courseService.createCertificate(courseId, userUid);
+            }
         }
         return true;
     }
@@ -403,11 +406,16 @@ public class LessonService {
 
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
         userCoursesRepository.save(userCourses);
-        if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
-        {
-            System.out.println("createCertificate");
-            System.out.println(userCourses.getCertificate());
-            courseService.createCertificate(courseId,userUid);
+
+
+        if (userCourses.getProgressPercent()-100 <= 1e-6f ) {
+            userCourses.setStatus(PredefinedLearningStatus.DONE);
+            userCoursesRepository.save(userCourses);
+            if (userCourses.getCertificate() == null) {
+                System.out.println("createCertificate");
+                System.out.println(userCourses.getCertificate());
+                courseService.createCertificate(courseId, userUid);
+            }
         }
 
         return true;
@@ -444,11 +452,14 @@ public class LessonService {
             userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
             userCoursesRepository.save(userCourses);
 
-            if (userCourses.getProgressPercent()-100 <= 1e-6f && userCourses.getCertificate() == null)
-            {
-                System.out.println("createCertificate");
-                System.out.println(userCourses.getCertificate());
-                courseService.createCertificate(userCourses.getEnrollId().getCourseId(),userUid);
+            if (userCourses.getProgressPercent()-100 <= 1e-6f) {
+                userCourses.setStatus(PredefinedLearningStatus.DONE);
+                userCoursesRepository.save(userCourses);
+                if (userCourses.getCertificate() == null) {
+                    System.out.println("createCertificate");
+                    System.out.println(userCourses.getCertificate());
+                    courseService.createCertificate(userCourses.getEnrollId().getCourseId(), userUid);
+                }
             }
         }
 
