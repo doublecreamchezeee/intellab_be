@@ -11,6 +11,7 @@ import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
+import com.example.identityservice.model.User;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -79,6 +80,25 @@ public class AuthService {
 
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
         ValidatedTokenResponse firebaseToken = firebaseAuthClient.verifyToken(idToken);
+
+        try {
+            User user = firestoreService.getUserByUid(firebaseToken.getUserId());
+
+            if (user == null || user.getFirstName() == null || user.getLastName() == null) {
+                firestoreService.createUserByUid(firebaseToken.getUserId(), "User");
+
+                return FirebaseGoogleSignInResponse.builder()
+                        .uid(firebaseToken.getUserId())
+                        .email(firebaseToken.getEmail())
+                        .build();
+            }
+
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("Error finding user by uid: {}", e.getMessage(), e);
+
+        } catch (Exception e) {
+            log.error("Error finding user by uid: {}", e.getMessage(), e);
+        }
 
         return FirebaseGoogleSignInResponse.builder()
                 .uid(firebaseToken.getUserId())
