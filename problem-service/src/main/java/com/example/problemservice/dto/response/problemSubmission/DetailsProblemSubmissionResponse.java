@@ -1,5 +1,6 @@
 package com.example.problemservice.dto.response.problemSubmission;
 
+import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.TestCaseOutput;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -18,8 +19,15 @@ public class DetailsProblemSubmissionResponse {
     String code;
     String programmingLanguage;
     Integer scoreAchieved;
-    UUID problemId;
+    ProblemResponse problem;
     UUID userUid;
     Boolean isSolved;
     List<TestCaseOutput> testCasesOutput;
+
+    @Data
+    @Builder
+    public static class ProblemResponse {
+        String problemName;
+        UUID problemId;
+    }
 }

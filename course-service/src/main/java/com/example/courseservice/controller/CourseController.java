@@ -283,6 +283,18 @@ public class CourseController {
                 .build();
     }
 
+    @GetMapping("/courseList/me")
+    public ApiResponse<List<EnrolledCourseResponse>> getCourseByUserId(@RequestHeader("X-UserId") String userUid) {
+        userUid = userUid.split(",")[0];
+
+        System.out.println(userUid);
+        System.out.println(ParseUUID.normalizeUID(userUid));
+
+        return ApiResponse.<List<EnrolledCourseResponse>>builder()
+                .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(userUid)))
+                .build();
+    }
+
     @Operation(
             summary = "Get all courses that a user has enrolled"
     )
@@ -476,6 +488,7 @@ public class CourseController {
                 .result(commentService.getComments(courseId, userId, pageable, childrenPageable))
                 .build();
     }
+
     @Operation(
             summary = """
                     Lấy comment theo commentId với số lượng children comment được truyền vào tùy ý (size = ?) default 20

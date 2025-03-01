@@ -15,6 +15,8 @@ import java.util.UUID;
 public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmission, UUID> {
     Optional<List<ProblemSubmission>> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
 
+    List<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid);
+
     List<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
 
     @Query("SELECT COUNT(DISTINCT ps.problem.problemId) " +

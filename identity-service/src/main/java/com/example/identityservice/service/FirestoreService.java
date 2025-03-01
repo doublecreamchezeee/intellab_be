@@ -4,6 +4,7 @@ import com.example.identityservice.model.User;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +13,22 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @Service
+@AllArgsConstructor
 public class FirestoreService {
+    @Autowired
+    private final Firestore firestore;
 
-    private Firestore firestore;
+    public void createUserById(String id, String firstName, String lastName) throws ExecutionException, InterruptedException {
+        DocumentReference documentRef = firestore.collection("users").document(id);
+
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("firstName", firstName);
+        userData.put("lastName", lastName);
+
+        documentRef.set(userData).get();
+    }
+
+
 
     public User getUserById(String id) throws ExecutionException, InterruptedException {
         DocumentSnapshot document = firestore.collection("users").document(id).get().get();

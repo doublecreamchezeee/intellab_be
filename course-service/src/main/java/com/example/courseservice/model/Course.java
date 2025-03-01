@@ -58,6 +58,7 @@ public class Course {
     List<Lesson> lessons = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     List<Review> reviews = new ArrayList<>();
 
     @JoinColumn(name = "user_id")

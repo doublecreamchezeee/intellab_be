@@ -436,6 +436,23 @@ public class CourseService {
         return listEnrolledUsersResponse;
     }
 
+    public List<EnrolledCourseResponse> getCompleteCourseByUserId(UUID userUid) {
+        List<UserCourses> listEnrolledUserInCourse = userCoursesRepository.findAllByEnrollId_UserUid(userUid);
+        List<EnrolledCourseResponse> listEnrolledUsersResponse = new ArrayList<>();
+        for (UserCourses userCourses : listEnrolledUserInCourse) {
+            if (userCourses.getStatus().equals("Done")) {
+                listEnrolledUsersResponse.add(EnrolledCourseResponse.builder()
+                        .course(userCourses.getCourse())
+                        .enrollId(userCourses.getEnrollId())
+                        .lastAccessedDate(userCourses.getLastAccessedDate())
+                        .progressPercent(userCourses.getProgressPercent())
+                        .status(userCourses.getStatus())
+                        .build());
+            }
+        }
+        return listEnrolledUsersResponse;
+    }
+
     public Page<UserCourses> getEnrolledCoursesOfUser(UUID userUid, Pageable pageable) {
         if (userUid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);

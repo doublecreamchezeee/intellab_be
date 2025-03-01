@@ -44,6 +44,20 @@ public class ProblemSubmissionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // HTTP 500
         }
     }
+
+    @Operation(
+            summary = "Get submission by user id"
+    )
+    @GetMapping("/submitList/me")
+    public ResponseEntity<List<DetailsProblemSubmissionResponse>> getSubmissionByUserId(@RequestHeader("X-UserId") String userId) {
+        userId = userId.split(",")[0];
+        System.out.println(userId);
+        System.out.println(ParseUUID.normalizeUID(userId));
+
+        List<DetailsProblemSubmissionResponse> submission = problemSubmissionService.getSubmissionDetailsByUserUid(ParseUUID.normalizeUID(userId));
+        return ResponseEntity.ok(submission);
+    }
+
     @Operation(
             summary = "List submission by userid & problemId (Show the problem submission in submission tab)"
     )
@@ -115,8 +129,6 @@ public class ProblemSubmissionController {
                 .message("Submission details retrieved successfully")
                 .code(200)
                 .build();
-                /*UUID.fromString(problemId),
-                UUID.fromString(userId)*/
 
     }
 
