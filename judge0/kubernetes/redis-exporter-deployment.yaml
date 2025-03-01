@@ -1,0 +1,43 @@
+# Use a Redis exporter to expose the Redis queue length as a Metric. 
+# This exporter will be scraped by Prometheus.
+# The Redis exporter will be deployed as a Deployment and exposed as a Service.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter
+spec:
+  selector:
+    app: redis-exporter
+  ports:
+    - port: 9121
+      targetPort: 9121
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter
+  template:
+    metadata:
+      labels:
+        app: redis-exporter
+    spec:
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:v1.29.0
+          args:
+            - '--redis.addr=redis://redis:6379'
+            - '--redis.password=$(REDIS_PASSWORD)'
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: judge0-config
+                  key: REDIS_PASSWORD
+          ports:
+            - containerPort: 9121
