@@ -83,7 +83,7 @@ public class AuthService {
         ValidatedTokenResponse firebaseToken = firebaseAuthClient.verifyToken(idToken);
         try {
             User user = firestoreService.getUserById(firebaseToken.getUserId());
-            if (user == null) {
+            if (user == null || user.getFirstName() == null || user.getLastName() == null) {
                 firestoreService.createUserById(firebaseToken.getUserId(), "User", firebaseToken.getUserId());
             }
             return FirebaseGoogleSignInResponse.builder()
