@@ -309,7 +309,7 @@ public class CourseService {
             completedLessons += completedPractices;
 
             if (totalLessons > 0) {
-                completionRatio = (completedLessons / (float) totalLessons) * 100;
+                completionRatio = (completedLessons / (float) totalLessons) * 100/2;
             }
         }
 
@@ -393,7 +393,7 @@ public class CourseService {
                         LearningLesson learningLesson = LearningLesson.builder()
                                 .lesson(lesson)
                                 .userId(userUid)
-                                .status("NEW")
+                                .status(PredefinedLearningStatus.NEW)
                                 .assignments(new ArrayList<>())
                                 .isDoneTheory(null)
                                 .isDonePractice(false)
