@@ -106,7 +106,7 @@ public class ProfileService {
     public UserInfoResponse getUserInfo(String userUid, String email) {
         UserInfoResponse userInfoResponse = firebaseAuthClient.getUserInfo(userUid, email);
         try {
-            User userFirestore = firestoreService.getUserByUid(ParseUUID.normalizeUID(userUid).toString());
+            User userFirestore = firestoreService.getUserByUid(userUid);
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
 
