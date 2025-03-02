@@ -15,5 +15,8 @@ COPY ./build/libs/*.jar app.jar
 
 EXPOSE $PORT
 
+# Export environment variables from the .env file
+# RUN export $(cat .env | xargs)
+
 # Set the entrypoint to run the application
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=optional:classpath:/,optional:file:config/"]

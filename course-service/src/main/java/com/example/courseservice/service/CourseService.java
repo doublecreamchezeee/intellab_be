@@ -17,6 +17,7 @@ import com.example.courseservice.model.*;
 import com.example.courseservice.model.Firestore.User;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
+import com.example.courseservice.specification.LessonSpecification;
 import com.example.courseservice.utils.CertificateTemplate;
 import com.example.courseservice.utils.ParseUUID;
 
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -303,13 +305,33 @@ public class CourseService {
         // Calculate the completion ratio for the user
         float completionRatio = 0.0f;
         if (isUserEnrolled) {
-            int totalLessons = lessonRepository.countByCourse_CourseId(courseId);
+
+            /*Specification<Lesson> hasExerciseSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasExerciseId()
+            );*/
+
+            Specification<Lesson> hasProblemSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasProblemId()
+            );
+
+            int totalLessonsHasExercise = lessonRepository.countByCourse_CourseId(courseId);
+            int totalLessonsHasProblem = (int) lessonRepository.count(hasProblemSpecification);
+
+            log.info("Total lessons has exercise: {}", totalLessonsHasExercise);
+            log.info("Total lessons has problem: {}", totalLessonsHasProblem);
+
             int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
             int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUid, courseId, true);
             completedLessons += completedPractices;
 
-            if (totalLessons > 0) {
-                completionRatio = (completedLessons / (float) totalLessons) * 100/2;
+            log.info("Completed lessons: {}", completedLessons);
+
+            if (totalLessonsHasProblem + totalLessonsHasExercise > 0) {
+                completionRatio = (completedLessons / (float) (totalLessonsHasExercise + totalLessonsHasProblem)) * 100;
             }
         }
 

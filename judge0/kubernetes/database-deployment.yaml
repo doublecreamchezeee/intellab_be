@@ -10,6 +10,18 @@ spec:
       storage: 256Mi
   volumeMode: Filesystem
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    app: db
+  ports:
+    - port: 5432
+      targetPort: 5432
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

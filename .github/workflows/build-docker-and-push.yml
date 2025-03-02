@@ -9,6 +9,12 @@ on:
       - deploy
       - test-deploy
 
+    paths:
+    - 'api-gateway/**'
+    - 'course-service/**'
+    - 'identity-service/**'
+    - 'problem-service/**'
+
   pull_request:
     branches:
       - main
@@ -25,12 +31,16 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Cheapest GitHub-hosted runner
 
     env:
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      CICD_ACCESS_TOKEN: ${{ secrets.CICD_ACCESS_TOKEN }}
+      ENVIRONMENT_FILE: ${{ secrets.ENVIRONMENT_FILE }}
+      FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
     strategy:
       matrix:
@@ -43,11 +53,74 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Create .env file from secret (Multiline Support)
+        run: printf "%s" "${{ secrets.ENVIRONMENT_FILE }}" > .env
+
+      # Optional: be careful with this step,
+      # it may expose sensitive information in the logs, even if user using anonymous access
+      # MUST delete workflow logs after using this step
+      - name: Verify .env file
+        run: cat .env
+
+      - name: create credentials file
+        run: |
+          echo "${{ secrets.FIREBASE_CONFIG }}" | base64 --decode > ./identity-service/src/main/resources/firebase-config.json
+          echo "${{ secrets.FIREBASE_CONFIG }}" | base64 --decode > ./course-service/src/main/resources/firebase-config.json
+          echo "${{ secrets.GOOGLE_CREDENTIALS }}" | base64 --decode > ./identity-service/src/main/resources/google-credentials.json
+          echo "${{ secrets.PRIVATE_KEY }}" | base64 --decode > ./identity-service/src/main/resources/private-key.json
+
+      - name: Copy .env file to service folder
+        run: cp .env ${{ matrix.service }}/docker.env
+
+      - name: Set execute permission on gradlew
+        run: chmod +x ${{ matrix.service }}/gradlew
+
+      - name: build app jar
+        run: |
+          bash ${{ matrix.service }}/gradlew ${{ matrix.service }}:build
+
+      - name: Set up environment
+        run: docker buildx create --name intellab-env --use
+
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD}}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Build and push Docker image
         run: |
           cd ${{ matrix.service }}
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+          docker buildx build --platform linux/amd64,linux/arm64 -t doublecreamcheze/intellab_ops:${{ matrix.service }}-latest --push .
+          
+
+
+
+      # - name: Set up environment
+      #   uses: docker/buildx-action@v2
+      #   with:
+      #     driver-opts: name=intellab-env
+
+      # - name: create .env file
+      #   #Hard value environment variable
+      #   run: echo "HOST_NAME=host.docker.internal" >> .env
+
+      # echo $env:FIREBASE_CONFIG | Out-File -FilePath firebase-config-base64.txt
+      # $base64 = Get-Content firebase-config-base64.txt
+      # [System.Convert]::FromBase64String($base64) | Set-Content -Path ./identity-service/src/main/resources/firebase-config.json -AsByteStream
+      # [System.Convert]::FromBase64String($base64) | Set-Content -Path ./course-service/src/main/resources/firebase-config.json -AsByteStream
+
+      # echo $env:GOOGLE_CREDENTIALS | Out-File -FilePath google-credentials-base64.txt
+      # $base64 = Get-Content google-credentials-base64.txt
+      # [System.Convert]::FromBase64String($base64) | Set-Content -Path ./identity-service/src/main/resources/google-credentials.json -AsByteStream
+
+      # echo $env:PRIVATE_KEY | Out-File -FilePath private-key-base64.txt
+      # $base64 = Get-Content private-key-base64.txt
+      # [System.Convert]::FromBase64String($base64) | Set-Content -Path ./identity-service/src/main/resources/gprivate-key.json -AsByteStream
+
+      # echo "${{ secrets.FIREBASE_CONFIG }}" > identity-service/src/main/resources/firebase-config.json
+      # echo "${{ secrets.GOOGLE_CREDENTIALS }}" > identity-service/src/main/resources/google-credentials.json
+      # echo "${{ secrets.PRIVATE_KEY }}" > identity-service/src/main/resources/private-key.json
+      # echo "${{ secrets.FIREBASE_CONFIG }}" > course-service/src/main/resources/firebase-config.json
+
+      # Get-Content ./app/google-credentials.json
+      #      - name: build app jar
+      #        run: |
+      #          ./gradlew ${{ matrix.service }}:build

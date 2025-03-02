@@ -7,6 +7,7 @@ import com.example.identityservice.dto.request.profile.MultipleProfileInformatio
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
@@ -33,6 +34,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/profile")
 @Tag(name = "Profile")
+@Slf4j
 public class ProfileController {
     private final ProfileService profileService;
     private final AuthService authService;

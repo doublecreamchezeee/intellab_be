@@ -64,6 +64,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/root-and-children$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/children$",
+            "/ai/global_chatbot/stream",
+            "/global_chatbot/stream"
     };
 
     @NonFinal
@@ -91,6 +93,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
+        //log.info("Request path: {}", request.getURI().getPath());
+
         if (isPublicEndpoint(request) || isExploredEndpoint(request)) {
             return chain.filter(exchange);
         }
@@ -108,7 +112,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         String token = authHeader.get(0).replace("Bearer ", "");
 
+        //log.info("token: {}", token);
+
         return identityService.validateToken(token).flatMap( response -> {
+
+            //log.info("Objects.requireNonNull(response.getBody()).isValidated(): " + Objects.requireNonNull(response.getBody()).isValidated());
+
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
