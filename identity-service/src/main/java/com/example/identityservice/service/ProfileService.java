@@ -13,6 +13,7 @@ import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.model.User;
 import com.example.identityservice.utility.CloudinaryUtil;
+import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
@@ -102,10 +103,10 @@ public class ProfileService {
         }
     }
 
-    public UserInfoResponse getUserInfo(String userId, String email) {
-        UserInfoResponse userInfoResponse = firebaseAuthClient.getUserInfo(userId, email);
+    public UserInfoResponse getUserInfo(String userUid, String email) {
+        UserInfoResponse userInfoResponse = firebaseAuthClient.getUserInfo(userUid, email);
         try {
-            User userFirestore = firestoreService.getUserByUid(userId);
+            User userFirestore = firestoreService.getUserByUid(ParseUUID.normalizeUID(userUid).toString());
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
 

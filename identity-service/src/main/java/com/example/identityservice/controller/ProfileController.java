@@ -84,13 +84,13 @@ public class ProfileController {
 
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> getMyProfile(Authentication authentication) {
-        String userId = (String) authentication.getPrincipal();
+        String userUid = (String) authentication.getPrincipal();
         String role = authentication.getAuthorities().stream()
                 .findFirst() // Get first authority (ROLE_xxx)
                 .map(GrantedAuthority::getAuthority)
                 .map(auth -> auth.replace("ROLE_", "")) // Remove "ROLE_" prefix
                 .orElse("USER");
-        UserInfoResponse response = profileService.getUserInfo(userId, null);
+        UserInfoResponse response = profileService.getUserInfo(userUid, null);
         response.setRole(role);
         return ResponseEntity.ok(response);
     }
