@@ -106,6 +106,9 @@ public class AuthService {
         if (userUpdateRequest.getDisplayName() != null) {
             request.setDisplayName(userUpdateRequest.getDisplayName());
         }
+        if (userUpdateRequest.getPassword() != null ) {
+            request.setPassword(userUpdateRequest.getPassword());
+        }
         try {
             firestoreService.updateUserByUid(uid, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName());
             firebaseAuth.updateUser(request);
