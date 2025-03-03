@@ -29,7 +29,7 @@ springdoc:
     enabled: true
 
 cloudinary:
-  url: cloudinary://${CLOUDINARY_KEY}:${CLOUDINARY_SECRET}@${CLOUDINARY_NAME}
+  url: ${CLOUDINARY_URL}
 
 domain:
   auth:
