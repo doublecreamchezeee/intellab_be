@@ -22,4 +22,6 @@ public class UserUpdateRequest {
 
     @Size(max = 255, message = "Photo URL length must not exceed 255 characters")
     private String photoUrl;
+
+    private String password;
 }
