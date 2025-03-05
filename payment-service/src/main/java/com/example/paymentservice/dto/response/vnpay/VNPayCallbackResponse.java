@@ -1,4 +1,4 @@
-package com.example.courseservice.dto.response.vnpay;
+package com.example.paymentservice.dto.response.vnpay;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VNPayIPNResponse {
+public class VNPayCallbackResponse {
     String vnp_TmnCode;
     String vnp_Amount;
     String vnp_BankCode;

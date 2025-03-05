@@ -35,9 +35,16 @@ public class ProblemSubmissionController {
             summary = "Create submission (Submit code)"
     )
     @PostMapping
-    public ResponseEntity<DetailsProblemSubmissionResponse> createSubmission(@RequestBody SubmitCodeRequest request) {
+    public ResponseEntity<DetailsProblemSubmissionResponse> createSubmission(
+            @RequestBody SubmitCodeRequest request,
+            @RequestParam(value = "base64", required = false) Boolean base64
+    ) {
+        if (base64 == null) {
+            base64 = false;
+        }
+
         try {
-            DetailsProblemSubmissionResponse createdSubmission = problemSubmissionService.submitProblem(request);
+            DetailsProblemSubmissionResponse createdSubmission = problemSubmissionService.submitProblem(request, base64);
             return ResponseEntity.ok(createdSubmission); // HTTP 200 OK
         } catch (Exception e) {
             System.out.println(e);

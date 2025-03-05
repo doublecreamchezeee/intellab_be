@@ -33,6 +33,17 @@ services:
     depends_on:
       - db
 
+  payment-service:
+    image: doublecreamcheze/intellab_ops:payment-service-latest
+    ports:
+      - "8105:8005"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+    depends_on:
+      - db
+
   db:
     build:
       context: .

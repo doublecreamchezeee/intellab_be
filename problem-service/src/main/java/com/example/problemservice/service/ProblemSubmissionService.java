@@ -48,7 +48,7 @@ public class ProblemSubmissionService {
     private final TestCaseRepository testCaseRepository;
     private final CourseClient courseClient;
 
-    public DetailsProblemSubmissionResponse submitProblem(SubmitCodeRequest request) {
+    public DetailsProblemSubmissionResponse submitProblem(SubmitCodeRequest request, Boolean base64) {
 
         // Lấy Problem
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
@@ -57,6 +57,18 @@ public class ProblemSubmissionService {
 
         ProgrammingLanguage language = programmingLanguageRepository.findByLongName(request.getProgrammingLanguage())
                 .orElseThrow(() -> new AppException(ErrorCode.PROGRAMMING_LANGUAGE_NOT_EXIST));
+
+
+        if (base64!=null && base64) {
+            Base64.Decoder decoder = Base64.getDecoder();
+            request.setCode(
+                    new String(
+                            decoder.decode(
+                                    request.getCode()
+                            )
+                    )
+            );
+        }
 
         ProblemSubmission submission = ProblemSubmission.builder()
                 .code(boilerplateClient.enrich(
@@ -117,7 +129,12 @@ public class ProblemSubmissionService {
                 () -> new AppException(ErrorCode.TEST_CASE_OUTPUT_NOT_EXIST)
         );
 
-        output.setRuntime(Float.valueOf(request.getTime()));
+        if (request.getTime()!=null) {
+            output.setRuntime(Float.valueOf(request.getTime()));
+        } else {
+            output.setRuntime(null);
+        }
+
         output.setMemory(request.getMemory());
         Base64.Decoder decoder = Base64.getDecoder();
 

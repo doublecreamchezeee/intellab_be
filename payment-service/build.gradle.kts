@@ -19,6 +19,8 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("io.github.cdimascio:dotenv-java:2.2.4")
+	implementation("com.google.code.gson:gson:2.12.1")
+
 }
 
 tasks.withType<BootJar>  {
