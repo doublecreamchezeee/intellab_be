@@ -8,6 +8,7 @@ import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.*;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
+import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
@@ -458,17 +459,18 @@ public class CourseService {
         return listEnrolledUsersResponse;
     }
 
-    public List<EnrolledCourseResponse> getCompleteCourseByUserId(UUID userUid) {
+    public List<CompleteCourseResponse> getCompleteCourseByUserId(UUID userUid) {
         List<UserCourses> listEnrolledUserInCourse = userCoursesRepository.findAllByEnrollId_UserUid(userUid);
-        List<EnrolledCourseResponse> listEnrolledUsersResponse = new ArrayList<>();
+        List<CompleteCourseResponse> listEnrolledUsersResponse = new ArrayList<>();
         for (UserCourses userCourses : listEnrolledUserInCourse) {
             if (userCourses.getStatus().equals("Done")) {
-                listEnrolledUsersResponse.add(EnrolledCourseResponse.builder()
+                listEnrolledUsersResponse.add(CompleteCourseResponse.builder()
                         .course(userCourses.getCourse())
                         .enrollId(userCourses.getEnrollId())
                         .lastAccessedDate(userCourses.getLastAccessedDate())
                         .progressPercent(userCourses.getProgressPercent())
                         .status(userCourses.getStatus())
+                        .certificateId(userCourses.getCertificate().getCertificateId())
                         .build());
             }
         }
