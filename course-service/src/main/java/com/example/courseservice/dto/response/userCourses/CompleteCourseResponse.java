@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -22,4 +23,6 @@ public class CompleteCourseResponse {
     String status;
     Instant lastAccessedDate;
     UUID certificateId;
+    Date completedDate;
+
 }

@@ -471,6 +471,7 @@ public class CourseService {
                         .progressPercent(userCourses.getProgressPercent())
                         .status(userCourses.getStatus())
                         .certificateId(userCourses.getCertificate().getCertificateId())
+                        .completedDate(Date.from(userCourses.getCertificate().getCompletedDate()))
                         .build());
             }
         }

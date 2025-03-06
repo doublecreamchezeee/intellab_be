@@ -55,6 +55,7 @@ public class ProblemSubmissionController {
         System.out.println(ParseUUID.normalizeUID(userId));
 
         List<DetailsProblemSubmissionResponse> submission = problemSubmissionService.getSubmissionDetailsByUserUid(ParseUUID.normalizeUID(userId));
+
         return ResponseEntity.ok(submission);
     }
 
