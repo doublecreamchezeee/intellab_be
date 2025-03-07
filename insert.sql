@@ -654,6 +654,42 @@ create table problem_comment_reactions
 alter table problem_comment_reactions
     owner to postgres;
 
+create table vnpay_payment
+(
+    payment_id uuid not null default uuid_generate_v4()
+        primary key,
+    bank_code           character,
+    bank_transaction_no character,
+    created_at          timestamp(6) with time zone,,
+    currency            character,
+    paid_amount         real,
+    received_at         timestamp with time zone,
+    response_code       character,
+    total_payment_amount real,
+    transaction_no      character,
+    transaction_reference character,
+    transaction_status  varchar,
+    user_uid            varchar,
+    user_uuid           uuid
+);
+
+alter table vnpay_payment
+    owner to postgres;
+
+create table  vnpay_payment_courses
+(
+    course_id uuid NOT NULL,
+    user_uid character NOT NULL,
+    payment_id uuid NOT NULL,
+    CONSTRAINT vnpay_payment_courses_pkey PRIMARY KEY (course_id, user_uid),
+    CONSTRAINT fkqbo2u2em1wlor0eeu9alboqoy FOREIGN KEY (payment_id)
+        REFERENCES vnpay_payment (payment_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+alter table vnpay_payment_courses
+    owner to postgres;
 
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('dbfea360-dda9-46a5-9487-ea624080bb60', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('5fe612b4-3998-44c7-85b2-2e4e973a38a7', 'The logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', null, null, 'Logic Building Problems', null);
@@ -683,7 +719,15 @@ INSERT INTO public.courses (course_id, course_name, description, level, price, u
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'Introduction to DSA II', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 'Queue', 'The Queue lesson series dives into the mechanics of this fundamental data structure, which follows the FIFO (First In, First Out) principle. You’ll learn how to perform operations such as enqueue, dequeue, and peek, while also exploring its variations like Circular Queues and Priority Queues. Practical applications, including task scheduling, buffering, and breadth-first search algorithms, will help solidify your understanding. This series is perfect for beginners and anyone looking to master essential programming concepts.', 'Beginner', 0.00, 'VND', null, '01e7b3b3-a36a-4679-b082-14c2ad622628', null, null);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 'Stack', 'The Stack lesson series offers a comprehensive introduction to one of the fundamental data structures in programming. You''ll explore how a Stack operates based on the LIFO (Last In, First Out) principle, perform core operations such as push, pop, and peek, and apply these concepts to real-world problems like validating parentheses, converting expressions, or building a browser''s backtracking system. This series is ideal for beginners and those looking to strengthen their understanding of data structures.', 'Beginner', 0.00, 'VND', null, 'd9fbda58-f71b-4567-affe-4fbab0933feb', null, null);
-INSERT INTO pulbic.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count) VALUES ('82d991c9-2ed9-4d33-b4d9-be5a6dcaf4ae', 'DSA Masterclass', 'Basic to Advanced DSA', 'Advanced', 100000.00, 'VND', null, null, null, null);
+
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('82d991c9-2ed9-4d33-b4d9-be5a6dcaf4ae', null, 'DSA Masterclass', 'Basic to Advanced DSA', 'Advanced', 100000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('00a55f07-0d45-4d32-9f5e-e92777155e56', null, 'TAOCP 1', 'Basic to Advanced TAOCP Part 1', 'Advanced', 50000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('a75fb9c7-d3db-41d3-8e89-265730b5d629', null, 'TAOCP 2', 'Basic to Advanced TAOCP Part 2', 'Advanced', 100000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('dfd2221f-9615-4ca8-9967-27ec7542e991', null, 'TAOCP 3', 'Basic to Advanced TAOCP Part 3', 'Advanced', 200000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('92f189a3-47d3-478a-b5a7-2832db75e119', null, 'TAOCP 4', 'Basic to Advanced TAOCP Part 4', 'Advanced', 300000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('575bd0a6-afca-439c-bb6f-f1a0caaa27b9', null, 'TAOCP 5', 'Basic to Advanced TAOCP Part 5', 'Advanced', 400000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('8e963cdf-2416-4196-bea7-f24a5272964d', null, 'TAOCP 6', 'Basic to Advanced TAOCP Part 6', 'Advanced', 500000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
+INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, user_uid, topic_id, user_id, author_name) VALUES ('91010d93-3d40-40d6-9b3f-f0f950fe508a', null, 'TAOCP 7', 'Basic to Advanced TAOCP Part 7', 'Advanced', 1000000.00, null, 'VND', null, 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null);
 
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '', 'Stack');
 INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '', 'Queue');

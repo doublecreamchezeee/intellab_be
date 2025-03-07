@@ -41,6 +41,9 @@ public enum ErrorCode {
     USER_ALREADY_REVIEW_COURSE(409, "User already review course", HttpStatus.CONFLICT),
     CANNOT_CREATE_PAYMENT(500, "Cannot create payment", HttpStatus.INTERNAL_SERVER_ERROR),
     CANNOT_HANDLE_IPN_CALLBACK(500, "Cannot handle IPN callback", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_NOT_FOUND(404, "Payment not found", HttpStatus.NOT_FOUND),
+    CANNOT_ENROLL_COURSE(500, "Cannot enroll course! Course service error", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_NOT_SUCCESSFUL(500, "Payment not successful", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

@@ -57,7 +57,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/reviews/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/reviews$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/reviews-stats$",
-            "/identity/profile/single",
+           // "/identity/profile/single",
             "/identity/profile/single/public",
             "/identity/profile/multiple",
             "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/comments$",
@@ -94,6 +94,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
 
         //log.info("Request path: {}", request.getURI().getPath());
+        //log.info("isPublicEndpoint(request): {}", isPublicEndpoint(request));
+        //log.info("isExploredEndpoint(request): {}", isExploredEndpoint(request));
 
         if (isPublicEndpoint(request) || isExploredEndpoint(request)) {
             return chain.filter(exchange);
@@ -143,7 +145,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isExploredEndpoint(ServerHttpRequest request) {
-        if (request.getMethod() == HttpMethod.GET) {
+        if (request.getMethod() == HttpMethod.GET || request.getMethod() == HttpMethod.POST) {
             /*boolean isRestricted = Arrays.stream(restrictedEndpoints)
                     .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
 

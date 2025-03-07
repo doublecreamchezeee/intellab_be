@@ -1,15 +1,26 @@
 package com.example.paymentservice.service;
 
 import com.example.paymentservice.client.CourseClient;
+import com.example.paymentservice.client.VNPayClient;
+import com.example.paymentservice.constant.*;
 import com.example.paymentservice.dto.ApiResponse;
+import com.example.paymentservice.dto.request.course.EnrollCourseRequest;
+import com.example.paymentservice.dto.request.vnpay.VNPayQueryRequest;
+import com.example.paymentservice.dto.request.vnpay.VNPayRefundRequest;
 import com.example.paymentservice.dto.request.vnpay.VNPaySinglePaymentCreationRequest;
 import com.example.paymentservice.dto.response.course.DetailCourseResponse;
-import com.example.paymentservice.dto.response.vnpay.VNPayCallbackResponse;
-import com.example.paymentservice.dto.response.vnpay.VNPayIPNReturnResponse;
+import com.example.paymentservice.dto.response.userCourse.UserCoursesResponse;
+import com.example.paymentservice.dto.response.vnpay.*;
 import com.example.paymentservice.exception.AppException;
 import com.example.paymentservice.exception.ErrorCode;
-import com.google.gson.JsonObject;
+import com.example.paymentservice.mapper.VNPayPaymentMapper;
+import com.example.paymentservice.model.VNPayPayment;
+import com.example.paymentservice.model.VNPayPaymentCourses;
+import com.example.paymentservice.model.composite.VNPayPaymentCoursesId;
+import com.example.paymentservice.repository.VNPayPaymentCoursesRepository;
+import com.example.paymentservice.repository.VNPayPaymentRepository;
 import com.example.paymentservice.utils.HashUtility;
+import com.example.paymentservice.utils.ParseUUID;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -17,11 +28,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -32,7 +43,11 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 public class VNPayService {
+    private final VNPayClient vnpayClient;
     private final CourseClient courseClient;
+    private final VNPayPaymentRepository vnPayPaymentRepository;
+    private final VNPayPaymentMapper vnPaymentMapper;
+    private final VNPayPaymentCoursesRepository vnPayPaymentCoursesRepository;
 
     @Value("${vnpay.tmn-code}")
     private String vnp_TmnCode;
@@ -49,18 +64,8 @@ public class VNPayService {
     @Value("${vnpay.api-url}")
     private String vnp_ApiUrl;
 
-   /* @Value("${vnpay.version}")
-    private String vnp_Version;
-
-    @Value("${vnpay.command}")
-    private String vnp_Command;
-
-    @Value("${vnpay.curr-code}")
-    private String vnp_CurrCode;
-    */
-
-
-    public String createSinglePayment(String ipAddr, VNPaySinglePaymentCreationRequest request, String userId) {
+    public VNPayPaymentCreationResponse createSinglePayment(
+            String ipAddr, VNPaySinglePaymentCreationRequest request, String userUid) {
         try {
             ApiResponse<DetailCourseResponse> courseResponse = courseClient.getDetailCourseById(request.getCourseId());
             DetailCourseResponse course = courseResponse.getResult();
@@ -74,28 +79,40 @@ public class VNPayService {
                     (long) course.getPrice(),
                     request.getVNPayBankCode().getCode(),
                     request.getVNPayCurrencyCode().getCode(),
-                    userId
+                    request.getLanguage().getCode(),
+                    userUid,
+                    request.getCourseId()
             );
 
+        } catch (AppException e) {
+            throw e;
         } catch (Exception e) {
             throw new AppException(ErrorCode.CANNOT_CREATE_PAYMENT);
         }
 
     }
 
-    public String createPaymentUrl(String ipAddr, long amount, String bankCode, String currCode, String userId) {
+    public VNPayPaymentCreationResponse createPaymentUrl(
+            String ipAddr, long amount,
+            String bankCode, String currCode,
+            String locale, String userUid, UUID courseId
+    ) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
         String vnp_TxnRef = HashUtility.getRandomNumber(8);
-        String orderInfo = "Payment for course(s): " + vnp_TxnRef;
-
-        log.info("bankCode: " + bankCode);
-        log.info("currCode: " + currCode);
-        log.info("amount: " + amount);
+        String orderInfo = null;
+        if (locale.equals("vi")) {
+            orderInfo = "Thanh toan cho khoa hoc: " + vnp_TxnRef;
+        } else {
+            orderInfo = "Payment for courses: " + vnp_TxnRef;
+        }
 
         /*log.info("vnp_HashSecret: " + vnp_HashSecret);
-        log.info("vnp_TmnCode: " + vnp_TmnCode);*/
+        log.info("vnp_TmnCode: " + vnp_TmnCode);
+        log.info("bankCode: " + bankCode);
+        log.info("currCode: " + currCode);
+        log.info("amount: " + amount);*/
 
         try {
             Map<String, String> vnpParams = new HashMap<>();
@@ -113,16 +130,17 @@ public class VNPayService {
             vnpParams.put("vnp_TxnRef", vnp_TxnRef); //String.valueOf(System.currentTimeMillis()));
             vnpParams.put("vnp_OrderInfo", orderInfo);
             vnpParams.put("vnp_OrderType", orderType);
-            vnpParams.put("vnp_Locale", "vn");
+            vnpParams.put("vnp_Locale", locale);
             vnpParams.put("vnp_ReturnUrl", vnp_ReturnUrl);
             vnpParams.put("vnp_IpAddr", ipAddr);
 
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-            String vnp_CreateDate = formatter.format(calendar.getTime());
+            Date currentDate = calendar.getTime();
+            String vnp_CreateDate = formatter.format(currentDate);
             vnpParams.put("vnp_CreateDate", vnp_CreateDate);
 
-            calendar.add(Calendar.MINUTE, 45);
+            calendar.add(Calendar.MINUTE, 15);
             String vnp_ExpireDate = formatter.format(calendar.getTime());
             vnpParams.put("vnp_ExpireDate", vnp_ExpireDate);
 
@@ -156,9 +174,49 @@ public class VNPayService {
             String secureHash = HashUtility.hmacSHA512(vnp_HashSecret, hashData.toString());
             query.append("&vnp_SecureHash=").append(secureHash);
 
-            log.info(vnp_PayUrl + "?" + query);
+            //log.info("Secure hash: {}", secureHash);
 
-            return vnp_PayUrl + "?" + query.toString();
+            // save payment to database
+            VNPayPayment payment = VNPayPayment.builder()
+                    .userUid(userUid)
+                    .userUuid(ParseUUID.normalizeUID(userUid))
+                    .transactionStatus("01") // Pending transaction
+                    .totalPaymentAmount((float) amount)
+                    .currency(currCode)
+                    .paidAmount(0.0f)
+                    .bankCode(bankCode)
+                    .transactionReference(vnp_TxnRef)
+                    .createdAt(currentDate.toInstant())
+                    .build();
+
+            payment = vnPayPaymentRepository.save(payment);
+
+            VNPayPaymentCoursesId id = VNPayPaymentCoursesId.builder()
+                    .courseId(courseId)
+                    .userUid(userUid)
+                    .build();
+
+            VNPayPaymentCourses paymentCourses = VNPayPaymentCourses.builder()
+                    .id(id)
+                    .payment(payment)
+                    .build();
+
+            vnPayPaymentCoursesRepository.save(paymentCourses);
+
+            // Create response
+            VNPayPaymentCreationResponse response = vnPaymentMapper.toVNPayPaymentCreationResponse(payment);
+
+            response.setPaymentUrl(vnp_PayUrl + "?" + query.toString());
+
+            response.setTransactionStatusDescription(
+                    VNPayTransactionStatus
+                            .getDescription(
+                                    payment.getTransactionStatus()
+                            )
+            );
+            // log.info(vnp_PayUrl + "?" + query);
+
+            return response;
         } catch (Exception e) {
             throw new AppException(ErrorCode.CANNOT_CREATE_PAYMENT);
         }
@@ -191,23 +249,36 @@ public class VNPayService {
         }
     }
 
-    public String getPaymentInformation(String ipAddr, String orderId, String transDate)  {
+    public VNPayQueryResponse getPaymentInformationInVNPayServer(
+            String ipAddr, UUID paymentId
+    )  {
+
+        VNPayPayment payment = vnPayPaymentRepository.findById(paymentId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+
         try {
+            Calendar calender = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+
             String vnp_RequestId = HashUtility.getRandomNumber(8);
             String vnp_Version = "2.1.0";
             String vnp_Command = "querydr";
-            String vnp_TxnRef = orderId;
-            String vnp_OrderInfo = "Check payment for course: " + vnp_TxnRef;
-            String vnp_TransDate = transDate;
+            String vnp_TxnRef = payment.getTransactionReference();
+            String vnp_OrderInfo = "Check result of transaction of order Id: " + vnp_TxnRef;
+            String vnp_TransDate = formatter.format(
+                    payment.getReceivedAt() != null
+                            ?  Date.from(payment.getReceivedAt())
+                            : Date.from(payment.getCreatedAt())
+            );
 
-            Calendar calender = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
             String vnp_CreateDate = formatter.format(calender.getTime());
 
             String vnp_IpAddr = ipAddr;
 
-            JsonObject  vnp_Params = new JsonObject ();
+            String hash_Data= String.join("|", vnp_RequestId, vnp_Version, vnp_Command, vnp_TmnCode, vnp_TxnRef, vnp_TransDate, vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
+            String vnp_SecureHash = HashUtility.hmacSHA512(vnp_HashSecret, hash_Data.toString());
 
+            /*JsonObject vnp_Params = new JsonObject ();
             vnp_Params.addProperty("vnp_RequestId", vnp_RequestId);
             vnp_Params.addProperty("vnp_Version", vnp_Version);
             vnp_Params.addProperty("vnp_Command", vnp_Command);
@@ -217,15 +288,39 @@ public class VNPayService {
             //vnp_Params.put("vnp_TransactionNo", vnp_TransactionNo);
             vnp_Params.addProperty("vnp_TransactionDate", vnp_TransDate);
             vnp_Params.addProperty("vnp_CreateDate", vnp_CreateDate);
-            vnp_Params.addProperty("vnp_IpAddr", vnp_IpAddr);
+            vnp_Params.addProperty("vnp_IpAddr", vnp_IpAddr);*/
 
+            VNPayQueryRequest request = VNPayQueryRequest
+                    .builder()
+                    .vnp_RequestId(vnp_RequestId)
+                    .vnp_Version(vnp_Version)
+                    .vnp_Command(vnp_Command)
+                    .vnp_TmnCode(vnp_TmnCode)
+                    .vnp_TxnRef(vnp_TxnRef)
+                    .vnp_OrderInfo(vnp_OrderInfo)
+                    .vnp_TransactionDate(vnp_TransDate)
+                    .vnp_CreateDate(vnp_CreateDate)
+                    .vnp_IpAddr(vnp_IpAddr)
+                    .vnp_SecureHash(vnp_SecureHash)
+                    .build();
 
-            String hash_Data= String.join("|", vnp_RequestId, vnp_Version, vnp_Command, vnp_TmnCode, vnp_TxnRef, vnp_TransDate, vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
-            String vnp_SecureHash = HashUtility.hmacSHA512(vnp_HashSecret, hash_Data.toString());
+            VNPayQueryResponse response = vnpayClient.queryPayment(request);
 
-            vnp_Params.addProperty("vnp_SecureHash", vnp_SecureHash);
+            response.setVnp_TransactionStatusDescription(
+                    VNPayTransactionStatus
+                            .getDescription(
+                                    response.getVnp_TransactionStatus()
+                            )
+            );
 
-            URL url = new URL(vnp_ApiUrl);
+            response.setVnp_ResponseCodeDescription(
+                    VNPayQueryResponseCode
+                            .getDescription(
+                                    response.getVnp_ResponseCode()
+                            )
+            );
+            //vnp_Params.addProperty("vnp_SecureHash", vnp_SecureHash);
+            /*URL url = new URL(vnp_ApiUrl);
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
@@ -241,14 +336,15 @@ public class VNPayService {
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String output;
-            StringBuffer response = new StringBuffer();
+            StringBuffer response2 = new StringBuffer();
             while ((output = in.readLine()) != null) {
-                response.append(output);
+                response2.append(output);
             }
             in.close();
+            log.info("Response: {}", response2.toString());*/
 
-            return response.toString();
-        } catch (IOException e) {
+            return response;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -258,38 +354,91 @@ public class VNPayService {
         try {
             String RspCode = response.getVnp_ResponseCode();
             String vnp_SecureHash = response.getVnp_SecureHash();
-            String Message = "Server intellab: Payment successful";
-            if (!"00".equals(RspCode)) {
-                Message = "Server intellab: Payment failed or canceled";
-            }
+
             Map fields = new HashMap();
 
-            fields.put("vnp_TmnCode", response.getVnp_TmnCode());
             fields.put("vnp_Amount", response.getVnp_Amount());
             fields.put("vnp_BankCode", response.getVnp_BankCode());
             fields.put("vnp_BankTranNo", response.getVnp_BankTranNo());
             fields.put("vnp_CardType", response.getVnp_CardType());
-            fields.put("vnp_PayDate", response.getVnp_PayDate());
             fields.put("vnp_OrderInfo", response.getVnp_OrderInfo());
-            fields.put("vnp_TransactionNo", response.getVnp_TransactionNo());
+            fields.put("vnp_PayDate", response.getVnp_PayDate());
             fields.put("vnp_ResponseCode", response.getVnp_ResponseCode());
+            fields.put("vnp_TmnCode", response.getVnp_TmnCode());
+            fields.put("vnp_TransactionNo", response.getVnp_TransactionNo());
             fields.put("vnp_TransactionStatus", response.getVnp_TransactionStatus());
             fields.put("vnp_TxnRef", response.getVnp_TxnRef());
 
             String signingValue = HashUtility.hashAllFields(fields, vnp_HashSecret);
+
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String formattedDate = formatter.format(calendar.getTime());
+
+            /*log.info("Received date: {}", formattedDate);
+
+            log.info("vnp_SecureHash: {}", vnp_SecureHash);
+            log.info("signingValue: {}", signingValue);*/
+
             if (signingValue.equals(vnp_SecureHash)) {
-                boolean checkOrderId = true; // Giá trị của vnp_TxnRef tồn tại trong CSDL của merchant
-                boolean checkAmount = true; //Kiểm tra số tiền thanh toán do VNPAY phản hồi(vnp_Amount/100) với số tiền của đơn hàng merchant tạo thanh toán: giả sử số tiền kiểm tra là đúng.
-                boolean checkOrderStatus = true; // Giả sử PaymnentStatus = 0 (pending) là trạng thái thanh toán của giao dịch khởi tạo chưa có IPN.
+                boolean checkOrderId = vnPayPaymentRepository.existsByTransactionReference(response.getVnp_TxnRef()); // Giá trị của vnp_TxnRef tồn tại trong CSDL của merchant
+                boolean checkOrderStatus = true; // Giả sử PaymentStatus = 0 (pending) là trạng thái thanh toán của giao dịch khởi tạo chưa có IPN.
                 if (checkOrderId) {
+
+                    VNPayPayment payment = vnPayPaymentRepository.findByTransactionReference(response.getVnp_TxnRef())
+                            .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+
+                    if (payment.getReceivedAt() != null) {
+                        return VNPayIPNReturnResponse.builder()
+                                .RspCode("02")
+                                .Message("Order already confirmed")
+                                .build();
+                    }
+
+                    payment.setReceivedAt(calendar.getTime().toInstant());
+
+                    //Kiểm tra số tiền thanh toán do VNPAY phản hồi(vnp_Amount/100) với số tiền của đơn hàng merchant tạo thanh toán: giả sử số tiền kiểm tra là đúng.
+                    boolean checkAmount = payment.getTotalPaymentAmount() == (float) (Long.parseLong(response.getVnp_Amount()) / 100);
+
                     if (checkAmount) {
                         if (checkOrderStatus) {
                             if ("00".equals(response.getVnp_ResponseCode())) {
                                 //Xử lý/Cập nhật tình trạng giao dịch thanh toán "Thành công"
                                 // out.print("GD Thanh cong");
+                                payment.setBankTransactionNo(response.getVnp_BankTranNo());
+                                payment.setTransactionNo(response.getVnp_TransactionNo());
+                                payment.setResponseCode(response.getVnp_ResponseCode());
+                                payment.setTransactionStatus(response.getVnp_TransactionStatus());
+                                payment.setPaidAmount((float) (Long.parseLong(response.getVnp_Amount()) / 100));
+                                vnPayPaymentRepository.save(payment);
+
+                                // Update payment status in course-service
+                                VNPayPaymentCourses paymentCourses = vnPayPaymentCoursesRepository
+                                        .findByPayment_paymentId(
+                                                payment.getPaymentId()
+                                        )
+                                        .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+
+                                try {
+                                    ApiResponse<UserCoursesResponse> userCoursesResponse = courseClient.enrollPaidCourse(
+                                            EnrollCourseRequest.builder()
+                                                    .courseId(paymentCourses.getId().getCourseId())
+                                                    .userUid(payment.getUserUid())
+                                                    .build()
+                                    );
+                                    log.info("Enroll course response from course service: {}", userCoursesResponse);
+                                } catch (Exception e) {
+                                    throw new AppException(ErrorCode.CANNOT_ENROLL_COURSE);
+                                }
+
                             } else {
                                 //Xử lý/Cập nhật tình trạng giao dịch thanh toán "Không thành công"
                                 //  out.print("GD Khong thanh cong");
+                                payment.setBankTransactionNo(response.getVnp_BankTranNo());
+                                payment.setTransactionNo(response.getVnp_TransactionNo());
+                                payment.setResponseCode(response.getVnp_ResponseCode());
+                                payment.setTransactionStatus("02"); // Transaction error
+                                vnPayPaymentRepository.save(payment);
                             }
                             return VNPayIPNReturnResponse.builder()
                                     .RspCode("00")
@@ -328,7 +477,134 @@ public class VNPayService {
             throw new AppException(ErrorCode.CANNOT_HANDLE_IPN_CALLBACK);
         }
 
-
     }
 
+    @Transactional
+    public VNPayRefundResponse refundPayment(
+            String ipAddr, UUID paymentId
+    ) {
+        VNPayPayment payment = vnPayPaymentRepository.findById(paymentId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        if (!payment.getTransactionStatus().equals("00") || payment.getPaidAmount() == 0.0f) {
+            throw new AppException(ErrorCode.PAYMENT_NOT_SUCCESSFUL);
+        }
+
+
+        try {
+            Calendar calender = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+
+            String vnp_RequestId = HashUtility.getRandomNumber(8);
+            String vnp_Version = "2.1.0";
+            String vnp_Command = "refund";
+            String vnp_TxnRef = payment.getTransactionReference();
+            String vnp_TransactionType = VNPayRefundType.FULL_REFUND.getCode();
+            String vnp_Amount = String.valueOf(payment.getPaidAmount() * 100);
+            String vnp_TransactionNo = payment.getBankTransactionNo();
+            String vnp_OrderInfo = "Refund for order Id: " + vnp_TxnRef;
+            String vnp_TransactionDate = formatter.format(
+                    payment.getReceivedAt() != null
+                            ?  Date.from(payment.getReceivedAt())
+                            : Date.from(payment.getCreatedAt())
+            );
+            String vnp_CreateBy = "IntellabAdmin";
+
+
+            String vnp_CreateDate = formatter.format(calender.getTime());
+
+            String vnp_IpAddr = ipAddr;
+
+            String hash_Data= String.join("|", vnp_RequestId, vnp_Version, vnp_Command, vnp_TmnCode,
+                    vnp_TransactionType, vnp_TxnRef, vnp_Amount, vnp_TransactionNo, vnp_TransactionDate,
+                    vnp_CreateBy, vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
+            String vnp_SecureHash = HashUtility.hmacSHA512(vnp_HashSecret, hash_Data.toString());
+
+            VNPayRefundRequest request = VNPayRefundRequest
+                    .builder()
+                    .vnp_RequestId(vnp_RequestId)
+                    .vnp_Version(vnp_Version)
+                    .vnp_Command(vnp_Command)
+                    .vnp_TmnCode(vnp_TmnCode)
+                    .vnp_TransactionType(vnp_TransactionType)
+                    .vnp_TxnRef(vnp_TxnRef)
+                    .vnp_Amount(vnp_Amount)
+                    .vnp_OrderInfo(vnp_OrderInfo)
+                    .vnp_TransactionNo(vnp_TransactionNo)
+                    .vnp_TransactionDate(vnp_TransactionDate)
+                    .vnp_CreateBy(vnp_CreateBy)
+                    .vnp_CreateDate(vnp_CreateDate)
+                    .vnp_IpAddr(vnp_IpAddr)
+                    .vnp_SecureHash(vnp_SecureHash)
+                    .build();
+
+            VNPayRefundResponse response = vnpayClient.refundPayment(request);
+
+            response.setVnp_TransactionStatusDescription(
+                    VNPayTransactionStatus
+                            .getDescription(
+                                    response.getVnp_TransactionStatus()
+                            )
+            );
+
+            response.setVnp_ResponseCodeDescription(
+                    VNPayRefundResponseCode
+                            .getDescription(
+                                    response.getVnp_ResponseCode()
+                            )
+            );
+
+            if (response.getVnp_ResponseCode().equals("00")) {
+                payment.setTransactionStatus("05"); // VNPAY has sent a refund request to the bank  (Refund transaction)
+                vnPayPaymentRepository.save(payment);
+
+                for (VNPayPaymentCourses paymentCourses : payment.getPaymentCourses()) {
+                    ApiResponse<Boolean> result = courseClient.disenrollCourse(paymentCourses.getId().getCourseId(), payment.getUserUid());
+
+                    if (!result.getResult()) {
+                        log.info("Cannot disenroll course: {}", paymentCourses.getId().getCourseId());
+                    }
+                }
+            }
+
+            return response;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public VNPayDetailsPaymentResponse getPaymentDetailsByPaymentId(UUID paymentId) {
+        VNPayPayment payment = vnPayPaymentRepository.findById(paymentId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        VNPayDetailsPaymentResponse response = vnPaymentMapper.toVNPayDetailsPaymentResponse(payment);
+
+        response.setTransactionStatusDescription(
+                VNPayTransactionStatus
+                        .getDescription(
+                                payment.getTransactionStatus()
+                        )
+        );
+
+        response.setResponseCodeDescription(
+                VNPayPayResponseCode
+                        .getDescription(
+                                payment.getResponseCode()
+                        )
+        );
+        return response;
+    }
+
+    public Page<VNPayDetailsPaymentResponse> getListPaymentDetailsByUserUid(String userUid, Pageable pageable) {
+        Page<VNPayPayment> payments = vnPayPaymentRepository.findAllByUserUid(userUid, pageable);
+        return payments.map(vnPaymentMapper::toVNPayDetailsPaymentResponse);
+    }
+
+    public UUID getPaymentIdByTransactionReference(String transactionReference) {
+        VNPayPayment payment = vnPayPaymentRepository.findByTransactionReference(transactionReference)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+        return payment.getPaymentId();
+    }
 }

@@ -1,16 +1,21 @@
 package com.example.paymentservice.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class HashUtility {
+    private static final Logger log = LoggerFactory.getLogger(HashUtility.class);
+
     public static String md5(String message) {
         String digest = null;
         try {
@@ -60,12 +65,16 @@ public class HashUtility {
         StringBuilder sb = new StringBuilder();
         Iterator itr = fieldNames.iterator();
         while (itr.hasNext()) {
+
             String fieldName = (String) itr.next();
+
+            //log.info("fieldName: {}", fieldName);
+
             String fieldValue = (String) fields.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                sb.append(fieldName);
+                sb.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
                 sb.append("=");
-                sb.append(fieldValue);
+                sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
             }
             if (itr.hasNext()) {
                 sb.append("&");
