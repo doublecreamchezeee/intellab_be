@@ -18,6 +18,8 @@ import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.exception.AppException;
+import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CommentService;
@@ -285,7 +287,20 @@ public class CourseController {
     }
 
     @GetMapping("/courseList/me")
-    public ApiResponse<List<CompleteCourseResponse>> getCourseByUserId(@RequestHeader("X-UserId") String userUid) {
+    public ApiResponse<List<CompleteCourseResponse>> getCourseByUserId(
+            @RequestHeader(name = "X-UserId", required = false) String userUid,
+            @RequestParam (required = false) String UserUid) {
+
+        if (userUid == null && UserUid == null) {
+            throw new AppException(ErrorCode.INVALID_USER);
+        }
+
+        if (userUid != null) {
+            return ApiResponse.<List<CompleteCourseResponse>>builder()
+                    .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(UserUid)))
+                    .build();
+        }
+
         userUid = userUid.split(",")[0];
 
         System.out.println(userUid);
