@@ -126,7 +126,6 @@ public class ProblemService {
             problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
         });
         return results;
-
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {

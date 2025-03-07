@@ -83,6 +83,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses/search",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/course/courses/details",
+            "/course/courses/courseList/me",
+            "/problem/problem-submissions/submitList/me",
+            "/problem/statistics/progress/language",
+            "/problem/statistics/progress/level",
     };
 
     @Value("${app.api-prefix}")
