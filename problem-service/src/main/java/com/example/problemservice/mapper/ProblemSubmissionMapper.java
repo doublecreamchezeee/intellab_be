@@ -1,10 +1,18 @@
 package com.example.problemservice.mapper;
 
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
+import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
+import com.example.problemservice.model.ProblemCategory;
 import com.example.problemservice.model.ProblemSubmission;
+import com.example.problemservice.model.TestCaseOutput;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProblemSubmissionMapper {
@@ -28,4 +36,5 @@ public interface ProblemSubmissionMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "isSolved", ignore = true)
     ProblemSubmission toProblemSubmission(DetailsProblemSubmissionRequest detailsProblemSubmissionRequest);
+
 }

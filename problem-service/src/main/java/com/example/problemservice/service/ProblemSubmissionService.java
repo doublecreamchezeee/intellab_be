@@ -6,6 +6,7 @@ import com.example.problemservice.client.Judge0Client;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
 import com.example.problemservice.dto.request.lesson.DonePracticeRequest;
+import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
 import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
@@ -26,6 +27,7 @@ import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.repository.TestCaseOutputRepository;
 //import com.example.problemservice.utils.Base64Util;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +123,31 @@ public class ProblemSubmissionService {
         submission.setTestCasesOutput(outputs);
 
         // Lưu lại ProblemSubmission
-        return problemSubmissionMapper.toDetailsProblemSubmissionResponse(problemSubmissionRepository.save(submission));
+        ProblemSubmission result = problemSubmissionRepository.save(submission);
+
+        return getDetailsProblemSubmissionResponse(result);
+    }
+
+    @NotNull
+    private DetailsProblemSubmissionResponse getDetailsProblemSubmissionResponse(ProblemSubmission result) {
+        DetailsProblemSubmissionResponse response = problemSubmissionMapper.toDetailsProblemSubmissionResponse(result);
+        List<TestCaseOutput> testCaseOutputs = result.getTestCasesOutput();
+        if (testCaseOutputs != null && !testCaseOutputs.isEmpty()) {
+            Float totalMemories = (float) result.getTestCasesOutput().stream().mapToDouble(testCaseOutput ->
+                    testCaseOutput.getMemory() != null ? testCaseOutput.getMemory() : 0).sum();
+            response.setUsedMemory(totalMemories);
+            Float totalRuntime = (float) result.getTestCasesOutput().stream().mapToDouble(testCaseOutput ->
+                    testCaseOutput.getRuntime() != null ? testCaseOutput.getRuntime() : 0).sum();
+            response.setRuntime(totalRuntime);
+        }
+
+        List<ProblemCategory> problemCategories = result.getProblem().getCategories();
+
+        List<CategoryResponse> categories = problemCategories.stream()
+                .map(p-> courseClient.categories(p.getProblemCategoryID().getCategoryId()).getResult())
+                .toList();
+        response.getProblem().setCategories(categories);
+        return response;
     }
 
     public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request){
@@ -253,7 +279,7 @@ public class ProblemSubmissionService {
 
         }
 
-        return problemSubmissionMapper.toDetailsProblemSubmissionResponse(submission);
+        return getDetailsProblemSubmissionResponse(submission);
     }
 
     public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {
@@ -275,7 +301,7 @@ public class ProblemSubmissionService {
 
         // Chuyển đổi submissions thành response
         return submissions.stream()
-                .map(problemSubmissionMapper::toDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
+                .map(this::getDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
                 .collect(Collectors.toList());
     }
 
@@ -286,7 +312,7 @@ public class ProblemSubmissionService {
 
         // Chuyển đổi submissions thành response
         return submissions.stream()
-                .map(problemSubmissionMapper::toDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
+                .map(this::getDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
                 .collect(Collectors.toList());
     }
 

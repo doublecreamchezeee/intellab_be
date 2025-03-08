@@ -56,12 +56,28 @@ public class ProblemSubmissionController {
             summary = "Get submission by user id"
     )
     @GetMapping("/submitList/me")
-    public ResponseEntity<List<DetailsProblemSubmissionResponse>> getSubmissionByUserId(@RequestHeader("X-UserId") String userId) {
-        userId = userId.split(",")[0];
-        System.out.println(userId);
-        System.out.println(ParseUUID.normalizeUID(userId));
+    public ResponseEntity<List<DetailsProblemSubmissionResponse>> getSubmissionByUserId(
+            @RequestHeader(name = "X-UserId", required = false) String userUid,
+            @RequestParam(required = false) String UserUid) {
 
-        List<DetailsProblemSubmissionResponse> submission = problemSubmissionService.getSubmissionDetailsByUserUid(ParseUUID.normalizeUID(userId));
+        if (userUid == null && UserUid == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        if (UserUid != null) {
+            List<DetailsProblemSubmissionResponse> submission = problemSubmissionService
+                    .getSubmissionDetailsByUserUid(
+                        ParseUUID.normalizeUID(UserUid));
+
+            return ResponseEntity.ok(submission);
+        }
+
+        userUid = userUid.split(",")[0];
+        System.out.println(userUid);
+        System.out.println(ParseUUID.normalizeUID(userUid));
+
+        List<DetailsProblemSubmissionResponse> submission = problemSubmissionService.getSubmissionDetailsByUserUid(ParseUUID.normalizeUID(userUid));
+
         return ResponseEntity.ok(submission);
     }
 
