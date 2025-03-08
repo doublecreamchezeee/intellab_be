@@ -1,6 +1,11 @@
 spring:
   application:
     name: identity-service
+  datasource:
+    url: ${DB_URL} #5433 jdbc:postgresql://localhost:5432/course-service #
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD} #htht01225923050
+    driver-class-name: org.postgresql.Driver
   mail:
     host: smtp.gmail.com
     port: 587

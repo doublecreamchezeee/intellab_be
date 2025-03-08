@@ -38,4 +38,18 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
             "LIMIT 3")
     List<Object[]> findTop3LanguagesBySolvedCount(@Param("userUid") UUID userUid);
 
+    @Query("""
+    SELECT ps.userId, SUM(ps.scoreAchieved) AS totalScore
+    FROM ProblemSubmission ps
+    WHERE ps.scoreAchieved = (
+        SELECT MAX(sub.scoreAchieved)
+        FROM ProblemSubmission sub
+        WHERE sub.userId = ps.userId
+        AND sub.problem.problemId = ps.problem.problemId
+    )
+    GROUP BY ps.userId
+    ORDER BY totalScore DESC
+""")
+    List<Object[]> getLeaderboard();
+
 }
