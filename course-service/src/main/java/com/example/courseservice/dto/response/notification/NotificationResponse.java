@@ -1,4 +1,4 @@
-package com.example.notificationservice.model;
+package com.example.courseservice.dto.response.notification;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Notification {
+public class NotificationResponse {
     private String id;
     private String title;
     private String message;
