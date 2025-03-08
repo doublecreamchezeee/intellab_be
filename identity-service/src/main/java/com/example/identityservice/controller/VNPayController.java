@@ -78,6 +78,7 @@ public class VNPayController {
         log.info("handlingResponse ipn: {}", handlingResponse);
         log.info("params return from vnpay: {}", params);
         UUID paymentId = vnPayService.getPaymentIdByTransactionReference(params.getVnp_TxnRef());
+        log.info("redirect to: {}", redirectUrlConfig.getRedirectUrl() + paymentId);
         return new RedirectView(redirectUrlConfig.getRedirectUrl() + paymentId);
     }
 
@@ -195,7 +196,7 @@ public class VNPayController {
     )
     @PublicEndpoint
     @PostMapping("/update-redirect-url")
-    public ApiResponse<String> updateRedirectUrl(@RequestParam String newUrl) {
+    public ApiResponse<String> updateRedirectUrl(@RequestBody String newUrl) {
         redirectUrlConfig.setRedirectUrl(redirectUrlConfig.getFeUrl() + newUrl);
         return ApiResponse.<String>builder()
                 .message("Redirect URL updated successfully")

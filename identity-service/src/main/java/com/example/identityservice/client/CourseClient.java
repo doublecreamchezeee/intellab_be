@@ -2,6 +2,7 @@ package com.example.identityservice.client;
 
 
 import com.example.identityservice.dto.ApiResponse;
+import com.example.identityservice.dto.request.course.DisenrollCourseRequest;
 import com.example.identityservice.dto.request.course.EnrollCourseRequest;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
@@ -21,7 +22,7 @@ public interface CourseClient {
     @PostMapping(value = "/courses/enrollPaidCourse", consumes = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<UserCoursesResponse> enrollPaidCourse(@RequestBody EnrollCourseRequest request);
 
-    @DeleteMapping(value = "/courses/disenroll/{courseId}/{userUid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ApiResponse<Boolean> disenrollCourse(@PathVariable UUID courseId, @PathVariable String userUid);
+    @PostMapping(value = "/courses/disenroll", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ApiResponse<Boolean> disenrollCourse(@RequestBody DisenrollCourseRequest request);
 
 }

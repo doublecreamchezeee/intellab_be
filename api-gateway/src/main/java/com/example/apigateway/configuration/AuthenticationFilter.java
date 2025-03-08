@@ -64,6 +64,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/root-and-children$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/children$",
+            "/course/courses/enrollPaidCourse",
+            "/course/courses/disenroll",
             "/ai/global_chatbot/stream",
             "/global_chatbot/stream"
     };
