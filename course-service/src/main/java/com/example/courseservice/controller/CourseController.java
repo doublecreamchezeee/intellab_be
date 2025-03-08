@@ -5,6 +5,7 @@ import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.request.course.DisenrollCourseRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
@@ -301,9 +302,14 @@ public class CourseController {
     @Operation(
             summary = "(BE only) Disenroll a course by user id and course id"
     )
-    @DeleteMapping("/disenroll/{courseId}/{userUid}")
-    public ApiResponse<Boolean> disenrollCourse(@PathVariable("courseId") UUID courseId, @PathVariable("userUid") String userUid) {
-        Boolean result = courseService.disenrollCourse(ParseUUID.normalizeUID(userUid), courseId);
+    @PostMapping("/disenroll")
+    public ApiResponse<Boolean> disenrollCourse(@RequestBody @Valid DisenrollCourseRequest request) {
+        Boolean result = courseService.disenrollCourse(
+                ParseUUID.normalizeUID(
+                        request.getUserUid()
+                ),
+                request.getCourseId()
+        );
         return ApiResponse.<Boolean>builder()
                 .message("Course has been disenrolled")
                 .result(result)

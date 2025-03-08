@@ -8,6 +8,7 @@ import com.example.identityservice.constant.response.vnpay.VNPayPayResponseCode;
 import com.example.identityservice.constant.response.vnpay.VNPayQueryResponseCode;
 import com.example.identityservice.constant.response.vnpay.VNPayRefundResponseCode;
 import com.example.identityservice.dto.ApiResponse;
+import com.example.identityservice.dto.request.course.DisenrollCourseRequest;
 import com.example.identityservice.dto.request.course.EnrollCourseRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayQueryRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayRefundRequest;
@@ -108,9 +109,9 @@ public class VNPayService {
         String vnp_TxnRef = HashUtility.getRandomNumber(8);
         String orderInfo = null;
         if (locale.equals("vi")) {
-            orderInfo = "Thanh toan cho khoa hoc: " + vnp_TxnRef;
+            orderInfo = "Thanh toan cho khoa hoc " + vnp_TxnRef;
         } else {
-            orderInfo = "Payment for courses: " + vnp_TxnRef;
+            orderInfo = "Payment for courses " + vnp_TxnRef;
         }
 
         /*log.info("vnp_HashSecret: " + vnp_HashSecret);
@@ -145,9 +146,13 @@ public class VNPayService {
             String vnp_CreateDate = formatter.format(currentDate);
             vnpParams.put("vnp_CreateDate", vnp_CreateDate);
 
-            calendar.add(Calendar.MINUTE, 15);
+
+            calendar.add(Calendar.MINUTE, 30);
             String vnp_ExpireDate = formatter.format(calendar.getTime());
             vnpParams.put("vnp_ExpireDate", vnp_ExpireDate);
+
+            log.info("Current vnp_CreateDate: {}", vnp_CreateDate);
+            log.info("Current vnp_ExpireDate: {}", vnp_ExpireDate);
 
             // Sort parameters
             List<String> fieldNames = new ArrayList<>(vnpParams.keySet());
@@ -564,7 +569,12 @@ public class VNPayService {
                 vnPayPaymentRepository.save(payment);
 
                 for (VNPayPaymentCourses paymentCourses : payment.getPaymentCourses()) {
-                    ApiResponse<Boolean> result = courseClient.disenrollCourse(paymentCourses.getId().getCourseId(), payment.getUserUid());
+                    ApiResponse<Boolean> result = courseClient.disenrollCourse(
+                            DisenrollCourseRequest.builder()
+                                    .courseId(paymentCourses.getId().getCourseId())
+                                    .userUid(payment.getUserUid())
+                                    .build()
+                    );
 
                     if (!result.getResult()) {
                         log.info("Cannot disenroll course: {}", paymentCourses.getId().getCourseId());
