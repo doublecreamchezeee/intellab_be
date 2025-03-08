@@ -10,6 +10,8 @@ import java.util.Optional;
 
 import com.example.identityservice.configuration.PublicEndpoint;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -27,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 @Slf4j
 public class ApiEndpointSecurityInspector {
 
+    @Qualifier("requestMappingHandlerMapping")
+    @Autowired
     private final RequestMappingHandlerMapping requestHandlerMapping;
 
     @Getter

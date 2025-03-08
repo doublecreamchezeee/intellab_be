@@ -1,4 +1,5 @@
 package com.example.identityservice.configuration;
+import com.example.identityservice.client.CourseClient;
 import com.example.identityservice.client.ProblemClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +48,25 @@ public class ClientConfiguration {
             return userId;
         }
         return "unknown-user";
+    }
+
+    @Bean
+    public WebClient courseWebClient() {
+        String hostname = DotenvConfig.get("HOST_NAME");
+        String port = DotenvConfig.get("COURSE_PORT");
+        String baseUrl = "http://" + hostname + ":" + port + "/course";
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+    }
+
+    @Bean
+    public CourseClient courseClient(WebClient courseWebClient) {
+        HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
+                .builderFor(
+                        WebClientAdapter.create(courseWebClient)
+                ).build();
+        return httpServiceProxyFactory.createClient(CourseClient.class);
     }
 
 

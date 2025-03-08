@@ -266,13 +266,47 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Enroll a course"
+            summary = "Enroll a free course"
     )
     @PostMapping("/enroll")
     public ApiResponse<UserCourses> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
 
         return ApiResponse.<UserCourses>builder()
                 .result(courseService.enrollCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .build();
+    }
+
+    @Operation(
+            summary = "Enroll a paid course",
+            description = "This API is used to enroll a paid course.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The request body contains the user UID and the course ID.",
+                    required = true,
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = EnrollCourseRequest.class)
+                    )
+            ),
+            hidden = true
+    )
+    @PostMapping("/enrollPaidCourse")
+    public ApiResponse<UserCourses> enrollPaidCourse(@RequestBody @Valid EnrollCourseRequest request) {
+
+        return ApiResponse.<UserCourses>builder()
+                .message("Course has been enrolled successfully")
+                .result(courseService.enrollPaidCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .build();
+    }
+
+    @Operation(
+            summary = "(BE only) Disenroll a course by user id and course id"
+    )
+    @DeleteMapping("/disenroll/{courseId}/{userUid}")
+    public ApiResponse<Boolean> disenrollCourse(@PathVariable("courseId") UUID courseId, @PathVariable("userUid") String userUid) {
+        Boolean result = courseService.disenrollCourse(ParseUUID.normalizeUID(userUid), courseId);
+        return ApiResponse.<Boolean>builder()
+                .message("Course has been disenrolled")
+                .result(result)
                 .build();
     }
 
@@ -450,7 +484,9 @@ public class CourseController {
     }
 
     @Operation(
-            summary = """
+            summary = "Lấy tất cả comment của course theo courseId",
+            description =
+            """
                     cách truyền params sort outer: sort=properties,order\s
                     order : gồm có asc, desc
                     
@@ -506,7 +542,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = """
+            summary = "Lấy comment và children comment theo commentId",
+            description = """
                     Lấy comment theo commentId với số lượng children comment được truyền vào tùy ý (size = ?) default 20
                     cách truyền params sort: sort=properties,order\s
                     order : gồm có asc, desc
@@ -541,7 +578,9 @@ public class CourseController {
 
 
     @Operation(
-            summary = """
+            summary =  "Lấy page comment con theo commentId",
+            description =
+            """
                     Lấy page comment con theo commentId với số lượng được truyền vào tùy ý (size = ?) default 20
                     cách truyền params sort: sort=properties,order\s
                     order : gồm có asc, desc
