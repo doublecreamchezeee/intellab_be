@@ -1,10 +1,12 @@
 package com.example.identityservice.handler;
 
 import com.example.identityservice.dto.response.notification.NotificationResponse;
+import com.example.identityservice.event.WebSocketEvent;
 import com.example.identityservice.model.Notification;
 import com.example.identityservice.service.NotificationService;
 import com.example.identityservice.utility.ParseUUID;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,48 +16,52 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NotificationWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public NotificationWebSocketHandler(NotificationService notificationService) {
-        this.notificationService = notificationService;
+    public NotificationWebSocketHandler(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
+
+    public Optional<WebSocketSession> getUserSessionIfConnected(String userId) {
+        WebSocketSession session = sessions.get(userId);
+        if (session != null && session.isOpen()) {
+            return Optional.of(session);
+        }
+        return Optional.empty();
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
         String userId = getUserIdFromSession(session);
         if (userId != null) {
-            sessions.put(userId, session);
+            sessions.put(String.valueOf(ParseUUID.normalizeUID(userId)), session);
             System.out.println("User connected: " + userId);
-
             sendWelcomeMessage(userId);
 
-//          Gửi thông báo qua NotificationService
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<NotificationResponse> notifications = notificationService.fetchNotifications(pageable,ParseUUID.normalizeUID(userId));
-            if (notifications != null && notifications.hasContent()) {
-                sendNotification(notifications, userId);
-            }
+            eventPublisher.publishEvent(new WebSocketEvent(this, userId, session));
         }
     }
 
-    private void sendNotification(Page<NotificationResponse> notificationResponses, String userId) {
-        WebSocketSession session = sessions.get(userId);
-
-        if (session != null && session.isOpen()) {
-            for (NotificationResponse notification : notificationResponses) {
-                try {
-                    session.sendMessage(new TextMessage(notification.getMessage()));
-                } catch (IOException e) {
-                    System.err.println("Failed to send message: " + e.getMessage());
-                }
-            }
-        }
-    }
+//    private void sendNotification(Page<NotificationResponse> notificationResponses, String userId) {
+//        WebSocketSession session = sessions.get(userId);
+//
+//        if (session != null && session.isOpen()) {
+//            for (NotificationResponse notification : notificationResponses) {
+//                try {
+//                    session.sendMessage(new TextMessage(notification.getMessage()));
+//                } catch (IOException e) {
+//                    System.err.println("Failed to send message: " + e.getMessage());
+//                }
+//            }
+//        }
+//    }
 
     @Override
     public void afterConnectionClosed(@NotNull WebSocketSession session, CloseStatus status) throws Exception {
@@ -78,19 +84,12 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    public void sendNotification(String title, String message, Notification.NotificationType type, String userId) {
-        // lưu vào db
-        NotificationResponse newNotification = notificationService.postNotification(title, message, type, ParseUUID.normalizeUID(userId));
-        // nếu user online thì push lên
-        WebSocketSession session = sessions.get(userId);
-        if (session != null && session.isOpen()) {
-            try {
-                session.sendMessage(new TextMessage(newNotification.getMessage()));
-            } catch (IOException e) {
-                System.err.println("Failed to send message: " + e.getMessage());
-            }
+    public void sendNotification(String message, WebSocketSession session) {
+        try {
+            session.sendMessage(new TextMessage(message));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        // không online thì sau khi online có thể fetch
     }
 
     private String getUserIdFromSession(WebSocketSession session) {
@@ -103,17 +102,17 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     public void broadcastMessage(String title, String message, Notification.NotificationType type) {
         // lưu db để các tài khoản ofline thì khi online lại có thẻ fetch lên để xem
-        notificationService.broadcastNotification(title, message, type);
-
-        for (WebSocketSession session : sessions.values()) {
-            if (session.isOpen()) {
-                try {
-                    session.sendMessage(new TextMessage(message));
-                } catch (IOException e) {
-                    System.err.println("Failed to send broadcast message: " + e.getMessage());
-                }
-            }
-        }
+//        notificationService.broadcastNotification(title, message, type);
+//
+//        for (WebSocketSession session : sessions.values()) {
+//            if (session.isOpen()) {
+//                try {
+//                    session.sendMessage(new TextMessage(message));
+//                } catch (IOException e) {
+//                    System.err.println("Failed to send broadcast message: " + e.getMessage());
+//                }
+//            }
+//        }
     }
 
 }
