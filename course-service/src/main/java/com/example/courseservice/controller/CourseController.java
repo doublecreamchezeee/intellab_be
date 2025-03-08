@@ -484,7 +484,9 @@ public class CourseController {
     }
 
     @Operation(
-            summary = """
+            summary = "Lấy tất cả comment của course theo courseId",
+            description =
+            """
                     cách truyền params sort outer: sort=properties,order\s
                     order : gồm có asc, desc
                     
@@ -540,7 +542,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = """
+            summary = "Lấy comment và children comment theo commentId",
+            description = """
                     Lấy comment theo commentId với số lượng children comment được truyền vào tùy ý (size = ?) default 20
                     cách truyền params sort: sort=properties,order\s
                     order : gồm có asc, desc
@@ -575,7 +578,9 @@ public class CourseController {
 
 
     @Operation(
-            summary = """
+            summary =  "Lấy page comment con theo commentId",
+            description =
+            """
                     Lấy page comment con theo commentId với số lượng được truyền vào tùy ý (size = ?) default 20
                     cách truyền params sort: sort=properties,order\s
                     order : gồm có asc, desc
