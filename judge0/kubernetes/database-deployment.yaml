@@ -1,15 +1,14 @@
-# database-deployment.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: db-pvc
 spec:
+  accessModes:
+    - ReadWriteOnce
   resources:
     requests:
       storage: 256Mi
   volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
 ---
 apiVersion: v1
 kind: Service
@@ -21,6 +20,7 @@ spec:
   ports:
     - port: 5432
       targetPort: 5432
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -49,6 +49,8 @@ spec:
               value: "judge0"
             - name: POSTGRES_PASSWORD
               value: "htht01225923050"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
           resources:
             limits:
               memory: "256Mi"

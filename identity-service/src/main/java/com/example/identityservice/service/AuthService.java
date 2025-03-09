@@ -4,19 +4,15 @@ import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
-import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
-import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInResponse;
 import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
 import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
-import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
-import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
-import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
-import com.google.common.base.Strings;
+import com.example.identityservice.model.User;
+import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -28,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -55,6 +52,11 @@ public class AuthService {
 
             firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
             sendEmailVerification(userRecord.getUid());
+            try{
+                firestoreService.createUserByUid(userRecord.getUid(), "User");
+            } catch (ExecutionException e) {
+                log.error("Error creating user's firestore document: {}", e.getMessage(), e);
+            }
 
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
@@ -78,6 +80,25 @@ public class AuthService {
 
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
         ValidatedTokenResponse firebaseToken = firebaseAuthClient.verifyToken(idToken);
+
+        try {
+            User user = firestoreService.getUserByUid(firebaseToken.getUserId());
+
+            if (user == null || user.getFirstName() == null || user.getLastName() == null) {
+                firestoreService.createUserByUid(firebaseToken.getUserId(), "User");
+
+                return FirebaseGoogleSignInResponse.builder()
+                        .uid(firebaseToken.getUserId())
+                        .email(firebaseToken.getEmail())
+                        .build();
+            }
+
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("Error finding user by uid: {}", e.getMessage(), e);
+
+        } catch (Exception e) {
+            log.error("Error finding user by uid: {}", e.getMessage(), e);
+        }
 
         return FirebaseGoogleSignInResponse.builder()
                 .uid(firebaseToken.getUserId())
@@ -105,8 +126,11 @@ public class AuthService {
         if (userUpdateRequest.getDisplayName() != null) {
             request.setDisplayName(userUpdateRequest.getDisplayName());
         }
+        if (userUpdateRequest.getPassword() != null ) {
+            request.setPassword(userUpdateRequest.getPassword());
+        }
         try {
-            firestoreService.updateUserById(uid, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName());
+            firestoreService.updateUserByUid(uid, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName());
             firebaseAuth.updateUser(request);
         } catch (final Exception exception) {
             throw new RuntimeException("Error updating user: " + exception.getMessage(), exception);

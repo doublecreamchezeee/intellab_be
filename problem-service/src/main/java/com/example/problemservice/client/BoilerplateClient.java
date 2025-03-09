@@ -607,12 +607,13 @@ public class BoilerplateClient {
                 case 48, 49, 50 -> parser.generateFunctionC();
                 case 51 -> parser.generateFunctionCSharp();
                 case 52, 53, 54 -> parser.generateFunctionCpp();
-                case 62 -> parser.generateFunctionJava();
+                case 62, 91 -> parser.generateFunctionJava();
                 case 63 -> parser.generateFunctionJavaScript();
                 case 71 -> parser.generateFunctionPython();
                 case 74 -> parser.generateFunctionTypeScript();
                 default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
             };
+            //return defaultCode;
         }
 
 
@@ -638,7 +639,7 @@ public class BoilerplateClient {
             case 48, 49, 50 -> parser.generateC();
             case 51 -> parser.generateCSharp();
             case 52, 53, 54 -> parser.generateCpp();
-            case 62 -> parser.generateJava();
+            case 62, 91 -> parser.generateJava();
             case 63 -> parser.generateJavaScript();
             case 71 -> parser.generatePython();
             case 74 -> parser.generateTypeScript();

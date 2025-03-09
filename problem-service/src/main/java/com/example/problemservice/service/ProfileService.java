@@ -19,7 +19,7 @@ public class ProfileService {
     private final IdentityClient identityClient;
 
     public MultipleProfileInformationResponse getMultipleProfileInformation(MultipleProfileInformationRequest request) {
-        try {
+        try {   
             ApiResponse<MultipleProfileInformationResponse> response =  identityClient
                     .getMultipleProfileInformation(
                             request

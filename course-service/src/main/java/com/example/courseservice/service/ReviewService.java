@@ -18,12 +18,14 @@ import com.example.courseservice.model.Course;
 import com.example.courseservice.model.Review;
 import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.ReviewRepository;
+import com.example.courseservice.specification.ReviewSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,6 +67,10 @@ public class ReviewService {
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
+        if (checkIfUserAlreadyReviewCourse(course.getCourseId(), userUid)) {
+            throw new AppException(ErrorCode.USER_ALREADY_REVIEW_COURSE);
+        }
+
         Review review = reviewMapper.toReview(request);
         review.setCourse(course);
         review.setUserUid(userUid);
@@ -105,9 +111,25 @@ public class ReviewService {
         return response;
     }
 
-    public Page<DetailsReviewResponse> getAllReviewsByCourseId(UUID courseId, Pageable pageable) {
-        Page<DetailsReviewResponse> response = reviewRepository.findAllByCourse_CourseId(courseId, pageable)
-                .map(reviewMapper::toDetailsReviewResponse);
+    public Page<DetailsReviewResponse> getAllReviewsByCourseId(UUID courseId, Integer filteredRating, Pageable pageable) {
+
+        Page<DetailsReviewResponse> response = null;
+
+        if (filteredRating == null ) {
+            response =
+                    reviewRepository.findAllByCourse_CourseId(courseId, pageable)
+                            .map(reviewMapper::toDetailsReviewResponse);
+        } else {
+            if (filteredRating < 1 || filteredRating > 5) {
+                throw new AppException(ErrorCode.INVALID_RATING_VALUE_FILTER);
+            }
+            Specification<Review> specification = Specification.where(ReviewSpecification
+                            .hasCourseId(courseId))
+                    .and(ReviewSpecification.hasRating(filteredRating));
+
+            response = reviewRepository.findAll(specification, pageable)
+                    .map(reviewMapper::toDetailsReviewResponse);
+        }
 
         // get user info
         try {
@@ -266,6 +288,10 @@ public class ReviewService {
         response.setPercentageOneStar(((double) oneStar / course.getReviewCount() * 100));
 
         return response;
+    }
+
+    public Boolean checkIfUserAlreadyReviewCourse(UUID courseId, String userUid) {
+        return reviewRepository.existsByUserUidAndCourse_CourseId(userUid, courseId);
     }
 
 

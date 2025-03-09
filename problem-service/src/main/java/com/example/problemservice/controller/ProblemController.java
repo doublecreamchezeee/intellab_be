@@ -82,8 +82,10 @@ public class ProblemController {
             summary = "Get problem page"
     )
     @GetMapping("/search")
-    public ApiResponse<Page<ProblemRowResponse>> getProblems(@RequestParam(required = false) String category,
-                                                             @RequestParam(required = false) String userUId,
+    public ApiResponse<Page<ProblemRowResponse>> getProblems(@RequestParam(required = false) List<Integer> categories,
+                                                             @RequestParam(required = false) String level,
+                                                             @RequestParam(required = false) Boolean status,
+                                                             @RequestHeader(required = false, name = "X-UserId") String userUId,
                                                              @ParameterObject Pageable pageable,
                                                              @RequestParam(required = false) String keyword) {
         if (userUId != null) {
@@ -91,18 +93,18 @@ public class ProblemController {
             System.out.println("user id: " + userId);
             if(keyword != null) {
                 return ApiResponse.<Page<ProblemRowResponse>>builder()
-                        .result(problemService.searchProblems(pageable,keyword, userId)).build();
+                        .result(problemService.searchProblems(categories, level, status, pageable, keyword, userId)).build();
             }
 
             return ApiResponse.<Page<ProblemRowResponse>>builder()
-                    .result(problemService.getAllProblems(category, pageable, userId)).build();
+                    .result(problemService.getAllProblems(categories, level, status, pageable, userId)).build();
         }
         if(keyword != null) {
             return ApiResponse.<Page<ProblemRowResponse>>builder()
-                    .result(problemService.searchProblems(pageable,keyword)).build();
+                    .result(problemService.searchProblems(categories, level, pageable,keyword)).build();
         }
         return ApiResponse.<Page<ProblemRowResponse>>builder()
-                .result(problemService.getAllProblems(category, pageable)).build();
+                .result(problemService.getAllProblems(categories, level, pageable)).build();
     }
 
     @Operation(
@@ -112,9 +114,9 @@ public class ProblemController {
     public ApiResponse<Page<ProblemRowResponse>> getAllProblem() {
         Pageable pageable = PageRequest.of(0, 1000);
         try {
-            Page<ProblemRowResponse> response = problemService.getAllProblems("", pageable);
+            Page<ProblemRowResponse> response = problemService.getAllProblems(pageable);
             return ApiResponse.<Page<ProblemRowResponse>>builder()
-                    .result(problemService.getAllProblems("", pageable)).build();
+                    .result(problemService.getAllProblems(pageable)).build();
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
                 ApiResponse.<Page<ProblemRowResponse>>builder()
@@ -239,7 +241,7 @@ public class ProblemController {
             @RequestParam(name = "childrenSize", required = false, defaultValue = "20") Integer childrenSize,
             @RequestParam(defaultValue = "lastModifiedAt", required = false) String childrenSortBy,
             @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder,
-            @RequestParam(name = "userId", value = "userId", required = false) String userUid
+            @RequestHeader(required = false, name = "X-UserId") String userUid
         /*     @Qualifier("pageable")  @ParameterObject DoublePageable doublePageable
             @Qualifier("childrenPageable") @ParameterObject Pageable childrenPageable*/
     ) {

@@ -17,29 +17,23 @@ import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.mapper.ProblemcategoryMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.composite.DefaultCodeId;
-import com.example.problemservice.model.course.Category;
-import com.example.problemservice.repository.DefaultCodeRepository;
+import com.example.problemservice.repository.*;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
-import com.example.problemservice.model.TestCaseOutput;
-import com.example.problemservice.repository.ProblemRepository;
+import com.example.problemservice.repository.specification.ProblemSpecification;
 import com.example.problemservice.utils.MarkdownUtility;
 import com.example.problemservice.utils.TestCaseFileReader;
-import com.example.problemservice.repository.ProblemSubmissionRepository;
-import com.example.problemservice.repository.ProgrammingLanguageRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +48,14 @@ public class ProblemService {
     private final DefaultCodeMapper defaultCodeMapper;
     private final ProblemcategoryMapper problemcategoryMapper;
     private final CourseClient courseClient;
+    private final ProblemCategoryRepository problemCategoryRepository;
+
+    private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), list.size());
+        List<T> subList = list.subList(start, end);
+        return new PageImpl<>(subList, pageable, list.size());
+    }
 
     public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
         Problem problem = problemMapper.toProblem(request);
@@ -95,16 +97,35 @@ public class ProblemService {
         return problemRepository.findAll();
     }
 
-    public Page<ProblemRowResponse> searchProblems(Pageable pageable, String keyword) {
-        Page<Problem> problems = problemRepository.findAllByProblemNameContainingIgnoreCase(keyword, pageable);
+    public Page<ProblemRowResponse> searchProblems(List<Integer> categories,
+                                                   String level,
+                                                   Pageable pageable,
+                                                   String keyword) {
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.categoriesFilter(categories)
+                        .and(ProblemSpecification.levelFilter(level))
+                        .and(ProblemSpecification.NameFilter(keyword)));
+
+        Page<Problem> problems = problemRepository.findAll(specification,pageable);
 
         return getProblemRowResponses(problems);
     }
 
-    public Page<ProblemRowResponse> searchProblems(Pageable pageable, String keyword, UUID userId) {
-        Page<Problem> problems = problemRepository.findAllByProblemNameContainingIgnoreCase(keyword, pageable);
+    public Page<ProblemRowResponse> searchProblems(List<Integer> categories, String level, Boolean status, Pageable pageable, String keyword, UUID userId) {
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.categoriesFilter(categories)
+                        .and(ProblemSpecification.levelFilter(level))
+                        .and(ProblemSpecification.NameFilter(keyword))
+                        .and(ProblemSpecification.StatusFilter(status,userId)));
 
-        return getProblemRowResponses(userId, problems);
+        Page<Problem> problems = problemRepository.findAll(specification,pageable);
+
+        Page<ProblemRowResponse> results = getProblemRowResponses(userId, problems);
+
+        results.forEach(problemRowResponse -> {
+            problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(),userId));
+        });
+        return results;
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
@@ -120,8 +141,13 @@ public class ProblemService {
         return false;
     }
 
-    public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable, UUID userId) {
-        Page<Problem> problems = problemRepository.findAll(pageable);
+    public Page<ProblemRowResponse> getAllProblems(List<Integer> categories, String level, Boolean status,  Pageable pageable, UUID userId) {
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.categoriesFilter(categories)
+                        .and(ProblemSpecification.levelFilter(level))
+                        .and(ProblemSpecification.StatusFilter(status,userId)));
+
+        Page<Problem> problems = problemRepository.findAll(specification,pageable);
 
         return getProblemRowResponses(userId, problems);
     }
@@ -144,7 +170,18 @@ public class ProblemService {
         });
     }
 
-    public Page<ProblemRowResponse> getAllProblems(String category, Pageable pageable) {
+    public Page<ProblemRowResponse> getAllProblems(List<Integer> categories, String level,  Pageable pageable) {
+
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.categoriesFilter(categories)
+                        .and(ProblemSpecification.levelFilter(level)));
+
+        Page<Problem> problems = problemRepository.findAll(specification,pageable);
+
+        return getProblemRowResponses(problems);
+    }
+
+    public Page<ProblemRowResponse> getAllProblems(Pageable pageable) {
         Page<Problem> problems = problemRepository.findAll(pageable);
 
         return getProblemRowResponses(problems);

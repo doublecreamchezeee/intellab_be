@@ -1,6 +1,11 @@
 spring:
   application:
     name: identity-service
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   mail:
     host: smtp.gmail.com
     port: 587
@@ -12,6 +17,15 @@ spring:
           auth: true
           starttls:
             enable: true
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
 server:
   port: 8001
   servlet:
@@ -29,7 +43,7 @@ springdoc:
     enabled: true
 
 cloudinary:
-  url: cloudinary://${CLOUDINARY_KEY}:${CLOUDINARY_SECRET}@${CLOUDINARY_NAME}
+  url: ${CLOUDINARY_URL}
 
 domain:
   auth:

@@ -37,6 +37,8 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(404, "Comment not found", HttpStatus.NOT_FOUND),
     INVALID_COMMENT(409, "Invalid comment", HttpStatus.CONFLICT),
     INVALID_USER(409, "Invalid user", HttpStatus.CONFLICT),
+    INVALID_RATING_VALUE_FILTER(409, "Invalid rating value filter", HttpStatus.CONFLICT),
+    USER_ALREADY_REVIEW_COURSE(409, "User already review course", HttpStatus.CONFLICT),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

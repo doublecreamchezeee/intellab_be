@@ -8,6 +8,7 @@ import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.*;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
+import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
@@ -17,6 +18,7 @@ import com.example.courseservice.model.*;
 import com.example.courseservice.model.Firestore.User;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
+import com.example.courseservice.specification.LessonSpecification;
 import com.example.courseservice.utils.CertificateTemplate;
 import com.example.courseservice.utils.ParseUUID;
 
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -303,13 +306,33 @@ public class CourseService {
         // Calculate the completion ratio for the user
         float completionRatio = 0.0f;
         if (isUserEnrolled) {
-            int totalLessons = lessonRepository.countByCourse_CourseId(courseId);
+
+            /*Specification<Lesson> hasExerciseSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasExerciseId()
+            );*/
+
+            Specification<Lesson> hasProblemSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasProblemId()
+            );
+
+            int totalLessonsHasExercise = lessonRepository.countByCourse_CourseId(courseId);
+            int totalLessonsHasProblem = (int) lessonRepository.count(hasProblemSpecification);
+
+            log.info("Total lessons has exercise: {}", totalLessonsHasExercise);
+            log.info("Total lessons has problem: {}", totalLessonsHasProblem);
+
             int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
             int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUid, courseId, true);
             completedLessons += completedPractices;
 
-            if (totalLessons > 0) {
-                completionRatio = (completedLessons / (float) totalLessons) * 100;
+            log.info("Completed lessons: {}", completedLessons);
+
+            if (totalLessonsHasProblem + totalLessonsHasExercise > 0) {
+                completionRatio = (completedLessons / (float) (totalLessonsHasExercise + totalLessonsHasProblem)) * 100;
             }
         }
 
@@ -393,7 +416,7 @@ public class CourseService {
                         LearningLesson learningLesson = LearningLesson.builder()
                                 .lesson(lesson)
                                 .userId(userUid)
-                                .status("NEW")
+                                .status(PredefinedLearningStatus.NEW)
                                 .assignments(new ArrayList<>())
                                 .isDoneTheory(null)
                                 .isDonePractice(false)
@@ -432,6 +455,25 @@ public class CourseService {
                         .progressPercent(userCourses.getProgressPercent())
                         .status(userCourses.getStatus())
                     .build());
+        }
+        return listEnrolledUsersResponse;
+    }
+
+    public List<CompleteCourseResponse> getCompleteCourseByUserId(UUID userUid) {
+        List<UserCourses> listEnrolledUserInCourse = userCoursesRepository.findAllByEnrollId_UserUid(userUid);
+        List<CompleteCourseResponse> listEnrolledUsersResponse = new ArrayList<>();
+        for (UserCourses userCourses : listEnrolledUserInCourse) {
+            if (userCourses.getStatus().equals("Done")) {
+                listEnrolledUsersResponse.add(CompleteCourseResponse.builder()
+                        .course(userCourses.getCourse())
+                        .enrollId(userCourses.getEnrollId())
+                        .lastAccessedDate(userCourses.getLastAccessedDate())
+                        .progressPercent(userCourses.getProgressPercent())
+                        .status(userCourses.getStatus())
+                        .certificateId(userCourses.getCertificate().getCertificateId())
+                        .completedDate(Date.from(userCourses.getCertificate().getCompletedDate()))
+                        .build());
+            }
         }
         return listEnrolledUsersResponse;
     }
@@ -512,6 +554,7 @@ public class CourseService {
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
+
         String userName = user.getLastName()
                 + " " + user.getFirstName();
 

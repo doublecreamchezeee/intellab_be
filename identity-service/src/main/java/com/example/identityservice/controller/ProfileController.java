@@ -7,6 +7,7 @@ import com.example.identityservice.dto.request.profile.MultipleProfileInformatio
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
@@ -33,6 +34,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/profile")
 @Tag(name = "Profile")
+@Slf4j
 public class ProfileController {
     private final ProfileService profileService;
     private final AuthService authService;
@@ -46,6 +48,22 @@ public class ProfileController {
         return ApiResponse.<SingleProfileInformationResponse>builder()
                         .result(profileService.getSingleProfileInformation(userId))
                         .build();
+    }
+
+    @Operation(
+            summary = "Get single profile information"
+    )
+    @PublicEndpoint
+    @PostMapping(value = "/single/public", consumes = MediaType.APPLICATION_JSON_VALUE)
+    /*,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)*/
+    public ApiResponse<SingleProfileInformationResponse> getSingleProfileInformation(
+            @RequestBody @Valid SingleProfileInformationRequest request
+    ) {
+        return ApiResponse.<SingleProfileInformationResponse>builder()
+                .result(profileService.getSingleProfileInformation(request.getUserId()))
+                .build();
     }
 
     @Operation(
@@ -68,13 +86,13 @@ public class ProfileController {
 
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> getMyProfile(Authentication authentication) {
-        String userId = (String) authentication.getPrincipal();
+        String userUid = (String) authentication.getPrincipal();
         String role = authentication.getAuthorities().stream()
                 .findFirst() // Get first authority (ROLE_xxx)
                 .map(GrantedAuthority::getAuthority)
                 .map(auth -> auth.replace("ROLE_", "")) // Remove "ROLE_" prefix
                 .orElse("USER");
-        UserInfoResponse response = profileService.getUserInfo(userId, null);
+        UserInfoResponse response = profileService.getUserInfo(userUid, null);
         response.setRole(role);
         return ResponseEntity.ok(response);
     }

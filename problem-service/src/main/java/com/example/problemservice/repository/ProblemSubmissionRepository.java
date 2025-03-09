@@ -15,6 +15,8 @@ import java.util.UUID;
 public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmission, UUID> {
     Optional<List<ProblemSubmission>> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
 
+    List<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid);
+
     List<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
 
     @Query("SELECT COUNT(DISTINCT ps.problem.problemId) " +
@@ -35,5 +37,19 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
             "ORDER BY COUNT(ps) DESC " +
             "LIMIT 3")
     List<Object[]> findTop3LanguagesBySolvedCount(@Param("userUid") UUID userUid);
+
+    @Query("""
+    SELECT ps.userId, SUM(ps.scoreAchieved) AS totalScore
+    FROM ProblemSubmission ps
+    WHERE ps.scoreAchieved = (
+        SELECT MAX(sub.scoreAchieved)
+        FROM ProblemSubmission sub
+        WHERE sub.userId = ps.userId
+        AND sub.problem.problemId = ps.problem.problemId
+    )
+    GROUP BY ps.userId
+    ORDER BY totalScore DESC
+    """)
+    List<Object[]> getLeaderboard();
 
 }

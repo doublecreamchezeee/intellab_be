@@ -45,11 +45,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses",
             "/course/reviews",
             "/course/lessons",
-            "/course/courses/search",
             "/course/courses/categories",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/categories$",
             "/course/exceptEnrolled",
-            "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/lessons$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/certificate$",
             "/problem/problems/search",
@@ -59,15 +57,15 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/reviews/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/reviews$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/reviews-stats$",
-            "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/comments$",
-            "/course/courses/comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-            "/course/courses/comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/children$",
             "/identity/profile/single",
+            "/identity/profile/single/public",
             "/identity/profile/multiple",
             "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/comments$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/root-and-children$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/children$",
+            "/ai/global_chatbot/stream",
+            "/global_chatbot/stream"
     };
 
     @NonFinal
@@ -78,6 +76,17 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String[] hybridEndpoints = {
             "/course/enrollCourses/.*",
+            "/problem/problems/search",
+            "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/comments$",
+            "/course/courses/comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "/course/courses/comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/children$",
+            "/course/courses/search",
+            "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "/course/courses/details",
+            "/course/courses/courseList/me",
+            "/problem/problem-submissions/submitList/me",
+            "/problem/statistics/progress/language",
+            "/problem/statistics/progress/level",
     };
 
     @Value("${app.api-prefix}")
@@ -87,6 +96,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+
+        //log.info("Request path: {}", request.getURI().getPath());
 
         if (isPublicEndpoint(request) || isExploredEndpoint(request)) {
             return chain.filter(exchange);
@@ -105,7 +116,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         String token = authHeader.get(0).replace("Bearer ", "");
 
+        //log.info("token: {}", token);
+
         return identityService.validateToken(token).flatMap( response -> {
+
+            //log.info("Objects.requireNonNull(response.getBody()).isValidated(): " + Objects.requireNonNull(response.getBody()).isValidated());
+
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())

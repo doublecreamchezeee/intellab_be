@@ -33,13 +33,15 @@ public class ClientConfiguration {
         String coursePort = DotenvConfig.get("COURSE_PORT");
         String apiGatewayPort = DotenvConfig.get("API_GATEWAY_PORT");
         String fePort = DotenvConfig.get("FRONTEND_PORT");
+        String aiPort = DotenvConfig.get("AI_PORT");
 
         System.out.println(hostname + fePort);
         corsConfiguration.setAllowedOrigins(List.of(
                 "http://" + hostname + ":" + identityPort,
                 "http://" + hostname + ":" + coursePort,
                 "http://" + hostname + ":" + apiGatewayPort,
-                "http://" + hostname + ":" + fePort
+                "http://" + hostname + ":" + fePort,
+                "http://" + hostname + ":" + aiPort
         ));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowedMethods(List.of("*"));

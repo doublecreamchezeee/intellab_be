@@ -1,5 +1,6 @@
 package com.example.identityservice.client;
 
+import com.example.identityservice.dto.response.LeaderboardProblemResponse;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,4 +17,7 @@ public interface ProblemClient {
 
     @GetExchange("/statistics/progress/language")
     Mono<ProgressLanguageResponse> getProgressLanguage();
+
+    @GetExchange("/statistics/leaderboard")
+    Mono<List<LeaderboardProblemResponse>> getLeaderboard();
 }

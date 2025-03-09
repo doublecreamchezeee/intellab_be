@@ -41,6 +41,9 @@ public class Course {
     @Column(columnDefinition = "VARCHAR(20)")
     String level;
 
+    @Column(name = "score")
+    int score;
+
     @Column(columnDefinition = "DECIMAL(11,2)")
     Float price;
 
@@ -58,6 +61,7 @@ public class Course {
     List<Lesson> lessons = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     List<Review> reviews = new ArrayList<>();
 
     @JoinColumn(name = "user_id")
@@ -73,7 +77,7 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<UserCourses> enrollCourses = new ArrayList<>();
 
-    @JsonIgnore
+    @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "course_category",
