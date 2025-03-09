@@ -1,6 +1,7 @@
 package com.example.identityservice.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -71,4 +72,8 @@ public class VNPayPayment {
     @JsonManagedReference
     List<VNPayPaymentCourses> paymentCourses = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
+    @JoinColumn(name = "payment_premium_package_id", nullable = true)
+    VNPayPaymentPremiumPackage vnPayPaymentPremiumPackage;
 }

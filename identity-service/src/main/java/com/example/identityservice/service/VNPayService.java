@@ -13,6 +13,7 @@ import com.example.identityservice.dto.request.course.EnrollCourseRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayQueryRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayRefundRequest;
 import com.example.identityservice.dto.request.vnpay.VNPaySinglePaymentCreationRequest;
+import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
 import com.example.identityservice.dto.response.vnpay.*;
@@ -22,8 +23,10 @@ import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.mapper.VNPayPaymentMapper;
 import com.example.identityservice.model.VNPayPayment;
 import com.example.identityservice.model.VNPayPaymentCourses;
+import com.example.identityservice.model.VNPayPaymentPremiumPackage;
 import com.example.identityservice.model.composite.VNPayPaymentCoursesId;
 import com.example.identityservice.repository.VNPayPaymentCoursesRepository;
+import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.repository.VNPayPaymentRepository;
 import com.example.identityservice.utility.HashUtility;
 import com.example.identityservice.utility.ParseUUID;
@@ -54,6 +57,7 @@ public class VNPayService {
     private final VNPayPaymentRepository vnPayPaymentRepository;
     private final VNPayPaymentMapper vnPaymentMapper;
     private final VNPayPaymentCoursesRepository vnPayPaymentCoursesRepository;
+    private final VNPayPaymentPremiumPackageRepository vnPayPaymentPremiumPackageRepository;
 
     @Value("${vnpay.tmn-code}")
     private String vnp_TmnCode;
@@ -70,9 +74,10 @@ public class VNPayService {
     @Value("${vnpay.api-url}")
     private String vnp_ApiUrl;
 
-    public VNPayPaymentCreationResponse createSinglePayment(
+    public VNPayPaymentCreationResponse createSingleCoursePayment(
             String ipAddr, VNPaySinglePaymentCreationRequest request, String userUid) {
         try {
+            // Get course information and check if course is existed
             ApiResponse<DetailCourseResponse> courseResponse = courseClient.getDetailCourseById(request.getCourseId());
             DetailCourseResponse course = courseResponse.getResult();
 
@@ -80,15 +85,66 @@ public class VNPayService {
                 throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
             }
 
-            return createPaymentUrl(
+            // create description for order
+            String orderDescription = null;
+
+            if (request.getLanguage().getCode().equals("vi")) {
+                orderDescription = "Thanh toan cho khoa hoc ";
+            } else {
+                orderDescription = "Payment for courses ";
+            }
+
+            // Create payment url
+            VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
                     ipAddr,
                     (long) course.getPrice(),
                     request.getVNPayBankCode().getCode(),
                     request.getVNPayCurrencyCode().getCode(),
                     request.getLanguage().getCode(),
-                    userUid,
-                    request.getCourseId()
+                    orderDescription
             );
+
+            // save payment to database
+            VNPayPayment payment = VNPayPayment.builder()
+                    .userUid(userUid)
+                    .userUuid(ParseUUID.normalizeUID(userUid))
+                    .transactionStatus("01") // Pending transaction
+                    .totalPaymentAmount(course.getPrice())
+                    .currency(request.getVNPayCurrencyCode().getCode())
+                    .paidAmount(0.0f)
+                    .bankCode(request.getVNPayBankCode().getCode())
+                    .transactionReference(paymentUrlResponse.getTransactionReference())
+                    .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
+                    .build();
+
+            payment = vnPayPaymentRepository.save(payment);
+
+            // Save payment of courses to database
+            VNPayPaymentCoursesId id = VNPayPaymentCoursesId.builder()
+                    .courseId(request.getCourseId())
+                    .userUid(userUid)
+                    .build();
+
+            VNPayPaymentCourses paymentCourses = VNPayPaymentCourses.builder()
+                    .id(id)
+                    .payment(payment)
+                    .build();
+
+            vnPayPaymentCoursesRepository.save(paymentCourses);
+
+            // Create response
+            VNPayPaymentCreationResponse response = vnPaymentMapper.toVNPayPaymentCreationResponse(payment);
+
+            response.setPaymentUrl(paymentUrlResponse.getPaymentUrl());
+
+            response.setTransactionStatusDescription(
+                    VNPayTransactionStatus
+                            .getDescription(
+                                    payment.getTransactionStatus()
+                            )
+            );
+
+            return response;
 
         } catch (AppException e) {
             throw e;
@@ -98,21 +154,95 @@ public class VNPayService {
 
     }
 
-    public VNPayPaymentCreationResponse createPaymentUrl(
+    public VNPayPaymentCreationResponse createUpgradeAccountPayment(
+            String ipAddr, VNPayUpgradeAccountRequest request, String userUid
+    ) {
+        try {
+            // create description for order
+            String orderDescription = null;
+
+            if (request.getLanguage().getCode().equals("vi")) {
+                orderDescription = "Nang cap tai khoan " ;
+            } else {
+                orderDescription = "Payment for courses ";
+            }
+
+            orderDescription += request.getPremiumPackage().getCode() + " package ";
+
+            // Create payment url
+            VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
+                    ipAddr,
+                    (long) request.getPremiumPackage().getPrice(),
+                    request.getVNPayBankCode().getCode(),
+                    request.getVNPayCurrencyCode().getCode(),
+                    request.getLanguage().getCode(),
+                    orderDescription
+            );
+
+            // Save payment of premium package to database
+            VNPayPaymentPremiumPackage paymentPremiumPackage = VNPayPaymentPremiumPackage.builder()
+                    .userUid(userUid)
+                    .userUuid(ParseUUID.normalizeUID(userUid))
+                    //.payment(payment)
+                    .packageType(request.getPremiumPackage().getCode())
+                    .startDate(null)
+                    .build();
+
+            paymentPremiumPackage = vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
+
+            // save payment to database
+            VNPayPayment payment = VNPayPayment.builder()
+                    .userUid(userUid)
+                    .userUuid(ParseUUID.normalizeUID(userUid))
+                    .transactionStatus("01") // Pending transaction
+                    .totalPaymentAmount(Float.valueOf(request.getPremiumPackage().getPrice()))
+                    .currency(request.getVNPayCurrencyCode().getCode())
+                    .paidAmount(0.0f)
+                    .bankCode(request.getVNPayBankCode().getCode())
+                    .transactionReference(paymentUrlResponse.getTransactionReference())
+                    .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
+                    .vnPayPaymentPremiumPackage(paymentPremiumPackage)
+                    .build();
+
+            payment = vnPayPaymentRepository.save(payment);
+
+            // create response
+            VNPayPaymentCreationResponse response = vnPaymentMapper.toVNPayPaymentCreationResponse(payment);
+
+            response.setPaymentUrl(paymentUrlResponse.getPaymentUrl());
+
+            response.setTransactionStatusDescription(
+                    VNPayTransactionStatus
+                            .getDescription(
+                                    payment.getTransactionStatus()
+                            )
+            );
+
+            return response;
+
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.CANNOT_CREATE_PAYMENT);
+        }
+    }
+
+    public VNPayPaymentUrlResponse createPaymentUrl(
             String ipAddr, long amount,
             String bankCode, String currCode,
-            String locale, String userUid, UUID courseId
+            String locale, String orderDescription
     ) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
         String vnp_TxnRef = HashUtility.getRandomNumber(8);
-        String orderInfo = null;
-        if (locale.equals("vi")) {
+        String orderInfo = orderDescription != null && !orderDescription.isEmpty()
+                ? orderDescription + vnp_TxnRef
+                : "Payment for something " + vnp_TxnRef;
+
+        /*if (locale.equals("vi")) {
             orderInfo = "Thanh toan cho khoa hoc " + vnp_TxnRef;
         } else {
             orderInfo = "Payment for courses " + vnp_TxnRef;
-        }
+        }*/
 
         /*log.info("vnp_HashSecret: " + vnp_HashSecret);
         log.info("vnp_TmnCode: " + vnp_TmnCode);
@@ -186,47 +316,14 @@ public class VNPayService {
 
             //log.info("Secure hash: {}", secureHash);
 
-            // save payment to database
-            VNPayPayment payment = VNPayPayment.builder()
-                    .userUid(userUid)
-                    .userUuid(ParseUUID.normalizeUID(userUid))
-                    .transactionStatus("01") // Pending transaction
-                    .totalPaymentAmount((float) amount)
-                    .currency(currCode)
-                    .paidAmount(0.0f)
-                    .bankCode(bankCode)
-                    .transactionReference(vnp_TxnRef)
-                    .createdAt(currentDate.toInstant())
-                    .build();
 
-            payment = vnPayPaymentRepository.save(payment);
-
-            VNPayPaymentCoursesId id = VNPayPaymentCoursesId.builder()
-                    .courseId(courseId)
-                    .userUid(userUid)
-                    .build();
-
-            VNPayPaymentCourses paymentCourses = VNPayPaymentCourses.builder()
-                    .id(id)
-                    .payment(payment)
-                    .build();
-
-            vnPayPaymentCoursesRepository.save(paymentCourses);
-
-            // Create response
-            VNPayPaymentCreationResponse response = vnPaymentMapper.toVNPayPaymentCreationResponse(payment);
-
-            response.setPaymentUrl(vnp_PayUrl + "?" + query.toString());
-
-            response.setTransactionStatusDescription(
-                    VNPayTransactionStatus
-                            .getDescription(
-                                    payment.getTransactionStatus()
-                            )
-            );
             // log.info(vnp_PayUrl + "?" + query);
-
-            return response;
+            return VNPayPaymentUrlResponse.builder()
+                    .paymentUrl(vnp_PayUrl + "?" + query.toString())
+                    .transactionReference(vnp_TxnRef)
+                    .currentDate(currentDate)
+                    .build();
+            //return vnp_PayUrl + "?" + query;
         } catch (Exception e) {
             throw new AppException(ErrorCode.CANNOT_CREATE_PAYMENT);
         }
@@ -398,6 +495,7 @@ public class VNPayService {
                     VNPayPayment payment = vnPayPaymentRepository.findByTransactionReference(response.getVnp_TxnRef())
                             .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
+                    // check if payment is already confirmed
                     if (payment.getReceivedAt() != null) {
                         return VNPayIPNReturnResponse.builder()
                                 .RspCode("02")
@@ -405,6 +503,7 @@ public class VNPayService {
                                 .build();
                     }
 
+                    // Update payment received date status
                     payment.setReceivedAt(calendar.getTime().toInstant());
 
                     //Kiểm tra số tiền thanh toán do VNPAY phản hồi(vnp_Amount/100) với số tiền của đơn hàng merchant tạo thanh toán: giả sử số tiền kiểm tra là đúng.
@@ -420,10 +519,33 @@ public class VNPayService {
                                 payment.setResponseCode(response.getVnp_ResponseCode());
                                 payment.setTransactionStatus(response.getVnp_TransactionStatus());
                                 payment.setPaidAmount((float) (Long.parseLong(response.getVnp_Amount()) / 100));
-                                vnPayPaymentRepository.save(payment);
+                                payment = vnPayPaymentRepository.save(payment);
 
                                 // Update payment status in course-service
-                                VNPayPaymentCourses paymentCourses = vnPayPaymentCoursesRepository
+                                if (payment.getPaymentCourses()!=null && !payment.getPaymentCourses().isEmpty()) {
+                                    for (VNPayPaymentCourses paymentCourses : payment.getPaymentCourses()) {
+                                        try {
+                                            ApiResponse<UserCoursesResponse> userCoursesResponse = courseClient.enrollPaidCourse(
+                                                    EnrollCourseRequest.builder()
+                                                            .courseId(paymentCourses.getId().getCourseId())
+                                                            .userUid(payment.getUserUid())
+                                                            .build()
+                                            );
+                                            log.info("Enroll course response from course service: {}", userCoursesResponse);
+                                        } catch (Exception e) {
+                                            throw new AppException(ErrorCode.CANNOT_ENROLL_COURSE);
+                                        }
+                                    }
+                                }
+
+                                if (payment.getVnPayPaymentPremiumPackage()!=null) {
+                                    VNPayPaymentPremiumPackage paymentPremiumPackage = payment.getVnPayPaymentPremiumPackage();
+                                    paymentPremiumPackage.setStartDate(calendar.getTime().toInstant());
+                                    vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
+                                    log.info("Upgrade account successfully with premium package: {}", paymentPremiumPackage.getPackageType());
+                                }
+                                // Update payment status in course-service
+                                /*VNPayPaymentCourses paymentCourses = vnPayPaymentCoursesRepository
                                         .findByPayment_paymentId(
                                                 payment.getPaymentId()
                                         )
@@ -439,7 +561,7 @@ public class VNPayService {
                                     log.info("Enroll course response from course service: {}", userCoursesResponse);
                                 } catch (Exception e) {
                                     throw new AppException(ErrorCode.CANNOT_ENROLL_COURSE);
-                                }
+                                }*/
 
                             } else {
                                 //Xử lý/Cập nhật tình trạng giao dịch thanh toán "Không thành công"
