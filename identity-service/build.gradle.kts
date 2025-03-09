@@ -2,8 +2,10 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web-services")
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
@@ -16,7 +18,9 @@ dependencies {
     implementation("com.cloudinary:cloudinary-http44:1.35.0")
     implementation("com.nimbusds:nimbus-jose-jwt:9.15.2")
     implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     compileOnly("org.projectlombok:lombok")
+    runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")

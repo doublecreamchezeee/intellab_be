@@ -7,6 +7,7 @@ import com.example.problemservice.model.TestCaseOutput;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class DetailsProblemSubmissionResponse {
     Boolean isSolved;
     List<TestCaseOutput> testCasesOutput;
 
+    Date submitDate;
     Float usedMemory;
     Float runtime;
 

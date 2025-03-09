@@ -41,6 +41,9 @@ public class Course {
     @Column(columnDefinition = "VARCHAR(20)")
     String level;
 
+    @Column(name = "score")
+    int score;
+
     @Column(columnDefinition = "DECIMAL(11,2)")
     Float price;
 

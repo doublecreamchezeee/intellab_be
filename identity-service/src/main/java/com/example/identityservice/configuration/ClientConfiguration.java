@@ -14,6 +14,17 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 @Configuration
 public class ClientConfiguration {
     @Bean
+    WebClient courseWebClient() {
+        String hostname = DotenvConfig.get("HOST_NAME");
+        String port = DotenvConfig.get("COURSE_PORT");
+        String baseUrl = "http://" + hostname + ":" + port + "/course";
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .filter(addUserIdHeaderFilter())
+                .build();
+    }
+
+    @Bean
     WebClient problemWebClient(){
         String hostname = DotenvConfig.get("HOST_NAME");
         String port = DotenvConfig.get("PROBLEM_PORT");
@@ -22,6 +33,16 @@ public class ClientConfiguration {
                 .baseUrl(baseUrl)
                 .filter(addUserIdHeaderFilter())
                 .build();
+    }
+
+    @Bean
+    CourseClient courseClient(WebClient courseWebClient) {
+        HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
+                .builderFor(
+                        WebClientAdapter.create(courseWebClient)
+                )
+                .build();
+        return httpServiceProxyFactory.createClient(CourseClient.class);
     }
 
     @Bean
@@ -48,25 +69,6 @@ public class ClientConfiguration {
             return userId;
         }
         return "unknown-user";
-    }
-
-    @Bean
-    public WebClient courseWebClient() {
-        String hostname = DotenvConfig.get("HOST_NAME");
-        String port = DotenvConfig.get("COURSE_PORT");
-        String baseUrl = "http://" + hostname + ":" + port + "/course";
-        return WebClient.builder()
-                .baseUrl(baseUrl)
-                .build();
-    }
-
-    @Bean
-    public CourseClient courseClient(WebClient courseWebClient) {
-        HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
-                .builderFor(
-                        WebClientAdapter.create(courseWebClient)
-                ).build();
-        return httpServiceProxyFactory.createClient(CourseClient.class);
     }
 
 

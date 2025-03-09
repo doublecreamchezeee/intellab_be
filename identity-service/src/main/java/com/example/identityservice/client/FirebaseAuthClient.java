@@ -7,11 +7,14 @@ import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
 import com.example.identityservice.mapper.UserMapper;
+import com.example.identityservice.model.User;
+import com.example.identityservice.utility.ParseUUID;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.services.people.v1.PeopleService;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.UserCredentials;
 import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.auth.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +27,7 @@ import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Component
@@ -36,6 +36,8 @@ import java.util.concurrent.ExecutionException;
 public class FirebaseAuthClient {
 
     private final FirebaseConfigurationProperties firebaseConfigurationProperties;
+
+    private final Firestore firestore;
 
     private static final String BASE_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword";
     private static final String API_KEY_PARAM = "key";
@@ -56,6 +58,14 @@ public class FirebaseAuthClient {
                 .accessToken(response.getIdToken())
                 .refreshToken(response.getRefreshToken())
                 .build();
+    }
+
+    public String getUid(UUID userUUID) throws ExecutionException, InterruptedException {
+        DocumentSnapshot document = firestore.collection("users").document(userUUID.toString()).get().get();
+        if (document.exists()) {
+            return document.toObject(User.class).getUid();
+        }
+        return null;
     }
 
     public ValidatedTokenResponse verifyToken(@NonNull final String token) {

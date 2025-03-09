@@ -1,5 +1,6 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.dto.response.LeaderboardResponse;
 import com.example.problemservice.dto.response.ProgressLanguageResponse;
 import com.example.problemservice.dto.response.ProgressLevelResponse;
 import com.example.problemservice.exception.AppException;
@@ -11,8 +12,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/statistics")
@@ -58,6 +64,12 @@ public class StatisticsController {
 
         userUid = userUid.split(",")[0];
         ProgressLanguageResponse response = statisticsService.getProgressLanguage(ParseUUID.normalizeUID(userUid));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<LeaderboardResponse>> getLeaderboard(){
+        List<LeaderboardResponse> response = statisticsService.getProblemLeaderboard();
         return ResponseEntity.ok(response);
     }
 }
