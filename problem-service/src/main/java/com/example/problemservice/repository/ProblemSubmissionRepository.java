@@ -49,7 +49,7 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
     )
     GROUP BY ps.userId
     ORDER BY totalScore DESC
-""")
+    """)
     List<Object[]> getLeaderboard();
 
 }
