@@ -132,6 +132,7 @@ public class ProblemSubmissionService {
     private DetailsProblemSubmissionResponse getDetailsProblemSubmissionResponse(ProblemSubmission result) {
         DetailsProblemSubmissionResponse response = problemSubmissionMapper.toDetailsProblemSubmissionResponse(result);
         List<TestCaseOutput> testCaseOutputs = result.getTestCasesOutput();
+        response.setSubmitDate(result.getCreatedAt());
         if (testCaseOutputs != null && !testCaseOutputs.isEmpty()) {
             Float totalMemories = (float) result.getTestCasesOutput().stream().mapToDouble(testCaseOutput ->
                     testCaseOutput.getMemory() != null ? testCaseOutput.getMemory() : 0).sum();
