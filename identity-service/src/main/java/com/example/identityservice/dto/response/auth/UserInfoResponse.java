@@ -23,6 +23,7 @@ public class UserInfoResponse {
     private String role;
     private boolean isDisabled;
     private Date lastSignIn;
+    private int courseCount;
 
     public Date getLastSignIn() {
         if (lastSignIn == null || lastSignIn.toString().contains("1970")) {

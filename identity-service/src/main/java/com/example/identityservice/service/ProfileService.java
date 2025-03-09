@@ -1,10 +1,12 @@
 package com.example.identityservice.service;
 
+import com.example.identityservice.client.CourseClient;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.client.GooglePeopleApiClient;
 import com.example.identityservice.client.ProblemClient;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
+import com.example.identityservice.dto.response.course.CompleteCourseResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
@@ -38,6 +40,7 @@ public class ProfileService {
     private final FirebaseAuthClient firebaseAuthClient;
     private final GooglePeopleApiClient googlePeopleApiClient;
     private final ProblemClient problemClient;
+    private final CourseClient courseClient;
     private final CloudinaryService cloudinaryService;
     private final FirestoreService firestoreService;
 
@@ -120,6 +123,9 @@ public class ProfileService {
             User userFirestore = firestoreService.getUserByUid(userUid);
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
+
+            List<CompleteCourseResponse> completeCourseResponse = courseClient.getCourseByUserId().block().getResult();
+            userInfoResponse.setCourseCount(completeCourseResponse.size());
 
             return userInfoResponse;
         } catch (ExecutionException | InterruptedException e) {
