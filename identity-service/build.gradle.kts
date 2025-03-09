@@ -2,8 +2,10 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("com.google.firebase:firebase-admin:8.1.0")
     implementation("io.github.cdimascio:dotenv-java:3.0.0")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
