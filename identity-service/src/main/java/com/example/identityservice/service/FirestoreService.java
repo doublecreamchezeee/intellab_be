@@ -1,6 +1,7 @@
 package com.example.identityservice.service;
 
 import com.example.identityservice.model.User;
+import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -10,9 +11,12 @@ import com.google.cloud.firestore.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +31,17 @@ public class FirestoreService {
             return document.toObject(User.class);
         }
         return null;
+    }
+
+    public List<User> getAllUsers() throws ExecutionException, InterruptedException {
+        CollectionReference collectionRef = firestore.collection("users");
+
+        // lấy danh sách users trong collection
+        ApiFuture<QuerySnapshot> querySnapshot = collectionRef.get();
+        QuerySnapshot query = querySnapshot.get();
+
+        return query.getDocuments().stream()
+                .map(document -> document.toObject(User.class)).toList();
     }
 
     public User updateUserByUid(String uid, String firstName, String lastName) throws ExecutionException, InterruptedException {
