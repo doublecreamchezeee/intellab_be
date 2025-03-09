@@ -297,7 +297,7 @@ public class CourseController {
 
         if (userUid != null) {
             return ApiResponse.<List<CompleteCourseResponse>>builder()
-                    .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(UserUid)))
+                    .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(userUid)))
                     .build();
         }
 
