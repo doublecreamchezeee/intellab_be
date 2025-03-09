@@ -10,6 +10,7 @@ public class LeaderboardResponse {
     String displayName;
     String firstName;
     String lastName;
+    String photoUrl;
     CourseStatResponse courseStat;
     ProblemStatResponse problemStat;
 

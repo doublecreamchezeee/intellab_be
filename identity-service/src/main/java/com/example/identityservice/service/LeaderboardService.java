@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class LeaderboardService {
     private final ProblemClient problemClient;
     private final CourseClient courseClient;
+    private final ProfileService profileService;
     private final FirebaseAuthClient firebaseAuthClient;
 
     public Page<LeaderboardResponse> getLeaderboard(Pageable pageable, String filter) {
@@ -35,13 +37,20 @@ public class LeaderboardService {
         }
     }
 
+    private UserInfoResponse getUserInfo(String userId) {
+        try {
+            return profileService.getUserInfo(firebaseAuthClient.getUid(UUID.fromString(userId)), "");
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Page<LeaderboardResponse> getProblemLeaderboard(Pageable pageable) {
         List<LeaderboardProblemResponse> problemResponses = problemClient.getLeaderboard().block();
 
         List<LeaderboardResponse> leaderboardResponses = problemResponses.stream()
                 .map(problemResponse -> {
-                    String userId = problemResponse.getUserId();
-                    UserInfoResponse userInfo = firebaseAuthClient.getUserInfo(userId, "");
+                    UserInfoResponse userInfo = getUserInfo(problemResponse.getUserId());
                     if (userInfo == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
                     return LeaderboardResponse.builder()
@@ -49,6 +58,7 @@ public class LeaderboardService {
                             .displayName(userInfo.getDisplayName())
                             .firstName(userInfo.getFirstName())
                             .lastName(userInfo.getLastName())
+                            .photoUrl(userInfo.getPhotoUrl())
                             .problemStat(LeaderboardResponse.ProblemStatResponse.builder()
                                     .easy(problemResponse.getProblemStat().getEasy())
                                     .medium(problemResponse.getProblemStat().getMedium())
@@ -66,8 +76,7 @@ public class LeaderboardService {
 
         List<LeaderboardResponse> leaderboardResponses = courseResponses.stream()
                 .map(courseResponse -> {
-                    String userId = courseResponse.getUserId();
-                    UserInfoResponse userInfo = firebaseAuthClient.getUserInfo(userId, "");
+                    UserInfoResponse userInfo = getUserInfo(courseResponse.getUserId());
                     if (userInfo == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
                     return LeaderboardResponse.builder()
@@ -75,6 +84,7 @@ public class LeaderboardService {
                             .displayName(userInfo.getDisplayName())
                             .firstName(userInfo.getFirstName())
                             .lastName(userInfo.getLastName())
+                            .photoUrl(userInfo.getPhotoUrl())
                             .courseStat(LeaderboardResponse.CourseStatResponse.builder()
                                     .beginner(courseResponse.getCourseStat().getBeginner())
                                     .intermediate(courseResponse.getCourseStat().getIntermediate())
@@ -93,17 +103,16 @@ public class LeaderboardService {
 
         Map<String, LeaderboardResponse> mergedLeaderboard = new HashMap<>();
 
-        // Process problem leaderboard
         for (LeaderboardProblemResponse problemResponse : problemResponses) {
-            String userId = problemResponse.getUserId();
-            UserInfoResponse userInfo = firebaseAuthClient.getUserInfo(userId, "");
+            UserInfoResponse userInfo = getUserInfo(problemResponse.getUserId());
             if (userInfo == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
-            mergedLeaderboard.put(userId, LeaderboardResponse.builder()
+            mergedLeaderboard.put(problemResponse.getUserId(), LeaderboardResponse.builder()
                     .point(problemResponse.getPoint())
                     .displayName(userInfo.getDisplayName())
                     .firstName(userInfo.getFirstName())
                     .lastName(userInfo.getLastName())
+                    .photoUrl(userInfo.getPhotoUrl())
                     .problemStat(LeaderboardResponse.ProblemStatResponse.builder()
                             .easy(problemResponse.getProblemStat().getEasy())
                             .medium(problemResponse.getProblemStat().getMedium())
@@ -113,17 +122,16 @@ public class LeaderboardService {
                     .build());
         }
 
-        // Process course leaderboard
         for (LeaderboardCourseResponse courseResponse : courseResponses) {
-            String userId = courseResponse.getUserId();
-            UserInfoResponse userInfo = firebaseAuthClient.getUserInfo(userId, "");
+            UserInfoResponse userInfo = getUserInfo(courseResponse.getUserId());
             if (userInfo == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
-            mergedLeaderboard.merge(userId, LeaderboardResponse.builder()
+            mergedLeaderboard.merge(courseResponse.getUserId(), LeaderboardResponse.builder()
                     .point(courseResponse.getPoint())
                     .displayName(userInfo.getDisplayName())
                     .firstName(userInfo.getFirstName())
                     .lastName(userInfo.getLastName())
+                    .photoUrl(userInfo.getPhotoUrl())
                     .courseStat(LeaderboardResponse.CourseStatResponse.builder()
                             .beginner(courseResponse.getCourseStat().getBeginner())
                             .intermediate(courseResponse.getCourseStat().getIntermediate())
@@ -132,20 +140,20 @@ public class LeaderboardService {
                             .build())
                     .build(), (existing, newEntry) -> {
                 return LeaderboardResponse.builder()
-                        .point(existing.getPoint() + newEntry.getPoint()) // Sum points
+                        .point(existing.getPoint() + newEntry.getPoint())
                         .displayName(existing.getDisplayName())
                         .firstName(existing.getFirstName())
                         .lastName(existing.getLastName())
+                        .photoUrl(existing.getPhotoUrl())
                         .problemStat(existing.getProblemStat() != null ? existing.getProblemStat() : newEntry.getProblemStat())
                         .courseStat(existing.getCourseStat() != null ? existing.getCourseStat() : newEntry.getCourseStat())
                         .build();
             });
         }
 
-        // Convert map to sorted list
         List<LeaderboardResponse> leaderboardResponses = mergedLeaderboard.values()
                 .stream()
-                .sorted(Comparator.comparingLong(LeaderboardResponse::getPoint).reversed()) // Sort by total points
+                .sorted(Comparator.comparingLong(LeaderboardResponse::getPoint).reversed())
                 .collect(Collectors.toList());
 
         return paginateResults(leaderboardResponses, pageable);
