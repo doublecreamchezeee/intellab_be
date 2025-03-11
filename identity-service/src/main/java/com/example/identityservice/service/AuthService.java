@@ -140,12 +140,14 @@ public class AuthService {
     public ValidatedTokenResponse validateToken(@NonNull final String token) {
         try {
             FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
+            String role = firestoreService.getRoleByUid(decodeToken.getUid());
 
             return ValidatedTokenResponse.builder()
                     .isValidated(true)
                     .userId(decodeToken.getUid())
                     .name(decodeToken.getName())
                     .email(decodeToken.getEmail())
+                    .role(role)
                     .message("Token validation successful.")
                     .build();
         } catch (FirebaseAuthException e) {

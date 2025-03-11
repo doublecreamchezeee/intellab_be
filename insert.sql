@@ -218,16 +218,21 @@ alter table leaderboard
 
 create table notifications
 (
-    notification_order bigint not null,
-    user_id            uuid   not null,
-    content            text,
-    notified_date      timestamp(6) with time zone,
-    title              varchar(255),
-    primary key (notification_order, user_id)
+    id           uuid not null
+        primary key,
+    message      text,
+    recipient_id uuid,
+    timestamp    timestamp(6) with time zone,
+    title        varchar(255),
+    type         smallint
+        constraint notifications_type_check
+            check ((type >= 0) AND (type <= 3)),
+    mark_as_read boolean
 );
 
 alter table notifications
     owner to postgres;
+
 
 create table questions
 (

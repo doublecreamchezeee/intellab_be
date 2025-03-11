@@ -11,10 +11,7 @@ import com.google.cloud.firestore.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -70,6 +67,12 @@ public class FirestoreService {
 
         WriteResult result = docRef.set(userData).get();
         return "User added with ID: " + ParseUUID.normalizeUID(uid) + " at " + result.getUpdateTime();
+
+    }
+
+    public String getRoleByUid(String uid) throws ExecutionException, InterruptedException {
+        DocumentSnapshot docRef = firestore.collection("users").document(ParseUUID.normalizeUID(uid).toString()).get().get();
+        return Objects.requireNonNull(docRef.get("role")).toString();
 
     }
 }

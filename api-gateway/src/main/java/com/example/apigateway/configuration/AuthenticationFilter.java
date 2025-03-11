@@ -123,9 +123,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             //log.info("Objects.requireNonNull(response.getBody()).isValidated(): " + Objects.requireNonNull(response.getBody()).isValidated());
 
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
+                System.out.println(response.getBody().getRole());
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
+                        .header("UserRole", response.getBody().getRole())
                         .build();
+
 
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
             } else if (isHybrid) { // sai token -> hybrid -> đi tiếp

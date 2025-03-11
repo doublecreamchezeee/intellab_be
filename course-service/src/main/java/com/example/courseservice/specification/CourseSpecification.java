@@ -1,37 +1,84 @@
-/*
 package com.example.courseservice.specification;
 
 
 import javax.sql.rowset.Predicate;
+
+import com.example.courseservice.model.Category;
 import com.example.courseservice.model.Course;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import org.springframework.data.jpa.domain.Specification;
 
-public class CourseSpecification implements Specification<Course> {
-    private final SearchCriteria criteria;
+import java.util.List;
 
-  
 
-    @Override
-    public Predicate toPredicate(Root<Course> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-        if (criteria.getOperation().equalsIgnoreCase(">")) {
-            return builder.greaterThanOrEqualTo(
-                    root.get(criteria.getKey()), criteria.getValue().toString());
-        } else if (criteria.getOperation().equalsIgnoreCase("<")) {
-            return builder.lessThanOrEqualTo(
-                    root.get(criteria.getKey()), criteria.getValue().toString());
-        } else if (criteria.getOperation().equalsIgnoreCase(":")) {
-            if (root.get(criteria.getKey()).getJavaType() == String.class) {
-                return builder.like(
-                        root.get(criteria.getKey()), "%" + criteria.getValue() + "%");
-            } else {
-                return builder.equal(root.get(criteria.getKey()), criteria.getValue());
+public class CourseSpecification {
+    public static Specification<Course> categoriesSpecification(List<Integer> categories) {
+        return (root, query, criteriaBuilder) -> {
+            if (categories == null || categories.isEmpty()) {
+                return null;
             }
-        }
-        return null;
+            Join<Course, Category> join = root.join("categories", JoinType.LEFT);
+
+            return join.get("id").in(categories);
+        };
+    };
+
+    public static Specification<Course> nameSpecification(String keyword) {
+        return (root, query, criteriaBuilder) -> {
+            if (keyword == null || keyword.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.like(
+                    criteriaBuilder.lower(root.get("name")), "%" + keyword.toLowerCase() + "%");
+        };
     }
-    
+
+    public static Specification<Course> descriptionSpecification(String keyword) {
+        return (root, query, criteriaBuilder) -> {
+            if (keyword == null || keyword.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.like(
+                    criteriaBuilder.lower(root.get("description")), "%" + keyword.toLowerCase() + "%");
+        };
+    }
+
+    public static Specification<Course> levelsSpecification(List<String> levels) {
+        return (root, query, criteriaBuilder) -> {
+            if (levels == null || levels.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            return root.get("level").in(levels);
+        };
+    }
+
+    public static Specification<Course> ratingSpecification(Float rating) {
+        return (root, query, criteriaBuilder) -> {
+            if (rating == null || (rating <= 0.0f || rating > 5.0f)) {
+                return criteriaBuilder.conjunction();
+            }
+
+            return criteriaBuilder.greaterThanOrEqualTo(root.get("rating"), rating);
+        };
+    }
+
+    public static Specification<Course> priceSpecification(Boolean price) {
+        return (root, query, criteriaBuilder) ->
+        {
+            if (price == null) {
+                return null;
+            }
+
+            if (price) {
+                return criteriaBuilder.greaterThan(root.get("price"), 0.0);
+            }
+            else {
+                return null;
+            }
+        };
+
+    }
 }
-*/

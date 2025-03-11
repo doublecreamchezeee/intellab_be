@@ -18,6 +18,7 @@ import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.dto.response.userCourses.UserCoursesResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.model.Comment;
@@ -41,6 +42,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -60,13 +63,30 @@ public class CourseController {
     LessonService lessonService;
     ReviewService reviewService;
     private final CommentService commentService;
+    private Boolean isAdmin(String role)
+    {
+        return role.equals("admin");
+    }
 
     @Operation(
-            summary = "Create course"
+            summary = "Create course",
+            description = "- Create a new course.\n" +
+                    "- Only admin."
     )
     @PostMapping("")
-    ApiResponse<CourseCreationResponse> createCourse(@RequestBody @Valid CourseCreationRequest request) {
+    ApiResponse<CourseCreationResponse> createCourse(
+            @RequestBody @Valid CourseCreationRequest request,
+            @RequestHeader("UserRole") String role) {
+        if (!isAdmin(role))
+        {
+            return ApiResponse.<CourseCreationResponse>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
         return ApiResponse.<CourseCreationResponse>builder()
+                .code(201)
+                .message("Created")
                 .result(courseService.createCourse(
                         ParseUUID.normalizeUID(request.getUserUid()),
                         request))
@@ -78,7 +98,8 @@ public class CourseController {
     )
     @GetMapping("/{courseId}/lessons")
     ApiResponse<Page<LessonResponse>> getLessonsByCourseId(
-            @PathVariable("courseId") String courseId, @ParameterObject Pageable pageable) {
+            @PathVariable("courseId") String courseId,
+            @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<LessonResponse>>builder()
                 .result(lessonService.getLessonsByCourseId(
                             courseId,
@@ -210,9 +231,21 @@ public class CourseController {
             summary = "Delete a course by id"
     )
     @DeleteMapping("/{courseId}")
-    ApiResponse<String> deleteCourseById(@PathVariable("courseId") UUID courseId) {
-        courseService.deleteCourseById(courseId);
+    ApiResponse<String> deleteCourseById(
+            @PathVariable("courseId") UUID courseId,
+            @RequestHeader("X-UserID") String userUid,
+            @RequestHeader("UserRole") String role) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<String>builder()
+                    .code(201)
+                    .result("You are not allowed to delete this course")
+                    .message("Forbidden").build();
+        }
+        userUid = userUid.split(",")[0];
+        courseService.deleteCourseById(courseId, userUid);
         return ApiResponse.<String>builder()
+                .code(204)
+                .message("Delete course by id: " + courseId)
                 .result("Course has been deleted")
                 .build();
     }
@@ -221,9 +254,19 @@ public class CourseController {
             summary = "Update a course by id"
     )
     @PutMapping("/{courseId}")
-    ApiResponse<CourseCreationResponse> updateCourse(@PathVariable("courseId") UUID courseId, @RequestBody CourseUpdateRequest request) {
+    ApiResponse<CourseCreationResponse> updateCourse(
+            @PathVariable("courseId") UUID courseId,
+            @RequestBody CourseUpdateRequest request,
+            @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("UserRole") String role) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<CourseCreationResponse>builder()
+                    .code(201)
+                    .result(null)
+                    .message("Forbidden").build();
+        }
         return ApiResponse.<CourseCreationResponse>builder()
-                .result(courseService.updateCourse(courseId, request))
+                .result(courseService.updateCourse(courseId, request, userUid.split(",")[0 ]))
                 .build();
     }
 
@@ -269,8 +312,16 @@ public class CourseController {
             summary = "Enroll a course"
     )
     @PostMapping("/enroll")
-    public ApiResponse<UserCourses> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
-
+    public ApiResponse<UserCourses> enrollCourse(
+            @RequestBody @Valid EnrollCourseRequest request,
+            @RequestHeader("UserRole") String role) {
+        if (isAdmin(role)) {
+            return ApiResponse.<UserCourses>builder()
+                    .code(201)
+                    .message("Forbidden")
+                    .result(null)
+                    .build();
+        }
         return ApiResponse.<UserCourses>builder()
                 .result(courseService.enrollCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
                 .build();
@@ -318,8 +369,15 @@ public class CourseController {
     public ApiResponse<Page<UserCourses>> getEnrolledCoursesOfUser(
             //@PathVariable("userUid") String userUid,
             @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("UserRole") String role,
             @ParameterObject Pageable pageable) {
-
+        if(isAdmin(role)) {
+            return ApiResponse.<Page<UserCourses>>builder()
+                    .result(null)
+                    .message("Forbidden")
+                    .code(201)
+                    .build();
+        }
         userUid = userUid.split(",")[0];
         log.info("UserUid: " + ParseUUID.normalizeUID(userUid));
         return ApiResponse.<Page<UserCourses>>builder()
@@ -628,6 +686,14 @@ public class CourseController {
         UUID userId = ParseUUID.normalizeUID(userUid);
         return ApiResponse.<Boolean>builder()
                 .result(commentService.removeComment(commentId, userId)).build();
+    }
+
+    @GetMapping("/role")
+    public String getRole(
+            @RequestHeader("UserRole") String role
+    )
+    {
+        return role;
     }
 
 
