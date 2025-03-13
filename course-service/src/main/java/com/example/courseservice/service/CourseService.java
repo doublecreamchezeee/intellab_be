@@ -510,13 +510,17 @@ public class CourseService {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
-        String userName = user.getLastName()
-                + " " + user.getFirstName();
+        String userName = user.getFirstName()
+                + " " + user.getLastName();
 
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
         String courseName = course.getCourseName();
 
-        String directorName = "[To be discussed...]";
+        User author = firestoreService.getUserById(course.getUserId().toString());
+        if (author == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        String directorName = author.getFirstName() + " " + author.getLastName();
         Image sign = null;
         try
         {
