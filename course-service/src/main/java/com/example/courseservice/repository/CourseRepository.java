@@ -40,4 +40,6 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     @NotNull
     Page<Course> findAll(Specification<Course> specification, @NotNull Pageable pageable);
+
+    Page<Course> findByUserId(Pageable pageable, UUID userId);
 }

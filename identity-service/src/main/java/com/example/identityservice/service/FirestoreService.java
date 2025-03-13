@@ -1,5 +1,6 @@
 package com.example.identityservice.service;
 
+import com.example.identityservice.dto.response.auth.PremiumSubscription;
 import com.example.identityservice.model.User;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.cloud.firestore.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -75,4 +77,25 @@ public class FirestoreService {
         return Objects.requireNonNull(docRef.get("role")).toString();
 
     }
+    public PremiumSubscription getUserPremiumSubscriptionByUid(String uid){
+        try
+        {
+            DocumentSnapshot sub = firestore.collection("subscriptions").document(ParseUUID.normalizeUID(uid).toString()).get().get();
+            if (sub.exists()) {
+                PremiumSubscription result = sub.toObject(PremiumSubscription.class);
+                DocumentReference plan = sub.get("plan", DocumentReference.class);
+                DocumentSnapshot planDoc = plan.get().get();
+                String planType = planDoc.get("name", String.class);
+                assert result != null;
+                result.setPlanType(planType);
+                return result;
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
 }

@@ -123,10 +123,16 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             //log.info("Objects.requireNonNull(response.getBody()).isValidated(): " + Objects.requireNonNull(response.getBody()).isValidated());
 
             if (Objects.requireNonNull(response.getBody()).isValidated()) {
-                System.out.println(response.getBody().getRole());
+                String role = response.getBody().getRole();
+                if (role.equals("user"))
+                {
+                    String premium = response.getBody().getPremium();
+                    role += "," + premium;
+                }
+
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
-                        .header("UserRole", response.getBody().getRole())
+                        .header("X-UserRole", role)
                         .build();
 
 

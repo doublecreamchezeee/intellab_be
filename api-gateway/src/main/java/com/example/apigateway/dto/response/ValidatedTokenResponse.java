@@ -12,4 +12,5 @@ public class ValidatedTokenResponse {
     String message;
     String userId;
     String role;
+    String premium;
 }

@@ -76,7 +76,7 @@ public class CourseController {
     @PostMapping("")
     ApiResponse<CourseCreationResponse> createCourse(
             @RequestBody @Valid CourseCreationRequest request,
-            @RequestHeader("UserRole") String role) {
+            @RequestHeader("X-UserRole") String role) {
         if (!isAdmin(role))
         {
             return ApiResponse.<CourseCreationResponse>builder()
@@ -234,7 +234,7 @@ public class CourseController {
     ApiResponse<String> deleteCourseById(
             @PathVariable("courseId") UUID courseId,
             @RequestHeader("X-UserID") String userUid,
-            @RequestHeader("UserRole") String role) {
+            @RequestHeader("X-UserRole") String role) {
         if (!isAdmin(role)) {
             return ApiResponse.<String>builder()
                     .code(201)
@@ -258,7 +258,7 @@ public class CourseController {
             @PathVariable("courseId") UUID courseId,
             @RequestBody CourseUpdateRequest request,
             @RequestHeader("X-UserId") String userUid,
-            @RequestHeader("UserRole") String role) {
+            @RequestHeader("X-UserRole") String role) {
         if (!isAdmin(role)) {
             return ApiResponse.<CourseCreationResponse>builder()
                     .code(201)
@@ -314,7 +314,7 @@ public class CourseController {
     @PostMapping("/enroll")
     public ApiResponse<UserCourses> enrollCourse(
             @RequestBody @Valid EnrollCourseRequest request,
-            @RequestHeader("UserRole") String role) {
+            @RequestHeader("X-UserRole") String role) {
         if (isAdmin(role)) {
             return ApiResponse.<UserCourses>builder()
                     .code(201)
@@ -340,8 +340,15 @@ public class CourseController {
     @GetMapping("/courseList/me")
     public ApiResponse<List<CompleteCourseResponse>> getCourseByUserId(
             @RequestHeader(name = "X-UserId", required = false) String userUid,
+            @RequestHeader("X-UserRole") String role,
             @RequestParam (required = false) String UserUid) {
-
+        if (isAdmin(role)) {
+            return ApiResponse.<List<CompleteCourseResponse>>builder()
+                    .code(201)
+                    .message("Forbidden")
+                    .result(null)
+                    .build();
+        }
         if (userUid == null && UserUid == null) {
             throw new AppException(ErrorCode.INVALID_USER);
         }
@@ -369,7 +376,7 @@ public class CourseController {
     public ApiResponse<Page<UserCourses>> getEnrolledCoursesOfUser(
             //@PathVariable("userUid") String userUid,
             @RequestHeader("X-UserId") String userUid,
-            @RequestHeader("UserRole") String role,
+            @RequestHeader("X-UserRole") String role,
             @ParameterObject Pageable pageable) {
         if(isAdmin(role)) {
             return ApiResponse.<Page<UserCourses>>builder()
@@ -429,7 +436,6 @@ public class CourseController {
                 .result(courseService.getListCategory(listOfId)).build();
     }
 
-
     @Operation(
             summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
     )
@@ -455,7 +461,6 @@ public class CourseController {
     public ApiResponse<Object> getCertificate(
             @PathVariable UUID certificateId
     ) throws ExecutionException, InterruptedException {
-
 
         return ApiResponse.builder()
                 .result(courseService.getCertificate(certificateId)).build();
@@ -690,7 +695,7 @@ public class CourseController {
 
     @GetMapping("/role")
     public String getRole(
-            @RequestHeader("UserRole") String role
+            @RequestHeader("X-UserRole") String role
     )
     {
         return role;

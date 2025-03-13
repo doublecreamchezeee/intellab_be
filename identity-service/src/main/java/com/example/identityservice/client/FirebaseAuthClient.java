@@ -8,6 +8,7 @@ import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
 import com.example.identityservice.mapper.UserMapper;
 import com.example.identityservice.model.User;
+import com.example.identityservice.service.FirestoreService;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.services.people.v1.PeopleService;
@@ -44,6 +45,7 @@ public class FirebaseAuthClient {
     private static final String INVALID_CREDENTIALS_ERROR = "INVALID_LOGIN_CREDENTIALS";
     private static final String REFRESH_TOKEN_URL = "https://securetoken.googleapis.com/v1/token";
     private final FirebaseAuth firebaseAuth;
+    private final FirestoreService firestoreService;
 
     @Value("${domain.auth.reset-password-callback-url}")
     private String RESET_PASSWORD_CALLBACK_URL;
@@ -73,12 +75,26 @@ public class FirebaseAuthClient {
             FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
 
             String userId = decodeToken.getUid(); // Correct way to get user ID
-            String role = (String) decodeToken.getClaims().getOrDefault("role", "USER"); // Default to "USER" if missing
+//            String role = (String) decodeToken.getClaims().getOrDefault("role", "USER"); // Default to "USER" if missing
+            String role = firestoreService.getRoleByUid(userId);
+            String premium = null;
+            if (role.equals("user")) {
+                PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
+                if (pre != null)
+                {
+                    premium = pre.getPlanType();
+                }
+                else
+                {
+                    premium = "free";
+                }
+            }
             String email = decodeToken.getEmail(); // Get email if available
 
             return ValidatedTokenResponse.builder()
                     .userId(userId)
                     .role(role)
+                    .premium(premium)
                     .email(email) // Ensure email is included
                     .isValidated(true)
                     .message("Token validation successful.")

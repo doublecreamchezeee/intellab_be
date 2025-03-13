@@ -14,6 +14,7 @@ import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CategoryMapper;
 import com.example.courseservice.mapper.CourseMapper;
+import com.example.courseservice.mapper.LessonMapper;
 import com.example.courseservice.model.*;
 import com.example.courseservice.model.Firestore.User;
 import com.example.courseservice.model.compositeKey.EnrollCourse;
@@ -61,6 +62,7 @@ public class CourseService {
     private final IdentityClient identityClient;
     CertificateRepository certificateRepository;
     private final FirestoreService firestoreService;
+    private final LessonMapper lessonMapper;
 
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
@@ -577,9 +579,29 @@ public class CourseService {
         certificateResponse.setUsername(username);
 
         return certificateResponse;
-
     }
 
+    private AuthorCourseResponse toAuthorCourseResponse(Course course)
+    {
+        return AuthorCourseResponse.builder()
+                .courseId(course.getCourseId())
+                .courseName(course.getCourseName())
+                .description(course.getDescription())
+                .level(course.getLevel())
+                .price(course.getPrice())
+                .unitPrice(course.getUnitPrice())
+                .userId(course.getUserId())
+                .averageRating(course.getAverageRating())
+                .reviewCount(course.getReviews().size())
+                .lessonCount(course.getLessons().size())
+                .lessons(course.getLessons().stream().map(lessonMapper::toLessonResponse).collect(Collectors.toList()))
+                .categories(course.getCategories().stream().map(categoryMapper::categoryToCategoryResponse).collect(Collectors.toList()))
+                .sections(course.getSections())
+                .build();
+    }
 
-
+    public Page<AuthorCourseResponse> getAuthorCourses(Pageable pageable, UUID userId) {
+        Page<Course> courses = courseRepository.findByUserId(pageable, userId);
+        return courses.map(this::toAuthorCourseResponse);
+    }
 }
