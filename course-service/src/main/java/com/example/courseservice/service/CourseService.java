@@ -574,11 +574,8 @@ public class CourseService {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
         String courseName = course.getCourseName();
 
-        User author = firestoreService.getUserById(course.getUserId().toString());
-        if (author == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
-        String directorName = author.getFirstName() + " " + author.getLastName();
+
+        String directorName = "Phạm Nguyễn Sơn Tùng";
         Image sign = null;
         try
         {
