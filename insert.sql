@@ -64327,3 +64327,1423 @@ INSERT INTO public.problem_comments(
  'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
  '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
  '5ddd3184-4713-419c-8611-9cfd5e984c96', 0, NULL);
+
+
+ 
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('838dd085-dcea-4d9e-82f7-f9e8058d446c', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '573a0d23-196a-6b35-cf9c-6e168c18596a', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:04:07.230000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('23e66b94-4802-4124-8e51-227d021d4987', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, '8fdd9c28-78e4-b5b4-741d-ccfaec3aa7b6', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('7eb3e1a4-6227-450d-a99f-2e846561c49b', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '6b1fd807-2f7b-77a2-ea02-5530cadbe946', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 14:57:17.134000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('cb1cf4b9-bbd4-4481-897e-7c96302d87f4', e'function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i] += 1;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1].concat(digits);
+}
+
+const input = require(\'fs\').readFileSync(\'/dev/stdin\', \'utf8\').trim().split(\'\\n\').join(\' \').split(\' \');
+const size_digits = parseInt(input.shift());
+const digits = input.splice(0, size_digits).map(Number);
+
+const result = plusOne(digits);
+console.log(result.join(\' \'));
+', 'JavaScript (Node.js 12.14.0)', 20, 0, '59208f4f-d6ae-0792-0317-f36822578f81', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:19:20.024000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, '6eaea212-5351-45c3-3a53-9c9b9a407e1e', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('34971531-94fa-4b3c-af60-7fdc611ce206', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '8fdd9c28-78e4-b5b4-741d-ccfaec3aa7b6', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:16:27.669000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('70e9ab41-1106-4562-b855-4427d48de154', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, 'cabb0e34-1cdb-7818-5ab4-4018b7c81fe4', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('c89dfa85-9aeb-4948-926f-f10e6fc1f0de', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, 'aef57c4e-4011-1938-0086-86b46a63617c', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:04:07.230000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('835e0efb-6ab0-4c0b-ac69-5f9724b46022', e'function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i] += 1;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1].concat(digits);
+}
+
+const input = require(\'fs\').readFileSync(\'/dev/stdin\', \'utf8\').trim().split(\'\\n\').join(\' \').split(\' \');
+const size_digits = parseInt(input.shift());
+const digits = input.splice(0, size_digits).map(Number);
+
+const result = plusOne(digits);
+console.log(result.join(\' \'));
+', 'JavaScript (Node.js 12.14.0)', 20, 0, '573a0d23-196a-6b35-cf9c-6e168c18596a', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:19:20.024000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('1db561e3-4482-41bf-9750-9faaf1c6d133', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, '341c45e0-d57e-4467-21fa-9ec708e60365', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('7982e122-efa7-4e33-a3ff-0522923ad9fd', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, '573a0d23-196a-6b35-cf9c-6e168c18596a', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('5fc0d1c1-601e-4a1a-a60f-589e42da43de', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '6b1fd807-2f7b-77a2-ea02-5530cadbe946', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 15:04:07.230000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('35c043a0-8bd1-44f0-b1b3-ecb5ab896542', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, '59208f4f-d6ae-0792-0317-f36822578f81', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('7d7743ea-ca6d-40d1-8a9e-a1e6be0e9574', e'function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i] += 1;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1].concat(digits);
+}
+
+const input = require(\'fs\').readFileSync(\'/dev/stdin\', \'utf8\').trim().split(\'\\n\').join(\' \').split(\' \');
+const size_digits = parseInt(input.shift());
+const digits = input.splice(0, size_digits).map(Number);
+
+const result = plusOne(digits);
+console.log(result.join(\' \'));
+', 'JavaScript (Node.js 12.14.0)', 20, 0, 'ad9f9995-484b-9a12-8c25-7bd32527ab3d', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:19:20.024000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('9885d7af-679a-4e67-9fa8-c6a1bd68382c', e'function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i] += 1;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1].concat(digits);
+}
+
+const input = require(\'fs\').readFileSync(\'/dev/stdin\', \'utf8\').trim().split(\'\\n\').join(\' \').split(\' \');
+const size_digits = parseInt(input.shift());
+const digits = input.splice(0, size_digits).map(Number);
+
+const result = plusOne(digits);
+console.log(result.join(\' \'));
+', 'JavaScript (Node.js 12.14.0)', 20, 0, 'aef57c4e-4011-1938-0086-86b46a63617c', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:19:20.024000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('a253ffd2-f5fc-4004-a903-99e4d7751335', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, 'aef57c4e-4011-1938-0086-86b46a63617c', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('8c5455e6-96da-4018-8abf-30e65aaadaba', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, 'ad9f9995-484b-9a12-8c25-7bd32527ab3d', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('7539f9d4-8a30-402b-9081-59efc1a0e970', e'function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i] += 1;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1].concat(digits);
+}
+
+const input = require(\'fs\').readFileSync(\'/dev/stdin\', \'utf8\').trim().split(\'\\n\').join(\' \').split(\' \');
+const size_digits = parseInt(input.shift());
+const digits = input.splice(0, size_digits).map(Number);
+
+const result = plusOne(digits);
+console.log(result.join(\' \'));
+', 'JavaScript (Node.js 12.14.0)', 20, 0, '8fdd9c28-78e4-b5b4-741d-ccfaec3aa7b6', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:19:20.024000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('7a9e2b41-d9e0-4645-bf94-c74c2fb1460a', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '341c45e0-d57e-4467-21fa-9ec708e60365', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:16:27.669000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('1f761fef-6379-469c-9ff7-4b443d81010b', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, 'cabb0e34-1cdb-7818-5ab4-4018b7c81fe4', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 14:57:17.134000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('7dedb18e-a73a-404d-85fb-9d00a2ad15f3', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, '59208f4f-d6ae-0792-0317-f36822578f81', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('6a28e722-6828-47a4-a9d7-3dda450c5cb0', e'function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i] += 1;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1].concat(digits);
+}
+
+const input = require(\'fs\').readFileSync(\'/dev/stdin\', \'utf8\').trim().split(\'\\n\').join(\' \').split(\' \');
+const size_digits = parseInt(input.shift());
+const digits = input.splice(0, size_digits).map(Number);
+
+const result = plusOne(digits);
+console.log(result.join(\' \'));
+', 'JavaScript (Node.js 12.14.0)', 20, 0, '1974945b-162f-c609-9934-c330126caf14', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:19:20.024000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('73862ab4-8b8c-4bb0-901e-2750a9cc59e5', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '2e6402f0-d2b0-30ff-dc2e-53e9666d6f1d', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:04:07.230000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('77415a5e-37bb-4e14-9fa4-bfde079edbc6', e'import sys
+def searchInsertPosition(nums, target):
+    l = 0
+    r = len(nums)
+
+    while l < r:
+      m = (l + r) // 2
+      if nums[m] == target:
+        return m
+      if nums[m] < target:
+        l = m + 1
+      else:
+        r = m
+
+    return l
+
+if __name__ == \'__main__\':
+    sizenums = int(input())
+    nums = list(map(int, input().split()[:sizenums]))
+
+    target = int(input())
+    result = searchInsertPosition(nums, target)
+    print(result)
+', 'Python (3.8.1)', 20, 0, '6b1fd807-2f7b-77a2-ea02-5530cadbe946', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:20:59.458000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('08dd1872-e547-44e4-bf05-fd563bfd0f0a', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '6eaea212-5351-45c3-3a53-9c9b9a407e1e', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 15:04:07.230000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('d36ce982-331c-46f7-a2aa-93c4fb826057', e'function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i] += 1;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1].concat(digits);
+}
+
+const input = require(\'fs\').readFileSync(\'/dev/stdin\', \'utf8\').trim().split(\'\\n\').join(\' \').split(\' \');
+const size_digits = parseInt(input.shift());
+const digits = input.splice(0, size_digits).map(Number);
+
+const result = plusOne(digits);
+console.log(result.join(\' \'));
+', 'JavaScript (Node.js 12.14.0)', 20, 0, '341c45e0-d57e-4467-21fa-9ec708e60365', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:19:20.024000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('0e3ed25f-90e6-4240-8a60-e6213f94f324', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, 'cabb0e34-1cdb-7818-5ab4-4018b7c81fe4', 'e608ebb7-07ef-4a2f-8081-92e5993e6118', true, '2025-03-05 15:16:27.669000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('fecc38c8-13e4-45a4-86bb-c1f8368d1c11', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, '8fdd9c28-78e4-b5b4-741d-ccfaec3aa7b6', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('8d4d4c29-79b4-456e-8295-3eb15e625b5b', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '341c45e0-d57e-4467-21fa-9ec708e60365', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 15:16:27.669000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('12485ad3-429b-464b-8029-bf16fad47508', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, '573a0d23-196a-6b35-cf9c-6e168c18596a', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('0e9581f7-cb44-42c5-b215-55a3601ae3a7', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, 'cabb0e34-1cdb-7818-5ab4-4018b7c81fe4', '82978535-a8da-46e1-a39a-31a232e3fffc', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('db60151b-fa0e-4b5f-a7f5-d46cdfb24a67', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '6b1fd807-2f7b-77a2-ea02-5530cadbe946', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:16:27.669000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('2764ae3f-e4b4-4074-b02b-8a56fa5d8692', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, 'ad9f9995-484b-9a12-8c25-7bd32527ab3d', 'e608ebb7-07ef-4a2f-8081-92e5993e6118', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('8c5742a4-b8fd-4253-862c-73253e9d26ba', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '1974945b-162f-c609-9934-c330126caf14', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 14:57:17.134000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('14b90b9a-d9ba-44be-81be-347e97d33614', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '341c45e0-d57e-4467-21fa-9ec708e60365', 'e608ebb7-07ef-4a2f-8081-92e5993e6118', true, '2025-03-05 15:16:27.669000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('09be6f23-d72d-4a0e-aced-f30bf7e35684', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '2e6402f0-d2b0-30ff-dc2e-53e9666d6f1d', '591b3457-2157-4d61-b03d-d53f8666342c', true, '2025-03-05 14:57:17.134000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('b42da9cd-b69d-4082-a754-4f59033b9143', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, 'ad9f9995-484b-9a12-8c25-7bd32527ab3d', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 14:57:17.134000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('72d6e7c2-0ec3-4581-8d0c-c5325631b070', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '6eaea212-5351-45c3-3a53-9c9b9a407e1e', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 14:57:17.134000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('df121b91-1571-45c8-845b-4d0ce1d334e9', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, '2e6402f0-d2b0-30ff-dc2e-53e9666d6f1d', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('62d2ebf2-f9a5-4291-bd55-115f52bfb96e', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '1974945b-162f-c609-9934-c330126caf14', '7328995b-6079-4bd9-8be0-7c9152d5a73b', true, '2025-03-05 15:16:27.669000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('5a510bc3-cfa0-4d52-8b42-4db553b01cc4', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '6eaea212-5351-45c3-3a53-9c9b9a407e1e', '73c532f9-4d55-4737-ae19-3006e02864cc', true, '2025-03-05 15:04:07.230000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('3b8dd294-058e-44d4-98c3-d9e14bab3dce', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '6b1fd807-2f7b-77a2-ea02-5530cadbe946', 'e608ebb7-07ef-4a2f-8081-92e5993e6118', true, '2025-03-05 15:04:07.230000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('018d8d4c-8436-46c2-a034-d9577b5a8cbc', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, '573a0d23-196a-6b35-cf9c-6e168c18596a', 'e608ebb7-07ef-4a2f-8081-92e5993e6118', true, '2025-03-05 14:57:17.134000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('b9e1b90a-a63e-47da-b452-b74eaa10788d', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {
+  std::vector<int> result(m + n);
+  int i = m - 1;     
+    int j = n - 1;    
+    int k = m + n - 1;
+
+    while (j >= 0) {
+        if (i >= 0 && nums1[i] > nums2[j]) {
+            result[k--] = nums1[i--];
+        } else {
+            result[k--] = nums2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        result[k--] = nums1[i--];
+    }
+    
+  return result;
+}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 15, 0, '6eaea212-5351-45c3-3a53-9c9b9a407e1e', 'e608ebb7-07ef-4a2f-8081-92e5993e6118', true, '2025-03-05 15:15:19.350000');
+INSERT INTO public.problem_submissions (submission_id, code, programming_language, score_achieved, submit_order, user_id, problem_id, is_solved, created_at) VALUES ('a3b73a9c-4525-45e1-bc7b-f57d3936ca89', e'#include <iostream>
+#include <vector>
+#include <string>
+
+std::vector<int> mergeSortedArray(std::vector<int> nums1, int m, std::vector<int> nums2, int n) {\\n  std::vector<int> result(m + n);\\n  int i = m - 1;     \\n    int j = n - 1;    \\n    int k = m + n - 1;\\n\\n    while (j >= 0) {\\n        if (i >= 0 && nums1[i] > nums2[j]) {\\n            result[k--] = nums1[i--];\\n        } else {\\n            result[k--] = nums2[j--];\\n        }\\n    }\\n\\n    while (i >= 0) {\\n        result[k--] = nums1[i--];\\n    }\\n    \\n  return result;\\n}
+
+int main() {
+  int m; 
+int n;
+
+  int size_num1;
+  std::cin >> size_num1;
+  std::vector<int> num1(size_num1);
+  for(int i = 0; i < size_num1; ++i) std::cin >> num1[i];
+ std::cin >> m;
+ int size_num2;
+  std::cin >> size_num2;
+  std::vector<int> num2(size_num2);
+  for(int i = 0; i < size_num2; ++i) std::cin >> num2[i];
+ std::cin >> n;
+  std::vector<int> result = mergeSortedArray(num1, m, num2, n);
+  for (const auto &item : result) std::cout << item << \' \';
+std::cout << std::endl;
+  return 0;
+}
+', 'C++ (GCC 7.4.0)', 10, 0, 'aef57c4e-4011-1938-0086-86b46a63617c', 'e608ebb7-07ef-4a2f-8081-92e5993e6118', true, '2025-03-05 14:57:17.134000');
+
+
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('7ed76fd1-c4bb-4bc9-a6e2-0b48e2e36ac2', 'In Queue', 0, 'null', 0, '018d8d4c-8436-46c2-a034-d9577b5a8cbc', '23f35de8-7a82-4688-9253-6b5330894296');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('be005588-c3e3-486f-86cc-b4427610a7c5', 'In Queue', 0, 'null', 0, '018d8d4c-8436-46c2-a034-d9577b5a8cbc', 'eb1f21cf-b8fa-41cc-aea8-7224a85998c6');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('28532c62-52ec-4738-8a94-95e230b9c5d8', 'In Queue', 0, 'null', 0, '018d8d4c-8436-46c2-a034-d9577b5a8cbc', '607a6878-899a-4f10-a3ff-106e36f6db7b');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('3fed16cd-09c9-4371-920c-2758315c6d6d', 'In Queue', 0, 'null', 0, '018d8d4c-8436-46c2-a034-d9577b5a8cbc', '285e81b0-b13c-4a30-b861-228edd8fa05a');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('5e78971a-72af-4c3a-bd58-26f0b7ff69c8', 'In Queue', 0, 'null', 0, '018d8d4c-8436-46c2-a034-d9577b5a8cbc', '7d1d2398-47fd-480a-a662-b8bb892656a4');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('f8189d62-4550-47f5-8d48-feb2dff0da8e', 'Compilation Error', null, null, 0, 'c89dfa85-9aeb-4948-926f-f10e6fc1f0de', 'eb1f21cf-b8fa-41cc-aea8-7224a85998c6');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('ca7bf7ea-4ce8-4630-8a9e-83ab4ad33b24', 'Compilation Error', null, null, 0, 'c89dfa85-9aeb-4948-926f-f10e6fc1f0de', '23f35de8-7a82-4688-9253-6b5330894296');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('985a7521-6c8c-44e8-9eff-2d2dde5212a8', 'Compilation Error', null, null, 0, 'c89dfa85-9aeb-4948-926f-f10e6fc1f0de', '285e81b0-b13c-4a30-b861-228edd8fa05a');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('9f68f2d4-51ae-4c29-a618-31579ca70a12', 'Compilation Error', null, null, 0, 'c89dfa85-9aeb-4948-926f-f10e6fc1f0de', '607a6878-899a-4f10-a3ff-106e36f6db7b');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('000426d0-76a7-40f6-bc87-ff34ca89180e', 'Compilation Error', null, null, 0, 'c89dfa85-9aeb-4948-926f-f10e6fc1f0de', '7d1d2398-47fd-480a-a662-b8bb892656a4');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('e8f8e960-2a84-4c41-9915-4fb2e48b736e', 'Accepted', 0.008, '1 ', 14652, '70e9ab41-1106-4562-b855-4427d48de154', '23f35de8-7a82-4688-9253-6b5330894296');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('068bd117-8c68-4f07-89d7-43cbd74eff96', 'Accepted', 0.003, '1 2 3 4 5 6 ', 5264, '70e9ab41-1106-4562-b855-4427d48de154', '607a6878-899a-4f10-a3ff-106e36f6db7b');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('24213ce2-1b5b-4aca-bb96-0957c8ae543d', 'Wrong Answer', 0.004, '', 1952, '70e9ab41-1106-4562-b855-4427d48de154', '285e81b0-b13c-4a30-b861-228edd8fa05a');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('ad04fa0b-b6be-44e7-bb8a-dbd3c1781894', 'Accepted', 0.004, '1 2 2 3 5 6 ', 1372, '70e9ab41-1106-4562-b855-4427d48de154', '7d1d2398-47fd-480a-a662-b8bb892656a4');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('87d633ac-d62b-4e25-a6b2-721c6f44c850', 'Accepted', 0.003, '1 2 3 4 5 6 7 ', 1244, '70e9ab41-1106-4562-b855-4427d48de154', 'eb1f21cf-b8fa-41cc-aea8-7224a85998c6');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('8a146cbe-5444-4efb-b48e-8576281ca921', 'Accepted', 0.004, '1 ', 3324, '62d2ebf2-f9a5-4291-bd55-115f52bfb96e', '23f35de8-7a82-4688-9253-6b5330894296');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('abb451ef-6e9f-49a4-8e56-bbd0125cb3b1', 'Accepted', 0.004, '1 2 3 4 5 6 7 ', 1292, '62d2ebf2-f9a5-4291-bd55-115f52bfb96e', 'eb1f21cf-b8fa-41cc-aea8-7224a85998c6');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('0748d68e-315b-4f51-a64c-b9c6fe31956e', 'Accepted', 0.003, '1 2 3 4 5 6 ', 960, '62d2ebf2-f9a5-4291-bd55-115f52bfb96e', '607a6878-899a-4f10-a3ff-106e36f6db7b');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('55f439c1-239c-4f63-a873-f97afdbbf13d', 'Wrong Answer', 0.012, '', 828, '62d2ebf2-f9a5-4291-bd55-115f52bfb96e', '285e81b0-b13c-4a30-b861-228edd8fa05a');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('1f58f3fb-c7fd-4ce3-81b0-3c23ebd09c20', 'Accepted', 0.003, '1 2 2 3 5 6 ', 3104, '62d2ebf2-f9a5-4291-bd55-115f52bfb96e', '7d1d2398-47fd-480a-a662-b8bb892656a4');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('ad6c6db3-3e04-4f25-b0a1-caeb1d2ce0be', 'Accepted', 0.066, '4 3 2 2', 15112, '835e0efb-6ab0-4c0b-ac69-5f9724b46022', '00222cc2-be0a-4b78-8e49-8a7572418dad');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('b48d2db5-77fd-4083-8c82-1d3c4813d59d', 'Accepted', 0.058, '1 0 0 0', 7788, '835e0efb-6ab0-4c0b-ac69-5f9724b46022', '6fbb0344-0bc8-4df2-a64d-785fb373a9a7');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('56eb1f8f-0b7f-4da1-85cd-37ca03f238c5', 'Accepted', 0.061, '7 2 8 5 0 9 1 2 9 5 3 6 6 7 3 2 8 4 3 7 9 5 7 7 4 7 4 9 4 7 0 1 1 1 7 4 0 0 7', 9012, '835e0efb-6ab0-4c0b-ac69-5f9724b46022', '8a85700f-ffb4-438b-8183-8f3aa1999c24');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('8e1698ec-eb85-4647-adaf-88740b8c84a9', 'Accepted', 0.071, '1 0', 21704, '835e0efb-6ab0-4c0b-ac69-5f9724b46022', '0ccce6f3-b6f1-4184-b13d-0aec69dfc148');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('3e1af1c7-3daa-4739-a004-c9f5379ecc4f', 'Accepted', 0.05, '1 2 4', 6744, '835e0efb-6ab0-4c0b-ac69-5f9724b46022', 'd725244d-31f7-4ddc-b494-dc54cab67964');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('87145b81-d15c-4b8e-b6a5-d77455b0da90', 'Accepted', 0.052, '1 0 0 1', 6868, '835e0efb-6ab0-4c0b-ac69-5f9724b46022', '4a9c10f0-eb2a-4b19-8e19-9edf117e76d8');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('70157a27-db5b-44aa-b98d-8d69ff917197', 'Accepted', 0.05, '2', 8252, '4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', '21a234fc-adc3-4012-9802-63ab716fb8c4');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('88b078a8-8f40-4620-b425-a19dac06f328', 'Accepted', 0.12, '4', 3244, '4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', '4703bfe2-5040-49f7-b728-bdea2b6c97e4');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('927b5ca6-daf1-417e-b3f2-186bc33f93e7', 'Accepted', 0.344, '2', 3204, '4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', 'e8698f62-9051-49e0-8610-56c27a7dcb96');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('6545d9d6-79ec-4a79-8cc2-13df47de95e3', 'Accepted', 0.016, '0', 3280, '4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', 'da031658-0ac7-4aae-99e5-6c01e2862b29');
+INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('b0c47d08-6c98-4001-a3cf-c3ea37d3bcb7', 'Accepted', 0.014, '1', 3348, '4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', '2becdcf8-1773-4d3a-b759-63fea450106c');
+

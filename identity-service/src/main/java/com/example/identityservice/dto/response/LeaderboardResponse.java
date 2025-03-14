@@ -13,6 +13,7 @@ public class LeaderboardResponse {
     String photoUrl;
     CourseStatResponse courseStat;
     ProblemStatResponse problemStat;
+    String userUid;
 
     @Data
     @Builder
