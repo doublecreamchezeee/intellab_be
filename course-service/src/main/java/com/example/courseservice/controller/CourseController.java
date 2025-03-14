@@ -43,8 +43,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -380,15 +378,15 @@ public class CourseController {
     @GetMapping("/courseList/me")
     public ApiResponse<List<CompleteCourseResponse>> getCourseByUserId(
             @RequestHeader(name = "X-UserId", required = false) String userUid,
-            @RequestHeader("X-UserRole") String role,
+            @RequestHeader(name = "X-UserRole", required = false) String role,
             @RequestParam (required = false) String UserUid) {
-        if (isAdmin(role)) {
-            return ApiResponse.<List<CompleteCourseResponse>>builder()
-                    .code(201)
-                    .message("Forbidden")
-                    .result(null)
-                    .build();
-        }
+//        if (isAdmin(role)) {
+//            return ApiResponse.<List<CompleteCourseResponse>>builder()
+//                    .code(201)
+//                    .message("Forbidden")
+//                    .result(null)
+//                    .build();
+//        }
         if (userUid == null && UserUid == null) {
             throw new AppException(ErrorCode.INVALID_USER);
         }
