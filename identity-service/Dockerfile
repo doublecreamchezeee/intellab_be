@@ -3,6 +3,14 @@ FROM openjdk:17-jdk AS runtime
 
 WORKDIR /app
 
+## Install tzdata package
+#RUN apt-get update && apt-get install -y tzdata
+#
+## Set the time zone
+#ENV TZ=Etc/GMT+7
+
+#RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Copy environment variables (if needed)
 COPY docker.env /app/.env
 

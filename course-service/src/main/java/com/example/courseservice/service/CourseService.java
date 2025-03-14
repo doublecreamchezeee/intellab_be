@@ -352,6 +352,10 @@ public class CourseService {
         // Lấy đối tượng Course từ cơ sở dữ liệu
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
+        if (course.getPrice() > 0) {
+            throw new AppException(ErrorCode.COURSE_NOT_FREE);
+        }
+
         // Kiểm tra nếu đã có đăng ký khóa học này
         return userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
                 .orElseGet(() -> {
@@ -380,10 +384,64 @@ public class CourseService {
                     });
 
 
+                    // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
+                    return userCoursesRepository.save(newUserCourses);
+                });
+    }
+
+    public UserCourses enrollPaidCourse(UUID userUid, UUID courseId) {
+        if (userUid == null || courseId == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        // Lấy đối tượng Course từ cơ sở dữ liệu
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        // Kiểm tra nếu đã có đăng ký khóa học này
+        return userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+                .orElseGet(() -> {
+                    // Tạo đối tượng UserCourses mới
+                    UserCourses newUserCourses = UserCourses.builder()
+                            .enrollId(EnrollCourse.builder()
+                                    .userUid(userUid)
+                                    .courseId(courseId)
+                                    .build())
+                            .course(course)  // Đảm bảo course không null
+                            .status(PredefinedLearningStatus.LEARNING)
+                            .progressPercent(0.0f)
+                            .build();
+
+                    // create default learning lesson progress for user
+                    lessonRepository.findAllByCourse_CourseIdOrderByLessonOrderDesc(courseId).forEach(lesson -> {
+                        LearningLesson learningLesson = LearningLesson.builder()
+                                .lesson(lesson)
+                                .userId(userUid)
+                                .status(PredefinedLearningStatus.NEW)
+                                .assignments(new ArrayList<>())
+                                .isDoneTheory(null)
+                                .isDonePractice(false)
+                                .build();
+                        learningLessonRepository.save(learningLesson);
+                    });
+
 
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
                 });
+    }
+
+    public Boolean disenrollCourse(UUID userUid, UUID courseId) {
+        if (userUid == null || courseId == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_COURSE_NOT_EXISTED));
+
+        List<LearningLesson> learningLessons = learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId);
+        learningLessonRepository.deleteAll(learningLessons);
+        userCoursesRepository.delete(userCourses);
+        return true;
     }
 
     public List<EnrolledCourseResponse> getEnrolledUsersOfCourse(UUID courseId) {

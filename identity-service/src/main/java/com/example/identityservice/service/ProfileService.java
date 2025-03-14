@@ -1,10 +1,12 @@
 package com.example.identityservice.service;
 
+import com.example.identityservice.client.CourseClient;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.client.GooglePeopleApiClient;
 import com.example.identityservice.client.ProblemClient;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
+import com.example.identityservice.dto.response.course.CompleteCourseResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -37,16 +40,19 @@ public class ProfileService {
     private final FirebaseAuthClient firebaseAuthClient;
     private final GooglePeopleApiClient googlePeopleApiClient;
     private final ProblemClient problemClient;
+    private final CourseClient courseClient;
     private final CloudinaryService cloudinaryService;
     private final FirestoreService firestoreService;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
-            @NonNull String userId
+            @NonNull String userUid
     ) {
         try {
             UserRecord userRecord = firebaseAuth.getUser(
-                    userId
+                    userUid
             );
+
+            User userFirestore = firestoreService.getUserByUid(userUid);
 
             return SingleProfileInformationResponse.builder()
                     .userId(userRecord.getUid())
@@ -54,9 +60,17 @@ public class ProfileService {
                     .email(userRecord.getEmail())
                     .phoneNumber(userRecord.getPhoneNumber())
                     .photoUrl(userRecord.getPhotoUrl())
+                    .emailVerified(userRecord.isEmailVerified())
+                    .isDisabled(userRecord.isDisabled())
+                    .lastSignIn(new Date(userRecord.getUserMetadata().getLastSignInTimestamp()))
+                    .firstName(userFirestore.getFirstName())
+                    .lastName(userFirestore.getLastName())
                     .build();
+
         } catch (FirebaseAuthException e) {
             throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -109,6 +123,9 @@ public class ProfileService {
             User userFirestore = firestoreService.getUserByUid(userUid);
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
+
+            List<CompleteCourseResponse> completeCourseResponse = courseClient.getCourseByUserId().block().getResult();
+            userInfoResponse.setCourseCount(completeCourseResponse.size());
 
             return userInfoResponse;
         } catch (ExecutionException | InterruptedException e) {

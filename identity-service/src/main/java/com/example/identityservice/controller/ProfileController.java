@@ -55,9 +55,6 @@ public class ProfileController {
     )
     @PublicEndpoint
     @PostMapping(value = "/single/public", consumes = MediaType.APPLICATION_JSON_VALUE)
-    /*,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)*/
     public ApiResponse<SingleProfileInformationResponse> getSingleProfileInformation(
             @RequestBody @Valid SingleProfileInformationRequest request
     ) {
@@ -71,11 +68,6 @@ public class ProfileController {
     )
     @PublicEndpoint
     @PostMapping(value = "/multiple", consumes = MediaType.APPLICATION_JSON_VALUE)
-    /*
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-
-     */
     public ApiResponse<MultipleProfileInformationResponse> getMultipleProfileInformation(
             @RequestBody @Valid MultipleProfileInformationRequest request
     ) {

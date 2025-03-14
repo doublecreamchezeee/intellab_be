@@ -22,6 +22,12 @@ server:
   servlet:
     context-path: /course
 
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-password: 123456
+#    key-store-type: PKCS12
+#    key-alias: mysslkey
+
 #logging:
 #  level:
 #    org.hibernate.SQL: DEBUG
@@ -32,3 +38,4 @@ springdoc:
   swagger-ui:
     use-root-path: true
     enabled: true
+

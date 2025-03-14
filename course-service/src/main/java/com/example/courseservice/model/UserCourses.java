@@ -25,7 +25,6 @@ public class UserCourses {
     @EmbeddedId
     EnrollCourse enrollId;
 
-
     @ManyToOne
     @JsonIgnore
     @MapsId("courseId")
