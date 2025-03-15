@@ -38,6 +38,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String[] publicEndpoints = {
             "/identity/auth/.*",
+
     };
 
     @NonFinal
@@ -60,7 +61,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
            // "/identity/profile/single",
             "/identity/profile/single/public",
             "/identity/profile/multiple",
-            "/identity/leaderboard",
             "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/comments$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/root-and-children$",
@@ -90,6 +90,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/problem-submissions/submitList/me",
             "/problem/statistics/progress/language",
             "/problem/statistics/progress/level",
+            "/identity/leaderboard",
     };
 
     @Value("${app.api-prefix}")
