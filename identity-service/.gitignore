@@ -41,3 +41,5 @@ firebase-config.json
 ./.env
 **/google-credentials.json
 **/firebase-config.json
+**/keystore.jks
+./docker.env

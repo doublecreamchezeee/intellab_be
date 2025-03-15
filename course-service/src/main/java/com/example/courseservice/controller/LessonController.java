@@ -90,7 +90,8 @@ public class LessonController {
     }
 
     @Operation(
-            summary = "Start learning lesson (fe don't need to use, be auto created when user enroll course)"
+            summary = "Start learning lesson (fe don't need to use, be auto created when user enroll course)",
+            hidden = true
     )
     @PostMapping("/startLesson")
     ApiResponse<LearningLessonResponse> startLesson(@RequestBody LearningLessonCreationRequest request){
@@ -104,7 +105,8 @@ public class LessonController {
     }
 
     @Operation(
-            summary = "Update learning progress of lesson by id, status can be 'new', 'inprogress', 'completed' (call before fetch detail lesson)"
+            summary = "Update learning progress of lesson",
+            description = "Update learning progress of lesson by id, status can be 'new', 'inprogress', 'completed' (call before fetch detail lesson)"
     )
     @PutMapping("/{learningLessonId}/{courseId}/updateLearningProgress")
     ApiResponse<LearningLessonResponse> updateLearningProgress(

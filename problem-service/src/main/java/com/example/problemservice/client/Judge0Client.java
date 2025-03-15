@@ -1,5 +1,7 @@
 package com.example.problemservice.client;
 
+import com.example.problemservice.core.TokenExtractor;
+import com.example.problemservice.dto.request.judeg0.TestCaseRequest;
 import com.example.problemservice.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,10 +12,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -262,6 +261,98 @@ public class Judge0Client {
             TestCaseRunCodeOutput result = getJudge0RunCodeResult(submissionId, testCase);
             result.setToken(UUID.fromString(submissionId));
             return result;
+        } else {
+            // Throw a meaningful error with status code and response body
+            String errorMessage = String.format(
+                    "Failed to submit code to Judge0. Status: %s, Body: %s",
+                    response.getStatusCode(),
+                    response.getBody()
+            );
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+    public List<TestCaseRunCodeOutput> runCodeBatch(ProblemRunCode problemRunCode, List<TestCase> testCases) {
+        // Extract details from the submission
+        String code = problemRunCode.getCode();
+        String language = problemRunCode.getProgrammingLanguage();
+
+        // Map the programming language to the corresponding language_id
+        Integer languageId = languageIdMap.get(language);
+        if (languageId == null) {
+            throw new IllegalArgumentException("Invalid programming language: " + language);
+        }
+
+        List<TestCaseRequest> submissions = new ArrayList<>();
+        for (TestCase testCase : testCases) {
+            // Extract input and expected output from the TestCase
+            String input = testCase.getInput();
+            String expectedOutput = testCase.getOutput();
+
+            // Create the request body as a Map
+            /*Map<String, Object> testCaseRequestBody = new HashMap<>();
+            testCaseRequestBody.put("source_code", code);
+            testCaseRequestBody.put("language_id", languageId);
+            testCaseRequestBody.put("stdin", input);
+            testCaseRequestBody.put("expected_output", expectedOutput);
+            testCaseRequestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL);
+            */
+
+            TestCaseRequest request = TestCaseRequest
+                    .builder()
+                    .source_code(code)
+                    .language_id(languageId)
+                    .stdin(input)
+                    .expected_output(expectedOutput)
+                    .callback_url(RUN_CODE_CALLBACK_BASE_URL)
+                    .build();
+
+            submissions.add(request);
+        }
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("submissions", submissions);
+
+        // Convert the request body to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequestBody;
+        try {
+            jsonRequestBody = objectMapper.writeValueAsString(requestBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize request body", e);
+        }
+
+        log.info("Request body: {}", jsonRequestBody);
+
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(jsonRequestBody, headers);
+
+        // Send POST request to Judge0 for code execution
+        ResponseEntity<String> response = restTemplate.exchange(
+                JUDGE0_BASE_URL + "/submissions/batch", HttpMethod.POST, requestEntity, String.class
+        );
+
+        List<TestCaseRunCodeOutput> results = new ArrayList<>();
+
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            // Extract submission ID from the response body
+            List<String> listTokens= TokenExtractor.extractTokens(Objects.requireNonNull(response.getBody()));
+
+            for (int i = 0; i < listTokens.size(); i++) {
+                String submissionId = listTokens.get(i);
+                // Call the status endpoint to get execution result
+                TestCaseRunCodeOutput result = TestCaseRunCodeOutput
+                        .builder()
+                        .resultStatus("In Queue")
+                        .token(UUID.fromString(submissionId))
+                        .build();
+                results.add(result);
+            }
+
+            return results;
         } else {
             // Throw a meaningful error with status code and response body
             String errorMessage = String.format(

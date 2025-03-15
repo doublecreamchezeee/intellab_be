@@ -24,7 +24,7 @@ create table solutions
     content    text,
     problem_id uuid not null
         constraint fkrm3misp2p4syk4tcnefnqspbl
-            references problems,
+            references problems,c
     primary key (author_id, problem_id)
 );
 

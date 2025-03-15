@@ -89,7 +89,8 @@ public class ProblemCommentController {
     }
 
     @Operation(
-            summary = "Soft delete a comment by comment id (hide content of comment but still keep it in database)"
+            summary = "Soft delete a comment",
+            description = "Soft delete a comment by comment id (hide content of comment but still keep it in database)"
     )
     @DeleteMapping("/{commentId}/soft")
     public ApiResponse<String> softDeleteProblemComment(
@@ -201,7 +202,8 @@ public class ProblemCommentController {
     }
 
     @Operation(
-            summary = "Upvote a comment by comment id, return number of upvote of the comment"
+            summary = "Upvote a comment",
+            description = "Upvote a comment by comment id, this will return the number of upvote of the comment"
     )
     @PostMapping("/{commentId}/upvote")
     public ApiResponse<Integer> upvoteProblemComment(
@@ -225,7 +227,8 @@ public class ProblemCommentController {
     }
 
     @Operation(
-            summary = "Cancel upvote a comment by comment id, return number of upvote of the comment"
+            summary = "Cancel upvote a comment",
+            description = "Cancel upvote a comment by comment id, this will return the number of upvote of the comment"
     )
     @PostMapping("/{commentId}/cancel-upvote")
     public ApiResponse<Integer> cancelUpvoteProblemComment(

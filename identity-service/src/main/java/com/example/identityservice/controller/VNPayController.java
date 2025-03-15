@@ -233,4 +233,19 @@ public class VNPayController {
                 .build();
     }
 
+    @Operation(
+            summary = "Update redirect URL absolutely",
+            description = "Update the redirect URL for payment result",
+            tags = "VN Pay"
+    )
+    @PublicEndpoint
+    @PostMapping("/update-redirect-url/absolutely")
+    public ApiResponse<String> updateRedirectUrlAbsolutely(@RequestBody String newUrl) {
+        redirectUrlConfig.setRedirectUrl(newUrl);
+        return ApiResponse.<String>builder()
+                .message("Redirect URL updated successfully")
+                .result(newUrl)
+                .build();
+    }
+
 }
