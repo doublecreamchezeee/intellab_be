@@ -59,8 +59,8 @@ jobs:
       # Optional: be careful with this step,
       # it may expose sensitive information in the logs, even if user using anonymous access
       # MUST delete workflow logs after using this step
-      - name: Verify .env file
-        run: cat .env
+#      - name: Verify .env file
+#        run: cat .env
 
       - name: create credentials file
         run: |
