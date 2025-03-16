@@ -20,7 +20,7 @@ public class ClientConfiguration {
         String baseUrl = "http://" + hostname + ":" + port + "/course";
         return WebClient.builder()
                 .baseUrl(baseUrl)
-                .filter(addUserIdHeaderFilter())
+                //.filter(addUserIdHeaderFilter())
                 .build();
     }
 
