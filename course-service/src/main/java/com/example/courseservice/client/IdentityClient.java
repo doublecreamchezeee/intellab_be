@@ -1,6 +1,7 @@
 package com.example.courseservice.client;
 
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.LeaderboardUpdateRequest;
 import com.example.courseservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.courseservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
@@ -26,4 +27,7 @@ public interface IdentityClient {
     @PostExchange(url = "/profile/multiple", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<MultipleProfileInformationResponse>> getMultipleProfileInformation(
             @RequestBody MultipleProfileInformationRequest request);
+
+    @PostExchange(url = "/leaderboard/update", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<Void>> updateLeaderboard(@RequestBody LeaderboardUpdateRequest request);
 }

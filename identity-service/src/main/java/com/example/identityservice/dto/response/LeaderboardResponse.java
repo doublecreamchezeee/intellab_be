@@ -1,5 +1,6 @@
 package com.example.identityservice.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class LeaderboardResponse {
     CourseStatResponse courseStat;
     ProblemStatResponse problemStat;
 
+    @AllArgsConstructor
     @Data
     @Builder
     public static class CourseStatResponse {
@@ -23,6 +25,7 @@ public class LeaderboardResponse {
         int total;
     }
 
+    @AllArgsConstructor
     @Data
     @Builder
     public static class ProblemStatResponse {
