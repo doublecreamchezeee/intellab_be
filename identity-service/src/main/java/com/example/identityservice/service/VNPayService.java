@@ -73,7 +73,7 @@ public class VNPayService {
     public VNPayPaymentCreationResponse createSinglePayment(
             String ipAddr, VNPaySinglePaymentCreationRequest request, String userUid) {
         try {
-            ApiResponse<DetailCourseResponse> courseResponse = courseClient.getDetailCourseById(request.getCourseId());
+            ApiResponse<DetailCourseResponse> courseResponse = courseClient.getDetailCourseById(request.getCourseId()).block();
             DetailCourseResponse course = courseResponse.getResult();
 
             if (course == null) {
@@ -435,7 +435,7 @@ public class VNPayService {
                                                     .courseId(paymentCourses.getId().getCourseId())
                                                     .userUid(payment.getUserUid())
                                                     .build()
-                                    );
+                                    ).block();
                                     log.info("Enroll course response from course service: {}", userCoursesResponse);
                                 } catch (Exception e) {
                                     throw new AppException(ErrorCode.CANNOT_ENROLL_COURSE);
@@ -574,7 +574,7 @@ public class VNPayService {
                                     .courseId(paymentCourses.getId().getCourseId())
                                     .userUid(payment.getUserUid())
                                     .build()
-                    );
+                    ).block();
 
                     if (!result.getResult()) {
                         log.info("Cannot disenroll course: {}", paymentCourses.getId().getCourseId());
