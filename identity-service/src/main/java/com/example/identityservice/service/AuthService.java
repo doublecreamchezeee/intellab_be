@@ -4,10 +4,7 @@ import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
-import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInResponse;
-import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
-import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
-import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
+import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
@@ -140,12 +137,28 @@ public class AuthService {
     public ValidatedTokenResponse validateToken(@NonNull final String token) {
         try {
             FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
+            String role = firestoreService.getRoleByUid(decodeToken.getUid());
+            String premium = null;
+            if (role.equals("user")) {
+                PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
+                if (pre != null)
+                {
+                    premium = pre.getPlanType();
+                }
+                else
+                {
+                    premium = "free";
+                }
+
+            }
 
             return ValidatedTokenResponse.builder()
                     .isValidated(true)
                     .userId(decodeToken.getUid())
                     .name(decodeToken.getName())
                     .email(decodeToken.getEmail())
+                    .role(role)
+                    .premium(premium)
                     .message("Token validation successful.")
                     .build();
         } catch (FirebaseAuthException e) {
@@ -199,4 +212,6 @@ public class AuthService {
             throw new RuntimeException("Error verifying email: " + e.getMessage(), e);
         }
     }
+
+
 }

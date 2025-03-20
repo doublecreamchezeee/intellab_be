@@ -1,8 +1,10 @@
 package com.example.problemservice.client;
 
+import com.example.problemservice.dto.request.notification.NotificationRequest;
 import com.example.problemservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.problemservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
+import com.example.problemservice.dto.response.notification.NotificationResponse;
 import com.example.problemservice.dto.response.profile.MultipleProfileInformationResponse;
 import com.example.problemservice.dto.response.profile.SingleProfileInformationResponse;
 import org.springframework.http.MediaType;
@@ -19,4 +21,10 @@ public interface IdentityClient {
     @PostExchange(url = "/profile/multiple", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<MultipleProfileInformationResponse>> getMultipleProfileInformation(
             @RequestBody MultipleProfileInformationRequest request);
+
+    @PostExchange(url = "/notifications")
+    Mono<ApiResponse<NotificationResponse>> postNotifications(
+            @RequestBody NotificationRequest request
+    );
+
 }

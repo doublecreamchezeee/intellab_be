@@ -21,6 +21,7 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-java:2.2.4")
     implementation ("com.google.firebase:firebase-admin:9.2.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.security:spring-security-test")
     implementation("com.paypal.sdk:rest-api-sdk:1.14.0")
     implementation("com.google.code.gson:gson:2.12.1")
 }

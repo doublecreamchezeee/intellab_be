@@ -2,6 +2,7 @@ package com.example.courseservice.service;
 
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.notification.NotificationRequest;
 import com.example.courseservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.courseservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.courseservice.dto.request.review.ReviewCreationRequest;
@@ -40,6 +41,7 @@ public class ReviewService {
     CourseRepository courseRepository;
     ReviewMapper reviewMapper;
     private final IdentityClient identityClient;
+    private final FirestoreService firestoreService;
 
     private void updateReviewCountAndAverageRating(Course course, Review review) {
         //update course average rating and review count of course
@@ -81,7 +83,20 @@ public class ReviewService {
         //update course average rating and review count of course
         updateReviewCountAndAverageRating(course, review);
 
-        return reviewMapper.toReviewCreationResponse(review);
+        ReviewCreationResponse response = reviewMapper.toReviewCreationResponse(review);
+        try {
+            String userName = firestoreService.getUsername(userUuid);
+            NotificationRequest notificationRequest = new NotificationRequest(
+                    userName + " has just review your course:",
+                    review.getComment(),
+                    review.getCourse().getUserId()
+            );
+            identityClient.postNotifications(notificationRequest);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+        return response;
     }
 
     public DetailsReviewResponse getReviewById(UUID reviewId) {

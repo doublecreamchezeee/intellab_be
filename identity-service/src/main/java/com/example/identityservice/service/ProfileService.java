@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -124,7 +125,7 @@ public class ProfileService {
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
 
-            List<CompleteCourseResponse> completeCourseResponse = courseClient.getCourseByUserId().block().getResult();
+            List<CompleteCourseResponse> completeCourseResponse = Objects.requireNonNull(courseClient.getCourseByUserId().block()).getResult();
             userInfoResponse.setCourseCount(completeCourseResponse.size());
 
             return userInfoResponse;

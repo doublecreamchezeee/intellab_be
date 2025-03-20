@@ -29,7 +29,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Tag(name = "Exercise")
 public class ExerciseController {
-
     ExerciseService exerciseService;
     QuestionService questionService;
     @Operation(

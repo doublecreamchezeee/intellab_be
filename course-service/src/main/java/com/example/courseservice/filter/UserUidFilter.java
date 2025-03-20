@@ -27,6 +27,11 @@ public class UserUidFilter implements Filter {
             httpRequest.setAttribute("X-UserId", userUid);
         }
 
+        String role = httpRequest.getHeader("UserRole");
+        if (role != null) {
+            httpRequest.setAttribute("UserRole", role);
+        }
+
         chain.doFilter(httpRequest, httpResponse);
     }
 

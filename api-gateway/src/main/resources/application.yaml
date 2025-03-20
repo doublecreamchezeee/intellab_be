@@ -32,6 +32,7 @@ spring:
           filters:
             - StripPrefix=1
             - AddRequestHeader=X-UserId, myUserId
+            - AddRequestHeader=X-UserRole, myRole
         - id: problem-service
           uri: http://${HOST_NAME}:${PROBLEM_PORT}
           predicates:
@@ -39,6 +40,7 @@ spring:
           filters:
             - StripPrefix=1
             - AddRequestHeader=X-UserId, myUserId
+            - AddRequestHeader=X-UserRole, myRole
         - id: ai-service
           uri: http://${HOST_NAME}:${AI_PORT}
           predicates:
@@ -46,3 +48,4 @@ spring:
           filters:
             - StripPrefix=1
             - AddRequestHeader=X-UserId, myUserId
+            - AddRequestHeader=X-UserRole, myRole

@@ -24,6 +24,7 @@ public class Leaderboard {
 
     @Column(columnDefinition = "VARCHAR(20)")
     String hierarchy;
+
     Long score;
 
     @ManyToOne(fetch = FetchType.LAZY)

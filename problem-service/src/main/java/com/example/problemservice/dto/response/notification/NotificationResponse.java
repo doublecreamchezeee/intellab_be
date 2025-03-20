@@ -1,9 +1,8 @@
-package com.example.courseservice.dto.response.notification;
+package com.example.problemservice.dto.response.notification;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ public class NotificationResponse {
 
     String message;
 
-    NotificationResponse.NotificationType type;
+    NotificationType type;
 
     Date timestamp;
 

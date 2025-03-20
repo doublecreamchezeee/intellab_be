@@ -4,17 +4,17 @@ import com.example.identityservice.dto.request.auth.ListEmailsRequest;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
-import com.example.identityservice.dto.response.auth.FirebaseGoogleSignInResponse;
-import com.example.identityservice.dto.response.auth.RefreshTokenSuccessResponse;
-import com.example.identityservice.dto.response.auth.TokenSuccessResponse;
+import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.configuration.PublicEndpoint;
-import com.example.identityservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.identityservice.service.AuthService;
+import com.example.identityservice.service.FirestoreService;
+import com.example.identityservice.utility.SecurityUtil;
 import com.google.firebase.auth.FirebaseAuthException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Collection;
 import java.util.Map;
 
 @RestController
@@ -32,6 +33,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final FirestoreService firestoreService;
 
     @Operation(
             summary = "Register user"
@@ -126,5 +128,14 @@ public class AuthController {
     public ResponseEntity<HttpStatus> setVerifiedEmail(@RequestBody ListEmailsRequest request) {
         authService.setVerifiedListEmails(request.getEmails());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+    @PublicEndpoint
+    @GetMapping("/role")
+    public ResponseEntity<Collection<? extends GrantedAuthority>> roleEndpoint() {
+        return ResponseEntity.ok(SecurityUtil.getUserAuthorities());
+    }
+    @GetMapping("/premium")
+    public PremiumSubscription getSubscription(@RequestParam String uid) {
+        return firestoreService.getUserPremiumSubscriptionByUid(uid);
     }
 }
