@@ -2,8 +2,10 @@ package com.example.courseservice.service;
 
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.constant.PredefinedLearningStatus;
+import com.example.courseservice.dto.request.LeaderboardUpdateRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.request.notification.NotificationRequest;
 import com.example.courseservice.dto.response.auth.ValidatedTokenResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.*;
@@ -483,7 +485,7 @@ public class CourseService {
                         .lastAccessedDate(userCourses.getLastAccessedDate())
                         .progressPercent(userCourses.getProgressPercent())
                         .status(userCourses.getStatus())
-                        .certificateId(userCourses.getCertificate().getCertificateId())
+                        .certificateId(userCourses.getCertificate() != null ? userCourses.getCertificate().getCertificateId() : null)
                         .completedDate(Date.from(userCourses.getCertificate().getCompletedDate()))
                         .build());
             }
@@ -601,6 +603,61 @@ public class CourseService {
             certificateCreationResponse.setUrl(certificate.getCertificateUrl());
             certificateCreationResponse.setCourseId(courseId);
             certificateCreationResponse.setUserId(userId);
+
+            try{
+                LeaderboardUpdateRequest leaderboardUpdateRequest = new LeaderboardUpdateRequest();
+                leaderboardUpdateRequest.setUserId(userId.toString());
+                leaderboardUpdateRequest.setType("course");
+                leaderboardUpdateRequest.setAdditionalScore((long)course.getScore());
+                if (course.getLevel().equals("beginner"))
+                {
+                    leaderboardUpdateRequest.getCourseStat().setBeginner(1);
+                    leaderboardUpdateRequest.getCourseStat().setIntermediate(0);
+                    leaderboardUpdateRequest.getCourseStat().setAdvanced(0);
+                }
+                else if (course.getLevel().equals("intermediate"))
+                {
+                    leaderboardUpdateRequest.getCourseStat().setBeginner(0);
+                    leaderboardUpdateRequest.getCourseStat().setIntermediate(1);
+                    leaderboardUpdateRequest.getCourseStat().setAdvanced(0);
+                }
+                else
+                {
+                    leaderboardUpdateRequest.getCourseStat().setBeginner(0);
+                    leaderboardUpdateRequest.getCourseStat().setIntermediate(0);
+                    leaderboardUpdateRequest.getCourseStat().setAdvanced(1);
+                }
+                identityClient.updateLeaderboard(leaderboardUpdateRequest);
+            }
+            catch(Exception ignore){
+
+            }
+
+            try{
+                NotificationRequest notificationRequest = new NotificationRequest();
+                notificationRequest.setTitle("Congratulations on Completing Your Course!");
+                notificationRequest.setMessage("Dear "+ userName +",\n" +
+                        "\n" +
+                        "Congratulations on successfully completing the \"" + courseName + "\" on [Platform/Institution Name]! We recognize your dedication and commitment to learning.\n" +
+                        "\n" +
+                        "\uD83D\uDCDC Your Certificate of Completion is Ready! You can download it here: [Certificate Download Link]\n" +
+                        "\n" +
+                        "\uD83D\uDD39 Certificate Details:\n" +
+                        "\n" +
+                        "Learner’s Name: " + userName + "\n" +
+                        "Course Name: " + courseName + "\n" +
+                        "Completion Date: [Completion Date]\n" +
+                        "Issued by: Intellab\n" +
+                        "Showcase your achievement by sharing your certificate on LinkedIn or other social media platforms!\n" +
+                        "\n" +
+                        "Thank you for learning with us. We wish you continued success in your future endeavors!\n" +
+                        "\n" +
+                        "\n");
+                notificationRequest.setUserid(userId);
+                identityClient.postNotifications(notificationRequest);
+            }
+            catch (Exception ignored){
+            }
 
             return certificateCreationResponse;
 

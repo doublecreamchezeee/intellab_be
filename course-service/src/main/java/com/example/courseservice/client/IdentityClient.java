@@ -16,12 +16,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 public interface IdentityClient {
     @PostExchange(url = "/auth/validateToken", contentType = MediaType.APPLICATION_JSON_VALUE)
@@ -43,10 +46,10 @@ public interface IdentityClient {
 //            @RequestHeader("X-UserId") String userUid,
 //            @ParameterObject Pageable pageable
 //    );
+    @Async
     @PostExchange(url = "/notifications")
     Mono<ApiResponse<NotificationResponse>> postNotifications(
             @RequestBody NotificationRequest request
     );
-
 
 }

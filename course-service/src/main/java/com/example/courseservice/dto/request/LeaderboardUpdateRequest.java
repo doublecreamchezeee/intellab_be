@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class LeaderboardUpdateRequest {
     private String userId;
     private String type; // "problem" or "course"
-    private Long newScore;
+    private Long additionalScore;
     private ProblemStat problemStat;
     private CourseStat courseStat;
 

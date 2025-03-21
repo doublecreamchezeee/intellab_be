@@ -12,4 +12,6 @@ public interface LeaderboardRepository extends JpaRepository<Leaderboard, UUID> 
     Optional<Leaderboard> findByUserIdAndType(UUID userId, String type);
 
     List<Leaderboard> findByTypeOrderByScoreDesc(String type, Pageable pageable);
+
+    Optional<Leaderboard> findByUserId(UUID userUUID);
 }

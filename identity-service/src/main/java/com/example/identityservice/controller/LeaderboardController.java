@@ -9,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,7 +34,7 @@ public class LeaderboardController {
         leaderboardService.updateLeaderboard(
                 request.getUserId(),
                 request.getType(),
-                request.getNewScore(),
+                request.getAdditionalScore(),
                 request.getProblemStat(),
                 request.getCourseStat()
         );

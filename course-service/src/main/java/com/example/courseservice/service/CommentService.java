@@ -189,9 +189,8 @@ public class CommentService {
             {
                 identityClient.postNotifications(request).block().getResult().getMessage();
             }
-            catch (Exception e)
+            catch (Exception ignore)
             {
-                System.err.println("Error while created upvote notification: " + e.getMessage());
             }
         }
         return response;

@@ -61,6 +61,7 @@ public class LeaderboardService {
                 .lastName(user.getLastName())
                 .problemStat("problem".equals(leaderboard.getType()) ? mapProblemStat(leaderboard.getProblemStat()) : null)
                 .courseStat("course".equals(leaderboard.getType()) ? mapCourseStat(leaderboard.getCourseStat()) : null)
+                .userUid(user.getUserId())
                 .build();
     }
 
@@ -90,7 +91,7 @@ public class LeaderboardService {
         );
     }
 
-    public void updateLeaderboard(String userId, String type, Long newScore, ProblemStat problemStat, CourseStat courseStat) {
+    public void updateLeaderboard(String userId, String type, Long additionalScore, ProblemStat problemStat, CourseStat courseStat) {
         UUID userUUID = UUID.fromString(userId);
 
         // Check if leaderboard entry exists for the given type
@@ -99,14 +100,27 @@ public class LeaderboardService {
         if (existingEntry.isPresent()) {
             // Update existing entry
             Leaderboard leaderboard = existingEntry.get();
-            leaderboard.setScore(newScore);
+            Long oldScore = leaderboard.getScore();
+            leaderboard.setScore(oldScore + additionalScore);
 
             if ("problem".equals(type)) {
-                problemStat.setTotalProblem(problemStat.getEasy() + problemStat.getMedium() + problemStat.getHard());
-                leaderboard.setProblemStat(problemStat);
+                ProblemStat temp = leaderboard.getProblemStat();
+                temp.setEasy(temp.getEasy() + problemStat.getEasy());
+                temp.setMedium(temp.getMedium() + problemStat.getMedium());
+                temp.setHard(temp.getHard() + problemStat.getHard());
+
+                temp.setTotalProblem(temp.getEasy() + temp.getMedium() + temp.getHard());
+
+                leaderboard.setProblemStat(temp);
             } else if ("course".equals(type)) {
-                courseStat.setTotalCourse(courseStat.getAdvanced() + courseStat.getBeginner() + courseStat.getIntermediate());
-                leaderboard.setCourseStat(courseStat);
+                CourseStat temp = leaderboard.getCourseStat();
+
+                temp.setBeginner(temp.getBeginner() + courseStat.getBeginner());
+                temp.setIntermediate(temp.getIntermediate() + courseStat.getIntermediate());
+                temp.setAdvanced(temp.getAdvanced() + courseStat.getAdvanced());
+
+                temp.setTotalCourse(temp.getAdvanced() + temp.getBeginner() + temp.getIntermediate());
+                leaderboard.setCourseStat(temp);
             }
 
             leaderboardRepository.save(leaderboard);
@@ -115,7 +129,7 @@ public class LeaderboardService {
             Leaderboard newLeaderboard = Leaderboard.builder()
                     .userId(userUUID)
                     .type(type)
-                    .score(newScore)
+                    .score(additionalScore)
                     .problemStat("problem".equals(type) ? problemStat : null)
                     .courseStat("course".equals(type) ? courseStat : null)
                     .build();

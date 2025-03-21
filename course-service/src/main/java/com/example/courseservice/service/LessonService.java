@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.abs;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -366,11 +368,11 @@ public class LessonService {
         DetailCourseResponse detailCourseResponse = courseService.getCourseById(courseId, userUid);
 
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
-        userCoursesRepository.save(userCourses);
+        userCourses = userCoursesRepository.save(userCourses);
 
-        if (userCourses.getProgressPercent()-100 <= 1e-6f ) {
+        if (abs(userCourses.getProgressPercent()-100) <= 1e-5f ) {
             userCourses.setStatus(PredefinedLearningStatus.DONE);
-            userCoursesRepository.save(userCourses);
+            userCourses = userCoursesRepository.save(userCourses);
             if (userCourses.getCertificate() == null) {
                 System.out.println("createCertificate");
                 System.out.println(userCourses.getCertificate());
@@ -405,12 +407,12 @@ public class LessonService {
         DetailCourseResponse detailCourseResponse = courseService.getCourseById(courseId, userUid);
 
         userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
-        userCoursesRepository.save(userCourses);
+        userCourses = userCoursesRepository.save(userCourses);
 
 
-        if (userCourses.getProgressPercent()-100 <= 1e-6f ) {
+        if (abs(userCourses.getProgressPercent()-100) <= 1e-5f ) {
             userCourses.setStatus(PredefinedLearningStatus.DONE);
-            userCoursesRepository.save(userCourses);
+            userCourses = userCoursesRepository.save(userCourses);
             if (userCourses.getCertificate() == null) {
                 System.out.println("createCertificate");
                 System.out.println(userCourses.getCertificate());
@@ -450,11 +452,11 @@ public class LessonService {
             DetailCourseResponse detailCourseResponse = courseService.getCourseById(lesson.getCourse().getCourseId(), userUid);
 
             userCourses.setProgressPercent(detailCourseResponse.getProgressPercent());
-            userCoursesRepository.save(userCourses);
+            userCourses = userCoursesRepository.save(userCourses);
 
-            if (userCourses.getProgressPercent()-100 <= 1e-6f) {
+            if (abs(userCourses.getProgressPercent()-100) <= 1e-5f) {
                 userCourses.setStatus(PredefinedLearningStatus.DONE);
-                userCoursesRepository.save(userCourses);
+                userCourses = userCoursesRepository.save(userCourses);
                 if (userCourses.getCertificate() == null) {
                     System.out.println("createCertificate");
                     System.out.println(userCourses.getCertificate());
