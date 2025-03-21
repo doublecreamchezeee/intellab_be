@@ -1,6 +1,7 @@
 package com.example.courseservice.client;
 
 import com.example.courseservice.dto.ApiResponse;
+import com.example.courseservice.dto.request.LeaderboardUpdateRequest;
 import com.example.courseservice.dto.request.notification.NotificationRequest;
 import com.example.courseservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.courseservice.dto.request.profile.SingleProfileInformationRequest;
@@ -45,4 +46,7 @@ public interface IdentityClient {
     );
 
 
+
+    @PostExchange(url = "/leaderboard/update", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<Void>> updateLeaderboard(@RequestBody LeaderboardUpdateRequest request);
 }

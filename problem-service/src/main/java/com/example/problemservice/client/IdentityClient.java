@@ -1,5 +1,6 @@
 package com.example.problemservice.client;
 
+import com.example.problemservice.dto.request.LeaderboardUpdateRequest;
 import com.example.problemservice.dto.request.notification.NotificationRequest;
 import com.example.problemservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.problemservice.dto.request.profile.SingleProfileInformationRequest;
@@ -21,6 +22,9 @@ public interface IdentityClient {
     @PostExchange(url = "/profile/multiple", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<MultipleProfileInformationResponse>> getMultipleProfileInformation(
             @RequestBody MultipleProfileInformationRequest request);
+
+    @PostExchange(url = "/leaderboard/update", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<Void>> updateLeaderboard(@RequestBody LeaderboardUpdateRequest request);
 
     @PostExchange(url = "/notifications")
     Mono<ApiResponse<NotificationResponse>> postNotifications(

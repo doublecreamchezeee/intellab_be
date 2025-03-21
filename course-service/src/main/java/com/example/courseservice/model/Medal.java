@@ -35,8 +35,8 @@ public class Medal {
     @Column(name = "bonus_score")
     Integer bonusScore;
 
-    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
-    Set<Leaderboard> leaderboards;
+//    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
+//    Set<Leaderboard> leaderboards;
 
     @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
     Set<Streak> streaks;
