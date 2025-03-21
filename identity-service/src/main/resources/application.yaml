@@ -1,11 +1,6 @@
 spring:
   application:
     name: identity-service
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
   mail:
     host: smtp.gmail.com
     port: 587
@@ -17,19 +12,28 @@ spring:
           auth: true
           starttls:
             enable: true
-  main:
-    allow-bean-definition-overriding: true
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
+    #    show-sql: true
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
 server:
   port: 8001
   servlet:
     context-path: /identity
+
+#  ssl:
+#    key-store: classpath:keystore.jks
+#    key-store-password: 123456
+#    key-store-type: PKCS12
+#    key-alias: mysslkey
 
 com:
   example:
@@ -53,3 +57,10 @@ google:
   credentials:
     file:
       path: google-credentials.json
+
+vnpay:
+  tmn-code: ${VNPAY_TMN_CODE}
+  hash-secret: ${VNPAY_HASH_SECRET_KEY}
+  pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html  # Use production URL in live mode
+  return-url: http://localhost:${IDENTITY_PORT}/identity/payment/vnpay/vnpay-return
+  api-url: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction

@@ -5,6 +5,7 @@ import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
+import com.example.courseservice.dto.request.course.DisenrollCourseRequest;
 import com.example.courseservice.dto.request.course.EnrollCourseRequest;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
@@ -18,6 +19,7 @@ import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.dto.response.userCourses.UserCoursesResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.model.Comment;
@@ -60,13 +62,30 @@ public class CourseController {
     LessonService lessonService;
     ReviewService reviewService;
     private final CommentService commentService;
+    private Boolean isAdmin(String role)
+    {
+        return role.equals("admin");
+    }
 
     @Operation(
-            summary = "Create course"
+            summary = "Create course",
+            description = "- Create a new course.\n" +
+                    "- Only admin."
     )
     @PostMapping("")
-    ApiResponse<CourseCreationResponse> createCourse(@RequestBody @Valid CourseCreationRequest request) {
+    ApiResponse<CourseCreationResponse> createCourse(
+            @RequestBody @Valid CourseCreationRequest request,
+            @RequestHeader("X-UserRole") String role) {
+        if (!isAdmin(role))
+        {
+            return ApiResponse.<CourseCreationResponse>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
         return ApiResponse.<CourseCreationResponse>builder()
+                .code(201)
+                .message("Created")
                 .result(courseService.createCourse(
                         ParseUUID.normalizeUID(request.getUserUid()),
                         request))
@@ -78,7 +97,8 @@ public class CourseController {
     )
     @GetMapping("/{courseId}/lessons")
     ApiResponse<Page<LessonResponse>> getLessonsByCourseId(
-            @PathVariable("courseId") String courseId, @ParameterObject Pageable pageable) {
+            @PathVariable("courseId") String courseId,
+            @ParameterObject Pageable pageable) {
         return ApiResponse.<Page<LessonResponse>>builder()
                 .result(lessonService.getLessonsByCourseId(
                             courseId,
@@ -210,9 +230,21 @@ public class CourseController {
             summary = "Delete a course by id"
     )
     @DeleteMapping("/{courseId}")
-    ApiResponse<String> deleteCourseById(@PathVariable("courseId") UUID courseId) {
-        courseService.deleteCourseById(courseId);
+    ApiResponse<String> deleteCourseById(
+            @PathVariable("courseId") UUID courseId,
+            @RequestHeader("X-UserID") String userUid,
+            @RequestHeader("X-UserRole") String role) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<String>builder()
+                    .code(201)
+                    .result("You are not allowed to delete this course")
+                    .message("Forbidden").build();
+        }
+        userUid = userUid.split(",")[0];
+        courseService.deleteCourseById(courseId, userUid);
         return ApiResponse.<String>builder()
+                .code(204)
+                .message("Delete course by id: " + courseId)
                 .result("Course has been deleted")
                 .build();
     }
@@ -221,9 +253,19 @@ public class CourseController {
             summary = "Update a course by id"
     )
     @PutMapping("/{courseId}")
-    ApiResponse<CourseCreationResponse> updateCourse(@PathVariable("courseId") UUID courseId, @RequestBody CourseUpdateRequest request) {
+    ApiResponse<CourseCreationResponse> updateCourse(
+            @PathVariable("courseId") UUID courseId,
+            @RequestBody CourseUpdateRequest request,
+            @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("X-UserRole") String role) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<CourseCreationResponse>builder()
+                    .code(201)
+                    .result(null)
+                    .message("Forbidden").build();
+        }
         return ApiResponse.<CourseCreationResponse>builder()
-                .result(courseService.updateCourse(courseId, request))
+                .result(courseService.updateCourse(courseId, request, userUid.split(",")[0 ]))
                 .build();
     }
 
@@ -266,13 +308,60 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Enroll a course"
+            summary = "Enroll a free course"
     )
     @PostMapping("/enroll")
-    public ApiResponse<UserCourses> enrollCourse(@RequestBody @Valid EnrollCourseRequest request) {
-
+    public ApiResponse<UserCourses> enrollCourse(
+            @RequestBody @Valid EnrollCourseRequest request,
+            @RequestHeader("X-UserRole") String role) {
+        if (isAdmin(role)) {
+            return ApiResponse.<UserCourses>builder()
+                    .code(201)
+                    .message("Forbidden")
+                    .result(null)
+                    .build();
+        }
         return ApiResponse.<UserCourses>builder()
                 .result(courseService.enrollCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .build();
+    }
+
+    @Operation(
+            summary = "Enroll a paid course",
+            description = "This API is used to enroll a paid course.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The request body contains the user UID and the course ID.",
+                    required = true,
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = EnrollCourseRequest.class)
+                    )
+            ),
+            hidden = true
+    )
+    @PostMapping("/enrollPaidCourse")
+    public ApiResponse<UserCourses> enrollPaidCourse(@RequestBody @Valid EnrollCourseRequest request) {
+
+        return ApiResponse.<UserCourses>builder()
+                .message("Course has been enrolled successfully")
+                .result(courseService.enrollPaidCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .build();
+    }
+
+    @Operation(
+            summary = "(BE only) Disenroll a course by user id and course id"
+    )
+    @PostMapping("/disenroll")
+    public ApiResponse<Boolean> disenrollCourse(@RequestBody @Valid DisenrollCourseRequest request) {
+        Boolean result = courseService.disenrollCourse(
+                ParseUUID.normalizeUID(
+                        request.getUserUid()
+                ),
+                request.getCourseId()
+        );
+        return ApiResponse.<Boolean>builder()
+                .message("Course has been disenrolled")
+                .result(result)
                 .build();
     }
 
@@ -289,8 +378,15 @@ public class CourseController {
     @GetMapping("/courseList/me")
     public ApiResponse<List<CompleteCourseResponse>> getCourseByUserId(
             @RequestHeader(name = "X-UserId", required = false) String userUid,
+            @RequestHeader(name = "X-UserRole", required = false) String role,
             @RequestParam (required = false) String UserUid) {
-
+//        if (isAdmin(role)) {
+//            return ApiResponse.<List<CompleteCourseResponse>>builder()
+//                    .code(201)
+//                    .message("Forbidden")
+//                    .result(null)
+//                    .build();
+//        }
         if (userUid == null && UserUid == null) {
             throw new AppException(ErrorCode.INVALID_USER);
         }
@@ -318,8 +414,15 @@ public class CourseController {
     public ApiResponse<Page<UserCourses>> getEnrolledCoursesOfUser(
             //@PathVariable("userUid") String userUid,
             @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("X-UserRole") String role,
             @ParameterObject Pageable pageable) {
-
+        if(isAdmin(role)) {
+            return ApiResponse.<Page<UserCourses>>builder()
+                    .result(null)
+                    .message("Forbidden")
+                    .code(201)
+                    .build();
+        }
         userUid = userUid.split(",")[0];
         log.info("UserUid: " + ParseUUID.normalizeUID(userUid));
         return ApiResponse.<Page<UserCourses>>builder()
@@ -371,7 +474,6 @@ public class CourseController {
                 .result(courseService.getListCategory(listOfId)).build();
     }
 
-
     @Operation(
             summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
     )
@@ -397,7 +499,6 @@ public class CourseController {
     public ApiResponse<Object> getCertificate(
             @PathVariable UUID certificateId
     ) throws ExecutionException, InterruptedException {
-
 
         return ApiResponse.builder()
                 .result(courseService.getCertificate(certificateId)).build();
@@ -450,7 +551,9 @@ public class CourseController {
     }
 
     @Operation(
-            summary = """
+            summary = "Lấy tất cả comment của course theo courseId",
+            description =
+            """
                     cách truyền params sort outer: sort=properties,order\s
                     order : gồm có asc, desc
                     
@@ -506,7 +609,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = """
+            summary = "Lấy comment và children comment theo commentId",
+            description = """
                     Lấy comment theo commentId với số lượng children comment được truyền vào tùy ý (size = ?) default 20
                     cách truyền params sort: sort=properties,order\s
                     order : gồm có asc, desc
@@ -541,7 +645,9 @@ public class CourseController {
 
 
     @Operation(
-            summary = """
+            summary =  "Lấy page comment con theo commentId",
+            description =
+            """
                     Lấy page comment con theo commentId với số lượng được truyền vào tùy ý (size = ?) default 20
                     cách truyền params sort: sort=properties,order\s
                     order : gồm có asc, desc
@@ -628,6 +734,14 @@ public class CourseController {
         UUID userId = ParseUUID.normalizeUID(userUid);
         return ApiResponse.<Boolean>builder()
                 .result(commentService.removeComment(commentId, userId)).build();
+    }
+
+    @GetMapping("/role")
+    public String getRole(
+            @RequestHeader("X-UserRole") String role
+    )
+    {
+        return role;
     }
 
 

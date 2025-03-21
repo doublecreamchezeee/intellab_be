@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NotificationWebSocketHandler extends TextWebSocketHandler {
@@ -29,8 +30,8 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         this.eventPublisher = eventPublisher;
     }
 
-    public Optional<WebSocketSession> getUserSessionIfConnected(String userId) {
-        WebSocketSession session = sessions.get(userId);
+    public Optional<WebSocketSession> getUserSessionIfConnected(UUID userId) {
+        WebSocketSession session = sessions.get(userId.toString());
         if (session != null && session.isOpen()) {
             return Optional.of(session);
         }
@@ -41,9 +42,9 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
         String userId = getUserIdFromSession(session);
         if (userId != null) {
-            sessions.put(String.valueOf(ParseUUID.normalizeUID(userId)), session);
+            sessions.put(userId, session);
             System.out.println("User connected: " + userId);
-            sendWelcomeMessage(userId);
+            sendWelcomeMessage(UUID.fromString(userId));
 
             eventPublisher.publishEvent(new WebSocketEvent(this, userId, session));
         }
@@ -72,8 +73,8 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void sendWelcomeMessage(String userId) {
-        WebSocketSession session = sessions.get(userId);
+    private void sendWelcomeMessage(UUID userId) {
+        WebSocketSession session = sessions.get(userId.toString());
         if (session != null && session.isOpen()) {
             try {
                 String welcomeMessage = "Welcome " + userId + ", you are now connected!";

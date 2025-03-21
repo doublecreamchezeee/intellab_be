@@ -18,6 +18,7 @@ import java.util.UUID;
 @Table(name = "\"notifications\"")
 public class Notification {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String title;

@@ -1,7 +1,6 @@
 package com.example.courseservice.model.compositeKey;
 
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
@@ -16,9 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Embeddable
-public class NotificationID {
-    @JoinColumn(name = "user_id")
-    UUID userId;
-    @Column(name = "notification_order")
-    long notificationOrder;
+public class CartCourseId {
+    @Column(name = "course_id")
+    UUID courseId;
+    @Column(name = "cart_id")
+    UUID cartId;
 }

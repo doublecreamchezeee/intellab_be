@@ -1,23 +1,27 @@
 package com.example.courseservice.dto.response.notification;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationResponse {
-    private String id;
-    private String title;
-    private String message;
-    private NotificationType type;
-    private LocalDateTime timestamp;
-    private String recipientId; // Can be null for broadcast notifications
+    UUID id;
+
+    String title;
+
+    String message;
+
+    NotificationResponse.NotificationType type;
+
+    Date timestamp;
 
     public enum NotificationType {
         INFO,

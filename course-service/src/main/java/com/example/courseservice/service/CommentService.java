@@ -1,14 +1,18 @@
 package com.example.courseservice.service;
 
 
+import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
+import com.example.courseservice.dto.request.notification.NotificationRequest;
+import com.example.courseservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CommentMapper;
 import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.Course;
+import com.example.courseservice.model.Firestore.User;
 import com.example.courseservice.model.Reaction;
 import com.example.courseservice.model.compositeKey.ReactionID;
 import com.example.courseservice.repository.CommentRepository;
@@ -21,9 +25,12 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +40,8 @@ public class CommentService {
     private final CourseRepository courseRepository;
     private final CommentMapper commentMapper;
     private final ReactionRepository reactionRepository;
+    private final IdentityClient identityClient;
+    private final FirestoreService firestoreService;
 
     public Page<CommentResponse> getComments(UUID courseId, UUID userId, Pageable pageable, Pageable childrenPageable) {
         Course course = courseRepository.findById(courseId)
@@ -68,6 +77,7 @@ public class CommentService {
                 });
     }
 
+    @Transactional
     public CommentResponse addComment(UUID courseId, CommentCreationRequest request, UUID userId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(()-> new AppException(ErrorCode.COURSE_NOT_EXISTED));
@@ -76,8 +86,9 @@ public class CommentService {
         comment.setContent(request.getContent());
         comment.setUserId(userId);
 
+        Comment repliedComment = null;
         if (request.getRepliedCommentId() != null) {
-            Comment repliedComment = commentRepository.findById(request.getRepliedCommentId())
+            repliedComment = commentRepository.findById(request.getRepliedCommentId())
                 .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
 
             comment.setRepliedComment(repliedComment);
@@ -105,7 +116,27 @@ public class CommentService {
 
         Comment result = commentRepository.save(comment);
 
-        return commentMapper.toResponse(result);
+        CommentResponse response =  commentMapper.toResponse(result);
+        response.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
+
+        response.setIsUpvoted(comment.getReactions()
+                .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+
+
+        if (repliedComment != null && result.getUserId() != repliedComment.getUserId())
+        {
+            NotificationRequest notificationRequest = new NotificationRequest();
+            notificationRequest.setTitle(response.getUserName() + " replied to your comment:");
+            notificationRequest.setMessage(response.getContent());
+            notificationRequest.setUserid(repliedComment.getUserId());
+            try{
+            identityClient.postNotifications(notificationRequest);
+            } catch (Exception e) {
+                System.err.println("Error while created comment notification: " + e.getMessage());
+            }
+
+        }
+        return response;
     }
     public CommentResponse ModifyComment(UUID userId, CommentModifyRequest request) {
         Comment comment = commentRepository.findById(request.getCommentId())
@@ -121,9 +152,12 @@ public class CommentService {
         return commentMapper.toResponse(comment);
     }
 
+    @Transactional
     public CommentResponse upvoteComment(UUID userId, UUID commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
+        Long oldNOL = comment.getNumberOfLikes();
 
 
         ReactionID id = new ReactionID(userId,commentId);
@@ -137,7 +171,30 @@ public class CommentService {
 
         comment = commentRepository.save(comment);
 
-        return commentMapper.toResponse(comment);
+        CommentResponse response = commentMapper.toResponse(comment);
+        response.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
+
+        response.setIsUpvoted(comment.getReactions()
+                .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+
+
+        if (userId != response.getUserId() && !Objects.equals(oldNOL, response.getNumberOfLikes())) {
+            NotificationRequest request = new NotificationRequest();
+            request.setUserid(comment.getUserId());
+            request.setTitle("Your comment has just been upvote:");
+            String userName = firestoreService.getUsername(userId);
+            request.setMessage("Your comment has just been upvote by " + userName);
+
+            try
+            {
+                identityClient.postNotifications(request).block().getResult().getMessage();
+            }
+            catch (Exception e)
+            {
+                System.err.println("Error while created upvote notification: " + e.getMessage());
+            }
+        }
+        return response;
     }
 
     public CommentResponse cancelUpvoteComment(UUID userId, UUID commentId) {

@@ -5,11 +5,20 @@ services:
     image: doublecreamcheze/intellab_ops:api-gateway-latest
     ports:
       - "8100:8000"
+    environment:
+      TZ: Asia/Ho_Chi_Minh #Etc/GMT+7
 
   identity-service:
     image: doublecreamcheze/intellab_ops:identity-service-latest
     ports:
       - "8101:8001"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+      TZ: Asia/Ho_Chi_Minh
+    depends_on:
+      - db
 
   course-service:
     image: doublecreamcheze/intellab_ops:course-service-latest
@@ -19,6 +28,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 123456
+      TZ: Asia/Ho_Chi_Minh
     depends_on:
       - db
 
@@ -30,6 +40,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 123456
+      TZ: Asia/Ho_Chi_Minh
     depends_on:
       - db
 
@@ -46,6 +57,10 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone:ro
 
 volumes:
   postgres_data:

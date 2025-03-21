@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -44,12 +46,14 @@ public class ProfileService {
     private final FirestoreService firestoreService;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
-            @NonNull String userId
+            @NonNull String userUid
     ) {
         try {
             UserRecord userRecord = firebaseAuth.getUser(
-                    userId
+                    userUid
             );
+
+            User userFirestore = firestoreService.getUserByUid(userUid);
 
             return SingleProfileInformationResponse.builder()
                     .userId(userRecord.getUid())
@@ -57,9 +61,17 @@ public class ProfileService {
                     .email(userRecord.getEmail())
                     .phoneNumber(userRecord.getPhoneNumber())
                     .photoUrl(userRecord.getPhotoUrl())
+                    .emailVerified(userRecord.isEmailVerified())
+                    .isDisabled(userRecord.isDisabled())
+                    .lastSignIn(new Date(userRecord.getUserMetadata().getLastSignInTimestamp()))
+                    .firstName(userFirestore.getFirstName())
+                    .lastName(userFirestore.getLastName())
                     .build();
+
         } catch (FirebaseAuthException e) {
             throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -113,7 +125,7 @@ public class ProfileService {
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
 
-            List<CompleteCourseResponse> completeCourseResponse = courseClient.getCourseByUserId().block().getResult();
+            List<CompleteCourseResponse> completeCourseResponse = Objects.requireNonNull(courseClient.getCourseByUserId().block()).getResult();
             userInfoResponse.setCourseCount(completeCourseResponse.size());
 
             return userInfoResponse;

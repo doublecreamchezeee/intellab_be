@@ -1,8 +1,10 @@
 package com.example.courseservice.repository;
 
 import com.example.courseservice.model.Course;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -34,4 +36,10 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     List<Course> findAllByDescriptionContainingIgnoreCaseAndLevel(String description, String level);
 
+    Course findByCourseIdAndUserId(UUID id, UUID userId);
+
+    @NotNull
+    Page<Course> findAll(Specification<Course> specification, @NotNull Pageable pageable);
+
+    Page<Course> findByUserId(Pageable pageable, UUID userId);
 }

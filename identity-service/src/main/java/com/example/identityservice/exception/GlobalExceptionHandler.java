@@ -2,6 +2,7 @@ package com.example.identityservice.exception;
 
 import com.example.identityservice.dto.ApiResponse;
 import com.google.firebase.auth.FirebaseAuthException;
+import kotlin.io.AccessDeniedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -101,6 +102,24 @@ public class GlobalExceptionHandler {
                         .message(ex.getMessage())
                         .build()
         );
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException e) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity.status(errorCode.getStatusCode()).body(
+                ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build()
+        );
+    }
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    ResponseEntity<ApiResponse> handlingIllegalArgumentException(IllegalArgumentException e) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage(e.getMessage());
+        apiResponse.setCode(ErrorCode.BAD_REQUEST.getCode());
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 
     @ExceptionHandler(Exception.class)

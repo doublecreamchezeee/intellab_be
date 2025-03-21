@@ -66,8 +66,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 try {
                     // Verify the Firebase token
                     final var firebaseToken = firebaseAuthClient.verifyToken(token);
+
                     String role = firebaseToken.getRole();
-                    List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+                    System.out.println("- (JTWAuthentication) role: " + role);
+                    List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
                     // Extract user ID from claims (or throw an exception if it's missing)
                     final var userId = Optional.ofNullable(firebaseToken.getUserId())
                             .orElseThrow(() -> new IllegalStateException("User ID claim missing"));
