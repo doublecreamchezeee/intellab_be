@@ -13,7 +13,9 @@ import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
 import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
+import com.example.identityservice.model.Leaderboard;
 import com.example.identityservice.model.User;
+import com.example.identityservice.repository.LeaderboardRepository;
 import com.example.identityservice.utility.CloudinaryUtil;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -44,6 +47,7 @@ public class ProfileService {
     private final CourseClient courseClient;
     private final CloudinaryService cloudinaryService;
     private final FirestoreService firestoreService;
+    private final  LeaderboardRepository leaderboardRepository;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userUid
@@ -120,11 +124,12 @@ public class ProfileService {
 
     public UserInfoResponse getUserInfo(String userUid, String email) {
         UserInfoResponse userInfoResponse = firebaseAuthClient.getUserInfo(userUid, email);
+        Optional<Leaderboard> leaderboard = leaderboardRepository.findByUserIdAndType(ParseUUID.normalizeUID(userUid), "all");
         try {
             User userFirestore = firestoreService.getUserByUid(userUid);
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
-
+            userInfoResponse.setPoint(leaderboard.get().getScore());
             List<CompleteCourseResponse> completeCourseResponse = Objects.requireNonNull(courseClient.getCourseByUserId().block()).getResult();
             userInfoResponse.setCourseCount(completeCourseResponse.size());
 

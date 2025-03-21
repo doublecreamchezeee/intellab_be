@@ -1,8 +1,5 @@
 package com.example.identityservice.dto.response.auth;
 
-import com.example.identityservice.enums.Role;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -24,6 +21,7 @@ public class UserInfoResponse {
     private boolean isDisabled;
     private Date lastSignIn;
     private int courseCount;
+    private long point;
 
     public Date getLastSignIn() {
         if (lastSignIn == null || lastSignIn.toString().contains("1970")) {
