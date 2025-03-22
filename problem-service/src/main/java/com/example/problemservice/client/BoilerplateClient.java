@@ -155,7 +155,12 @@ public class BoilerplateClient {
             String inputs = String.join(", ", inputFields.stream()
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .toArray(String[]::new));
-            return String.format("%s %s(%s) {\n    // Implementation goes here\n    return result;\n}",
+            return String.format("""
+                    #include <iostream>
+                    #include <vector>
+                    #include <string>
+                    %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
+                    """,
                     mapTypeToCpp(outputFields.get(0).getType()), functionName, inputs);
         }
 
@@ -222,7 +227,9 @@ public class BoilerplateClient {
                     .map(field -> mapTypeToJava(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining(", "));
             String outputType = mapTypeToJava(outputFields.get(0).getType());
-            javaCode.append(String.format("public static %s %s(%s) {\n", outputType, functionName, inputs));
+            javaCode.append(String.format("""
+                    public static %s %s(%s) {\n
+                    """, outputType, functionName, inputs));
             javaCode.append("    // Implementation goes here\n");
             javaCode.append("    return null;\n");
             javaCode.append("}\n");
@@ -297,7 +304,10 @@ public class BoilerplateClient {
             String inputs = inputFields.stream()
                     .map(Field::getName)
                     .collect(Collectors.joining(", "));
-            pythonCode.append(String.format("def %s(%s):\n", functionName, inputs));
+            pythonCode.append(String.format("""
+                    import sys
+                    def %s(%s):\n
+                    """, functionName, inputs));
             pythonCode.append("    # Implementation goes here\n");
             pythonCode.append("    return None\n");
 

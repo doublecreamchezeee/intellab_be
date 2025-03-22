@@ -1,8 +1,10 @@
 package com.example.problemservice.service;
 
 import com.example.problemservice.constants.SupportedDataType;
+import com.example.problemservice.core.NumberTestCaseGenerator;
 import com.example.problemservice.dto.request.TestCaseCreationRequest;
 import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationRequest;
+import com.example.problemservice.dto.request.testcase.TestCasesGenerationRequest;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.model.Problem;
@@ -112,5 +114,18 @@ public class TestCaseService {
 
     public List<String> getSupportedDataTypes() {
         return SupportedDataType.getSupportedDataTypes();
+    }
+
+    public <T extends Number> List<T[]> generateNumericTestCases(TestCasesGenerationRequest<T> request) {
+        NumberTestCaseGenerator<T> generator = new NumberTestCaseGenerator<>();
+        return generator.generate1DTestCases(
+                request.getNumberOfTestCases(),
+                request.getMinArrayLength(),
+                request.getMaxArrayLength(),
+                request.getMinValue(),
+                request.getMaxValue(),
+                request.getDirectoryPath(),
+                request.getClazz()
+        );
     }
 }

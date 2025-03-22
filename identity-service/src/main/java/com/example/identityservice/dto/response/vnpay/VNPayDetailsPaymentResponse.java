@@ -29,4 +29,6 @@ public class VNPayDetailsPaymentResponse {
     String transactionNo;
     String transactionStatusDescription;
     String responseCodeDescription;
+    String orderDescription;
+    String paymentFor;
 }

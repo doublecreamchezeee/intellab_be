@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  api-gateway:
+    image: doublecreamcheze/intellab_ops:api-gateway-latest
+    ports:
+      - "8100:8000"
+    environment:
+      TZ: Asia/Ho_Chi_Minh #Etc/GMT+7
+
+  identity-service:
+    image: doublecreamcheze/intellab_ops:identity-service-deploy
+    ports:
+      - "8101:8001"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-cv7iekogph6c73bbn0qg-a.singapore-postgres.render.com:5432/intellab_db
+      SPRING_DATASOURCE_USERNAME: intellab_db_user
+      SPRING_DATASOURCE_PASSWORD: MI9CtDDTXeQdhER1piZQlYtAg3lbmcXr
+    depends_on:
+      - db
+
+  course-service:
+    image: doublecreamcheze/intellab_ops:course-service-latest
+    ports:
+      - "8102:8002"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+      TZ: Asia/Ho_Chi_Minh
+    depends_on:
+      - db
+
+  problem-service:
+    image: doublecreamcheze/intellab_ops:problem-service-latest
+    ports:
+      - "8103:8003"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/intellab-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+      TZ: Asia/Ho_Chi_Minh
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: intellab-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: intellab-db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone:ro
+
+volumes:
+  postgres_data:

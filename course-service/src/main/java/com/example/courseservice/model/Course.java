@@ -42,7 +42,7 @@ public class Course {
     String level;
 
     @Column(name = "score")
-    int score;
+    Integer score;
 
     @Column(columnDefinition = "DECIMAL(11,2)")
     Float price;

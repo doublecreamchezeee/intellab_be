@@ -64,3 +64,7 @@ vnpay:
   pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html  # Use production URL in live mode
   return-url: http://localhost:${IDENTITY_PORT}/identity/payment/vnpay/vnpay-return
   api-url: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
+
+scheduler:
+  customCronExpression: 0 0 12 * * ?
+

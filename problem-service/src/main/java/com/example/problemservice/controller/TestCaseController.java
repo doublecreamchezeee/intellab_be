@@ -2,6 +2,7 @@ package com.example.problemservice.controller;
 
 import com.example.problemservice.dto.request.TestCaseCreationRequest;
 import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationRequest;
+import com.example.problemservice.dto.request.testcase.TestCasesGenerationRequest;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.TestCase;
 import com.example.problemservice.service.TestCaseService;
@@ -94,5 +95,14 @@ public class TestCaseController {
     public ResponseEntity<List<TestCase>> getTestCasesByProblemId(@PathVariable String problemId) {
         List<TestCase> response = testCaseService.getTestCasesByProblemId(UUID.fromString(problemId));
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "(testing) Generate test cases"
+    )
+    @PostMapping("/generate")
+    public <T extends Number> ResponseEntity<List<T[]>> generateTestCases(@RequestBody TestCasesGenerationRequest<T> request) {
+        List<T[]> testCases = testCaseService.generateNumericTestCases(request);
+        return ResponseEntity.ok(testCases);
     }
 }

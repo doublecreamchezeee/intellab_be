@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @Slf4j
 public class ApiEndpointSecurityInspector {
 
-    @Qualifier("requestMappingHandlerMapping")
+    //@Qualifier("requestMappingHandlerMapping")
     @Autowired
     private final RequestMappingHandlerMapping requestHandlerMapping;
 

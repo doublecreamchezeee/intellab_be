@@ -40,3 +40,10 @@ identity-service/src/main/resources/private-key.json
 docker.env
 *.txt
 *.md
+build_image.bat
+build_image.ps1
+build_gradle.bat
+build_gradle.ps1
+push_hub.bat
+Jenkinsfile
+./deploy.compose.yaml

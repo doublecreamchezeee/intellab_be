@@ -1,4 +1,4 @@
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2 #beta2
 kind: HorizontalPodAutoscaler
 metadata:
   name: workers-hpa
@@ -15,12 +15,14 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50
+          averageUtilization: 30 #50
           
-    - type: Pods
-      pods:
-        metric:
-          name: redis_queue_length
-        target:
-          type: AverageValue
-          averageValue: 10
+#    - type: Pods
+#      pods:
+#        metric:
+#          name: redis_queue_length
+#        target:
+#          type: AverageValue
+#          averageValue: 10
+
+# kubectl get pods -n kube-system

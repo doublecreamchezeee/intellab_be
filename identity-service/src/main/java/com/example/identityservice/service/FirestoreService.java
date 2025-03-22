@@ -146,6 +146,8 @@ public class FirestoreService {
         return Objects.requireNonNull(docRef.get("role")).toString();
 
     }
+
+
     public PremiumSubscription getUserPremiumSubscriptionByUid(String uid){
         try
         {

@@ -173,6 +173,7 @@ public class ProblemController {
     // api để test code
     @Operation(
             summary = "(testing only) Enrich code"
+            //,hidden = true
     )
     @PostMapping("/enrichCode")
     public ApiResponse<String> enrichCode(@RequestBody EnrichCodeRequest request) {
