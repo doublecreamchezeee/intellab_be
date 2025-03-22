@@ -68,7 +68,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses/enrollPaidCourse",
             "/course/courses/disenroll",
             "/ai/global_chatbot/stream",
-            "/global_chatbot/stream"
+            "/global_chatbot/stream",
+            "identity/leaderboard",
     };
 
     @NonFinal

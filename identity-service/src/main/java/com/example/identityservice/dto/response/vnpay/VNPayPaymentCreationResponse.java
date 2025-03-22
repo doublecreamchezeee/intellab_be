@@ -25,5 +25,7 @@ public class VNPayPaymentCreationResponse {
     String bankTransactionNo;
     String transactionNo;
     String transactionStatusDescription;
+    String orderDescription;
+    String paymentFor;
     String paymentUrl;
 }

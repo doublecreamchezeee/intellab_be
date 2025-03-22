@@ -1,5 +1,6 @@
 package com.example.identityservice.dto.request.vnpay;
 
+import com.example.identityservice.enums.account.PremiumDuration;
 import com.example.identityservice.enums.account.PremiumPackage;
 import com.example.identityservice.enums.vnpay.VNPayBankCode;
 import com.example.identityservice.enums.vnpay.VNPayCurrencyCode;
@@ -17,4 +18,5 @@ public class VNPayUpgradeAccountRequest {
     VNPayCurrencyCode VNPayCurrencyCode;
     VNPayLocale language;
     PremiumPackage premiumPackage;
+    PremiumDuration premiumDuration;
 }

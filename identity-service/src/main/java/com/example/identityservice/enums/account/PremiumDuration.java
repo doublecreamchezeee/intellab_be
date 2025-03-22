@@ -8,15 +8,10 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public enum PremiumPackage {
-
-    PREMIUM_PLAN("premium plan", 1000000L, "VND"),
-    PROBLEM_PLAN("problem plan", 600000L, "VND"),
-    COURSE_PLAN("course plan", 600000L, "VND")
+public enum PremiumDuration {
+    MONTHLY_PACKAGE("MONTHLY", 30),
+    YEARLY_PACKAGE("YEARLY", 365),
     ;
     String code;
-    Long price;
-    String unitPrice;
-
-    static String VND = "VND";
+    Integer duration; // in days
 }

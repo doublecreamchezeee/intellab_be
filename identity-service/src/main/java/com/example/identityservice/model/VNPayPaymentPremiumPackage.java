@@ -39,4 +39,13 @@ public class VNPayPaymentPremiumPackage {
 
     @Column(name = "package_type")
     String packageType;
+
+    @Column(name = "end_date", nullable = true)
+    Instant endDate;
+
+    @Column(name = "status")
+    String status;
+
+    @Column(name = "duration")
+    Integer duration; // in days
 }

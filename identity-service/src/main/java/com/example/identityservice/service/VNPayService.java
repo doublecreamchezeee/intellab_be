@@ -17,6 +17,7 @@ import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
 import com.example.identityservice.dto.response.vnpay.*;
+import com.example.identityservice.enums.account.PremiumDuration;
 import com.example.identityservice.enums.vnpay.VNPayRefundType;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
@@ -30,6 +31,7 @@ import com.example.identityservice.repository.VNPayPaymentPremiumPackageReposito
 import com.example.identityservice.repository.VNPayPaymentRepository;
 import com.example.identityservice.utility.HashUtility;
 import com.example.identityservice.utility.ParseUUID;
+import com.example.identityservice.utility.StringUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -86,13 +88,15 @@ public class VNPayService {
             }
 
             // create description for order
-            String orderDescription = null;
+            String orderDescription = StringUtility.convertToAscii(
+                        course.getCourseName()
+                ); // null;
 
-            if (request.getLanguage().getCode().equals("vi")) {
-                orderDescription = "Thanh toan cho khoa hoc ";
+            /*if (request.getLanguage().getCode().equals("vi")) {
+                orderDescription = StringUtility.convertToAscii(course.getCourseName());
             } else {
                 orderDescription = "Payment for courses ";
-            }
+            }*/
 
             // Create payment url
             VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
@@ -115,6 +119,8 @@ public class VNPayService {
                     .bankCode(request.getVNPayBankCode().getCode())
                     .transactionReference(paymentUrlResponse.getTransactionReference())
                     .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
+                    .orderDescription(orderDescription)
+                    .paymentFor("Course")
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -159,20 +165,27 @@ public class VNPayService {
     ) {
         try {
             // create description for order
-            String orderDescription = null;
+            String orderDescription = request.getPremiumPackage().getCode(); // null;
 
-            if (request.getLanguage().getCode().equals("vi")) {
+            /*if (request.getLanguage().getCode().equals("vi")) {
                 orderDescription = "Nang cap tai khoan " ;
             } else {
-                orderDescription = "Payment for courses ";
-            }
+                orderDescription = "Payment for upgrade account ";
+            }*/
 
-            orderDescription += request.getPremiumPackage().getCode() + " package ";
+            //orderDescription += request.getPremiumPackage().getCode() + " package ";
+
+            Long price = Objects.equals(
+                        request.getPremiumDuration().getCode(),
+                        PremiumDuration.MONTHLY_PACKAGE.getCode()
+                )
+                ? request.getPremiumPackage().getPrice()
+                : (long) (request.getPremiumPackage().getPrice() * 12 * 0.9f);   // 10% discount for yearly package
 
             // Create payment url
             VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
                     ipAddr,
-                    (long) request.getPremiumPackage().getPrice(),
+                    price,
                     request.getVNPayBankCode().getCode(),
                     request.getVNPayCurrencyCode().getCode(),
                     request.getLanguage().getCode(),
@@ -186,6 +199,17 @@ public class VNPayService {
                     //.payment(payment)
                     .packageType(request.getPremiumPackage().getCode())
                     .startDate(null)
+                    .endDate(null)
+                    .status("Pending transaction") // 01: Pending transaction
+                    .duration(
+                            request.getPremiumDuration().getCode()
+                                    .equals(
+                                            PremiumDuration.MONTHLY_PACKAGE
+                                                    .getCode()
+                                    )
+                                    ? 30
+                                    : 365
+                    )
                     .build();
 
             paymentPremiumPackage = vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
@@ -202,6 +226,8 @@ public class VNPayService {
                     .transactionReference(paymentUrlResponse.getTransactionReference())
                     .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
                     .vnPayPaymentPremiumPackage(paymentPremiumPackage)
+                    .orderDescription(orderDescription)
+                    .paymentFor("Subscription")
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -235,8 +261,8 @@ public class VNPayService {
         String orderType = "other";
         String vnp_TxnRef = HashUtility.getRandomNumber(8);
         String orderInfo = orderDescription != null && !orderDescription.isEmpty()
-                ? orderDescription + vnp_TxnRef
-                : "Payment for something " + vnp_TxnRef;
+                ? orderDescription
+                : "Payment for something";
 
         /*if (locale.equals("vi")) {
             orderInfo = "Thanh toan cho khoa hoc " + vnp_TxnRef;
@@ -530,7 +556,7 @@ public class VNPayService {
                                                             .courseId(paymentCourses.getId().getCourseId())
                                                             .userUid(payment.getUserUid())
                                                             .build()
-                                            );
+                                            ).block();
                                             log.info("Enroll course response from course service: {}", userCoursesResponse);
                                         } catch (Exception e) {
                                             throw new AppException(ErrorCode.CANNOT_ENROLL_COURSE);
@@ -541,6 +567,8 @@ public class VNPayService {
                                 if (payment.getVnPayPaymentPremiumPackage()!=null) {
                                     VNPayPaymentPremiumPackage paymentPremiumPackage = payment.getVnPayPaymentPremiumPackage();
                                     paymentPremiumPackage.setStartDate(calendar.getTime().toInstant());
+                                    paymentPremiumPackage.setEndDate(calendar.getTime().toInstant().plusSeconds(paymentPremiumPackage.getDuration() * 24 * 60 * 60));
+                                    paymentPremiumPackage.setStatus("Active");
                                     vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
                                     log.info("Upgrade account successfully with premium package: {}", paymentPremiumPackage.getPackageType());
                                 }

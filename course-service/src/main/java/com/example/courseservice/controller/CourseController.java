@@ -64,7 +64,7 @@ public class CourseController {
     private final CommentService commentService;
     private Boolean isAdmin(String role)
     {
-        return role.equals("admin");
+        return role.contains("admin");
     }
 
     @Operation(
@@ -419,7 +419,7 @@ public class CourseController {
         if(isAdmin(role)) {
             return ApiResponse.<Page<UserCourses>>builder()
                     .result(null)
-                    .message("Forbidden")
+                    .message("Forbidden: this is admin account")
                     .code(201)
                     .build();
         }

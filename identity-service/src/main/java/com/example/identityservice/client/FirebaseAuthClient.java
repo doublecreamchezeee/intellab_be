@@ -8,6 +8,8 @@ import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
 import com.example.identityservice.mapper.UserMapper;
 import com.example.identityservice.model.User;
+import com.example.identityservice.model.VNPayPaymentPremiumPackage;
+import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.service.FirestoreService;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -39,6 +41,8 @@ public class FirebaseAuthClient {
     private final FirebaseConfigurationProperties firebaseConfigurationProperties;
 
     private final Firestore firestore;
+
+    private final VNPayPaymentPremiumPackageRepository vnpayPaymentPremiumPackageRepository;
 
     private static final String BASE_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword";
     private static final String API_KEY_PARAM = "key";
@@ -78,11 +82,15 @@ public class FirebaseAuthClient {
 //            String role = (String) decodeToken.getClaims().getOrDefault("role", "USER"); // Default to "USER" if missing
             String role = firestoreService.getRoleByUid(userId);
             String premium = null;
+
             if (role.equals("user")) {
-                PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
+                //PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
+                VNPayPaymentPremiumPackage pre = vnpayPaymentPremiumPackageRepository.findByUserUid(userId)
+                        .orElse(null);
                 if (pre != null)
                 {
-                    premium = pre.getPlanType();
+                    premium = pre.getPackageType();
+                    //premium = pre.getPlanType();
                 }
                 else
                 {

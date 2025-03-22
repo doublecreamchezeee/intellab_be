@@ -68,6 +68,12 @@ public class VNPayPayment {
     @Column(name = "transaction_no")
     String transactionNo;
 
+    @Column(name = "order_description")
+    String orderDescription;
+
+    @Column(name = "payment_for")
+    String paymentFor;
+
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     List<VNPayPaymentCourses> paymentCourses = new ArrayList<>();
@@ -76,4 +82,5 @@ public class VNPayPayment {
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
     @JoinColumn(name = "payment_premium_package_id", nullable = true)
     VNPayPaymentPremiumPackage vnPayPaymentPremiumPackage;
+
 }

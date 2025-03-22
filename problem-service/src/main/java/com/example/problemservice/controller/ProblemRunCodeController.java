@@ -24,7 +24,7 @@ public class ProblemRunCodeController {
     @Operation(
             summary = "Create run code request"
     )
-    @PostMapping
+    @PostMapping("/old-version")
     public ApiResponse<CreationProblemRunCodeResponse> createRunCode(
             @RequestBody DetailsProblemRunCodeRequest request,
             @RequestHeader("X-UserId") String userUid,
@@ -49,7 +49,7 @@ public class ProblemRunCodeController {
     @Operation(
             summary = "Create run code batch request"
     )
-    @PostMapping("/batch")
+    @PostMapping("")
     public ApiResponse<CreationProblemRunCodeResponse> createRunCodeBatch(
             @RequestBody DetailsProblemRunCodeRequest request,
             @RequestHeader("X-UserId") String userUid,
