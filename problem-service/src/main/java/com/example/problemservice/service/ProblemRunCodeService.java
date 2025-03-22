@@ -123,6 +123,91 @@ public class ProblemRunCodeService {
         return problemRunCodeMapper.toCreationProblemRunCodeResponse(problemRunCode);
     }
 
+    public CreationProblemRunCodeResponse runCodeBatch(UUID userId, DetailsProblemRunCodeRequest request, Boolean base64) {
+        // Get problem by problemId
+        Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
+                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+        );
+
+        ProgrammingLanguage language = programmingLanguageRepository.findById(request.getLanguageId())
+                .orElseThrow(() -> new AppException(ErrorCode.PROGRAMMING_LANGUAGE_NOT_EXIST));
+
+        //DELETE ALL PREVIOUS RUN CODES
+        List<ProblemRunCode> runCodes = problemRunCodeRepository.findProblemRunCodeByUserIdAndProblem_ProblemId(
+                userId,
+                request.getProblemId()
+        );
+
+        runCodes.forEach(runCode -> {
+            testCaseRunCodeOutputRepository.deleteAll(runCode.getTestCasesRunCodeOutput());
+        });
+        problemRunCodeRepository.deleteAll(runCodes);
+
+        ProblemRunCode problemRunCode = problemRunCodeMapper.toProblemRunCode(request);
+
+        problemRunCode.setUserId(userId);
+        problemRunCode.setProblem(problem);
+
+        if (base64!=null && base64) {
+            Base64.Decoder decoder = Base64.getDecoder();
+            problemRunCode.setCode(
+                    new String(
+                            decoder.decode(
+                                    problemRunCode.getCode()
+                            )
+                    )
+            );
+        }
+
+        problemRunCode.setCode(
+                boilerplateClient.enrich(
+                        problemRunCode.getCode(),
+                        request.getLanguageId(),
+                        problem.getProblemStructure()
+                )
+        );
+
+        problemRunCode.setProgrammingLanguage(language.getLongName());
+
+        problemRunCode = problemRunCodeRepository.save(problemRunCode);
+
+        List<TestCase> testCases = testCaseRepository.findAllByProblem_ProblemId(
+                request.getProblemId()
+        );
+
+        // Limit the number of test cases to NUMBER_OF_TEST_CASE
+        testCases = testCases.subList(0, Math.min(testCases.size(), NUMBER_OF_TEST_CASE));
+
+        List<TestCaseRunCodeOutput> outputs = judge0Client.runCodeBatch(
+                problemRunCode,
+                testCases
+        );
+
+        for (int i = 0; i < outputs.size(); i++) {
+            TestCaseRunCodeOutput output = outputs.get(i);
+            // Khởi tạo composite ID
+            TestCaseRunCodeOutputId outputId = new TestCaseRunCodeOutputId();
+            outputId.setRunCodeId(problemRunCode.getRunCodeId());
+            outputId.setTestcaseId(testCases.get(i).getTestcaseId());
+
+            // Gán composite ID và liên kết với ProblemRunCode
+            output.setTestCaseRunCodeOutputID(outputId);
+            output.setTestcase(testCases.get(i));
+            output.setRunCode(problemRunCode);
+
+            output = testCaseRunCodeOutputRepository.save(output);
+
+            outputs.set(i, output);
+        }
+
+        problemRunCode.setTestCasesRunCodeOutput(outputs);
+
+        problemRunCode = problemRunCodeRepository.save(problemRunCode);
+
+        return problemRunCodeMapper.toCreationProblemRunCodeResponse(problemRunCode);
+    }
+
+
     public CreationProblemRunCodeResponse callbackUpdate(SubmissionCallbackResponse request) {
         TestCaseRunCodeOutput output = testCaseRunCodeOutputRepository.findByToken(
                 UUID.fromString(

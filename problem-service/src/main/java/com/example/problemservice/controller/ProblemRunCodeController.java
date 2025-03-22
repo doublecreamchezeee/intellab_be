@@ -24,7 +24,7 @@ public class ProblemRunCodeController {
     @Operation(
             summary = "Create run code request"
     )
-    @PostMapping
+    @PostMapping("/old-version")
     public ApiResponse<CreationProblemRunCodeResponse> createRunCode(
             @RequestBody DetailsProblemRunCodeRequest request,
             @RequestHeader("X-UserId") String userUid,
@@ -47,7 +47,33 @@ public class ProblemRunCodeController {
     }
 
     @Operation(
-            summary = "(BE only) Callback update run code by id"
+            summary = "Create run code batch request"
+    )
+    @PostMapping("")
+    public ApiResponse<CreationProblemRunCodeResponse> createRunCodeBatch(
+            @RequestBody DetailsProblemRunCodeRequest request,
+            @RequestHeader("X-UserId") String userUid,
+            @RequestParam(value = "base64", required = false) Boolean base64
+    ) {
+        if (base64 == null) {
+            base64 = false;
+        }
+
+        userUid = userUid.split(",")[0];
+        CreationProblemRunCodeResponse response = problemRunCodeService.runCodeBatch(
+                ParseUUID.normalizeUID(userUid),
+                request,
+                base64);
+
+        return ApiResponse.<CreationProblemRunCodeResponse>builder()
+                .message("Submits to run code successfully")
+                .result(response)
+                .build();
+    }
+
+    @Operation(
+            summary = "(BE only) Callback update run code by id",
+            hidden = true
     )
     @PutMapping("/update/run-code/callback")
     public ApiResponse<Object> callbackUpdateRunCode(@RequestBody SubmissionCallbackResponse request) {

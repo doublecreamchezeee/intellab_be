@@ -5,6 +5,7 @@ import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.configuration.RedirectUrlConfig;
 import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.vnpay.VNPaySinglePaymentCreationRequest;
+import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
 import com.example.identityservice.dto.response.vnpay.*;
 import com.example.identityservice.service.VNPayService;
 import com.example.identityservice.utility.HashUtility;
@@ -35,8 +36,8 @@ public class VNPayController {
     private RedirectUrlConfig redirectUrlConfig;
 
     @Operation(
-            summary = "Create payment",
-            description = "Create payment, using payment url (deprecated)",
+            summary = "Create payment for single course",
+            description = "Create payment for single course, using payment url (deprecated)",
             tags = "VN Pay"
     )
     @PublicEndpoint
@@ -50,9 +51,37 @@ public class VNPayController {
 
         String ipAddr = HashUtility.getIpAddress(request); //request.getRemoteAddr();
 
-        VNPayPaymentCreationResponse response = vnPayService.createSinglePayment(
+        VNPayPaymentCreationResponse response = vnPayService.createSingleCoursePayment(
                 ipAddr,
                 vnPaySinglePaymentCreationRequest,
+                userId
+        );
+
+        return  ApiResponse.<VNPayPaymentCreationResponse>builder()
+                .message("success")
+                .result(response)
+                .build();
+    }
+
+    @Operation(
+            summary = "Create payment for upgrading premium package",
+            description = "Create payment for upgrading premium package, using payment url",
+            tags = "VN Pay"
+    )
+    @PublicEndpoint
+    @PostMapping("/checkout/premium-package")
+    public ApiResponse<VNPayPaymentCreationResponse> createPremiumPackageOrder(
+            HttpServletRequest request,
+            @RequestBody VNPayUpgradeAccountRequest vnPayUpgradeAccountRequest,
+            @RequestHeader("X-UserId") String userId
+    ) {
+        userId = userId.split(",")[0];
+
+        String ipAddr = HashUtility.getIpAddress(request);
+
+        VNPayPaymentCreationResponse response = vnPayService.createUpgradeAccountPayment(
+                ipAddr,
+                vnPayUpgradeAccountRequest,
                 userId
         );
 
@@ -198,6 +227,21 @@ public class VNPayController {
     @PostMapping("/update-redirect-url")
     public ApiResponse<String> updateRedirectUrl(@RequestBody String newUrl) {
         redirectUrlConfig.setRedirectUrl(redirectUrlConfig.getFeUrl() + newUrl);
+        return ApiResponse.<String>builder()
+                .message("Redirect URL updated successfully")
+                .result(newUrl)
+                .build();
+    }
+
+    @Operation(
+            summary = "Update redirect URL absolutely",
+            description = "Update the redirect URL for payment result",
+            tags = "VN Pay"
+    )
+    @PublicEndpoint
+    @PostMapping("/update-redirect-url/absolutely")
+    public ApiResponse<String> updateRedirectUrlAbsolutely(@RequestBody String newUrl) {
+        redirectUrlConfig.setRedirectUrl(newUrl);
         return ApiResponse.<String>builder()
                 .message("Redirect URL updated successfully")
                 .result(newUrl)

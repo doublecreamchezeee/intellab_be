@@ -9,6 +9,8 @@ import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
 import com.example.identityservice.model.User;
+import com.example.identityservice.model.VNPayPaymentPremiumPackage;
+import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -32,6 +34,7 @@ public class AuthService {
     private final FirebaseAuthClient firebaseAuthClient;
     private final EmailService emailService;
     private final FirestoreService firestoreService;
+    private final VNPayPaymentPremiumPackageRepository vnpayPaymentPremiumPackageRepository;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -140,10 +143,15 @@ public class AuthService {
             String role = firestoreService.getRoleByUid(decodeToken.getUid());
             String premium = null;
             if (role.equals("user")) {
-                PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
+                //PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
+
+                VNPayPaymentPremiumPackage pre = vnpayPaymentPremiumPackageRepository.findByUserUid(decodeToken.getUid())
+                        .orElse(null);
+
                 if (pre != null)
                 {
-                    premium = pre.getPlanType();
+                    premium = pre.getPackageType();
+                    //premium = pre.getPlanType();
                 }
                 else
                 {

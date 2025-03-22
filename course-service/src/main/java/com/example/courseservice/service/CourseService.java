@@ -485,7 +485,9 @@ public class CourseService {
                         .lastAccessedDate(userCourses.getLastAccessedDate())
                         .progressPercent(userCourses.getProgressPercent())
                         .status(userCourses.getStatus())
-                        .certificateId(userCourses.getCertificate() != null ? userCourses.getCertificate().getCertificateId() : null)
+                        .certificateId(userCourses.getCertificate() != null ?
+                                userCourses.getCertificate().getCertificateId()
+                                : null)
                         .completedDate(Date.from(userCourses.getCertificate().getCompletedDate()))
                         .build());
             }

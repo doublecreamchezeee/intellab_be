@@ -107,7 +107,8 @@ public class ProblemSubmissionController {
     }
 
     @Operation(
-            summary = "Update submission by id (Unused api-call)"
+            summary = "Update submission by id (Unused api-call)",
+            hidden = true
     )
     @PostMapping("/update/{submissionId}")
     public ResponseEntity<ProblemSubmission> updateSubmission(@PathVariable UUID submissionId) {

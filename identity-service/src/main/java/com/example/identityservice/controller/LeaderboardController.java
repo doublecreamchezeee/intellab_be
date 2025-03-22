@@ -1,5 +1,6 @@
 package com.example.identityservice.controller;
 
+import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.dto.LeaderboardUpdateRequest;
 import com.example.identityservice.dto.response.LeaderboardResponse;
 import com.example.identityservice.service.LeaderboardService;
@@ -19,6 +20,7 @@ public class LeaderboardController {
     private final LeaderboardService leaderboardService;
 
     @GetMapping
+    @PublicEndpoint
     public ResponseEntity<Page<LeaderboardResponse>> getLeaderboard(
             @RequestParam(defaultValue = "all") String filter,
             @RequestParam(defaultValue = "0") int page,
