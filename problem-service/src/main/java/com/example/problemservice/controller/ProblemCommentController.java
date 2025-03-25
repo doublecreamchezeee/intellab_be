@@ -212,9 +212,6 @@ public class ProblemCommentController {
     ) {
         userUid = userUid.split(",")[0];
 
-        UUID userUuid = ParseUUID.normalizeUID(
-                userUid
-        );
 
         UUID problemCommentId = UUID.fromString(
                 commentId
@@ -222,7 +219,7 @@ public class ProblemCommentController {
 
         return ApiResponse.<Integer>builder()
                 .message("Problem comment upvoted successfully")
-                .result(problemCommentService.upvoteProblemComment(userUuid, problemCommentId))
+                .result(problemCommentService.upvoteProblemComment(userUid, problemCommentId))
                 .build();
     }
 

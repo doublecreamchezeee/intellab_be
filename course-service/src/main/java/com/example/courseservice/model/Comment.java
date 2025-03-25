@@ -33,7 +33,7 @@ public class Comment {
 
 
     @CreationTimestamp
-    Instant created;
+    Instant created = Instant.now();
 
     @Column(name = "last_modified")
     Instant lastModified;
