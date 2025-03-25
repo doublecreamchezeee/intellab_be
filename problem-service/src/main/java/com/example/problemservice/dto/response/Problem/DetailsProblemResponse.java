@@ -1,8 +1,6 @@
 package com.example.problemservice.dto.response.Problem;
 
-import com.example.problemservice.core.ProblemStructure;
 import com.example.problemservice.model.*;
-import com.example.problemservice.model.composite.SolutionID;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -23,7 +21,7 @@ public class DetailsProblemResponse {
     Boolean isAvailable;
     Boolean isPublished;
     List<TestCase> testCases;
-    List<Solution> solutions;
+    Solution solution;
     List<ProblemCategory> categories;
     List<Hint> hints;
 }
