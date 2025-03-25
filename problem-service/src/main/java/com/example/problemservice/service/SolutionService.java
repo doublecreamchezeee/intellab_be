@@ -42,16 +42,6 @@ public class SolutionService {
 
         solution.setProblem(problem);
 
-        SolutionID solutionId = new SolutionID(
-                UUID.fromString(
-                        request.getProblemId()
-                ),
-                UUID.fromString(
-                        request.getAuthorId()
-                )
-        );
-
-        solution.setSolutionId(solutionId);
 
         solution = solutionRepository.save(solution);
 
@@ -79,11 +69,8 @@ public class SolutionService {
         return solutionMapper.toDetailsSolutionResponse(solution);
     }
 
-    public List<DetailsSolutionResponse> getSolutionByProblemId(UUID problemId) {
-        List<DetailsSolutionResponse> solutions = solutionRepository.findAllBySolutionId_ProblemId(problemId)
-                .stream().map(solutionMapper::toDetailsSolutionResponse).toList();
-
-        return solutions;
+    public DetailsSolutionResponse getSolutionByProblemId(UUID problemId) {
+        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByProblemId(problemId));
     }
 
     public SolutionUpdateResponse updateSolution(String problemId, String authorId, SolutionUpdateRequest request) {
@@ -107,13 +94,7 @@ public class SolutionService {
     }
 
     public void deleteSolution(String problemId, String authorId) {
-        SolutionIdRequest request = new SolutionIdRequest(
-                problemId,
-                authorId
-        );
-
-        SolutionID solutionId = solutionMapper.toSolutionID(request);
-        solutionRepository.deleteById(solutionId);
+        //solutionRepository.deleteById(UUID.fromString(problemId));
     }
 
 
