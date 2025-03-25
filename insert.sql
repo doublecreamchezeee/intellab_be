@@ -729,14 +729,14 @@ alter table vnpay_payment_courses
     owner to postgres;
 
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('dbfea360-dda9-46a5-9487-ea624080bb60', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('5fe612b4-3998-44c7-85b2-2e4e973a38a7', 'The logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', null, null, 'Logic Building Problems', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('5fe612b4-3998-44c7-85b2-2e4e973a38a7', 'The logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solution. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', null, null, 'Logic Building Problems', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', null, null, 'Introduction to DSA', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', null, null, 'Matrix Data Structure Guide', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('067b8270-f488-41b8-a741-9d118e9dc6c4', 'An in-depth guide to understanding and implementing linked lists. Explore concepts like singly, doubly, and circular linked lists, along with common operations such as insertion, deletion, traversal, and reversal. Ideal for mastering dynamic data organization and memory-efficient problem-solving.', null, null, 'Linked List Data Structure Guide', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('5df3554d-160e-45b9-989a-ebd58ee65235', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', null, null, 'Heap Data Structure Guide', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('f16f21af-1f53-4b7d-be4f-368c17574f02', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', null, null, 'Guide on Recursive Algorithms', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('f16f21af-1f53-4b7d-be4f-368c17574f02', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solution.', null, null, 'Guide on Recursive Algorithms', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('dd29f271-a9df-4fcc-a742-127dd269f84b', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', null, null, 'Guide on Graph Algorithms', null);
-INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('a926fe6d-ded3-4127-9558-599fa430e1f6', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', null, null, 'Guide on Greedy Algorithms', null);
+INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('a926fe6d-ded3-4127-9558-599fa430e1f6', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solution.', null, null, 'Guide on Greedy Algorithms', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('0a489a2f-a622-4ba9-a94d-70d5624e1309', 'A comprehensive guide to dynamic programming, covering principles like overlapping subproblems and optimal substructure. Master classic problems such as knapsack, longest common subsequence, and matrix chain multiplication. Ideal for tackling complex optimization challenges.', null, null, 'Dynamic Programming Guide', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('95795791-8e54-4cce-8272-c06c15df68fc', 'An essential guide to bitwise operations and their applications in algorithm design. Covers AND, OR, XOR, shifts, and tricks for solving problems like subsets, power-of-two checks, and fast calculations. Perfect for low-level optimization and competitive programming.', null, null, 'Bitwise Algorithms Guide', null);
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('01e7b3b3-a36a-4679-b082-14c2ad622628', 'Introduction to Queue Data Structure', null, null, 'Queue', null);
@@ -744,8 +744,8 @@ INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title
 
 
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 'Matrix Data Structure Guide', 'The fundamentals and applications of the matrix as a data structure. You’ll learn how to represent, manipulate, and solve problems involving matrices, including operations like addition, multiplication, transposition, and common algorithms for pathfinding, transformations, and dynamic programming. Perfect for mastering 2D data organization and computation in programming.', 'Beginner', 100000.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'ed7db5f2-03dc-4a0c-a7c6-5549b1c5c090', null, null, 10);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'Guide on Recursive Algorithms', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solutions.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'f16f21af-1f53-4b7d-be4f-368c17574f02', null, null, 20);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'The Logic Building Problems', 'Logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solutions. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', 'Beginner', 100000.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', '5fe612b4-3998-44c7-85b2-2e4e973a38a7', null, null, 30);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 'Guide on Recursive Algorithms', 'A concise guide to understanding and applying recursion in programming. Covers key concepts like base cases, recursive calls, and stack behavior, along with examples in problems such as factorials, Fibonacci sequences, tree traversals, and divide-and-conquer algorithms. Perfect for building efficient and elegant solution.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'f16f21af-1f53-4b7d-be4f-368c17574f02', null, null, 20);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'The Logic Building Problems', 'Logical thinking and problem-solving skills through practical programming exercises. You’ll learn how to analyze problems, design algorithms, and optimize solution. By the end of the course, you’ll confidently tackle various problem types, including sorting, searching, recursion, and basic data structures, preparing you for coding challenges and real-world applications.', 'Beginner', 100000.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', '5fe612b4-3998-44c7-85b2-2e4e973a38a7', null, null, 30);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'Guide on Graph Algorithms', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', 'Intermediate', 50000.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'dd29f271-a9df-4fcc-a742-127dd269f84b', null, null, 10);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 'Introduction to DSA II', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 100000.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'f8a1c71a-39ef-406f-b5e3-93b5c4deb5bc', null, null, 20);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 'Stack', 'The Stack lesson series offers a comprehensive introduction to one of the fundamental data structures in programming. You''ll explore how a Stack operates based on the LIFO (Last In, First Out) principle, perform core operations such as push, pop, and peek, and apply these concepts to real-world problems like validating parentheses, converting expressions, or building a browser''s backtracking system. This series is ideal for beginners and those looking to strengthen their understanding of data structures.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'd9fbda58-f71b-4567-affe-4fbab0933feb', null, null, 20);
@@ -756,7 +756,7 @@ INSERT INTO public.courses (course_id, course_name, description, level, price, u
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', e'Introduction to DSA I
 ', 'A foundational understanding of Data Structures and Algorithms (DSA). You’ll explore key concepts like arrays, linked lists, stacks, queues, trees, and graphs, along with essential algorithms for searching, sorting, and traversal. By mastering these principles, you’ll enhance your problem-solving skills and prepare for advanced programming challenges and technical interviews.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'dbfea360-dda9-46a5-9487-ea624080bb60', null, null, 20);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 'Heap Data Structure Guide', 'A detailed guide to mastering heaps, including min-heaps and max-heaps. Learn heap operations like insertion, deletion, and heapify, along with their applications in priority queues, sorting algorithms, and efficient problem-solving. Essential for optimizing tasks involving hierarchical data.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', '5df3554d-160e-45b9-989a-ebd58ee65235', null, null, 20);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'Guide on Greedy Algorithms', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solutions.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'a926fe6d-ded3-4127-9558-599fa430e1f6', null, null, 30);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 'Guide on Greedy Algorithms', 'A practical guide to greedy algorithms, focusing on solving optimization problems step-by-step. Learn key strategies with examples like activity selection, Huffman coding, and Kruskal’s algorithm. Perfect for building efficient and straightforward solution.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'a926fe6d-ded3-4127-9558-599fa430e1f6', null, null, 30);
 
 INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, topic_id, user_id, score) VALUES ('82d991c9-2ed9-4d33-b4d9-be5a6dcaf4ae', null, 'DSA Masterclass', 'Basic to Advanced DSA', 'Advanced', 100000.00, null, 'VND', null, null, 30);
 INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, topic_id, user_id, score) VALUES ('00a55f07-0d45-4d32-9f5e-e92777155e56', null, 'TAOCP 1', 'Basic to Advanced TAOCP Part 1', 'Advanced', 50000.00, null, 'VND', null, null, 30);
@@ -922,7 +922,7 @@ INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Usin
 INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Using complex data structures', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
 INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Writing long code', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
 INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Breaking down the problem into smaller parts', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Memorizing solutions', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Memorizing solution', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
 INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Digital Structure and Algorithm', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
 INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Data Storage and Access', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
 INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Data System and Analysis', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
@@ -12671,7 +12671,7 @@ The multiplication and division-based approach doesn’t work if one of the numb
 
 
 ****2)****
-Both Arithmetic solutions may cause an arithmetic overflow. If x and y are too large, addition and multiplication may go out of the integer range.
+Both Arithmetic solution may cause an arithmetic overflow. If x and y are too large, addition and multiplication may go out of the integer range.
 
 
 
@@ -16480,7 +16480,7 @@ Recursive functions break complex problems into smaller instances of the same pr
 ### 2. Divide and Conquer:
 
 
-Recursive functions are suitable for divide-and-conquer algorithms such as merge sort and quicksort, breaking problems into smaller subproblems, solving them recursively, and merging the solutions with the original problem.
+Recursive functions are suitable for divide-and-conquer algorithms such as merge sort and quicksort, breaking problems into smaller subproblems, solving them recursively, and merging the solution with the original problem.
 
 
 ### 3. ****Backtracking**** :
@@ -16493,7 +16493,7 @@ Recursive backtracking is ideal for exploring and solving problems like N-Queens
 ### 4. Dynamic ****programming:****
 
 
-Recursive functions efficiently solve dynamic programming problems by solving subproblems and combining their solutions into a complete solution.
+Recursive functions efficiently solve dynamic programming problems by solving subproblems and combining their solution into a complete solution.
 
 
 ### 5. Tree and ****graph structures:****
@@ -21780,7 +21780,7 @@ Problems associated with backtracking can be categorized into 3 categories:
 * ****Optimization Problems:****
   For this type, we search for the best solution.
 * ****Enumeration Problems:****
-  We find set of all possible feasible solutions to the problems of this type.
+  We find set of all possible feasible solution to the problems of this type.
 
 How does Backtracking works?
 ----------------------------
@@ -65821,3 +65821,990 @@ INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_
 INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('6545d9d6-79ec-4a79-8cc2-13df47de95e3', 'Accepted', 0.016, '0', 3280, '4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', 'da031658-0ac7-4aae-99e5-6c01e2862b29');
 INSERT INTO public.test_case_outputs (token, result_status, runtime, submission_output, memory, submission_id, testcase_id) VALUES ('b0c47d08-6c98-4001-a3cf-c3ea37d3bcb7', 'Accepted', 0.014, '1', 3348, '4fd9a7eb-92cf-4899-97c8-f49c5ba24f66', '2becdcf8-1773-4d3a-b759-63fea450106c');
 
+
+
+
+
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### **Problem Description**  
+You are given two integer arrays `nums1` and `nums2`, sorted in **non-decreasing order**, and two integers `m` and `n` representing the number of elements in each array. Merge the two arrays so that `nums1` becomes a single array sorted in **non-decreasing order**.  
+
+- `nums1` has a size of `m + n` with the last `n` slots set to `0`, which will store elements from `nums2`.  
+- Modify `nums1` **in-place**, without returning anything.  
+
+---
+
+### **Approach**  
+
+To merge the arrays in-place, we can solve this problem efficiently by merging from **right to left**, starting at the end of `nums1` and `nums2` (this prevents overwriting elements that haven’t been processed yet).  
+
+**Optimal Solution:**  
+1. Use three pointers:  
+   - `p1`: Last valid element in `nums1` (`m - 1`)  
+   - `p2`: Last element in `nums2` (`n - 1`)  
+   - `p`: Points to the last position in `nums1` (`m + n - 1`)  
+2. Compare the elements from `nums1[p1]` and `nums2[p2]`, and place the larger element at `nums1[p]`, then decrement `p`, `p1`, or `p2` accordingly.  
+3. If there are any remaining elements in `nums2`, copy them to the beginning of `nums1`.  
+
+---
+
+### **Solutions in Different Languages:**  
+
+
+```python
+def merge(nums1, m, nums2, n):
+    p1, p2, p = m - 1, n - 1, m + n - 1
+    
+    while p1 >= 0 and p2 >= 0:
+        if nums1[p1] > nums2[p2]:
+            nums1[p] = nums1[p1]
+            p1 -= 1
+        else:
+            nums1[p] = nums2[p2]
+            p2 -= 1
+        p -= 1
+    
+    # If there are remaining elements in nums2
+    while p2 >= 0:
+        nums1[p] = nums2[p2]
+        p2 -= 1
+        p -= 1
+
+# Example test cases
+nums1 = [1, 2, 3, 0, 0, 0]
+m = 3
+nums2 = [2, 5, 6]
+n = 3
+merge(nums1, m, nums2, n)
+print(nums1)  # Output: [1, 2, 2, 3, 5, 6]
+```
+```java
+import java.util.Arrays;
+
+public class MergeSortedArray {
+    public static void merge(int[] nums1, int m, int[] nums2, int n) {
+        int p1 = m - 1, p2 = n - 1, p = m + n - 1;
+        
+        while (p1 >= 0 && p2 >= 0) {
+            if (nums1[p1] > nums2[p2]) {
+                nums1[p--] = nums1[p1--];
+            } else {
+                nums1[p--] = nums2[p2--];
+            }
+        }
+        
+        // Copy remaining elements from nums2 (if any)
+        while (p2 >= 0) {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+
+    public static void main(String[] args) {
+        int[] nums1 = {1, 2, 3, 0, 0, 0};
+        int m = 3;
+        int[] nums2 = {2, 5, 6};
+        int n = 3;
+        merge(nums1, m, nums2, n);
+        System.out.println(Arrays.toString(nums1));  // Output: [1, 2, 2, 3, 5, 6]
+    }
+}
+```
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+    int p1 = m - 1, p2 = n - 1, p = m + n - 1;
+    
+    while (p1 >= 0 && p2 >= 0) {
+        if (nums1[p1] > nums2[p2]) {
+            nums1[p--] = nums1[p1--];
+        } else {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+    
+    // Copy remaining elements from nums2
+    while (p2 >= 0) {
+        nums1[p--] = nums2[p2--];
+    }
+}
+
+int main() {
+    vector<int> nums1 = {1, 2, 3, 0, 0, 0};
+    int m = 3;
+    vector<int> nums2 = {2, 5, 6};
+    int n = 3;
+    merge(nums1, m, nums2, n);
+    for (int num : nums1) {
+        cout << num << " ";
+    }
+    // Output: 1 2 2 3 5 6
+}
+```
+```javascript
+function merge(nums1, m, nums2, n) {
+    let p1 = m - 1, p2 = n - 1, p = m + n - 1;
+
+    while (p1 >= 0 && p2 >= 0) {
+        if (nums1[p1] > nums2[p2]) {
+            nums1[p--] = nums1[p1--];
+        } else {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+
+    // Copy remaining elements from nums2 (if any)
+    while (p2 >= 0) {
+        nums1[p--] = nums2[p2--];
+    }
+}
+
+// Example test case
+let nums1 = [1, 2, 3, 0, 0, 0];
+let m = 3;
+let nums2 = [2, 5, 6];
+let n = 3;
+merge(nums1, m, nums2, n);
+console.log(nums1);  // Output: [1, 2, 2, 3, 5, 6]
+```
+```typescript
+function merge(nums1: number[], m: number, nums2: number[], n: number): void {
+    let p1 = m - 1, p2 = n - 1, p = m + n - 1;
+
+    while (p1 >= 0 && p2 >= 0) {
+        if (nums1[p1] > nums2[p2]) {
+            nums1[p--] = nums1[p1--];
+        } else {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+
+    // Copy remaining elements from nums2 (if any)
+    while (p2 >= 0) {
+        nums1[p--] = nums2[p2--];
+    }
+}
+
+// Example test case
+let nums1 = [1, 2, 3, 0, 0, 0];
+let m = 3;
+let nums2 = [2, 5, 6];
+let n = 3;
+merge(nums1, m, nums2, n);
+console.log(nums1);  // Output: [1, 2, 2, 3, 5, 6]
+```
+
+---
+
+### **Time Complexity:**  
+- **Time:** `O(m + n)` since we iterate through all the elements of `nums1` and `nums2`.  
+- **Space:** `O(1)` (in-place modification of `nums1`).  
+
+This is an optimal solution that efficiently merges the arrays in sorted order.', '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### Approach and Solution  
+To solve this problem, we can follow a simple digit-by-digit approach, incrementing the last digit of the array by one. If this increment leads to a carry (i.e., the digit becomes 10), we set the current position to 0 and move the carry to the next left digit. This process is repeated until there are no more carry values left.  
+
+If, after processing all the digits, we still have a carry (like `[9, 9, 9]` becoming `[0, 0, 0]` with a carry left), we insert `1` at the beginning of the array.  
+
+---
+
+### Code Implementations  
+
+```python
+def plusOne(digits):
+    n = len(digits)
+    
+    # Traverse the array from the last digit to the first
+    for i in range(n - 1, -1, -1):
+        if digits[i] < 9:  # If the current digit is less than 9, increment it
+            digits[i] += 1
+            return digits
+        else:
+            digits[i] = 0  # Set the current digit to 0 if it becomes 10 and carry over
+    
+    # If all digits are 9, we need to add a 1 at the front (e.g., [9, 9] -> [1, 0, 0])
+    return [1] + digits
+
+# Example test cases
+print(plusOne([1, 2, 3]))  # Output: [1, 2, 4]
+print(plusOne([4, 3, 2, 1]))  # Output: [4, 3, 2, 2]
+print(plusOne([9]))  # Output: [1, 0]
+```
+```java
+import java.util.Arrays;
+
+public class PlusOne {
+    public static int[] plusOne(int[] digits) {
+        int n = digits.length;
+        
+        // Traverse from the last digit to the first
+        for (int i = n - 1; i >= 0; i--) {
+            if (digits[i] < 9) {
+                digits[i]++;
+                return digits;
+            }
+            digits[i] = 0;  // Set to 0 and carry to the next digit
+        }
+        
+        // If all digits were 9, we need to add an extra 1 at the beginning
+        int[] result = new int[n + 1];
+        result[0] = 1;
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Arrays.toString(plusOne(new int[]{1, 2, 3})));  // Output: [1, 2, 4]
+        System.out.println(Arrays.toString(plusOne(new int[]{4, 3, 2, 1})));  // Output: [4, 3, 2, 2]
+        System.out.println(Arrays.toString(plusOne(new int[]{9})));  // Output: [1, 0]
+    }
+}
+```
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> plusOne(vector<int>& digits) {
+    int n = digits.size();
+    
+    // Traverse the array from last to first
+    for (int i = n - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i]++;
+            return digits;  // Return result when no carry is left
+        }
+        digits[i] = 0;  // Set to 0 and propagate carry
+    }
+    
+    // If all digits are 9, add an extra 1 at the beginning
+    digits.insert(digits.begin(), 1);
+    return digits;
+}
+
+int main() {
+    vector<int> digits1 = {1, 2, 3};
+    vector<int> digits2 = {4, 3, 2, 1};
+    vector<int> digits3 = {9};
+    
+    vector<int> result1 = plusOne(digits1);
+    vector<int> result2 = plusOne(digits2);
+    vector<int> result3 = plusOne(digits3);
+    
+    for (int num : result1) cout << num << " ";  // Output: 1 2 4
+    cout << endl;
+    
+    for (int num : result2) cout << num << " ";  // Output: 4 3 2 2
+    cout << endl;
+    
+    for (int num : result3) cout << num << " ";  // Output: 1 0
+    cout << endl;
+}
+```
+```javascript
+function plusOne(digits) {
+    let n = digits.length;
+    
+    // Traverse from the last digit to the first
+    for (let i = n - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i]++;
+            return digits;  // Return result after incrementing
+        }
+        digits[i] = 0;  // Set to 0 if 9 and propagate carry
+    }
+    
+    // If all digits are 9, add a 1 at the front (e.g., [9, 9] -> [1, 0, 0])
+    digits.unshift(1);
+    return digits;
+}
+
+// Example test cases
+console.log(plusOne([1, 2, 3]));  // Output: [1, 2, 4]
+console.log(plusOne([4, 3, 2, 1]));  // Output: [4, 3, 2, 2]
+console.log(plusOne([9]));  // Output: [1, 0]
+```
+```typescript
+function plusOne(digits: number[]): number[] {
+    let n = digits.length;
+    
+    for (let i = n - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i]++;
+            return digits;  // Return if increment is done without carry
+        }
+        digits[i] = 0;  // Handle carry by setting digit to 0
+    }
+    
+    // If carry remains after all digits, add 1 at the beginning
+    digits.unshift(1);
+    return digits;
+}
+
+// Example test cases
+console.log(plusOne([1, 2, 3]));  // Output: [1, 2, 4]
+console.log(plusOne([4, 3, 2, 1]));  // Output: [4, 3, 2, 2]
+console.log(plusOne([9]));  // Output: [1, 0]
+```
+
+---
+
+### Time and Space Complexity:  
+- **Time Complexity:** `O(n)` because we traverse the array from right to left.  
+- **Space Complexity:** `O(1)` if the input array can be modified in-place. Otherwise, if new memory is allocated (like in Java or inserting elements in Python), the space complexity is `O(n)`.', '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### Approach and Solution  
+To achieve `O(log n)` runtime complexity, we can use **binary search**, which is efficient for searching in sorted arrays. The goal is to find the index of the target or determine where the target would fit if it is not present in the array.  
+
+**Binary Search Approach:**  
+1. Initialize two pointers: `left` at the start of the array and `right` at the end.  
+2. Perform binary search:
+   - Calculate the middle index: `mid = (left + right) // 2`.  
+   - If `nums[mid] == target`, return `mid`.  
+   - If `nums[mid] > target`, move `right` to `mid - 1`.  
+   - If `nums[mid] < target`, move `left` to `mid + 1`.  
+3. If the target is not found, return the `left` pointer, which will be at the position where the target should be inserted.  
+
+---
+
+### Code Implementations  
+```python
+def searchInsert(nums, target):
+    left, right = 0, len(nums) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        
+        if nums[mid] == target:
+            return mid
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    return left  # Return the index where the target should be inserted
+
+# Example test cases
+print(searchInsert([1, 3, 5, 6], 5))  # Output: 2
+print(searchInsert([1, 3, 5, 6], 2))  # Output: 1
+print(searchInsert([1, 3, 5, 6], 7))  # Output: 4
+```
+```java
+public class SearchInsertPosition {
+    public static int searchInsert(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        return left;  // Return the insertion position
+    }
+
+    public static void main(String[] args) {
+        System.out.println(searchInsert(new int[]{1, 3, 5, 6}, 5));  // Output: 2
+        System.out.println(searchInsert(new int[]{1, 3, 5, 6}, 2));  // Output: 1
+        System.out.println(searchInsert(new int[]{1, 3, 5, 6}, 7));  // Output: 4
+    }
+}
+```
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int searchInsert(vector<int>& nums, int target) {
+    int left = 0, right = nums.size() - 1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (nums[mid] == target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return left;  // Return the insertion index
+}
+
+int main() {
+    vector<int> nums = {1, 3, 5, 6};
+    
+    cout << searchInsert(nums, 5) << endl;  // Output: 2
+    cout << searchInsert(nums, 2) << endl;  // Output: 1
+    cout << searchInsert(nums, 7) << endl;  // Output: 4
+}
+```
+```javascript
+function searchInsert(nums, target) {
+    let left = 0, right = nums.length - 1;
+    
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        
+        if (nums[mid] === target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return left;  // Return the insertion position
+}
+
+// Example test cases
+console.log(searchInsert([1, 3, 5, 6], 5));  // Output: 2
+console.log(searchInsert([1, 3, 5, 6], 2));  // Output: 1
+console.log(searchInsert([1, 3, 5, 6], 7));  // Output: 4
+```
+```typescript
+function searchInsert(nums: number[], target: number): number {
+    let left = 0, right = nums.length - 1;
+    
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        
+        if (nums[mid] === target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return left;  // Return the position to insert the target
+}
+
+// Example test cases
+console.log(searchInsert([1, 3, 5, 6], 5));  // Output: 2
+console.log(searchInsert([1, 3, 5, 6], 2));  // Output: 1
+console.log(searchInsert([1, 3, 5, 6], 7));  // Output: 4
+```
+
+---
+
+### Time and Space Complexity  
+- **Time Complexity:** `O(log n)` because we are performing a binary search.  
+- **Space Complexity:** `O(1)` because we do not use any extra space, and the solution modifies pointers in place.  ', '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Solution Article  
+
+## Approach 1: Brute Force  
+### Algorithm  
+The brute force approach is simple: loop through each element `x` and find if there is another value that equals `target - x`.  
+
+### Implementation  
+``` C++
+class Solution {
+public:
+    vector<int> twoSum(vector<int> &nums, int target) {
+        for (int i = 0; i < nums.size(); i++) {
+            for (int j = i + 1; j < nums.size(); j++) {
+                if (nums[j] == target - nums[i]) {
+                    return {i, j};
+                }
+            }
+        }
+        // Return an empty vector if no solution is found
+        return {};
+    }
+};
+```  
+```C
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+    for (int i = 0; i < numsSize; i++) {
+        for (int j = i + 1; j < numsSize; j++) {
+            if (nums[j] == target - nums[i]) {
+                int* result = malloc(sizeof(int) * 2);
+                result[0] = i;
+                result[1] = j;
+                *returnSize = 2;
+                return result;
+            }
+        }
+    }
+    // Return an empty array if no solution is found
+    *returnSize = 0;
+    return malloc(sizeof(int) * 0);
+}
+```
+```C#
+public class Solution {
+    public int[] TwoSum(int[] nums, int target) {
+        for (int i = 0; i < nums.Length; i++) {
+            for (int j = i + 1; j < nums.Length; j++) {
+                if (nums[j] == target - nums[i]) {
+                    return new int[] { i, j };
+                }
+            }
+        }
+        // Return an empty array if no solution is found
+        return new int[] {};
+    }
+}
+```
+```Java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        for (int i = 0; i < nums.length; i++) {
+            for (int j = i + 1; j < nums.length; j++) {
+                if (nums[j] == target - nums[i]) {
+                    return new int[] { i, j };
+                }
+            }
+        }
+        // If no valid pair is found, return an empty array instead of null
+        return new int[] {};
+    }
+}
+```
+```JavaScript
+var twoSum = function (nums, target) {
+    for (let i = 0; i < nums.length; i++) {
+        for (let j = i + 1; j < nums.length; j++) {
+            if (nums[j] === target - nums[i]) {
+                return [i, j];
+            }
+        }
+    }
+    // Return an empty array if no solution is found
+    return [];
+};
+```
+```Python3
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        for i in range(len(nums)):
+            for j in range(i + 1, len(nums)):
+                if nums[j] == target - nums[i]:
+                    return [i, j]
+        # Return an empty list if no solution is found
+        return []
+```
+```TypeScript
+function twoSum(nums: number[], target: number): number[] {
+    for (let i = 0; i < nums.length; i++) {
+        for (let j = i + 1; j < nums.length; j++) {
+            if (nums[j] === target - nums[i]) {
+                return [i, j];
+            }
+        }
+    }
+    // Return an empty array if no solution is found
+    return [];
+}
+```
+
+### Complexity Analysis  
+- **Time complexity**: O(n²)  
+  - For each element, we try to find its complement by looping through the rest of the array, which takes O(n) time. Therefore, the overall time complexity is O(n²).  
+- **Space complexity**: O(1)  
+  - The space required does not depend on the size of the input array, so only constant space is used.  
+
+---
+
+## Approach 2: Two-pass Hash Table  
+### Intuition  
+To improve our runtime complexity, we need a more efficient way to check if the complement exists in the array. If the complement exists, we need to get its index.  
+
+Using a **hash table** can reduce the lookup time from O(n) to O(1) by trading space for speed. A hash table is well suited for this purpose because it supports fast lookup in near constant time. (Note that if a collision occurs, lookup could degenerate to O(n) time. However, with a well-chosen hash function, lookup remains amortized O(1) time.)  
+
+### Algorithm  
+A simple implementation involves two iterations:  
+1. In the first iteration, add each element\'s value as a key and its index as a value to the hash table.  
+2. In the second iteration, check if each element\'s complement (`target - nums[i]`) exists in the hash table. If it does exist, return the current element\'s index and its complement\'s index. **Note:** The complement must not be `nums[i]` itself!  
+
+### Implementation  
+``` C++
+class Solution {
+public:
+    vector<int> twoSum(vector<int> &nums, int target) {
+        unordered_map<int, int> hash;
+        for (int i = 0; i < nums.size(); i++) {
+            hash[nums[i]] = i;
+        }
+        for (int i = 0; i < nums.size(); i++) {
+            int complement = target - nums[i];
+            if (hash.find(complement) != hash.end() && hash[complement] != i) {
+                return {i, hash[complement]};
+            }
+        }
+        // If no valid pair is found, return an empty vector
+        return {};
+    }
+};
+```  
+```C
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+    struct hashTable {
+        int key;
+        int value;
+        UT_hash_handle hh;
+    } *hashTable = NULL, *item, *tmpItem;
+
+    for (int i = 0; i < numsSize; i++) {
+        HASH_FIND_INT(hashTable, &nums[i], item);
+        if (item) {
+            int* result = malloc(sizeof(int) * 2);
+            result[0] = item->value;
+            result[1] = i;
+            *returnSize = 2;
+            HASH_ITER(hh, hashTable, item, tmpItem) {
+                HASH_DEL(hashTable, item);
+                free(item);
+            }
+            return result;
+        }
+        item = malloc(sizeof(struct hashTable));
+        item->key = target - nums[i];
+        item->value = i;
+        HASH_ADD_INT(hashTable, key, item);
+    }
+    HASH_ITER(hh, hashTable, item, tmpItem) {
+        HASH_DEL(hashTable, item);
+        free(item);
+    }
+    *returnSize = 0;
+    // If no valid pair is found, return an empty array
+    return malloc(sizeof(int) * 0);
+}
+```
+```C#
+public class Solution {
+    public int[] TwoSum(int[] nums, int target) {
+        Dictionary<int, int> map = new Dictionary<int, int>();
+        for (int i = 0; i < nums.Length; i++) {
+            map[nums[i]] = i;
+        }
+
+        for (int i = 0; i < nums.Length; i++) {
+            int complement = target - nums[i];
+            if (map.ContainsKey(complement) && map[complement] != i) {
+                return new int[] { i, map[complement] };
+            }
+        }
+
+        // If no valid pair is found, return an empty array
+        return new int[] {};
+    }
+}
+```
+```Java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            map.put(nums[i], i);
+        }
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement) && map.get(complement) != i) {
+                return new int[] { i, map.get(complement) };
+            }
+        }
+        // In case there is no solution, return an empty array
+        return new int[] {};
+    }
+}
+```
+```JavaScript
+var twoSum = function (nums, target) {
+    const map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        map.set(nums[i], i);
+    }
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (map.has(complement) && map.get(complement) !== i) {
+            return [i, map.get(complement)];
+        }
+    }
+    // If no valid pair is found, return an empty array
+    return [];
+};
+```
+```Python3
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        hashmap = {}
+        for i in range(len(nums)):
+            hashmap[nums[i]] = i
+        for i in range(len(nums)):
+            complement = target - nums[i]
+            if complement in hashmap and hashmap[complement] != i:
+                return [i, hashmap[complement]]
+        # If no valid pair is found, return an empty list
+        return []
+```
+```TypeScript
+function twoSum(nums: number[], target: number): number[] {
+    const map: Map<number, number> = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        map.set(nums[i], i);
+    }
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (map.has(complement) && map.get(complement) !== i) {
+            return [i, map.get(complement)];
+        }
+    }
+    // If no valid pair is found, return an empty array
+    return [];
+}
+```
+
+
+
+### Complexity Analysis  
+- **Time complexity**: O(n)  
+  - We traverse the list containing `n` elements exactly twice. Since the hash table reduces the lookup time to O(1), the overall time complexity is O(n).  
+- **Space complexity**: O(n)  
+  - The extra space required depends on the number of items stored in the hash table, which stores exactly `n` elements.  
+
+---
+
+## Approach 3: One-pass Hash Table  
+### Algorithm  
+It turns out we can do it in one pass! While iterating and inserting elements into the hash table, we also look back to check if the current element\'s complement already exists in the hash table. If it exists, we have found a solution and return the indices immediately.  
+
+### Implementation  
+``` C++
+class Solution {
+public:
+    vector<int> twoSum(vector<int> &nums, int target) {
+        unordered_map<int, int> hash;
+        for (int i = 0; i < nums.size(); ++i) {
+            int complement = target - nums[i];
+            if (hash.find(complement) != hash.end()) {
+                return {hash[complement], i};
+            }
+            hash[nums[i]] = i;
+        }
+        // Return an empty vector if no solution is found
+        return {};
+    }
+};
+```  
+```C
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+    struct hashTable {
+        int key;
+        int value;
+        UT_hash_handle hh;
+    } *hashTable = NULL, *item;
+
+    for (int i = 0; i < numsSize; i++) {
+        int complement = target - nums[i];
+        HASH_FIND_INT(hashTable, &complement, item);
+        if (item) {
+            int* result = malloc(sizeof(int) * 2);
+            result[0] = item->value;
+            result[1] = i;
+            *returnSize = 2;
+            HASH_CLEAR(hh, hashTable);  // Free the hash table
+            return result;
+        }
+        item = malloc(sizeof(struct hashTable));
+        item->key = nums[i];
+        item->value = i;
+        HASH_ADD_INT(hashTable, key, item);
+    }
+    *returnSize = 0;
+    HASH_CLEAR(hh, hashTable);  // Free the hash table
+    // Return an empty array if no solution is found
+    return malloc(0);  // Allocate 0 bytes
+}
+```
+```C#
+public class Solution {
+    public int[] TwoSum(int[] nums, int target) {
+        Dictionary<int, int> map = new Dictionary<int, int>();
+        for (int i = 0; i < nums.Length; i++) {
+            int complement = target - nums[i];
+            if (map.ContainsKey(complement)) {
+                return new int[] { map[complement], i };
+            }
+            map[nums[i]] = i;
+        }
+        // Return an empty array if no solution is found
+        return new int[] {};
+    }
+}
+```
+```Java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement)) {
+                return new int[] { map.get(complement), i };
+            }
+            map.put(nums[i], i);
+        }
+        // Return an empty array if no solution is found
+        return new int[] {};
+    }
+}
+```
+```JavaScript
+var twoSum = function (nums, target) {
+    const map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (map.has(complement)) {
+            return [map.get(complement), i];
+        }
+        map.set(nums[i], i);
+    }
+    // Return an empty array if no solution is found
+    return [];
+};
+```
+```Python3
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        hashmap = {}
+        for i in range(len(nums)):
+            complement = target - nums[i]
+            if complement in hashmap:
+                return [i, hashmap[complement]]
+            hashmap[nums[i]] = i
+        # Return an empty list if no solution is found
+        return []
+```
+```TypeScript
+function twoSum(nums: number[], target: number): number[] {
+    const map: Map<number, number> = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (map.has(complement)) {
+            return [map.get(complement), i];
+        }
+        map.set(nums[i], i);
+    }
+    // Return an empty array if no solution is found
+    return [];
+}
+```
+
+
+### Complexity Analysis  
+- **Time complexity**: O(n)  
+  - We traverse the list containing `n` elements only once. Each lookup in the hash table costs only O(1) time.  
+- **Space complexity**: O(n)  
+  - The extra space required depends on the number of items stored in the hash table, which stores at most `n` elements.  
+```  ', '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### Approach and Solution  
+To solve this problem in **linear time complexity** `O(n)` and using **constant extra space** `O(1)`, we can leverage **bitwise XOR**.  
+
+#### XOR Properties:
+1. `a ^ a = 0` (XOR of a number with itself is 0).  
+2. `a ^ 0 = a` (XOR of a number with 0 is the number itself).  
+3. XOR is commutative and associative, so the order of operations doesn\'t matter.  
+
+Using these properties, if we XOR all numbers in the array, the numbers that appear twice will cancel each other out, and the remaining number will be the single one.
+
+---
+
+### Code Implementations  
+
+```python
+def singleNumber(nums):
+    result = 0
+    for num in nums:
+        result ^= num  # XOR all numbers
+    return result
+
+# Example test cases
+print(singleNumber([2, 2, 1]))       # Output: 1
+print(singleNumber([4, 1, 2, 1, 2]))  # Output: 4
+print(singleNumber([1]))              # Output: 1
+```
+```java
+public class SingleNumber {
+    public static int singleNumber(int[] nums) {
+        int result = 0;
+        for (int num : nums) {
+            result ^= num;  // XOR all numbers
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(singleNumber(new int[]{2, 2, 1}));       // Output: 1
+        System.out.println(singleNumber(new int[]{4, 1, 2, 1, 2}));  // Output: 4
+        System.out.println(singleNumber(new int[]{1}));              // Output: 1
+    }
+}
+```
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int singleNumber(vector<int>& nums) {
+    int result = 0;
+    for (int num : nums) {
+        result ^= num;  // XOR all numbers
+    }
+    return result;
+}
+
+int main() {
+    vector<int> nums1 = {2, 2, 1};
+    vector<int> nums2 = {4, 1, 2, 1, 2};
+    vector<int> nums3 = {1};
+
+    cout << singleNumber(nums1) << endl;  // Output: 1
+    cout << singleNumber(nums2) << endl;  // Output: 4
+    cout << singleNumber(nums3) << endl;  // Output: 1
+}
+```
+```javascript
+function singleNumber(nums) {
+    let result = 0;
+    for (let num of nums) {
+        result ^= num;  // XOR all numbers
+    }
+    return result;
+}
+
+// Example test cases
+console.log(singleNumber([2, 2, 1]));       // Output: 1
+console.log(singleNumber([4, 1, 2, 1, 2]));  // Output: 4
+console.log(singleNumber([1]));              // Output: 1
+```
+```typescript
+function singleNumber(nums: number[]): number {
+    let result = 0;
+    for (const num of nums) {
+        result ^= num;  // XOR all numbers
+    }
+    return result;
+}
+
+// Example test cases
+console.log(singleNumber([2, 2, 1]));       // Output: 1
+console.log(singleNumber([4, 1, 2, 1, 2]));  // Output: 4
+console.log(singleNumber([1]));              // Output: 1
+```
+
+---
+
+### Time and Space Complexity  
+- **Time Complexity:** `O(n)` – We traverse the array once.  
+- **Space Complexity:** `O(1)` – Only a single variable `result` is used, which does not depend on the input size.  ', 'e608ebb7-07ef-4a2f-8081-92e5993e6118');

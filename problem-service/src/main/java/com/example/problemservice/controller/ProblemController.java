@@ -198,8 +198,8 @@ public class ProblemController {
             summary = "Get all solution of a problem"
     )
     @GetMapping("/{problemId}/solutions")
-    public ApiResponse<List<DetailsSolutionResponse>> getSolutionByProblemId(@PathVariable UUID problemId) {
-        return ApiResponse.<List<DetailsSolutionResponse>>builder()
+    public ApiResponse<DetailsSolutionResponse> getSolutionByProblemId(@PathVariable UUID problemId) {
+        return ApiResponse.<DetailsSolutionResponse>builder()
                 .result(solutionService.getSolutionByProblemId(problemId))
                 .build();
     }
