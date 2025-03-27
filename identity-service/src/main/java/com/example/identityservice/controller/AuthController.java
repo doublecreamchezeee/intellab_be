@@ -130,13 +130,15 @@ public class AuthController {
         authService.setVerifiedListEmails(request.getEmails());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     @PublicEndpoint
     @GetMapping("/role")
     public ResponseEntity<Collection<? extends GrantedAuthority>> roleEndpoint() {
         return ResponseEntity.ok(SecurityUtil.getUserAuthorities());
     }
+
     @GetMapping("/premium")
-    public PremiumSubscription getSubscription(@RequestParam String uid) {
-        return firestoreService.getUserPremiumSubscriptionByUid(uid);
+    public PremiumSubscriptionResponse getSubscription(@RequestParam String uid) {
+        return authService.getUserPremiumSubscriptionByUid(uid);
     }
 }
