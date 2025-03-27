@@ -3,6 +3,7 @@ package com.example.identityservice.client;
 
 import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.course.DisenrollCourseRequest;
+import com.example.identityservice.dto.request.course.DisenrollCoursesEnrolledUsingSubscriptionPlanRequest;
 import com.example.identityservice.dto.request.course.EnrollCourseRequest;
 import com.example.identityservice.dto.response.LeaderboardCourseResponse;
 import com.example.identityservice.dto.response.course.CompleteCourseResponse;
@@ -41,5 +42,8 @@ public interface CourseClient {
 
     @GetExchange("/courses/courseList/me")
     Mono<ApiResponse<List<CompleteCourseResponse>>> getCourseByUserId();
+
+    @PostExchange(url = "/courses/disenroll-courses-enrolled-using-subscription-plan")
+    Mono<ApiResponse<Boolean>> disenrollCoursesEnrolledUsingSubscriptionPlan(@RequestBody DisenrollCoursesEnrolledUsingSubscriptionPlanRequest request);
 
 }

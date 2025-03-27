@@ -1,4 +1,4 @@
-package com.example.identityservice.enums.account;
+package com.example.problemservice.enums;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
