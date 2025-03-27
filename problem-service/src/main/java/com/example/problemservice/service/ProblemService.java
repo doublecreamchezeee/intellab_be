@@ -10,6 +10,7 @@ import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
+import com.example.problemservice.enums.PremiumPackage;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.DefaultCodeMapper;
@@ -87,10 +88,21 @@ public class ProblemService {
         return response;
     }
 
-    public DetailsProblemResponse getProblem(UUID problemId) {
-        return problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
+    public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan) {
+        DetailsProblemResponse response = problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         ));
+
+        if (response.getIsPublished()
+            || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
+            || subscriptionPlan.equals(PremiumPackage.PROBLEM_PLAN.getCode())
+        ) {
+            return response;
+        }
+
+        //TODO
+
+        throw new AppException(ErrorCode.PROBLEM_NOT_PUBLISHED);
     }
 
     public List<Problem> getAllProblems() {

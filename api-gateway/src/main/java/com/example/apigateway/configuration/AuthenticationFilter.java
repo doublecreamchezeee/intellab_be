@@ -53,7 +53,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/certificate$",
             "/problem/problems/search",
             "/problem/problems",
-            "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/partial-boilerplate$",
             "/course/reviews/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/reviews$",
@@ -67,9 +66,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/children$",
             "/course/courses/enrollPaidCourse",
             "/course/courses/disenroll",
-            "/ai/global_chatbot/stream",
-            "/global_chatbot/stream",
-            "identity/leaderboard",
+            "/identity/leaderboard",
     };
 
     @NonFinal
@@ -92,6 +89,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/statistics/progress/language",
             "/problem/statistics/progress/level",
             "/identity/leaderboard",
+            "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     };
 
     @Value("${app.api-prefix}")

@@ -10,6 +10,8 @@ import com.example.courseservice.dto.response.course.*;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.enums.account.PremiumPackage;
+import com.example.courseservice.enums.userCourse.UserCourseAccessStatus;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CategoryMapper;
@@ -21,11 +23,11 @@ import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.specification.CourseSpecification;
 import com.example.courseservice.specification.LessonSpecification;
+import com.example.courseservice.specification.UserCoursesSpecification;
 import com.example.courseservice.utils.CertificateTemplate;
 import com.example.courseservice.utils.ParseUUID;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -205,7 +207,9 @@ public class CourseService {
             }
 
             // Check if the user is enrolled in the course
-            boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId());
+            boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
+                    userUid, course.getCourseId(), UserCourseAccessStatus.ACCESSIBLE.getCode()
+            );
 
             String certificateUrl = null;
             String certificateId = null;
@@ -248,7 +252,9 @@ public class CourseService {
         int reviewCount = course.getReviews().size();
 
         // Check if the user is enrolled in the course
-        boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId);
+        boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
+                userUid, courseId, UserCourseAccessStatus.ACCESSIBLE.getCode()
+        );
 
         // Get the latest lesson ID for the user (if enrolled)
         UUID latestLessonId = null;
@@ -344,7 +350,7 @@ public class CourseService {
     }
 
 
-    public UserCourses enrollCourse(UUID userUid, UUID courseId) {
+    public UserCourses enrollCourse(UUID userUid, UUID courseId, String subscriptionPlan) {
         if (userUid == null || courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
@@ -352,7 +358,20 @@ public class CourseService {
         // Lấy đối tượng Course từ cơ sở dữ liệu
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
+
         if (course.getPrice() > 0) {
+            // check if user has subscription plan
+            if (subscriptionPlan != null &&
+                    (subscriptionPlan.equals(PremiumPackage.COURSE_PLAN.getCode())
+                        || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
+                    )
+            ) {
+                // enroll course using subscription plan
+                return enrollPaidCourse(userUid, courseId, true);
+
+            }
+
+            // if user does not have subscription plan, return error
             throw new AppException(ErrorCode.COURSE_NOT_FREE);
         }
 
@@ -368,6 +387,8 @@ public class CourseService {
                             .course(course)  // Đảm bảo course không null
                             .status(PredefinedLearningStatus.LEARNING)
                             .progressPercent(0.0f)
+                            .enrollUsingSubscription(false)
+                            .accessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode())
                             .build();
 
                     // create default learning lesson progress for user
@@ -389,7 +410,10 @@ public class CourseService {
                 });
     }
 
-    public UserCourses enrollPaidCourse(UUID userUid, UUID courseId) {
+    public UserCourses enrollPaidCourse(
+            UUID userUid, UUID courseId,
+            Boolean enrollUsingSubscription
+    ) {
         if (userUid == null || courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
@@ -409,6 +433,8 @@ public class CourseService {
                             .course(course)  // Đảm bảo course không null
                             .status(PredefinedLearningStatus.LEARNING)
                             .progressPercent(0.0f)
+                            .enrollUsingSubscription(enrollUsingSubscription)
+                            .accessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode())
                             .build();
 
                     // create default learning lesson progress for user
@@ -423,7 +449,6 @@ public class CourseService {
                                 .build();
                         learningLessonRepository.save(learningLesson);
                     });
-
 
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
@@ -441,6 +466,29 @@ public class CourseService {
         List<LearningLesson> learningLessons = learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId);
         learningLessonRepository.deleteAll(learningLessons);
         userCoursesRepository.delete(userCourses);
+        return true;
+    }
+
+    public Boolean disenrollCoursesEnrolledUsingSubscriptionPlan(List<UUID> userUuids) {
+        if (userUuids == null || userUuids.isEmpty()) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        userUuids.forEach(userUid -> {
+            Specification<UserCourses> specification = Specification.where(
+                    (UserCoursesSpecification.hasUserUid(userUid))
+                            .and(UserCoursesSpecification.isEnrollUsingSubscription(true))
+                            .and(UserCoursesSpecification.hasAccessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode()))
+            );
+            List<UserCourses> userCourses = userCoursesRepository.findAll(specification);
+
+            userCourses.forEach(userCourse -> {
+                userCourse.setAccessStatus(UserCourseAccessStatus.INACCESSIBLE.getCode());
+                userCoursesRepository.save(userCourse);
+            });
+
+        });
+
         return true;
     }
 
@@ -497,8 +545,13 @@ public class CourseService {
         if (userUid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
+        Specification<UserCourses> specification = Specification.where(
+                UserCoursesSpecification.hasUserUid(userUid)
+                        .and(UserCoursesSpecification.hasAccessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode()))
+        );
 
-        return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+        return userCoursesRepository.findAll(specification, pageable);
+        //return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
         /*return userCourses.map(userCourse -> {
             DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
                     .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUid)
@@ -665,4 +718,6 @@ public class CourseService {
         Page<Course> courses = courseRepository.findByUserId(pageable, userId);
         return courses.map(this::toAuthorCourseResponse);
     }
+
+
 }

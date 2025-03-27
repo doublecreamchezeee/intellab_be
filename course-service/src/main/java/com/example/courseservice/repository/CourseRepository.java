@@ -29,7 +29,7 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     List<Course> findAllByCourseNameContainingIgnoreCaseAndCategories_Id(String name,
                                                                            Integer categoryId);
 
-    @Query("SELECT c FROM Course c WHERE c.courseId NOT IN (SELECT uc.enrollId.courseId FROM UserCourses uc WHERE uc.enrollId.userUid = :userId)")
+    @Query("SELECT c FROM Course c WHERE c.courseId NOT IN (SELECT uc.enrollId.courseId FROM UserCourses uc WHERE uc.enrollId.userUid = :userId AND uc.accessStatus = 'ACCESSIBLE')")
     Page<Course> findAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable);
 
     List<Course> findAllByCourseNameContainingIgnoreCaseAndLevel(String keyword, String level);

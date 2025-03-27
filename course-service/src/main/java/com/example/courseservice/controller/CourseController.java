@@ -3,10 +3,7 @@ package com.example.courseservice.controller;
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
-import com.example.courseservice.dto.request.course.CourseCreationRequest;
-import com.example.courseservice.dto.request.course.CourseUpdateRequest;
-import com.example.courseservice.dto.request.course.DisenrollCourseRequest;
-import com.example.courseservice.dto.request.course.EnrollCourseRequest;
+import com.example.courseservice.dto.request.course.*;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
@@ -62,6 +59,7 @@ public class CourseController {
     LessonService lessonService;
     ReviewService reviewService;
     private final CommentService commentService;
+    final String defaultRole = "myRole";
     private Boolean isAdmin(String role)
     {
         return role.contains("admin");
@@ -308,12 +306,18 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Enroll a free course"
+            summary = "Enroll a course (both free and paid - BE auto check condition)",
+            description = """
+                This API is used to enroll a course.
+                If the course is free, the user will be enrolled immediately.
+                If the course is paid, the user will be enrolled if the user has a subscription plan.
+                """
     )
     @PostMapping("/enroll")
     public ApiResponse<UserCourses> enrollCourse(
             @RequestBody @Valid EnrollCourseRequest request,
-            @RequestHeader("X-UserRole") String role) {
+            @RequestHeader("X-UserRole") String role
+    ) {
         if (isAdmin(role)) {
             return ApiResponse.<UserCourses>builder()
                     .code(201)
@@ -321,8 +325,22 @@ public class CourseController {
                     .result(null)
                     .build();
         }
+
+        if (role == null || role.equals(defaultRole)) {
+            role = "user,free";
+        }
+
+        //log.info("role: {}", (Object) role.split(","));
+        String subscriptionPlan = role.split(",")[1];
+
         return ApiResponse.<UserCourses>builder()
-                .result(courseService.enrollCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .result(
+                        courseService.enrollCourse(
+                                ParseUUID.normalizeUID(request.getUserUid()),
+                                request.getCourseId(),
+                                subscriptionPlan
+                        )
+                )
                 .build();
     }
 
@@ -344,12 +362,18 @@ public class CourseController {
 
         return ApiResponse.<UserCourses>builder()
                 .message("Course has been enrolled successfully")
-                .result(courseService.enrollPaidCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .result(courseService.enrollPaidCourse(
+                            ParseUUID.normalizeUID(request.getUserUid()),
+                            request.getCourseId(),
+                            false // user enroll by purchase exactly this course
+                        )
+                )
                 .build();
     }
 
     @Operation(
-            summary = "(BE only) Disenroll a course by user id and course id"
+            summary = "(BE only) Disenroll a course by user id and course id",
+            hidden = true
     )
     @PostMapping("/disenroll")
     public ApiResponse<Boolean> disenrollCourse(@RequestBody @Valid DisenrollCourseRequest request) {
@@ -736,6 +760,9 @@ public class CourseController {
                 .result(commentService.removeComment(commentId, userId)).build();
     }
 
+    @Operation(
+            summary = "testing only"
+    )
     @GetMapping("/role")
     public String getRole(
             @RequestHeader("X-UserRole") String role
@@ -744,6 +771,21 @@ public class CourseController {
         return role;
     }
 
+    @Operation(
+            summary = "Disenroll all courses that user has enrolled using subscription plan",
+            hidden =   true
+    )
+    @PostMapping("disenroll-courses-enrolled-using-subscription-plan")
+    public ApiResponse<Boolean> disenrollCoursesEnrolledUsingSubscriptionPlan(
+            @RequestBody DisenrollCoursesEnrolledUsingSubscriptionPlanRequest request) {
+        return ApiResponse.<Boolean>builder()
+                .message("All courses have been disenrolled")
+                .result(courseService.disenrollCoursesEnrolledUsingSubscriptionPlan(
+                            request.getListUserUuid()
+                        )
+                )
+                .build();
+    }
 
 
 

@@ -529,6 +529,8 @@ create table user_courses
     progress_percent   numeric(5, 2),
     status             varchar(10),
     latest_lesson_id   uuid,
+    enroll_using_subscription boolean default FALSE,
+    accessStatus varchar(20),
     course_id          uuid not null
         constraint fkcve18frw4nbxwrq0qh78dgipc
             references courses,
@@ -64127,7 +64129,7 @@ Output: [1]
 ```
 Input: nums1 = [0], m = 0, nums2 = [1], n = 1
 Output: [1]
-```', 'easy', e'Merge sorted array', 2, false, false, e'Problem Name: Merge Sorted Array
+```', 'easy', e'Merge sorted array', 2, false, true, e'Problem Name: Merge Sorted Array
 Function Name: mergeSortedArray
 Input Structure:
 Input Field: list<int> num1
@@ -64160,7 +64162,7 @@ Output: [4,3,2,2]
 ```
 Input: digits = [9]
 Output: [1,0]
-```', 'easy', 'Plus one', 2, false, false, e'Problem Name: Plus One
+```', 'easy', 'Plus one', 2, false, true, e'Problem Name: Plus One
 Function Name: plusOne
 Input Structure:
 Input Field: list<int> digits
@@ -64189,7 +64191,7 @@ Output: 1
 ```
 Input: nums = [1,3,5,6], target = 7
 Output: 4
-```', 'easy', 'Search Insert Position', 2, false, false, e'Problem Name: Search Insert Position
+```', 'easy', 'Search Insert Position', 2, false, true, e'Problem Name: Search Insert Position
 Function Name: searchInsertPosition
 Input Structure:
 Input Field: list<int> nums
@@ -64220,7 +64222,7 @@ Output: 4
 ```
 Input: nums = [1]
 Output: 1
-```', 'easy', 'Single Number', 2, false, false, e'Problem Name: Single Number
+```', 'easy', 'Single Number', 2, false, true, e'Problem Name: Single Number
 Function Name: singleNumber
 Input Structure:
 Input Field: list<int> nums
@@ -64251,7 +64253,7 @@ Output: [1,2]
 ```
 Input: nums = [3,3], target = 6
 Output: [0,1]
-```', 'easy', 'Two sum', 2, false, false, e'Function Name: twoSum
+```', 'easy', 'Two sum', 2, false, true, e'Function Name: twoSum
 Input Structure:
 Input Field: list<int> nums
 Input Field: int target
@@ -64259,6 +64261,76 @@ Output Structure:
 Output Field: list<int> result');
 
 --INSERT INTO public.problems (problem_id, acceptance_rate, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('79751b4f-cad0-42ef-a592-f67298d08003', 0.00, 'string', 'string', 'string', 0, true, true, 'string');
+
+INSERT INTO public.problems (
+    problem_id,
+    acceptance_rate,
+    description,
+    problem_level,
+    problem_name,
+    score,
+    is_available,
+    is_published,
+    problem_structure
+)
+VALUES (
+           'c3756efe-d408-4e99-844e-a55021fb7c02', -- Replace with a unique UUID
+           0.00,
+           e'Given a string `s` containing just the characters \'(\', \')\', \'{\', \'}\', \'[\', and \']\', determine if the input string is valid.
+
+       An input string is valid if:
+       1. Open brackets must be closed by the same type of brackets.
+       2. Open brackets must be closed in the correct order.
+
+       #### Example 1:
+
+       ```
+       Input: s = "()"
+       Output: true
+       ```
+
+       #### Example 2:
+
+       ```
+       Input: s = "()[]{}"
+       Output: true
+       ```
+
+       #### Example 3:
+
+       ```
+       Input: s = "(]"
+       Output: false
+       ```
+
+       #### Example 4:
+
+       ```
+       Input: s = "([)]"
+       Output: false
+       ```
+
+       #### Example 5:
+
+       ```
+       Input: s = "{[]}"
+       Output: true
+       ```
+
+       #### Constraints:
+       - 1 <= s.length <= 10^4
+       - `s` consists of parentheses only: \'(\', \')\', \'{\', \'}\', \'[\', and \']\'.',
+           'easy',
+           'Valid Parentheses',
+           3,
+           true,
+           false,
+           e'Function Name: isValid
+       Input Structure:
+       Input Field: string s
+       Output Structure:
+       Output Field: boolean result'
+       );
 
 
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1

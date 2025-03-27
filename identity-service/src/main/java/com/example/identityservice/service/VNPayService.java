@@ -17,7 +17,9 @@ import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
 import com.example.identityservice.dto.response.vnpay.*;
+import com.example.identityservice.enums.account.PaymentFor;
 import com.example.identityservice.enums.account.PremiumDuration;
+import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.enums.vnpay.VNPayRefundType;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
@@ -29,6 +31,7 @@ import com.example.identityservice.model.composite.VNPayPaymentCoursesId;
 import com.example.identityservice.repository.VNPayPaymentCoursesRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.repository.VNPayPaymentRepository;
+import com.example.identityservice.specification.VNPayPaymentSpecification;
 import com.example.identityservice.utility.HashUtility;
 import com.example.identityservice.utility.ParseUUID;
 import com.example.identityservice.utility.StringUtility;
@@ -41,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -120,7 +124,7 @@ public class VNPayService {
                     .transactionReference(paymentUrlResponse.getTransactionReference())
                     .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
                     .orderDescription(orderDescription)
-                    .paymentFor("Course")
+                    .paymentFor(PaymentFor.COURSE.getCode())
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -164,6 +168,16 @@ public class VNPayService {
             String ipAddr, VNPayUpgradeAccountRequest request, String userUid
     ) {
         try {
+            if (request.getIsChangePlan()==null || !request.getIsChangePlan()) {
+                vnPayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
+                        userUid,
+                        PremiumPackageStatus.ACTIVE.getCode()
+                ).ifPresent(premiumPackage -> {
+                            throw new AppException(ErrorCode.USER_ALREADY_HAS_SUBSCRIPTION);
+                        }
+                );
+            }
+
             // create description for order
             String orderDescription = request.getPremiumPackage().getCode(); // null;
 
@@ -180,7 +194,7 @@ public class VNPayService {
                         PremiumDuration.MONTHLY_PACKAGE.getCode()
                 )
                 ? request.getPremiumPackage().getPrice()
-                : (long) (request.getPremiumPackage().getPrice() * 12 * 0.9f);   // 10% discount for yearly package
+                : (long) (request.getPremiumPackage().getPrice() * 11);   // cost only 11 months for yearly package
 
             // Create payment url
             VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
@@ -227,7 +241,7 @@ public class VNPayService {
                     .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
                     .vnPayPaymentPremiumPackage(paymentPremiumPackage)
                     .orderDescription(orderDescription)
-                    .paymentFor("Subscription")
+                    .paymentFor(PaymentFor.SUBSCRIPTION.getCode())
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -565,12 +579,22 @@ public class VNPayService {
                                 }
 
                                 if (payment.getVnPayPaymentPremiumPackage()!=null) {
+                                    // if user has already had a subscription, then set the current subscription to inactive
+                                    vnPayPaymentPremiumPackageRepository.findAllByUserUidAndStatus(
+                                            payment.getUserUid(),
+                                            PremiumPackageStatus.ACTIVE.getCode()
+                                    ).forEach(premiumPackage -> {
+                                        premiumPackage.setStatus(PremiumPackageStatus.INACTIVE.getCode());
+                                        vnPayPaymentPremiumPackageRepository.save(premiumPackage);
+                                    });
+
                                     VNPayPaymentPremiumPackage paymentPremiumPackage = payment.getVnPayPaymentPremiumPackage();
                                     paymentPremiumPackage.setStartDate(calendar.getTime().toInstant());
                                     paymentPremiumPackage.setEndDate(calendar.getTime().toInstant().plusSeconds(paymentPremiumPackage.getDuration() * 24 * 60 * 60));
-                                    paymentPremiumPackage.setStatus("Active");
+                                    paymentPremiumPackage.setStatus(PremiumPackageStatus.ACTIVE.getCode());
                                     vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
                                     log.info("Upgrade account successfully with premium package: {}", paymentPremiumPackage.getPackageType());
+
                                 }
                                 // Update payment status in course-service
                                 /*VNPayPaymentCourses paymentCourses = vnPayPaymentCoursesRepository
@@ -740,11 +764,11 @@ public class VNPayService {
     }
 
     @Transactional
-    public VNPayDetailsPaymentResponse getPaymentDetailsByPaymentId(UUID paymentId) {
+    public VNPayDetailsPaymentForCourseResponse getPaymentDetailsByPaymentId(UUID paymentId) {
         VNPayPayment payment = vnPayPaymentRepository.findById(paymentId)
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
-        VNPayDetailsPaymentResponse response = vnPaymentMapper.toVNPayDetailsPaymentResponse(payment);
+        VNPayDetailsPaymentForCourseResponse response = vnPaymentMapper.toVNPayDetailsPaymentForCourseResponse(payment);
 
         response.setTransactionStatusDescription(
                 VNPayTransactionStatus
@@ -762,9 +786,12 @@ public class VNPayService {
         return response;
     }
 
-    public Page<VNPayDetailsPaymentResponse> getListPaymentDetailsByUserUid(String userUid, Pageable pageable) {
-        Page<VNPayPayment> payments = vnPayPaymentRepository.findAllByUserUid(userUid, pageable);
-        return payments.map(vnPaymentMapper::toVNPayDetailsPaymentResponse);
+    public Page<VNPayDetailsPaymentForCourseResponse> getListDetailsPaymentForCourseByUserUid(String userUid, Pageable pageable, PaymentFor paymentFor) {
+        Specification<VNPayPayment> specification = VNPayPaymentSpecification.hasPaymentFor(paymentFor.getCode())
+                .and(VNPayPaymentSpecification.hasUserUid(userUid));
+
+        Page<VNPayPayment> payments = vnPayPaymentRepository.findAll(specification, pageable);
+        return payments.map(vnPaymentMapper::toVNPayDetailsPaymentForCourseResponse);
     }
 
     public UUID getPaymentIdByTransactionReference(String transactionReference) {

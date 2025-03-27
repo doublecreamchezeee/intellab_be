@@ -4,6 +4,7 @@ import com.example.identityservice.configuration.firebase.FirebaseConfigurationP
 import com.example.identityservice.dto.request.auth.FirebaseSignInRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.response.auth.*;
+import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
 import com.example.identityservice.mapper.UserMapper;
@@ -11,11 +12,7 @@ import com.example.identityservice.model.User;
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.service.FirestoreService;
-import com.example.identityservice.utility.ParseUUID;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.services.people.v1.PeopleService;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.UserCredentials;
+import com.example.identityservice.specification.VNPayPaymentPremiumPackageSpecification;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.auth.*;
@@ -23,13 +20,12 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -85,8 +81,18 @@ public class FirebaseAuthClient {
 
             if (role.equals("user")) {
                 //PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
-                VNPayPaymentPremiumPackage pre = vnpayPaymentPremiumPackageRepository.findByUserUid(userId)
+                /*VNPayPaymentPremiumPackage pre = vnpayPaymentPremiumPackageRepository.findByUserUid(userId)
+                        .orElse(null);*/
+
+                Specification<VNPayPaymentPremiumPackage> spec = Specification.where(VNPayPaymentPremiumPackageSpecification.hasUserUid(decodeToken.getUid()))
+                        .and(VNPayPaymentPremiumPackageSpecification.hasStatus(PremiumPackageStatus.ACTIVE.getCode()));
+
+                VNPayPaymentPremiumPackage pre = vnpayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
+                                    decodeToken.getUid(),
+                                    PremiumPackageStatus.ACTIVE.getCode()
+                                )
                         .orElse(null);
+
                 if (pre != null)
                 {
                     premium = pre.getPackageType();

@@ -19,4 +19,5 @@ public class VNPayUpgradeAccountRequest {
     VNPayLocale language;
     PremiumPackage premiumPackage;
     PremiumDuration premiumDuration;
+    Boolean isChangePlan = false;
 }
