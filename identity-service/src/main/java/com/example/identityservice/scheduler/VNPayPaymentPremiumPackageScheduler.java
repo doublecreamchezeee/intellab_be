@@ -53,7 +53,7 @@ public class VNPayPaymentPremiumPackageScheduler {
 
     public void checkPremiumPackageEndDate() {
         Instant now = Instant.now();
-        List<VNPayPaymentPremiumPackage> expiredPackages = vnPayPaymentPremiumPackageRepository.findByEndDateBeforeAndStatus(now, PremiumPackageStatus.ACTIVE.getCode());
+        List<VNPayPaymentPremiumPackage> expiredPackages = vnPayPaymentPremiumPackageRepository.findAllByEndDateBeforeAndStatus(now, PremiumPackageStatus.ACTIVE.getCode());
 
         for (VNPayPaymentPremiumPackage premiumPackage : expiredPackages) {
             // Perform the necessary actions for expired packages
@@ -78,6 +78,10 @@ public class VNPayPaymentPremiumPackageScheduler {
                     .toList();
 
             log.info("Disenrolling users uuid with expired premium packages from courses: {}", uuids);
+
+            if (uuids.isEmpty()) {
+                return;
+            }
 
             courseClient.disenrollCoursesEnrolledUsingSubscriptionPlan(
                     DisenrollCoursesEnrolledUsingSubscriptionPlanRequest

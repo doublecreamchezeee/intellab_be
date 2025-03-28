@@ -1,10 +1,8 @@
 package com.example.identityservice.repository;
 
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -16,7 +14,7 @@ import java.util.UUID;
 public interface VNPayPaymentPremiumPackageRepository extends JpaRepository<VNPayPaymentPremiumPackage, UUID>, JpaSpecificationExecutor<VNPayPaymentPremiumPackage> {
     VNPayPaymentPremiumPackage findByPayment_PaymentId(UUID paymentId);
     List<VNPayPaymentPremiumPackage> findByEndDateBefore(Instant endDate);
-    List<VNPayPaymentPremiumPackage> findByEndDateBeforeAndStatus(Instant endDate, String status);
+    List<VNPayPaymentPremiumPackage> findAllByEndDateBeforeAndStatus(Instant endDate, String status);
     Optional<VNPayPaymentPremiumPackage> findByUserUid(String userUid);
     //TODO: check if this is correct
     //Optional<VNPayPaymentPremiumPackage> findFirstByUserUidOrderByEndDateDesc(String userUid);

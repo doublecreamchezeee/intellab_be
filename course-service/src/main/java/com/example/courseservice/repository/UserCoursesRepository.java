@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.rmi.server.UID;
 import java.util.List;
@@ -34,4 +35,16 @@ public interface UserCoursesRepository extends JpaRepository<UserCourses, Enroll
             "ORDER BY SUM(c.score) DESC")
     List<Object[]> getLeaderboard();
 
+    @Query("SELECT CASE WHEN COUNT(uc) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM UserCourses uc " +
+            "JOIN uc.course c " +
+            "JOIN c.lessons l " +
+            "WHERE l.problemId = :problemId " +
+            "AND uc.enrollId.userUid = :userId AND uc.accessStatus = :accessStatus"
+    )
+    Boolean existsByProblemIdAndUserIdAAndAccessStatus(
+            @Param("problemId") UUID problemId,
+            @Param("userId") UUID userId,
+            @Param("accessStatus") String accessStatus
+    );
 }

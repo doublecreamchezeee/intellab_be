@@ -3,6 +3,7 @@ package com.example.problemservice.service;
 import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.converter.ProblemStructureConverter;
 import com.example.problemservice.client.BoilerplateClient;
+import com.example.problemservice.dto.request.course.CheckingUserCourseExistedRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
@@ -88,7 +89,7 @@ public class ProblemService {
         return response;
     }
 
-    public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan) {
+    public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan, UUID userUuid) {
         DetailsProblemResponse response = problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         ));
@@ -100,7 +101,24 @@ public class ProblemService {
             return response;
         }
 
-        //TODO
+        // Check if the problem is in the course plan,
+        // so that the user can access this private problem
+        if (subscriptionPlan.equals(
+                PremiumPackage.COURSE_PLAN.getCode()
+        )) {
+            Boolean hasUserAlreadyEnrollCourse = courseClient.checkEnrolled(
+                    CheckingUserCourseExistedRequest.builder()
+                            .problemId(problemId)
+                            .userUuid(userUuid)
+                            .build()
+            ).getResult();
+
+            log.info("hasUserAlreadyEnrollCourse: {}", hasUserAlreadyEnrollCourse);
+
+            if (hasUserAlreadyEnrollCourse) {
+                return response;
+            }
+        }
 
         throw new AppException(ErrorCode.PROBLEM_NOT_PUBLISHED);
     }

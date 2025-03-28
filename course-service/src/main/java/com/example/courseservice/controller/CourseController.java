@@ -787,6 +787,19 @@ public class CourseController {
                 .build();
     }
 
-
+    @Operation(
+            summary = "Check if user already enrolled in course",
+            hidden = true
+    )
+    @PostMapping("/check-enrolled")
+    public ApiResponse<Boolean> checkUserCourseExisted(
+            @RequestBody CheckingUserCourseExistedRequest request) {
+        return ApiResponse.<Boolean>builder()
+                .result(courseService.hasUserAlreadyEnrollCourse(
+                        request
+                    )
+                )
+                .build();
+    }
 
 }
