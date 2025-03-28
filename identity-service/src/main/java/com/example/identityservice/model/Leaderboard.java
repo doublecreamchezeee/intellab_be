@@ -1,5 +1,4 @@
-package com.example.courseservice.model;
-
+package com.example.identityservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,20 +16,19 @@ import java.util.UUID;
 public class Leaderboard {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    UUID leaderboardId;
+
     @JoinColumn(name = "user_id")
     UUID userId;
 
-    Integer rank;
+    String type; // "problem", "course", hoặc "merged"
 
-    @Column(columnDefinition = "VARCHAR(20)")
-    String hierarchy;
+    Long score; // Tổng điểm
 
-    Long score;
+    @Embedded
+    ProblemStat problemStat;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medal_id")
-    Medal medal;
-
-
-
+    @Embedded
+    CourseStat courseStat;
 }

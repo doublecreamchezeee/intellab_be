@@ -266,8 +266,11 @@ public class ProblemSubmissionService {
                 .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
 
         if (allAccepted) {
-            submission.setIsSolved(true);
-            problemSubmissionRepository.save(submission);
+            if (!submission.getIsSolved())
+            {
+                submission.setIsSolved(true);
+                problemSubmissionRepository.save(submission);
+            }
 
             try {
                 courseClient.donePracticeByProblemId(

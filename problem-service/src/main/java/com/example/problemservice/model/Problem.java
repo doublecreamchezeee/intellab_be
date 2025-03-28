@@ -64,9 +64,9 @@ public class Problem {
 //    @JsonBackReference("submissions-problem")
     List<ProblemSubmission> submissions;
 
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference("problem-solution")
-    List<Solution> solutions;
+    Solution solution;
 
     @JsonIgnore
     @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
