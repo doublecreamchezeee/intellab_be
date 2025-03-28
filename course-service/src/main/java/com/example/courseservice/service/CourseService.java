@@ -2,6 +2,7 @@ package com.example.courseservice.service;
 
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.constant.PredefinedLearningStatus;
+import com.example.courseservice.dto.request.course.CheckingUserCourseExistedRequest;
 import com.example.courseservice.dto.request.LeaderboardUpdateRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
@@ -778,5 +779,12 @@ public class CourseService {
         return courses.map(this::toAuthorCourseResponse);
     }
 
-
+    public Boolean hasUserAlreadyEnrollCourse(CheckingUserCourseExistedRequest request) {
+        log.info("Checking user course existed: {}", request.getUserUuid() + " " + request.getProblemId());
+        return userCoursesRepository.existsByProblemIdAndUserIdAAndAccessStatus(
+                request.getProblemId(),
+                request.getUserUuid(),
+                UserCourseAccessStatus.ACCESSIBLE.getCode()
+        );
+    }
 }

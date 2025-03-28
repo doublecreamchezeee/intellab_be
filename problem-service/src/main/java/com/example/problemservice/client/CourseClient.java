@@ -1,5 +1,6 @@
 package com.example.problemservice.client;
 
+import com.example.problemservice.dto.request.course.CheckingUserCourseExistedRequest;
 import com.example.problemservice.dto.request.lesson.DonePracticeRequest;
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
@@ -28,4 +29,6 @@ public interface CourseClient {
     @GetMapping(value = "/courses/category/{categoryId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<CategoryResponse> categories(@PathVariable Integer categoryId);
 
+    @PostMapping(value = "/courses/check-enrolled", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ApiResponse<Boolean> checkEnrolled(@RequestBody CheckingUserCourseExistedRequest request);
 }

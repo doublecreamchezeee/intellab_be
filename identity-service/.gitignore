@@ -44,3 +44,4 @@ firebase-config.json
 **/keystore.jks
 ./docker.env
 ./deploy.env
+deploy.env

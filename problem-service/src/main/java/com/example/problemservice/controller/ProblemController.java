@@ -68,6 +68,7 @@ public class ProblemController {
     @GetMapping("/{problemId}")
     public ResponseEntity<DetailsProblemResponse> getProblem(
             @PathVariable UUID problemId,
+            @RequestHeader(value = "X-UserId", required = false) String userId,
             @RequestHeader(value = "X-UserRole", required = false) String role
     ) {
 
@@ -78,8 +79,19 @@ public class ProblemController {
         //log.info("role: {}", (Object) role.split(","));
         String subscriptionPlan = role.split(",")[1];
 
+        UUID userUuid = null;
+
+        if (userId != null) {
+            String userUid = userId.split(",")[0];
+            userUuid = ParseUUID.normalizeUID(userUid);
+        }
+
         try {
-            DetailsProblemResponse problem = problemService.getProblem(problemId, subscriptionPlan);
+            DetailsProblemResponse problem = problemService.getProblem(
+                    problemId,
+                    subscriptionPlan,
+                    userUuid
+            );
             return ResponseEntity.ok(problem); // Return the problem if found
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
