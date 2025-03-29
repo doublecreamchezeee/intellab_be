@@ -632,6 +632,7 @@ public class CourseService {
 
         User user = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString());
         if (user == null) {
+            log.error("Error while get user by user id: " + userCourses.getEnrollId().getUserUid());
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
@@ -694,8 +695,8 @@ public class CourseService {
                 }
                 identityClient.updateLeaderboard(leaderboardUpdateRequest);
             }
-            catch(Exception ignore){
-
+            catch(Exception e){
+                System.out.println("Error in updating leaderboard: " + e);
             }
 
             try{
