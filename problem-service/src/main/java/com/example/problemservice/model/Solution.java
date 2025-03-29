@@ -16,17 +16,21 @@ import java.util.UUID;
 @Entity
 @Table(name = "\"Solutions\"")
 public class Solution {
-    @EmbeddedId
-    SolutionID solutionId;
+    @Id
+    @Column(name = "problem_id")
+    UUID problemId;
 
-    @Column(columnDefinition = "TEXT")
-    String content;
-
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId("problemId")
     @JoinColumn(name = "problem_id", nullable = false)
     @JsonBackReference("problem-solution")
     Problem problem;
+
+    @Column(columnDefinition = "TEXT")
+    String content;
+
+    UUID authorId;
+
+
 
 }

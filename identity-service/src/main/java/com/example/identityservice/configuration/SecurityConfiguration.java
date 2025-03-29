@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                     authManager
                             .requestMatchers(HttpMethod.GET, apiEndpointSecurityInspector.getPublicGetEndpoints().toArray(String[]::new)).permitAll()
                             .requestMatchers(HttpMethod.POST, apiEndpointSecurityInspector.getPublicPostEndpoints().toArray(String[]::new)).permitAll()
-
+                            .requestMatchers("/ws/**").permitAll()
                             .anyRequest().authenticated();
                 })
                 /*.oauth2Login(oauth2 -> oauth2
