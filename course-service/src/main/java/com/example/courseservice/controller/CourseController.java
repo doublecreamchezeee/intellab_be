@@ -411,17 +411,17 @@ public class CourseController {
 //                    .result(null)
 //                    .build();
 //        }
+        userUid = userUid.split(",")[0];
+
         if (userUid == null && UserUid == null) {
             throw new AppException(ErrorCode.INVALID_USER);
         }
 
-        if (userUid != null) {
+        if (UserUid != null) {
             return ApiResponse.<List<CompleteCourseResponse>>builder()
-                    .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(userUid)))
+                    .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(UserUid)))
                     .build();
         }
-
-        userUid = userUid.split(",")[0];
 
         System.out.println(userUid);
         System.out.println(ParseUUID.normalizeUID(userUid));
