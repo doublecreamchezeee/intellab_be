@@ -198,7 +198,7 @@ public class VNPayService {
                     )
 
                 ? request.getPremiumPackage().getPrice()
-                : (long) (request.getPremiumPackage().getPrice() * 11);   // cost only 11 months for yearly package
+                : (long) ((request.getPremiumPackage().getPrice()-100000L) * 12);   // cost only 11 months for yearly package
 
             // Create payment url
             VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
@@ -584,10 +584,13 @@ public class VNPayService {
 
                                 if (payment.getVnPayPaymentPremiumPackage()!=null) {
                                     // if user has already had a subscription, then set the current subscription to inactive
-                                    vnPayPaymentPremiumPackageRepository.findAllByUserUidAndStatus(
+
+                                    List<VNPayPaymentPremiumPackage> premiumPackages = vnPayPaymentPremiumPackageRepository.findAllByUserUidAndStatus(
                                             payment.getUserUid(),
                                             PremiumPackageStatus.ACTIVE.getCode()
-                                    ).forEach(premiumPackage -> {
+                                    );
+
+                                    premiumPackages.forEach(premiumPackage -> {
                                         premiumPackage.setStatus(PremiumPackageStatus.INACTIVE.getCode());
                                         vnPayPaymentPremiumPackageRepository.save(premiumPackage);
                                     });
@@ -599,10 +602,22 @@ public class VNPayService {
                                     vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
                                     log.info("Upgrade account successfully with premium package: {}", paymentPremiumPackage.getPackageType());
 
-                                    if (paymentPremiumPackage.getPackageType().equals(PremiumPackage.PREMIUM_PLAN.getCode())
-                                        || paymentPremiumPackage.getPackageType().equals(PremiumPackage.COURSE_PLAN.getCode())
+                                    if (paymentPremiumPackage.getPackageType().equals(PremiumPackage.ALGORITHM_PLAN.getCode())
                                     ) {
-                                        disenrollCourses(List.of(payment.getUserUuid()));
+                                        boolean changeCourseOrPremiumPlanToProblemPlan = false;
+
+                                        for (VNPayPaymentPremiumPackage premiumPackage : premiumPackages) {
+                                           if (premiumPackage.getPackageType().equals(PremiumPackage.COURSE_PLAN.getCode())
+                                                    || premiumPackage.getPackageType().equals(PremiumPackage.PREMIUM_PLAN.getCode())
+                                           ) {
+                                               changeCourseOrPremiumPlanToProblemPlan = true;
+                                               break;
+                                           }
+                                        }
+
+                                        if (changeCourseOrPremiumPlanToProblemPlan) {
+                                            disenrollCourses(List.of(payment.getUserUuid()));
+                                        }
                                     }
 
                                 }

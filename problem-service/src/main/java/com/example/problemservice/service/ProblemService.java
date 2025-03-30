@@ -96,7 +96,7 @@ public class ProblemService {
 
         if (response.getIsPublished()
             || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
-            || subscriptionPlan.equals(PremiumPackage.PROBLEM_PLAN.getCode())
+            || subscriptionPlan.equals(PremiumPackage.ALGORITHM_PLAN.getCode())
         ) {
             return response;
         }

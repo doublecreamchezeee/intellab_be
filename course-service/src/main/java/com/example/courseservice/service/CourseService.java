@@ -1,5 +1,6 @@
 package com.example.courseservice.service;
 
+import com.example.courseservice.annotation.ExecutionTiming;
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.course.CheckingUserCourseExistedRequest;
@@ -539,7 +540,10 @@ public class CourseService {
                         .certificateId(userCourses.getCertificate() != null ?
                                 userCourses.getCertificate().getCertificateId()
                                 : null)
-                        .completedDate(Date.from(userCourses.getCertificate().getCompletedDate()))
+                        .completedDate(userCourses.getCertificate() != null ?(
+                                Date.from(userCourses.getCertificate().getCompletedDate())
+                            ) : null
+                        )
                         .build());
             }
         }
@@ -603,7 +607,10 @@ public class CourseService {
         return (day >= 11 && day <= 13) ? "th" : new String[]{"th", "st", "nd", "rd"}[(day % 10 < 4) ? day % 10 : 0];
     }
 
+    @ExecutionTiming
     public CertificateCreationResponse createCertificate(UUID courseId, UUID userId) throws Exception {
+        //long startTime = System.currentTimeMillis();
+
         System.out.println("userid: " + userId + "\n" +
                 "courseId: " + courseId);
 
@@ -727,6 +734,11 @@ public class CourseService {
             log.error(msg, ex);
             throw ex;
         }
+        /*finally {
+            long endTime = System.currentTimeMillis(); // End time measurement
+            long duration = endTime - startTime; // Calculate duration
+            log.info("createCertificate execution time: {} ms", duration); // Log the duration
+        }*/
     }
 
     public CertificateResponse getCertificate(UUID certificateId) throws ExecutionException, InterruptedException {
