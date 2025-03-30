@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   api-gateway:
@@ -44,6 +44,16 @@ services:
     depends_on:
       - db
 
+  ai-service:
+    image: cheesepp129/intellab_ops:ai-service-latest
+    ports:
+      - "8106:8006"
+    env_file:
+      - ./ai-service/docker.env
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+    depends_on:
+      - db
   db:
     build:
       context: .
