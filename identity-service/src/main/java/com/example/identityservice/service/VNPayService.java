@@ -602,7 +602,7 @@ public class VNPayService {
                                     vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
                                     log.info("Upgrade account successfully with premium package: {}", paymentPremiumPackage.getPackageType());
 
-                                    if (paymentPremiumPackage.getPackageType().equals(PremiumPackage.PROBLEM_PLAN.getCode())
+                                    if (paymentPremiumPackage.getPackageType().equals(PremiumPackage.ALGORITHM_PLAN.getCode())
                                     ) {
                                         boolean changeCourseOrPremiumPlanToProblemPlan = false;
 

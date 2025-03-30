@@ -195,7 +195,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     Mono<Void> unknownErrorOccurred(ServerHttpResponse response) {
-        String message = "Unauthenticated or unknown error occurred";
+        String message = "Unauthenticated or unknown error occurred in services";
 
         response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
