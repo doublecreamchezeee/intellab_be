@@ -34,6 +34,12 @@ judge0:
     callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
     run_code_callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-run-code/update/run-code/callback"
 
+k8s:
+  server:
+    url: https://192.168.1.11:8443
+  namespace: default
+  deployment-name: workers
+
 #logging:
 #  level:
 #    root: TRACE
