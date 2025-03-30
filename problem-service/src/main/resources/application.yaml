@@ -37,8 +37,6 @@ judge0:
 k8s:
   server:
     url: https://192.168.1.11:8443
-  namespace: default
-  deployment-name: workers
 
 #logging:
 #  level:
