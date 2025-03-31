@@ -48,6 +48,8 @@ services:
     image: doublecreamcheze/intellab_ops:ai-service-latest
     ports:
       - "8106:8006"
+    env_file:
+      - ai-service/docker.env
     environment:
       DB_CONNECTION_STRING: postgresql://postgres:123456@db:5432/intellab-db
       TZ: Asia/Ho_Chi_Minh
