@@ -93,6 +93,16 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void sendNotification(Notification notification, WebSocketSession session){
+        try {
+            ObjectMapper notificationObject = new ObjectMapper();
+            String json = notificationObject.writeValueAsString(notification);
+            session.sendMessage(new TextMessage(json));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to send WebSocket message", e);
+        }
+    }
+
     private String getUserIdFromSession(WebSocketSession session) {
         String query = session.getUri().getQuery();
         if (query != null && query.startsWith("userId=")) {

@@ -26,6 +26,10 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String message;
 
+    private String redirectType;
+
+    private String redirectContent;
+    
     private Notification.NotificationType type;
 
     @CreationTimestamp
