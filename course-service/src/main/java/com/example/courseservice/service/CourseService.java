@@ -1,7 +1,9 @@
 package com.example.courseservice.service;
 
+import com.example.courseservice.annotation.ExecutionTiming;
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.constant.PredefinedLearningStatus;
+import com.example.courseservice.dto.request.course.CheckingUserCourseExistedRequest;
 import com.example.courseservice.dto.request.LeaderboardUpdateRequest;
 import com.example.courseservice.dto.request.course.CourseCreationRequest;
 import com.example.courseservice.dto.request.course.CourseUpdateRequest;
@@ -12,6 +14,8 @@ import com.example.courseservice.dto.response.course.*;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
+import com.example.courseservice.enums.account.PremiumPackage;
+import com.example.courseservice.enums.userCourse.UserCourseAccessStatus;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CategoryMapper;
@@ -23,11 +27,11 @@ import com.example.courseservice.model.compositeKey.EnrollCourse;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.specification.CourseSpecification;
 import com.example.courseservice.specification.LessonSpecification;
+import com.example.courseservice.specification.UserCoursesSpecification;
 import com.example.courseservice.utils.CertificateTemplate;
 import com.example.courseservice.utils.ParseUUID;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -207,7 +211,9 @@ public class CourseService {
             }
 
             // Check if the user is enrolled in the course
-            boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId());
+            boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
+                    userUid, course.getCourseId(), UserCourseAccessStatus.ACCESSIBLE.getCode()
+            );
 
             String certificateUrl = null;
             String certificateId = null;
@@ -250,7 +256,9 @@ public class CourseService {
         int reviewCount = course.getReviews().size();
 
         // Check if the user is enrolled in the course
-        boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId);
+        boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
+                userUid, courseId, UserCourseAccessStatus.ACCESSIBLE.getCode()
+        );
 
         // Get the latest lesson ID for the user (if enrolled)
         UUID latestLessonId = null;
@@ -346,7 +354,7 @@ public class CourseService {
     }
 
 
-    public UserCourses enrollCourse(UUID userUid, UUID courseId) {
+    public UserCourses enrollCourse(UUID userUid, UUID courseId, String subscriptionPlan) {
         if (userUid == null || courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
@@ -354,7 +362,20 @@ public class CourseService {
         // Lấy đối tượng Course từ cơ sở dữ liệu
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
+
         if (course.getPrice() > 0) {
+            // check if user has subscription plan
+            if (subscriptionPlan != null &&
+                    (subscriptionPlan.equals(PremiumPackage.COURSE_PLAN.getCode())
+                        || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
+                    )
+            ) {
+                // enroll course using subscription plan
+                return enrollPaidCourse(userUid, courseId, true);
+
+            }
+
+            // if user does not have subscription plan, return error
             throw new AppException(ErrorCode.COURSE_NOT_FREE);
         }
 
@@ -370,6 +391,8 @@ public class CourseService {
                             .course(course)  // Đảm bảo course không null
                             .status(PredefinedLearningStatus.LEARNING)
                             .progressPercent(0.0f)
+                            .enrollUsingSubscription(false)
+                            .accessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode())
                             .build();
 
                     // create default learning lesson progress for user
@@ -391,7 +414,10 @@ public class CourseService {
                 });
     }
 
-    public UserCourses enrollPaidCourse(UUID userUid, UUID courseId) {
+    public UserCourses enrollPaidCourse(
+            UUID userUid, UUID courseId,
+            Boolean enrollUsingSubscription
+    ) {
         if (userUid == null || courseId == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
@@ -411,6 +437,8 @@ public class CourseService {
                             .course(course)  // Đảm bảo course không null
                             .status(PredefinedLearningStatus.LEARNING)
                             .progressPercent(0.0f)
+                            .enrollUsingSubscription(enrollUsingSubscription)
+                            .accessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode())
                             .build();
 
                     // create default learning lesson progress for user
@@ -425,7 +453,6 @@ public class CourseService {
                                 .build();
                         learningLessonRepository.save(learningLesson);
                     });
-
 
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
@@ -443,6 +470,31 @@ public class CourseService {
         List<LearningLesson> learningLessons = learningLessonRepository.findAllByUserIdAndLesson_Course_CourseId(userUid, courseId);
         learningLessonRepository.deleteAll(learningLessons);
         userCoursesRepository.delete(userCourses);
+        return true;
+    }
+
+    public Boolean disenrollCoursesEnrolledUsingSubscriptionPlan(List<UUID> userUuids) {
+        if (userUuids == null || userUuids.isEmpty()) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        log.info("Disenroll users: {}", userUuids);
+
+        userUuids.forEach(userUid -> {
+            Specification<UserCourses> specification = Specification.where(
+                    (UserCoursesSpecification.hasUserUid(userUid))
+                            .and(UserCoursesSpecification.isEnrollUsingSubscription(true))
+                            .and(UserCoursesSpecification.hasAccessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode()))
+            );
+            List<UserCourses> userCourses = userCoursesRepository.findAll(specification);
+
+            userCourses.forEach(userCourse -> {
+                userCourse.setAccessStatus(UserCourseAccessStatus.INACCESSIBLE.getCode());
+                userCoursesRepository.save(userCourse);
+            });
+
+        });
+
         return true;
     }
 
@@ -488,7 +540,10 @@ public class CourseService {
                         .certificateId(userCourses.getCertificate() != null ?
                                 userCourses.getCertificate().getCertificateId()
                                 : null)
-                        .completedDate(Date.from(userCourses.getCertificate().getCompletedDate()))
+                        .completedDate(userCourses.getCertificate() != null ?(
+                                Date.from(userCourses.getCertificate().getCompletedDate())
+                            ) : null
+                        )
                         .build());
             }
         }
@@ -499,8 +554,13 @@ public class CourseService {
         if (userUid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
+        Specification<UserCourses> specification = Specification.where(
+                UserCoursesSpecification.hasUserUid(userUid)
+                        .and(UserCoursesSpecification.hasAccessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode()))
+        );
 
-        return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+        return userCoursesRepository.findAll(specification, pageable);
+        //return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
         /*return userCourses.map(userCourse -> {
             DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
                     .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUid)
@@ -547,7 +607,10 @@ public class CourseService {
         return (day >= 11 && day <= 13) ? "th" : new String[]{"th", "st", "nd", "rd"}[(day % 10 < 4) ? day % 10 : 0];
     }
 
+    @ExecutionTiming
     public CertificateCreationResponse createCertificate(UUID courseId, UUID userId) throws Exception {
+        //long startTime = System.currentTimeMillis();
+
         System.out.println("userid: " + userId + "\n" +
                 "courseId: " + courseId);
 
@@ -569,6 +632,7 @@ public class CourseService {
 
         User user = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString());
         if (user == null) {
+            log.error("Error while get user by user id: " + userCourses.getEnrollId().getUserUid());
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
@@ -631,8 +695,8 @@ public class CourseService {
                 }
                 identityClient.updateLeaderboard(leaderboardUpdateRequest);
             }
-            catch(Exception ignore){
-
+            catch(Exception e){
+                System.out.println("Error in updating leaderboard: " + e);
             }
 
             try{
@@ -670,6 +734,11 @@ public class CourseService {
             log.error(msg, ex);
             throw ex;
         }
+        /*finally {
+            long endTime = System.currentTimeMillis(); // End time measurement
+            long duration = endTime - startTime; // Calculate duration
+            log.info("createCertificate execution time: {} ms", duration); // Log the duration
+        }*/
     }
 
     public CertificateResponse getCertificate(UUID certificateId) throws ExecutionException, InterruptedException {
@@ -721,5 +790,14 @@ public class CourseService {
     public Page<AuthorCourseResponse> getAuthorCourses(Pageable pageable, UUID userId) {
         Page<Course> courses = courseRepository.findByUserId(pageable, userId);
         return courses.map(this::toAuthorCourseResponse);
+    }
+
+    public Boolean hasUserAlreadyEnrollCourse(CheckingUserCourseExistedRequest request) {
+        log.info("Checking user course existed: {}", request.getUserUuid() + " " + request.getProblemId());
+        return userCoursesRepository.existsByProblemIdAndUserIdAAndAccessStatus(
+                request.getProblemId(),
+                request.getUserUuid(),
+                UserCourseAccessStatus.ACCESSIBLE.getCode()
+        );
     }
 }

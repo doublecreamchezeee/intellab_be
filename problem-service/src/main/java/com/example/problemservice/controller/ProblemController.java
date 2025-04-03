@@ -50,6 +50,7 @@ public class ProblemController {
     private final ProblemService problemService;
     private final SolutionService solutionService;
     private final ProblemCommentService problemCommentService;
+    final String defaultRole = "myRole";
 
     @Operation(
             summary = "Create problem"
@@ -65,9 +66,32 @@ public class ProblemController {
             summary = "Get problem by id"
     )
     @GetMapping("/{problemId}")
-    public ResponseEntity<DetailsProblemResponse> getProblem(@PathVariable UUID problemId) {
+    public ResponseEntity<DetailsProblemResponse> getProblem(
+            @PathVariable UUID problemId,
+            @RequestHeader(value = "X-UserId", required = false) String userId,
+            @RequestHeader(value = "X-UserRole", required = false) String role
+    ) {
+
+        if (role == null || role.equals(defaultRole)) {
+            role = "user,free";
+        }
+
+        //log.info("role: {}", (Object) role.split(","));
+        String subscriptionPlan = role.split(",")[1];
+
+        UUID userUuid = null;
+
+        if (userId != null) {
+            String userUid = userId.split(",")[0];
+            userUuid = ParseUUID.normalizeUID(userUid);
+        }
+
         try {
-            DetailsProblemResponse problem = problemService.getProblem(problemId);
+            DetailsProblemResponse problem = problemService.getProblem(
+                    problemId,
+                    subscriptionPlan,
+                    userUuid
+            );
             return ResponseEntity.ok(problem); // Return the problem if found
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.PROBLEM_NOT_EXIST) {
@@ -114,7 +138,7 @@ public class ProblemController {
     public ApiResponse<Page<ProblemRowResponse>> getAllProblem() {
         Pageable pageable = PageRequest.of(0, 1000);
         try {
-            Page<ProblemRowResponse> response = problemService.getAllProblems(pageable);
+            //Page<ProblemRowResponse> response = problemService.getAllProblems(pageable);
             return ApiResponse.<Page<ProblemRowResponse>>builder()
                     .result(problemService.getAllProblems(pageable)).build();
         } catch (AppException e) {

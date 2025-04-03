@@ -7,6 +7,7 @@ import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.vnpay.VNPaySinglePaymentCreationRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
 import com.example.identityservice.dto.response.vnpay.*;
+import com.example.identityservice.enums.account.PaymentFor;
 import com.example.identityservice.service.VNPayService;
 import com.example.identityservice.utility.HashUtility;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +43,7 @@ public class VNPayController {
     )
     @PublicEndpoint
     @PostMapping("/checkout/single-course")
-    public ApiResponse<VNPayPaymentCreationResponse> createOrder(
+    public ApiResponse<VNPayPaymentCreationResponse> createCourseOrder(
             HttpServletRequest request,
             @RequestBody VNPaySinglePaymentCreationRequest vnPaySinglePaymentCreationRequest,
             @RequestHeader("X-UserId") String userId
@@ -187,12 +188,12 @@ public class VNPayController {
     )
     @PublicEndpoint
     @GetMapping("/get-payment/{paymentId}")
-    public ApiResponse<VNPayDetailsPaymentResponse> getPaymentDetails(
+    public ApiResponse<VNPayDetailsPaymentForCourseResponse> getDetailsPaymentForCourse(
             @PathVariable UUID paymentId
     ) {
-        VNPayDetailsPaymentResponse response = vnPayService.getPaymentDetailsByPaymentId(paymentId);
+        VNPayDetailsPaymentForCourseResponse response = vnPayService.getPaymentDetailsByPaymentId(paymentId);
 
-        return ApiResponse.<VNPayDetailsPaymentResponse>builder()
+        return ApiResponse.<VNPayDetailsPaymentForCourseResponse>builder()
                 .message("success")
                 .result(response)
                 .build();
@@ -204,15 +205,16 @@ public class VNPayController {
     )
     @PublicEndpoint
     @GetMapping("/get-payments/me")
-    public ApiResponse<Page<VNPayDetailsPaymentResponse>> getPayments(
+    public ApiResponse<Page<VNPayDetailsPaymentForCourseResponse>> getPaymentsForCourse(
+            @RequestParam PaymentFor paymentFor,
             @ParameterObject Pageable pageable,
             @RequestHeader(value = "X-UserId", required = true) String userId
     ) {
         userId = userId.split(",")[0];
 
-        Page<VNPayDetailsPaymentResponse> response = vnPayService.getListPaymentDetailsByUserUid(userId, pageable);
+        Page<VNPayDetailsPaymentForCourseResponse> response = vnPayService.getListDetailsPaymentForCourseByUserUid(userId, pageable, paymentFor);
 
-        return ApiResponse.<Page<VNPayDetailsPaymentResponse>>builder()
+        return ApiResponse.<Page<VNPayDetailsPaymentForCourseResponse>>builder()
                 .message("success")
                 .result(response)
                 .build();

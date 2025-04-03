@@ -9,6 +9,7 @@ import com.example.identityservice.constant.response.vnpay.VNPayQueryResponseCod
 import com.example.identityservice.constant.response.vnpay.VNPayRefundResponseCode;
 import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.course.DisenrollCourseRequest;
+import com.example.identityservice.dto.request.course.DisenrollCoursesEnrolledUsingSubscriptionPlanRequest;
 import com.example.identityservice.dto.request.course.EnrollCourseRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayQueryRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayRefundRequest;
@@ -17,7 +18,10 @@ import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
 import com.example.identityservice.dto.response.vnpay.*;
+import com.example.identityservice.enums.account.PaymentFor;
 import com.example.identityservice.enums.account.PremiumDuration;
+import com.example.identityservice.enums.account.PremiumPackage;
+import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.enums.vnpay.VNPayRefundType;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
@@ -29,6 +33,7 @@ import com.example.identityservice.model.composite.VNPayPaymentCoursesId;
 import com.example.identityservice.repository.VNPayPaymentCoursesRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.repository.VNPayPaymentRepository;
+import com.example.identityservice.specification.VNPayPaymentSpecification;
 import com.example.identityservice.utility.HashUtility;
 import com.example.identityservice.utility.ParseUUID;
 import com.example.identityservice.utility.StringUtility;
@@ -41,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -120,7 +126,7 @@ public class VNPayService {
                     .transactionReference(paymentUrlResponse.getTransactionReference())
                     .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
                     .orderDescription(orderDescription)
-                    .paymentFor("Course")
+                    .paymentFor(PaymentFor.COURSE.getCode())
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -164,6 +170,16 @@ public class VNPayService {
             String ipAddr, VNPayUpgradeAccountRequest request, String userUid
     ) {
         try {
+            if (request.getIsChangePlan()==null || !request.getIsChangePlan()) {
+                vnPayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
+                        userUid,
+                        PremiumPackageStatus.ACTIVE.getCode()
+                ).ifPresent(premiumPackage -> {
+                            throw new AppException(ErrorCode.USER_ALREADY_HAS_SUBSCRIPTION);
+                        }
+                );
+            }
+
             // create description for order
             String orderDescription = request.getPremiumPackage().getCode(); // null;
 
@@ -175,12 +191,14 @@ public class VNPayService {
 
             //orderDescription += request.getPremiumPackage().getCode() + " package ";
 
-            Long price = Objects.equals(
-                        request.getPremiumDuration().getCode(),
-                        PremiumDuration.MONTHLY_PACKAGE.getCode()
-                )
+            Long price =
+                    Objects.equals(
+                            request.getPremiumDuration().getDuration(),
+                            PremiumDuration.MONTHLY_PACKAGE.getDuration()
+                    )
+
                 ? request.getPremiumPackage().getPrice()
-                : (long) (request.getPremiumPackage().getPrice() * 12 * 0.9f);   // 10% discount for yearly package
+                : (long) ((request.getPremiumPackage().getPrice()-100000L) * 12);   // cost only 11 months for yearly package
 
             // Create payment url
             VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
@@ -219,7 +237,7 @@ public class VNPayService {
                     .userUid(userUid)
                     .userUuid(ParseUUID.normalizeUID(userUid))
                     .transactionStatus("01") // Pending transaction
-                    .totalPaymentAmount(Float.valueOf(request.getPremiumPackage().getPrice()))
+                    .totalPaymentAmount(Float.valueOf(price))
                     .currency(request.getVNPayCurrencyCode().getCode())
                     .paidAmount(0.0f)
                     .bankCode(request.getVNPayBankCode().getCode())
@@ -227,7 +245,7 @@ public class VNPayService {
                     .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
                     .vnPayPaymentPremiumPackage(paymentPremiumPackage)
                     .orderDescription(orderDescription)
-                    .paymentFor("Subscription")
+                    .paymentFor(PaymentFor.SUBSCRIPTION.getCode())
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -565,31 +583,45 @@ public class VNPayService {
                                 }
 
                                 if (payment.getVnPayPaymentPremiumPackage()!=null) {
+                                    // if user has already had a subscription, then set the current subscription to inactive
+
+                                    List<VNPayPaymentPremiumPackage> premiumPackages = vnPayPaymentPremiumPackageRepository.findAllByUserUidAndStatus(
+                                            payment.getUserUid(),
+                                            PremiumPackageStatus.ACTIVE.getCode()
+                                    );
+
+                                    premiumPackages.forEach(premiumPackage -> {
+                                        premiumPackage.setStatus(PremiumPackageStatus.INACTIVE.getCode());
+                                        vnPayPaymentPremiumPackageRepository.save(premiumPackage);
+                                    });
+
                                     VNPayPaymentPremiumPackage paymentPremiumPackage = payment.getVnPayPaymentPremiumPackage();
                                     paymentPremiumPackage.setStartDate(calendar.getTime().toInstant());
                                     paymentPremiumPackage.setEndDate(calendar.getTime().toInstant().plusSeconds(paymentPremiumPackage.getDuration() * 24 * 60 * 60));
-                                    paymentPremiumPackage.setStatus("Active");
+                                    paymentPremiumPackage.setStatus(PremiumPackageStatus.ACTIVE.getCode());
                                     vnPayPaymentPremiumPackageRepository.save(paymentPremiumPackage);
                                     log.info("Upgrade account successfully with premium package: {}", paymentPremiumPackage.getPackageType());
+
+                                    if (paymentPremiumPackage.getPackageType().equals(PremiumPackage.ALGORITHM_PLAN.getCode())
+                                    ) {
+                                        boolean changeCourseOrPremiumPlanToProblemPlan = false;
+
+                                        for (VNPayPaymentPremiumPackage premiumPackage : premiumPackages) {
+                                           if (premiumPackage.getPackageType().equals(PremiumPackage.COURSE_PLAN.getCode())
+                                                    || premiumPackage.getPackageType().equals(PremiumPackage.PREMIUM_PLAN.getCode())
+                                           ) {
+                                               changeCourseOrPremiumPlanToProblemPlan = true;
+                                               break;
+                                           }
+                                        }
+
+                                        if (changeCourseOrPremiumPlanToProblemPlan) {
+                                            disenrollCourses(List.of(payment.getUserUuid()));
+                                        }
+                                    }
+
                                 }
                                 // Update payment status in course-service
-                                /*VNPayPaymentCourses paymentCourses = vnPayPaymentCoursesRepository
-                                        .findByPayment_paymentId(
-                                                payment.getPaymentId()
-                                        )
-                                        .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
-
-                                try {
-                                    ApiResponse<UserCoursesResponse> userCoursesResponse = courseClient.enrollPaidCourse(
-                                            EnrollCourseRequest.builder()
-                                                    .courseId(paymentCourses.getId().getCourseId())
-                                                    .userUid(payment.getUserUid())
-                                                    .build()
-                                    ).block();
-                                    log.info("Enroll course response from course service: {}", userCoursesResponse);
-                                } catch (Exception e) {
-                                    throw new AppException(ErrorCode.CANNOT_ENROLL_COURSE);
-                                }*/
 
                             } else {
                                 //Xử lý/Cập nhật tình trạng giao dịch thanh toán "Không thành công"
@@ -637,6 +669,19 @@ public class VNPayService {
             throw new AppException(ErrorCode.CANNOT_HANDLE_IPN_CALLBACK);
         }
 
+    }
+
+    private void disenrollCourses(List<UUID> uuids) {
+        try {
+            courseClient.disenrollCoursesEnrolledUsingSubscriptionPlan(
+                    DisenrollCoursesEnrolledUsingSubscriptionPlanRequest
+                            .builder()
+                            .listUserUuid(uuids)
+                            .build()
+            ).block();
+        } catch (Exception e) {
+            log.error("Error calling course service while disenrolling courses for users with expired premium packages", e);
+        }
     }
 
     @Transactional
@@ -740,11 +785,11 @@ public class VNPayService {
     }
 
     @Transactional
-    public VNPayDetailsPaymentResponse getPaymentDetailsByPaymentId(UUID paymentId) {
+    public VNPayDetailsPaymentForCourseResponse getPaymentDetailsByPaymentId(UUID paymentId) {
         VNPayPayment payment = vnPayPaymentRepository.findById(paymentId)
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
-        VNPayDetailsPaymentResponse response = vnPaymentMapper.toVNPayDetailsPaymentResponse(payment);
+        VNPayDetailsPaymentForCourseResponse response = vnPaymentMapper.toVNPayDetailsPaymentForCourseResponse(payment);
 
         response.setTransactionStatusDescription(
                 VNPayTransactionStatus
@@ -762,9 +807,12 @@ public class VNPayService {
         return response;
     }
 
-    public Page<VNPayDetailsPaymentResponse> getListPaymentDetailsByUserUid(String userUid, Pageable pageable) {
-        Page<VNPayPayment> payments = vnPayPaymentRepository.findAllByUserUid(userUid, pageable);
-        return payments.map(vnPaymentMapper::toVNPayDetailsPaymentResponse);
+    public Page<VNPayDetailsPaymentForCourseResponse> getListDetailsPaymentForCourseByUserUid(String userUid, Pageable pageable, PaymentFor paymentFor) {
+        Specification<VNPayPayment> specification = VNPayPaymentSpecification.hasPaymentFor(paymentFor.getCode())
+                .and(VNPayPaymentSpecification.hasUserUid(userUid));
+
+        Page<VNPayPayment> payments = vnPayPaymentRepository.findAll(specification, pageable);
+        return payments.map(vnPaymentMapper::toVNPayDetailsPaymentForCourseResponse);
     }
 
     public UUID getPaymentIdByTransactionReference(String transactionReference) {

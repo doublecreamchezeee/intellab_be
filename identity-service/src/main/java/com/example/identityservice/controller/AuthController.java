@@ -90,8 +90,9 @@ public class AuthController {
             summary = "Refresh token, re"
     )
     @PublicEndpoint
-    @PostMapping(value = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TokenSuccessResponse> refreshToken(@RequestBody String refreshToken) {
+    @PostMapping(value = "/refresh")
+    public ResponseEntity<TokenSuccessResponse> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("token"); // ✅ Extract from JSON
         RefreshTokenSuccessResponse refreshTokenResponse = authService.refreshAccessToken(refreshToken);
         TokenSuccessResponse response = TokenSuccessResponse.builder()
                 .accessToken(refreshTokenResponse.getId_token())
@@ -129,13 +130,15 @@ public class AuthController {
         authService.setVerifiedListEmails(request.getEmails());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     @PublicEndpoint
     @GetMapping("/role")
     public ResponseEntity<Collection<? extends GrantedAuthority>> roleEndpoint() {
         return ResponseEntity.ok(SecurityUtil.getUserAuthorities());
     }
+
     @GetMapping("/premium")
-    public PremiumSubscription getSubscription(@RequestParam String uid) {
-        return firestoreService.getUserPremiumSubscriptionByUid(uid);
+    public PremiumSubscriptionResponse getSubscription(@RequestParam String uid) {
+        return authService.getUserPremiumSubscriptionByUid(uid);
     }
 }

@@ -19,6 +19,7 @@ public interface ProblemMapper {
     @Mapping(target = "hintCount", expression = "java(problem.getHints().size())")
     @Mapping(target = "isDone", ignore = true)
     @Mapping(target = "categories", ignore = true)
+    @Mapping(target = "isPublished", source = "isPublished")
     ProblemRowResponse toProblemRowResponse(Problem problem);
 
     @Mapping(target = "problemStructure", ignore = true)

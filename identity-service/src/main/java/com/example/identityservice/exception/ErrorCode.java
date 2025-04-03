@@ -30,6 +30,7 @@ public enum ErrorCode {
     PAYMENT_NOT_FOUND(404, "Payment not found", HttpStatus.NOT_FOUND),
     CANNOT_ENROLL_COURSE(500, "Cannot enroll course! Course service error", HttpStatus.INTERNAL_SERVER_ERROR),
     PAYMENT_NOT_SUCCESSFUL(500, "Payment not successful", HttpStatus.INTERNAL_SERVER_ERROR),
+    USER_ALREADY_HAS_SUBSCRIPTION(409, "User already has subscription", HttpStatus.CONFLICT),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

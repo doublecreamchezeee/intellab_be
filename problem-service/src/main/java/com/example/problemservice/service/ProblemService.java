@@ -3,6 +3,7 @@ package com.example.problemservice.service;
 import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.converter.ProblemStructureConverter;
 import com.example.problemservice.client.BoilerplateClient;
+import com.example.problemservice.dto.request.course.CheckingUserCourseExistedRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
@@ -10,6 +11,7 @@ import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
+import com.example.problemservice.enums.PremiumPackage;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.DefaultCodeMapper;
@@ -87,10 +89,38 @@ public class ProblemService {
         return response;
     }
 
-    public DetailsProblemResponse getProblem(UUID problemId) {
-        return problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
+    public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan, UUID userUuid) {
+        DetailsProblemResponse response = problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         ));
+
+        if (response.getIsPublished()
+            || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
+            || subscriptionPlan.equals(PremiumPackage.ALGORITHM_PLAN.getCode())
+        ) {
+            return response;
+        }
+
+        // Check if the problem is in the course plan,
+        // so that the user can access this private problem
+        if (subscriptionPlan.equals(
+                PremiumPackage.COURSE_PLAN.getCode()
+        )) {
+            Boolean hasUserAlreadyEnrollCourse = courseClient.checkEnrolled(
+                    CheckingUserCourseExistedRequest.builder()
+                            .problemId(problemId)
+                            .userUuid(userUuid)
+                            .build()
+            ).getResult();
+
+            log.info("hasUserAlreadyEnrollCourse: {}", hasUserAlreadyEnrollCourse);
+
+            if (hasUserAlreadyEnrollCourse) {
+                return response;
+            }
+        }
+
+        throw new AppException(ErrorCode.PROBLEM_NOT_PUBLISHED);
     }
 
     public List<Problem> getAllProblems() {

@@ -5,12 +5,15 @@ import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.response.auth.*;
+import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
 import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
+import com.example.identityservice.mapper.VNPayPaymentPremiumPackageMapper;
 import com.example.identityservice.model.User;
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
+import com.example.identityservice.specification.VNPayPaymentPremiumPackageSpecification;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -20,6 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +39,7 @@ public class AuthService {
     private final EmailService emailService;
     private final FirestoreService firestoreService;
     private final VNPayPaymentPremiumPackageRepository vnpayPaymentPremiumPackageRepository;
+    private final VNPayPaymentPremiumPackageMapper vnpayPaymentPremiumPackageMapper;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -145,11 +150,22 @@ public class AuthService {
             if (role.equals("user")) {
                 //PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
 
-                VNPayPaymentPremiumPackage pre = vnpayPaymentPremiumPackageRepository.findByUserUid(decodeToken.getUid())
+                Specification<VNPayPaymentPremiumPackage> spec = Specification.where(VNPayPaymentPremiumPackageSpecification.hasUserUid(decodeToken.getUid()))
+                        .and(VNPayPaymentPremiumPackageSpecification.hasStatus(PremiumPackageStatus.ACTIVE.getCode()));
+
+                VNPayPaymentPremiumPackage pre =vnpayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
+                                decodeToken.getUid(),
+                                PremiumPackageStatus.ACTIVE.getCode()
+                        )
                         .orElse(null);
+
+                log.info("uid: {}",decodeToken.getUid());
+
+                //vnpayPaymentPremiumPackageRepository.findByUserUid(decodeToken.getUid())
 
                 if (pre != null)
                 {
+                    log.info("premium package: {}", pre.getUserUid());
                     premium = pre.getPackageType();
                     //premium = pre.getPlanType();
                 }
@@ -221,5 +237,34 @@ public class AuthService {
         }
     }
 
+    public PremiumSubscriptionResponse getUserPremiumSubscriptionByUid(String uid) {
+        VNPayPaymentPremiumPackage pre =vnpayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
+                        uid,
+                        PremiumPackageStatus.ACTIVE.getCode()
+                )
+                .orElse(null);
+
+        log.info("uid: {}", uid);
+
+        PremiumSubscriptionResponse response = null;
+        if (pre != null)
+        {
+            log.info("premium package uuid: {}", pre.getUserUid());
+            response = vnpayPaymentPremiumPackageMapper.toPremiumSubscriptionResponse(pre);
+            return response;
+        }
+        else
+        {
+            response = PremiumSubscriptionResponse.builder()
+                    .planType("free")
+                    .userUid(uid)
+                    .userUuid(
+                            ParseUUID.normalizeUID(uid)
+                    )
+                    .build();
+            return response;
+        }
+
+    }
 
 }
