@@ -10,6 +10,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web-services")
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
     implementation("org.postgresql:postgresql:42.5.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.hibernate:hibernate-core:6.2.10.Final")
     implementation("com.google.firebase:firebase-admin:8.1.0")
