@@ -5,7 +5,6 @@ import java.util.List;
 
 
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
-import com.example.identityservice.enums.Role;
 import com.example.identityservice.mapper.UserMapper;
 import com.google.firebase.auth.UserRecord;
 
@@ -24,6 +23,7 @@ public class UserMapperImpl implements UserMapper {
                 .photoUrl(userRecord.getPhotoUrl())
                 .isDisabled(userRecord.isDisabled())
                 .lastSignIn(new Date(userRecord.getUserMetadata().getLastSignInTimestamp()))
+                .isEmailVerified(userRecord.isEmailVerified())
                 .build();
     }
 

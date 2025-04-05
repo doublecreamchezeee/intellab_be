@@ -19,4 +19,5 @@ public class ProblemCreationResponse {
     Boolean isAvailable;
     Boolean isPublished;
     ProblemStructure problemStructure;
+    Boolean hasSolution;
 }

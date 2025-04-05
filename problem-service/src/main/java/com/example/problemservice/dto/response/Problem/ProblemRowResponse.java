@@ -21,4 +21,5 @@ public class ProblemRowResponse {
     Integer hintCount;
     Boolean isPublished;
     List<CategoryResponse> categories;
+    Boolean hasSolution;
 }

@@ -26,4 +26,8 @@ public class UserCoursesSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("accessStatus"), accessStatus);
     }
 
+    public static Specification<UserCourses> hasCertificateId(UUID certificateId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("certificate").get("certificateId"), certificateId);
+    }
+
 }

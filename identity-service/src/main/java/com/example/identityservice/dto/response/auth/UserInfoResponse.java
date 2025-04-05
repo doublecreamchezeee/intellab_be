@@ -1,8 +1,5 @@
 package com.example.identityservice.dto.response.auth;
 
-import com.example.identityservice.enums.Role;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +14,7 @@ public class UserInfoResponse {
     private String firstName;
     private String lastName;
     private String displayName;
-    private boolean emailVerified;
+    private Boolean isEmailVerified;
     private String phoneNumber;
     private String photoUrl;
     private String role;
