@@ -1,5 +1,6 @@
 package com.example.identityservice.controller;
 
+import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.request.auth.ListEmailsRequest;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
@@ -34,6 +35,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final FirestoreService firestoreService;
+    private final FirebaseAuthClient firebaseAuthClient;
 
     @Operation(
             summary = "Register user"
@@ -131,6 +133,16 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Operation(
+            summary = "(testing only) set unverified email"
+    )
+    @PublicEndpoint
+    @PostMapping("/set-unverified-email")
+    public ResponseEntity<HttpStatus> setUnverifiedEmail(@RequestBody ListEmailsRequest request) {
+        authService.setUnverifiedListEmails(request.getEmails());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @PublicEndpoint
     @GetMapping("/role")
     public ResponseEntity<Collection<? extends GrantedAuthority>> roleEndpoint() {
@@ -140,5 +152,15 @@ public class AuthController {
     @GetMapping("/premium")
     public PremiumSubscriptionResponse getSubscription(@RequestParam String uid) {
         return authService.getUserPremiumSubscriptionByUid(uid);
+    }
+
+    @Operation(
+            summary = "(testing only) Get is email verified by user uid"
+    )
+    @PublicEndpoint
+    @GetMapping(value = "/is-email-verified")
+    public ResponseEntity<Boolean> isVerifiedEmail(@RequestParam String uid) {
+        Boolean response = firebaseAuthClient.isEmailVerifiedByUserUid(uid);
+        return ResponseEntity.ok(response);
     }
 }

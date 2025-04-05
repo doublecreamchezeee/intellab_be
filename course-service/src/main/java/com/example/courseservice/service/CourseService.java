@@ -380,7 +380,7 @@ public class CourseService {
         }
 
         // Kiểm tra nếu đã có đăng ký khóa học này
-        return userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+        UserCourses userCoursesResponse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
                 .orElseGet(() -> {
                     // Tạo đối tượng UserCourses mới
                     UserCourses newUserCourses = UserCourses.builder()
@@ -412,6 +412,20 @@ public class CourseService {
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
                 });
+
+        if (userCoursesResponse.getEnrollUsingSubscription()
+         || !userCoursesResponse.getAccessStatus().equals(
+                 UserCourseAccessStatus.ACCESSIBLE.getCode())
+        ) {
+            userCoursesResponse.setAccessStatus(
+                    UserCourseAccessStatus.ACCESSIBLE.getCode()
+            );
+            userCoursesResponse.setEnrollUsingSubscription(false);
+
+            userCoursesResponse = userCoursesRepository.save(userCoursesResponse);
+        }
+
+        return userCoursesResponse;
     }
 
     public UserCourses enrollPaidCourse(
@@ -426,7 +440,7 @@ public class CourseService {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
         // Kiểm tra nếu đã có đăng ký khóa học này
-        return userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+        UserCourses userCoursesResponse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
                 .orElseGet(() -> {
                     // Tạo đối tượng UserCourses mới
                     UserCourses newUserCourses = UserCourses.builder()
@@ -457,6 +471,45 @@ public class CourseService {
                     // Lưu đối tượng UserCourses mới vào cơ sở dữ liệu
                     return userCoursesRepository.save(newUserCourses);
                 });
+
+        if (!userCoursesResponse.getAccessStatus().equals(
+                UserCourseAccessStatus.ACCESSIBLE.getCode()
+        )) {
+            userCoursesResponse.setAccessStatus(
+                    UserCourseAccessStatus.ACCESSIBLE.getCode()
+            );
+
+            userCoursesResponse = userCoursesRepository.save(userCoursesResponse);
+        }
+
+        return userCoursesResponse;
+    }
+
+    public List<UserCourses> reEnrollPaidCourseWhenResubscribePlan(UUID userUid, String subscriptionPlan) {
+        if (userUid == null || subscriptionPlan == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        if (!subscriptionPlan.equals(PremiumPackage.COURSE_PLAN.getCode())
+                && !subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
+        ){
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        Specification<UserCourses> specification = Specification.where(
+                UserCoursesSpecification.hasUserUid(userUid)
+                        .and(UserCoursesSpecification.isEnrollUsingSubscription(true))
+                        .and(UserCoursesSpecification.hasAccessStatus(UserCourseAccessStatus.INACCESSIBLE.getCode()))
+        );
+
+        List<UserCourses> userCoursesResponse = userCoursesRepository.findAll(specification);
+
+        userCoursesResponse.forEach(userCourse -> {
+            userCourse.setAccessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode());
+            userCoursesRepository.save(userCourse);
+        });
+
+        return userCoursesResponse;
     }
 
     public Boolean disenrollCourse(UUID userUid, UUID courseId) {

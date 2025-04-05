@@ -73,7 +73,6 @@ public class FirebaseAuthClient {
     public ValidatedTokenResponse verifyToken(@NonNull final String token) {
         try {
             FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
-
             String userId = decodeToken.getUid(); // Correct way to get user ID
 //            String role = (String) decodeToken.getClaims().getOrDefault("role", "USER"); // Default to "USER" if missing
             String role = firestoreService.getRoleByUid(userId);
@@ -112,6 +111,7 @@ public class FirebaseAuthClient {
                     .email(email) // Ensure email is included
                     .isValidated(true)
                     .message("Token validation successful.")
+                    .isEmailVerified(decodeToken.isEmailVerified())
                     .build();
         } catch (FirebaseAuthException e) {
             return ValidatedTokenResponse.builder()
@@ -211,10 +211,10 @@ public class FirebaseAuthClient {
                     .setAndroidPackageName("com.example.android")
                     .setAndroidInstallApp(true)
                     .setAndroidMinimumVersion("12")
-                    .setDynamicLinkDomain("example.page.link")
+                    .setDynamicLinkDomain("https://example.page.link/summer-sale")
                     .build();
 
-            return firebaseAuth.generatePasswordResetLink(email);
+            return firebaseAuth.generatePasswordResetLink(email, actionCodeSettings);
         } catch (Exception e) {
             throw new FirebaseAuthenticationException();
         }
@@ -251,6 +251,20 @@ public class FirebaseAuthClient {
         }
     }
 
+    public void setUnverifiedListEmails(List<String> emails) {
+        for (String email : emails) {
+            try {
+                UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+
+                UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(userRecord.getUid())
+                        .setEmailVerified(false);
+                firebaseAuth.updateUser(request);
+            } catch (FirebaseAuthException e) {
+                throw new FirebaseAuthenticationException();
+            }
+        }
+    }
+
     public UserInfoResponse getUserInfo(String userId, String email) {
         try {
             UserRecord userRecord;
@@ -280,6 +294,17 @@ public class FirebaseAuthClient {
             throw new RuntimeException("Error finding users by ids: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("Error finding users by ids: " + e.getMessage(), e);
+        }
+    }
+
+    public Boolean isEmailVerifiedByUserUid(String userUid) {
+        try {
+            UserRecord userRecord = firebaseAuth.getUser(
+                    userUid
+            );
+            return userRecord.isEmailVerified();
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
         }
     }
 }

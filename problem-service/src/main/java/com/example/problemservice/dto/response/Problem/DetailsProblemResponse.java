@@ -24,4 +24,5 @@ public class DetailsProblemResponse {
     Solution solution;
     List<ProblemCategory> categories;
     List<Hint> hints;
+    Boolean hasSolution;
 }

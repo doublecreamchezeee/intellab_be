@@ -75,11 +75,11 @@ public class AuthService {
     }
 
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) {
-        boolean isEmailVerified = false;
+       /* boolean isEmailVerified = false;
         isEmailVerified = firebaseAuthClient.isEmailVerified(userLoginRequest.getEmail());
         if (!isEmailVerified) {
             throw new NotVerifiedEmailException();
-        }
+        }*/
         return firebaseAuthClient.login(userLoginRequest);
     }
 
@@ -144,7 +144,7 @@ public class AuthService {
 
     public ValidatedTokenResponse validateToken(@NonNull final String token) {
         try {
-            FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
+            FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
             String role = firestoreService.getRoleByUid(decodeToken.getUid());
             String premium = null;
             if (role.equals("user")) {
@@ -159,13 +159,13 @@ public class AuthService {
                         )
                         .orElse(null);
 
-                log.info("uid: {}",decodeToken.getUid());
+                //log.info("uid: {}",decodeToken.getUid());
 
                 //vnpayPaymentPremiumPackageRepository.findByUserUid(decodeToken.getUid())
 
                 if (pre != null)
                 {
-                    log.info("premium package: {}", pre.getUserUid());
+                    //log.info("premium package: {}", pre.getUserUid());
                     premium = pre.getPackageType();
                     //premium = pre.getPlanType();
                 }
@@ -184,6 +184,7 @@ public class AuthService {
                     .role(role)
                     .premium(premium)
                     .message("Token validation successful.")
+                    .isEmailVerified(decodeToken.isEmailVerified())
                     .build();
         } catch (FirebaseAuthException e) {
             return ValidatedTokenResponse.builder()
@@ -206,10 +207,13 @@ public class AuthService {
             if (email != null) {
                 String link = firebaseAuthClient.generateEmailVerification(email);
                 System.out.println("generate email to " + email + " with link: " + link);
+
+                String htmlContent = "<a href=\"" + link + "\" style=\"color: blue; text-decoration: underline;\">Click here to verify your email</a>";
+
                 emailService.sendMail(
                         email,
                         "Verify your email in Intellab website",
-                        "Congrats on sending your confirmation link: " + link);
+                        "Congrats on sending your confirmation link: " + htmlContent);
             }
         } catch (Exception e) {
             throw new SendingEmailFailedException();
@@ -219,11 +223,12 @@ public class AuthService {
     public void sendPasswordResetLink(String email) {
         try {
             String link = firebaseAuthClient.generatePasswordResetLink(email);
+            String htmlContent = "<a href=\"" + link + "\" style=\"color: blue; text-decoration: underline;\">Click here to reset your password</a>";
 
             emailService.sendMail(
                     email,
                     "Reset your password in Intellab website",
-                    "Congrats on sending your password reset link: " + link);
+                    "Congrats on sending your password reset link: " + htmlContent);
         } catch (Exception e) {
             throw new SendingEmailFailedException();
         }
@@ -237,6 +242,14 @@ public class AuthService {
         }
     }
 
+    public void setUnverifiedListEmails(List<String> email) {
+        try {
+            firebaseAuthClient.setUnverifiedListEmails(email);
+        } catch (Exception e) {
+            throw new RuntimeException("Error verifying email: " + e.getMessage(), e);
+        }
+    }
+
     public PremiumSubscriptionResponse getUserPremiumSubscriptionByUid(String uid) {
         VNPayPaymentPremiumPackage pre =vnpayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
                         uid,
@@ -244,7 +257,7 @@ public class AuthService {
                 )
                 .orElse(null);
 
-        log.info("uid: {}", uid);
+        //log.info("uid: {}", uid);
 
         PremiumSubscriptionResponse response = null;
         if (pre != null)
