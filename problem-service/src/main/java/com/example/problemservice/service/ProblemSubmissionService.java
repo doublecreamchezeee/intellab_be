@@ -2,7 +2,9 @@ package com.example.problemservice.service;
 
 import com.example.problemservice.client.BoilerplateClient;
 import com.example.problemservice.client.CourseClient;
+import com.example.problemservice.client.IdentityClient;
 import com.example.problemservice.client.Judge0Client;
+import com.example.problemservice.dto.request.LeaderboardUpdateRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
 import com.example.problemservice.dto.request.lesson.DonePracticeRequest;
@@ -31,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -49,6 +52,8 @@ public class ProblemSubmissionService {
     private final ProgrammingLanguageRepository programmingLanguageRepository;
     private final TestCaseRepository testCaseRepository;
     private final CourseClient courseClient;
+    private final IdentityClient identityClient;
+    private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
 
     public DetailsProblemSubmissionResponse submitProblem(SubmitCodeRequest request, Boolean base64) {
 
@@ -151,6 +156,20 @@ public class ProblemSubmissionService {
         return response;
     }
 
+
+    protected void updateLeaderboard(int score, String level, UUID userId){
+        LeaderboardUpdateRequest request = new LeaderboardUpdateRequest();
+        request.setType("problem");
+        request.setNewScore((long) score);
+        request.setUserId(userId.toString());
+        switch (level) {
+            case "easy" -> request.getProblemStat().setEasy(1);
+            case "medium" -> request.getProblemStat().setMedium(1);
+            case "hard" -> request.getProblemStat().setHard(1);
+        }
+        identityClient.updateLeaderboard(request).block();
+    }
+
     public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request){
         TestCaseOutput output = testCaseOutputRepository.findByToken(UUID.fromString(request.getToken())).orElseThrow(
                 () -> new AppException(ErrorCode.TEST_CASE_OUTPUT_NOT_EXIST)
@@ -190,7 +209,56 @@ public class ProblemSubmissionService {
         output.setResult_status(request.getStatus().getDescription());
         testCaseOutputRepository.save(output);
 
-        return output.getSubmission();
+        ProblemSubmission result = output.getSubmission();
+        if (result.getTestCasesOutput().size() == result.getProblem().getTestCases().size()) {
+            boolean allAccepted = result.getTestCasesOutput().stream()
+                    .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
+
+            if (allAccepted) {
+                if (!result.getIsSolved())
+                {
+                    result.setIsSolved(true);
+                    ViewSolutionBehavior viewSolutionBehavior = viewSolutionBehaviorRepository
+                            .findByProblemIdAndUserId(result.getProblem().getProblemId(),result.getUserId());
+                    if (viewSolutionBehavior != null)
+                    {
+                        try
+                        {
+                            List<ProblemSubmission> submissions = problemSubmissionRepository
+                                    .findAllByUserIdAndProblem_ProblemId(result.getUserId(), result.getProblem().getProblemId());
+                            if (submissions == null || submissions.isEmpty()) {
+                                //cộng điểm
+                                Problem problem = result.getProblem();
+                                updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
+                            }
+                            else if ( submissions.stream()
+                                    .noneMatch(ProblemSubmission::getIsSolved)) {
+                                // cộng điểm
+                                Problem problem = result.getProblem();
+                                updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Error while update leaderboard: " + e.getMessage());
+                        }
+                        viewSolutionBehaviorRepository.delete(viewSolutionBehavior);
+                    }
+
+                    problemSubmissionRepository.save(result);
+                }
+
+                try {
+                    courseClient.donePracticeByProblemId(
+                            result.getProblem().getProblemId(),
+                            result.getUserId()
+                    );
+                } catch (Exception e) {
+                    log.error("Error while calling course service: {}", e.getMessage());
+                }
+
+            }
+        }
+
+        return result;
     }
 
     public ProblemSubmission updateSubmissionResult(UUID submissionId) {

@@ -46,7 +46,6 @@ public interface IdentityClient {
 //            @RequestHeader("X-UserId") String userUid,
 //            @ParameterObject Pageable pageable
 //    );
-    @Async
     @PostExchange(url = "/notifications")
     Mono<ApiResponse<NotificationResponse>> postNotifications(
             @RequestBody NotificationRequest request

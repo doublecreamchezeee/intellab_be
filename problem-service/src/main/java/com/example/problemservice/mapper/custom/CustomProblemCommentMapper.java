@@ -218,7 +218,6 @@ public class CustomProblemCommentMapper {
                 }
             }
         }
-
         return problemComments;
     }
 

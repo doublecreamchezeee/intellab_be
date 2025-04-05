@@ -601,7 +601,7 @@ public class CourseController {
             @ParameterObject Pageable pageable,
             @RequestParam(name = "childrenPage", required = false, defaultValue = "0") Integer childrenPage,
             @RequestParam(name = "childrenSize", required = false, defaultValue = "5") Integer childrenSize,
-            @RequestParam(defaultValue = "lastModified", required = false) String childrenSortBy,
+            @RequestParam(defaultValue = "created", required = false) String childrenSortBy,
             @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder
     ) {
         UUID userId = null;
@@ -625,7 +625,6 @@ public class CourseController {
                 : Sort.by(childrenSortBy).ascending();
 
         Pageable childrenPageable = PageRequest.of(childrenPage, childrenSize, sort);
-
 
         return ApiResponse.<Page<CommentResponse>>builder()
                 .result(commentService.getComments(courseId, userId, pageable, childrenPageable))
@@ -718,25 +717,25 @@ public class CourseController {
     }
 
     @PutMapping("/comments/{commentId}/upvote")
-    public ApiResponse<CommentResponse> upVoteComment(
+    public ApiResponse<Long> upVoteComment(
             @RequestHeader("X-UserId") String userUid,
             @PathVariable("commentId") UUID commentId){
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
-        return ApiResponse.<CommentResponse>builder()
+        return ApiResponse.<Long>builder()
                 .result(commentService.upvoteComment(userId, commentId)).build();
     }
 
 
     @PutMapping("/comments/{commentId}/cancelUpvote")
-    public ApiResponse<CommentResponse> cancelUpvoteComment(
+    public ApiResponse<Long> cancelUpvoteComment(
             @RequestHeader("X-UserId") String userUid,
             @PathVariable("commentId") UUID commentId ) {
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
-        return ApiResponse.<CommentResponse>builder()
+        return ApiResponse.<Long>builder()
                 .result(commentService.cancelUpvoteComment(userId, commentId)).build();
     }
 
