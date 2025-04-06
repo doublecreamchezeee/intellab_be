@@ -35,9 +35,11 @@ public class Comment {
     @CreationTimestamp
     Instant created = Instant.now();
 
-    @UpdateTimestamp
     @Column(name = "last_modified")
     Instant lastModified = Instant.now();
+
+    @Column(name = "number_of_likes")
+    Long numberOfLikes = 0L;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)

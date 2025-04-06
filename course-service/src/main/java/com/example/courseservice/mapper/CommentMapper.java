@@ -24,9 +24,6 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class CommentMapper {
-    @Autowired
-    private final FirestoreService firestoreService;
-    private final IdentityClient identityClient;
 
     @SneakyThrows
     public CommentResponse toResponse(Comment comment) {
@@ -36,7 +33,7 @@ public class CommentMapper {
         return CommentResponse.builder()
                 .commentId(comment.getCommentId())
                 .content(comment.getContent())
-                .numberOfLikes(comment.getReactions().stream().filter(Reaction::getActive).count())
+                .numberOfLikes(comment.getNumberOfLikes())
                 .created(comment.getCreated())
                 .lastModified(comment.getLastModified())
                 .userId(comment.getUserId())

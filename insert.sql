@@ -394,7 +394,7 @@ create table courses
         primary key,
     course_name    varchar(255),
     description    text,
-    level          varchar(20) check(level in ('Beginner','Intermediate','Advance')),
+    level          varchar(20) check(level in ('Beginner','Intermediate','Advanced')),
     price          numeric(11, 2) default 0.00,
     unit_price     varchar(10) default 'VNĐ',
     user_id        uuid,

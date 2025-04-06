@@ -222,6 +222,9 @@ public class CommentService {
 
         Reaction reactions = new Reaction(id, comment, true);
         comment.getReactions().add(reactions);
+        comment.setNumberOfLikes(comment.getReactions()
+                .stream().filter(Reaction::getActive)
+                .count());
         comment = commentRepository.save(comment);
 
 //        CommentResponse response = commentMapper.toResponse(comment);
@@ -235,7 +238,7 @@ public class CommentService {
         if (!userId.equals(comment.getUserId()) && !isExisted) {
             notificationService.upvoteCommentNotification(comment,userId);
         }
-        return comment.getReactions().stream().filter(Reaction::getActive).count();
+        return comment.getNumberOfLikes();
     }
 
 
@@ -253,7 +256,13 @@ public class CommentService {
         reaction.setActive(false);
         reactionRepository.save(reaction);
 
-        return comment.getReactions().stream().filter(Reaction::getActive).count();
+        comment.setNumberOfLikes(comment.getReactions()
+                .stream()
+                .filter(Reaction::getActive)
+                .count());
+
+        comment = commentRepository.save(comment);
+        return comment.getNumberOfLikes();
     }
 
     public Boolean removeComment(UUID commentId, UUID userId) {
