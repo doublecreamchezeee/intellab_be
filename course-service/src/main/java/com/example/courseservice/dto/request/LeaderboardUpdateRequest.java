@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class LeaderboardUpdateRequest {
     private String userId;
@@ -14,6 +13,12 @@ public class LeaderboardUpdateRequest {
     private Long additionalScore;
     private ProblemStat problemStat;
     private CourseStat courseStat;
+
+    public LeaderboardUpdateRequest()
+    {
+        problemStat = new ProblemStat(0,0,0,0);
+        courseStat = new CourseStat(0,0,0,0);
+    }
 
     @Data
     @Builder

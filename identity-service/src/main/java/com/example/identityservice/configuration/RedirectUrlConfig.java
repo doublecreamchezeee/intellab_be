@@ -15,15 +15,13 @@ public class RedirectUrlConfig {
     @Value("${FE_URL}")
     String feUrl;
 
-    @Value("${HOST_NAME}")
-    String beHostName;
-
-    @Value("${IDENTITY_PORT}")
-    String bePort;
-
     String redirectUrl;// = feUrl + "/payment-result?paymentId=";
 
     String updateAccessTokenUrl;// = feUrl + "/update-access-token";
+
+    @Value("${CALLBACK_DOMAIN}")
+    String callbackDomain;
+
     @PostConstruct
     public void init(){
         this.redirectUrl = feUrl + "/payment-result?paymentId=";

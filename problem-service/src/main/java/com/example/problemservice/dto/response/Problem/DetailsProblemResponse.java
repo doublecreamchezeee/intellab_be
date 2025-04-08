@@ -22,6 +22,7 @@ public class DetailsProblemResponse {
     Boolean isPublished;
     List<TestCase> testCases;
     Solution solution;
+    Boolean ViewedSolution;
     List<ProblemCategory> categories;
     List<Hint> hints;
     Boolean hasSolution;

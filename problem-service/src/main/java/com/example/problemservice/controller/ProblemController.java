@@ -308,4 +308,20 @@ public class ProblemController {
                 )
                 .build();
     }
+
+    @PostMapping("/viewSolution")
+    public ApiResponse<Boolean> viewSolutionByProblemId(
+            @RequestHeader("X-UserId") String userUid,
+            @RequestParam UUID problemId) {
+        userUid = userUid.split(",")[0];
+        if (userUid == null) {
+            return ApiResponse.<Boolean>builder()
+                    .message("User ID is null")
+                    .code(401)
+                    .result(false).build();
+        }
+        return ApiResponse.<Boolean>builder()
+                .result(problemService.viewSolution(problemId, ParseUUID.normalizeUID(userUid)))
+                .build();
+    }
 }

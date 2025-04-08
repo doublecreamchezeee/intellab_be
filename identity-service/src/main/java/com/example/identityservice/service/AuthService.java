@@ -305,10 +305,7 @@ public class AuthService {
     public String generateCustomVerificationLink(String email) {
         try {
             return new StringBuilder()
-                    .append("http://")
-                    .append(redirectUrlConfig.getBeHostName())
-                    .append(":")
-                    .append(redirectUrlConfig.getBePort())
+                    .append(redirectUrlConfig.getCallbackDomain())
                     .append("/identity/auth/callback-set-verified-email")
                     .append("?email=")
                     .append(email)

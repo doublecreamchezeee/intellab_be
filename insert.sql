@@ -13,11 +13,11 @@ create table problems
 (
     problem_id         uuid not null default uuid_generate_v4()
         primary key,
-    acceptance_rate    numeric(5, 2) default 0,
-    average_rating     numeric(5, 2) default 0,
-    description        text,
-    problem_level      varchar(20),
-    problem_name       varchar(255),
+    acceptance_rate    numeric(5, 2) default 0 check(acceptance_rate>=0.0 and acceptance_rate <= 100.00),
+    average_rating     numeric(5, 2) default 0 check(average_rating >= 0.0 and average_rating <= 5.0),
+    description        text default '',
+    problem_level      varchar(20) check(problem_level in ('easy','medium','hard')) default 'easy',
+    problem_name       varchar(255) not null,
     score              integer,
     is_available       boolean       default false,
     is_published       boolean       default false,
@@ -92,7 +92,7 @@ create table problem_submissions
         constraint fkatyso4hx6mtu96ixk88g328er
             references problems,
     is_solved            boolean,
-    created_at           timestamp(6)
+    created_at           timestamp(6) default current_timestamp
 );
 
 alter table problem_submissions
@@ -178,7 +178,8 @@ create table exercises
     exercise_id   uuid not null default uuid_generate_v4()
         primary key,
     description   text,
-    exercise_name varchar(255)
+    exercise_name varchar(255),
+	passing_score int
 );
 
 alter table exercises
@@ -213,7 +214,7 @@ alter table achievements
 create table leaderboard
 (
     user_id        uuid not null,
-    score          bigint,
+    score          bigint not null default 0,
     leaderboard_id uuid not null
         primary key,
     advanced       integer,
@@ -234,14 +235,14 @@ create table notifications
 (
     id           uuid not null
         primary key,
-    message      text,
+    message      text default '',
     recipient_id uuid,
-    timestamp    timestamp(6) with time zone,
-    title        varchar(255),
+    timestamp    timestamp(6) with time zone default current_timestamp,
+    title        varchar(255) default '',
     type         smallint
         constraint notifications_type_check
             check ((type >= 0) AND (type <= 3)),
-    mark_as_read boolean
+    mark_as_read boolean default false
 );
 
 alter table notifications
@@ -253,10 +254,10 @@ create table questions
     question_id      uuid not null default uuid_generate_v4()
         primary key,
     correct_answer   varchar(255),
-    created_at       timestamp(6) with time zone,
+    created_at       timestamp(6) with time zone default current_timestamp,
     question_content text,
-    question_type    char,
-    status           varchar(10),
+    question_type    char check(question_type in ('S','M')),
+    status           varchar(10) check (status in ('active', 'unavailable')),
     updated_at       timestamp(6) with time zone
 );
 
@@ -322,10 +323,12 @@ create table topics
         primary key,
     content         text,
     number_of_likes bigint default 0,
-    post_reach      varchar(10),
+    post_reach      varchar(10) check (post_reach in ('public', 'private')) default 'public',
     title           varchar(255),
     user_id         varchar(255)
 );
+
+
 
 alter table topics
     owner to postgres;
@@ -336,7 +339,7 @@ create table comments
         primary key,
     content            text,
     number_of_likes bigint default 0,
-    created            timestamp(6) with time zone,
+    created            timestamp(6) with time zone default current_timestamp,
     last_modified      timestamp(6) with time zone,
     user_id            uuid,
     parent_comment_id  uuid
@@ -359,7 +362,8 @@ create table comment_reactions
     comment_comment_id uuid not null
         constraint fkq6o8wtr8e4nhe4ya9yhnm4mli
             references comments,
-    primary key (comment_comment_id, user_id)
+    primary key (comment_comment_id, user_id),
+    active boolean default true
 );
 
 alter table comment_reactions
@@ -390,9 +394,9 @@ create table courses
         primary key,
     course_name    varchar(255),
     description    text,
-    level          varchar(20),
-    price          numeric(11, 2),
-    unit_price     varchar(10),
+    level          varchar(20) check(level in ('Beginner','Intermediate','Advanced')),
+    price          numeric(11, 2) default 0.00,
+    unit_price     varchar(10) default 'VNĐ',
     user_id        uuid,
     topic_id       uuid
         constraint uk23uffat5pnitvcg67ugi4kvck
@@ -400,7 +404,7 @@ create table courses
         constraint fklljvfay1x0yv1gm2xmd6s7j9b
             references topics,
     average_rating double precision,
-    review_count   integer,
+    review_count   integer default 0,
 	score          integer
 );
 
@@ -414,7 +418,7 @@ create table lessons
     content      text,
     description  text,
     lesson_name  varchar(255),
-    lesson_order integer,
+    lesson_order integer not null default 1,
     problem_id   uuid,
     course_id    uuid                            not null
         constraint fk2uhy91p0gnptep0xxwaal7gnu
@@ -436,7 +440,7 @@ create table learning_lesson
     is_done_practice   boolean,
     is_done_theory     boolean,
     last_accessed_date timestamp(6) with time zone,
-    status             varchar(10),
+    status             varchar(10) check(status in ('New','Done','Learning')),
     user_id            uuid,
     lesson_id          uuid
         constraint fktl0duxtv32rt2myr59sv7d3r3
@@ -504,10 +508,10 @@ create table reviews
     review_id uuid    not null default uuid_generate_v4()
         primary key,
     comment   text,
-    rating    integer not null,
+    rating    integer not null check (rating >= 0 and rating <= 5),
     user_uuid   uuid,
     user_uid varchar,
-    create_at timestamp(6) with time zone,
+    create_at timestamp(6) with time zone default current_timestamp,
     last_modified_at timestamp(6) with time zone,
     course_id uuid    not null
         constraint fkl9h49973yigjg39ov07a9mog6
@@ -521,7 +525,7 @@ create table certificates
     certificate_id  uuid not null
         primary key,
     certificate_url text,
-    completed_date  timestamp(6) with time zone
+    completed_date  timestamp(6) with time zone default current_timestamp
 );
 
 alter table certificates
@@ -531,7 +535,7 @@ create table user_courses
 (
     user_uid           uuid not null,
     last_accessed_date timestamp(6) with time zone,
-    progress_percent   numeric(5, 2),
+    progress_percent   numeric(5, 2) check ((progress_percent>= 0.00) and (progress_percent <= 100.00)),
     status             varchar(10),
     latest_lesson_id   uuid,
     enroll_using_subscription boolean default FALSE,
@@ -733,6 +737,18 @@ create table vnpay_payment_courses
 );
 
 alter table vnpay_payment_courses
+    owner to postgres;
+
+create table view_solution_behaviors
+(
+    id         integer generated by default as identity
+        primary key,
+    created_at timestamp(6),
+    problem_id uuid,
+    user_id    uuid
+);
+
+alter table view_solution_behaviors
     owner to postgres;
 
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('dbfea360-dda9-46a5-9487-ea624080bb60', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);

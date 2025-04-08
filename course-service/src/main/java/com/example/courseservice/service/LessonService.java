@@ -1,6 +1,9 @@
 package com.example.courseservice.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.courseservice.client.ProblemClient;
+import com.example.courseservice.configuration.DotenvConfig;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.exercise.ExerciseCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
@@ -29,7 +32,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +56,8 @@ public class LessonService {
 
     AssignmentDetailMapper assignmentDetailMapper;
     OptionMapper optionMapper;
+
+
 
 
     //@Qualifier("learningLessonRepositoryCustomImpl")
@@ -547,6 +554,13 @@ public class LessonService {
         userCoursesRepository.save(userCourses);
 
         return true;
+    }
+    public String uploadFile(MultipartFile file, UUID courseId, UUID userId) throws IOException {
+        Cloudinary cloudinary = new Cloudinary(DotenvConfig.get("CLOUDINARY_URL"));
+        String path = "CourseImages/"+ userId + "/" + courseId;
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap("folder", path));
+        return uploadResult.get("secure_url").toString(); // Trả về đường dẫn ảnh đã upload
     }
 }
 

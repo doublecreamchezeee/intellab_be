@@ -4,21 +4,21 @@ package com.example.courseservice.service;
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
-import com.example.courseservice.dto.request.notification.NotificationRequest;
+import com.example.courseservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.courseservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
+import com.example.courseservice.dto.response.profile.MultipleProfileInformationResponse;
+import com.example.courseservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.CommentMapper;
 import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.Course;
-import com.example.courseservice.model.Firestore.User;
 import com.example.courseservice.model.Reaction;
 import com.example.courseservice.model.compositeKey.ReactionID;
 import com.example.courseservice.repository.CommentRepository;
 import com.example.courseservice.repository.CourseRepository;
 import com.example.courseservice.repository.ReactionRepository;
-import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,8 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -42,16 +41,30 @@ public class CommentService {
     private final ReactionRepository reactionRepository;
     private final IdentityClient identityClient;
     private final FirestoreService firestoreService;
+    private final NotificationService notificationService;
 
     public Page<CommentResponse> getComments(UUID courseId, UUID userId, Pageable pageable, Pageable childrenPageable) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(()-> new AppException(ErrorCode.COURSE_NOT_EXISTED));
         Page<Comment> comments = commentRepository.findByTopicAndParentCommentIsNull(course.getTopic(), pageable);
 
+        List<UUID> uuids = extractUuidFromComments(comments.getContent());
 
-        System.out.println(userId);
+        List<String> uids = uuids.stream().map(uuid -> {
+            try {
+                return firestoreService.getUserById(uuid.toString()).getUid();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
 
-        return comments.map( comment -> {
+        MultipleProfileInformationResponse profileInformation = Objects.requireNonNull(identityClient.getMultipleProfileInformation(
+                new MultipleProfileInformationRequest(
+                        uids
+                )
+        ).block()).getResult();
+
+        Page<CommentResponse> response = comments.map( comment -> {
             CommentResponse commentResponse = commentMapper.toResponse(comment);
 
             Page<Comment> childrenComments = commentRepository.findByParentComment(comment, childrenPageable);
@@ -63,7 +76,7 @@ public class CommentService {
                 childrenCommentResponse.setIsOwner(userId != null ? childrenComment.getUserId().equals(userId) : false);
 
                 childrenCommentResponse.setIsUpvoted(childrenComment.getReactions()
-                        .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+                        .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId) && reaction.getActive()));
 
                 return childrenCommentResponse;
             }));
@@ -71,10 +84,17 @@ public class CommentService {
             commentResponse.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
 
             commentResponse.setIsUpvoted(comment.getReactions()
-                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId) && reaction.getActive()));
 
             return commentResponse;
-                });
+        });
+
+        if(profileInformation != null && !profileInformation.getProfiles().isEmpty())
+        {
+            response = commentMapper.mapProfileToCommentResponsePage(response, profileInformation);
+        }
+
+        return response;
     }
 
     @Transactional
@@ -117,27 +137,40 @@ public class CommentService {
         Comment result = commentRepository.save(comment);
 
         CommentResponse response =  commentMapper.toResponse(result);
-        response.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
+        response.setIsOwner(true);
+        response.setIsUpvoted(false);
 
-        response.setIsUpvoted(comment.getReactions()
-                .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
-
-
-        if (repliedComment != null && result.getUserId() != repliedComment.getUserId())
+        SingleProfileInformationResponse profile = null;
+        try
         {
-            NotificationRequest notificationRequest = new NotificationRequest();
-            notificationRequest.setTitle(response.getUserName() + " replied to your comment:");
-            notificationRequest.setMessage(response.getContent());
-            notificationRequest.setUserid(repliedComment.getUserId());
-            try{
-            identityClient.postNotifications(notificationRequest);
-            } catch (Exception e) {
-                System.err.println("Error while created comment notification: " + e.getMessage());
-            }
-
+            profile = identityClient.getSingleProfileInformation(
+                    new SingleProfileInformationRequest(
+                            firestoreService.getUserById(response.getUserId().toString()).getUid()
+                    ))
+                    .block()
+                    .getResult();
         }
+        catch (Exception e)
+        {
+            System.err.println("Error while get SingleProfile: " + e);
+        }
+
+        if (profile != null)
+        {
+            response.setUserUid(profile.getUserId());
+            response.setUserName(profile.getDisplayName());
+            response.setAvatarUrl(profile.getPhotoUrl());
+        }
+
+        if (repliedComment != null && !result.getUserId().equals(repliedComment.getUserId()))
+        {
+            notificationService.commentNotification(response,repliedComment);
+        }
+
         return response;
     }
+
+
     public CommentResponse ModifyComment(UUID userId, CommentModifyRequest request) {
         Comment comment = commentRepository.findById(request.getCommentId())
                 .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
@@ -149,54 +182,68 @@ public class CommentService {
 
         comment = commentRepository.save(comment);
 
-        return commentMapper.toResponse(comment);
-    }
-
-    @Transactional
-    public CommentResponse upvoteComment(UUID userId, UUID commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
-
-        Long oldNOL = comment.getNumberOfLikes();
-
-
-        ReactionID id = new ReactionID(userId,commentId);
-        Reaction reactions = new Reaction(id,comment);
-
-        comment.getReactions().add(reactions);
-
-        comment = commentRepository.save(comment);
-
-        comment.setNumberOfLikes((long) comment.getReactions().size());
-
-        comment = commentRepository.save(comment);
-
         CommentResponse response = commentMapper.toResponse(comment);
-        response.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
 
-        response.setIsUpvoted(comment.getReactions()
-                .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+        response.setIsOwner(true);
+        response.setIsUpvoted(false);
 
+        SingleProfileInformationResponse profile = null;
+        try
+        {
+            profile = identityClient.getSingleProfileInformation(
+                            new SingleProfileInformationRequest(
+                                    firestoreService.getUserById(response.getUserId().toString()).getUid()
+                            ))
+                    .block()
+                    .getResult();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error while get SingleProfile: " + e);
+        }
 
-        if (userId != response.getUserId() && !Objects.equals(oldNOL, response.getNumberOfLikes())) {
-            NotificationRequest request = new NotificationRequest();
-            request.setUserid(comment.getUserId());
-            request.setTitle("Your comment has just been upvote:");
-            String userName = firestoreService.getUsername(userId);
-            request.setMessage("Your comment has just been upvote by " + userName);
-
-            try
-            {
-                identityClient.postNotifications(request).block().getResult().getMessage();
-            }
-            catch (Exception ignore)
-            {
-            }
+        if (profile != null)
+        {
+            response.setUserUid(profile.getUserId());
+            response.setUserName(profile.getDisplayName());
+            response.setAvatarUrl(profile.getPhotoUrl());
         }
         return response;
     }
 
-    public CommentResponse cancelUpvoteComment(UUID userId, UUID commentId) {
+    @Transactional
+    public Long upvoteComment(UUID userId, UUID commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
+
+        ReactionID id = new ReactionID(userId,commentId);
+        Boolean isExisted = reactionRepository.existsById(id);
+
+        Reaction reactions = new Reaction(id, comment, true);
+        comment.getReactions().add(reactions);
+        comment.setNumberOfLikes(comment.getReactions()
+                .stream().filter(Reaction::getActive)
+                .count());
+        comment = commentRepository.save(comment);
+
+//        CommentResponse response = commentMapper.toResponse(comment);
+//        response.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
+//
+//        response.setIsUpvoted(comment.getReactions()
+//                .stream().anyMatch(
+//                        reaction -> reaction.getReactionID().getUserId().equals(userId) && reaction.getActive()
+//                        ));
+
+        if (!userId.equals(comment.getUserId()) && !isExisted) {
+            notificationService.upvoteCommentNotification(comment,userId);
+        }
+        return comment.getNumberOfLikes();
+    }
+
+
+
+    public Long cancelUpvoteComment(UUID userId, UUID commentId) {
         Comment comment = commentRepository.findById(commentId)
             .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
 
@@ -204,17 +251,18 @@ public class CommentService {
             throw new AppException(ErrorCode.INVALID_USER);
         }
 
-        Reaction reactions = reactionRepository.findByReactionID_UserIdAndComment(userId,comment);
+        Reaction reaction = reactionRepository.findByReactionID_UserIdAndComment(userId,comment);
 
-        comment.getReactions().remove(reactions);
+        reaction.setActive(false);
+        reactionRepository.save(reaction);
+
+        comment.setNumberOfLikes(comment.getReactions()
+                .stream()
+                .filter(Reaction::getActive)
+                .count());
 
         comment = commentRepository.save(comment);
-
-        comment.setNumberOfLikes((long) comment.getReactions().size());
-
-        comment = commentRepository.save(comment);
-
-        return commentMapper.toResponse(comment);
+        return comment.getNumberOfLikes();
     }
 
     public Boolean removeComment(UUID commentId, UUID userId) {
@@ -236,17 +284,43 @@ public class CommentService {
 
         Page<Comment> children = commentRepository.findByParentComment(parent, pageable);
 
-        return children.map(childrenComment-> {
+        List<UUID> uuids = extractUuidFromComments(children.getContent());
+
+        List<String> uids = uuids.stream().map(uuid -> {
+            try {
+                return firestoreService.getUserById(uuid.toString()).getUid();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
+
+        Page<CommentResponse> response = children.map(childrenComment-> {
 
             CommentResponse childrenCommentResponse = commentMapper.toResponse(childrenComment);
 
             childrenCommentResponse.setIsOwner(userId != null ? childrenComment.getUserId().equals(userId) : false);
 
             childrenCommentResponse.setIsUpvoted(childrenComment.getReactions()
-                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId) && reaction.getActive()));
 
             return childrenCommentResponse;
         });
+
+        MultipleProfileInformationResponse profiles = null;
+        try {
+            profiles = identityClient.getMultipleProfileInformation(
+                    new MultipleProfileInformationRequest(uids)
+            ).block().getResult();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error while get MultipleProfile: " + e);
+        }
+        if (profiles != null) {
+            response = commentMapper.mapProfileToCommentResponsePage(response, profiles);
+        }
+
+        return response;
     }
 
     public CommentResponse getComment(UUID commentId, UUID userId, Pageable pageable) {
@@ -264,12 +338,55 @@ public class CommentService {
             childrenCommentResponse.setIsOwner(userId != null ? childrenComment.getUserId().equals(userId) : false);
 
             childrenCommentResponse.setIsUpvoted(childrenComment.getReactions()
-                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId)));
+                    .stream().anyMatch(reaction -> reaction.getReactionID().getUserId().equals(userId) && reaction.getActive()));
 
             return childrenCommentResponse;
         }));
 
+        List<UUID> uuids = new ArrayList<>();
+        uuids.add(parent.getUserId());
+        if (!children.isEmpty()){
+            uuids.addAll(extractUuidFromComments(children.getContent()));
+        }
+
+        List<String> uids = uuids.stream().map(uuid -> {
+            try {
+                return firestoreService.getUserById(uuid.toString()).getUid();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
+
+        MultipleProfileInformationResponse profiles = null;
+        try {
+            profiles = identityClient.getMultipleProfileInformation(
+                    new MultipleProfileInformationRequest(uids)
+            ).block().getResult();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error while get MultipleProfile: " + e);
+        }
+        if (profiles != null) {
+            result = commentMapper.mapProfileToCommentResponse(result, profiles);
+        }
+
         return result;
+    }
+
+    private List<UUID> extractUuidFromComments(List<Comment> comments) {
+        Set<UUID> userUuids = new HashSet<>();
+
+        for(Comment comment : comments) {
+            userUuids.add(comment.getUserId());
+            if (comment.getComments() != null) {
+                for (Comment childComment : comment.getComments()) {
+                    userUuids.add(childComment.getUserId());
+                }
+            }
+        }
+
+        return List.copyOf(userUuids);
     }
 
 }

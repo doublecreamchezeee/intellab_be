@@ -43,6 +43,7 @@ public class ReviewService {
     ReviewMapper reviewMapper;
     private final IdentityClient identityClient;
     private final FirestoreService firestoreService;
+    private final NotificationService notificationService;
 
     private void updateReviewCountAndAverageRating(Course course, Review review) {
         //update course average rating and review count of course
@@ -85,17 +86,8 @@ public class ReviewService {
         updateReviewCountAndAverageRating(course, review);
 
         ReviewCreationResponse response = reviewMapper.toReviewCreationResponse(review);
-        try {
-            String userName = firestoreService.getUsername(userUuid);
-            NotificationRequest notificationRequest = new NotificationRequest(
-                    userName + " has just review your course:",
-                    review.getComment(),
-                    review.getCourse().getUserId()
-            );
-            identityClient.postNotifications(notificationRequest);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
+
+        notificationService.reviewNotification(review, userUuid);
 
         return response;
     }

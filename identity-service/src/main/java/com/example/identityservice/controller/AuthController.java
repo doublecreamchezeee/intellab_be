@@ -3,6 +3,7 @@ package com.example.identityservice.controller;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.configuration.RedirectUrlConfig;
 import com.example.identityservice.client.FirebaseAuthClient;
+import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.auth.ListEmailsRequest;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
@@ -190,5 +191,19 @@ public class AuthController {
     public ResponseEntity<Boolean> isVerifiedEmail(@RequestParam String uid) {
         Boolean response = firebaseAuthClient.isEmailVerifiedByUserUid(uid);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Update redirect URL for update access token",
+            description = "Update the redirect URL for update access token"
+    )
+    @PublicEndpoint
+    @PostMapping("/update-redirect-url-for-update-access-token")
+    public ApiResponse<String> updateRedirectUrlForUpdateAccessToken(@RequestBody String newUrl) {
+        redirectUrlConfig.setUpdateAccessTokenUrl(redirectUrlConfig.getFeUrl() + newUrl);
+        return ApiResponse.<String>builder()
+                .message("Redirect URL updated successfully")
+                .result(newUrl)
+                .build();
     }
 }

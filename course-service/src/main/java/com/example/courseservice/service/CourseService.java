@@ -728,25 +728,13 @@ public class CourseService {
                 leaderboardUpdateRequest.setUserId(userId.toString());
                 leaderboardUpdateRequest.setType("course");
                 leaderboardUpdateRequest.setAdditionalScore((long)course.getScore());
-                if (course.getLevel().equals("beginner"))
-                {
-                    leaderboardUpdateRequest.getCourseStat().setBeginner(1);
-                    leaderboardUpdateRequest.getCourseStat().setIntermediate(0);
-                    leaderboardUpdateRequest.getCourseStat().setAdvanced(0);
+
+                switch (course.getLevel()) {
+                    case "Beginner" -> leaderboardUpdateRequest.getCourseStat().setBeginner(1);
+                    case "Intermediate" -> leaderboardUpdateRequest.getCourseStat().setIntermediate(1);
+                    case "Advanced" -> leaderboardUpdateRequest.getCourseStat().setAdvanced(1);
                 }
-                else if (course.getLevel().equals("intermediate"))
-                {
-                    leaderboardUpdateRequest.getCourseStat().setBeginner(0);
-                    leaderboardUpdateRequest.getCourseStat().setIntermediate(1);
-                    leaderboardUpdateRequest.getCourseStat().setAdvanced(0);
-                }
-                else
-                {
-                    leaderboardUpdateRequest.getCourseStat().setBeginner(0);
-                    leaderboardUpdateRequest.getCourseStat().setIntermediate(0);
-                    leaderboardUpdateRequest.getCourseStat().setAdvanced(1);
-                }
-                identityClient.updateLeaderboard(leaderboardUpdateRequest);
+                identityClient.updateLeaderboard(leaderboardUpdateRequest).block();
             }
             catch(Exception e){
                 System.out.println("Error in updating leaderboard: " + e);
@@ -773,11 +761,11 @@ public class CourseService {
                         "\n" +
                         "\n");
                 notificationRequest.setUserid(userId);
-                identityClient.postNotifications(notificationRequest);
+                identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
             }
-            catch (Exception ignored){
+            catch (Exception e){
+                System.out.println("Error in creating notification: " + e);
             }
-
             return certificateCreationResponse;
 
         }
