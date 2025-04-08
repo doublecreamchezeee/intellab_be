@@ -25,4 +25,5 @@ public class DetailsProblemResponse {
     Boolean ViewedSolution;
     List<ProblemCategory> categories;
     List<Hint> hints;
+    Boolean hasSolution;
 }

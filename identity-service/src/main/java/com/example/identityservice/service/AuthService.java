@@ -1,13 +1,13 @@
 package com.example.identityservice.service;
 
 import com.example.identityservice.client.FirebaseAuthClient;
+import com.example.identityservice.configuration.RedirectUrlConfig;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
-import com.example.identityservice.exception.NotVerifiedEmailException;
 import com.example.identityservice.exception.SendingEmailFailedException;
 import com.example.identityservice.mapper.VNPayPaymentPremiumPackageMapper;
 import com.example.identityservice.model.User;
@@ -40,6 +40,7 @@ public class AuthService {
     private final FirestoreService firestoreService;
     private final VNPayPaymentPremiumPackageRepository vnpayPaymentPremiumPackageRepository;
     private final VNPayPaymentPremiumPackageMapper vnpayPaymentPremiumPackageMapper;
+    private final RedirectUrlConfig redirectUrlConfig;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -56,7 +57,7 @@ public class AuthService {
             log.info("User successfully created: {}", userCreationRequest.getEmail());
 
             firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
-            sendEmailVerification(userRecord.getUid());
+            sendVerificationEmail(userRecord.getUid());
             try{
                 firestoreService.createUserByUid(userRecord.getUid(), "User");
             } catch (ExecutionException e) {
@@ -75,11 +76,11 @@ public class AuthService {
     }
 
     public TokenSuccessResponse login(@NonNull final UserLoginRequest userLoginRequest) {
-        boolean isEmailVerified = false;
+       /* boolean isEmailVerified = false;
         isEmailVerified = firebaseAuthClient.isEmailVerified(userLoginRequest.getEmail());
         if (!isEmailVerified) {
             throw new NotVerifiedEmailException();
-        }
+        }*/
         return firebaseAuthClient.login(userLoginRequest);
     }
 
@@ -144,7 +145,7 @@ public class AuthService {
 
     public ValidatedTokenResponse validateToken(@NonNull final String token) {
         try {
-            FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
+            FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
             String role = firestoreService.getRoleByUid(decodeToken.getUid());
             String premium = null;
             if (role.equals("user")) {
@@ -159,13 +160,13 @@ public class AuthService {
                         )
                         .orElse(null);
 
-                log.info("uid: {}",decodeToken.getUid());
+                //log.info("uid: {}",decodeToken.getUid());
 
                 //vnpayPaymentPremiumPackageRepository.findByUserUid(decodeToken.getUid())
 
                 if (pre != null)
                 {
-                    log.info("premium package: {}", pre.getUserUid());
+                    //log.info("premium package: {}", pre.getUserUid());
                     premium = pre.getPackageType();
                     //premium = pre.getPlanType();
                 }
@@ -184,6 +185,7 @@ public class AuthService {
                     .role(role)
                     .premium(premium)
                     .message("Token validation successful.")
+                    .isEmailVerified(decodeToken.isEmailVerified())
                     .build();
         } catch (FirebaseAuthException e) {
             return ValidatedTokenResponse.builder()
@@ -198,18 +200,33 @@ public class AuthService {
         }
     }
 
-    public void sendEmailVerification(String uid) {
+    public void resendVerificationEmail(@NonNull String email) {
+        try {
+            UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+            String uid = userRecord.getUid();
+            sendVerificationEmail(uid);
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error finding user by email: " + e.getMessage(), e);
+        }
+    }
+
+    public void sendVerificationEmail(String uid) {
         try {
             UserRecord userRecord = firebaseAuth.getUser(uid);
             String email = userRecord.getEmail();
 
             if (email != null) {
-                String link = firebaseAuthClient.generateEmailVerification(email);
+                //String link = firebaseAuthClient.generateEmailVerification(email);
+
+                String link = generateCustomVerificationLink(email);
                 System.out.println("generate email to " + email + " with link: " + link);
+
+                String htmlContent = "<a href=\"" + link + "\" target=\"_blank\" style=\"color: blue; text-decoration: underline;\">Click here to verify your email</a>";
+
                 emailService.sendMail(
                         email,
                         "Verify your email in Intellab website",
-                        "Congrats on sending your confirmation link: " + link);
+                        "Congrats on sending your confirmation link: " + htmlContent);
             }
         } catch (Exception e) {
             throw new SendingEmailFailedException();
@@ -219,11 +236,13 @@ public class AuthService {
     public void sendPasswordResetLink(String email) {
         try {
             String link = firebaseAuthClient.generatePasswordResetLink(email);
+            System.out.println("generate email to " + email + " with link: " + link);
+            String htmlContent = "<a href=\"" + link + "\" style=\"color: blue; text-decoration: underline;\">Click here to reset your password</a>";
 
             emailService.sendMail(
                     email,
                     "Reset your password in Intellab website",
-                    "Congrats on sending your password reset link: " + link);
+                    "Congrats on sending your password reset link: " + htmlContent);
         } catch (Exception e) {
             throw new SendingEmailFailedException();
         }
@@ -237,6 +256,22 @@ public class AuthService {
         }
     }
 
+    public void setVerifiedEmail(String email) {
+        try {
+            firebaseAuthClient.setVerifiedEmail(email);
+        } catch (Exception e) {
+            throw new RuntimeException("Error verifying email: " + e.getMessage(), e);
+        }
+    }
+
+    public void setUnverifiedListEmails(List<String> email) {
+        try {
+            firebaseAuthClient.setUnverifiedListEmails(email);
+        } catch (Exception e) {
+            throw new RuntimeException("Error verifying email: " + e.getMessage(), e);
+        }
+    }
+
     public PremiumSubscriptionResponse getUserPremiumSubscriptionByUid(String uid) {
         VNPayPaymentPremiumPackage pre =vnpayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
                         uid,
@@ -244,7 +279,7 @@ public class AuthService {
                 )
                 .orElse(null);
 
-        log.info("uid: {}", uid);
+        //log.info("uid: {}", uid);
 
         PremiumSubscriptionResponse response = null;
         if (pre != null)
@@ -267,4 +302,16 @@ public class AuthService {
 
     }
 
+    public String generateCustomVerificationLink(String email) {
+        try {
+            return new StringBuilder()
+                    .append(redirectUrlConfig.getCallbackDomain())
+                    .append("/identity/auth/callback-set-verified-email")
+                    .append("?email=")
+                    .append(email)
+                    .toString();
+        } catch (Exception e) {
+            throw new SendingEmailFailedException();
+        }
+    }
 }

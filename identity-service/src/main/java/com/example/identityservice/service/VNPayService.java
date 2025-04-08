@@ -2,6 +2,7 @@ package com.example.identityservice.service;
 
 
 import com.example.identityservice.client.CourseClient;
+import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.client.VNPayClient;
 import com.example.identityservice.constant.VNPayTransactionStatus;
 import com.example.identityservice.constant.response.vnpay.VNPayPayResponseCode;
@@ -11,6 +12,7 @@ import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.course.DisenrollCourseRequest;
 import com.example.identityservice.dto.request.course.DisenrollCoursesEnrolledUsingSubscriptionPlanRequest;
 import com.example.identityservice.dto.request.course.EnrollCourseRequest;
+import com.example.identityservice.dto.request.course.ReEnrollCoursesUsingSubscriptionPlanRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayQueryRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayRefundRequest;
 import com.example.identityservice.dto.request.vnpay.VNPaySinglePaymentCreationRequest;
@@ -66,6 +68,7 @@ public class VNPayService {
     private final VNPayPaymentMapper vnPaymentMapper;
     private final VNPayPaymentCoursesRepository vnPayPaymentCoursesRepository;
     private final VNPayPaymentPremiumPackageRepository vnPayPaymentPremiumPackageRepository;
+    private final FirebaseAuthClient firebaseAuthClient;
 
     @Value("${vnpay.tmn-code}")
     private String vnp_TmnCode;
@@ -111,7 +114,8 @@ public class VNPayService {
                     request.getVNPayBankCode().getCode(),
                     request.getVNPayCurrencyCode().getCode(),
                     request.getLanguage().getCode(),
-                    orderDescription
+                    orderDescription,
+                    userUid
             );
 
             // save payment to database
@@ -181,7 +185,7 @@ public class VNPayService {
             }
 
             // create description for order
-            String orderDescription = request.getPremiumPackage().getCode(); // null;
+            String orderDescription = request.getPremiumPackage().getName(); // null;
 
             /*if (request.getLanguage().getCode().equals("vi")) {
                 orderDescription = "Nang cap tai khoan " ;
@@ -207,7 +211,8 @@ public class VNPayService {
                     request.getVNPayBankCode().getCode(),
                     request.getVNPayCurrencyCode().getCode(),
                     request.getLanguage().getCode(),
-                    orderDescription
+                    orderDescription,
+                    userUid
             );
 
             // Save payment of premium package to database
@@ -272,8 +277,16 @@ public class VNPayService {
     public VNPayPaymentUrlResponse createPaymentUrl(
             String ipAddr, long amount,
             String bankCode, String currCode,
-            String locale, String orderDescription
+            String locale, String orderDescription,
+            String userUid
     ) {
+        Boolean isEmailVerified = firebaseAuthClient
+                .isEmailVerifiedByUserUid(userUid);
+
+        if (!isEmailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
@@ -617,6 +630,22 @@ public class VNPayService {
 
                                         if (changeCourseOrPremiumPlanToProblemPlan) {
                                             disenrollCourses(List.of(payment.getUserUuid()));
+                                        }
+                                    }
+
+                                    if (paymentPremiumPackage.getPackageType().equals(PremiumPackage.COURSE_PLAN.getCode())
+                                            || paymentPremiumPackage.getPackageType().equals(PremiumPackage.PREMIUM_PLAN.getCode())
+                                    ) {
+                                        try {
+                                            courseClient.reEnrollCoursesEnrolledUsingSubscriptionPlan(
+                                                    ReEnrollCoursesUsingSubscriptionPlanRequest
+                                                            .builder()
+                                                            .userUuid(payment.getUserUuid())
+                                                            .subscriptionPlan(paymentPremiumPackage.getPackageType())
+                                                            .build()
+                                            ).block();
+                                        } catch (Exception e) {
+                                            log.error("Error calling course service while re-enroll courses for users", e);
                                         }
                                     }
 

@@ -20,6 +20,7 @@ import com.example.courseservice.dto.response.userCourses.UserCoursesResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.model.Comment;
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CommentService;
 import com.example.courseservice.service.CourseService;
@@ -316,8 +317,13 @@ public class CourseController {
     @PostMapping("/enroll")
     public ApiResponse<UserCourses> enrollCourse(
             @RequestBody @Valid EnrollCourseRequest request,
-            @RequestHeader("X-UserRole") String role
+            @RequestHeader("X-UserRole") String role,
+            @RequestHeader("X-EmailVerified") Boolean isEmailVerified
     ) {
+        if (isEmailVerified == null || !isEmailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         if (isAdmin(role)) {
             return ApiResponse.<UserCourses>builder()
                     .code(201)
@@ -368,6 +374,37 @@ public class CourseController {
                             false // user enroll by purchase exactly this course
                         )
                 )
+                .build();
+    }
+
+    @Operation(
+            summary = "Re-enroll courses that user has enrolled by using subscription plan",
+            hidden = true
+    )
+    @PostMapping("/re-enroll-courses-enrolled-using-subscription-plan")
+    public ApiResponse<Boolean> reEnrollCoursesUsingSubscriptionPlan(
+            @RequestBody ReEnrollCoursesUsingSubscriptionPlanRequest request) {
+
+        List<UserCourses> userCourses = courseService.reEnrollPaidCourseWhenResubscribePlan(
+                request.getUserUuid(),
+                request.getSubscriptionPlan()
+        );
+
+
+       userCourses.stream()
+                .map(UserCourses::getCourse)
+                .map(Course::getCourseId)
+                .forEach(courseId -> {
+                    log.info("CourseId: {}", courseId);
+                    /*lessonService.restartAllLessonByCourseId(
+                            courseId,
+                            ParseUUID.normalizeUID(request.getUserUuid())
+                    );*/
+                });
+
+        return ApiResponse.<Boolean>builder()
+                .message("All courses have been re-enrolled")
+                .result(true)
                 .build();
     }
 
@@ -704,11 +741,27 @@ public class CourseController {
     }
 
 
+    @Operation(
+            summary = "Add comment to course",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    - Nếu parentId không tồn tại thì trả về lỗi 404
+                    - Nếu parentId là null thì tạo comment gốc
+                    """
+    )
     @PostMapping("/{courseId}/comments")
     public ApiResponse<CommentResponse> addComment(
             @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("X-EmailVerified") Boolean emailVerified,
             @PathVariable("courseId") UUID courseId,
-            @RequestBody CommentCreationRequest creationRequest ){
+            @RequestBody CommentCreationRequest creationRequest
+    ){
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
@@ -716,10 +769,24 @@ public class CourseController {
                 .result(commentService.addComment(courseId, creationRequest, userId)).build();
     }
 
+    @Operation(
+            summary = "Upvote comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @PutMapping("/comments/{commentId}/upvote")
     public ApiResponse<Long> upVoteComment(
             @RequestHeader("X-UserId") String userUid,
-            @PathVariable("commentId") UUID commentId){
+            @RequestHeader("X-EmailVerified") Boolean emailVerified,
+            @PathVariable("commentId") UUID commentId
+    ){
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
@@ -728,6 +795,14 @@ public class CourseController {
     }
 
 
+    @Operation(
+            summary = "Cancel upvote comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @PutMapping("/comments/{commentId}/cancelUpvote")
     public ApiResponse<Long> cancelUpvoteComment(
             @RequestHeader("X-UserId") String userUid,
@@ -739,6 +814,14 @@ public class CourseController {
                 .result(commentService.cancelUpvoteComment(userId, commentId)).build();
     }
 
+    @Operation(
+            summary = "Modify comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @PutMapping("/comments/modify")
     public ApiResponse<CommentResponse> modifyComment(
             @RequestHeader("X-UserId") String userUid,
@@ -749,6 +832,14 @@ public class CourseController {
                 .result(commentService.ModifyComment(userId, modifyRequest)).build();
     }
 
+    @Operation(
+            summary = "Delete comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @DeleteMapping("/comments/{commentId}/delete")
     public ApiResponse<Boolean> deleteComment(
             @RequestHeader("X-UserId") String userUid,
@@ -768,6 +859,17 @@ public class CourseController {
     )
     {
         return role;
+    }
+
+    @Operation(
+            summary = "testing only"
+    )
+    @GetMapping("/emailVerified")
+    public Boolean getRole(
+            @RequestHeader("X-EmailVerified") Boolean emailVerified
+    )
+    {
+        return emailVerified;
     }
 
     @Operation(

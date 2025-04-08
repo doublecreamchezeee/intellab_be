@@ -45,6 +45,12 @@ public class VNPayPaymentPremiumPackageScheduler {
         checkPremiumPackageEndDate();
     }
 
+    @Scheduled(cron = "0 0 * * * ?")
+    public void runHourlyTask() {
+        log.info("Running scheduled task every hour");
+        checkPremiumPackageEndDate();
+    }
+
     @Scheduled(cron = "#{@schedulerConfig.customCronExpression}")
     public void checkPremiumPackageAtCustomTime() {
         log.info("Running scheduled task to check premium package end date");

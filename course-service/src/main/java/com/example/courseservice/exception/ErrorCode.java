@@ -40,6 +40,7 @@ public enum ErrorCode {
     INVALID_RATING_VALUE_FILTER(409, "Invalid rating value filter", HttpStatus.CONFLICT),
     USER_ALREADY_REVIEW_COURSE(409, "User already review course", HttpStatus.CONFLICT),
     COURSE_NOT_FREE(409, "Course not free", HttpStatus.CONFLICT),
+    EMAIL_NOT_VERIFIED(403, "Email is not verified", HttpStatus.FORBIDDEN),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

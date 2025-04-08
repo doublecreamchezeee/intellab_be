@@ -20,14 +20,17 @@ public interface ProblemMapper {
     @Mapping(target = "isDone", ignore = true)
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "isPublished", source = "isPublished")
+    @Mapping(target = "hasSolution", expression = "java(problem.getSolution() != null)")
     ProblemRowResponse toProblemRowResponse(Problem problem);
 
     @Mapping(target = "problemStructure", ignore = true)
     Problem toProblem(ProblemCreationRequest problemCreationRequest);
 
+    @Mapping(target = "hasSolution", expression = "java(problem.getSolution() != null)")
     @Mapping(target = "problemStructure", ignore = true)
     ProblemCreationResponse toProblemCreationResponse(Problem problem);
 
+    @Mapping(target = "hasSolution", expression = "java(problem.getSolution() != null)")
     DetailsProblemResponse toProblemDetailsResponse(Problem problem);
 
     @Mapping(target = "problemStructure", ignore = true)

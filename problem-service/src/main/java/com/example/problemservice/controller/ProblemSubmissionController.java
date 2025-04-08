@@ -37,8 +37,13 @@ public class ProblemSubmissionController {
     @PostMapping
     public ResponseEntity<DetailsProblemSubmissionResponse> createSubmission(
             @RequestBody SubmitCodeRequest request,
-            @RequestParam(value = "base64", required = false) Boolean base64
+            @RequestParam(value = "base64", required = false) Boolean base64,
+            @RequestHeader("X-EmailVerified") Boolean emailVerified
     ) {
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         if (base64 == null) {
             base64 = false;
         }
