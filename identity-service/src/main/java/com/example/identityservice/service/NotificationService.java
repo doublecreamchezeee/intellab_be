@@ -45,13 +45,15 @@ public class NotificationService {
         notification.setType(type);
         notification.setRecipientId(userId);
         notification.setMarkAsRead(false);
-        notification = notificationRepository.save(notification);
+        
+        final Notification savedNotification = notificationRepository.save(notification);
 
         Optional<WebSocketSession> userSession = notificationWebSocketHandler.getUserSessionIfConnected(userId);
+        // userSession.ifPresent(webSocketSession
+        //         -> notificationWebSocketHandler.sendNotification(title + "\n" +body, webSocketSession));
         userSession.ifPresent(webSocketSession
-                -> notificationWebSocketHandler.sendNotification(title + "\n" +body, webSocketSession));
-
-        return notificationMapper.toNotificationResponse(notification);
+                   -> notificationWebSocketHandler.sendNotification(savedNotification, webSocketSession));
+        return notificationMapper.toNotificationResponse(savedNotification);
     }
 
     @EventListener
@@ -62,7 +64,8 @@ public class NotificationService {
 
         for (Notification notification : unreadNotifications) {
             try {
-                session.sendMessage(new TextMessage(notification.getMessage()));
+                notificationWebSocketHandler.sendNotification(notification, session);
+                // session.sendMessage(new TextMessage(notification.getMessage()));
             } catch (IOException e) {
                 System.err.println("Failed to send notification: " + e.getMessage());
             }
