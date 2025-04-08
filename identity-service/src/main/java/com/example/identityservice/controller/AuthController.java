@@ -2,6 +2,7 @@ package com.example.identityservice.controller;
 
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.configuration.RedirectUrlConfig;
+import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.request.auth.ListEmailsRequest;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
@@ -137,6 +138,16 @@ public class AuthController {
     }
 
     @Operation(
+            summary = "(testing only) set unverified email"
+    )
+    @PublicEndpoint
+    @PostMapping("/set-unverified-email")
+    public ResponseEntity<HttpStatus> setUnverifiedEmail(@RequestBody ListEmailsRequest request) {
+        authService.setUnverifiedListEmails(request.getEmails());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(
             summary = "(BE only) callback set verified email",
             description = "callback set verified email from gmail, using redirect URL",
             hidden = true
@@ -157,16 +168,6 @@ public class AuthController {
     @PostMapping("/resend-verification-email")
     public ResponseEntity<HttpStatus> resendVerificationEmail(@RequestBody String email) {
         authService.resendVerificationEmail(email);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    @Operation(
-            summary = "(testing only) set unverified email"
-    )
-    @PublicEndpoint
-    @PostMapping("/set-unverified-email")
-    public ResponseEntity<HttpStatus> setUnverifiedEmail(@RequestBody ListEmailsRequest request) {
-        authService.setUnverifiedListEmails(request.getEmails());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
