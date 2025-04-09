@@ -720,6 +720,8 @@ public class CourseService {
                         "\n" +
                         "\n");
                 notificationRequest.setUserid(userId);
+                notificationRequest.setRedirectType("COURSE_COMPLETE");
+                notificationRequest.setRedirectContent("");
                 identityClient.postNotifications(notificationRequest);
             }
             catch (Exception ignored){

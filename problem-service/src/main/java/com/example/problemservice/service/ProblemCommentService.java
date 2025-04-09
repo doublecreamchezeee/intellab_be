@@ -164,6 +164,9 @@ public class ProblemCommentService {
             notificationRequest.setUserid(response.getReplyToCommentId());
             notificationRequest.setTitle(response.getUsername() + "has just replied to your comment.");
             notificationRequest.setMessage(response.getContent());
+            notificationRequest.setUserid(response.getUserUuid());
+            notificationRequest.setRedirectType("PROBLEM_COMMENT");
+            notificationRequest.setRedirectContent("");
             try{
                 identityClient.postNotifications(notificationRequest);
             }
@@ -585,6 +588,9 @@ public class ProblemCommentService {
                     .block().getResult().getDisplayName();
             notificationRequest.setTitle(userName + " has been upvoted your comment");
             notificationRequest.setMessage("");
+            notificationRequest.setUserid(problemComment.getUserUuid());
+            notificationRequest.setRedirectType("PROBLEM_COMMENT");
+            notificationRequest.setRedirectContent("");
             identityClient.postNotifications(notificationRequest);
         }catch (Exception ignored){}
 

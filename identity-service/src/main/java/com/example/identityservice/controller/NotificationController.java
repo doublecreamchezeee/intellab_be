@@ -39,11 +39,7 @@ public class NotificationController {
                     .build();
         }
         return ApiResponse.<NotificationResponse>builder()
-                .result(notificationService.postNotification(
-                        request.getTitle()
-                        ,request.getMessage()
-                        ,INFO
-                        ,request.getUserid()))
+                .result(notificationService.postNotification(request))
                 .build();
     }
 

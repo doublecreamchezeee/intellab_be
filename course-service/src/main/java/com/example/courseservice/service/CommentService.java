@@ -129,6 +129,8 @@ public class CommentService {
             notificationRequest.setTitle(response.getUserName() + " replied to your comment:");
             notificationRequest.setMessage(response.getContent());
             notificationRequest.setUserid(repliedComment.getUserId());
+            notificationRequest.setRedirectType("COURSE_COMMENT");
+            notificationRequest.setRedirectContent("");
             try{
             identityClient.postNotifications(notificationRequest);
             } catch (Exception e) {
@@ -184,6 +186,8 @@ public class CommentService {
             request.setTitle("Your comment has just been upvote:");
             String userName = firestoreService.getUsername(userId);
             request.setMessage("Your comment has just been upvote by " + userName);
+            request.setRedirectType("COURSE_COMMENT");
+            request.setRedirectContent("");
 
             try
             {
