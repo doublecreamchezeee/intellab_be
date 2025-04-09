@@ -20,6 +20,7 @@ import com.example.problemservice.mapper.ProblemcategoryMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.ViewSolutionBehavior;
 import com.example.problemservice.model.composite.DefaultCodeId;
+import com.example.problemservice.model.course.Category;
 import com.example.problemservice.repository.*;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
@@ -93,12 +94,24 @@ public class ProblemService {
     }
 
     public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan, UUID userUuid) {
-        DetailsProblemResponse response = problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId)
-                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)));
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+        DetailsProblemResponse response = problemMapper.toProblemDetailsResponse(problem);
 
+        System.out.println(userUuid + "," + problemId);
         response.setViewedSolution(
-                viewSolutionBehaviorRepository.findByProblemIdAndUserId(userUuid, problemId) != null
+                viewSolutionBehaviorRepository.findByProblemIdAndUserId(problemId, userUuid) != null
         );
+
+        List<Category> category = courseClient.categories(
+                problem.getCategories()
+                        .stream()
+                        .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
+                        .toList()).getResult();
+
+        response.setCategories(category);
+
+        response.setIsSolved(isDoneProblem(problemId,userUuid));
 
         if (response.getIsPublished()
             || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
