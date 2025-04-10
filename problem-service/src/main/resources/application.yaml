@@ -37,6 +37,7 @@ judge0:
 k8s:
   server:
     url: https://192.168.1.11:8443
+    mertrics-url: http://192.168.1.11:10251
 
 #logging:
 #  level:
