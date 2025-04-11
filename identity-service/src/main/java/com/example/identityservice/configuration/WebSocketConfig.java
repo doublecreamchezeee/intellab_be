@@ -14,19 +14,16 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationWebSocketHandler notificationWebSocketHandler;
 
-    public WebSocketConfig(ApplicationEventPublisher eventPublisher) {
+    public WebSocketConfig(ApplicationEventPublisher eventPublisher, NotificationWebSocketHandler notificationWebSocketHandler) {
         this.eventPublisher = eventPublisher;
-    }
-
-    @Bean
-    public NotificationWebSocketHandler notificationWebSocketHandler() {
-        return new NotificationWebSocketHandler(eventPublisher);
+        this.notificationWebSocketHandler = notificationWebSocketHandler;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new NotificationWebSocketHandler(eventPublisher), "/ws/notification")
+        registry.addHandler(notificationWebSocketHandler, "/ws/notification")
                 .setAllowedOrigins("*");
     }
 }

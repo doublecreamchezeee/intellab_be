@@ -54,6 +54,7 @@ public class NotificationService {
         Optional<WebSocketSession> userSession = notificationWebSocketHandler.getUserSessionIfConnected(request.getUserid());
         // userSession.ifPresent(webSocketSession
         //         -> notificationWebSocketHandler.sendNotification(title + "\n" +body, webSocketSession));
+
         userSession.ifPresent(webSocketSession
                    -> notificationWebSocketHandler.sendNotification(savedNotification, webSocketSession));
         return notificationMapper.toNotificationResponse(savedNotification);

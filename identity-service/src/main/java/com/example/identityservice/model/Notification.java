@@ -32,7 +32,7 @@ public class Notification {
     
     private Notification.NotificationType type;
 
-    @CreationTimestamp
+    // @CreationTimestamp
     private Instant timestamp;
 
     private Boolean markAsRead;
