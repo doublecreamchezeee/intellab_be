@@ -6,6 +6,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -32,12 +34,12 @@ public class Notification {
     
     private Notification.NotificationType type;
 
-    // @CreationTimestamp
-    private Instant timestamp;
+    @CreationTimestamp
+    private Timestamp timestamp;
 
     private Boolean markAsRead;
 
-    private UUID recipientId; // nếu là broadcast notification thì giá trị là null
+    private UUID recipientId;
 
     public enum NotificationType {
         INFO,

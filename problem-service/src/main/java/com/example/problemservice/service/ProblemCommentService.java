@@ -5,7 +5,6 @@ import com.example.problemservice.dto.request.notification.NotificationRequest;
 import com.example.problemservice.dto.request.problemComment.ProblemCommentCreationRequest;
 import com.example.problemservice.dto.request.problemComment.ProblemCommentUpdateRequest;
 import com.example.problemservice.dto.request.profile.MultipleProfileInformationRequest;
-import com.example.problemservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.problemservice.dto.response.problemComment.DetailsProblemCommentResponse;
 import com.example.problemservice.dto.response.problemComment.ProblemCommentCreationResponse;
 import com.example.problemservice.dto.response.problemComment.ProblemCommentUpdateResponse;
@@ -45,6 +44,7 @@ public class ProblemCommentService {
     private final ProfileService profileService;
     private final ProblemCommentReactionRepository problemCommentReactionRepository;
     private final IdentityClient identityClient;
+    private final NotificationService notificationService;
 
     // create a new comment
     public ProblemCommentCreationResponse createProblemComment(String userUid, ProblemCommentCreationRequest request) {
@@ -106,6 +106,7 @@ public class ProblemCommentService {
             request.setReplyToCommentId(request.getParentCommentId());
         }
 
+        Boolean notification = false;
         // Set replied comment
         if (request.getReplyToCommentId() != null)  {
             UUID repliedCommentId = null;
@@ -129,8 +130,7 @@ public class ProblemCommentService {
 
             problemComment.setRepliedComment(repliedComment);
 
-
-
+            notification = !userUid.equals(problemComment.getUserUid());
             //reset parent comment if exist replied comment
             problemComment.setParentComment(
                     repliedComment.getParentComment() != null
@@ -159,20 +159,8 @@ public class ProblemCommentService {
             response.setUserAvatar(null);
         }
 
-        if (response.getReplyToCommentId() != null) {
-            NotificationRequest notificationRequest = new NotificationRequest();
-            notificationRequest.setUserid(response.getReplyToCommentId());
-            notificationRequest.setTitle(response.getUsername() + "has just replied to your comment.");
-            notificationRequest.setMessage(response.getContent());
-            notificationRequest.setUserid(response.getUserUuid());
-            notificationRequest.setRedirectType("PROBLEM_COMMENT");
-            notificationRequest.setRedirectContent("");
-            try{
-                identityClient.postNotifications(notificationRequest);
-            }
-            catch (Exception ignore)
-            {
-            }
+        if (response.getReplyToCommentId() != null && notification) {
+            notificationService.createCommentNotification(response);
         }
 
         response.setIsUpVoted(false);
@@ -581,18 +569,7 @@ public class ProblemCommentService {
         );// (long)
 
         problemComment = problemCommentRepository.save(problemComment);
-        try{
-            NotificationRequest notificationRequest = new NotificationRequest();
-            String userName = identityClient.getSingleProfileInformation(
-                    new SingleProfileInformationRequest(userUid))
-                    .block().getResult().getDisplayName();
-            notificationRequest.setTitle(userName + " has been upvoted your comment");
-            notificationRequest.setMessage("");
-            notificationRequest.setUserid(problemComment.getUserUuid());
-            notificationRequest.setRedirectType("PROBLEM_COMMENT");
-            notificationRequest.setRedirectContent("");
-            identityClient.postNotifications(notificationRequest);
-        }catch (Exception ignored){}
+        notificationService.upvoteCommentNotification(problemComment, userUid);
 
         return problemComment.getReactions().size();
     }

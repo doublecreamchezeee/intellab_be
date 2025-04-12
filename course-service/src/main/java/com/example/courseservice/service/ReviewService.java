@@ -88,27 +88,27 @@ public class ReviewService {
         ReviewCreationResponse response = reviewMapper.toReviewCreationResponse(review);
 
         notificationService.reviewNotification(review, userUuid);
-        try {
-            String userName = firestoreService.getUsername(userUuid);
-            // NotificationRequest notificationRequest = new NotificationRequest(
-            //         userName + " has just review your course:",
-            //         review.getComment(),
-            //         review.getCourse().getUserId()
-            // );
-
-            NotificationRequest notificationRequest =
-                NotificationRequest.builder()
-                    .userid(review.getCourse().getUserId())
-                    .title(userName + "has just review your course:")
-                    .message(review.getComment())
-                    .redirectType("COURSE_REVIEW")
-                    .redirectContent("")
-                    .build();
-
-            identityClient.postNotifications(notificationRequest);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            String userName = firestoreService.getUsername(userUuid);
+//            // NotificationRequest notificationRequest = new NotificationRequest(
+//            //         userName + " has just review your course:",
+//            //         review.getComment(),
+//            //         review.getCourse().getUserId()
+//            // );
+//
+//            NotificationRequest notificationRequest =
+//                NotificationRequest.builder()
+//                    .userid(review.getCourse().getUserId())
+//                    .title(userName + "has just review your course:")
+//                    .message(review.getComment())
+//                    .redirectType("COURSE_REVIEW")
+//                    .redirectContent("")
+//                    .build();
+//
+//            identityClient.postNotifications(notificationRequest);
+//        } catch (RuntimeException e) {
+//            throw new RuntimeException(e);
+//        }
 
         return response;
     }

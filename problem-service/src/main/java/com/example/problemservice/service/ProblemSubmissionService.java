@@ -53,6 +53,7 @@ public class ProblemSubmissionService {
     private final TestCaseRepository testCaseRepository;
     private final CourseClient courseClient;
     private final IdentityClient identityClient;
+    private final NotificationService notificationService;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
 
     public DetailsProblemSubmissionResponse submitProblem(SubmitCodeRequest request, Boolean base64) {
@@ -157,18 +158,7 @@ public class ProblemSubmissionService {
     }
 
 
-    protected void updateLeaderboard(int score, String level, UUID userId){
-        LeaderboardUpdateRequest request = new LeaderboardUpdateRequest();
-        request.setType("problem");
-        request.setNewScore((long) score);
-        request.setUserId(userId.toString());
-        switch (level) {
-            case "easy" -> request.getProblemStat().setEasy(1);
-            case "medium" -> request.getProblemStat().setMedium(1);
-            case "hard" -> request.getProblemStat().setHard(1);
-        }
-        identityClient.updateLeaderboard(request).block();
-    }
+
 
     public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request){
         TestCaseOutput output = testCaseOutputRepository.findByToken(UUID.fromString(request.getToken())).orElseThrow(
@@ -229,13 +219,15 @@ public class ProblemSubmissionService {
                             if (submissions == null || submissions.isEmpty()) {
                                 //cộng điểm
                                 Problem problem = result.getProblem();
-                                updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
+                                notificationService.updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
+                                // Thông báo
+                                notificationService.solveProblemNotification(problem, result.getUserId());
                             }
                             else if ( submissions.stream()
                                     .noneMatch(ProblemSubmission::getIsSolved)) {
                                 // cộng điểm
                                 Problem problem = result.getProblem();
-                                updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
+                                notificationService.updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
                             }
                         } catch (Exception e) {
                             System.out.println("Error while update leaderboard: " + e.getMessage());

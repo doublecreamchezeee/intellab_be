@@ -21,11 +21,13 @@ public class NotificationRequest {
     String redirectContent; 
     String timestamp;
 
+
     @Getter
     public enum NotificationType {
         INFO,
         SUCCESS,
         WARNING,
-        ERROR
+        ERROR,
+        BROADCAST
     }
 }
