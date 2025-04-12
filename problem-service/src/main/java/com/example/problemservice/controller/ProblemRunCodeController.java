@@ -5,6 +5,8 @@ import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemRunCode.CreationProblemRunCodeResponse;
 import com.example.problemservice.dto.response.problemRunCode.DetailsProblemRunCodeResponse;
+import com.example.problemservice.exception.AppException;
+import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.service.ProblemRunCodeService;
 import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,8 +30,13 @@ public class ProblemRunCodeController {
     public ApiResponse<CreationProblemRunCodeResponse> createRunCode(
             @RequestBody DetailsProblemRunCodeRequest request,
             @RequestHeader("X-UserId") String userUid,
-            @RequestParam(value = "base64", required = false) Boolean base64
+            @RequestParam(value = "base64", required = false) Boolean base64,
+            @RequestHeader("X-EmailVerified") Boolean emailVerified
     ) {
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         if (base64 == null) {
             base64 = false;
         }
@@ -53,8 +60,13 @@ public class ProblemRunCodeController {
     public ApiResponse<CreationProblemRunCodeResponse> createRunCodeBatch(
             @RequestBody DetailsProblemRunCodeRequest request,
             @RequestHeader("X-UserId") String userUid,
-            @RequestParam(value = "base64", required = false) Boolean base64
+            @RequestParam(value = "base64", required = false) Boolean base64,
+            @RequestHeader("X-EmailVerified") Boolean emailVerified
     ) {
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         if (base64 == null) {
             base64 = false;
         }

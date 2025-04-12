@@ -23,7 +23,7 @@ public interface CourseClient {
     @GetMapping(value = "/courses/categories", consumes = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<List<Category>> categories();
 
-    @PostMapping(value = "/courses/categories", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/courses/category", consumes = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<List<Category>> categories(@RequestBody List<Integer> categoryIds);
 
     @GetMapping(value = "/courses/category/{categoryId}", consumes = MediaType.APPLICATION_JSON_VALUE)

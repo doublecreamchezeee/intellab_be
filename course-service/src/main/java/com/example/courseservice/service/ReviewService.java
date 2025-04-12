@@ -30,6 +30,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -42,6 +43,7 @@ public class ReviewService {
     ReviewMapper reviewMapper;
     private final IdentityClient identityClient;
     private final FirestoreService firestoreService;
+    private final NotificationService notificationService;
 
     private void updateReviewCountAndAverageRating(Course course, Review review) {
         //update course average rating and review count of course
@@ -84,6 +86,8 @@ public class ReviewService {
         updateReviewCountAndAverageRating(course, review);
 
         ReviewCreationResponse response = reviewMapper.toReviewCreationResponse(review);
+
+        notificationService.reviewNotification(review, userUuid);
         try {
             String userName = firestoreService.getUsername(userUuid);
             // NotificationRequest notificationRequest = new NotificationRequest(
@@ -92,7 +96,7 @@ public class ReviewService {
             //         review.getCourse().getUserId()
             // );
 
-            NotificationRequest notificationRequest = 
+            NotificationRequest notificationRequest =
                 NotificationRequest.builder()
                     .userid(review.getCourse().getUserId())
                     .title(userName + "has just review your course:")
@@ -100,7 +104,7 @@ public class ReviewService {
                     .redirectType("COURSE_REVIEW")
                     .redirectContent("")
                     .build();
-                
+
             identityClient.postNotifications(notificationRequest);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
@@ -266,7 +270,7 @@ public class ReviewService {
 
         CourseReviewsStatisticsResponse response = new CourseReviewsStatisticsResponse();
 
-        if (course.getReviewCount() != null) {
+        /*if (course.getReviewCount() != null) {
             response.setTotalReviews(course.getReviewCount());
         } else {
             response.setTotalReviews(0);
@@ -276,7 +280,15 @@ public class ReviewService {
             response.setAverageRating(course.getAverageRating());
         } else {
             response.setAverageRating(0.0);
-        }
+        }*/
+
+        // Use default value 0 if reviewCount is null
+        int reviewCount = Objects.requireNonNullElse(course.getReviewCount(), 0);
+        response.setTotalReviews(reviewCount);
+
+        // Use default value 0.0 if averageRating is null
+        double averageRating = Objects.requireNonNullElse(course.getAverageRating(), 0.0);
+        response.setAverageRating(averageRating);
 
         response.setCourseId(courseId);
 
@@ -306,11 +318,27 @@ public class ReviewService {
         response.setTwoStar(twoStar);
         response.setOneStar(oneStar);
 
-        response.setPercentageFiveStar(((double) fiveStar / course.getReviewCount() * 100));
+        /*response.setPercentageFiveStar(((double) fiveStar / course.getReviewCount() * 100));
         response.setPercentageFourStar(((double) fourStar / course.getReviewCount() * 100));
         response.setPercentageThreeStar(((double) threeStar / course.getReviewCount() * 100));
         response.setPercentageTwoStar(((double) twoStar / course.getReviewCount() * 100));
         response.setPercentageOneStar(((double) oneStar / course.getReviewCount() * 100));
+*/
+
+        // Avoid division by zero
+        if (reviewCount > 0) {
+            response.setPercentageFiveStar(((double) fiveStar / reviewCount * 100));
+            response.setPercentageFourStar(((double) fourStar / reviewCount * 100));
+            response.setPercentageThreeStar(((double) threeStar / reviewCount * 100));
+            response.setPercentageTwoStar(((double) twoStar / reviewCount * 100));
+            response.setPercentageOneStar(((double) oneStar / reviewCount * 100));
+        } else {
+            response.setPercentageFiveStar(0.0);
+            response.setPercentageFourStar(0.0);
+            response.setPercentageThreeStar(0.0);
+            response.setPercentageTwoStar(0.0);
+            response.setPercentageOneStar(0.0);
+        }
 
         return response;
     }

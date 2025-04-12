@@ -1,6 +1,7 @@
 package com.example.problemservice.dto.response.Problem;
 
 import com.example.problemservice.model.*;
+import com.example.problemservice.model.course.Category;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,6 +23,9 @@ public class DetailsProblemResponse {
     Boolean isPublished;
     List<TestCase> testCases;
     Solution solution;
-    List<ProblemCategory> categories;
+    Boolean ViewedSolution;
+    List<Category> categories;
     List<Hint> hints;
+    Boolean hasSolution;
+    Boolean isSolved;
 }

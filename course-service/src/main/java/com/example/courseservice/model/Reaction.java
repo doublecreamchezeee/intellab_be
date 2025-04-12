@@ -21,4 +21,6 @@ public class Reaction {
     @MapsId("commentId")
     @ManyToOne(fetch = FetchType.LAZY)
     Comment comment;
+
+    Boolean active = true;
 }

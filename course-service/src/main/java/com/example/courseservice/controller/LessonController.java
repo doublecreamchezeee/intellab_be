@@ -1,7 +1,6 @@
 package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
-import com.example.courseservice.dto.request.Assignment.AssignmentCreationRequest;
 import com.example.courseservice.dto.request.Assignment.SubmitAssignmentRequest;
 import com.example.courseservice.dto.request.exercise.ExerciseCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
@@ -13,8 +12,6 @@ import com.example.courseservice.dto.response.learningLesson.LearningLessonRespo
 import com.example.courseservice.dto.response.lesson.DetailsLessonResponse;
 import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.service.AssignmentService;
-import com.example.courseservice.service.ExerciseService;
-import com.example.courseservice.model.LearningLesson;
 import com.example.courseservice.service.LessonService;
 import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,9 +21,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -231,6 +231,29 @@ public class LessonController {
                         )
                 )
                 .build();
+    }
+
+    @PostMapping("/upload")
+    ApiResponse<String> uploadFile(
+            @RequestParam MultipartFile file,
+            @RequestParam UUID courseId,
+            @RequestHeader("X-UserId") String userUid
+    )
+    {
+        UUID userId = ParseUUID.normalizeUID(userUid.split(",")[0]);
+        try{
+            return ApiResponse.<String>builder()
+                    .code(201)
+                    .message("File uploaded successfully")
+                    .result(lessonService.uploadFile(file,courseId,userId))
+                    .build();
+        } catch (IOException e) {
+            log.error("lessons/upload" + e.getMessage());
+            return ApiResponse.<String>builder()
+                    .code(401)
+                    .message("File upload failed")
+                    .build();
+        }
     }
 
 }

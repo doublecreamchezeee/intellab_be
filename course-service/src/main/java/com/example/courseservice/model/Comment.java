@@ -36,7 +36,7 @@ public class Comment {
     Instant created = Instant.now();
 
     @Column(name = "last_modified")
-    Instant lastModified;
+    Instant lastModified = Instant.now();
 
     @Column(name = "number_of_likes")
     Long numberOfLikes = 0L;

@@ -31,6 +31,7 @@ public enum ErrorCode {
     CANNOT_ENROLL_COURSE(500, "Cannot enroll course! Course service error", HttpStatus.INTERNAL_SERVER_ERROR),
     PAYMENT_NOT_SUCCESSFUL(500, "Payment not successful", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_ALREADY_HAS_SUBSCRIPTION(409, "User already has subscription", HttpStatus.CONFLICT),
+    EMAIL_NOT_VERIFIED(403, "Email is not verified", HttpStatus.FORBIDDEN),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

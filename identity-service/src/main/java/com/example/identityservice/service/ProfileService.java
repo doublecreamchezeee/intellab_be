@@ -15,7 +15,6 @@ import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.model.User;
 import com.example.identityservice.utility.CloudinaryUtil;
-import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
@@ -61,7 +60,7 @@ public class ProfileService {
                     .email(userRecord.getEmail())
                     .phoneNumber(userRecord.getPhoneNumber())
                     .photoUrl(userRecord.getPhotoUrl())
-                    .emailVerified(userRecord.isEmailVerified())
+                    .isEmailVerified(userRecord.isEmailVerified())
                     .isDisabled(userRecord.isDisabled())
                     .lastSignIn(new Date(userRecord.getUserMetadata().getLastSignInTimestamp()))
                     .firstName(userFirestore.getFirstName())
@@ -74,6 +73,7 @@ public class ProfileService {
             throw new RuntimeException(e);
         }
     }
+
 
     public String getProfilePictureUrlByEmail(String userId) {
         try {

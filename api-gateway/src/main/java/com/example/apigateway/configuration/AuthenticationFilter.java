@@ -138,6 +138,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
                         .header("X-UserRole", role)
+                        .header("X-EmailVerified", response.getBody().getIsEmailVerified() != null ? response.getBody().getIsEmailVerified().toString() : "false")
                         .build();
 
 

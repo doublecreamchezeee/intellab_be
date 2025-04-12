@@ -18,7 +18,9 @@ import com.example.problemservice.mapper.DefaultCodeMapper;
 import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.mapper.ProblemcategoryMapper;
 import com.example.problemservice.model.*;
+import com.example.problemservice.model.ViewSolutionBehavior;
 import com.example.problemservice.model.composite.DefaultCodeId;
+import com.example.problemservice.model.course.Category;
 import com.example.problemservice.repository.*;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
@@ -51,6 +53,8 @@ public class ProblemService {
     private final ProblemcategoryMapper problemcategoryMapper;
     private final CourseClient courseClient;
     private final ProblemCategoryRepository problemCategoryRepository;
+    private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
+
 
     private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
         int start = (int) pageable.getOffset();
@@ -90,9 +94,24 @@ public class ProblemService {
     }
 
     public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan, UUID userUuid) {
-        DetailsProblemResponse response = problemMapper.toProblemDetailsResponse(problemRepository.findById(problemId).orElseThrow(
-                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
-        ));
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+        DetailsProblemResponse response = problemMapper.toProblemDetailsResponse(problem);
+
+        System.out.println(userUuid + "," + problemId);
+        response.setViewedSolution(
+                viewSolutionBehaviorRepository.findByProblemIdAndUserId(problemId, userUuid) != null
+        );
+
+        List<Category> category = courseClient.categories(
+                problem.getCategories()
+                        .stream()
+                        .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
+                        .toList()).getResult();
+
+        response.setCategories(category);
+
+        response.setIsSolved(isDoneProblem(problemId,userUuid));
 
         if (response.getIsPublished()
             || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
@@ -195,6 +214,7 @@ public class ProblemService {
             response.setCategories(categories);
 
             response.setIsDone(isDoneProblem(response.getProblemId(),userId));
+            response.setHasSolution(problem.getSolution() != null);
 
             return response;
         });
@@ -228,6 +248,7 @@ public class ProblemService {
                     .toList();
 
             response.setCategories(categories);
+            response.setHasSolution( problem.getSolution() != null);
 
             return response;
         });
@@ -331,6 +352,13 @@ public class ProblemService {
 //                    problem.getProblemName(), "Structure.md");
             generateDefaultCodes(problem.getProblemId(), problem.getProblemStructure());
         }
+    }
+    public Boolean viewSolution(UUID problemId, UUID userId) {
+        ViewSolutionBehavior viewSolutionBehavior = new ViewSolutionBehavior();
+        viewSolutionBehavior.setProblemId(problemId);
+        viewSolutionBehavior.setUserId(userId);
+        viewSolutionBehaviorRepository.save(viewSolutionBehavior);
+        return true;
     }
 
     /*@EventListener(ApplicationReadyEvent.class)
