@@ -109,7 +109,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     private String getUserIdFromSession(WebSocketSession session) {
         String query = session.getUri().getQuery();
         if (query != null && query.startsWith("userId=")) {
-            return query.substring(7);
+            return ParseUUID.normalizeUID(query.substring(7)).toString();
         }
         return null;
     }
