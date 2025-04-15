@@ -6,6 +6,7 @@ import com.example.courseservice.dto.request.comment.CommentModifyRequest;
 import com.example.courseservice.dto.request.course.*;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
+import com.example.courseservice.dto.response.course.CourseAndFirstLessonResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseSearchResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
@@ -900,6 +901,18 @@ public class CourseController {
                         request
                     )
                 )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get a course and its first lesson by course id"
+    )
+    @GetMapping("/{courseId}/first-lesson")
+    public ApiResponse<CourseAndFirstLessonResponse> getCourseAndFirstLessonByCourseId(
+            @PathVariable("courseId") UUID courseId
+    ) {
+        return ApiResponse.<CourseAndFirstLessonResponse>builder()
+                .result(courseService.getCourseAndFirstLessonByCourseId(courseId))
                 .build();
     }
 

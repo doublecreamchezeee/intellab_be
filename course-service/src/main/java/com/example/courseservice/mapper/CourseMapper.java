@@ -50,4 +50,15 @@ public interface CourseMapper {
     DetailCourseResponse toDetailCourseResponse(Course course, boolean isUserEnrolled);
 
     CourseResponse toCourseResponse(Course course, int numberOfReviews, float averageRating);
+
+    @Mapping(target = "courseDescription", source = "description")
+    @Mapping(target = "lessonCount", expression = "java((course.getLessons() != null) ? course.getLessons().size() : 0)")
+    @Mapping(target = "lessonId", ignore = true)
+    @Mapping(target = "lessonContent", ignore = true)
+    @Mapping(target = "lessonDescription", ignore = true)
+    @Mapping(target = "lessonOrder", ignore = true)
+    @Mapping(target = "lessonName", ignore = true)
+    @Mapping(target = "exerciseId", ignore = true)
+    @Mapping(target = "problemId", ignore = true)
+    CourseAndFirstLessonResponse toCourseAndFirstLessonResponse(Course course);
 }

@@ -4,8 +4,11 @@ package com.example.identityservice.controller;
 import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.configuration.RedirectUrlConfig;
 import com.example.identityservice.dto.ApiResponse;
+import com.example.identityservice.dto.request.profile.DetailsDiscountPercentResponse;
+import com.example.identityservice.dto.request.profile.UpdateSubscriptionStartDateRequest;
 import com.example.identityservice.dto.request.vnpay.VNPaySinglePaymentCreationRequest;
 import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
+import com.example.identityservice.dto.response.course.CourseAndFirstLessonResponse;
 import com.example.identityservice.dto.response.vnpay.*;
 import com.example.identityservice.enums.account.PaymentFor;
 import com.example.identityservice.service.VNPayService;
@@ -247,6 +250,72 @@ public class VNPayController {
         return ApiResponse.<String>builder()
                 .message("Redirect URL updated successfully")
                 .result(newUrl)
+                .build();
+    }
+
+    @Operation(
+            summary = "Get course and first lesson by payment id",
+            tags = "VN Pay"
+    )
+    @PublicEndpoint
+    @GetMapping("/{paymentId}/course-and-first-lesson")
+    public ApiResponse<CourseAndFirstLessonResponse> getCourseAndFirstLessonByPaymentId(
+            @PathVariable UUID paymentId
+    ) {
+        CourseAndFirstLessonResponse response = vnPayService.getCourseAndFirstLessonByPaymentId(paymentId);
+
+        return ApiResponse.<CourseAndFirstLessonResponse>builder()
+                .message("success")
+                .result(response)
+                .build();
+    }
+
+    @Operation(
+            summary = "(testing only) Set subscription plan end date to overdue by user uid",
+            tags = "VN Pay"
+    )
+    @PublicEndpoint
+    @PostMapping("/set-subscription-plan-end-date-overdue")
+    public ApiResponse<String> setSubscriptionPlanEndDateOverdue(
+            @RequestHeader(value = "X-UserId", required = true) String userId
+    ) {
+        vnPayService.setSubscriptionPlanEndDateToOverdue(userId);
+        return ApiResponse.<String>builder()
+                .message("success")
+                .result("Set subscription plan end date to overdue successfully")
+                .build();
+    }
+
+    @Operation(
+            summary = "(testing only) Set subscription plan start date by user uid",
+            tags = "VN Pay"
+    )
+    @PublicEndpoint
+    @PostMapping("/set-subscription-plan-start-date")
+    public ApiResponse<String> setSubscriptionPlanStartDate(
+            @RequestHeader(value = "X-UserId", required = true) String userId,
+            @RequestBody UpdateSubscriptionStartDateRequest request
+    ) {
+        vnPayService.setSubscriptionPlanStartDate(userId, request.getDiscountPercentByTime());
+        return ApiResponse.<String>builder()
+                .message("success")
+                .result("Set subscription plan start date successfully")
+                .build();
+    }
+
+    @Operation(
+            summary = "Get discount percent and discount value by user uid",
+            tags = "VN Pay"
+    )
+    @PublicEndpoint
+    @GetMapping("/get-discount-percent")
+    public ApiResponse<DetailsDiscountPercentResponse> getDiscountPercentAndValue(
+            @RequestParam(value = "userId", required = true) String userId
+    ) {
+        DetailsDiscountPercentResponse response = vnPayService.getDiscountPercentByUserUid(userId);
+        return ApiResponse.<DetailsDiscountPercentResponse>builder()
+                .message("success")
+                .result(response)
                 .build();
     }
 
