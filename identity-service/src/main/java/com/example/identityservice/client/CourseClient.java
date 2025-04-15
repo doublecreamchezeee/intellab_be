@@ -8,6 +8,7 @@ import com.example.identityservice.dto.request.course.EnrollCourseRequest;
 import com.example.identityservice.dto.request.course.ReEnrollCoursesUsingSubscriptionPlanRequest;
 import com.example.identityservice.dto.response.LeaderboardCourseResponse;
 import com.example.identityservice.dto.response.course.CompleteCourseResponse;
+import com.example.identityservice.dto.response.course.CourseAndFirstLessonResponse;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
 import org.springframework.http.MediaType;
@@ -49,4 +50,7 @@ public interface CourseClient {
 
     @PostExchange(url = "/courses/re-enroll-courses-enrolled-using-subscription-plan")
     Mono<ApiResponse<Boolean>> reEnrollCoursesEnrolledUsingSubscriptionPlan(@RequestBody ReEnrollCoursesUsingSubscriptionPlanRequest request);
+
+    @GetExchange(url = "/courses/{courseId}/first-lesson")
+    Mono<ApiResponse<CourseAndFirstLessonResponse>> getCourseAndFirstLessonByCourseId(@PathVariable UUID courseId);
 }

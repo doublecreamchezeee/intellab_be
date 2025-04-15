@@ -844,4 +844,23 @@ public class CourseService {
                 UserCourseAccessStatus.ACCESSIBLE.getCode()
         );
     }
+
+    public CourseAndFirstLessonResponse getCourseAndFirstLessonByCourseId(UUID courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseId(courseId);
+        Lesson firstLesson = null;
+        if (lessons != null && !lessons.isEmpty()) {
+            firstLesson = lessons.get(0);
+        }
+
+        CourseAndFirstLessonResponse response = courseMapper.toCourseAndFirstLessonResponse(course);
+
+        if (firstLesson != null) {
+            response = lessonMapper.updateCourseAndFirstLessonResponse(firstLesson, response);
+        }
+
+        return response;
+    }
 }
