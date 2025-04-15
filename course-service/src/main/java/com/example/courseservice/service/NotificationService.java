@@ -27,7 +27,6 @@ public class NotificationService {
 
     @Async
     void upvoteCommentNotification(Comment comment, UUID sessionUserId) {
-
         NotificationRequest request = new NotificationRequest();
         request.setUserid(comment.getUserId());
         request.setTitle("Your comment has just been upvote:");

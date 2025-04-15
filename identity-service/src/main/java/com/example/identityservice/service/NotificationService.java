@@ -34,6 +34,7 @@ public class NotificationService {
     private final FirestoreService firestoreService;
 
     public Page<NotificationResponse> fetchNotifications(Pageable pageable, UUID userId) {
+        System.out.println("fetch noti."+userId);
         Page<Notification> userNotification = notificationRepository.findAllByRecipientId(userId,pageable);
 
         return userNotification.map(notificationMapper::toNotificationResponse);
@@ -71,7 +72,6 @@ public class NotificationService {
                 // session.sendMessage(new TextMessage(notification.getMessage()));
         }
             // Mark notifications as read after sending
-            unreadNotifications.forEach(notification -> notification.setMarkAsRead(true));
             notificationRepository.saveAll(unreadNotifications);
         }
 
