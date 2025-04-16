@@ -40,11 +40,13 @@ public class ReviewController {
             @RequestHeader("X-UserId") String userUid,
             BindingResult bindingResult
     ) {
-        System.out.println(userUid);
+        log.info("userUid: {}", userUid);
         userUid = userUid.split(",")[0];
-        if (userUid == null || !userUid.isEmpty()) {
+
+        if (userUid == null || userUid.isEmpty()) {
             throw new AppException(ErrorCode.USER_ID_IS_NULL);
         }
+
         if (bindingResult.hasErrors()) {
             log.error("Error in creating review: {}", bindingResult.getAllErrors());
 

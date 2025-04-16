@@ -105,11 +105,11 @@ public class VNPayService {
                         course.getCourseName()
                 ); // null;
 
-            /*if (request.getLanguage().getCode().equals("vi")) {
-                orderDescription = StringUtility.convertToAscii(course.getCourseName());
+            if (request.getLanguage().getCode().equals("vi")) {
+                orderDescription = "Thanh toan cho khoa hoc: " + orderDescription;
             } else {
-                orderDescription = "Payment for courses ";
-            }*/
+                orderDescription = "Payment for course: "+ orderDescription;
+            }
 
             // Create payment url
             VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
@@ -237,11 +237,11 @@ public class VNPayService {
             // create description for order
             String orderDescription = request.getPremiumPackage().getName(); // null;
 
-            /*if (request.getLanguage().getCode().equals("vi")) {
-                orderDescription = "Nang cap tai khoan " ;
+            if (request.getLanguage().getCode().equals("vi")) {
+                orderDescription = "Thanh toan cho nang cap tai khoan: " + orderDescription ;
             } else {
-                orderDescription = "Payment for upgrade account ";
-            }*/
+                orderDescription = "Payment for subscription plan: " + orderDescription;
+            }
 
             //orderDescription += request.getPremiumPackage().getCode() + " package ";
 
