@@ -44,7 +44,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String[] exploredEndpoints = {
             "/course/courses",
-            "/course/reviews",
             "/course/lessons",
             "/course/courses/categories",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/categories$",
@@ -90,6 +89,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/statistics/progress/level",
             "/identity/leaderboard",
             "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            //"/course/reviews",
     };
 
     @Value("${app.api-prefix}")
