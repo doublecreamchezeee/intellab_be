@@ -762,7 +762,7 @@ public class CourseController {
         if (emailVerified == null || !emailVerified) {
             throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
-
+        System.out.println(userUid);
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 

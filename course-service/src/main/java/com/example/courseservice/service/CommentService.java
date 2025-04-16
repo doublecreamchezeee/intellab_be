@@ -162,9 +162,11 @@ public class CommentService {
             response.setAvatarUrl(profile.getPhotoUrl());
         }
 
-        if (repliedComment != null && !result.getUserId().equals(repliedComment.getUserId()))
+        if ((repliedComment != null && !result.getUserId().equals(repliedComment.getUserId()))
+                || (repliedComment == null && request.getParentCommentId() != null)
+        )
         {
-            notificationService.commentNotification(response,repliedComment);
+            notificationService.commentNotification(response,repliedComment, courseId);
         }
 
         return response;

@@ -32,21 +32,21 @@ public class NotificationService {
             notificationRequest.setMessage("");
             notificationRequest.setUserid(problemComment.getUserUuid());
             notificationRequest.setRedirectType("PROBLEM_COMMENT");
-            notificationRequest.setRedirectContent("/problem/problem-comments/"+ problemComment.getCommentId());
-            identityClient.postNotifications(notificationRequest);
+            notificationRequest.setRedirectContent("/problem/problems/" + problemComment.getProblem().getProblemId() + "?commentId="+ problemComment.getCommentId());
+            identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         }catch (Exception ignored){}
     }
 
     @Async
     public void createCommentNotification(ProblemCommentCreationResponse response) {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setTitle(response.getUsername() + "has just replied to your comment.");
+        notificationRequest.setTitle(response.getUsername() + "has just replied to your comment");
         notificationRequest.setMessage(response.getContent());
         notificationRequest.setUserid(UUID.fromString(response.getUserUuid()));
         notificationRequest.setRedirectType("PROBLEM_COMMENT");
-        notificationRequest.setRedirectContent("/problem/problem-comments/" + response.getCommentId());
+        notificationRequest.setRedirectContent("/problem/problems/"+ response.getProblemId()+ "?commentId=" + response.getCommentId());
         try{
-            identityClient.postNotifications(notificationRequest);
+            identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         }
         catch (Exception ignore)
         {
@@ -62,9 +62,9 @@ public class NotificationService {
                 "Keep up the momentum and continue challenging yourself with even more problems. " +
                 "Remember, every solved challenge brings you closer to mastery. 🔥");
         notificationRequest.setRedirectType("SOLVED_PROBLEM");
-        notificationRequest.setRedirectContent("/problem/problem-submissions/submitList/" + problem.getProblemId());
+        notificationRequest.setRedirectContent("/problem/problems/" + problem.getProblemId());
         try{
-            identityClient.postNotifications(notificationRequest);
+            identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         }
         catch (Exception ignore){
         }

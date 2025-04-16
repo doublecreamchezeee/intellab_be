@@ -743,7 +743,7 @@ public class CourseService {
             try{
                 NotificationRequest notificationRequest = new NotificationRequest();
                 notificationRequest.setTitle("Congratulations on Completing Your Course!");
-                notificationRequest.setMessage("Dear "+ userName +",\n" +
+                notificationRequest.setMessage("Dear [@"+ userName +"],\n" +
                         "\n" +
                         "Congratulations on successfully completing the \"" + courseName + "\" on [Platform/Institution Name]! We recognize your dedication and commitment to learning.\n" +
                         "\n" +
@@ -751,7 +751,7 @@ public class CourseService {
                         "\n" +
                         "\uD83D\uDD39 Certificate Details:\n" +
                         "\n" +
-                        "Learner’s Name: " + userName + "\n" +
+                        "Learner’s Name: [@" + userName + "]\n" +
                         "Course Name: " + courseName + "\n" +
                         "Completion Date: [Completion Date]\n" +
                         "Issued by: Intellab\n" +
@@ -762,8 +762,7 @@ public class CourseService {
                         "\n");
                 notificationRequest.setUserid(userId);
                 notificationRequest.setRedirectType("COURSE_COMPLETE");
-                notificationRequest.setRedirectContent("");
-                identityClient.postNotifications(notificationRequest);
+                notificationRequest.setRedirectContent("/course/courses/" + certificate.getCertificateId() + "/certificate");
                 identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
             }
             catch (Exception e){

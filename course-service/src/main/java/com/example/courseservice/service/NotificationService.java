@@ -29,11 +29,11 @@ public class NotificationService {
     void upvoteCommentNotification(Comment comment, UUID sessionUserId) {
         NotificationRequest request = new NotificationRequest();
         request.setUserid(comment.getUserId());
-        request.setTitle("Your comment has just been upvote:");
+        request.setTitle("Your comment has just been upvote");
         String userName = firestoreService.getUsername(sessionUserId);
-        request.setMessage("Your comment has just been upvote by " + userName);
+        request.setMessage("Your comment has just been upvote by [@" + userName + "]");
         request.setRedirectType("COURSE_COMMENT");
-        request.setRedirectContent("/course/courses/comments/" + comment.getCommentId());
+        request.setRedirectContent("/course/courses/" + comment.getTopic().getCourse().getCourseId() + "?commentId=" + comment.getCommentId());
         try
         {
             identityClient.postNotifications(request).block().getResult().getMessage();
@@ -43,13 +43,13 @@ public class NotificationService {
         }
     }
     @Async
-    void commentNotification(CommentResponse response, Comment repliedComment) {
+    void commentNotification(CommentResponse response, Comment repliedComment, UUID courseId) {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setTitle(response.getUserName() + " replied to your comment:");
+        notificationRequest.setTitle("[@" + response.getUserName() + "] replied to your comment");
         notificationRequest.setMessage(response.getContent());
         notificationRequest.setUserid(repliedComment.getUserId());
         notificationRequest.setRedirectType("COURSE_COMMENT");
-        notificationRequest.setRedirectContent("/course/courses/comments/" + response.getCommentId());
+        notificationRequest.setRedirectContent("/course/courses/" + courseId +"?commentId=" + response.getCommentId());
         System.out.println(notificationRequest.getTitle());
         try{
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
@@ -59,15 +59,15 @@ public class NotificationService {
     }
 
     @Async
-    void reviewNotification(Review review, UUID sessionUserId) {
+    void reviewNotification(Review review, UUID sessionUserId, UUID courseId) {
         try {
             String userName = firestoreService.getUsername(sessionUserId);
             NotificationRequest notificationRequest = new NotificationRequest();
-            notificationRequest.setTitle(userName + " has just review your course:");
+            notificationRequest.setTitle("[@" + userName + "] has just review your course");
             notificationRequest.setMessage(review.getComment());
             notificationRequest.setUserid(review.getCourse().getUserId());
             notificationRequest.setRedirectType("COURSE_REVIEW");
-            notificationRequest.setRedirectContent("/course/reviews/" + review.getReviewId());
+            notificationRequest.setRedirectContent("/course/"+ courseId+ "?reviewId=" + review.getReviewId());
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         } catch (RuntimeException e) {
             throw new RuntimeException(e);

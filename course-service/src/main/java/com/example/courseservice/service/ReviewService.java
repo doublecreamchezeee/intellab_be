@@ -87,7 +87,7 @@ public class ReviewService {
 
         ReviewCreationResponse response = reviewMapper.toReviewCreationResponse(review);
 
-        notificationService.reviewNotification(review, userUuid);
+        notificationService.reviewNotification(review, userUuid, course.getCourseId());
 //        try {
 //            String userName = firestoreService.getUsername(userUuid);
 //            // NotificationRequest notificationRequest = new NotificationRequest(
