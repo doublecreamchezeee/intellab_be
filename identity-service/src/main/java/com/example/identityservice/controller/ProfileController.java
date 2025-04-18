@@ -5,8 +5,10 @@ import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
+import com.example.identityservice.dto.response.LoginStreakResponse;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
+import com.example.identityservice.service.LoginStreakService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
@@ -38,6 +40,7 @@ import java.util.Optional;
 public class ProfileController {
     private final ProfileService profileService;
     private final AuthService authService;
+    private final LoginStreakService loginStreakService;
 
     @Operation(
             summary = "Get single profile information"
@@ -142,6 +145,17 @@ public class ProfileController {
     @GetMapping("/statistics/progress/language")
     public ResponseEntity<ProgressLanguageResponse> getProgressLanguage() {
         return ResponseEntity.ok(profileService.getProgressLanguage());
+    }
+
+    @PostMapping("/loginStreak")
+    public ApiResponse<LoginStreakResponse> loginStreak(Authentication authentication) {
+        String userUid = (String) authentication.getPrincipal();
+
+        if (userUid == null || userUid.isEmpty()) {
+            throw new IllegalArgumentException("User id is empty");
+        }
+        return ApiResponse.<LoginStreakResponse>builder()
+                .result(loginStreakService.loginStreak(userUid)).build();
     }
 
 

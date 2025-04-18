@@ -32,7 +32,7 @@ public class NotificationService {
             notificationRequest.setMessage("");
             notificationRequest.setUserid(problemComment.getUserUuid());
             notificationRequest.setRedirectType("PROBLEM_COMMENT");
-            notificationRequest.setRedirectContent("/problem/problems/" + problemComment.getProblem().getProblemId() + "?commentId="+ problemComment.getCommentId());
+            notificationRequest.setRedirectContent("http://localhost:3000/problems/" + problemComment.getProblem().getProblemId());
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         }catch (Exception ignored){}
     }
@@ -44,13 +44,13 @@ public class NotificationService {
         notificationRequest.setMessage(response.getContent());
         notificationRequest.setUserid(UUID.fromString(response.getUserUuid()));
         notificationRequest.setRedirectType("PROBLEM_COMMENT");
-        notificationRequest.setRedirectContent("/problem/problems/"+ response.getProblemId()+ "?commentId=" + response.getCommentId());
+        notificationRequest.setRedirectContent("http://localhost:3000/problems/"+ response.getProblemId());
         try{
+            System.out.println("Send problem comment noti");
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         }
         catch (Exception ignore)
-        {
-        }
+        {        }
     }
     @Async
     public void solveProblemNotification(Problem problem, UUID userUid) {
@@ -62,7 +62,7 @@ public class NotificationService {
                 "Keep up the momentum and continue challenging yourself with even more problems. " +
                 "Remember, every solved challenge brings you closer to mastery. 🔥");
         notificationRequest.setRedirectType("SOLVED_PROBLEM");
-        notificationRequest.setRedirectContent("/problem/problems/" + problem.getProblemId());
+        notificationRequest.setRedirectContent("http://localhost:3000/problems/" + problem.getProblemId());
         try{
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         }

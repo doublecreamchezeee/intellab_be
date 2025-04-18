@@ -1,4 +1,4 @@
-package com.example.courseservice.model;
+package com.example.identityservice.model;
 
 
 
@@ -38,9 +38,9 @@ public class Medal {
 //    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
 //    Set<Leaderboard> leaderboards;
 
-    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
-    Set<Streak> streaks;
+//    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
+//    Set<Streak> streaks;
 
-    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
-    List<Achievement> achievementList;
+//    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
+//    List<Achievement> achievementList;
 }

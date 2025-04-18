@@ -130,7 +130,7 @@ public class ProblemCommentService {
 
             problemComment.setRepliedComment(repliedComment);
 
-            notification = !userUid.equals(problemComment.getUserUid());
+            notification = !userUid.equals(repliedComment.getUserUid());
             //reset parent comment if exist replied comment
             problemComment.setParentComment(
                     repliedComment.getParentComment() != null
@@ -159,6 +159,8 @@ public class ProblemCommentService {
             response.setUserAvatar(null);
         }
 
+        System.out.println("ProblemComment noti: ");
+        System.out.println((response.getReplyToCommentId() != null && notification));
         if (response.getReplyToCommentId() != null && notification) {
             notificationService.createCommentNotification(response);
         }

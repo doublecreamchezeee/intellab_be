@@ -33,7 +33,7 @@ public class NotificationService {
         String userName = firestoreService.getUsername(sessionUserId);
         request.setMessage("Your comment has just been upvote by [@" + userName + "]");
         request.setRedirectType("COURSE_COMMENT");
-        request.setRedirectContent("/course/courses/" + comment.getTopic().getCourse().getCourseId() + "?commentId=" + comment.getCommentId());
+        request.setRedirectContent("http://localhost:3000/course/" + comment.getTopic().getCourse().getCourseId());
         try
         {
             identityClient.postNotifications(request).block().getResult().getMessage();
@@ -49,7 +49,7 @@ public class NotificationService {
         notificationRequest.setMessage(response.getContent());
         notificationRequest.setUserid(repliedComment.getUserId());
         notificationRequest.setRedirectType("COURSE_COMMENT");
-        notificationRequest.setRedirectContent("/course/courses/" + courseId +"?commentId=" + response.getCommentId());
+        notificationRequest.setRedirectContent("http://localhost:3000/course/" + courseId);
         System.out.println(notificationRequest.getTitle());
         try{
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
@@ -67,7 +67,7 @@ public class NotificationService {
             notificationRequest.setMessage(review.getComment());
             notificationRequest.setUserid(review.getCourse().getUserId());
             notificationRequest.setRedirectType("COURSE_REVIEW");
-            notificationRequest.setRedirectContent("/course/"+ courseId+ "?reviewId=" + review.getReviewId());
+            notificationRequest.setRedirectContent("http://localhost:3000/course/"+ courseId);
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         } catch (RuntimeException e) {
             throw new RuntimeException(e);

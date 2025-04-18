@@ -26,9 +26,9 @@ public class Achievement {
     Instant achievedDate;
 
 
-    @MapsId("medalId")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medal_id")
-    Medal medal;
+//    @MapsId("medalId")
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "medal_id")
+//    Medal medal;
 
 }
