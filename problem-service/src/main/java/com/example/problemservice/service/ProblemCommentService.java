@@ -107,6 +107,7 @@ public class ProblemCommentService {
         }
 
         Boolean notification = false;
+        UUID repliedUserId = null;
         // Set replied comment
         if (request.getReplyToCommentId() != null)  {
             UUID repliedCommentId = null;
@@ -131,6 +132,7 @@ public class ProblemCommentService {
             problemComment.setRepliedComment(repliedComment);
 
             notification = !userUid.equals(repliedComment.getUserUid());
+            repliedUserId = repliedComment.getUserUuid();
             //reset parent comment if exist replied comment
             problemComment.setParentComment(
                     repliedComment.getParentComment() != null
@@ -159,14 +161,11 @@ public class ProblemCommentService {
             response.setUserAvatar(null);
         }
 
-        System.out.println("ProblemComment noti: ");
-        System.out.println((response.getReplyToCommentId() != null && notification));
         if (response.getReplyToCommentId() != null && notification) {
-            notificationService.createCommentNotification(response);
+            notificationService.createCommentNotification(response, repliedUserId);
         }
 
         response.setIsUpVoted(false);
-
         return response;
     }
 

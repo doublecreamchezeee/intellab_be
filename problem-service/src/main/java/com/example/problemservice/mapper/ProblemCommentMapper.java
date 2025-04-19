@@ -20,6 +20,7 @@ public interface ProblemCommentMapper {
     @Mapping(target = "replyToCommentId", source = "repliedComment.commentId")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "lastModifiedAt", source = "lastModifiedAt")
+    @Mapping(target = "problemId", source = "problem.problemId")
     ProblemCommentCreationResponse toProblemCommentCreationResponse(ProblemComment problemComment);
 
     void updateProblemCommentFromRequest(ProblemCommentUpdateRequest request, @MappingTarget ProblemComment problemComment);

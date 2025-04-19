@@ -753,7 +753,7 @@ public class CourseService {
                         "\n");
                 notificationRequest.setUserid(userId);
                 notificationRequest.setRedirectType("COURSE_COMPLETE");
-                notificationRequest.setRedirectContent("http://localhost:3000/certificate" + certificate.getCertificateId());
+                notificationRequest.setRedirectContent("/certificate/" + certificate.getCertificateId());
                 identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
             }
             catch (Exception e){

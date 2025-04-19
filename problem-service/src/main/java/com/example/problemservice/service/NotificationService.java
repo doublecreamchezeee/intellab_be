@@ -35,7 +35,8 @@ public class NotificationService {
             notificationRequest.setMessage("");
             notificationRequest.setUserid(problemComment.getUserUuid());
             notificationRequest.setRedirectType("PROBLEM_COMMENT");
-            notificationRequest.setRedirectContent("http://localhost:3000/problems/" + problemComment.getProblem().getProblemId());
+            notificationRequest.setRedirectContent("/problems/" + problemComment.getProblem().getProblemId()
+                    + "?commentId=" + problemComment.getCommentId());
             identityClient.postNotifications(notificationRequest).block().getResult();
         }catch (Exception e){
             log.error("e: ", e);
@@ -43,13 +44,14 @@ public class NotificationService {
     }
 
     @Async
-    public void createCommentNotification(ProblemCommentCreationResponse response) {
+    public void createCommentNotification(ProblemCommentCreationResponse response, UUID userId) {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setTitle(response.getUsername() + "has just replied to your comment");
         notificationRequest.setMessage(response.getContent());
-        notificationRequest.setUserid(UUID.fromString(response.getUserUuid()));
+        notificationRequest.setUserid(userId);
         notificationRequest.setRedirectType("PROBLEM_COMMENT");
-        notificationRequest.setRedirectContent("http://localhost:3000/problems/"+ response.getProblemId());
+        notificationRequest.setRedirectContent("/problems/"+ response.getProblemId()+
+                "?commentId=" + response.getCommentId());
         try{
             System.out.println("Send problem comment noti");
             identityClient.postNotifications(notificationRequest).block().getResult();
@@ -69,7 +71,7 @@ public class NotificationService {
                 "Keep up the momentum and continue challenging yourself with even more problems. " +
                 "Remember, every solved challenge brings you closer to mastery. 🔥");
         notificationRequest.setRedirectType("SOLVED_PROBLEM");
-        notificationRequest.setRedirectContent("http://localhost:3000/problems/" + problem.getProblemId());
+        notificationRequest.setRedirectContent("/problems/" + problem.getProblemId());
         try{
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         }
