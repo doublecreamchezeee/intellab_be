@@ -39,7 +39,8 @@ public class NotificationResponse {
         INFO,
         SUCCESS,
         WARNING,
-        ERROR
+        ERROR,
+        BROADCAST
     }
 
 }

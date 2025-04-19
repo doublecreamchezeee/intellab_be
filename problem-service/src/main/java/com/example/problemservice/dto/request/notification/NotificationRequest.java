@@ -25,6 +25,7 @@ public class NotificationRequest {
         INFO,
         SUCCESS,
         WARNING,
-        ERROR
+        ERROR,
+        BROADCAST
     }
 }

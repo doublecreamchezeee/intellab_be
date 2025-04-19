@@ -29,7 +29,7 @@ public class LeaderboardController {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(leaderboardService.getLeaderboard(pageable, filter));
     }
-
+    @PublicEndpoint
     @PostMapping("/update")
     public ResponseEntity<Void> updateLeaderboard(@RequestBody LeaderboardUpdateRequest request) {
 

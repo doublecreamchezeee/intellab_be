@@ -29,6 +29,7 @@ public class NotificationController {
     @PublicEndpoint
     @PostMapping
     public ApiResponse<NotificationResponse> createNotification(@RequestBody NotificationRequest request) {
+        System.out.println("Request: " + request.getRedirectType());
         // nếu userid = null thì broadcast
         if (request.getUserid() == null) {
             return ApiResponse.<NotificationResponse>builder()

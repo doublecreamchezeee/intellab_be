@@ -18,14 +18,23 @@ public class NotificationResponse {
 
     String message;
 
-    NotificationType type;
+    String redirectType;
+
+    String redirectContent;
+
+    NotificationResponse.NotificationType type;
 
     Date timestamp;
+
+    Boolean markAsRead;
+
+    UUID recipientId;
 
     public enum NotificationType {
         INFO,
         SUCCESS,
         WARNING,
-        ERROR
+        ERROR,
+        BROADCAST
     }
 }

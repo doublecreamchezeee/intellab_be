@@ -2,9 +2,11 @@ package com.example.courseservice.service;
 
 
 import com.example.courseservice.client.IdentityClient;
+import com.example.courseservice.dto.request.LeaderboardUpdateRequest;
 import com.example.courseservice.dto.request.notification.NotificationRequest;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.model.Comment;
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.Review;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +73,27 @@ public class NotificationService {
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Async
+    void uploadLeaderBoard(UUID userId, Course course)
+    {
+        LeaderboardUpdateRequest leaderboardUpdateRequest = new LeaderboardUpdateRequest();
+        leaderboardUpdateRequest.setUserId(userId.toString());
+        leaderboardUpdateRequest.setType("course");
+        leaderboardUpdateRequest.setAdditionalScore((long)course.getScore());
+
+        switch (course.getLevel()) {
+            case "Beginner" -> leaderboardUpdateRequest.getCourseStat().setBeginner(1);
+            case "Intermediate" -> leaderboardUpdateRequest.getCourseStat().setIntermediate(1);
+            case "Advanced" -> leaderboardUpdateRequest.getCourseStat().setAdvanced(1);
+        }
+        try{
+            identityClient.updateLeaderboard(leaderboardUpdateRequest).block();
+        }
+        catch(Exception e){
+            System.out.println("Error in updating leaderboard: " + e);
         }
     }
 }

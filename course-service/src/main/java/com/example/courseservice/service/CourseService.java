@@ -69,6 +69,7 @@ public class CourseService {
     CertificateRepository certificateRepository;
     private final FirestoreService firestoreService;
     private final LessonMapper lessonMapper;
+    private final NotificationService notificationService;
 
 
     public Page<CourseCreationResponse> getAllCourses(Pageable pageable) {
@@ -724,20 +725,10 @@ public class CourseService {
             certificateCreationResponse.setUserId(userId);
 
             try{
-                LeaderboardUpdateRequest leaderboardUpdateRequest = new LeaderboardUpdateRequest();
-                leaderboardUpdateRequest.setUserId(userId.toString());
-                leaderboardUpdateRequest.setType("course");
-                leaderboardUpdateRequest.setAdditionalScore((long)course.getScore());
-
-                switch (course.getLevel()) {
-                    case "Beginner" -> leaderboardUpdateRequest.getCourseStat().setBeginner(1);
-                    case "Intermediate" -> leaderboardUpdateRequest.getCourseStat().setIntermediate(1);
-                    case "Advanced" -> leaderboardUpdateRequest.getCourseStat().setAdvanced(1);
-                }
-                identityClient.updateLeaderboard(leaderboardUpdateRequest).block();
+                notificationService.uploadLeaderBoard(userId, course);
             }
             catch(Exception e){
-                System.out.println("Error in updating leaderboard: " + e);
+                log.error("Error while uploading leader board: " + e.getMessage());
             }
 
             try{

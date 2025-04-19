@@ -8,7 +8,9 @@ import com.example.problemservice.dto.request.profile.SingleProfileInformationRe
 import com.example.problemservice.dto.response.problemComment.ProblemCommentCreationResponse;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemComment;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationService {
     IdentityClient identityClient;
 
@@ -33,8 +36,10 @@ public class NotificationService {
             notificationRequest.setUserid(problemComment.getUserUuid());
             notificationRequest.setRedirectType("PROBLEM_COMMENT");
             notificationRequest.setRedirectContent("http://localhost:3000/problems/" + problemComment.getProblem().getProblemId());
-            identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
-        }catch (Exception ignored){}
+            identityClient.postNotifications(notificationRequest).block().getResult();
+        }catch (Exception e){
+            log.error("e: ", e);
+        }
     }
 
     @Async
@@ -47,10 +52,12 @@ public class NotificationService {
         notificationRequest.setRedirectContent("http://localhost:3000/problems/"+ response.getProblemId());
         try{
             System.out.println("Send problem comment noti");
-            identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
+            identityClient.postNotifications(notificationRequest).block().getResult();
         }
-        catch (Exception ignore)
-        {        }
+        catch (Exception e)
+        {
+            log.error("e: ", e);
+        }
     }
     @Async
     public void solveProblemNotification(Problem problem, UUID userUid) {

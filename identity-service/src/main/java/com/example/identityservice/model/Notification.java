@@ -45,7 +45,8 @@ public class Notification {
         INFO,
         SUCCESS,
         WARNING,
-        ERROR
+        ERROR,
+        BROADCAST
     }
 
 }
