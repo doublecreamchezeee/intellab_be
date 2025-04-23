@@ -1,7 +1,6 @@
 package com.example.problemservice.service;
 
 import com.example.problemservice.client.IdentityClient;
-import com.example.problemservice.dto.request.notification.NotificationRequest;
 import com.example.problemservice.dto.request.problemComment.ProblemCommentCreationRequest;
 import com.example.problemservice.dto.request.problemComment.ProblemCommentUpdateRequest;
 import com.example.problemservice.dto.request.profile.MultipleProfileInformationRequest;
@@ -32,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -204,14 +204,13 @@ public class ProblemCommentService {
 
         // check if user upvoted his own comment
         if (userUid != null) {
-            Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuid(
+            Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuidAndIsActive(
                     problemComment.getCommentId(),
-                    ParseUUID.normalizeUID(userUid)
+                    ParseUUID.normalizeUID(userUid),
+                    true
             );
-
             response.setIsUpVoted(isReactionExisted);
         }
-
         return response;
 
     }
@@ -276,9 +275,10 @@ public class ProblemCommentService {
         }
 
         if (requestUserUuid != null) {
-            Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuid(
+            Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuidAndIsActive(
                     problemComment.getCommentId(),
-                    requestUserUuid
+                    requestUserUuid,
+                    true
             );
 
             response.setIsUpVoted(isReactionExisted);
@@ -540,39 +540,62 @@ public class ProblemCommentService {
         );
         UUID userUuid = ParseUUID.normalizeUID(userUid);
 
-        Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuid(
-                commentId,
-                userUuid
-        );
+//        Boolean isReactionExisted = problemCommentReactionRepository.existsByProblemComment_CommentIdAndReactionId_UserUuid(
+//                commentId,
+//                userUuid
+//        );
+//
+//        if (isReactionExisted) {
+//            throw new AppException(ErrorCode.REACTION_EXISTED);
+//        }
 
-        if (isReactionExisted) {
-            throw new AppException(ErrorCode.REACTION_EXISTED);
-        }
 
-        ProblemCommentReactionId id = ProblemCommentReactionId
+        ProblemCommentReaction reaction = problemCommentReactionRepository.findById(
+                ProblemCommentReactionId
+                    .builder()
+                    .commentId(commentId)
+                    .userUuid(userUuid)
+                    .build()).orElse(null);
+
+        if (reaction == null) {
+
+            ProblemCommentReactionId id = ProblemCommentReactionId
                 .builder()
                 .commentId(commentId)
                 .userUuid(userUuid)
                 .build();
 
-        ProblemCommentReaction reaction = ProblemCommentReaction
+            reaction = ProblemCommentReaction
                 .builder()
                 .reactionId(id)
                 .problemComment(problemComment)
+                .isActive(true)
                 .build();
 
-        reaction = problemCommentReactionRepository.save(reaction);
+            reaction = problemCommentReactionRepository.save(reaction);
 
-        problemComment.getReactions().add(reaction);
+            problemComment.getReactions().add(reaction);
 
-        problemComment.setNumberOfLikes(
-               (problemComment.getReactions().size())
-        );// (long)
+            problemComment.setNumberOfLikes(
+                    (int) problemComment.getReactions()
+                            .stream()
+                            .filter(ProblemCommentReaction::getIsActive)
+                            .count());// (long)
 
-        problemComment = problemCommentRepository.save(problemComment);
-        notificationService.upvoteCommentNotification(problemComment, userUid);
+            problemComment = problemCommentRepository.save(problemComment);
+            notificationService.upvoteCommentNotification(problemComment, userUid);
+        }
+        else{
+            reaction.setIsActive(true);
+            problemComment.setNumberOfLikes(
+                    (int) problemComment.getReactions()
+                            .stream()
+                            .filter(ProblemCommentReaction::getIsActive)
+                            .count());// (long)
+            problemComment = problemCommentRepository.save(problemComment);
+        }
 
-        return problemComment.getReactions().size();
+        return problemComment.getNumberOfLikes();
     }
 
     @Transactional
@@ -589,12 +612,11 @@ public class ProblemCommentService {
         );
         problemCommentReactionRepository.flush();*/
 
-        ProblemCommentReaction reaction = problemCommentReactionRepository
-                .findByProblemComment_CommentIdAndReactionId_UserUuid(commentId, userUuid)
-                .orElseThrow(
-                        () -> new AppException(ErrorCode.REACTION_NOT_EXISTED)
-                );
-
+//        ProblemCommentReaction reaction = problemCommentReactionRepository
+//                .findByProblemComment_CommentIdAndReactionId_UserUuid(commentId, userUuid)
+//                .orElseThrow(
+//                        () -> new AppException(ErrorCode.REACTION_NOT_EXISTED)
+//                );
 
        /* problemComment = problemCommentRepository.findById(
                 commentId
@@ -602,19 +624,28 @@ public class ProblemCommentService {
                 () -> new AppException(ErrorCode.COMMENT_NOT_EXIST)
         );*/
 
-
-
-        problemComment.getReactions().remove(reaction);
+        ProblemCommentReaction reaction = problemCommentReactionRepository.
+                findById(ProblemCommentReactionId
+                        .builder()
+                        .commentId(commentId)
+                        .userUuid(userUuid)
+                        .build()).orElseThrow(
+                                () -> new AppException(ErrorCode.REACTION_NOT_EXISTED)
+                );
+        reaction.setIsActive(false);
+        reaction = problemCommentReactionRepository.save(reaction);
 
         problemComment.setNumberOfLikes(
-                (problemComment.getReactions().size())
+                (int) problemComment
+                        .getReactions()
+                        .stream()
+                        .filter(ProblemCommentReaction::getIsActive)
+                        .count()
         ); //(long)
-
         problemComment = problemCommentRepository.save(problemComment);
 
-        problemCommentReactionRepository.delete(reaction);
 
-        return problemComment.getReactions().size();
+        return problemComment.getNumberOfLikes();
     }
 
     public List<ProblemCommentReaction> getListProblemCommentReactionByListCommentAndUserUuid(List<UUID> commentIds, UUID userUuid) {
@@ -628,6 +659,8 @@ public class ProblemCommentService {
             Page<DetailsProblemCommentResponse> problemComments,
             List<ProblemCommentReaction> reactions
     ) {
+        reactions = reactions.stream().filter(ProblemCommentReaction::getIsActive).collect(Collectors.toList());
+
         Map<UUID, ProblemCommentReaction> reactionMap = new HashMap<>();
 
         for (ProblemCommentReaction reaction : reactions) {
@@ -645,20 +678,14 @@ public class ProblemCommentService {
             if (problemComment.getChildrenComments() != null
                     && !problemComment.getChildrenComments().isEmpty()
             ) {
-
                 for (DetailsProblemCommentResponse childComment : problemComment.getChildrenComments().getContent()) {
                     ProblemCommentReaction childReaction = reactionMap.get(childComment.getCommentId());
 
                     childComment.setIsUpVoted(childReaction != null);
                 }
             }
-
-
         }
 
         return problemComments;
     }
-
-
-
 }

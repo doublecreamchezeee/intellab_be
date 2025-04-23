@@ -304,18 +304,14 @@ alter table report_options
 
 create table streak_records
 (
-    user_id      uuid not null
-        primary key,
     last_access  timestamp(6) with time zone,
-    status       varchar(10),
     streak_score integer,
-    medal_id     uuid
-        constraint fkejivk072an77tukw69rx6vplu
-            references medals
+    user_uid     varchar(255) not null
 );
 
 alter table streak_records
     owner to postgres;
+
 
 create table topics
 (
@@ -674,7 +670,8 @@ create table problem_comment_reactions
     problem_comment_comment_id uuid not null
         constraint fka45m53xgm1j7twrchtcvg5cax
             references problem_comments,
-    primary key (user_uuid, problem_comment_comment_id)
+    primary key (user_uuid, problem_comment_comment_id).
+    active boolean default true
 );
 
 alter table problem_comment_reactions
