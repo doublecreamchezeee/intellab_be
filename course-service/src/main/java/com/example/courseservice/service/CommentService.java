@@ -218,28 +218,32 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()-> new AppException(ErrorCode.COMMENT_NOT_FOUND));
 
-
         ReactionID id = new ReactionID(userId,commentId);
-        Boolean isExisted = reactionRepository.existsById(id);
+        Reaction reaction = reactionRepository.findById(id).orElse(null);
 
-        Reaction reactions = new Reaction(id, comment, true);
-        comment.getReactions().add(reactions);
-        comment.setNumberOfLikes(comment.getReactions()
-                .stream().filter(Reaction::getActive)
-                .count());
-        comment = commentRepository.save(comment);
+        if (reaction == null) {
+            Reaction reactions = new Reaction(id, comment, true);
+            comment.getReactions().add(reactions);
+            comment.setNumberOfLikes(comment.getReactions()
+                    .stream().filter(Reaction::getActive)
+                    .count());
+            comment = commentRepository.save(comment);
 
-//        CommentResponse response = commentMapper.toResponse(comment);
-//        response.setIsOwner(userId != null ? comment.getUserId().equals(userId) : false);
-//
-//        response.setIsUpvoted(comment.getReactions()
-//                .stream().anyMatch(
-//                        reaction -> reaction.getReactionID().getUserId().equals(userId) && reaction.getActive()
-//                        ));
-
-        if (!userId.equals(comment.getUserId()) && !isExisted) {
-            notificationService.upvoteCommentNotification(comment,userId);
+            if (!userId.equals(comment.getUserId())) {
+                notificationService.upvoteCommentNotification(comment,userId);
+            }
         }
+        else {
+            reaction.setActive(true);
+            reactionRepository.save(reaction);
+            
+            comment.setNumberOfLikes(comment.getReactions()
+                    .stream().filter(Reaction::getActive)
+                    .count());
+
+            comment = commentRepository.save(comment);
+        }
+
         return comment.getNumberOfLikes();
     }
 

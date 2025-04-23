@@ -8,6 +8,8 @@ import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.Course;
 import com.example.courseservice.model.Review;
+import com.example.courseservice.model.Topic;
+import com.example.courseservice.repository.CourseRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class NotificationService {
     FirestoreService firestoreService;
     IdentityClient identityClient;
+    private final CourseRepository courseRepository;
 
 
     @Async
@@ -35,8 +38,11 @@ public class NotificationService {
         String userName = firestoreService.getUsername(sessionUserId);
         request.setMessage("Your comment has just been upvote by [@" + userName + "]");
         request.setRedirectType("COURSE_COMMENT");
-        request.setRedirectContent("/course/" + comment.getTopic().getCourse().getCourseId()
-        + "?commentId=" + comment.getCommentId());
+        Topic topic = comment.getTopic();
+        Course course = courseRepository.findByTopic(topic);
+        System.out.println(course.getCourseId());
+        request.setRedirectContent("/course/" + course.getCourseId()
+            + "?commentId=" + comment.getCommentId());
         try
         {
             identityClient.postNotifications(request).block().getResult().getMessage();
@@ -53,7 +59,7 @@ public class NotificationService {
         notificationRequest.setUserid(repliedComment.getUserId());
         notificationRequest.setRedirectType("COURSE_COMMENT");
         notificationRequest.setRedirectContent("/course/" + courseId
-        +  "?commentId=" + response.getCommentId());
+            +  "?commentId=" + response.getCommentId());
         System.out.println(notificationRequest.getTitle());
         try{
             identityClient.postNotifications(notificationRequest).block().getResult().getMessage();

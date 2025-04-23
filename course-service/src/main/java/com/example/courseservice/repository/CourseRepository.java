@@ -1,6 +1,7 @@
 package com.example.courseservice.repository;
 
 import com.example.courseservice.model.Course;
+import com.example.courseservice.model.Topic;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,4 +43,6 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     Page<Course> findAll(Specification<Course> specification, @NotNull Pageable pageable);
 
     Page<Course> findByUserId(Pageable pageable, UUID userId);
+
+    Course findByTopic(Topic topic);
 }

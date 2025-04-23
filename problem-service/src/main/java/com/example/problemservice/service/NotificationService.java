@@ -31,7 +31,7 @@ public class NotificationService {
             String userName = identityClient.getSingleProfileInformation(
                             new SingleProfileInformationRequest(userUid))
                     .block().getResult().getDisplayName();
-            notificationRequest.setTitle(userName + " has been upvoted your comment");
+            notificationRequest.setTitle("[@" + userName + "] has been upvoted your comment");
             notificationRequest.setMessage("");
             notificationRequest.setUserid(problemComment.getUserUuid());
             notificationRequest.setRedirectType("PROBLEM_COMMENT");
@@ -46,7 +46,7 @@ public class NotificationService {
     @Async
     public void createCommentNotification(ProblemCommentCreationResponse response, UUID userId) {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setTitle(response.getUsername() + "has just replied to your comment");
+        notificationRequest.setTitle("[@" + response.getUsername() + "] has just replied to your comment");
         notificationRequest.setMessage(response.getContent());
         notificationRequest.setUserid(userId);
         notificationRequest.setRedirectType("PROBLEM_COMMENT");
