@@ -111,10 +111,25 @@ public class VNPayService {
                 orderDescription = "Payment for course: "+ orderDescription;
             }
 
+            VNPayPaymentPremiumPackage previousPackage = vnPayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
+                    userUid,
+                    PremiumPackageStatus.ACTIVE.getCode()
+            ).orElse(null);
+
+            Long discountValue = 0L;
+
+            if (previousPackage != null) {
+                if (previousPackage.getPackageType().equals(PremiumPackage.PREMIUM_PLAN.getCode())) {
+                    discountValue = (long) Math.ceil(course.getPrice() * 0.05);
+                }
+            }
+
+            Long price = (long) course.getPrice() - discountValue;
+
             // Create payment url
             VNPayPaymentUrlResponse paymentUrlResponse =  createPaymentUrl(
                     ipAddr,
-                    (long) course.getPrice(),
+                    price,
                     request.getVNPayBankCode().getCode(),
                     request.getVNPayCurrencyCode().getCode(),
                     request.getLanguage().getCode(),
@@ -127,7 +142,7 @@ public class VNPayService {
                     .userUid(userUid)
                     .userUuid(ParseUUID.normalizeUID(userUid))
                     .transactionStatus("01") // Pending transaction
-                    .totalPaymentAmount(course.getPrice())
+                    .totalPaymentAmount(price.floatValue())
                     .currency(request.getVNPayCurrencyCode().getCode())
                     .paidAmount(0.0f)
                     .bankCode(request.getVNPayBankCode().getCode())

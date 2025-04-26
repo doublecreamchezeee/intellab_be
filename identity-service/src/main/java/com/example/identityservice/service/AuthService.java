@@ -2,18 +2,22 @@ package com.example.identityservice.service;
 
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.configuration.RedirectUrlConfig;
+import com.example.identityservice.dto.request.auth.ResetPasswordRequest;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
+import com.example.identityservice.exception.AppException;
+import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.exception.SendingEmailFailedException;
 import com.example.identityservice.mapper.VNPayPaymentPremiumPackageMapper;
 import com.example.identityservice.model.User;
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.specification.VNPayPaymentPremiumPackageSpecification;
+import com.example.identityservice.utility.JwtUtil;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -23,9 +27,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -41,6 +47,7 @@ public class AuthService {
     private final VNPayPaymentPremiumPackageRepository vnpayPaymentPremiumPackageRepository;
     private final VNPayPaymentPremiumPackageMapper vnpayPaymentPremiumPackageMapper;
     private final RedirectUrlConfig redirectUrlConfig;
+    private final JwtUtil jwtUtil;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -221,12 +228,50 @@ public class AuthService {
                 String link = generateCustomVerificationLink(email);
                 System.out.println("generate email to " + email + " with link: " + link);
 
-                String htmlContent = "<a href=\"" + link + "\" target=\"_blank\" style=\"color: blue; text-decoration: underline;\">Click here to verify your email</a>";
+                //String htmlContent = "<a href=\"" + link + "\" target=\"_blank\" style=\"color: blue; text-decoration: underline;\">Click here to verify your email</a>";
+
+                User userFirestore = firestoreService.getUserByUid(userRecord.getUid());
+
+                String name = userFirestore.getFirstName() + " " + userFirestore.getLastName();
+
+                String feUrl = redirectUrlConfig.getFeUrl();
+
+                String htmlContent = String.format("""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verify email</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div style="text-align: center;">
+            <h1 style="color: #333;">Intellab</h1>
+                   
+        </div>
+        <h2 style="color: #333;">Hello %s!</h2>
+        <p style="color: #555;">We received a request to verify email for User ID: <strong>%s</strong></p>
+        <p>To verify your email, click the button below:</p>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="%s" target="_blank" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Verify email</a>
+        </div>
+        <p style="color: #777;">
+            If you did not make this request, your email address may have been entered by mistake and you can safely disregard this email.
+            Visit your account settings page on <a href="%s" target="_blank">Intellab</a> to update your information.
+        </p>
+        <p>If you have any questions or concerns, please contact us at
+            <a href="mailto:graduation21072003@gmail.com">graduation21072003@gmail.com</a>.
+        </p>
+        <p style="color: #555;">Thank you,<br>The Intellab Team</p>
+    </div>
+</body>
+</html>
+""", name, userFirestore.getUid(), link, feUrl);
 
                 emailService.sendMail(
                         email,
-                        "Verify your email in Intellab website",
-                        "Congrats on sending your confirmation link: " + htmlContent);
+                        "[Intellab] Verify your email",
+                        htmlContent);
             }
         } catch (Exception e) {
             throw new SendingEmailFailedException();
@@ -235,14 +280,60 @@ public class AuthService {
 
     public void sendPasswordResetLink(String email) {
         try {
-            String link = firebaseAuthClient.generatePasswordResetLink(email);
-            System.out.println("generate email to " + email + " with link: " + link);
-            String htmlContent = "<a href=\"" + link + "\" style=\"color: blue; text-decoration: underline;\">Click here to reset your password</a>";
+            UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+            String token = jwtUtil.generateJwtByUserUid(userRecord.getUid());
+
+            //String link = firebaseAuthClient.generatePasswordResetLink(email);
+            String resetLink = generateCustomResetPasswordLink(token);
+
+            System.out.println("generate email to " + email + " with link: " + resetLink);
+            //String htmlContent = "<a href=\"" + link + "\" style=\"color: blue; text-decoration: underline;\">Click here to reset your password</a>";
+
+            //<img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Intellab" width="100" />
+
+            User userFirestore = firestoreService.getUserByUid(userRecord.getUid());
+
+            String name = userFirestore.getFirstName() + " " + userFirestore.getLastName();
+
+            String feUrl = redirectUrlConfig.getFeUrl();
+
+            String htmlContent = String.format("""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Password Reset</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div style="text-align: center;">
+            <h1 style="color: #333;">Intellab</h1>
+            
+        </div>
+        <h2 style="color: #333;">Hello %s!</h2>
+        <p style="color: #555;">We received a request to update the password for User ID: <strong>%s</strong></p>
+        <p>To reset your password, click the button below:</p>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="%s" target="_blank" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Reset Password</a>
+        </div>
+        <p style="color: #777;">
+            If you did not make this request, your email address may have been entered by mistake and you can safely disregard this email.
+            Visit your account settings page on <a href="%s" target="_blank">Intellab</a> to update your information.
+        </p>
+        <p>If you have any questions or concerns, please contact us at
+            <a href="mailto:graduation21072003@gmail.com">graduation21072003@gmail.com</a>.
+        </p>
+        <p style="color: #555;">Thank you,<br>The Intellab Team</p>
+    </div>
+</body>
+</html>
+""", name, userFirestore.getUid(), resetLink, feUrl);
+
 
             emailService.sendMail(
                     email,
-                    "Reset your password in Intellab website",
-                    "Congrats on sending your password reset link: " + htmlContent);
+                    "[Intellab] Reset password request",
+                    htmlContent);
         } catch (Exception e) {
             throw new SendingEmailFailedException();
         }
@@ -312,6 +403,38 @@ public class AuthService {
                     .toString();
         } catch (Exception e) {
             throw new SendingEmailFailedException();
+        }
+    }
+
+    public String generateCustomResetPasswordLink(String token) {
+        try {
+            return new StringBuilder()
+                    .append(redirectUrlConfig.getFeUrl())
+                    .append("/profile/reset-password")
+                    .append("?token=")
+                    .append(token)
+                    .toString();
+        } catch (Exception e) {
+            throw new SendingEmailFailedException();
+        }
+    }
+
+    public Boolean updatePasswordForUser(ResetPasswordRequest request) {
+        ResetPasswordSessionToken sessionToken = jwtUtil.getUserUidAndExpiration(request.getToken());
+
+        Date now = new Date();
+
+        //log.info("expirationTime: {}", sessionToken.getExpirationDate());
+        //log.info("now: {}", now);
+
+        if (now.after(sessionToken.getExpirationDate())) {
+            throw new AppException(ErrorCode.TOKEN_IS_EXPIRED);
+        }
+
+        try {
+            return firebaseAuthClient.updatePasswordByUserUid(sessionToken.getUserUid(), request.getNewPassword());
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.CANNOT_UPDATE_PASSWORD);
         }
     }
 }

@@ -5,6 +5,7 @@ import com.example.identityservice.configuration.RedirectUrlConfig;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.auth.ListEmailsRequest;
+import com.example.identityservice.dto.request.auth.ResetPasswordRequest;
 import com.example.identityservice.dto.request.auth.UserCreationRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
 import com.example.identityservice.dto.response.auth.*;
@@ -19,7 +20,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -204,6 +207,21 @@ public class AuthController {
         return ApiResponse.<String>builder()
                 .message("Redirect URL updated successfully")
                 .result(newUrl)
+                .build();
+    }
+
+    @Operation(
+            summary = "Update new password for user using access token"
+    )
+    @PublicEndpoint
+    @PostMapping("/update-new-password")
+    public ApiResponse<Boolean> updateNewPasswordForUser(
+            @Validated  @RequestBody ResetPasswordRequest request
+    ) {
+
+        return ApiResponse.<Boolean>builder()
+                .message("Update password success")
+                .result(authService.updatePasswordForUser(request))
                 .build();
     }
 }

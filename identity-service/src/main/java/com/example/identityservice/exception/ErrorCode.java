@@ -37,6 +37,9 @@ public enum ErrorCode {
     SUBSCRIPTION_PLAN_NOT_EXISTED(404, "Subscription plan not existed", HttpStatus.NOT_FOUND),
     CANNOT_CHANGE_PLAN(400, "Cannot change plan", HttpStatus.BAD_REQUEST),
     PRICE_IS_NOT_VALID(500, "Price is not valid", HttpStatus.INTERNAL_SERVER_ERROR),
+    USER_UID_NOT_VALID(403,"User uid not valid", HttpStatus.FORBIDDEN),
+    TOKEN_IS_EXPIRED(403, "Token is expired", HttpStatus.FORBIDDEN),
+    CANNOT_UPDATE_PASSWORD(500, "Cannot update passowrd", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

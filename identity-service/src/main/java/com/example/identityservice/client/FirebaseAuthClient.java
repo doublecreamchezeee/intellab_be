@@ -321,4 +321,15 @@ public class FirebaseAuthClient {
             throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
         }
     }
+
+    public Boolean updatePasswordByUserUid(String userUid, String password) {
+        try {
+            UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(userUid)
+                    .setPassword(password);
+            firebaseAuth.updateUser(request);
+            return true;
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
+        }
+    }
 }

@@ -155,12 +155,15 @@ public class CourseController {
     @GetMapping("")
     ApiResponse<Page<CourseCreationResponse>> getAllCourse(
             @ParameterObject Pageable pageable,
-            @RequestParam(required = false) Integer Section) {
+            @RequestParam(required = false) Integer Section,
+            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable
+    ) {
         if (Section != null)
         {
             return ApiResponse.<Page<CourseCreationResponse>>builder()
                     .result(courseService.getAllByCategory(
                             Section,
+                            isAvailable,
                             pageable
                             )
                     )
@@ -169,6 +172,7 @@ public class CourseController {
 
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
+                            isAvailable,
                             pageable
                         )
                 )
@@ -204,12 +208,13 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Get all courses except enrolled courses by user"
+            summary = "Get all courses except enrolled courses by user (default get available course)"
     )
     @GetMapping("/exceptEnrolled")
     ApiResponse<Page<CourseCreationResponse>> getAllCourseExceptEnrolledByUser(
             @RequestHeader(required = false, name = "X-UserId") String userUid,
-            @ParameterObject Pageable pageable) {
+            @ParameterObject Pageable pageable
+    ) {
 
         UUID userUUID = null;
 
@@ -280,6 +285,7 @@ public class CourseController {
             @RequestParam(required = false) List<String> levels,
             @RequestParam(required = false) Boolean price,
             @RequestParam(required = false) List<Integer> categories,
+            @RequestHeader(value = "isAvailable", required = false) Boolean isAvailable,
             @ParameterObject Pageable pageable) {
 
         UUID normalizedUserId = null;
@@ -293,7 +299,8 @@ public class CourseController {
             return ApiResponse.<Page<CourseSearchResponse>>builder()
                     .result(courseService.searchCoursesWithFilter(
                             normalizedUserId,
-                            keyword,ratings,levels,price,categories, pageable
+                            keyword, ratings, levels, price, categories, isAvailable,
+                            pageable
                             )
                     ).build();
         }
@@ -301,7 +308,9 @@ public class CourseController {
         return ApiResponse.<Page<CourseSearchResponse>>builder()
                 .result(courseService.searchCourses(
                             normalizedUserId,
-                            keyword, pageable
+                            keyword,
+                            isAvailable,
+                            pageable
                         )
                 )
                 .build();
@@ -852,7 +861,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "testing only"
+            summary = "testing only",
+            hidden = true
     )
     @GetMapping("/role")
     public String getRole(
@@ -863,7 +873,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "testing only"
+            summary = "testing only",
+            hidden = true
     )
     @GetMapping("/emailVerified")
     public Boolean getRole(
@@ -905,7 +916,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Get a course and its first lesson by course id"
+            summary = "Get a course and its first lesson by course id",
+            hidden = true
     )
     @GetMapping("/{courseId}/first-lesson")
     public ApiResponse<CourseAndFirstLessonResponse> getCourseAndFirstLessonByCourseId(
@@ -916,4 +928,124 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Create general information in creating a course"
+    )
+    @PostMapping("/general-step")
+    public ApiResponse<CourseCreationResponse> createGeneralStepInCreatingCourse(
+            @RequestBody GeneralCourseCreationRequest request,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @RequestHeader(value = "X-UserRole", required = true) String userRole
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userUUid = ParseUUID.normalizeUID(userUid);
+
+        userRole = userRole.split(",")[0];
+
+        return ApiResponse.<CourseCreationResponse>builder()
+                .message("Create course successfully")
+                .result(courseService.createGeneralStepInCourseCreation(
+                            request, userUUid, userRole
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Create final step in creating a course",
+            description = "Provide price and unit price"
+    )
+    @PostMapping("/final-step/{courseId}")
+    public ApiResponse<CourseCreationResponse> createFinalStepInCreatingCourse(
+            @RequestBody FinalCourseCreationRequest request,
+            @PathVariable("courseId") UUID courseId,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @RequestHeader(value = "X-UserRole", required = true) String userRole
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userUUid = ParseUUID.normalizeUID(userUid);
+
+        userRole = userRole.split(",")[0];
+
+        return ApiResponse.<CourseCreationResponse>builder()
+                .message("Create course successfully")
+                .result(courseService.createFinalStepInCourseCreation(
+                            request, courseId, userUUid, userRole
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Update general information of course"
+    )
+    @PutMapping("/general-step/{courseId}")
+    public ApiResponse<CourseCreationResponse> updateGeneralStepInCreatingCourse(
+            @RequestBody GeneralCourseCreationRequest request,
+            @PathVariable("courseId") UUID courseId,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @RequestHeader(value = "X-UserRole", required = true) String userRole
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userUUid = ParseUUID.normalizeUID(userUid);
+
+        userRole = userRole.split(",")[0];
+
+        return ApiResponse.<CourseCreationResponse>builder()
+                .message("Update course successfully")
+                .result(courseService.updateGeneralStepInCourseCreation(
+                                request, courseId, userUUid, userRole
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Update final step in creating a course",
+            description = "Update price"
+    )
+    @PutMapping("final-step/{courseId}")
+    public ApiResponse<CourseCreationResponse> updateFinalStepInCreatingCourse(
+            @RequestBody FinalCourseCreationRequest request,
+            @PathVariable("courseId") UUID courseId,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @RequestHeader(value = "X-UserRole", required = true) String userRole
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userUUid = ParseUUID.normalizeUID(userUid);
+
+        userRole = userRole.split(",")[0];
+
+        return ApiResponse.<CourseCreationResponse>builder()
+                .message("Update course successfully")
+                .result(courseService.updateFinalStepInCourseCreation(
+                                request, courseId, userUUid, userRole
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Update available status of a course"
+    )
+    @PutMapping("/update-available-status/{courseId}")
+    public ApiResponse<CourseCreationResponse> updateAvailableStatusOfCourse(
+            @RequestParam(value = "availableStatus", required = true) Boolean availableStatus,
+            @PathVariable("courseId") UUID courseId,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @RequestHeader(value = "X-UserRole", required = true) String userRole
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userUUid = ParseUUID.normalizeUID(userUid);
+
+        userRole = userRole.split(",")[0];
+
+        return ApiResponse.<CourseCreationResponse>builder()
+                .message("Update course successfully")
+                .result(courseService.updateCourseAvailableStatus(
+                                availableStatus, courseId, userUUid, userRole
+                        )
+                )
+                .build();
+    }
 }

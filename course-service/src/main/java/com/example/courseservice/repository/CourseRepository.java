@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CourseRepository extends JpaRepository<Course, UUID> {
+public interface CourseRepository extends JpaRepository<Course, UUID>, JpaSpecificationExecutor<Course> {
     Page<Course> findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description, Pageable pageable);
 
     Page<Course> findAllBySections_Id(Integer sectionsId, Pageable pageable);
@@ -30,7 +31,7 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     List<Course> findAllByCourseNameContainingIgnoreCaseAndCategories_Id(String name,
                                                                            Integer categoryId);
 
-    @Query("SELECT c FROM Course c WHERE c.courseId NOT IN (SELECT uc.enrollId.courseId FROM UserCourses uc WHERE uc.enrollId.userUid = :userId AND uc.accessStatus LIKE 'ACCESSIBLE')")
+    @Query("SELECT c FROM Course c WHERE c.isAvailable = true and c.courseId NOT IN (SELECT uc.enrollId.courseId FROM UserCourses uc WHERE uc.enrollId.userUid = :userId AND uc.accessStatus LIKE 'ACCESSIBLE')")
     Page<Course> findAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable);
 
     List<Course> findAllByCourseNameContainingIgnoreCaseAndLevel(String keyword, String level);

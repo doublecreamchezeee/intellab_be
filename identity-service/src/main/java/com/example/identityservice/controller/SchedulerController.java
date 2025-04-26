@@ -26,7 +26,8 @@ public class SchedulerController {
             summary = "Update cron job time to check end date of subscription plan",
             description = """
                     Format: * * * * * *
-                    """
+                    """,
+            hidden = true
     )
     @PublicEndpoint
     @PostMapping("update-cron")
@@ -42,7 +43,8 @@ public class SchedulerController {
             summary = "Get current cron job time to check end date of subscription plan",
             description = """
                     Format: * * * * * *
-                    """
+                    """,
+            hidden = true
     )
     @PublicEndpoint
     @GetMapping("get-cron")
