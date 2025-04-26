@@ -22,6 +22,7 @@ public interface UserCoursesRepository extends JpaRepository<UserCourses, Enroll
     Page<UserCourses> findAllByEnrollId_UserUid(UUID userUid, Pageable pageable);
     boolean existsByEnrollId_UserUidAndEnrollId_CourseId(UUID userUid, UUID courseId);
     boolean existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(UUID userUid, UUID courseId, String accessStatus);
+    boolean existsByEnrollId_CourseId(UUID courseId);
 
     @Query("SELECT uc.enrollId.userUid, " +
             "SUM(c.score), " +

@@ -24,6 +24,9 @@ public class CourseCreationResponse {
     Integer reviewCount;
     Double averageRating;
     int lessonCount;
+    Boolean isAvailable;
+    Integer currentCreationStep;
+    String currentCreationStepDescription;
 
     List<CategoryResponse> categories;
     List<Section> sections;

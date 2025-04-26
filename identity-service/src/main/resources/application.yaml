@@ -28,7 +28,10 @@ server:
   port: 8001
   servlet:
     context-path: /identity
-
+# gRPC server port
+grpc:
+  server:
+    port: 9001
 #  ssl:
 #    key-store: classpath:keystore.jks
 #    key-store-password: 123456

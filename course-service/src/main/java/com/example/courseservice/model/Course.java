@@ -1,17 +1,13 @@
 package com.example.courseservice.model;
 
-import com.example.courseservice.dto.response.course.DetailCourseResponse;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Type;
 
 
-import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -55,6 +51,12 @@ public class Course {
 
     @Column(name = "review_count")
     Integer reviewCount;
+
+    @Column(name = "current_creation_step", columnDefinition = "integer default 1") // start at 1, only increase
+    Integer currentCreationStep;
+
+    @Column(name = "is_available", columnDefinition = "boolean default false")
+    Boolean isAvailable;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference

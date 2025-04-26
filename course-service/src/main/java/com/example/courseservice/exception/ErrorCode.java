@@ -42,6 +42,9 @@ public enum ErrorCode {
     USER_ALREADY_REVIEW_COURSE(409, "User already review course", HttpStatus.CONFLICT),
     COURSE_NOT_FREE(409, "Course not free", HttpStatus.CONFLICT),
     EMAIL_NOT_VERIFIED(403, "Email is not verified", HttpStatus.FORBIDDEN),
+    USER_IS_NOT_ADMIN(403, "User is not admin", HttpStatus.FORBIDDEN),
+    COURSE_NOT_COMPLETED(409, "Course is not created completely", HttpStatus.CONFLICT),
+    COURSE_ALREADY_ENROLLED(409, "Course already was enrolled by a user so it must be available", HttpStatus.CONFLICT),
     ;
     ErrorCode(int code, String message) {
         this.code = code;
