@@ -672,7 +672,7 @@ create table problem_comment_reactions
     problem_comment_comment_id uuid not null
         constraint fka45m53xgm1j7twrchtcvg5cax
             references problem_comments,
-    primary key (user_uuid, problem_comment_comment_id).
+    primary key (user_uuid, problem_comment_comment_id),
     active boolean default true
 );
 
