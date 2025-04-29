@@ -24,6 +24,11 @@ public class CourseSearchResponse {
     Integer reviewCount;
     Double averageRating;
     int lessonCount;
+    Boolean isAvailable;
+    Integer currentCreationStep;
+    String currentCreationStepDescription;
+    Boolean isCompletedCreation;
+    String courseImage;
 
     List<CategoryResponse> categories;
     List<Section> sections;

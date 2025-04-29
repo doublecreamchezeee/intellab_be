@@ -44,6 +44,7 @@ public interface CourseMapper {
     CourseCreationResponse toCourseCreationResponse(Course course);
 
     @Mapping(target = "categories",source = "categories")
+    @Mapping(target = "currentCreationStepDescription", source = "currentCreationStep", qualifiedByName = "mapCourseCreationStepEnums")
     CourseSearchResponse toCourseSearchResponse(Course course);
 
     @Mapping(target = "categories",source = "categories")

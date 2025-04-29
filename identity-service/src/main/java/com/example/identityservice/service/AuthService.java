@@ -88,7 +88,21 @@ public class AuthService {
         if (!isEmailVerified) {
             throw new NotVerifiedEmailException();
         }*/
-        return firebaseAuthClient.login(userLoginRequest);
+
+        try {
+            TokenSuccessResponse response = firebaseAuthClient.login(userLoginRequest);
+
+            // get role of user by email
+            UserInfoResponse user = firebaseAuthClient.getUserInfo(null, userLoginRequest.getEmail());
+            String role = firestoreService.getRoleByUid(user.getUserId());
+
+            response.setUserRole(role);
+
+            return response;
+        } catch (ExecutionException | InterruptedException e) {
+            log.error(e.getMessage());
+            throw new AppException(ErrorCode.ERROR_WHEN_LOGIN);
+        }
     }
 
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {

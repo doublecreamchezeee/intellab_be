@@ -42,7 +42,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -169,7 +171,8 @@ public class CourseController {
     ApiResponse<Page<CourseCreationResponse>> getAllCourse(
             @ParameterObject Pageable pageable,
             @RequestParam(required = false) Integer Section,
-            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable
+            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable,
+            @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation
     ) {
         if (Section != null)
         {
@@ -177,6 +180,7 @@ public class CourseController {
                     .result(courseService.getAllByCategory(
                             Section,
                             isAvailable,
+                            isCompletedCreation,
                             pageable
                             )
                     )
@@ -186,6 +190,7 @@ public class CourseController {
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
                             isAvailable,
+                            isCompletedCreation,
                             pageable
                         )
                 )
@@ -298,7 +303,8 @@ public class CourseController {
             @RequestParam(required = false) List<String> levels,
             @RequestParam(required = false) Boolean price,
             @RequestParam(required = false) List<Integer> categories,
-            @RequestHeader(value = "isAvailable", required = false) Boolean isAvailable,
+            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable,
+            @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation,
             @ParameterObject Pageable pageable) {
 
         UUID normalizedUserId = null;
@@ -312,7 +318,7 @@ public class CourseController {
             return ApiResponse.<Page<CourseSearchResponse>>builder()
                     .result(courseService.searchCoursesWithFilter(
                             normalizedUserId,
-                            keyword, ratings, levels, price, categories, isAvailable,
+                            keyword, ratings, levels, price, categories, isAvailable, isCompletedCreation,
                             pageable
                             )
                     ).build();
@@ -323,6 +329,7 @@ public class CourseController {
                             normalizedUserId,
                             keyword,
                             isAvailable,
+                            isCompletedCreation,
                             pageable
                         )
                 )
@@ -1059,6 +1066,75 @@ public class CourseController {
                                 availableStatus, courseId, userUUid, userRole
                         )
                 )
+                .build();
+    }
+
+    @Operation(
+            summary = "Update course completed creation status by course id"
+    )
+    @PutMapping("/update-completed-creation-status/{courseId}")
+    public ApiResponse<CourseCreationResponse> updateCompletedCreationStatus(
+            @RequestParam(value = "completedCreation", required = true) Boolean completedCreation,
+            @PathVariable("courseId") UUID courseId,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @RequestHeader(value = "X-UserRole", required = true) String userRole
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userUUid = ParseUUID.normalizeUID(userUid);
+
+        userRole = userRole.split(",")[0];
+
+        return ApiResponse.<CourseCreationResponse>builder()
+                .message("Update course successfully")
+                .result(courseService.updateCourseCompletedCreationStatus(
+                                completedCreation, courseId, userUUid, userRole
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Upload course image file"
+    )
+    @PostMapping(value = "/{courseId}/image/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<String> uploadCourseImage(
+            @PathVariable("courseId") UUID courseId,
+            @RequestPart(value = "file", required = true) MultipartFile file
+    ) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Uploaded file is empty!");
+        }
+
+        return ApiResponse.<String>builder()
+                .message("Upload image success!")
+                .result(courseService.uploadCourseAvatarImage(file, courseId))
+                .build();
+    }
+
+    @Operation(
+            summary = "Change course image link"
+    )
+    @PostMapping(value = "/{courseId}/image/link")
+    public ApiResponse<String> uploadCourseImageLink(
+            @PathVariable("courseId") UUID courseId,
+            @RequestBody String link
+    ) {
+        return ApiResponse.<String>builder()
+                .message("Upload image success!")
+                .result(courseService.uploadCourseAvatarLink(link, courseId))
+                .build();
+    }
+
+    @Operation(
+            summary = "Delete course image"
+    )
+    @DeleteMapping(value = "/{courseId}/image")
+    public ApiResponse<Boolean> deleteCourseImage(
+            @PathVariable("courseId") UUID courseId
+    ) {
+        return ApiResponse.<Boolean>builder()
+                .message("Delete image success!")
+                .result(courseService.deleteCourseAvatarImage(courseId))
                 .build();
     }
 }

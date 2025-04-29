@@ -41,6 +41,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
 import java.time.Instant;
@@ -69,11 +70,13 @@ public class CourseService {
     private final FirestoreService firestoreService;
     private final LessonMapper lessonMapper;
     private final NotificationService notificationService;
+    CloudinaryService cloudinaryService;
 
 
-    public Page<CourseCreationResponse> getAllCourses(Boolean isAvailable, Pageable pageable) {
+    public Page<CourseCreationResponse> getAllCourses(Boolean isAvailable, Boolean isCompletedCreation, Pageable pageable) {
         Specification<Course> specification = Specification.where(
                 CourseSpecification.isAvailableSpecification(isAvailable)
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
         );
 
         Page<Course> courses = courseRepository.findAll(specification, pageable);
@@ -95,11 +98,15 @@ public class CourseService {
         return new PageImpl<>(subList, pageable, list.size());
     }
 
-    public Page<CourseCreationResponse> getAllByCategory(Integer section, Boolean isAvailable, Pageable pageable) {
+    public Page<CourseCreationResponse> getAllByCategory(
+            Integer section, Boolean isAvailable,
+            Boolean isCompletedCreation, Pageable pageable
+    ) {
 
         Specification<Course> courseSpecification = Specification.where(
                 CourseSpecification.isAvailableSpecification(isAvailable)
                         .and(CourseSpecification.sectionSpecification(section))
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
         );
 
         Page<Course> result = courseRepository.findAll(courseSpecification, pageable);
@@ -125,6 +132,7 @@ public class CourseService {
 
             Specification<Course> specification = Specification.where(
                     CourseSpecification.isAvailableSpecification(true)
+                            .and(CourseSpecification.isCompletedCreationSpecification(true))
             );
 
             courses = courseRepository.findAll(specification, pageable);
@@ -196,6 +204,7 @@ public class CourseService {
                                                                 Boolean price,
                                                                 List<Integer> categories,
                                                                 Boolean isAvailable,
+                                                                Boolean isCompletedCreation,
                                                                 Pageable pageable) {
         Specification<Course> specification = Specification.where(
                 (CourseSpecification.nameSpecification(keyword).or(CourseSpecification.descriptionSpecification(keyword))
@@ -204,6 +213,7 @@ public class CourseService {
                         .and(CourseSpecification.priceSpecification(price))
                         .and(CourseSpecification.categoriesSpecification(categories)
                         .and(CourseSpecification.isAvailableSpecification(isAvailable))
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
                         )
                 ));
 
@@ -252,11 +262,16 @@ public class CourseService {
         });
     }
 
-    public Page<CourseSearchResponse> searchCourses(UUID userUid, String keyword, Boolean isAvailable ,Pageable pageable) {
+    public Page<CourseSearchResponse> searchCourses(
+            UUID userUid, String keyword,
+            Boolean isAvailable, Boolean isCompletedCreation,
+            Pageable pageable
+    ) {
 
         Specification<Course> specification = Specification.where(
                 CourseSpecification.isAvailableSpecification(isAvailable)
                         .and(CourseSpecification.courseNameOrDescriptionSpecification(keyword, keyword))
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
         );
 
         Page<Course>  courses = courseRepository.findAll(specification, pageable);
@@ -357,6 +372,7 @@ public class CourseService {
                 .progressPercent(completionRatio)
                 .certificateUrl(certificateUrl)
                 .certificateId(certificateId)
+                .courseImage(course.getCourseImage())
                 .build();
     }
 
@@ -901,6 +917,7 @@ public class CourseService {
 
         course.setCurrentCreationStep(1);
         course.setIsAvailable(false);
+        course.setIsCompletedCreation(false);
         course.setScore(0);
         course.setAverageRating(0.0);
         course.setReviewCount(0);
@@ -990,7 +1007,10 @@ public class CourseService {
 
 
         if (availableStatus) {
+            // auto update completed creation status to true
             course.setCurrentCreationStep(4);
+            course.setIsCompletedCreation(true);
+
         } else {
             boolean existedUserEnrolled = userCoursesRepository.existsByEnrollId_CourseId(courseId);
             if (existedUserEnrolled) {
@@ -1005,5 +1025,114 @@ public class CourseService {
         return courseMapper.toCourseCreationResponse(savedCourse);
    }
 
+   public CourseCreationResponse updateCourseCompletedCreationStatus(
+              Boolean completedCreationStatus, UUID courseId,
+              UUID userUuid, String userRole
+   ) {
+       if (!userRole.equals(PredefinedRole.admin)) {
+           throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+       }
 
+       Course course = courseRepository.findById(courseId)
+               .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+       if (course.getCurrentCreationStep() < 3) {
+           throw new AppException(ErrorCode.COURSE_NOT_COMPLETED);
+       }
+
+       if (!completedCreationStatus) {
+           course.setIsAvailable(false);
+
+           boolean existedUserEnrolled = userCoursesRepository.existsByEnrollId_CourseId(courseId);
+
+           if (existedUserEnrolled) {
+               throw new AppException(ErrorCode.COURSE_ALREADY_ENROLLED);
+           }
+       }
+
+       course.setIsCompletedCreation(completedCreationStatus);
+
+       Course savedCourse = courseRepository.save(course);
+
+       return courseMapper.toCourseCreationResponse(savedCourse);
+   }
+
+   public String uploadCourseAvatarImage(MultipartFile file, UUID courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(
+                        () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
+                );
+        try {
+            if (course.getCourseImage() != null) {
+                cloudinaryService.deleteImage(course.getCourseImage());
+            }
+
+            String newPhotoUrl = cloudinaryService.uploadImage(file, course.getCourseName(), "CourseAvatar");
+
+            if (newPhotoUrl == null) {
+                throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+            }
+
+            course.setCourseImage(newPhotoUrl);
+
+            courseRepository.save(course);
+
+            return newPhotoUrl;
+            //firebaseAuthClient.updateUserProfilePicture(userId, newPhotoUrl);
+        } catch (AppException e) {
+            log.error(e.getMessage());
+            throw  e;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+        }
+   }
+
+   public String uploadCourseAvatarLink(String fileLink, UUID courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(
+                        () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
+                );
+        try {
+            if (course.getCourseImage() != null) {
+                cloudinaryService.deleteImage(course.getCourseImage());
+            }
+
+            course.setCourseImage(fileLink);
+
+            courseRepository.save(course);
+
+            return fileLink;
+            //firebaseAuthClient.updateUserProfilePicture(userId, newPhotoUrl);
+        } catch (AppException e) {
+            log.error(e.getMessage());
+            throw  e;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+        }
+   }
+
+   public Boolean deleteCourseAvatarImage(UUID courseId) {
+       Course course = courseRepository.findById(courseId)
+               .orElseThrow(
+                       () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
+               );
+       try {
+           if (course != null && course.getCourseImage() != null) {
+               cloudinaryService.deleteImage(course.getCourseImage());
+               course.setCourseImage(null);
+               courseRepository.save(course);
+               return true;
+           }
+
+           return false;
+       } catch (AppException e) {
+           log.error(e.getMessage());
+           throw e;
+       } catch (Exception e) {
+           log.error(e.getMessage());
+           throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+       }
+   }
 }

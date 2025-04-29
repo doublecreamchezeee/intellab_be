@@ -40,6 +40,8 @@ public enum ErrorCode {
     USER_UID_NOT_VALID(403,"User uid not valid", HttpStatus.FORBIDDEN),
     TOKEN_IS_EXPIRED(403, "Token is expired", HttpStatus.FORBIDDEN),
     CANNOT_UPDATE_PASSWORD(500, "Cannot update passowrd", HttpStatus.INTERNAL_SERVER_ERROR),
+    ERROR_WHEN_LOGIN(500, "Error when login", HttpStatus.INTERNAL_SERVER_ERROR),
+
     ;
     ErrorCode(int code, String message) {
         this.code = code;

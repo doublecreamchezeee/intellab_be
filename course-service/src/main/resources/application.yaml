@@ -39,3 +39,5 @@ springdoc:
     use-root-path: true
     enabled: true
 
+cloudinary:
+  url: ${CLOUDINARY_URL}
