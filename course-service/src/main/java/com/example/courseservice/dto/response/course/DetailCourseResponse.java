@@ -34,4 +34,5 @@ public class DetailCourseResponse {
     Float progressPercent;
     String certificateUrl;
     String certificateId;
+    String courseImage;
 }

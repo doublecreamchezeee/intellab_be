@@ -58,6 +58,12 @@ public class Course {
     @Column(name = "is_available", columnDefinition = "boolean default false")
     Boolean isAvailable;
 
+    @Column(name = "course_image", nullable = true)
+    String courseImage;
+
+    @Column(name = "is_completed_creation", columnDefinition = "boolean default false")
+    Boolean isCompletedCreation;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     List<Lesson> lessons = new ArrayList<>();

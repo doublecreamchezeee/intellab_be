@@ -127,4 +127,13 @@ public class CourseSpecification {
             );
         };
     }
+
+    public static Specification<Course> isCompletedCreationSpecification(Boolean isCompletedCreation) {
+        return (root, query, criteriaBuilder) -> {
+            if (isCompletedCreation == null) {
+                return null;
+            }
+            return criteriaBuilder.equal(root.get("isCompletedCreation"), isCompletedCreation);
+        };
+    }
 }

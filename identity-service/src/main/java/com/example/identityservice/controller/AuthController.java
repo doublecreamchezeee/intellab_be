@@ -97,7 +97,7 @@ public class AuthController {
 //    }
 
     @Operation(
-            summary = "Refresh token, re"
+            summary = "Refresh token"
     )
     @PublicEndpoint
     @PostMapping(value = "/refresh")
