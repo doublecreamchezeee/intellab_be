@@ -27,6 +27,8 @@ public class CourseCreationResponse {
     Boolean isAvailable;
     Integer currentCreationStep;
     String currentCreationStepDescription;
+    Boolean isCompletedCreation;
+    String courseImage;
 
     List<CategoryResponse> categories;
     List<Section> sections;

@@ -45,6 +45,8 @@ public enum ErrorCode {
     USER_IS_NOT_ADMIN(403, "User is not admin", HttpStatus.FORBIDDEN),
     COURSE_NOT_COMPLETED(409, "Course is not created completely", HttpStatus.CONFLICT),
     COURSE_ALREADY_ENROLLED(409, "Course already was enrolled by a user so it must be available", HttpStatus.CONFLICT),
+    CANNOT_UPLOAD_IMAGE(500, "Cannot upload image", HttpStatus.INTERNAL_SERVER_ERROR),
+
     ;
     ErrorCode(int code, String message) {
         this.code = code;
