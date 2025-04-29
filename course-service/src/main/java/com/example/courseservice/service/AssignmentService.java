@@ -43,7 +43,7 @@ public class AssignmentService {
 //
 //    public AssignmentResponse addAssignment(AssignmentCreationRequest request) {
 //        Assignment assignment = assignmentMapper.toAssignment(request);
-//        Exercise exercise = exerciseRepository.findById(request.getExerciseId()
+//        Exercise exercise = exerciseRepository.findById(request.getQuizId()
 //        ).orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
 //        assignment.setExercise(exercise);
 //        LearningLesson learning = learningLessonRepository.findById(request.getLearningId()).orElseThrow(()->new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));

@@ -5,7 +5,6 @@ import com.cloudinary.utils.ObjectUtils;
 import com.example.courseservice.client.ProblemClient;
 import com.example.courseservice.configuration.DotenvConfig;
 import com.example.courseservice.constant.PredefinedLearningStatus;
-import com.example.courseservice.dto.request.exercise.ExerciseCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
@@ -21,6 +20,7 @@ import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.*;
 import com.example.courseservice.model.*;
+import com.example.courseservice.model.compositeKey.OptionID;
 import com.example.courseservice.repository.*;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
@@ -32,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -65,24 +66,163 @@ public class LessonService {
     ProblemClient problemClient;
     AssignmentRepository assignmentRepository;
     private final CourseService courseService;
+    private final QuestionRepository questionRepository;
+    private final ExerciseRepository exerciseRepository;
+    private final OptionRepository optionRepository;
 
-    public LessonResponse createLesson(LessonCreationRequest request) {
-        if (!courseRepository.existsById(request.getCourseId())) {
+    public LessonResponse getLessonInformation(UUID lessonId){
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
+        return lessonMapper.toLessonResponse(lesson);
+    }
+
+    public List<LessonResponse> getCourseLessons(UUID courseId){
+        boolean exits = courseRepository.existsById(courseId);
+        if (!exits)
+        {
             throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
         }
+        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseId(courseId);
+        return lessons.stream().map(lessonMapper::toLessonResponse).collect(Collectors.toList());
+    }
 
-        lessonRepository.findByLessonOrderAndCourse_CourseId(request.getLessonOrder(), request.getCourseId())
-                .ifPresent(lesson -> {
-                    throw new AppException(ErrorCode.LESSON_ORDER_EXISTED);
-                });
+    public LessonResponse createBlankLesson(UUID courseId){
+        if (!courseRepository.existsById(courseId)) {
+            throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
+        }
+        Lesson lesson = new Lesson();
 
-        Lesson lesson = lessonMapper.toLesson(request);
-        Course course = courseRepository.findById(request.getCourseId()).get();
+        Course course = courseRepository.findById(courseId).get();
+
         lesson.setCourse(course);
 
         lesson = lessonRepository.save(lesson);
         return lessonMapper.toLessonResponse(lesson);
     }
+
+    @Transactional
+    public LessonResponse copyLesson(UUID lessonId, UUID courseId){
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(
+                ()-> new AppException(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        Course course = courseRepository.findById(courseId).orElseThrow(
+                () -> new AppException(ErrorCode.COMMENT_NOT_FOUND)
+        );
+
+        Lesson newLesson = new Lesson();
+        // copy thuộc tính
+        newLesson.setCourse(course);
+        newLesson.setLessonName(lesson.getLessonName());
+        newLesson.setDescription(lesson.getDescription());
+        newLesson.setContent(lesson.getContent());
+        newLesson.setProblemId(lesson.getProblemId());
+        newLesson = lessonRepository.save(newLesson);
+
+
+        Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
+
+        newLesson.setExercise(cloneQuiz);
+
+        return lessonMapper.toLessonResponse(newLesson);
+    }
+
+    @Transactional
+    protected Exercise cloneQuiz(Exercise source, Lesson lesson){
+
+        Exercise newExercise = new Exercise();
+        newExercise.setDescription(source.getDescription());
+        newExercise.setExerciseName(source.getExerciseName());
+        newExercise.setPassingQuestions(source.getPassingQuestions());
+        newExercise.setQuestionsPerExercise(source.getQuestionsPerExercise());
+        newExercise.setLesson(lesson);
+        newExercise = exerciseRepository.save(newExercise);
+
+        newExercise = exerciseRepository.findById(newExercise.getExerciseId()).orElse(null);
+
+        if (newExercise == null)
+        {
+            System.out.println("Couldn't find exercise with id ");
+            return null;
+        }
+
+        List<UUID> questionIds = new ArrayList<>();
+        for (Question question:source.getQuestionList())
+        {
+            Question newQuestion = new Question();
+            newQuestion.setCorrectAnswer(question.getCorrectAnswer());
+            newQuestion.setQuestionId(UUID.randomUUID());
+            newQuestion.setQuestionContent(question.getQuestionContent());
+            newQuestion.setQuestionType(question.getQuestionType());
+
+            List<Category> categories = question.getCategories();
+            if (categories != null && !categories.isEmpty())
+            {
+                for (Category c : categories)
+                {
+                    newQuestion.getCategories().add(c);
+                }
+            }
+
+            for(Option option:question.getOptions())
+            {
+                Option cloneOption = new Option();
+                cloneOption.setContent(option.getContent());
+                cloneOption.setOptionId(
+                        OptionID
+                                .builder()
+                                .questionId(newQuestion.getQuestionId())
+                                .optionOrder(option.getOptionId().getOptionOrder())
+                                .build()
+                );
+                cloneOption.setQuestion(newQuestion);
+                newQuestion.getOptions().add(cloneOption);
+            }
+            newQuestion = questionRepository.save(newQuestion);
+            questionIds.add(newQuestion.getQuestionId());
+//            newExercise.getQuestionList().add(newQuestion);
+        }
+        newExercise = exerciseRepository.save(newExercise);
+        System.out.println(questionIds);
+        questionRepository.updateExerciseIdForQuestions(newExercise.getExerciseId(),questionIds);
+        return newExercise;
+    }
+
+    public LessonResponse updateLesson(LessonUpdateRequest request)
+    {
+        Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
+                () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
+        );
+        lesson.setLessonName(request.getLessonName());
+        lesson.setLessonOrder(request.getLessonOrder());
+        lesson.setContent(request.getContent());
+        lesson.setDescription(request.getDescription());
+        lesson.setProblemId(request.getProblemId());
+        lesson = lessonRepository.save(lesson);
+
+        return  lessonMapper.toLessonResponse(lesson);
+    }
+
+    public void removeLesson(UUID lessonId)
+    {
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(
+                () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        Exercise exercise = lesson.getExercise();
+
+        for (Question question: exercise.getQuestionList())
+        {
+            optionRepository.deleteAll(question.getOptions());
+        }
+        questionRepository.deleteAll(exercise.getQuestionList());
+        exerciseRepository.delete(exercise);
+
+        lessonRepository.delete(lesson);
+    }
+
+
+
 
 
     public Lesson getNextLessonId(Lesson lesson) {
@@ -219,36 +359,21 @@ public class LessonService {
         lessonRepository.deleteById(UUID.fromString(lessonId));
     }
 
-    public LessonResponse updateLesson(String lessonId, LessonUpdateRequest request) {
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+//    public LessonResponse updateLesson(String lessonId, LessonUpdateRequest request) {
+//        Course course = courseRepository.findById(request.getCourseId())
+//                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+//
+//        Lesson lesson = lessonRepository.findById(UUID.fromString(lessonId))
+//                .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
+//
+//        lessonMapper.updateLesson(lesson, request);
+//
+//        lesson.setCourse(course);
+//
+//        return lessonMapper.toLessonResponse(lessonRepository.save(lesson));
+//    }
 
-        Lesson lesson = lessonRepository.findById(UUID.fromString(lessonId))
-                .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
 
-        lessonMapper.updateLesson(lesson, request);
-
-        lesson.setCourse(course);
-
-        return lessonMapper.toLessonResponse(lessonRepository.save(lesson));
-    }
-
-    public LessonResponse addExercise(UUID lessonId, ExerciseCreationRequest request) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
-        Exercise exercise = lesson.getExercise();
-        if (exercise == null) {
-            exercise = new Exercise();
-            exercise.setExerciseName(request.getName());
-            exercise.setDescription(request.getDescription());
-            lesson.setExercise(exercise);
-        }
-        else
-        {
-            throw new AppException(ErrorCode.LESSON_ALREADY_HAD_EXERCISE);
-        }
-        return lessonMapper.toLessonResponse(lessonRepository.save(lesson));
-    }
 
     public LearningLessonResponse createLearningLesson(UUID userUid, LearningLessonCreationRequest request) {
 

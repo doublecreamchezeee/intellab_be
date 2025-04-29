@@ -2,6 +2,7 @@ package com.example.courseservice.repository;
 
 import com.example.courseservice.model.LearningLesson;
 
+import com.example.courseservice.model.Lesson;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +23,7 @@ public interface LearningLessonRepository extends JpaRepository<LearningLesson, 
     int countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(UUID userUid, UUID courseId, boolean isDoneTheory);
     int countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(UUID userUid, UUID courseId, boolean isDonePractice);
     List<LearningLesson> findByUserIdAndLesson_Course_CourseIdAndStatus(UUID userId, UUID courseId, String aNew);
+
 
     // @Query(value = "SELECT * FROM get_lessons_and_learning_progress(:studentId, :courseId)", nativeQuery = true)
     // List<LessonProgressResponse> getLessonsAndLearningProgress(

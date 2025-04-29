@@ -5,8 +5,11 @@ import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.Option.OptionRequest;
 import com.example.courseservice.dto.request.Question.QuestionCreationRequest;
 import com.example.courseservice.dto.request.Question.QuestionUpdateRequest;
+import com.example.courseservice.dto.request.exercise.ModifyQuizRequest;
 import com.example.courseservice.dto.response.Option.OptionResponse;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
+import com.example.courseservice.dto.response.exercise.ExerciseResponse;
+import com.example.courseservice.service.ExerciseService;
 import com.example.courseservice.service.OptionService;
 import com.example.courseservice.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,88 +34,53 @@ import java.util.UUID;
 public class QuestionController {
     QuestionService questionService;
     OptionService optionService;
+    private final ExerciseService exerciseService;
 
     @Operation(
-            summary = "Get all questions"
+            summary = "Modify list Quiz",
+            description = ""
     )
-    @GetMapping
-    public ApiResponse<Page<QuestionResponse>> getAllQuestions(@ParameterObject Pageable pageable) {
-        return ApiResponse.<Page<QuestionResponse>>builder()
-                .result(questionService.getAllQuestions(pageable))
+    @PutMapping("/quiz")
+    ApiResponse<ExerciseResponse> modifyQuiz(@RequestBody ModifyQuizRequest request) {
+        return ApiResponse.<ExerciseResponse>builder()
+                .result(exerciseService.updateQuiz(request))
                 .build();
     }
 
-    @Operation(
-            summary = "Get question by id"
-    )
-    @GetMapping("/{questionId}")
-    public ApiResponse<QuestionResponse> getQuestion(@PathVariable("questionId") UUID questionId) {
-        return ApiResponse.<QuestionResponse>builder()
-                .result(questionService.getQuestionById(questionId))
+    @DeleteMapping("/removeQuestion/{questionId}")
+    ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") UUID questionId) {
+        exerciseService.removeQuestionFromQuiz(questionId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{lessonId}/quiz")
+    ApiResponse<ExerciseResponse> getQuiz(@PathVariable("lessonId") UUID lessonId) {
+        return ApiResponse.<ExerciseResponse>builder()
+                .result(exerciseService.getExerciseByLessonId(lessonId))
                 .build();
     }
 
-    @Operation(
-            summary = "Create question"
-    )
-    @PostMapping
-    public ApiResponse<QuestionResponse> createQuestion(@RequestBody QuestionCreationRequest request) {
-        return ApiResponse.<QuestionResponse>builder()
-                .result(questionService.createQuestion(request))
-                .build();
-    }
 
-    @Operation(
-            summary = "Update question by id"
-    )
-    @PutMapping("/{questionId}")
-    public ApiResponse<QuestionResponse> updateQuestion(@PathVariable("questionId") UUID questionId, @RequestBody QuestionUpdateRequest request) {
-        return ApiResponse.<QuestionResponse>builder()
-                .result(questionService.updateQuestion(questionId,request))
-                .build();
-    }
-
-    @Operation(
-            summary = "Delete question by id"
-    )
-    @DeleteMapping("/{questionId}")
-    public ApiResponse<String> deleteQuestion(@PathVariable("questionId") UUID questionId) {
-        questionService.deleteQuestion(questionId);
-        return ApiResponse.<String>builder()
-                .result("Question have been deleted.")
-                .build();
-    }
-
-    // Các control cho option
-    @Operation(
-            summary = "Delete one option of a question"
-    )
-    @DeleteMapping("/{questionID}/options/{optionOrder}")
-    ApiResponse<String> deleteOption(@PathVariable("questionID") UUID questionId, @PathVariable("optionOrder") int optionOrder) {
-        optionService.deleteOption(questionId, optionOrder);
-        return ApiResponse.<String>builder().result("Option have been deleted.").build();
-    }
-
-    @Operation(
-            summary = "Update one option of a question"
-    )
-    @PutMapping("/{questionId}/options/{optionOrder}")
-    ApiResponse<OptionResponse> updateOption(@PathVariable("questionId") UUID questionId,
-                                             @PathVariable("optionOrder") Integer optionOrder,
-                                             @RequestBody OptionRequest optionRequest) {
-        optionRequest.setOrder(optionOrder);
-        OptionResponse response = optionService.updateOption(questionId, optionRequest);
-        return ApiResponse.<OptionResponse>builder().result(response).build();
-    }
-
-    @Operation(
-            summary = "Create option for a question"
-    )
-    @PostMapping("/{questionId})")
-    public ApiResponse<OptionResponse> createOption(@PathVariable("questionId") UUID questionId, @RequestBody OptionRequest request) {
-
-        return ApiResponse.<OptionResponse>builder()
-                .result(optionService.creteOption(questionId,request))
-                .build();
-    }
+//    @Operation(
+//            summary = "Update one option of a question"
+//    )
+//    @PutMapping("/{questionId}/options/{optionOrder}")
+//    ApiResponse<OptionResponse> updateOption(@PathVariable("questionId") UUID questionId,
+//                                             @PathVariable("optionOrder") Integer optionOrder,
+//                                             @RequestBody OptionRequest optionRequest) {
+//        optionRequest.setOrder(optionOrder);
+//        OptionResponse response = optionService.updateOption(questionId, optionRequest);
+//        return ApiResponse.<OptionResponse>builder().result(response).build();
+//    }
+//
+//    @Operation(
+//            summary = "Create option for a question"
+//    )
+//    @PostMapping("/{questionId})")
+//    public ApiResponse<OptionResponse> createOption(@PathVariable("questionId") UUID questionId, @RequestBody OptionRequest request) {
+//
+//        return ApiResponse.<OptionResponse>builder()
+//                .result(optionService.creteOption(questionId,request))
+//                .build();
+//    }
 }

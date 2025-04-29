@@ -3,6 +3,7 @@ package com.example.courseservice.model;
 
 import com.example.courseservice.model.compositeKey.OptionID;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +19,7 @@ public class Option {
     @EmbeddedId
     OptionID optionId;
 
+    @JsonIgnore
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("questionId")

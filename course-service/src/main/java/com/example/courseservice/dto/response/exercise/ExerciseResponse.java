@@ -1,12 +1,11 @@
 package com.example.courseservice.dto.response.exercise;
 
 
-import com.example.courseservice.model.Question;
+import com.example.courseservice.dto.response.Question.QuestionCreationResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -16,6 +15,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExerciseResponse {
     UUID exerciseId;
-    String exerciseName;
-    String exerciseDescription;
+    Integer questionsPerExercise;
+    Integer passingQuestions;
+    List<QuestionCreationResponse> questionList;
 }

@@ -96,7 +96,7 @@ public class LearningLesson {
                         @FieldResult(name = "description", column="description"),
                         @FieldResult(name = "content", column="content"),
                         @FieldResult(name = "problemId", column="problem_id"),
-                        @FieldResult(name = "exerciseId", column="exercise_id"),
+                        @FieldResult(name = "quizId", column="exercise_id"),
                         @FieldResult(name = "status", column="status"),
                         @FieldResult(name = "lastAccessedDate", column="last_accessed_date"),
                     }
@@ -113,7 +113,7 @@ public class LearningLesson {
                     @ColumnResult(name = "description", type = String.class),
                     @ColumnResult(name = "content", type = String.class),
                     @ColumnResult(name = "problemId", type = UUID.class),
-                    @ColumnResult(name = "exerciseId", type = UUID.class),
+                    @ColumnResult(name = "quizId", type = UUID.class),
                     @ColumnResult(name = "status", type = String.class),
                     @ColumnResult(name = "lastAccessedDate", type = Instant.class)
             }

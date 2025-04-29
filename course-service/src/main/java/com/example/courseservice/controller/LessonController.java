@@ -2,7 +2,6 @@ package com.example.courseservice.controller;
 
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.Assignment.SubmitAssignmentRequest;
-import com.example.courseservice.dto.request.exercise.ExerciseCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
@@ -21,7 +20,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,9 +42,15 @@ public class LessonController {
             summary = "Create lesson"
     )
     @PostMapping
-    ApiResponse<LessonResponse> createLesson(@RequestBody @Valid LessonCreationRequest request) {
+    ApiResponse<LessonResponse> createLesson(@RequestBody LessonCreationRequest request) {
+        if (request.getClonedLessonId() == null)
+        {
+            return ApiResponse.<LessonResponse>builder()
+                    .result(lessonService.createBlankLesson(request.getCourseId()))
+                    .build();
+        }
         return ApiResponse.<LessonResponse>builder()
-                .result(lessonService.createLesson(request))
+                .result(lessonService.copyLesson(request.getClonedLessonId(),request.getCourseId()))
                 .build();
     }
 
@@ -72,8 +76,8 @@ public class LessonController {
             summary = "Delete lesson by id"
     )
     @DeleteMapping("/{lessonId}")
-    ApiResponse<String> deleteLesson(@PathVariable("lessonId") String lessonId){
-        lessonService.deleteLesson(lessonId);
+    ApiResponse<String> deleteLesson(@PathVariable("lessonId") UUID lessonId){
+        lessonService.removeLesson(lessonId);
         return ApiResponse.<String>builder()
                 .result("Lesson has been deleted")
                 .build();
@@ -82,10 +86,10 @@ public class LessonController {
     @Operation(
             summary = "Update lesson by id"
     )
-    @PutMapping("/{lessonId}")
-    ApiResponse<LessonResponse> updateLesson(@PathVariable("lessonId") String lessonId, @RequestBody LessonUpdateRequest request){
+    @PutMapping
+    ApiResponse<LessonResponse> updateLesson(@RequestBody LessonUpdateRequest request){
         return ApiResponse.<LessonResponse>builder()
-                .result(lessonService.updateLesson(lessonId, request))
+                .result(lessonService.updateLesson(request))
                 .build();
     }
 
@@ -121,16 +125,7 @@ public class LessonController {
                 .build();
     }
 
-    @Operation(
-            summary = "Add exercise to lesson"
-    )
-    @PostMapping("/{lessonId}")
-    ApiResponse<LessonResponse> addExercise(@PathVariable("lessonId") UUID lessonId, @RequestBody ExerciseCreationRequest request){
 
-        return ApiResponse.<LessonResponse>builder()
-                .result(lessonService.addExercise(lessonId,request))
-                .build();
-    }
 
     @PostMapping("{lessonId}/submitquiz")
     ApiResponse<Float> submitQuiz(@PathVariable("lessonId") UUID lessonId,

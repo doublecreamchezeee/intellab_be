@@ -109,6 +109,19 @@ public class CourseController {
     }
 
     @Operation(
+            summary = "Get lesson list",
+            description = "trả về List thay vì page"
+    )
+    @GetMapping("/{courseId}/lessonsList")
+    ApiResponse<List<LessonResponse>> getCourseLessons(
+            @PathVariable("courseId") UUID courseId
+    ){
+        return ApiResponse.<List<LessonResponse>>builder()
+                .result(lessonService.getCourseLessons(courseId))
+                .build();
+    }
+
+    @Operation(
             summary = "Get all lessons and progress of learning lessons in a course (using when user has enrolled in course)"
     )
     @GetMapping("/{courseId}/lessons/me") ///{userUid}

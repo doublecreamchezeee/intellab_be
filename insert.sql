@@ -1,11 +1,11 @@
-CREATE EXTENSION IF NOT EXISTS "vector";
+-- CREATE EXTENSION IF NOT EXISTS "vector";
 
-CREATE TABLE IF NOT EXISTS embeddings (
-                                          id SERIAL PRIMARY KEY,
-                                          embedding vector,
-                                          text text,
-                                          created_at timestamptz DEFAULT now()
-    );
+-- CREATE TABLE IF NOT EXISTS embeddings (
+--                                           id SERIAL PRIMARY KEY,
+--                                           embedding vector,
+--                                           text text,
+--                                           created_at timestamptz DEFAULT now()
+--     );
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -173,18 +173,6 @@ create table test_case_run_code_outputs
 alter table test_case_run_code_outputs
     owner to postgres;
 
-create table exercises
-(
-    exercise_id   uuid not null default uuid_generate_v4()
-        primary key,
-    description   text,
-    exercise_name varchar(255),
-	passing_score int
-);
-
-alter table exercises
-    owner to postgres;
-
 create table medals
 (
     medal_id    uuid         not null default uuid_generate_v4()
@@ -249,46 +237,8 @@ alter table notifications
     owner to postgres;
 
 
-create table questions
-(
-    question_id      uuid not null default uuid_generate_v4()
-        primary key,
-    correct_answer   varchar(255),
-    created_at       timestamp(6) with time zone default current_timestamp,
-    question_content text,
-    question_type    char check(question_type in ('S','M')),
-    status           varchar(10) check (status in ('active', 'unavailable')),
-    updated_at       timestamp(6) with time zone
-);
 
-alter table questions
-    owner to postgres;
 
-create table options
-(
-    option_order integer not null,
-    content      varchar(255),
-    question_id  uuid    not null
-        constraint fkjglnbyg0fqsplv75m2oi42ji1
-            references questions,
-    primary key (option_order, question_id)
-);
-
-alter table options
-    owner to postgres;
-
-create table question_list
-(
-    exercise_id uuid not null default uuid_generate_v4()
-        constraint fki72qnw59jeo39x6v1uhe0wb51
-            references exercises,
-    question_id uuid not null
-        constraint fkabppvo14rfcil3brx1s9begg2
-            references questions
-);
-
-alter table question_list
-    owner to postgres;
 
 create table report_options
 (
@@ -420,16 +370,63 @@ create table lessons
     problem_id   uuid,
     course_id    uuid                            not null
         constraint fk2uhy91p0gnptep0xxwaal7gnu
-            references courses,
-    exercise_id  uuid
-        constraint uker6gswadtti4suc2pq8wbq94a
-            unique
-        constraint fkkm6c9l61pmyo1j6a8rpivr85m
-            references exercises
+            references courses
 );
 
 alter table lessons
     owner to postgres;
+
+
+create table exercises
+(
+    exercise_id   uuid not null default uuid_generate_v4()
+        primary key,
+    description   text,
+    exercise_name varchar(255),
+    passing_questions      integer,
+    questions_per_exercise integer,
+    lesson_id              uuid
+        constraint uk9yqkdn70s99mfseuswi0mspbi
+            unique
+        constraint fkevmwr324tb3wfuachs1jimucn
+            references lessons
+);
+
+alter table exercises
+    owner to postgres;
+
+
+create table questions
+(
+    question_id      uuid not null default uuid_generate_v4()
+        primary key,
+    correct_answer   varchar(255),
+    created_at       timestamp(6) with time zone default current_timestamp,
+    question_content text,
+    question_type    char check(question_type in ('S','M')),
+    status           varchar(10) check (status in ('active', 'unavailable')),
+    updated_at       timestamp(6) with time zone,
+    exercise_id      uuid
+        constraint fkostmdcxvqgrn6vvu29bkbyfjp
+            references exercises
+);
+
+alter table questions
+    owner to postgres;
+
+create table options
+(
+    option_order integer not null,
+    content      varchar(255),
+    question_id  uuid    not null
+        constraint fkjglnbyg0fqsplv75m2oi42ji1
+            references questions,
+    primary key (option_order, question_id)
+);
+
+alter table options
+    owner to postgres;
+
 
 create table learning_lesson
 (
@@ -672,7 +669,7 @@ create table problem_comment_reactions
     problem_comment_comment_id uuid not null
         constraint fka45m53xgm1j7twrchtcvg5cax
             references problem_comments,
-    primary key (user_uuid, problem_comment_comment_id).
+    primary key (user_uuid, problem_comment_comment_id),
     active boolean default true
 );
 
@@ -789,377 +786,65 @@ INSERT INTO public.courses (course_id, average_rating, course_name, description,
 INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, topic_id, user_id, score, is_available) VALUES ('8e963cdf-2416-4196-bea7-f24a5272964d', null, 'TAOCP 6', 'Basic to Advanced TAOCP Part 6', 'Advanced', 500000.00, null, 'VND', null, null, 30, true);
 INSERT INTO public.courses (course_id, average_rating, course_name, description, level, price, review_count, unit_price, topic_id, user_id, score, is_available) VALUES ('91010d93-3d40-40d6-9b3f-f0f950fe508a', null, 'TAOCP 7', 'Basic to Advanced TAOCP Part 7', 'Advanced', 1000000.00, null, 'VND', null, null, 30, true);
 
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '', 'Stack');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '', 'Queue');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('853e7ebc-48f7-4f47-aa0f-7cd103b4e503', '', 'Linked List');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', '', 'Array');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('fa41a74d-5590-49a6-84f7-ad1ceed83eaf', '', 'The Logic Building Problems');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('8f893dfd-b897-4bd5-9c29-097703871710', '', 'Introduction to DSA');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('19759307-a805-4bfd-b1a3-648921705a71', '', 'Matrix Data Structure Guide');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('e73a74e2-29d5-4617-aa46-84c970dbba55', '', 'Linked List Data Structure Guide');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('52aae031-0311-4a7d-b6ba-939bd82fbbff', '', 'Heap Data Structure Guide');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('404d18fc-dd60-448d-bd5f-cb0f8c217553', '', 'Guide on Recursive Algorithms');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('53495d50-8eb3-4188-8976-44ad88b30cb6', '', 'Guide on Graph Algorithms');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('28239350-2d7a-4ab2-8f97-137146a725ca', '', 'Guide on Greedy Algorithms');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('3dea63cf-4407-413b-82be-5cba86b4e6bc', '', 'Dynamic Programming Guide');
-INSERT INTO public.exercises (exercise_id, description, exercise_name) VALUES ('3de5e4c5-3fe6-4fa5-be9e-63966e2d63b7', '', 'Bitwise Algorithms Guide');
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (1, 'Data Structure', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (2, 'Algorithm', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (5, 'Problem Solving', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (6, 'Array', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (7, 'Queue', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (8, 'Recursive', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (9, 'Dynamic Programming', null);
+INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (10, 'Matrix', null);
 
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('dfa51df3-225e-42c9-82b4-7ffd179ced23', '2', '2024-12-23 14:19:14.661456 +00:00', 'How are elements stored in an array?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('f2d6151a-0fba-4117-934f-9f0496ea456d', '1', '2024-12-23 16:05:33.703857 +00:00', 'What is the time complexity of accessing an element in an array?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('707fc477-b79b-4065-b220-a79199e534ca', '2', '2024-12-23 16:05:38.507629 +00:00', 'Which of the following operations is not efficient in an array?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('a6330516-d682-4807-90c0-5893c31a2a77', '2', '2024-12-23 16:05:44.210787 +00:00', 'What is the space complexity of an array with n elements?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('c4bf4382-3d91-4f88-84ff-6e73b3c58a59', '1', '2024-12-23 16:05:50.300063 +00:00', 'In a singly linked list, what information does each node contain?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('e00b2dbc-bf57-46fd-ba89-0d58ff3e751f', '1', '2024-12-23 16:05:50.300063 +00:00', 'What is the time complexity of inserting an element at the beginning of a linked list?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('e43c4cb2-0cdd-43c9-b608-99f705d3a897', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which of the following operations is more efficient in a linked list compared to an array?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('7192dff8-d333-42a7-86ed-43f14f041587', '2', '2024-12-23 16:05:58.506602 +00:00', 'What is the space complexity of a linked list with n elements?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which principle does a queue operate on?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('50b51410-e800-4ef0-8433-06aa3575b95d', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which method is used to add an element to a queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('5d0938d2-2457-4491-a759-3b32818c164d', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which method is used to remove an element from a queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('962c9fc6-db27-4ed1-8a05-eae5e2dab1e0', '1', '2024-12-23 16:06:05.315234 +00:00', 'What is the time complexity of enqueue operation in a queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('d4c17fd9-83bc-4b1e-bfd7-114cfd755ce5', '1', '2024-12-23 16:06:05.315234 +00:00', 'Which principle does a stack operate on?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('bdeb7a18-1e34-49d2-8f04-9fcf91561bd0', '1', '2024-12-23 16:06:05.315234 +00:00', 'Which method is used to remove an element from a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('f95e89ba-00d1-4e45-b566-a43aa34202f3', '1', '2024-12-23 16:06:14.614514 +00:00', 'Which method is used to add an element to a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('e6d03d99-6e22-4fb0-97c8-2d18131b8555', '1', '2024-12-23 16:06:22.484900 +00:00', 'What is the time complexity of push operation in a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('a5fb678a-0546-40f4-b17c-7e95a12fd6fd', '3', '2024-12-23 16:06:22.484900 +00:00', 'Which of the following problems is commonly used to test logical thinking?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('46f75789-7fc5-44bd-a19a-de98668d4393', '2', '2024-12-23 16:08:21.577441 +00:00', 'What is the most important step when solving logical problems?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('1352cb96-7ad9-4a91-af36-102cb37966fd', '1', '2024-12-23 16:10:21.272876 +00:00', 'Which of the following is a common approach to solve logical problems?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('99e0a84b-3a47-415d-b2a0-9335394d9ad3', '2', '2024-12-23 16:10:27.576521 +00:00', 'What is the key to solving complex logical problems?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('d7cfdfe2-3a50-4c99-85fa-ce0dc633498f', '1', '2024-12-23 16:10:27.576521 +00:00', 'What does DSA stand for?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('43dcf436-65e4-472d-9ece-17234c1bde58', '2', '2024-12-23 16:10:33.042012 +00:00', 'Why is learning DSA important in programming?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('e423c8a6-60f2-4e45-b71f-08ca35678003', '2', '2024-12-23 16:10:33.042012 +00:00', 'Which of the following is a fundamental concept in DSA?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('4661f08e-36f8-4599-9ec2-a18e6e837316', '2', '2024-12-23 16:10:37.787124 +00:00', 'What is the primary goal of studying DSA?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b', '2', '2024-12-23 16:10:37.787124 +00:00', 'What is a matrix?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('0a8f8813-b742-46e6-9f1a-e4499f6ccadb', '3', '2024-12-23 16:10:45.125857 +00:00', 'What is the time complexity of multiplying two matrices?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('1a50cda2-bf99-467d-a835-394783c20787', '4', '2024-12-23 16:10:45.125857 +00:00', 'Which of the following operations is not efficient on a matrix?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('8d26a566-aa07-414e-ace1-a7b21bb7074c', '3', '2024-12-23 16:10:45.125857 +00:00', 'What is the space complexity of a matrix with n rows and m columns?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('f4b27993-6b3b-4c08-9028-bf4dc40504bd', '3', '2024-12-23 16:10:45.125857 +00:00', 'In a doubly linked list, what information does each node contain?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('7d7f8f96-947c-4bdd-9a44-dc13ac5804a6', '2', '2024-12-23 16:10:45.125857 +00:00', 'What is the time complexity of traversing a linked list?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('626da05f-e658-4fe0-b7e9-9deba29e4d9e', '4', '2024-12-23 16:10:51.325304 +00:00', 'Which of the following operations is more efficient in a doubly linked list compared to a singly linked list?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('e801c3ac-7931-4a9e-8ef9-c36093c14894', '2', '2024-12-23 16:10:51.325304 +00:00', 'What is the space complexity of a doubly linked list with n elements?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('4481dc50-aadc-41e8-b380-43eb9a3980ce', '2', '2024-12-23 16:10:51.325304 +00:00', 'What property must a heap satisfy?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('4854185c-c851-4865-b287-200036252a7f', '3', '2024-12-23 16:10:51.325304 +00:00', 'What is the time complexity of inserting an element into a heap?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('ba2381e4-26d3-4324-a620-ee7c330f048b', '3', '2024-12-23 16:10:51.325304 +00:00', 'Which of the following operations is not efficient on a heap?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('1f837751-5482-4cc6-abaf-9f1b484ab0c9', '2', '2024-12-23 16:10:51.325304 +00:00', 'What is the space complexity of a heap with n elements?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('1c708886-b0db-4910-b14a-97c860599c31', '1', '2025-01-16 12:49:41.834480 +00:00', 'What does FIFO stand for?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('1470e07c-d79d-452d-ac5b-b131cccc2dae', '4', '2025-01-16 12:49:41.834480 +00:00', 'Which data structure is ideal for implementing task scheduling?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('4de9f1b5-4908-44c1-be16-0bd72e917a55', '3', '2025-01-16 12:49:41.834480 +00:00', 'Which type of Queue allows insertion at both ends?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('41178b65-991e-478c-9f3b-873efbf30b56', '4', '2025-01-16 12:49:41.834480 +00:00', 'In which scenario is a Queue most commonly used?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('44c275b0-f360-4676-8664-010bc0565861', '4', '2025-01-16 12:49:41.834480 +00:00', 'Which of the following is NOT a type of Queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('04b149c8-95ec-454c-9e6f-6d215d7c5d01', '3', '2025-01-16 12:49:41.834480 +00:00', 'What happens when you try to dequeue from an empty Queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('25ff1ed8-1171-4361-b5b1-df695e19c44c', '3', '2025-01-16 12:58:46.979356 +00:00', 'Which of the following is an example of a Stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('c39095ad-0a08-4a7a-9f05-a4c6a319f170', '2', '2025-01-16 12:58:46.979356 +00:00', 'In a stack, what does the peek operation do?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('72ce8429-4c6f-46ff-9029-6fc69150ce4a', '1', '2025-01-16 12:58:46.979356 +00:00', 'What is the space complexity of a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('20453226-4074-4f81-a5d7-832f55181149', '2', '2025-01-16 12:49:41.834480 +00:00', 'What is the key principle of a Queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('501b8db5-5608-412d-a0a2-a44572085c80', '1', '2025-01-16 12:49:41.834480 +00:00', 'Which of the following is an example of a Queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('76d412d0-9dbd-40ce-9fc5-da9b057e5c08', '3', '2025-01-16 12:49:41.834480 +00:00', 'Which operation removes an item from the front of the Queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('973a3348-e394-4d3f-a597-35158aa51c74', '1', '2025-01-16 12:49:41.834480 +00:00', 'What is the time complexity of enqueue and dequeue operations in a Queue?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('2114e6b6-1510-4b2f-b379-ed01f9e2b2f3', '4', '2025-01-16 12:58:46.979356 +00:00', 'Which data structure works on Last In First Out (LIFO)?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('35eb528d-f31b-4d02-8f35-083fb12d4b9c', '4', '2025-01-16 12:58:46.979356 +00:00', 'Which operation inserts an element into a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('5ada76a4-9e1c-4f93-8e26-653430a2eb10', '1', '2025-01-16 12:58:46.979356 +00:00', 'What is the initial condition of a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('684fb820-a370-4d34-954f-ddaa11b4f0b4', '3', '2025-01-16 12:58:46.979356 +00:00', 'Which operation removes the top element from a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('720aea7e-824a-46cd-acae-627157c68c16', '4', '2025-01-16 12:58:46.979356 +00:00', 'Which operation is not possible in a stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd', '2', '2025-01-16 12:58:46.979356 +00:00', 'What happens when a stack is full and a push operation is attempted?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('7e482eb8-a094-48b3-97a6-6c253045b3e0', '1', '2025-01-16 12:58:46.979356 +00:00', 'Which of these is an application of stack?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('d04af04d-8330-4b16-be86-313bb1df0cac', '3', '2025-01-16 12:58:46.979356 +00:00', 'What is the time complexity of a stack push operation?', 'S', 'active', null);
-INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at) VALUES ('f0a148ac-4c4e-4306-8957-d9de760351e8', '2', '2025-01-16 12:58:46.979356 +00:00', 'Which data structure can be used for undo operations in text editors?', 'S', 'active', null);
+
+INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 5);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 7);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 6);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 8);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 9);
+INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 10);
+
+INSERT INTO public.sections (section_id, name) VALUES (1, 'Free Courses');
+INSERT INTO public.sections (section_id, name) VALUES (2, 'Featured Courses');
+
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 1);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 2);
+INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 2);
 
 
 
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'In arbitrary order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'In contiguous memory locations', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'In reverse order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'In random order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deleting an element from the end', '707fc477-b79b-4065-b220-a79199e534ca');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', '707fc477-b79b-4065-b220-a79199e534ca');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Searching for an element', '707fc477-b79b-4065-b220-a79199e534ca');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Inserting an element at the beginning', '707fc477-b79b-4065-b220-a79199e534ca');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'a6330516-d682-4807-90c0-5893c31a2a77');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'a6330516-d682-4807-90c0-5893c31a2a77');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'a6330516-d682-4807-90c0-5893c31a2a77');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'a6330516-d682-4807-90c0-5893c31a2a77');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Data and a pointer to the next node', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Only a pointer', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Only data', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Data and a pointer to the previous node', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Searching for an element', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deleting an element from the end', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Inserting an element at the beginning', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '7192dff8-d333-42a7-86ed-43f14f041587');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '7192dff8-d333-42a7-86ed-43f14f041587');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '7192dff8-d333-42a7-86ed-43f14f041587');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '7192dff8-d333-42a7-86ed-43f14f041587');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'FILO (First In Last Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'LILO (Last In Last Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'FIFO (First In First Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'LIFO (Last In First Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'enqueue()', '50b51410-e800-4ef0-8433-06aa3575b95d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'add()', '50b51410-e800-4ef0-8433-06aa3575b95d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'insert()', '50b51410-e800-4ef0-8433-06aa3575b95d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'push()', '50b51410-e800-4ef0-8433-06aa3575b95d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'remove()', '5d0938d2-2457-4491-a759-3b32818c164d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'delete()', '5d0938d2-2457-4491-a759-3b32818c164d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'dequeue()', '5d0938d2-2457-4491-a759-3b32818c164d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'pop()', '5d0938d2-2457-4491-a759-3b32818c164d');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'FIFO (First In First Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'LILO (Last In Last Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'LIFO (Last In First Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'FILO (First In Last Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'delete()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'remove()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'pop()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'dequeue()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'add()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'push()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'enqueue()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'insert()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Counting prime numbers', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Binary search', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Traveling salesman problem', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Quick sort', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Writing code quickly', '46f75789-7fc5-44bd-a19a-de98668d4393');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Understanding the problem and designing the algorithm', '46f75789-7fc5-44bd-a19a-de98668d4393');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Using existing libraries', '46f75789-7fc5-44bd-a19a-de98668d4393');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Optimizing the code', '46f75789-7fc5-44bd-a19a-de98668d4393');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Random guessing', '1352cb96-7ad9-4a91-af36-102cb37966fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Divide and conquer', '1352cb96-7ad9-4a91-af36-102cb37966fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Ignoring the problem', '1352cb96-7ad9-4a91-af36-102cb37966fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Using brute force', '1352cb96-7ad9-4a91-af36-102cb37966fd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Using complex data structures', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Writing long code', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Breaking down the problem into smaller parts', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Memorizing solution', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Digital Structure and Algorithm', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Data Storage and Access', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Data System and Analysis', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Data Structure and Algorithm', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'To increase debugging skills', '43dcf436-65e4-472d-9ece-17234c1bde58');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'To optimize algorithms and program performance', '43dcf436-65e4-472d-9ece-17234c1bde58');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'To increase the use of libraries', '43dcf436-65e4-472d-9ece-17234c1bde58');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'To increase coding speed', '43dcf436-65e4-472d-9ece-17234c1bde58');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Scripting', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Data abstraction', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Functional programming', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Object-oriented programming', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'To write more lines of code', '4661f08e-36f8-4599-9ec2-a18e6e837316');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'To learn new programming languages', '4661f08e-36f8-4599-9ec2-a18e6e837316');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'To understand how to organize and manipulate data efficiently', '4661f08e-36f8-4599-9ec2-a18e6e837316');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'To create graphical user interfaces', '4661f08e-36f8-4599-9ec2-a18e6e837316');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(n)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(log n)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n^3)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n^2)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Inserting an element in the middle', '1a50cda2-bf99-467d-a835-394783c20787');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', '1a50cda2-bf99-467d-a835-394783c20787');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Adding two matrices', '1a50cda2-bf99-467d-a835-394783c20787');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Transposing a matrix', '1a50cda2-bf99-467d-a835-394783c20787');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n*m)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Only data', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Data and pointers to both the previous and next nodes', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Data and a pointer to the previous node', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Data and a pointer to the next node', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Traversing the list in reverse order', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Inserting an element at the beginning', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deleting an element from the end', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Recursive property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Balanced tree property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Determinant property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Complete binary tree property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '4854185c-c851-4865-b287-200036252a7f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '4854185c-c851-4865-b287-200036252a7f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '4854185c-c851-4865-b287-200036252a7f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '4854185c-c851-4865-b287-200036252a7f');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Deleting the root element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Accessing the root element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Searching for an element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Inserting an element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Random Access', '20453226-4074-4f81-a5d7-832f55181149');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'FIFO', '20453226-4074-4f81-a5d7-832f55181149');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'None of the above', '20453226-4074-4f81-a5d7-832f55181149');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'LIFO', '20453226-4074-4f81-a5d7-832f55181149');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'insert', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'pop', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'dequeue', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'enqueue', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Call Center System', '501b8db5-5608-412d-a0a2-a44572085c80');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Tree', '501b8db5-5608-412d-a0a2-a44572085c80');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Stack', '501b8db5-5608-412d-a0a2-a44572085c80');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Binary Search Tree', '501b8db5-5608-412d-a0a2-a44572085c80');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '973a3348-e394-4d3f-a597-35158aa51c74');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n^2)', '973a3348-e394-4d3f-a597-35158aa51c74');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n)', '973a3348-e394-4d3f-a597-35158aa51c74');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(log n)', '973a3348-e394-4d3f-a597-35158aa51c74');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'First In First Out', '1c708886-b0db-4910-b14a-97c860599c31');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'None of the above', '1c708886-b0db-4910-b14a-97c860599c31');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Last In First Out', '1c708886-b0db-4910-b14a-97c860599c31');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'File Input File Output', '1c708886-b0db-4910-b14a-97c860599c31');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Queue', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Binary Tree', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Hash Table', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Stack', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Stack', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Priority Queue', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deque', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Circular Queue', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Breadth-First Search', '41178b65-991e-478c-9f3b-873efbf30b56');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Undo operations in editors', '41178b65-991e-478c-9f3b-873efbf30b56');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Evaluating expressions', '41178b65-991e-478c-9f3b-873efbf30b56');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Task scheduling', '41178b65-991e-478c-9f3b-873efbf30b56');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Circular Queue', '44c275b0-f360-4676-8664-010bc0565861');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Priority Queue', '44c275b0-f360-4676-8664-010bc0565861');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deque', '44c275b0-f360-4676-8664-010bc0565861');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Binary Search Queue', '44c275b0-f360-4676-8664-010bc0565861');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Adds a default value', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Dequeues another element', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Throws an exception or error', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Ignores the operation', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Queue', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Binary Search Tree', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Browser back button', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Tree', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Pop', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Enqueue', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Peek', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Push', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Dequeue', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Push', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Pop', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Peek', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(n^2)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(1)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(log n)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Array', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Queue', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Tree', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Stack', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Recursion', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Breadth First Search', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Sorting', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Graph traversal', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Inserts an element at the top', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Returns the top element without removing it', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Checks if the stack is full', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Removes the top element', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'The stack is resized', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Stack underflow occurs', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Stack overflow occurs', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'The element is added', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'The stack is empty', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'The stack is full', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'The stack is half full', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'The stack has one element', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Tree', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Stack', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Queue', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Array', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(n)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(log n)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n^2)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(1)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
-INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Peek', '720aea7e-824a-46cd-acae-627157c68c16');
-INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Pop', '720aea7e-824a-46cd-acae-627157c68c16');
-INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Push', '720aea7e-824a-46cd-acae-627157c68c16');
-INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Traversal', '720aea7e-824a-46cd-acae-627157c68c16');
-
-
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', '707fc477-b79b-4065-b220-a79199e534ca');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', 'a6330516-d682-4807-90c0-5893c31a2a77');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('853e7ebc-48f7-4f47-aa0f-7cd103b4e503', '7192dff8-d333-42a7-86ed-43f14f041587');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('853e7ebc-48f7-4f47-aa0f-7cd103b4e503', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('853e7ebc-48f7-4f47-aa0f-7cd103b4e503', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('853e7ebc-48f7-4f47-aa0f-7cd103b4e503', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '50b51410-e800-4ef0-8433-06aa3575b95d');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '5d0938d2-2457-4491-a759-3b32818c164d');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('fa41a74d-5590-49a6-84f7-ad1ceed83eaf', '1352cb96-7ad9-4a91-af36-102cb37966fd');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('fa41a74d-5590-49a6-84f7-ad1ceed83eaf', '46f75789-7fc5-44bd-a19a-de98668d4393');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('fa41a74d-5590-49a6-84f7-ad1ceed83eaf', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('fa41a74d-5590-49a6-84f7-ad1ceed83eaf', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('8f893dfd-b897-4bd5-9c29-097703871710', '43dcf436-65e4-472d-9ece-17234c1bde58');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('8f893dfd-b897-4bd5-9c29-097703871710', '4661f08e-36f8-4599-9ec2-a18e6e837316');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('8f893dfd-b897-4bd5-9c29-097703871710', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('8f893dfd-b897-4bd5-9c29-097703871710', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('19759307-a805-4bfd-b1a3-648921705a71', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('19759307-a805-4bfd-b1a3-648921705a71', '1a50cda2-bf99-467d-a835-394783c20787');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('19759307-a805-4bfd-b1a3-648921705a71', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('19759307-a805-4bfd-b1a3-648921705a71', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('e73a74e2-29d5-4617-aa46-84c970dbba55', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('e73a74e2-29d5-4617-aa46-84c970dbba55', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('e73a74e2-29d5-4617-aa46-84c970dbba55', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('e73a74e2-29d5-4617-aa46-84c970dbba55', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('52aae031-0311-4a7d-b6ba-939bd82fbbff', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('52aae031-0311-4a7d-b6ba-939bd82fbbff', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('52aae031-0311-4a7d-b6ba-939bd82fbbff', '4854185c-c851-4865-b287-200036252a7f');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('52aae031-0311-4a7d-b6ba-939bd82fbbff', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '20453226-4074-4f81-a5d7-832f55181149');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '501b8db5-5608-412d-a0a2-a44572085c80');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '973a3348-e394-4d3f-a597-35158aa51c74');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '1c708886-b0db-4910-b14a-97c860599c31');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '41178b65-991e-478c-9f3b-873efbf30b56');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '44c275b0-f360-4676-8664-010bc0565861');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'd04af04d-8330-4b16-be86-313bb1df0cac');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
-INSERT INTO public.question_list (exercise_id, question_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '720aea7e-824a-46cd-acae-627157c68c16');
-
-
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('bc7282ef-2185-47e3-acbc-5b5597cbbbfc', e'****Examples :****
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('bc7282ef-2185-47e3-acbc-5b5597cbbbfc', e'****Examples :****
 
 
 
@@ -1600,8 +1285,8 @@ O(log(min(a, b)), where a and b are two integers.
 
 ****Auxiliary Space:****
 O(1), no extra space required so it is a constant.
-', 'Add two fraction a/b and c/d and print answer in simplest form.', 'Program to add two fractions', 2, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('aad6df64-c3f4-40e1-961b-817fa187f81f', e'
+', 'Add two fraction a/b and c/d and print answer in simplest form.', 'Program to add two fractions', 2, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('aad6df64-c3f4-40e1-961b-817fa187f81f', e'
 ****Examples:****
 
 
@@ -2056,8 +1741,8 @@ Below are all perfect numbers till 10000
 ****Time Complexity:****
 O(log(n))
 
-', 'A number is a perfect number if is equal to sum of its proper divisors, that is, sum of its positive divisors excluding the number itself. Write a function to check if a given number is perfect or not.', 'Perfect Number', 3, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('b1a2bec7-f49b-4d01-a799-d27664456f71', e'A number is called as a
+', 'A number is a perfect number if is equal to sum of its proper divisors, that is, sum of its positive divisors excluding the number itself. Write a function to check if a given number is perfect or not.', 'Perfect Number', 3, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('b1a2bec7-f49b-4d01-a799-d27664456f71', e'A number is called as a
 
 ****Jumping Number****
 if all adjacent digits in it differ by
@@ -3128,8 +2813,8 @@ O(len(N))
 
 Here len(N) is the maximum length from all the jumping numbers, the extra space is used due to recursive function call stack.
 
-', '', 'Print all Jumping Numbers smaller than or equal to a given value', 4, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('023ee905-49cc-4ff9-b0f6-57f68b7a1d9a', e'
+', '', 'Print all Jumping Numbers smaller than or equal to a given value', 4, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('023ee905-49cc-4ff9-b0f6-57f68b7a1d9a', e'
 
 [****LCM****](https://www.geeksforgeeks.org/lcm-least-common-multiple/)
 of two numbers is the smallest number which can be divided by both numbers.
@@ -3592,8 +3277,8 @@ O(min(a,b))
 
 ****Auxiliary Space:****
 O(1)
-', 'LCM of two numbers is the smallest number which can be divided by both numbers.', 'Program to find LCM of two numbers', 5, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('995fe7e2-ea73-4f91-8cbc-00bcdc769c4d', e'Given two numbers
+', 'LCM of two numbers is the smallest number which can be divided by both numbers.', 'Program to find LCM of two numbers', 5, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('995fe7e2-ea73-4f91-8cbc-00bcdc769c4d', e'Given two numbers
 
 ****a****
 and
@@ -5042,8 +4727,8 @@ O(log(min(a, b)))
 ****Auxiliary Space:****
 O(1)
 
-', '', 'Program to Find GCD or HCF of Two Numbers', 6, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ddbdf68b-6bcc-4c3f-8472-f24f5f5d1320', e'Given a positive integer
+', '', 'Program to Find GCD or HCF of Two Numbers', 6, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('ddbdf68b-6bcc-4c3f-8472-f24f5f5d1320', e'Given a positive integer
 
 ****n****
 , find its square root. If
@@ -6006,8 +5691,8 @@ console.log(floorSqrt(n));
 ```
 3
 
-```', '', 'Square root of an integer', 7, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('d1958775-d3e0-4bf8-b656-d1136cdb0e05', e'Given the number
+```', '', 'Square root of an integer', 7, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('d1958775-d3e0-4bf8-b656-d1136cdb0e05', e'Given the number
 
 ****n****
 (n >=0), find its
@@ -6531,8 +6216,8 @@ Iterative approach is better as the recursive approach requires extra space for 
 
 
 One simple improvement that we can do is use long long in C/C++ and long in Java/C#, but that does not help much as factorials are really large numbers and causes overflow for small values. Please refer
-', '', 'Factorial of a Number', 8, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('770b0b45-edf6-4bc7-9880-e2727206798f', e'
+', '', 'Factorial of a Number', 8, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('770b0b45-edf6-4bc7-9880-e2727206798f', e'
 Given two positive numbers x and y, check if y is a power of x or not.
 
 
@@ -7281,8 +6966,8 @@ console.log(isPower(2, 128));
 
 
 **Auxiliary space**
-: O(1)', '', 'Check if a number is a power of another number', 9, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('3346a2ba-c1c6-4b4f-bde7-37811686b1c0', e'
+: O(1)', '', 'Check if a number is a power of another number', 9, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('3346a2ba-c1c6-4b4f-bde7-37811686b1c0', e'
 Given a number
 
 ****N****
@@ -8016,8 +7701,8 @@ O(sqrt N
 O(1)
 
 
-', '', 'Find numbers from 1 to N with exactly 3 divisors', 10, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('723f7734-7503-4850-8863-e4f4887152a7', e'
+', '', 'Find numbers from 1 to N with exactly 3 divisors', 10, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('723f7734-7503-4850-8863-e4f4887152a7', e'
 A
 
 [****prime number****](https://www.geeksforgeeks.org/prime-numbers/)
@@ -8972,8 +8657,8 @@ For more related problems on prime number, please refer to
 
 [Recent Articles on Prime Numbers](https://www.geeksforgeeks.org/tag/prime-number/)
 
-  ', '', 'Check for Prime Number', 11, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('e463ed6b-9b9c-4b7f-aaa9-d9607492b53e', e'Given a number
+  ', '', 'Check for Prime Number', 11, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('e463ed6b-9b9c-4b7f-aaa9-d9607492b53e', e'Given a number
 
 ****n****
 , find the sum of its digits.
@@ -9473,8 +9158,8 @@ O(n)
 ****Auxiliary Space:****
 O(1)
 
-', '', 'Program for Sum of the digits of a given number', 12, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ec26f50a-f134-4978-b817-3084496c9feb', e'Table of Content
+', '', 'Program for Sum of the digits of a given number', 12, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('ec26f50a-f134-4978-b817-3084496c9feb', e'Table of Content
 
 * [Applications of Array Data Structure:](#applications-of-array-data-structure)
 * [Advantages of Array Data Structure:](#advantages-of-array-data-structure)
@@ -9540,8 +9225,8 @@ Below are some applications of arrays.
   Fixed size and limited type support make arrays less adaptable than
   structures like linked lists or trees.', e'Array is a linear data structure that is a collection of data elements of same
 types. Arrays are stored in contiguous memory locations. It is a static
-data structure with a fixed size.', 'Applications, Advantages and Disadvantages of Array', 2, '73c532f9-4d55-4737-ae19-3006e02864cc', 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('96fc2a66-d810-48cb-9c86-1f28415e1e5b', e'
+data structure with a fixed size.', 'Applications, Advantages and Disadvantages of Array', 2, '73c532f9-4d55-4737-ae19-3006e02864cc', 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('96fc2a66-d810-48cb-9c86-1f28415e1e5b', e'
 Given the radius of a circle, find the area of that circle.
 
 
@@ -9748,8 +9433,8 @@ O(1)
 
 ****Auxiliary Space:****
 O(1), since no extra space has been taken.
-', '', 'Program to find area of a circle', 13, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('1b6d1c4b-b27f-48f6-a074-6891bfbd3ab6', e'Given Principal
+', '', 'Program to find area of a circle', 13, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('1b6d1c4b-b27f-48f6-a074-6891bfbd3ab6', e'Given Principal
 
 ****p****
 , Rate
@@ -9913,8 +9598,8 @@ console.log(simpleInterest(p, r, t));
 
 ****Auxiliary Space****
 : O(1)
-', '', 'Program to find simple interest', 14, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('1c9888f0-5d92-4cf6-b41a-deff87b117b1', e'
+', '', 'Program to find simple interest', 14, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('1c9888f0-5d92-4cf6-b41a-deff87b117b1', e'
 Table of Content
 
 * [Operations on Circular Queue](#operations-on-circular-queue)
@@ -10432,8 +10117,8 @@ O(size), where
 is the number of elements in the circular queue.
 ', e'A Circular Queue is another way of implementing a normal queue
 where the last element of the queue is connected
-to the first element of the queue forming a circle.', 'Introduction to Circular Queue', 9, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('39944df7-8db0-4d3d-a12d-e09eebfacaaa', e'****Stack Operations:****
+to the first element of the queue forming a circle.', 'Introduction to Circular Queue', 9, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('39944df7-8db0-4d3d-a12d-e09eebfacaaa', e'****Stack Operations:****
 -------------------------
 
 * [****push()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
@@ -11219,8 +10904,8 @@ In summary, stacks are widely used in many applications where LIFO
 functionality is required, such as function calls, undo/redo operations,
 browser history, expression evaluation, and recursive function
 calls.
-', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 10, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('82a0d245-a665-4ec2-a2fe-145f7e841ef1', e'
+', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 10, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('82a0d245-a665-4ec2-a2fe-145f7e841ef1', e'
 You are given a
 
 ****cubic dice****
@@ -11555,8 +11240,8 @@ oppositeFaceOfDice(n);
 
 *****Auxiliary Space:*****
 **O(1)**
-', '', 'The Logic Building Problems', 15, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ddd30ce5-7b19-476e-ab39-8ea4f71a40f6', e'
+', '', 'The Logic Building Problems', 15, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('ddd30ce5-7b19-476e-ab39-8ea4f71a40f6', e'
 Given two integers
 
 ****n****
@@ -12046,8 +11731,8 @@ O(1)
 O(1)
 
 
-', '', 'Find the number closest to n and divisible by m', 16, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('7e9a63b3-707f-46f9-a983-79eab80f9bce', e'
+', '', 'Find the number closest to n and divisible by m', 16, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('7e9a63b3-707f-46f9-a983-79eab80f9bce', e'
 
 Given two variables, x, and y, swap two variables without using a third variable.
 
@@ -13516,8 +13201,8 @@ O(1)
 
 ****Auxiliary Space:****
 O(1)
-', '', 'How to swap two numbers without using a temporary variable?', 17, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('52069685-2d95-4f5f-9678-294844ede87b', e'
+', '', 'How to swap two numbers without using a temporary variable?', 17, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('52069685-2d95-4f5f-9678-294844ede87b', e'
 Given a number n, find the sum of the first natural numbers.
 
 
@@ -14200,8 +13885,8 @@ echo findSum($n);
 ```
 15
 ```
-', '', 'Program to find sum of first n natural numbers', 18, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0aeea379-45ac-4886-bc6e-ebee7abcae78', e'****Learn Basics of Singly Linked List:****
+', '', 'Program to find sum of first n natural numbers', 18, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('0aeea379-45ac-4886-bc6e-ebee7abcae78', e'****Learn Basics of Singly Linked List:****
 -------------------------------------------
 
 1. [Basic Terminologies in Linked List](https://www.geeksforgeeks.org/what-is-linked-list/)
@@ -14278,8 +13963,1097 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 * [\'Practice Problems\' on Linked List](https://www.geeksforgeeks.org/explore?page=2&category=Linked%20List&sortBy=difficulty&itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=practice_header)
     * [\'Videos\' on Linked List](https://www.youtube.com/playlist?list=PLqM7alHXFySH41ZxzrPNj2pAYPOI8ITe7)
 * [\'Quizzes\' on Linked List](https://www.geeksforgeeks.org/data-structure-gq/linked-list-gq/)
-', 'Singly linked list is a linear data structure in which the elements are not stored in contiguous memory locations and each element is connected only to its next element using a pointer.', 'Singly Linked List Problems', 3, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ae34492a-cfab-417f-952f-ddb4957195e8', e'Given a number
+', 'Singly linked list is a linear data structure in which the elements are not stored in contiguous memory locations and each element is connected only to its next element using a pointer.', 'Singly Linked List Problems', 3, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('0f843284-a32b-478b-af5b-85f375980a0b', e'Properties of Heap:
+-------------------
+
+* The minimum or maximum element is always at the root of the heap, allowing constant-time access.
+* The relationship between a parent node at index
+
+  ****‘i’****
+  and its children is given by the formulas: left child at index
+
+  ****2i+1****
+  and right child at index
+
+  ****2i+2****
+  for 0-based indexing of node numbers.
+* As the tree is complete binary, all levels are filled except possibly the last level. And the last level is filled from left to right.
+* When we insert an item, we insert it at the last available slot and then rearrange the nodes so that the heap property is maintained.
+* When we remove an item, we swap root with the last node to make sure either the max or min item is removed. Then we rearrange the remaining nodes to ensure heap property (max or min)
+
+Operations Supported by Heap:
+-----------------------------
+
+
+Operations supported by
+
+****min – heap****
+and
+
+****max – heap****
+are same. The difference is just that min-heap contains minimum element at root of the tree and max – heap contains maximum element at the root of the tree.
+
+
+****Heapify:****
+It is the process to rearrange the elements to maintain the property of heap data structure. It is done when root is removed (we replace root with the last node and then call heapify to ensure that heap property is maintained) or heap is built (we call heapify from the last internal node to root) to make sure that the heap property is maintained. This operation also takes
+
+****O(log n)****
+time.
+
+
+* For
+
+  ****max-heap,****
+  it
+
+
+  makes sure the maximum element is the root of that binary tree and all descendants also follow the same property.
+* For
+
+  ****min-heap,****
+  it balances in such a way that the minimum element is the root and all descendants also follow the same property.
+
+****Insertion****
+: When a new element is inserted into the heap, it can disrupt the heap’s properties. To restore and maintain the heap structure, a heapify operation is performed. This operation ensures the heap properties are preserved and has a time complexity of
+
+****O(log n)****
+.
+
+
+
+****Examples:****
+
+> Assume initially heap(taking
+>
+> ****max-heap****
+> ) is as follows
+>
+>
+> 8
+>
+>
+>
+> /   \\
+>
+>
+>
+> 4     5
+>
+>
+>
+> / \\
+>
+>
+>
+> 1   2
+>
+>
+> Now if we insert 10 into the heap
+>
+>
+>
+> 8
+>
+>
+>
+> /      \\
+>
+>
+>
+> 4       5
+>
+>
+>
+> /  \\      /
+>
+>
+>
+> 1     2  10
+>
+>
+> After repeatedly comparing with the parent nodes and swapping if required, the final heap will be look like this
+>
+>
+>
+> 10
+>
+>
+>
+> /    \\
+>
+>
+>
+> 4      8
+>
+>
+>
+> /  \\     /
+>
+>
+>
+> 1     2 5
+
+### Deletion:
+
+* If we delete the element from the heap it always deletes the root element of the tree and replaces it with the last element of the tree.
+* Since we delete the root element from the heap it will distort the properties of the heap so we need to perform heapify operations so that it maintains the property of the heap.
+
+
+It takes
+
+****O(log n)****
+time.
+
+
+****Example:****
+
+> Assume initially heap(taking max-heap) is as follows
+>
+>
+>
+> 15
+>
+>
+>
+> /   \\
+>
+>
+>
+> 5     7
+>
+>
+>
+> /  \\
+>
+>
+>
+> 2     3
+>
+>
+> Now if we delete 15 into the heap it will be replaced by leaf node of the tree for temporary.
+>
+>
+>
+> 3
+>
+>
+>
+> /   \\
+>
+>
+>
+> 5     7
+>
+>
+>
+> /
+>
+>
+>
+> 2
+>
+>
+> After heapify operation final heap will be look like this
+>
+>
+>
+> 7
+>
+>
+>
+> /   \\
+>
+>
+>
+> 5     3
+>
+>
+>
+> /
+>
+>
+>
+> 2
+
+### getMax (For max-heap) or getMin (For min-heap):
+
+
+It finds the maximum element or minimum element for
+
+****max-heap****
+and
+
+****min-heap****
+respectively and as we know minimum and maximum elements will always be the root node itself for min-heap and max-heap respectively. It takes
+
+****O(1)****
+time.
+
+
+### removeMin or removeMax:
+
+
+This operation returns and deletes the maximum element and minimum element from the max-heap and min-heap respectively. In short, it deletes the root element of the heap binary tree.
+
+
+Implementation of Heap Data Structure:-
+---------------------------------------
+
+
+The following code shows the implementation of a
+
+****max-heap****
+.
+
+
+Let’s understand the
+
+****maxHeapify****
+function in detail:-
+
+
+****maxHeapify****
+is the function responsible for restoring the property of the Max Heap. It arranges the node
+
+****i****
+, and its subtrees accordingly so that the heap property is maintained.
+
+
+1. Suppose we are given an array,
+
+   ****arr[]****
+   representing the complete binary tree. The left and the right child of
+
+   ****i****
+   ****th****
+   node are in indices
+
+   ****2\\*i+1****
+   and
+
+   ****2\\*i+2****
+   .
+2. We set the index of the current element,
+
+   ****i****
+   , as the ‘MAXIMUM’.
+3. If
+
+   ****arr[2 \\* i + 1] > arr[i]****
+   , i.e., the left child is larger than the current value, it is set as ‘MAXIMUM’.
+4. Similarly if
+
+   ****arr[2 \\* i + 2] > arr[i]****
+   , i.e., the right child is larger than the current value, it is set as ‘MAXIMUM’.
+5. Swap the ‘MAXIMUM’ with the current element.
+6. Repeat steps
+
+   ****2 to 5****
+   till the property of the heap is restored.
+
+C++
+
+````
+// C++ code to depict
+// the implementation of a max heap.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+// A class for Max Heap.
+class MaxHeap {
+    // A pointer pointing to the elements
+    // in the array in the heap.
+    int* arr;
+
+// Maximum possible size of
+    // the Max Heap.
+    int maxSize;
+
+// Number of elements in the
+    // Max heap currently.
+    int heapSize;
+
+public:
+    // Constructor function.
+    MaxHeap(int maxSize);
+
+// Heapifies a sub-tree taking the
+    // given index as the root.
+    void MaxHeapify(int);
+
+// Returns the index of the parent
+    // of the element at ith index.
+    int parent(int i)
+    {
+        return (i - 1) / 2;
+}
+
+    // Returns the index of the left child.
+    int lChild(int i)
+    {
+        return (2 * i + 1);
+}
+
+    // Returns the index of the
+    // right child.
+    int rChild(int i)
+    {
+        return (2 * i + 2);
+}
+
+    // Removes the root which in this
+    // case contains the maximum element.
+    int removeMax();
+
+// Increases the value of the key
+    // given by index i to some new value.
+    void increaseKey(int i, int newVal);
+
+// Returns the maximum key
+    // (key at root) from max heap.
+    int getMax()
+    {
+        return arr[0];
+}
+
+    int curSize()
+    {
+        return heapSize;
+}
+
+    // Deletes a key at given index i.
+    void deleteKey(int i);
+
+// Inserts a new key \'x\' in the Max Heap.
+    void insertKey(int x);
+};
+
+// Constructor function builds a heap
+// from a given array a[]
+// of the specified size.
+MaxHeap::MaxHeap(int totSize)
+{
+    heapSize = 0;
+    maxSize = totSize;
+    arr = new int[totSize];
+}
+
+// Inserting a new key \'x\'.
+void MaxHeap::insertKey(int x)
+{
+    // To check whether the key
+    // can be inserted or not.
+    if (heapSize == maxSize) {
+        cout << "\\nOverflow: Could not insertKey\\n";
+        return;
+}
+
+    // The new key is initially
+    // inserted at the end.
+    heapSize++;
+int i = heapSize - 1;
+    arr[i] = x;
+
+// The max heap property is checked
+    // and if violation occurs,
+    // it is restored.
+    while (i != 0 && arr[parent(i)] < arr[i]) {
+        swap(arr[i], arr[parent(i)]);
+        i = parent(i);
+}
+}
+
+// Increases value of key at
+// index \'i\' to new_val.
+void MaxHeap::increaseKey(int i, int newVal)
+{
+    arr[i] = newVal;
+    while (i != 0 && arr[parent(i)] < arr[i]) {
+        swap(arr[i], arr[parent(i)]);
+        i = parent(i);
+}
+}
+
+// To remove the root node which contains
+// the maximum element of the Max Heap.
+int MaxHeap::removeMax()
+{
+    // Checking whether the heap array
+    // is empty or not.
+    if (heapSize <= 0)
+        return INT_MIN;
+    if (heapSize == 1) {
+        heapSize--;
+        return arr[0];
+}
+
+    // Storing the maximum element
+    // to remove it.
+    int root = arr[0];
+    arr[0] = arr[heapSize - 1];
+    heapSize--;
+
+// To restore the property
+    // of the Max heap.
+    MaxHeapify(0);
+
+return root;
+}
+
+// In order to delete a key
+// at a given index i.
+void MaxHeap::deleteKey(int i)
+{
+    // It increases the value of the key
+    // to infinity and then removes
+    // the maximum value.
+    increaseKey(i, INT_MAX);
+    removeMax();
+}
+
+// To heapify the subtree this method
+// is called recursively
+void MaxHeap::MaxHeapify(int i)
+{
+    int l = lChild(i);
+int r = rChild(i);
+int largest = i;
+    if (l < heapSize && arr[l] > arr[i])
+        largest = l;
+    if (r < heapSize && arr[r] > arr[largest])
+        largest = r;
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        MaxHeapify(largest);
+}
+}
+
+// Driver program to test above functions.
+int main()
+{
+    // Assuming the maximum size of the heap to be 15.
+    MaxHeap h(15);
+
+// Asking the user to input the keys:
+    int k, i, n = 6, arr[10];
+    cout << "Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n";
+    h.insertKey(3);
+    h.insertKey(10);
+    h.insertKey(12);
+    h.insertKey(8);
+    h.insertKey(2);
+    h.insertKey(14);
+
+// Printing the current size
+    // of the heap.
+    cout << "The current size of the heap is "
+         << h.curSize() << "\\n";
+
+// Printing the root element which is
+    // actually the maximum element.
+    cout << "The current maximum element is " << h.getMax()
+         << "\\n";
+
+// Deleting key at index 2.
+    h.deleteKey(2);
+
+// Printing the size of the heap
+    // after deletion.
+    cout << "The current size of the heap is "
+         << h.curSize() << "\\n";
+
+// Inserting 2 new keys into the heap.
+    h.insertKey(15);
+    h.insertKey(5);
+    cout << "The current size of the heap is "
+         << h.curSize() << "\\n";
+    cout << "The current maximum element is " << h.getMax()
+         << "\\n";
+
+return 0;
+}
+
+````
+
+Java
+
+````
+// Java code to depict
+// the implementation of a max heap.
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class MaxHeap {
+    // A pointer pointing to the elements
+    // in the array in the heap.
+    int[] arr;
+
+// Maximum possible size of
+    // the Max Heap.
+    int maxSize;
+
+// Number of elements in the
+    // Max heap currently.
+    int heapSize;
+
+// Constructor function.
+    MaxHeap(int maxSize) {
+        this.maxSize = maxSize;
+        arr = new int[maxSize];
+        heapSize = 0;
+}
+
+    // Heapifies a sub-tree taking the
+    // given index as the root.
+    void MaxHeapify(int i) {
+        int l = lChild(i);
+int r = rChild(i);
+int largest = i;
+        if (l < heapSize && arr[l] > arr[i])
+            largest = l;
+        if (r < heapSize && arr[r] > arr[largest])
+            largest = r;
+        if (largest != i) {
+            int temp = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = temp;
+            MaxHeapify(largest);
+}
+    }
+
+    // Returns the index of the parent
+    // of the element at ith index.
+    int parent(int i) {
+        return (i - 1) / 2;
+}
+
+    // Returns the index of the left child.
+    int lChild(int i) {
+        return (2 * i + 1);
+}
+
+    // Returns the index of the
+    // right child.
+    int rChild(int i) {
+        return (2 * i + 2);
+}
+
+    // Removes the root which in this
+    // case contains the maximum element.
+    int removeMax() {
+        // Checking whether the heap array
+        // is empty or not.
+        if (heapSize <= 0)
+            return Integer.MIN_VALUE;
+        if (heapSize == 1) {
+            heapSize--;
+            return arr[0];
+}
+
+        // Storing the maximum element
+        // to remove it.
+        int root = arr[0];
+        arr[0] = arr[heapSize - 1];
+        heapSize--;
+
+// To restore the property
+        // of the Max heap.
+        MaxHeapify(0);
+
+return root;
+}
+
+    // Increases value of key at
+    // index \'i\' to new_val.
+    void increaseKey(int i, int newVal) {
+        arr[i] = newVal;
+        while (i != 0 && arr[parent(i)] < arr[i]) {
+            int temp = arr[i];
+            arr[i] = arr[parent(i)];
+            arr[parent(i)] = temp;
+            i = parent(i);
+}
+    }
+
+    // Returns the maximum key
+    // (key at root) from max heap.
+    int getMax() {
+        return arr[0];
+}
+
+    int curSize() {
+        return heapSize;
+}
+
+    // Deletes a key at given index i.
+    void deleteKey(int i) {
+        // It increases the value of the key
+        // to infinity and then removes
+        // the maximum value.
+        increaseKey(i, Integer.MAX_VALUE);
+        removeMax();
+}
+
+    // Inserts a new key \'x\' in the Max Heap.
+    void insertKey(int x) {
+        // To check whether the key
+        // can be inserted or not.
+        if (heapSize == maxSize) {
+            System.out.println("\\nOverflow: Could not insertKey\\n");
+            return;
+}
+
+        // The new key is initially
+        // inserted at the end.
+        heapSize++;
+int i = heapSize - 1;
+        arr[i] = x;
+
+// The max heap property is checked
+        // and if violation occurs,
+        // it is restored.
+        while (i != 0 && arr[parent(i)] < arr[i]) {
+            int temp = arr[i];
+            arr[i] = arr[parent(i)];
+            arr[parent(i)] = temp;
+            i = parent(i);
+}
+    }
+
+    // Driver program to test above functions.
+    public static void main(String[] args) {
+        // Assuming the maximum size of the heap to be 15.
+        MaxHeap h = new MaxHeap(15);
+
+// Asking the user to input the keys:
+        int k, i, n = 6;
+        System.out.println("Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n");
+        h.insertKey(3);
+        h.insertKey(10);
+        h.insertKey(12);
+        h.insertKey(8);
+        h.insertKey(2);
+        h.insertKey(14);
+
+// Printing the current size
+        // of the heap.
+        System.out.println("The current size of the heap is "
+                + h.curSize() + "\\n");
+
+// Printing the root element which is
+        // actually the maximum element.
+        System.out.println("The current maximum element is " + h.getMax()
+                + "\\n");
+
+// Deleting key at index 2.
+        h.deleteKey(2);
+
+// Printing the size of the heap
+        // after deletion.
+        System.out.println("The current size of the heap is "
+                + h.curSize() + "\\n");
+
+// Inserting 2 new keys into the heap.
+        h.insertKey(15);
+        h.insertKey(5);
+        System.out.println("The current size of the heap is "
+                + h.curSize() + "\\n");
+        System.out.println("The current maximum element is " + h.getMax()
+                + "\\n");
+}
+}
+
+````
+
+Python
+
+````
+# Python code to depict
+# the implementation of a max heap.
+
+class MaxHeap:
+    # A pointer pointing to the elements
+    # in the array in the heap.
+    arr = []
+
+    # Maximum possible size of
+    # the Max Heap.
+    maxSize = 0
+
+    # Number of elements in the
+    # Max heap currently.
+    heapSize = 0
+
+    # Constructor function.
+    def __init__(self, maxSize):
+        self.maxSize = maxSize
+        self.arr = [None]*maxSize
+        self.heapSize = 0
+
+    # Heapifies a sub-tree taking the
+    # given index as the root.
+    def MaxHeapify(self, i):
+        l = self.lChild(i)
+        r = self.rChild(i)
+        largest = i
+        if l < self.heapSize and self.arr[l] > self.arr[i]:
+            largest = l
+        if r < self.heapSize and self.arr[r] > self.arr[largest]:
+            largest = r
+        if largest != i:
+            temp = self.arr[i]
+            self.arr[i] = self.arr[largest]
+            self.arr[largest] = temp
+            self.MaxHeapify(largest)
+
+    # Returns the index of the parent
+    # of the element at ith index.
+    def parent(self, i):
+        return (i - 1) // 2
+
+    # Returns the index of the left child.
+    def lChild(self, i):
+        return (2 * i + 1)
+
+    # Returns the index of the
+    # right child.
+    def rChild(self, i):
+        return (2 * i + 2)
+
+    # Removes the root which in this
+    # case contains the maximum element.
+    def removeMax(self):
+        # Checking whether the heap array
+        # is empty or not.
+        if self.heapSize <= 0:
+            return None
+        if self.heapSize == 1:
+            self.heapSize -= 1
+            return self.arr[0]
+
+        # Storing the maximum element
+        # to remove it.
+        root = self.arr[0]
+        self.arr[0] = self.arr[self.heapSize - 1]
+        self.heapSize -= 1
+
+        # To restore the property
+        # of the Max heap.
+        self.MaxHeapify(0)
+
+        return root
+
+    # Increases value of key at
+    # index \'i\' to new_val.
+    def increaseKey(self, i, newVal):
+        self.arr[i] = newVal
+        while i != 0 and self.arr[self.parent(i)] < self.arr[i]:
+            temp = self.arr[i]
+            self.arr[i] = self.arr[self.parent(i)]
+            self.arr[self.parent(i)] = temp
+            i = self.parent(i)
+
+    # Returns the maximum key
+    # (key at root) from max heap.
+    def getMax(self):
+        return self.arr[0]
+
+    def curSize(self):
+        return self.heapSize
+
+    # Deletes a key at given index i.
+    def deleteKey(self, i):
+        # It increases the value of the key
+        # to infinity and then removes
+        # the maximum value.
+        self.increaseKey(i, float("inf"))
+        self.removeMax()
+
+    # Inserts a new key \'x\' in the Max Heap.
+    def insertKey(self, x):
+        # To check whether the key
+        # can be inserted or not.
+        if self.heapSize == self.maxSize:
+            print("\\nOverflow: Could not insertKey\\n")
+            return
+
+        # The new key is initially
+        # inserted at the end.
+        self.heapSize += 1
+        i = self.heapSize - 1
+        self.arr[i] = x
+
+        # The max heap property is checked
+        # and if violation occurs,
+        # it is restored.
+        while i != 0 and self.arr[self.parent(i)] < self.arr[i]:
+            temp = self.arr[i]
+            self.arr[i] = self.arr[self.parent(i)]
+            self.arr[self.parent(i)] = temp
+            i = self.parent(i)
+
+
+# Driver program to test above functions.
+if __name__ == \'__main__\':
+    # Assuming the maximum size of the heap to be 15.
+    h = MaxHeap(15)
+
+    # Asking the user to input the keys:
+    k, i, n = 6, 0, 6
+    print("Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n")
+    h.insertKey(3)
+    h.insertKey(10)
+    h.insertKey(12)
+    h.insertKey(8)
+    h.insertKey(2)
+    h.insertKey(14)
+
+    # Printing the current size
+    # of the heap.
+    print("The current size of the heap is "
+          + str(h.curSize()) + "\\n")
+
+    # Printing the root element which is
+    # actually the maximum element.
+    print("The current maximum element is " + str(h.getMax())
+          + "\\n")
+
+    # Deleting key at index 2.
+    h.deleteKey(2)
+
+    # Printing the size of the heap
+    # after deletion.
+    print("The current size of the heap is "
+          + str(h.curSize()) + "\\n")
+
+    # Inserting 2 new keys into the heap.
+    h.insertKey(15)
+    h.insertKey(5)
+    print("The current size of the heap is "
+          + str(h.curSize()) + "\\n")
+    print("The current maximum element is " + str(h.getMax())
+          + "\\n")
+
+````
+
+JavaScript
+
+````
+// JavaScript code to depict
+// the implementation of a max heap.
+
+class MaxHeap {
+    constructor(maxSize) {
+        // the array in the heap.
+        this.arr = new Array(maxSize).fill(null);
+
+// Maximum possible size of
+        // the Max Heap.
+        this.maxSize = maxSize;
+
+// Number of elements in the
+        // Max heap currently.
+        this.heapSize = 0;
+}
+
+    // Heapifies a sub-tree taking the
+    // given index as the root.
+    MaxHeapify(i) {
+        const l = this.lChild(i);
+        const r = this.rChild(i);
+        let largest = i;
+        if (l < this.heapSize && this.arr[l] > this.arr[i]) {
+            largest = l;
+}
+        if (r < this.heapSize && this.arr[r] > this.arr[largest]) {
+            largest = r;
+}
+        if (largest !== i) {
+            const temp = this.arr[i];
+            this.arr[i] = this.arr[largest];
+            this.arr[largest] = temp;
+            this.MaxHeapify(largest);
+}
+    }
+
+    // Returns the index of the parent
+    // of the element at ith index.
+    parent(i) {
+        return Math.floor((i - 1) / 2);
+}
+
+    // Returns the index of the left child.
+    lChild(i) {
+        return 2 * i + 1;
+}
+
+    // Returns the index of the
+    // right child.
+    rChild(i) {
+        return 2 * i + 2;
+}
+
+    // Removes the root which in this
+    // case contains the maximum element.
+    removeMax() {
+        // Checking whether the heap array
+        // is empty or not.
+        if (this.heapSize <= 0) {
+            return null;
+}
+        if (this.heapSize === 1) {
+            this.heapSize -= 1;
+return this.arr[0];
+}
+
+        // Storing the maximum element
+        // to remove it.
+        const root = this.arr[0];
+        this.arr[0] = this.arr[this.heapSize - 1];
+        this.heapSize -= 1;
+
+// To restore the property
+        // of the Max heap.
+        this.MaxHeapify(0);
+
+return root;
+}
+
+    // Increases value of key at
+    // index \'i\' to new_val.
+    increaseKey(i, newVal) {
+        this.arr[i] = newVal;
+        while (i !== 0 && this.arr[this.parent(i)] < this.arr[i]) {
+            const temp = this.arr[i];
+            this.arr[i] = this.arr[this.parent(i)];
+            this.arr[this.parent(i)] = temp;
+            i = this.parent(i);
+}
+    }
+
+    // Returns the maximum key
+    // (key at root) from max heap.
+    getMax() {
+        return this.arr[0];
+}
+
+    curSize() {
+        return this.heapSize;
+}
+
+    // Deletes a key at given index i.
+    deleteKey(i) {
+        // It increases the value of the key
+        // to infinity and then removes
+        // the maximum value.
+        this.increaseKey(i, Infinity);
+        this.removeMax();
+}
+
+    // Inserts a new key \'x\' in the Max Heap.
+    insertKey(x) {
+        // To check whether the key
+        // can be inserted or not.
+        if (this.heapSize === this.maxSize) {
+            console.log("\\nOverflow: Could not insertKey\\n");
+            return;
+}
+
+        let i = this.heapSize;
+        this.arr[i] = x;
+
+// The new key is initially
+        // inserted at the end.
+        this.heapSize += 1;
+
+
+
+// The max heap property is checked
+        // and if violation occurs,
+        // it is restored.
+        while (i !== 0 && this.arr[this.parent(i)] < this.arr[i]) {
+            const temp = this.arr[i];
+            this.arr[i] = this.arr[this.parent(i)];
+            this.arr[this.parent(i)] = temp;
+            i = this.parent(i);
+}
+    }
+}
+
+
+// Driver program to test above functions.
+
+// Assuming the maximum size of the heap to be 15.
+const h = new MaxHeap(15);
+
+// Asking the user to input the keys:
+console.log("Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n");
+
+h.insertKey(3);
+h.insertKey(10);
+h.insertKey(12);
+h.insertKey(8);
+h.insertKey(2);
+h.insertKey(14);
+
+
+// Printing the current size
+// of the heap.
+console.log(
+    "The current size of the heap is " + h.curSize() + "\\n"
+);
+
+
+// Printing the root element which is
+// actually the maximum element.
+console.log(
+    "The current maximum element is " + h.getMax() + "\\n"
+);
+
+
+// Deleting key at index 2.
+h.deleteKey(2);
+
+
+// Printing the size of the heap
+// after deletion.
+console.log(
+    "The current size of the heap is " + h.curSize() + "\\n"
+);
+
+
+// Inserting 2 new keys into the heap.
+h.insertKey(15);
+h.insertKey(5);
+
+console.log(
+    "The current size of the heap is " + h.curSize() + "\\n"
+);
+
+console.log(
+    "The current maximum element is " + h.getMax() + "\\n"
+);
+
+// Contributed by sdeadityasharma
+
+````
+
+
+
+
+**Output**
+```
+Entered 6 keys:- 3, 10, 12, 8, 2, 14
+The current size of the heap is 6
+The current maximum element is 14
+The current size of the heap is 5
+The current size of the heap is 7
+The current maximum element is 15
+```
+', '', 'Introduction to Heap – Data Structure and Algorithm Tutorials', 5, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('ae34492a-cfab-417f-952f-ddb4957195e8', e'Given a number
 
 ****n****
 , we need to print its table.
@@ -14613,8 +15387,8 @@ O(1)
 ****Auxiliary Space:****
 O(1), since the recursion stack will only go up to 10.
 
-', '', 'Program to print multiplication table of a number', 19, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2bbe24be-6a3c-49ad-bb76-363d65e58895', e'Given a number
+', '', 'Program to print multiplication table of a number', 19, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('2bbe24be-6a3c-49ad-bb76-363d65e58895', e'Given a number
 
 ****n****
 , check whether it is even or odd. Return
@@ -15081,8 +15855,8 @@ if (isEven(n)) {
 ```
 true
 ```
-', '', 'Check whether a given number is even or odd', 20, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('192cb6e4-14cd-4265-9d7d-7cbf5bc0817f', e'****Properties of Priority Queue****
+', '', 'Check whether a given number is even or odd', 20, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('192cb6e4-14cd-4265-9d7d-7cbf5bc0817f', e'****Properties of Priority Queue****
 ------------------------------------
 
 *****So, a priority Queue is an extension of the*****
@@ -16485,8 +17259,8 @@ A Self-Balancing Binary Search Tree like AVL Tree, Red-Black Tree, etc. can also
 * High consumption of memory. Storing the priority value for each element in a priority queue can take up additional memory, which may be a concern in systems with limited resources.
 * It is not always the most efficient data structure. In some cases, other data structures like heaps or binary search trees may be more efficient for certain operations, such as finding the minimum or maximum element in the queue.
 * At times it is less predictable:. This is because the order of elements in a priority queue is determined by their priority values, the order in which elements are retrieved may be less predictable than with other data structures like stacks or queues, which follow a first-in, first-out (FIFO) or last-in, first-out (LIFO) order.
-', 'A priority queue is a type of queue that arranges elements based on their priority values. Elements with higher priority values are typically retrieved or removed before elements with lower priority values. Each element has a priority value associated with it. When we add an item, it is inserted in a position based on its priority value.', 'What is Priority Queue | Introduction to Priority Queue', 10, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('7106768d-cb8a-49a3-b944-1aa4e1266f10', e'Need of Recursive Function:
+', 'A priority queue is a type of queue that arranges elements based on their priority values. Elements with higher priority values are typically retrieved or removed before elements with lower priority values. Each element has a priority value associated with it. When we add an item, it is inserted in a position based on its priority value.', 'What is Priority Queue | Introduction to Priority Queue', 10, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('7106768d-cb8a-49a3-b944-1aa4e1266f10', e'Need of Recursive Function:
 ---------------------------
 
 
@@ -16725,8 +17499,8 @@ O(n)
 ****Auxiliary Space:****
 O(n)
 
-', 'In other words, a recursive function is a function that solves a problem by solving smaller instances of the same problem. This technique is commonly used in programming to solve problems that can be broken down into simpler, similar subproblems.', 'Recursive Functions', 11, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('6477db8f-1fdf-4441-80b4-09122d290265', e'
+', 'In other words, a recursive function is a function that solves a problem by solving smaller instances of the same problem. This technique is commonly used in programming to solve problems that can be broken down into simpler, similar subproblems.', 'Recursive Functions', 11, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('6477db8f-1fdf-4441-80b4-09122d290265', e'
 [Factorial](https://www.geeksforgeeks.org/factorial/)
 of a number
 
@@ -16788,8 +17562,8 @@ Here is a list of problems based on Factorial.
 >
 > * [Factorial Formula](https://www.geeksforgeeks.org/factorial-formula/)
 > * [Interesting Facts about Factorial](https://www.geeksforgeeks.org/interesting-facts-about-factorial/)
-', '', 'Factorial Coding Problems', 21, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('e87fc291-5b1a-497b-ad5b-54a15743ed1f', e'
+', '', 'Factorial Coding Problems', 21, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('e87fc291-5b1a-497b-ad5b-54a15743ed1f', e'
 [Prime Numbers](https://www.geeksforgeeks.org/prime-numbers/)
 are natural numbers greater than 1 and can be divided by itself and 1 only. For instance, numbers 2, 3, 5, 7, and 11 are the prime numbers since they can only be divided by 1 and themselves, there is no other number that can fully divide them Since it is manually very difficult to check if a number is prime (no direct formula) and find prime factors, problems related to prime become really interesting coding problems.
 
@@ -16812,8 +17586,8 @@ Here is a list of example problems based on prime.
 * [Sieve of Eratosthenes](https://www.geeksforgeeks.org/sieve-of-eratosthenes/)
 * [Nth Prime Number](https://www.geeksforgeeks.org/program-to-find-the-nth-prime-number/)
 * [Program to print prime numbers from 1 to N.](https://www.geeksforgeeks.org/program-to-print-first-n-prime-numbers/)
-* [Segmented Sieve](https://www.geeksforgeeks.org/segmented-sieve/)', '', 'Prime Number Coding Problems', 22, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('28f5205e-a507-4ef7-aaf7-73b013044326', e'
+* [Segmented Sieve](https://www.geeksforgeeks.org/segmented-sieve/)', '', 'Prime Number Coding Problems', 22, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('28f5205e-a507-4ef7-aaf7-73b013044326', e'
 ### ****Mathematical Concepts:****
 
 * [Numbers](https://www.geeksforgeeks.org/numbers-aptitude-questions-and-answers/)
@@ -16912,8 +17686,8 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 * [Sum of Digits in Factorial](https://www.geeksforgeeks.org/find-sum-digits-factorial-number/)
 * [Egg Dropping](https://www.geeksforgeeks.org/egg-dropping-puzzle-dp-11/)
 * [Next String](https://www.geeksforgeeks.org/lexicographically-next-string/)', e'The following is the list of mathematical concepts and related coding problems. The coding problems are ordered according to difficulty level. Please refer
-Mathematical Algorithms (Topic Wise) for the topic wise list of problems.', 'Mathematical Algorithms (Difficulty Wise)', 23, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('c08fa70f-b522-438e-a134-46e4a754c0c8', e'
+Mathematical Algorithms (Topic Wise) for the topic wise list of problems.', 'Mathematical Algorithms (Difficulty Wise)', 23, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('c08fa70f-b522-438e-a134-46e4a754c0c8', e'
 Given a fraction, find a recurring sequence of digits if it exists, otherwise, print “No recurring sequence”.
 
                                                                                                                                     **Examples:**
@@ -17427,8 +18201,8 @@ Recurring sequence is 27
 
 **Auxiliary Space : O(N) ,**
                                                                                                                                         as we use map as extra space.
-                                                                                                                                        ', '', 'Find Recurring Sequence in a Fraction', 24, null, '598d78e5-c34f-437f-88fb-31557168c07b', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('7d5f99f3-4391-444d-92b9-28764219d6c9', e'Table of Content
+                                                                                                                                        ', '', 'Find Recurring Sequence in a Fraction', 24, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('7d5f99f3-4391-444d-92b9-28764219d6c9', e'Table of Content
 
                                                                                                                                         * [Divide and Conquer Algorithm Definition](#divide-and-conquer-algorithm-definition)
                                                                                                                                         * [Working of Divide and Conquer Algorithm](#working-of-divide-and-conquer-algorithm)
@@ -17774,8 +18548,8 @@ Frequently Asked Questions (FAQs) on Divide and Conquer Algorithm:
 
 Divide and Conquer is a popular algorithmic technique in computer science that involves breaking down a problem into smaller sub-problems, solving each sub-problem independently, and then combining the solutions to the sub-problems to solve the original problem. The basic idea behind this technique is to divide a problem into smaller, more manageable sub-problems that can be solved more easily.
 
-', 'Algorithm is a problem-solving technique used to solve problems by dividing the main problem into subproblems, solving them individually and then merging them to find solution to the original problem. In this article, we are going to discuss how Divide and Conquer Algorithm is helpful and how we can use it to solve problems.', 'Introduction to Divide and Conquer Algorithm', 2, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0a6a3db2-efff-45ec-8886-b5862fbb75e1', e'Basic Terminologies of Linked List
+', 'Algorithm is a problem-solving technique used to solve problems by dividing the main problem into subproblems, solving them individually and then merging them to find solution to the original problem. In this article, we are going to discuss how Divide and Conquer Algorithm is helpful and how we can use it to solve problems.', 'Introduction to Divide and Conquer Algorithm', 2, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('0a6a3db2-efff-45ec-8886-b5862fbb75e1', e'Basic Terminologies of Linked List
 ----------------------------------
 
 * ****Head:****
@@ -17997,1097 +18771,8 @@ and
 aspects of a
 
 ****data structure****
-and how they relate to the problem you are trying to solve.', 'In this article, we will provide a complete introduction of Linked List, which will help you tackle any problem based on Linked List.', 'Introduction to Linked List – Data Structure and Algorithm Tutorials', 4, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0f843284-a32b-478b-af5b-85f375980a0b', e'Properties of Heap:
--------------------
-
-* The minimum or maximum element is always at the root of the heap, allowing constant-time access.
-* The relationship between a parent node at index
-
-  ****‘i’****
-  and its children is given by the formulas: left child at index
-
-  ****2i+1****
-  and right child at index
-
-  ****2i+2****
-  for 0-based indexing of node numbers.
-* As the tree is complete binary, all levels are filled except possibly the last level. And the last level is filled from left to right.
-* When we insert an item, we insert it at the last available slot and then rearrange the nodes so that the heap property is maintained.
-* When we remove an item, we swap root with the last node to make sure either the max or min item is removed. Then we rearrange the remaining nodes to ensure heap property (max or min)
-
-Operations Supported by Heap:
------------------------------
-
-
-Operations supported by
-
-****min – heap****
-and
-
-****max – heap****
-are same. The difference is just that min-heap contains minimum element at root of the tree and max – heap contains maximum element at the root of the tree.
-
-
-****Heapify:****
-It is the process to rearrange the elements to maintain the property of heap data structure. It is done when root is removed (we replace root with the last node and then call heapify to ensure that heap property is maintained) or heap is built (we call heapify from the last internal node to root) to make sure that the heap property is maintained. This operation also takes
-
-****O(log n)****
-time.
-
-
-* For
-
-  ****max-heap,****
-  it
-
-
-  makes sure the maximum element is the root of that binary tree and all descendants also follow the same property.
-* For
-
-  ****min-heap,****
-  it balances in such a way that the minimum element is the root and all descendants also follow the same property.
-
-****Insertion****
-: When a new element is inserted into the heap, it can disrupt the heap’s properties. To restore and maintain the heap structure, a heapify operation is performed. This operation ensures the heap properties are preserved and has a time complexity of
-
-****O(log n)****
-.
-
-
-
-****Examples:****
-
-> Assume initially heap(taking
->
-> ****max-heap****
-> ) is as follows
->
->
-> 8
->
->
->
-> /   \\
->
->
->
-> 4     5
->
->
->
-> / \\
->
->
->
-> 1   2
->
->
-> Now if we insert 10 into the heap
->
->
->
-> 8
->
->
->
-> /      \\
->
->
->
-> 4       5
->
->
->
-> /  \\      /
->
->
->
-> 1     2  10
->
->
-> After repeatedly comparing with the parent nodes and swapping if required, the final heap will be look like this
->
->
->
-> 10
->
->
->
-> /    \\
->
->
->
-> 4      8
->
->
->
-> /  \\     /
->
->
->
-> 1     2 5
-
-### Deletion:
-
-* If we delete the element from the heap it always deletes the root element of the tree and replaces it with the last element of the tree.
-* Since we delete the root element from the heap it will distort the properties of the heap so we need to perform heapify operations so that it maintains the property of the heap.
-
-
-It takes
-
-****O(log n)****
-time.
-
-
-****Example:****
-
-> Assume initially heap(taking max-heap) is as follows
->
->
->
-> 15
->
->
->
-> /   \\
->
->
->
-> 5     7
->
->
->
-> /  \\
->
->
->
-> 2     3
->
->
-> Now if we delete 15 into the heap it will be replaced by leaf node of the tree for temporary.
->
->
->
-> 3
->
->
->
-> /   \\
->
->
->
-> 5     7
->
->
->
-> /
->
->
->
-> 2
->
->
-> After heapify operation final heap will be look like this
->
->
->
-> 7
->
->
->
-> /   \\
->
->
->
-> 5     3
->
->
->
-> /
->
->
->
-> 2
-
-### getMax (For max-heap) or getMin (For min-heap):
-
-
-It finds the maximum element or minimum element for
-
-****max-heap****
-and
-
-****min-heap****
-respectively and as we know minimum and maximum elements will always be the root node itself for min-heap and max-heap respectively. It takes
-
-****O(1)****
-time.
-
-
-### removeMin or removeMax:
-
-
-This operation returns and deletes the maximum element and minimum element from the max-heap and min-heap respectively. In short, it deletes the root element of the heap binary tree.
-
-
-Implementation of Heap Data Structure:-
----------------------------------------
-
-
-The following code shows the implementation of a
-
-****max-heap****
-.
-
-
-Let’s understand the
-
-****maxHeapify****
-function in detail:-
-
-
-****maxHeapify****
-is the function responsible for restoring the property of the Max Heap. It arranges the node
-
-****i****
-, and its subtrees accordingly so that the heap property is maintained.
-
-
-1. Suppose we are given an array,
-
-   ****arr[]****
-   representing the complete binary tree. The left and the right child of
-
-   ****i****
-   ****th****
-   node are in indices
-
-   ****2\\*i+1****
-   and
-
-   ****2\\*i+2****
-   .
-2. We set the index of the current element,
-
-   ****i****
-   , as the ‘MAXIMUM’.
-3. If
-
-   ****arr[2 \\* i + 1] > arr[i]****
-   , i.e., the left child is larger than the current value, it is set as ‘MAXIMUM’.
-4. Similarly if
-
-   ****arr[2 \\* i + 2] > arr[i]****
-   , i.e., the right child is larger than the current value, it is set as ‘MAXIMUM’.
-5. Swap the ‘MAXIMUM’ with the current element.
-6. Repeat steps
-
-   ****2 to 5****
-   till the property of the heap is restored.
-
-C++
-
-````
-// C++ code to depict
-// the implementation of a max heap.
-
-#include <bits/stdc++.h>
-using namespace std;
-
-// A class for Max Heap.
-class MaxHeap {
-    // A pointer pointing to the elements
-    // in the array in the heap.
-    int* arr;
-
-// Maximum possible size of
-    // the Max Heap.
-    int maxSize;
-
-// Number of elements in the
-    // Max heap currently.
-    int heapSize;
-
-public:
-    // Constructor function.
-    MaxHeap(int maxSize);
-
-// Heapifies a sub-tree taking the
-    // given index as the root.
-    void MaxHeapify(int);
-
-// Returns the index of the parent
-    // of the element at ith index.
-    int parent(int i)
-    {
-        return (i - 1) / 2;
-}
-
-    // Returns the index of the left child.
-    int lChild(int i)
-    {
-        return (2 * i + 1);
-}
-
-    // Returns the index of the
-    // right child.
-    int rChild(int i)
-    {
-        return (2 * i + 2);
-}
-
-    // Removes the root which in this
-    // case contains the maximum element.
-    int removeMax();
-
-// Increases the value of the key
-    // given by index i to some new value.
-    void increaseKey(int i, int newVal);
-
-// Returns the maximum key
-    // (key at root) from max heap.
-    int getMax()
-    {
-        return arr[0];
-}
-
-    int curSize()
-    {
-        return heapSize;
-}
-
-    // Deletes a key at given index i.
-    void deleteKey(int i);
-
-// Inserts a new key \'x\' in the Max Heap.
-    void insertKey(int x);
-};
-
-// Constructor function builds a heap
-// from a given array a[]
-// of the specified size.
-MaxHeap::MaxHeap(int totSize)
-{
-    heapSize = 0;
-    maxSize = totSize;
-    arr = new int[totSize];
-}
-
-// Inserting a new key \'x\'.
-void MaxHeap::insertKey(int x)
-{
-    // To check whether the key
-    // can be inserted or not.
-    if (heapSize == maxSize) {
-        cout << "\\nOverflow: Could not insertKey\\n";
-        return;
-}
-
-    // The new key is initially
-    // inserted at the end.
-    heapSize++;
-int i = heapSize - 1;
-    arr[i] = x;
-
-// The max heap property is checked
-    // and if violation occurs,
-    // it is restored.
-    while (i != 0 && arr[parent(i)] < arr[i]) {
-        swap(arr[i], arr[parent(i)]);
-        i = parent(i);
-}
-}
-
-// Increases value of key at
-// index \'i\' to new_val.
-void MaxHeap::increaseKey(int i, int newVal)
-{
-    arr[i] = newVal;
-    while (i != 0 && arr[parent(i)] < arr[i]) {
-        swap(arr[i], arr[parent(i)]);
-        i = parent(i);
-}
-}
-
-// To remove the root node which contains
-// the maximum element of the Max Heap.
-int MaxHeap::removeMax()
-{
-    // Checking whether the heap array
-    // is empty or not.
-    if (heapSize <= 0)
-        return INT_MIN;
-    if (heapSize == 1) {
-        heapSize--;
-        return arr[0];
-}
-
-    // Storing the maximum element
-    // to remove it.
-    int root = arr[0];
-    arr[0] = arr[heapSize - 1];
-    heapSize--;
-
-// To restore the property
-    // of the Max heap.
-    MaxHeapify(0);
-
-return root;
-}
-
-// In order to delete a key
-// at a given index i.
-void MaxHeap::deleteKey(int i)
-{
-    // It increases the value of the key
-    // to infinity and then removes
-    // the maximum value.
-    increaseKey(i, INT_MAX);
-    removeMax();
-}
-
-// To heapify the subtree this method
-// is called recursively
-void MaxHeap::MaxHeapify(int i)
-{
-    int l = lChild(i);
-int r = rChild(i);
-int largest = i;
-    if (l < heapSize && arr[l] > arr[i])
-        largest = l;
-    if (r < heapSize && arr[r] > arr[largest])
-        largest = r;
-    if (largest != i) {
-        swap(arr[i], arr[largest]);
-        MaxHeapify(largest);
-}
-}
-
-// Driver program to test above functions.
-int main()
-{
-    // Assuming the maximum size of the heap to be 15.
-    MaxHeap h(15);
-
-// Asking the user to input the keys:
-    int k, i, n = 6, arr[10];
-    cout << "Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n";
-    h.insertKey(3);
-    h.insertKey(10);
-    h.insertKey(12);
-    h.insertKey(8);
-    h.insertKey(2);
-    h.insertKey(14);
-
-// Printing the current size
-    // of the heap.
-    cout << "The current size of the heap is "
-         << h.curSize() << "\\n";
-
-// Printing the root element which is
-    // actually the maximum element.
-    cout << "The current maximum element is " << h.getMax()
-         << "\\n";
-
-// Deleting key at index 2.
-    h.deleteKey(2);
-
-// Printing the size of the heap
-    // after deletion.
-    cout << "The current size of the heap is "
-         << h.curSize() << "\\n";
-
-// Inserting 2 new keys into the heap.
-    h.insertKey(15);
-    h.insertKey(5);
-    cout << "The current size of the heap is "
-         << h.curSize() << "\\n";
-    cout << "The current maximum element is " << h.getMax()
-         << "\\n";
-
-return 0;
-}
-
-````
-
-Java
-
-````
-// Java code to depict
-// the implementation of a max heap.
-import java.util.Arrays;
-import java.util.Scanner;
-
-public class MaxHeap {
-    // A pointer pointing to the elements
-    // in the array in the heap.
-    int[] arr;
-
-// Maximum possible size of
-    // the Max Heap.
-    int maxSize;
-
-// Number of elements in the
-    // Max heap currently.
-    int heapSize;
-
-// Constructor function.
-    MaxHeap(int maxSize) {
-        this.maxSize = maxSize;
-        arr = new int[maxSize];
-        heapSize = 0;
-}
-
-    // Heapifies a sub-tree taking the
-    // given index as the root.
-    void MaxHeapify(int i) {
-        int l = lChild(i);
-int r = rChild(i);
-int largest = i;
-        if (l < heapSize && arr[l] > arr[i])
-            largest = l;
-        if (r < heapSize && arr[r] > arr[largest])
-            largest = r;
-        if (largest != i) {
-            int temp = arr[i];
-            arr[i] = arr[largest];
-            arr[largest] = temp;
-            MaxHeapify(largest);
-}
-    }
-
-    // Returns the index of the parent
-    // of the element at ith index.
-    int parent(int i) {
-        return (i - 1) / 2;
-}
-
-    // Returns the index of the left child.
-    int lChild(int i) {
-        return (2 * i + 1);
-}
-
-    // Returns the index of the
-    // right child.
-    int rChild(int i) {
-        return (2 * i + 2);
-}
-
-    // Removes the root which in this
-    // case contains the maximum element.
-    int removeMax() {
-        // Checking whether the heap array
-        // is empty or not.
-        if (heapSize <= 0)
-            return Integer.MIN_VALUE;
-        if (heapSize == 1) {
-            heapSize--;
-            return arr[0];
-}
-
-        // Storing the maximum element
-        // to remove it.
-        int root = arr[0];
-        arr[0] = arr[heapSize - 1];
-        heapSize--;
-
-// To restore the property
-        // of the Max heap.
-        MaxHeapify(0);
-
-return root;
-}
-
-    // Increases value of key at
-    // index \'i\' to new_val.
-    void increaseKey(int i, int newVal) {
-        arr[i] = newVal;
-        while (i != 0 && arr[parent(i)] < arr[i]) {
-            int temp = arr[i];
-            arr[i] = arr[parent(i)];
-            arr[parent(i)] = temp;
-            i = parent(i);
-}
-    }
-
-    // Returns the maximum key
-    // (key at root) from max heap.
-    int getMax() {
-        return arr[0];
-}
-
-    int curSize() {
-        return heapSize;
-}
-
-    // Deletes a key at given index i.
-    void deleteKey(int i) {
-        // It increases the value of the key
-        // to infinity and then removes
-        // the maximum value.
-        increaseKey(i, Integer.MAX_VALUE);
-        removeMax();
-}
-
-    // Inserts a new key \'x\' in the Max Heap.
-    void insertKey(int x) {
-        // To check whether the key
-        // can be inserted or not.
-        if (heapSize == maxSize) {
-            System.out.println("\\nOverflow: Could not insertKey\\n");
-            return;
-}
-
-        // The new key is initially
-        // inserted at the end.
-        heapSize++;
-int i = heapSize - 1;
-        arr[i] = x;
-
-// The max heap property is checked
-        // and if violation occurs,
-        // it is restored.
-        while (i != 0 && arr[parent(i)] < arr[i]) {
-            int temp = arr[i];
-            arr[i] = arr[parent(i)];
-            arr[parent(i)] = temp;
-            i = parent(i);
-}
-    }
-
-    // Driver program to test above functions.
-    public static void main(String[] args) {
-        // Assuming the maximum size of the heap to be 15.
-        MaxHeap h = new MaxHeap(15);
-
-// Asking the user to input the keys:
-        int k, i, n = 6;
-        System.out.println("Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n");
-        h.insertKey(3);
-        h.insertKey(10);
-        h.insertKey(12);
-        h.insertKey(8);
-        h.insertKey(2);
-        h.insertKey(14);
-
-// Printing the current size
-        // of the heap.
-        System.out.println("The current size of the heap is "
-                + h.curSize() + "\\n");
-
-// Printing the root element which is
-        // actually the maximum element.
-        System.out.println("The current maximum element is " + h.getMax()
-                + "\\n");
-
-// Deleting key at index 2.
-        h.deleteKey(2);
-
-// Printing the size of the heap
-        // after deletion.
-        System.out.println("The current size of the heap is "
-                + h.curSize() + "\\n");
-
-// Inserting 2 new keys into the heap.
-        h.insertKey(15);
-        h.insertKey(5);
-        System.out.println("The current size of the heap is "
-                + h.curSize() + "\\n");
-        System.out.println("The current maximum element is " + h.getMax()
-                + "\\n");
-}
-}
-
-````
-
-Python
-
-````
-# Python code to depict
-# the implementation of a max heap.
-
-class MaxHeap:
-    # A pointer pointing to the elements
-    # in the array in the heap.
-    arr = []
-
-    # Maximum possible size of
-    # the Max Heap.
-    maxSize = 0
-
-    # Number of elements in the
-    # Max heap currently.
-    heapSize = 0
-
-    # Constructor function.
-    def __init__(self, maxSize):
-        self.maxSize = maxSize
-        self.arr = [None]*maxSize
-        self.heapSize = 0
-
-    # Heapifies a sub-tree taking the
-    # given index as the root.
-    def MaxHeapify(self, i):
-        l = self.lChild(i)
-        r = self.rChild(i)
-        largest = i
-        if l < self.heapSize and self.arr[l] > self.arr[i]:
-            largest = l
-        if r < self.heapSize and self.arr[r] > self.arr[largest]:
-            largest = r
-        if largest != i:
-            temp = self.arr[i]
-            self.arr[i] = self.arr[largest]
-            self.arr[largest] = temp
-            self.MaxHeapify(largest)
-
-    # Returns the index of the parent
-    # of the element at ith index.
-    def parent(self, i):
-        return (i - 1) // 2
-
-    # Returns the index of the left child.
-    def lChild(self, i):
-        return (2 * i + 1)
-
-    # Returns the index of the
-    # right child.
-    def rChild(self, i):
-        return (2 * i + 2)
-
-    # Removes the root which in this
-    # case contains the maximum element.
-    def removeMax(self):
-        # Checking whether the heap array
-        # is empty or not.
-        if self.heapSize <= 0:
-            return None
-        if self.heapSize == 1:
-            self.heapSize -= 1
-            return self.arr[0]
-
-        # Storing the maximum element
-        # to remove it.
-        root = self.arr[0]
-        self.arr[0] = self.arr[self.heapSize - 1]
-        self.heapSize -= 1
-
-        # To restore the property
-        # of the Max heap.
-        self.MaxHeapify(0)
-
-        return root
-
-    # Increases value of key at
-    # index \'i\' to new_val.
-    def increaseKey(self, i, newVal):
-        self.arr[i] = newVal
-        while i != 0 and self.arr[self.parent(i)] < self.arr[i]:
-            temp = self.arr[i]
-            self.arr[i] = self.arr[self.parent(i)]
-            self.arr[self.parent(i)] = temp
-            i = self.parent(i)
-
-    # Returns the maximum key
-    # (key at root) from max heap.
-    def getMax(self):
-        return self.arr[0]
-
-    def curSize(self):
-        return self.heapSize
-
-    # Deletes a key at given index i.
-    def deleteKey(self, i):
-        # It increases the value of the key
-        # to infinity and then removes
-        # the maximum value.
-        self.increaseKey(i, float("inf"))
-        self.removeMax()
-
-    # Inserts a new key \'x\' in the Max Heap.
-    def insertKey(self, x):
-        # To check whether the key
-        # can be inserted or not.
-        if self.heapSize == self.maxSize:
-            print("\\nOverflow: Could not insertKey\\n")
-            return
-
-        # The new key is initially
-        # inserted at the end.
-        self.heapSize += 1
-        i = self.heapSize - 1
-        self.arr[i] = x
-
-        # The max heap property is checked
-        # and if violation occurs,
-        # it is restored.
-        while i != 0 and self.arr[self.parent(i)] < self.arr[i]:
-            temp = self.arr[i]
-            self.arr[i] = self.arr[self.parent(i)]
-            self.arr[self.parent(i)] = temp
-            i = self.parent(i)
-
-
-# Driver program to test above functions.
-if __name__ == \'__main__\':
-    # Assuming the maximum size of the heap to be 15.
-    h = MaxHeap(15)
-
-    # Asking the user to input the keys:
-    k, i, n = 6, 0, 6
-    print("Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n")
-    h.insertKey(3)
-    h.insertKey(10)
-    h.insertKey(12)
-    h.insertKey(8)
-    h.insertKey(2)
-    h.insertKey(14)
-
-    # Printing the current size
-    # of the heap.
-    print("The current size of the heap is "
-          + str(h.curSize()) + "\\n")
-
-    # Printing the root element which is
-    # actually the maximum element.
-    print("The current maximum element is " + str(h.getMax())
-          + "\\n")
-
-    # Deleting key at index 2.
-    h.deleteKey(2)
-
-    # Printing the size of the heap
-    # after deletion.
-    print("The current size of the heap is "
-          + str(h.curSize()) + "\\n")
-
-    # Inserting 2 new keys into the heap.
-    h.insertKey(15)
-    h.insertKey(5)
-    print("The current size of the heap is "
-          + str(h.curSize()) + "\\n")
-    print("The current maximum element is " + str(h.getMax())
-          + "\\n")
-
-````
-
-JavaScript
-
-````
-// JavaScript code to depict
-// the implementation of a max heap.
-
-class MaxHeap {
-    constructor(maxSize) {
-        // the array in the heap.
-        this.arr = new Array(maxSize).fill(null);
-
-// Maximum possible size of
-        // the Max Heap.
-        this.maxSize = maxSize;
-
-// Number of elements in the
-        // Max heap currently.
-        this.heapSize = 0;
-}
-
-    // Heapifies a sub-tree taking the
-    // given index as the root.
-    MaxHeapify(i) {
-        const l = this.lChild(i);
-        const r = this.rChild(i);
-        let largest = i;
-        if (l < this.heapSize && this.arr[l] > this.arr[i]) {
-            largest = l;
-}
-        if (r < this.heapSize && this.arr[r] > this.arr[largest]) {
-            largest = r;
-}
-        if (largest !== i) {
-            const temp = this.arr[i];
-            this.arr[i] = this.arr[largest];
-            this.arr[largest] = temp;
-            this.MaxHeapify(largest);
-}
-    }
-
-    // Returns the index of the parent
-    // of the element at ith index.
-    parent(i) {
-        return Math.floor((i - 1) / 2);
-}
-
-    // Returns the index of the left child.
-    lChild(i) {
-        return 2 * i + 1;
-}
-
-    // Returns the index of the
-    // right child.
-    rChild(i) {
-        return 2 * i + 2;
-}
-
-    // Removes the root which in this
-    // case contains the maximum element.
-    removeMax() {
-        // Checking whether the heap array
-        // is empty or not.
-        if (this.heapSize <= 0) {
-            return null;
-}
-        if (this.heapSize === 1) {
-            this.heapSize -= 1;
-return this.arr[0];
-}
-
-        // Storing the maximum element
-        // to remove it.
-        const root = this.arr[0];
-        this.arr[0] = this.arr[this.heapSize - 1];
-        this.heapSize -= 1;
-
-// To restore the property
-        // of the Max heap.
-        this.MaxHeapify(0);
-
-return root;
-}
-
-    // Increases value of key at
-    // index \'i\' to new_val.
-    increaseKey(i, newVal) {
-        this.arr[i] = newVal;
-        while (i !== 0 && this.arr[this.parent(i)] < this.arr[i]) {
-            const temp = this.arr[i];
-            this.arr[i] = this.arr[this.parent(i)];
-            this.arr[this.parent(i)] = temp;
-            i = this.parent(i);
-}
-    }
-
-    // Returns the maximum key
-    // (key at root) from max heap.
-    getMax() {
-        return this.arr[0];
-}
-
-    curSize() {
-        return this.heapSize;
-}
-
-    // Deletes a key at given index i.
-    deleteKey(i) {
-        // It increases the value of the key
-        // to infinity and then removes
-        // the maximum value.
-        this.increaseKey(i, Infinity);
-        this.removeMax();
-}
-
-    // Inserts a new key \'x\' in the Max Heap.
-    insertKey(x) {
-        // To check whether the key
-        // can be inserted or not.
-        if (this.heapSize === this.maxSize) {
-            console.log("\\nOverflow: Could not insertKey\\n");
-            return;
-}
-
-        let i = this.heapSize;
-        this.arr[i] = x;
-
-// The new key is initially
-        // inserted at the end.
-        this.heapSize += 1;
-
-
-
-// The max heap property is checked
-        // and if violation occurs,
-        // it is restored.
-        while (i !== 0 && this.arr[this.parent(i)] < this.arr[i]) {
-            const temp = this.arr[i];
-            this.arr[i] = this.arr[this.parent(i)];
-            this.arr[this.parent(i)] = temp;
-            i = this.parent(i);
-}
-    }
-}
-
-
-// Driver program to test above functions.
-
-// Assuming the maximum size of the heap to be 15.
-const h = new MaxHeap(15);
-
-// Asking the user to input the keys:
-console.log("Entered 6 keys:- 3, 10, 12, 8, 2, 14 \\n");
-
-h.insertKey(3);
-h.insertKey(10);
-h.insertKey(12);
-h.insertKey(8);
-h.insertKey(2);
-h.insertKey(14);
-
-
-// Printing the current size
-// of the heap.
-console.log(
-    "The current size of the heap is " + h.curSize() + "\\n"
-);
-
-
-// Printing the root element which is
-// actually the maximum element.
-console.log(
-    "The current maximum element is " + h.getMax() + "\\n"
-);
-
-
-// Deleting key at index 2.
-h.deleteKey(2);
-
-
-// Printing the size of the heap
-// after deletion.
-console.log(
-    "The current size of the heap is " + h.curSize() + "\\n"
-);
-
-
-// Inserting 2 new keys into the heap.
-h.insertKey(15);
-h.insertKey(5);
-
-console.log(
-    "The current size of the heap is " + h.curSize() + "\\n"
-);
-
-console.log(
-    "The current maximum element is " + h.getMax() + "\\n"
-);
-
-// Contributed by sdeadityasharma
-
-````
-
-
-
-
-**Output**
-```
-Entered 6 keys:- 3, 10, 12, 8, 2, 14
-The current size of the heap is 6
-The current maximum element is 14
-The current size of the heap is 5
-The current size of the heap is 7
-The current maximum element is 15
-```
-', '', 'Introduction to Heap – Data Structure and Algorithm Tutorials', 5, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('f6b69eae-bbcf-44ad-9b2d-18253be9e546', e'Features of Pattern Searching Algorithm:
+and how they relate to the problem you are trying to solve.', 'In this article, we will provide a complete introduction of Linked List, which will help you tackle any problem based on Linked List.', 'Introduction to Linked List – Data Structure and Algorithm Tutorials', 4, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('f6b69eae-bbcf-44ad-9b2d-18253be9e546', e'Features of Pattern Searching Algorithm:
 ----------------------------------------
 
 * Pattern searching algorithms should recognize familiar patterns quickly and accurately.
@@ -21732,8 +21417,8 @@ O(n + l + z), where ‘n’ is the length of the text, ‘l’ is the length of 
 
 
 ****Auxiliary Space:****
-O(l \\* q), where ‘q’ is the length of the alphabet since that is the maximum number of children a node can have.', 'We use certain algorithms to do the search process. The complexity of pattern searching varies from algorithm to algorithm. They are very useful when performing a search in a database. The Pattern Searching algorithm is useful for finding patterns in substrings of larger strings. This process can be accomplished using a variety of algorithms that we are going to discuss in this blog.', 'Introduction to Pattern Searching – Data Structure and Algorithm Tutorial', 6, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('b8165176-c256-44f6-bc1a-a32a3626fad5', e'Table of Content
+O(l \\* q), where ‘q’ is the length of the alphabet since that is the maximum number of children a node can have.', 'We use certain algorithms to do the search process. The complexity of pattern searching varies from algorithm to algorithm. They are very useful when performing a search in a database. The Pattern Searching algorithm is useful for finding patterns in substrings of larger strings. This process can be accomplished using a variety of algorithms that we are going to discuss in this blog.', 'Introduction to Pattern Searching – Data Structure and Algorithm Tutorial', 6, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('b8165176-c256-44f6-bc1a-a32a3626fad5', e'Table of Content
 
 * [What is Backtracking?](#what-is-backtracking)
 * [Types of Backtracking Problems](#types-of-backtracking-problems)
@@ -21995,8 +21680,8 @@ Applications of Backtracking
 * Solving mazes and puzzles such as N-Queen problem.
 * Network Routing and Congestion Control.
 * Decryption
-* Text Justification', 'Backtracking is like trying different paths, and when you hit a dead end, you backtrack to the last choice and try a different route. In this article, we’ll explore the basics of backtracking, how it works, and how it can help solve all sorts of challenging problems. It’s like a method for finding the right way through a complex choices.', 'Introduction to Backtracking', 1, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', '8f893dfd-b897-4bd5-9c29-097703871710');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2250b823-d1c9-4781-9d3d-71a989d37c49', e'What is a Doubly Linked List?
+* Text Justification', 'Backtracking is like trying different paths, and when you hit a dead end, you backtrack to the last choice and try a different route. In this article, we’ll explore the basics of backtracking, how it works, and how it can help solve all sorts of challenging problems. It’s like a method for finding the right way through a complex choices.', 'Introduction to Backtracking', 1, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('2250b823-d1c9-4781-9d3d-71a989d37c49', e'What is a Doubly Linked List?
 -----------------------------
 
 A ****doubly linked list****
@@ -26108,8 +25793,8 @@ Disadvantages of Doubly Linked List
   Doubly linked lists are more complex than singly linked lists, as they
   require additional pointers for each node.
 * ****More memory overhead:**** Doubly linked lists require more memory overhead than singly linked
-  lists, as each node stores two pointers instead of one.', 'A doubly linked list is a more complex data structure than a singly linked list, but it offers several advantages. The main advantage of a doubly linked list is that it allows for efficient traversal of the list in both directions. This is because each node in the list contains a pointer to the previous node and a pointer to the next node. This allows for quick and easy insertion and deletion of nodes from the list, as well as efficient traversal of the list in both directions.', 'Doubly Linked List Tutorial', 2, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('c8c6920e-7046-48a4-8dbe-89905c592b0d', e'
+  lists, as each node stores two pointers instead of one.', 'A doubly linked list is a more complex data structure than a singly linked list, but it offers several advantages. The main advantage of a doubly linked list is that it allows for efficient traversal of the list in both directions. This is because each node in the list contains a pointer to the previous node and a pointer to the next node. This allows for quick and easy insertion and deletion of nodes from the list, as well as efficient traversal of the list in both directions.', 'Doubly Linked List Tutorial', 2, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('c8c6920e-7046-48a4-8dbe-89905c592b0d', e'
 [Time Complexity](https://www.geeksforgeeks.org/understanding-time-complexity-simple-examples/)
 is a concept in computer science that deals with the quantification of the amount of time taken by a set of code or
 
@@ -26151,8 +25836,8 @@ It is the total memory space required by the program for its execution.
 * [Time and Space Complexity of Floyd Warshall Algorithm](https://www.geeksforgeeks.org/time-and-space-complexity-of-floyd-warshall-algorithm/)
 * [Time and Space Complexity of Bellman–Ford Algorithm](https://www.geeksforgeeks.org/time-and-space-complexity-of-bellman-ford-algorithm/)
 * [Time and Space Complexity of Dijkstra’s Algorithm](https://www.geeksforgeeks.org/time-and-space-complexity-of-dijkstras-algorithm/)
-* [Time and Space Complexity Analysis of Prim’s Algorithm](https://www.geeksforgeeks.org/time-and-space-complexity-analysis-of-prims-algorithm/)', 'Time Complexity: It is defined as the number of times a particular instruction set is executed rather than the total time taken. It is because the total time taken also depends on some external factors like the compiler used, the processor’s speed, etc.', 'Time complexities of different data structures', 7, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('aa9a9fdb-517e-4bec-ad2a-32a18c54993c', e'Representation of Stack Data Structure:
+* [Time and Space Complexity Analysis of Prim’s Algorithm](https://www.geeksforgeeks.org/time-and-space-complexity-analysis-of-prims-algorithm/)', 'Time Complexity: It is defined as the number of times a particular instruction set is executed rather than the total time taken. It is because the total time taken also depends on some external factors like the compiler used, the processor’s speed, etc.', 'Time complexities of different data structures', 7, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('aa9a9fdb-517e-4bec-ad2a-32a18c54993c', e'Representation of Stack Data Structure:
 ---------------------------------------
 
 
@@ -26333,8 +26018,8 @@ The basic operations that can be performed on a stack include push, pop, and pee
 * [****Implementation of Stack using Array****](https://www.geeksforgeeks.org/implement-stack-using-array/)
 * [****Implementation of Stack using Linked List****](https://www.geeksforgeeks.org/implement-a-stack-using-singly-linked-list/)
 
-', 'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 8, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('22607c58-8b6f-45e8-ab9c-6da9a201ea46', e'What is a Hash Function?
+', 'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 8, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('22607c58-8b6f-45e8-ab9c-6da9a201ea46', e'What is a Hash Function?
 ------------------------
 
 
@@ -26661,8 +26346,8 @@ Conclusion
 
 
 In conclusion, hash functions are very important tools that help store and find data quickly. Knowing the different types of hash functions and how to use them correctly is key to making software work better and more securely. By choosing the right hash function for the job, developers can greatly improve the efficiency and reliability of their systems.
-', 'Hash functions are a fundamental concept in computer science and play a crucial role in various applications such as data storage, retrieval, and cryptography. In data structures and algorithms (DSA), hash functions are primarily used in hash tables, which are essential for efficient data management. This article delves into the intricacies of hash functions, their properties, and the different types of hash functions used in DSA.', 'Hash Functions and Types of Hash functions', 12, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('1c6f4928-3c61-463e-8c84-f82e57915477', e'
+', 'Hash functions are a fundamental concept in computer science and play a crucial role in various applications such as data storage, retrieval, and cryptography. In data structures and algorithms (DSA), hash functions are primarily used in hash tables, which are essential for efficient data management. This article delves into the intricacies of hash functions, their properties, and the different types of hash functions used in DSA.', 'Hash Functions and Types of Hash functions', 12, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('1c6f4928-3c61-463e-8c84-f82e57915477', e'
 ****What is Hash Table?****
 ---------------------------
 
@@ -27165,8 +26850,8 @@ Applications of Hash Table:
 * Hash tables are frequently used for indexing and searching massive volumes of data. A search engine might use a hash table to store the web pages that it has indexed.
 * Data is usually cached in memory via hash tables, enabling rapid access to frequently used information.
 * Hash functions are frequently used in cryptography to create digital signatures, validate data, and guarantee data integrity.
-* Hash tables can be used for implementing database indexes, enabling fast access to data based on key values.', '', 'Hash Table Data Structure', 13, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('98378e7c-1240-46fe-be25-0032ad7aa554', e'****Example:****
+* Hash tables can be used for implementing database indexes, enabling fast access to data based on key values.', '', 'Hash Table Data Structure', 13, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('98378e7c-1240-46fe-be25-0032ad7aa554', e'****Example:****
 
 
 > ****Input:****
@@ -27768,8 +27453,8 @@ O(n\\*m)
 ****Auxiliary space:****
 O(1), since no extra space has been taken.
 
-', 'Given a matrix of 2D array of n rows and m columns. Print this matrix in ZIG-ZAG fashion as shown in figure.', 'Print matrix in zig-zag fashion', 2, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('630b6281-246f-490e-bb03-77b0b5ea16f1', e'Two common ways of traversing a matrix are row-major-order and column-major-order
+', 'Given a matrix of 2D array of n rows and m columns. Print this matrix in ZIG-ZAG fashion as shown in figure.', 'Print matrix in zig-zag fashion', 2, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('630b6281-246f-490e-bb03-77b0b5ea16f1', e'Two common ways of traversing a matrix are row-major-order and column-major-order
 
 
 
@@ -28130,8 +27815,8 @@ O(MAX\\*MAX)
 
 
 ****Auxiliary Space:****
-O(MAX\\*MAX)', '', 'Row-wise vs column-wise traversal of matrix', 3, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('c009b1a3-025d-4295-841e-6faecee91690', e'Given a matrix
+O(MAX\\*MAX)', '', 'Row-wise vs column-wise traversal of matrix', 3, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('c009b1a3-025d-4295-841e-6faecee91690', e'Given a matrix
 
 ****mat[n][m]****
 and an element
@@ -28426,8 +28111,8 @@ O(n \\* m), where n and m are the rows and column of matrix.
 
 
 ****Auxiliary Space :****
-O(1)', '', 'Search in a Matrix or 2D Array', 4, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('c810809a-8425-4105-91f6-cc98e64ead3e', e'
+O(1)', '', 'Search in a Matrix or 2D Array', 4, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('c810809a-8425-4105-91f6-cc98e64ead3e', e'
 
 Given two
 
@@ -28688,8 +28373,8 @@ O(n x m).  since n
 extra space has been taken for storing results
 
 
-The program can be extended for rectangular matrices. The following post can be useful for extending this program.', '', 'Program for addition of two matrices', 5, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('1196e9db-ba66-4fc1-af17-824bf7fd8444', e'
+The program can be extended for rectangular matrices. The following post can be useful for extending this program.', '', 'Program for addition of two matrices', 5, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('1196e9db-ba66-4fc1-af17-824bf7fd8444', e'
 
 Given two
 
@@ -29167,8 +28852,8 @@ int main() {
 6 6
 ```
 
-  ', '', 'Program to multiply two matrices', 6, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('40524f43-e22b-4dcf-9a51-965bd4affe1e', e'Given a
+  ', '', 'Program to multiply two matrices', 6, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('40524f43-e22b-4dcf-9a51-965bd4affe1e', e'Given a
 
 ****sorted****
 matrix
@@ -30035,8 +29720,8 @@ else
 **Output**
 ```
 true
-```', '', 'Search element in a sorted matrix', 7, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('aaf04cd6-13a7-415f-ac21-67a4c001f409', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+```', '', 'Search element in a sorted matrix', 7, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('aaf04cd6-13a7-415f-ac21-67a4c001f409', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
 
 
 > ****Input:****
@@ -30384,8 +30069,8 @@ Result matrix is:
 ****Time complexity: O(n****
 ****2****
 ****)****
-', '', 'Program for subtraction of matrices', 1, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', '19759307-a805-4bfd-b1a3-648921705a71');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0436340a-ef23-4fd2-9d0b-e233b60563e6', e'Collision Resolution Techniques
+', '', 'Program for subtraction of matrices', 1, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('0436340a-ef23-4fd2-9d0b-e233b60563e6', e'Collision Resolution Techniques
 -------------------------------
 
 
@@ -30529,8 +30214,8 @@ and second hash-function is
 
 ****h2(k) = 1 + (k mod 5)****
 
-', 'In Hashing, hash functions were used to generate hash values. The hash value is used to create an index for the keys in the hash table. The hash function may return the same hash value for two or more keys. When two or more keys have the same hash value, a collision happens. To handle this collision, we use Collision Resolution Techniques', 'Collision Resolution Techniques', 14, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('bdde6e1b-edc4-4731-a95b-bd1a61a42a7d', e'Basic terminologies of Array
+', 'In Hashing, hash functions were used to generate hash values. The hash value is used to create an index for the keys in the hash table. The hash function may return the same hash value for two or more keys. When two or more keys have the same hash value, a collision happens. To handle this collision, we use Collision Resolution Techniques', 'Collision Resolution Techniques', 14, null, '8ff4ea92-41f2-4d49-b230-0281874efb2d');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('bdde6e1b-edc4-4731-a95b-bd1a61a42a7d', e'Basic terminologies of Array
 ----------------------------
 
 * ****Array Index:****
@@ -31380,8 +31065,8 @@ Complexity Analysis of Operations on Array
 | ****Searching**** | θ(1) | θ(1) | θ(1) |
 ', e'Array is a collection of items of the same variable type that are stored at
 contiguous memory locations. It is one of the most popular and simple
-data structures used in programming.', 'Getting Started with Array Data Structure', 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '73a96fec-0145-4ffd-b7c0-ee6d6ff34aef');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('9d3e7774-66e8-4f47-8589-0f78ccd0f6ea', e'Given a
+data structures used in programming.', 'Getting Started with Array Data Structure', 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b', 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('9d3e7774-66e8-4f47-8589-0f78ccd0f6ea', e'Given a
 
 [matrix](https://www.geeksforgeeks.org/matrix/)
 
@@ -31683,8 +31368,8 @@ O(N \\* M)
 ****Auxiliary Space:****
 O(M), because of recursive calling
 
-', '', 'Traverse a given Matrix using Recursion', 8, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('86b60543-2809-4779-a1f3-bb6d01a8db8b', e'
+', '', 'Traverse a given Matrix using Recursion', 8, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('86b60543-2809-4779-a1f3-bb6d01a8db8b', e'
 Given a matrix of size n X m, find the transpose of the matrix.
 
 [Transpose of a matrix](https://www.geeksforgeeks.org/transpose-of-a-matrix/)
@@ -32237,8 +31922,8 @@ O(n
 
 ****Auxiliary Space:****
 O(1)
-', '', 'Program to find transpose of a matrix', 9, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ea4cc83e-26cf-46c3-84f6-5b4086825afb', e'
+', '', 'Program to find transpose of a matrix', 9, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('ea4cc83e-26cf-46c3-84f6-5b4086825afb', e'
 ****Determinant of 2 x 2 Matrix:****
 ------------------------------------
 
@@ -33173,8 +32858,8 @@ O(n
 
 ****Auxiliary Space:****
 O(1)
-', 'The determinant of a Matrix is defined as a special number that is defined only for square matrices (matrices that have the same number of rows and columns). A determinant is used in many places in calculus and other matrices related to algebra, it actually represents the matrix in terms of a real number which can be used in solving a system of a linear equation and finding the inverse of a matrix.', 'Program to find Determinant of a Matrix', 10, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('9d98daa6-0e42-485d-be16-d4ef0b03c5c6', e'Given a square matrix, find the adjoint and
+', 'The determinant of a Matrix is defined as a special number that is defined only for square matrices (matrices that have the same number of rows and columns). A determinant is used in many places in calculus and other matrices related to algebra, it actually represents the matrix in terms of a real number which can be used in solving a system of a linear equation and finding the inverse of a matrix.', 'Program to find Determinant of a Matrix', 10, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('9d98daa6-0e42-485d-be16-d4ef0b03c5c6', e'Given a square matrix, find the adjoint and
 
 [inverse](https://www.geeksforgeeks.org/inverse-of-matrix/)
 of the matrix. We strongly recommend you to refer
@@ -33999,8 +33684,8 @@ Let A[N][N] be input matrix.
     0.0454545 0.0454545 0.227273 0.136364
 
     ```
-    ', '', 'Adjoint and Inverse of a Matrix', 11, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('610cd734-a640-4ad0-9ed2-9360a01d068a', e'****Examples:****
+    ', '', 'Adjoint and Inverse of a Matrix', 11, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('610cd734-a640-4ad0-9ed2-9360a01d068a', e'****Examples:****
 
     ```
     Input: board[] =  {\'X\', \'X\', \'O\',
@@ -35202,8 +34887,8 @@ Given board is valid
 
 ****Auxiliary Space: O(N)****
 ', e'A Tic-Tac-Toe board is given after some moves are played. Find out if the given board is valid, i.e., is it possible to reach this board position after some moves or not.
-', 'Validity of a given Tic-Tac-Toe board configuration', 12, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0f01db32-ffc7-4834-9e6c-2ac158bdbac3', e'
+', 'Validity of a given Tic-Tac-Toe board configuration', 12, null, '4e26b4bd-d406-4641-9d68-3ba8e1c39c97');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('0f01db32-ffc7-4834-9e6c-2ac158bdbac3', e'
 ****Enqueue**** and when an element is deleted from the queue, then the operation is known as ****Dequeue.**** It is important to know that we cannot insert an element if the size of the queue is full and cannot delete an element when the queue itself is empty. If we try to insert an element even after the queue is full, then such a condition is known as overflow whereas, if we try to delete an element even after the queue is empty then such a condition is known as underflow.
 
 ****Primary Queue Operations:****
@@ -35309,8 +34994,8 @@ INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson
 ', e'A Queue
 is a linear data structure. This data structure follows a particular
 order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
-come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 5, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('4cd8171b-fbfb-4ac2-bd58-4d59d056750d', e'What is a Circular Linked List?
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 5, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('4cd8171b-fbfb-4ac2-bd58-4d59d056750d', e'What is a Circular Linked List?
 -------------------------------
 
 
@@ -39453,8 +39138,8 @@ Applications of Circular Linked Lists
 * Circular linked lists are often used in buffering applications, such as streaming data, where data is continuously produced and consumed.
 * In media players, circular linked lists can manage playlists, this allowing users to loop through songs continuously.
 * Browsers use circular linked lists to manage the cache. This allows you to navigate back through your browsing history efficiently by pressing the BACK button.
-', 'A circular linked list is a data structure where the last node connects back to the first, forming a loop. This structure allows for continuous traversal without any interruptions. Circular linked lists are especially helpful for tasks like scheduling and managing playlists, this allowing for smooth navigation. In this tutorial, we’ll cover the basics of circular linked lists, how to work with them, their advantages and disadvantages, and their applications.', 'Introduction to Circular Linked List', 3, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('184c2a73-cbb4-45dd-9892-6ee6acc78a7b', e'Advantages of Linked Lists (or Most Common Use Cases):
+', 'A circular linked list is a data structure where the last node connects back to the first, forming a loop. This structure allows for continuous traversal without any interruptions. Circular linked lists are especially helpful for tasks like scheduling and managing playlists, this allowing for smooth navigation. In this tutorial, we’ll cover the basics of circular linked lists, how to work with them, their advantages and disadvantages, and their applications.', 'Introduction to Circular Linked List', 3, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('184c2a73-cbb4-45dd-9892-6ee6acc78a7b', e'Advantages of Linked Lists (or Most Common Use Cases):
 ------------------------------------------------------
 
 * Linked Lists are mostly used because of their effective insertion and deletion.  We only need to change few pointers (or references) to insert (or delete) an item in the middle
@@ -39518,8 +39203,8 @@ Linked lists are a popular data structure in computer science, but like any othe
 
 
 In conclusion, linked lists are a powerful and flexible data structure, but they have certain disadvantages that need to be taken into consideration when deciding whether to use them or not. For example, if you need fast access time, arrays might be a better choice, but if you need to insert or delete elements frequently, linked lists might be the better choice.
-', 'A Linked List is a linear data structure that is used to store a collection of data with the help of nodes. Please remember the following points before moving forward.', 'Applications, Advantages and Disadvantages of Linked List', 4, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('e6b3784f-3ef1-4b59-896b-06430bafe574', e'Given a Singly Linked List, the task is to find the Length of the Linked List.
+', 'A Linked List is a linear data structure that is used to store a collection of data with the help of nodes. Please remember the following points before moving forward.', 'Applications, Advantages and Disadvantages of Linked List', 4, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('e6b3784f-3ef1-4b59-896b-06430bafe574', e'Given a Singly Linked List, the task is to find the Length of the Linked List.
 
 
 ****Examples:****
@@ -40263,8 +39948,8 @@ is the length of Linked List.
 
 
 ****Auxiliary Space:****
-O(N), Extra space is used in the recursion call stack.', '', 'Find Length of a Linked List (Iterative and Recursive)', 5, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('522fe91a-61af-4a65-9b20-bb62618061e5', e'Given a Singly Linked List, the task is to print all the elements in the list.
+O(N), Extra space is used in the recursion call stack.', '', 'Find Length of a Linked List (Iterative and Recursive)', 5, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('522fe91a-61af-4a65-9b20-bb62618061e5', e'Given a Singly Linked List, the task is to print all the elements in the list.
 
 
 ****Examples:****
@@ -40900,8 +40585,8 @@ is number of nodes in the linked list.
 
 
 ****Space complexity:****
-O(n) because of recursive stack space.', '', 'Print Linked List', 6, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('52d5e2e5-8598-413c-be15-d5c2a0db1948', e'Given a linked list and a
+O(n) because of recursive stack space.', '', 'Print Linked List', 6, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('52d5e2e5-8598-413c-be15-d5c2a0db1948', e'Given a linked list and a
 
 ****key****
 , the task is to check if
@@ -41775,8 +41460,8 @@ is the number of nodes in the linked list.
 
 
 ****Auxiliary Space:****
-O(N), Stack space used by recursive calls', '', 'Search an element in a Linked List (Iterative and Recursive)', 7, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('cf626aff-7b6c-4197-a2cb-c8365f512ec8', e'Given a singly linked list and a position (1-based indexing), the task is to delete a linked list node at the given position.
+O(N), Stack space used by recursive calls', '', 'Search an element in a Linked List (Iterative and Recursive)', 7, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('cf626aff-7b6c-4197-a2cb-c8365f512ec8', e'Given a singly linked list and a position (1-based indexing), the task is to delete a linked list node at the given position.
 
 
 ****Note:****
@@ -42343,8 +42028,8 @@ List after deletion : 1 -> 3 -> 4 -> 5 -> nullptr
 
 ****Auxiliary Space:****
 O(1)
-', '', 'Delete a Linked List node at a given position', 8, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('21a97134-4f54-443f-870a-71183556f602', e'Given a
+', '', 'Delete a Linked List node at a given position', 8, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('21a97134-4f54-443f-870a-71183556f602', e'Given a
 
 ****linked list****
 , the task is to
@@ -42977,8 +42662,8 @@ is the number of nodes in the given linked list.
 
 
 ****Auxiliary Space:****
-O(1)', '', 'Write a function to delete a Linked List', 9, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('a904febf-06a7-4308-ad85-436b2ed04ba7', e'Given a
+O(1)', '', 'Write a function to delete a Linked List', 9, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('a904febf-06a7-4308-ad85-436b2ed04ba7', e'Given a
 
 ****LinkedList****
 and an
@@ -43761,8 +43446,8 @@ where n is the nth node of linked list.
 
 
 ****Auxiliary Space:****
-O(1)', '', 'Write a function to get Nth node in a Linked List', 10, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('c4109005-926f-4553-bb7a-e8751a632d01', e'Given a Linked List of
+O(1)', '', 'Write a function to get Nth node in a Linked List', 10, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('c4109005-926f-4553-bb7a-e8751a632d01', e'Given a Linked List of
 
 ****M****
 nodes and a number
@@ -44613,8 +44298,8 @@ is the length of the linked list
 
 
 ****Auxiliary Space:****
-O(1)', '', 'Program for Nth node from the end of a Linked List', 11, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0f29c6e9-3edb-43c1-b60d-41e4c65c90e0', e'Given a
+O(1)', '', 'Program for Nth node from the end of a Linked List', 11, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('0f29c6e9-3edb-43c1-b60d-41e4c65c90e0', e'Given a
 
 [doubly linked list](https://www.geeksforgeeks.org/doubly-linked-list/)
 , The task is to find the
@@ -44968,8 +44653,8 @@ where n is the number of nodes in the linked list.
 
 ****Auxiliary Space:****
 
-****O(1)****', '', 'Program to find size of Doubly Linked List', 12, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('0c68fc2c-a6d9-4306-a996-07fbf5dccb2e', e'Given a
+****O(1)****', '', 'Program to find size of Doubly Linked List', 12, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('0c68fc2c-a6d9-4306-a996-07fbf5dccb2e', e'Given a
 
 ****singly linked list,****
 the task is to remove every k
@@ -45569,8 +45254,8 @@ is the number of nodes.
 
 
 ****Auxiliary Space :****
-O(1)', '', 'Remove every k-th node of the linked list', 13, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('237c88d5-987b-4fc0-8bd1-d27a07cd1aa9', e'Understanding Node Structure
+O(1)', '', 'Remove every k-th node of the linked list', 13, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('237c88d5-987b-4fc0-8bd1-d27a07cd1aa9', e'Understanding Node Structure
 ----------------------------
 
 In a singly linked list, each node consists of two parts: data and a
@@ -47152,8 +46837,8 @@ function deleteAtPosition(head, position) {
 ````
 
 
-', 'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data field and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient insertion and deletion operations.', 'Singly Linked List Tutorial', 1, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6', 'e73a74e2-29d5-4617-aa46-84c970dbba55');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('e9c94003-0430-44e0-ac55-fda3101baf00', e'Given two integers ****a**** and ****b**** (b != 0), the task is to return the fraction ****a/b**** in string format. If the fractional part is repeating, enclose the repeating part in parentheses.****Examples:****
+', 'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data field and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient insertion and deletion operations.', 'Singly Linked List Tutorial', 1, null, 'bd157822-862c-4b14-80e0-791fb1f7f1f6');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('e9c94003-0430-44e0-ac55-fda3101baf00', e'Given two integers ****a**** and ****b**** (b != 0), the task is to return the fraction ****a/b**** in string format. If the fractional part is repeating, enclose the repeating part in parentheses.****Examples:****
 
 
 > ****Input****
@@ -47534,8 +47219,8 @@ console.log(calculateFraction(a, b));
 ****Auxiliary Space****
 : O(max(log10(a), log10(b))), to store the result.
 
-', '', 'Fraction to Recurring Decimal', 1, null, '598d78e5-c34f-437f-88fb-31557168c07b', 'fa41a74d-5590-49a6-84f7-ad1ceed83eaf');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('864de22e-8f8d-4d5d-93ff-2bb5714cc2f5', e'Let’s take a look a simple example to demonstrate the use of vector
+', '', 'Fraction to Recurring Decimal', 1, null, '598d78e5-c34f-437f-88fb-31557168c07b');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('864de22e-8f8d-4d5d-93ff-2bb5714cc2f5', e'Let’s take a look a simple example to demonstrate the use of vector
 container:
 
 
@@ -47879,8 +47564,8 @@ help you master vector operations beyond the basics.', e'Array in C is one of th
 simple and fast way of storing multiple values under a single name. In
 this article, we will study the different aspects of array in C language
 such as array declaration, definition, initialization, types of arrays,
-array syntax, advantages and disadvantages, and many more.', 'C Arrays', 3, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ff4db851-5e60-40f5-9ff9-ab98645fc05c', e'**Types of Queues:**
+array syntax, advantages and disadvantages, and many more.', 'C Arrays', 3, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('ff4db851-5e60-40f5-9ff9-ab98645fc05c', e'**Types of Queues:**
 
 There are **five different types of queues** that are used in
 different scenarios. They are:
@@ -48072,8 +47757,8 @@ Some references for further reading on queues:
 operations are performed. The order is First In First Out (FIFO). A good
 example of a queue is any queue of consumers for a resource where the
 consumer that came first is served first. In this article, the different
-types of queues are discussed.', 'Different Types of Queues and its Applications', 6, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('d6d953c0-ff47-4998-ae93-b22677a0fd02', e'**Basic Operations on Queue:**
+types of queues are discussed.', 'Different Types of Queues and its Applications', 6, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('d6d953c0-ff47-4998-ae93-b22677a0fd02', e'**Basic Operations on Queue:**
 ------------------------------
 
 Some of the basic operations for Queue in Data Structure are:
@@ -48320,8 +48005,8 @@ return 0;
 **Time Complexity:** O(1)
 **Space Complexity:** O(N)
 
-', '', 'Basic Operations for Queue in Data Structure', 7, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('dfada5ab-a189-4507-8c06-78c269c52440', e'Basic Terminologies of Queue
+', '', 'Basic Operations for Queue in Data Structure', 7, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('dfada5ab-a189-4507-8c06-78c269c52440', e'Basic Terminologies of Queue
 ----------------------------
 
 * ****Front:**** Position of the entry in a queue ready to be served, that is, the
@@ -48526,8 +48211,8 @@ in a queue.
   mail queue.
 * Queue can be used in various algorithm techniques like Breadth First
   Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
-', 'Introduction to Queue Data Structure', 4, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '93e4dba5-5b14-488f-a3ad-45c90459826b');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('ba83bbd2-32b7-445a-9895-7a9502446497', e'Advantages of Linked Lists (or Most Common Use Cases):
+', 'Introduction to Queue Data Structure', 4, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('ba83bbd2-32b7-445a-9895-7a9502446497', e'Advantages of Linked Lists (or Most Common Use Cases):
 ------------------------------------------------------
 
 * Linked Lists are mostly used because of their effective insertion and
@@ -48614,8 +48299,8 @@ better choice.
 ', e'A Linked List is a linear data structure
 that is used to store a collection of data with the help of nodes.
 Please remember the following points before moving forward.
-', 'Applications, Advantages and Disadvantages of Linked List', 15, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('fe47d547-098c-4d93-a52b-09f5533ea97c', e'Understanding Node Structure
+', 'Applications, Advantages and Disadvantages of Linked List', 15, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('fe47d547-098c-4d93-a52b-09f5533ea97c', e'Understanding Node Structure
 ----------------------------
 
 In a singly linked list, each node consists of two parts: data and a
@@ -50198,8 +49883,8 @@ function deleteAtPosition(head, position) {
 
 
 ', e'A singly linked list is a fundamental data structure, it consists of nodes where each node contains a data field and a reference to the next node in the linked list. The next of the last node is null, indicating the end of the list. Linked Lists support efficient
-insertion and deletion operations.', 'Singly Linked List Tutorial', 12, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '853e7ebc-48f7-4f47-aa0f-7cd103b4e503');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2220549e-2da8-4f0c-9d38-2495ce6b234e', e'What is a Circular Linked List?
+insertion and deletion operations.', 'Singly Linked List Tutorial', 12, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('2220549e-2da8-4f0c-9d38-2495ce6b234e', e'What is a Circular Linked List?
 -------------------------------
 
 A ****circular linked list****
@@ -53989,8 +53674,8 @@ forming a loop. This structure allows for continuous traversal without
 any interruptions. Circular linked lists are especially helpful for
 tasks like scheduling and managing playlists, this allowing for smooth navigation. In this tutorial, we’ll cover the
 basics of circular linked lists, how to work with them, their advantages
-and disadvantages, and their applications.', 'Introduction to Circular Linked List', 14, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('039efe3e-47d0-410e-b3db-a9e64d9bedd7', e'Representation of Stack Data Structure:
+and disadvantages, and their applications.', 'Introduction to Circular Linked List', 14, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('039efe3e-47d0-410e-b3db-a9e64d9bedd7', e'Representation of Stack Data Structure:
 ---------------------------------------
 
 Stack follows LIFO (Last In First Out) Principle so the element which
@@ -54113,8 +53798,8 @@ and peek. There are two ways to implement a stack –
 | top() or  ****pee****k() | O(1) | O(1) |
 | isEmpty() | O(1) | O(1) |
 | isFull() | O(1) | O(1) |', e'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
-both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 8, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2b55a666-302b-4c46-8d3a-3fdaefcca1e7', e'Implement Stack using Array:
+both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 8, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('2b55a666-302b-4c46-8d3a-3fdaefcca1e7', e'Implement Stack using Array:
 ----------------------------
 
 > To implement a stack using an array, initialize an array and treat
@@ -54744,8 +54429,8 @@ Disadvantages of Array Implementation:
 ', e'Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
 Arrays. In Array-based approach, all stack-related operations are
 executed using arrays. Let’s see how we can implement each operation on
-the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 9, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('b41b7e34-c749-4217-b0f3-6b496b632261', e'Applications of Stacks:
+the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 9, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('b41b7e34-c749-4217-b0f3-6b496b632261', e'Applications of Stacks:
 -----------------------
 
 * ****Function calls:****
@@ -54795,8 +54480,8 @@ Disadvantages of Stacks:
   variable.
 ', e'A stack is a linear data structure
 in which the insertion of a new element and removal of an existing
-element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 11, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('9a7d3527-1c48-4e9d-8aac-990f873ca15d', e'What is a Doubly Linked List?
+element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 11, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('9a7d3527-1c48-4e9d-8aac-990f873ca15d', e'What is a Doubly Linked List?
 -----------------------------
 
 A ****doubly linked list****
@@ -58915,8 +58600,8 @@ that it allows for efficient traversal of the list in both directions.
 This is because each node in the list contains a pointer to the previous
 node and a pointer to the next node. This allows for quick and easy
 insertion and deletion of nodes from the list, as well as efficient
-traversal of the list in both directions.', 'Doubly Linked List Tutorial', 13, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('5579b7b8-f82f-4a7d-9fe5-7ec75bf66434', e'Basic Terminologies of Queue
+traversal of the list in both directions.', 'Doubly Linked List Tutorial', 13, null, 'dc8c4016-8dba-4baf-afea-ada6f0c21ae4');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('5579b7b8-f82f-4a7d-9fe5-7ec75bf66434', e'Basic Terminologies of Queue
 ----------------------------
 
 * ****Front:**** Position of the entry in a queue ready to be served, that is, the
@@ -59121,8 +58806,8 @@ in a queue.
   mail queue.
 * Queue can be used in various algorithm techniques like Breadth First
   Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
-', 'Introduction to Queue Data Structure', 1, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('2a878929-d192-4a08-a92c-f93b22786c0f', e'**Types of Queues:**
+', 'Introduction to Queue Data Structure', 1, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('2a878929-d192-4a08-a92c-f93b22786c0f', e'**Types of Queues:**
 
 There are **five different types of queues** that are used in
 different scenarios. They are:
@@ -59323,8 +59008,8 @@ Some references for further reading on queues:
 operations are performed. The order is First In First Out (FIFO). A good
 example of a queue is any queue of consumers for a resource where the
 consumer that came first is served first. In this article, the different
-types of queues are discussed.', 'Different Types of Queues and its Applications', 2, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('562940a2-1089-4c6d-a938-5fe36049bc5f', e'**Basic Operations on Queue:**
+types of queues are discussed.', 'Different Types of Queues and its Applications', 2, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('562940a2-1089-4c6d-a938-5fe36049bc5f', e'**Basic Operations on Queue:**
 ------------------------------
 
 Some of the basic operations for Queue in Data Structure are:
@@ -60400,8 +60085,8 @@ Javascript
 **Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
-', '', 'Basic Operations for Queue in Data Structure', 3, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('6c6539f0-a9f9-4639-b197-d3fc89870e6a', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
+', '', 'Basic Operations for Queue in Data Structure', 3, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('6c6539f0-a9f9-4639-b197-d3fc89870e6a', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
 known as ****Dequeue.****It is important to know that we cannot insert an element if the size of
 the queue is full and cannot delete an element when the queue itself is
 empty. If we try to insert an element even after the queue is full, then
@@ -60510,8 +60195,8 @@ underflow.
   implementation.', e'A Queue
 is a linear data structure. This data structure follows a particular
 order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
-come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 4, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('3126233c-3e02-455e-8152-6d095b943168', e'Basic Terminologies of Queue
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 4, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('3126233c-3e02-455e-8152-6d095b943168', e'Basic Terminologies of Queue
 ----------------------------
 
 * ****Front:**** Position of the entry in a queue ready to be served, that is, the
@@ -60716,8 +60401,8 @@ in a queue.
   mail queue.
 * Queue can be used in various algorithm techniques like Breadth First
   Search, Topological Sort, etc.', e'Queue is a linear data structure that follows FIFO (First In First Out) Principle, so the first element inserted is the first to be popped out.
-', 'Introduction to Queue Data Structure', 5, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('8d4f2d0d-a9f3-49f5-a13e-9aa4fad99826', e'**Types of Queues:**
+', 'Introduction to Queue Data Structure', 5, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('8d4f2d0d-a9f3-49f5-a13e-9aa4fad99826', e'**Types of Queues:**
 
 There are **five different types of queues** that are used in
 different scenarios. They are:
@@ -60918,8 +60603,8 @@ Some references for further reading on queues:
 operations are performed. The order is First In First Out (FIFO). A good
 example of a queue is any queue of consumers for a resource where the
 consumer that came first is served first. In this article, the different
-types of queues are discussed.', 'Different Types of Queues and its Applications', 6, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('dd501d4c-f5c6-424f-9678-af343551671c', e'**Basic Operations on Queue:**
+types of queues are discussed.', 'Different Types of Queues and its Applications', 6, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('dd501d4c-f5c6-424f-9678-af343551671c', e'**Basic Operations on Queue:**
 ------------------------------
 
 Some of the basic operations for Queue in Data Structure are:
@@ -61995,8 +61680,8 @@ Javascript
 **Time Complexity:** O(1)  
 **Space Complexity:** O(N)
 
-', '', 'Basic Operations for Queue in Data Structure', 7, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('21135289-e645-4045-a26c-697c91f3873f', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
+', '', 'Basic Operations for Queue in Data Structure', 7, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('21135289-e645-4045-a26c-697c91f3873f', e'****Enqueue**** and when an element is deleted from the queue, then the operation is
 known as ****Dequeue.****It is important to know that we cannot insert an element if the size of
 the queue is full and cannot delete an element when the queue itself is
 empty. If we try to insert an element even after the queue is full, then
@@ -62105,8 +61790,8 @@ underflow.
   implementation.', e'A Queue
 is a linear data structure. This data structure follows a particular
 order in which the operations are performed. The order is First In First Out (FIFO). It means that the element that is inserted first in the queue will
-come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 8, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('451c319e-a0a3-48e5-baca-ece2737e6010', e'Representation of Stack Data Structure:
+come out first and the element that is inserted last will come out last.', 'Applications, Advantages and Disadvantages of Queue', 8, null, 'c9b04774-3a81-43ab-ace6-5242360d9e07');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('451c319e-a0a3-48e5-baca-ece2737e6010', e'Representation of Stack Data Structure:
 ---------------------------------------
 
 Stack follows LIFO (Last In First Out) Principle so the element which
@@ -62229,8 +61914,8 @@ and peek. There are two ways to implement a stack –
 | top() or  ****pee****k() | O(1) | O(1) |
 | isEmpty() | O(1) | O(1) |
 | isFull() | O(1) | O(1) |', e'Stack is a linear data structure that follows LIFO (Last In First Out) Principle, the last element inserted is the first to be popped out. It means
-both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 1, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('63ddc11b-1888-48d8-afe0-f7153a56cc65', e'Implement Stack using Array:
+both insertion and deletion operations happen at one end only.', 'What is Stack Data Structure? A Complete Tutorial', 1, null, '95713603-63d1-4b75-8a89-1acdc0977459');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('63ddc11b-1888-48d8-afe0-f7153a56cc65', e'Implement Stack using Array:
 ----------------------------
 
 > To implement a stack using an array, initialize an array and treat
@@ -63226,8 +62911,8 @@ Disadvantages of Array Implementation:
 * The total size of the stack must be defined beforehand.', e'Stack is a linear data structurewhich follows LIFO principle. In this article, we will learn how to implement Stack using
 Arrays. In Array-based approach, all stack-related operations are
 executed using arrays. Let’s see how we can implement each operation on
-the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 2, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('cf945f38-3396-48d8-815b-81e37df21182', e'****Stack Operations:****
+the stack utilizing the Array Data Structure.', 'Implement Stack using Array', 2, null, '95713603-63d1-4b75-8a89-1acdc0977459');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('cf945f38-3396-48d8-815b-81e37df21182', e'****Stack Operations:****
 -------------------------
 
 * [****push()****](https://www.geeksforgeeks.org/stack-push-and-pop-in-c-stl/)****:****
@@ -64013,8 +63698,8 @@ In summary, stacks are widely used in many applications where LIFO
 functionality is required, such as function calls, undo/redo operations,
 browser history, expression evaluation, and recursive function
 calls.
-', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 3, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
-INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, exercise_id) VALUES ('a3e9b26a-8405-4132-a638-8fa5b1a3731e', e'Applications of Stacks:
+', 'To implement a stack using the singly linked list concept, all the singly linked list operations should be performed based on Stack operations LIFO(last in first out) and with the help of that knowledge, we are going to implement a stack using a singly linked list.', 'Implement a stack using singly linked list', 3, null, '95713603-63d1-4b75-8a89-1acdc0977459');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('a3e9b26a-8405-4132-a638-8fa5b1a3731e', e'Applications of Stacks:
 -----------------------
 
 * ****Function calls:****
@@ -64064,63 +63749,8050 @@ Disadvantages of Stacks:
   variable.
 ', e'A stack is a linear data structure
 in which the insertion of a new element and removal of an existing
-element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, null, '95713603-63d1-4b75-8a89-1acdc0977459', null);
-
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (1, 'Data Structure', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (2, 'Algorithm', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (5, 'Problem Solving', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (6, 'Array', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (7, 'Queue', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (8, 'Recursive', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (9, 'Dynamic Programming', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (10, 'Matrix', null);
+element takes place at the same end represented as the top of the stack.', 'Applications, Advantages and Disadvantages of Stack', 4, null, '95713603-63d1-4b75-8a89-1acdc0977459');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('cb775c45-7400-4554-a210-bddb2ade9f03', null, null, null, 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('44efdcdf-0629-48f9-a271-496cf8c1294f', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
 
 
-INSERT INTO public.course_category (course_id, category_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 5);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 7);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 6);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 8);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 9);
-INSERT INTO public.course_category (course_id, category_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 10);
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
 
-INSERT INTO public.sections (section_id, name) VALUES (1, 'Free Courses');
-INSERT INTO public.sections (section_id, name) VALUES (2, 'Featured Courses');
 
-INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 1);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('4e26b4bd-d406-4641-9d68-3ba8e1c39c97', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('e9d2858c-482e-4b04-8317-b93ce60c3581', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('58220cca-f7ec-4188-9921-18e6ea20e4d7', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('f19021ae-42fd-4c25-814c-f06027de04a9', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('aa613599-339e-4150-afe7-c11818e51f86', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('a24c71fe-2e77-4352-8449-a448ace4d400', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 2);
-INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 2);
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('40150d1a-6472-4cf3-a814-7c130783073d', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('06a8e89e-01d3-4218-a5c7-b50229b9d379', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('e0464e2f-bb5b-4c3b-bd4f-ef5d1de1a1bd', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('cd803866-117e-4313-99e4-b46b7e250340', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('2faf87e7-73ca-41ba-b628-8460a26f8c14', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('3f6c11f2-85d6-4d03-808c-c4e1e5ca2b6e', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('93d49a12-3653-4378-b419-b70cd092bbb8', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('5bdeaf80-2a0a-4799-b094-bc29df554f7b', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('f59995d1-11f4-41fc-b1dc-4343f67d0843', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('8330ff0e-3103-48b6-afe4-9dcc5df76472', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('7b29b491-135b-4e04-b59f-14b14e42c328', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('6f9ef614-c469-4dec-975f-c75da2e27b91', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('8dcafb80-ba78-4e19-b5a9-cf1c0b8c51a3', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('f78e2af6-1794-45be-b006-823c73f08c3c', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('29efa51f-d459-47a6-a735-6424352e6031', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('7e8c461b-6e74-4564-9530-6ee8a40eb6fd', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('409c6668-9870-48f1-8a1c-5a9191b1931b', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('8c839104-abfa-435c-9b41-3e62d1d8d101', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('085a07b3-3796-4665-b80b-d06e53e77358', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('c545ccf7-bd6f-4cc4-8968-37ebeb793d30', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('06284d7e-1a52-4006-a7f2-65ef4c1b2931', '', 'Test', 'Test Put mapping', 2, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id) VALUES ('26690fd3-6c33-4660-ab78-a775fce63ff4', e'Given two m x n matrices m1 and m2, the task is to subtract m2 from m1 and return res.
+
+
+> ****Input:****
+> m1 = {{1, 2},
+>
+>
+>
+> {3, 4}},
+>
+>
+>
+> m2 = {{4, 3},
+>
+>
+>
+> {2, 1}}
+>
+>
+>
+> ****Output:****
+> {{-3, -1},
+>
+>
+>
+> {1, 3}}
+>
+>
+>
+>
+>
+> ****Input:****
+> m1 = {{3, 3, 3},
+>
+>
+>
+> {3, 3, 3}},
+>
+>
+>
+> m1 = {{2, 2, 2},
+>
+>
+>
+> {1, 1, 1}},
+>
+>
+>
+> ****Output:****
+> {{1, 1, 1},
+>
+>
+>
+> {2, 2, 2}},
+
+
+We traverse both matrices element by element and subtract m2[i][j] from m1[i][j].
+
+
+C++
+
+````
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(vector<vector<int>>& m1,
+              vector<vector<int>>& m2,
+              vector<vector<int>>& res)
+{
+    int rows = m1.size();
+    int cols = m1[0].size();
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main()
+{
+    // Define two rectangular matrices
+    vector<vector<int>> m1 = { {1, 2, 3},
+                                {4, 5, 6} };
+    vector<vector<int>> m2 = { {1, 1, 1},
+                                {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    vector<vector<int>> res(m1.size(), vector<int>(m1[0].size()));
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    cout << "Result matrix is:" << endl;
+    for (auto& row : res)
+    {
+        for (int val : row)
+            cout << val << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+````
+
+C
+
+````
+#include <stdio.h>
+#include <stdlib.h>
+
+#define R 2 // Number of rows
+#define C 3 // Number of columns
+
+// This function subtracts m2 from m1 and
+// stores the result in res
+void subtract(int m1[R][C], int m2[R][C], int res[R][C]) {
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            res[i][j] = m1[i][j] - m2[i][j];
+}
+
+// Driver code
+int main() {
+
+    // Define two rectangular matrices
+    int m1[R][C] = { {1, 2, 3},
+                     {4, 5, 6} };
+    int m2[R][C] = { {1, 1, 1},
+                     {1, 1, 1} };
+
+    // Result matrix with the same dimensions
+    int res[R][C];
+
+    // Perform the subtraction
+    subtract(m1, m2, res);
+
+    // Print the result matrix
+    printf("Result matrix is:\\n");
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++)
+            printf("%d ", res[i][j]);
+        printf("\\n");
+    }
+
+    return 0;
+}
+
+````
+
+Java
+
+````
+// This function subtracts m2 from m1 and
+// stores the result in res
+public class MatrixSubtraction {
+    public static void subtract(int[][] m1, int[][] m2, int[][] res) {
+        int rows = m1.length;
+        int cols = m1[0].length;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i][j] = m1[i][j] - m2[i][j];
+    }
+
+    public static void main(String[] args) {
+        // Define two rectangular matrices
+        int[][] m1 = { {1, 2, 3}, {4, 5, 6} };
+        int[][] m2 = { {1, 1, 1}, {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[][] res = new int[m1.length][m1[0].length];
+
+        // Perform the subtraction
+        subtract(m1, m2, res);
+
+        // Print the result matrix
+        System.out.println("Result matrix is:");
+        for (int[] row : res) {
+            for (int val : row)
+                System.out.print(val + " ");
+            System.out.println();
+        }
+    }
+}
+
+````
+
+Python
+
+````
+# This function subtracts m2 from m1 and
+# stores the result in res
+def subtract(m1, m2):
+    rows = len(m1)
+    cols = len(m1[0])
+    res = [[0] * cols for _ in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = m1[i][j] - m2[i][j]
+    return res
+
+# Driver code
+if __name__ == \'__main__\':
+
+    # Define two rectangular matrices
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[1, 1, 1], [1, 1, 1]]
+
+    # Perform the subtraction
+    res = subtract(m1, m2)
+
+    # Print the result matrix
+    print("Result matrix is:")
+    for row in res:
+        print(\' \'.join(map(str, row)))
+
+````
+
+C#
+
+````
+using System;
+using System.Collections.Generic;
+
+class Program {
+    // This function subtracts m2 from m1 and
+    // stores the result in res
+    static void Subtract(int[,] m1, int[,] m2, int[,] res) {
+        int rows = m1.GetLength(0);
+        int cols = m1.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                res[i, j] = m1[i, j] - m2[i, j];
+    }
+
+    // Driver code
+    static void Main() {
+        // Define two rectangular matrices
+        int[,] m1 = { {1, 2, 3},
+                       {4, 5, 6} };
+        int[,] m2 = { {1, 1, 1},
+                       {1, 1, 1} };
+
+        // Result matrix with the same dimensions
+        int[,] res = new int[m1.GetLength(0), m1.GetLength(1)];
+
+        // Perform the subtraction
+        Subtract(m1, m2, res);
+
+        // Print the result matrix
+        Console.WriteLine("Result matrix is:");
+        for (int i = 0; i < res.GetLength(0); i++) {
+            for (int j = 0; j < res.GetLength(1); j++)
+                Console.Write(res[i, j] + " ");
+            Console.WriteLine();
+        }
+    }
+}
+
+````
+
+JavaScript
+
+````
+// This function subtracts m2 from m1 and
+function subtract(m1, m2) {
+    const rows = m1.length;
+    const cols = m1[0].length;
+    const res = Array.from({ length: rows }, () => Array(cols).fill(0));
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            res[i][j] = m1[i][j] - m2[i][j];
+        }
+    }
+    return res;
+}
+
+// Driver code
+const m1 = [[1, 2, 3], [4, 5, 6]];
+const m2 = [[1, 1, 1], [1, 1, 1]];
+
+// Perform the subtraction
+const res = subtract(m1, m2);
+
+// Print the result matrix
+console.log(\'Result matrix is:\');
+res.forEach(row => {
+    console.log(row.join(\' \'));
+});
+
+````
+
+PHP
+
+````
+<?php
+// This function subtracts m2 from m1 and
+// stores the result in res
+function subtract($m1, $m2) {
+    $rows = count($m1);
+    $cols = count($m1[0]);
+    $res = array();
+
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            $res[$i][$j] = $m1[$i][$j] - $m2[$i][$j];
+        }
+    }
+    return $res;
+}
+
+// Driver code
+$m1 = array(array(1, 2, 3),
+            array(4, 5, 6));
+$m2 = array(array(1, 1, 1),
+            array(1, 1, 1));
+
+// Perform the subtraction
+$res = subtract($m1, $m2);
+
+// Print the result matrix
+echo "Result matrix is:\\n";
+foreach ($res as $row) {
+    echo implode(\' \', $row) . "\\n";
+}
+?>
+
+````
+
+
+
+
+**Output**
+```
+Result matrix is:
+0 1 2
+3 4 5
+
+```
+
+****Time complexity: O(n****
+****2****
+****)****
+', '', 'Program for subtraction of matrices', 0, null, 'aa613599-339e-4150-afe7-c11818e51f86');
+
+
+
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('52aae031-0311-4a7d-b6ba-939bd82fbbff', '', 'Heap Data Structure Guide', 3, 4, null);
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('8f893dfd-b897-4bd5-9c29-097703871710', '', 'Introduction to DSA', 3, 4, 'b8165176-c256-44f6-bc1a-a32a3626fad5');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('19759307-a805-4bfd-b1a3-648921705a71', '', 'Matrix Data Structure Guide', 3, 4, 'aaf04cd6-13a7-415f-ac21-67a4c001f409');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('73a96fec-0145-4ffd-b7c0-ee6d6ff34aef', '', 'Array', 3, 4, 'bdde6e1b-edc4-4731-a95b-bd1a61a42a7d');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('e73a74e2-29d5-4617-aa46-84c970dbba55', '', 'Linked List Data Structure Guide', 3, 4, '237c88d5-987b-4fc0-8bd1-d27a07cd1aa9');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('fa41a74d-5590-49a6-84f7-ad1ceed83eaf', '', 'The Logic Building Problems', 3, 4, 'e9c94003-0430-44e0-ac55-fda3101baf00');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('853e7ebc-48f7-4f47-aa0f-7cd103b4e503', '', 'Linked List', 3, 4, 'fe47d547-098c-4d93-a52b-09f5533ea97c');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('93e4dba5-5b14-488f-a3ad-45c90459826b', '', 'Queue', 6, 10, 'dfada5ab-a189-4507-8c06-78c269c52440');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('1d759fa1-82b5-4b3e-b147-7979353fbc6a', '', 'Stack', 7, 10, '039efe3e-47d0-410e-b3db-a9e64d9bedd7');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('33f989fd-1f9d-4516-a491-081b973dfa14', '', 'Matrix Data Structure Guide', 3, 4, '44efdcdf-0629-48f9-a271-496cf8c1294f');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('718717e6-158d-46a7-b140-dc7c1c904da5', '', 'Matrix Data Structure Guide', 3, 4, '06a8e89e-01d3-4218-a5c7-b50229b9d379');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('6257fec1-a5d3-4256-bd73-08355513b8ba', '', 'Matrix Data Structure Guide', 3, 4, '93d49a12-3653-4378-b419-b70cd092bbb8');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('4d63d886-7c37-4a36-9caa-5f34a0de764f', '', 'Matrix Data Structure Guide', 3, 4, '5bdeaf80-2a0a-4799-b094-bc29df554f7b');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('14143585-a879-41c9-bfa2-3d6852db6ed9', '', 'Matrix Data Structure Guide', 2, 3, '06284d7e-1a52-4006-a7f2-65ef4c1b2931');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('1e751a05-0b4c-438d-98a5-e277b6f651b6', '', 'Matrix Data Structure Guide', 2, 3, '29efa51f-d459-47a6-a735-6424352e6031');
+INSERT INTO public.exercises (exercise_id, description, exercise_name, passing_questions, questions_per_exercise, lesson_id) VALUES ('75682f09-e8d4-49eb-b64c-bd91a3079028', '', 'Matrix Data Structure Guide', 3, 4, '26690fd3-6c33-4660-ab78-a775fce63ff4');
+
+
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('707fc477-b79b-4065-b220-a79199e534ca', '2', '2024-12-23 16:05:38.507629 +00:00', 'Which of the following operations is not efficient in an array?', 'S', 'active', null, '73a96fec-0145-4ffd-b7c0-ee6d6ff34aef');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('a6330516-d682-4807-90c0-5893c31a2a77', '2', '2024-12-23 16:05:44.210787 +00:00', 'What is the space complexity of an array with n elements?', 'S', 'active', null, '73a96fec-0145-4ffd-b7c0-ee6d6ff34aef');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('dfa51df3-225e-42c9-82b4-7ffd179ced23', '2', '2024-12-23 14:19:14.661456 +00:00', 'How are elements stored in an array?', 'S', 'active', null, '73a96fec-0145-4ffd-b7c0-ee6d6ff34aef');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('f2d6151a-0fba-4117-934f-9f0496ea456d', '1', '2024-12-23 16:05:33.703857 +00:00', 'What is the time complexity of accessing an element in an array?', 'S', 'active', null, '73a96fec-0145-4ffd-b7c0-ee6d6ff34aef');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b', '2', '2024-12-23 16:10:37.787124 +00:00', 'What is a matrix?', 'S', 'active', null, '19759307-a805-4bfd-b1a3-648921705a71');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('7192dff8-d333-42a7-86ed-43f14f041587', '2', '2024-12-23 16:05:58.506602 +00:00', 'What is the space complexity of a linked list with n elements?', 'S', 'active', null, '853e7ebc-48f7-4f47-aa0f-7cd103b4e503');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('c4bf4382-3d91-4f88-84ff-6e73b3c58a59', '1', '2024-12-23 16:05:50.300063 +00:00', 'In a singly linked list, what information does each node contain?', 'S', 'active', null, '853e7ebc-48f7-4f47-aa0f-7cd103b4e503');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('e00b2dbc-bf57-46fd-ba89-0d58ff3e751f', '1', '2024-12-23 16:05:50.300063 +00:00', 'What is the time complexity of inserting an element at the beginning of a linked list?', 'S', 'active', null, '853e7ebc-48f7-4f47-aa0f-7cd103b4e503');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('e43c4cb2-0cdd-43c9-b608-99f705d3a897', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which of the following operations is more efficient in a linked list compared to an array?', 'S', 'active', null, '853e7ebc-48f7-4f47-aa0f-7cd103b4e503');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('50b51410-e800-4ef0-8433-06aa3575b95d', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which method is used to add an element to a queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('5d0938d2-2457-4491-a759-3b32818c164d', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which method is used to remove an element from a queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('962c9fc6-db27-4ed1-8a05-eae5e2dab1e0', '1', '2024-12-23 16:06:05.315234 +00:00', 'What is the time complexity of enqueue operation in a queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27', '2', '2024-12-23 16:05:58.506602 +00:00', 'Which principle does a queue operate on?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('bdeb7a18-1e34-49d2-8f04-9fcf91561bd0', '1', '2024-12-23 16:06:05.315234 +00:00', 'Which method is used to remove an element from a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('d4c17fd9-83bc-4b1e-bfd7-114cfd755ce5', '1', '2024-12-23 16:06:05.315234 +00:00', 'Which principle does a stack operate on?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('e6d03d99-6e22-4fb0-97c8-2d18131b8555', '1', '2024-12-23 16:06:22.484900 +00:00', 'What is the time complexity of push operation in a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('f95e89ba-00d1-4e45-b566-a43aa34202f3', '1', '2024-12-23 16:06:14.614514 +00:00', 'Which method is used to add an element to a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('1352cb96-7ad9-4a91-af36-102cb37966fd', '1', '2024-12-23 16:10:21.272876 +00:00', 'Which of the following is a common approach to solve logical problems?', 'S', 'active', null, 'fa41a74d-5590-49a6-84f7-ad1ceed83eaf');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('46f75789-7fc5-44bd-a19a-de98668d4393', '2', '2024-12-23 16:08:21.577441 +00:00', 'What is the most important step when solving logical problems?', 'S', 'active', null, 'fa41a74d-5590-49a6-84f7-ad1ceed83eaf');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('99e0a84b-3a47-415d-b2a0-9335394d9ad3', '2', '2024-12-23 16:10:27.576521 +00:00', 'What is the key to solving complex logical problems?', 'S', 'active', null, 'fa41a74d-5590-49a6-84f7-ad1ceed83eaf');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('a5fb678a-0546-40f4-b17c-7e95a12fd6fd', '3', '2024-12-23 16:06:22.484900 +00:00', 'Which of the following problems is commonly used to test logical thinking?', 'S', 'active', null, 'fa41a74d-5590-49a6-84f7-ad1ceed83eaf');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('43dcf436-65e4-472d-9ece-17234c1bde58', '2', '2024-12-23 16:10:33.042012 +00:00', 'Why is learning DSA important in programming?', 'S', 'active', null, '8f893dfd-b897-4bd5-9c29-097703871710');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('4661f08e-36f8-4599-9ec2-a18e6e837316', '2', '2024-12-23 16:10:37.787124 +00:00', 'What is the primary goal of studying DSA?', 'S', 'active', null, '8f893dfd-b897-4bd5-9c29-097703871710');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('d7cfdfe2-3a50-4c99-85fa-ce0dc633498f', '1', '2024-12-23 16:10:27.576521 +00:00', 'What does DSA stand for?', 'S', 'active', null, '8f893dfd-b897-4bd5-9c29-097703871710');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('e423c8a6-60f2-4e45-b71f-08ca35678003', '2', '2024-12-23 16:10:33.042012 +00:00', 'Which of the following is a fundamental concept in DSA?', 'S', 'active', null, '8f893dfd-b897-4bd5-9c29-097703871710');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('0a8f8813-b742-46e6-9f1a-e4499f6ccadb', '3', '2024-12-23 16:10:45.125857 +00:00', 'What is the time complexity of multiplying two matrices?', 'S', 'active', null, '19759307-a805-4bfd-b1a3-648921705a71');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('1a50cda2-bf99-467d-a835-394783c20787', '4', '2024-12-23 16:10:45.125857 +00:00', 'Which of the following operations is not efficient on a matrix?', 'S', 'active', null, '19759307-a805-4bfd-b1a3-648921705a71');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('8d26a566-aa07-414e-ace1-a7b21bb7074c', '3', '2024-12-23 16:10:45.125857 +00:00', 'What is the space complexity of a matrix with n rows and m columns?', 'S', 'active', null, '19759307-a805-4bfd-b1a3-648921705a71');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('626da05f-e658-4fe0-b7e9-9deba29e4d9e', '4', '2024-12-23 16:10:51.325304 +00:00', 'Which of the following operations is more efficient in a doubly linked list compared to a singly linked list?', 'S', 'active', null, 'e73a74e2-29d5-4617-aa46-84c970dbba55');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('7d7f8f96-947c-4bdd-9a44-dc13ac5804a6', '2', '2024-12-23 16:10:45.125857 +00:00', 'What is the time complexity of traversing a linked list?', 'S', 'active', null, 'e73a74e2-29d5-4617-aa46-84c970dbba55');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('e801c3ac-7931-4a9e-8ef9-c36093c14894', '2', '2024-12-23 16:10:51.325304 +00:00', 'What is the space complexity of a doubly linked list with n elements?', 'S', 'active', null, 'e73a74e2-29d5-4617-aa46-84c970dbba55');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('f4b27993-6b3b-4c08-9028-bf4dc40504bd', '3', '2024-12-23 16:10:45.125857 +00:00', 'In a doubly linked list, what information does each node contain?', 'S', 'active', null, 'e73a74e2-29d5-4617-aa46-84c970dbba55');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('1f837751-5482-4cc6-abaf-9f1b484ab0c9', '2', '2024-12-23 16:10:51.325304 +00:00', 'What is the space complexity of a heap with n elements?', 'S', 'active', null, '52aae031-0311-4a7d-b6ba-939bd82fbbff');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('4481dc50-aadc-41e8-b380-43eb9a3980ce', '2', '2024-12-23 16:10:51.325304 +00:00', 'What property must a heap satisfy?', 'S', 'active', null, '52aae031-0311-4a7d-b6ba-939bd82fbbff');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('4854185c-c851-4865-b287-200036252a7f', '3', '2024-12-23 16:10:51.325304 +00:00', 'What is the time complexity of inserting an element into a heap?', 'S', 'active', null, '52aae031-0311-4a7d-b6ba-939bd82fbbff');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('ba2381e4-26d3-4324-a620-ee7c330f048b', '3', '2024-12-23 16:10:51.325304 +00:00', 'Which of the following operations is not efficient on a heap?', 'S', 'active', null, '52aae031-0311-4a7d-b6ba-939bd82fbbff');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('20453226-4074-4f81-a5d7-832f55181149', '2', '2025-01-16 12:49:41.834480 +00:00', 'What is the key principle of a Queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('76d412d0-9dbd-40ce-9fc5-da9b057e5c08', '3', '2025-01-16 12:49:41.834480 +00:00', 'Which operation removes an item from the front of the Queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('501b8db5-5608-412d-a0a2-a44572085c80', '1', '2025-01-16 12:49:41.834480 +00:00', 'Which of the following is an example of a Queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('973a3348-e394-4d3f-a597-35158aa51c74', '1', '2025-01-16 12:49:41.834480 +00:00', 'What is the time complexity of enqueue and dequeue operations in a Queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('1c708886-b0db-4910-b14a-97c860599c31', '1', '2025-01-16 12:49:41.834480 +00:00', 'What does FIFO stand for?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('1470e07c-d79d-452d-ac5b-b131cccc2dae', '4', '2025-01-16 12:49:41.834480 +00:00', 'Which data structure is ideal for implementing task scheduling?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('4de9f1b5-4908-44c1-be16-0bd72e917a55', '3', '2025-01-16 12:49:41.834480 +00:00', 'Which type of Queue allows insertion at both ends?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('41178b65-991e-478c-9f3b-873efbf30b56', '4', '2025-01-16 12:49:41.834480 +00:00', 'In which scenario is a Queue most commonly used?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('44c275b0-f360-4676-8664-010bc0565861', '4', '2025-01-16 12:49:41.834480 +00:00', 'Which of the following is NOT a type of Queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('04b149c8-95ec-454c-9e6f-6d215d7c5d01', '3', '2025-01-16 12:49:41.834480 +00:00', 'What happens when you try to dequeue from an empty Queue?', 'S', 'active', null, '93e4dba5-5b14-488f-a3ad-45c90459826b');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('25ff1ed8-1171-4361-b5b1-df695e19c44c', '3', '2025-01-16 12:58:46.979356 +00:00', 'Which of the following is an example of a Stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('35eb528d-f31b-4d02-8f35-083fb12d4b9c', '4', '2025-01-16 12:58:46.979356 +00:00', 'Which operation inserts an element into a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('684fb820-a370-4d34-954f-ddaa11b4f0b4', '3', '2025-01-16 12:58:46.979356 +00:00', 'Which operation removes the top element from a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('d04af04d-8330-4b16-be86-313bb1df0cac', '3', '2025-01-16 12:58:46.979356 +00:00', 'What is the time complexity of a stack push operation?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('2114e6b6-1510-4b2f-b379-ed01f9e2b2f3', '4', '2025-01-16 12:58:46.979356 +00:00', 'Which data structure works on Last In First Out (LIFO)?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('7e482eb8-a094-48b3-97a6-6c253045b3e0', '1', '2025-01-16 12:58:46.979356 +00:00', 'Which of these is an application of stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('c39095ad-0a08-4a7a-9f05-a4c6a319f170', '2', '2025-01-16 12:58:46.979356 +00:00', 'In a stack, what does the peek operation do?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd', '2', '2025-01-16 12:58:46.979356 +00:00', 'What happens when a stack is full and a push operation is attempted?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('5ada76a4-9e1c-4f93-8e26-653430a2eb10', '1', '2025-01-16 12:58:46.979356 +00:00', 'What is the initial condition of a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('f0a148ac-4c4e-4306-8957-d9de760351e8', '2', '2025-01-16 12:58:46.979356 +00:00', 'Which data structure can be used for undo operations in text editors?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('72ce8429-4c6f-46ff-9029-6fc69150ce4a', '1', '2025-01-16 12:58:46.979356 +00:00', 'What is the space complexity of a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('720aea7e-824a-46cd-acae-627157c68c16', '4', '2025-01-16 12:58:46.979356 +00:00', 'Which operation is not possible in a stack?', 'S', 'active', null, '1d759fa1-82b5-4b3e-b147-7979353fbc6a');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('26a22ae7-efeb-42ec-8dd3-cdabb86369ea', '2', '2025-04-29 10:00:55.693845 +00:00', 'What is a matrix?', 'S', null, '2025-04-29 10:00:55.693845 +00:00', '33f989fd-1f9d-4516-a491-081b973dfa14');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('037f4fcf-035b-444b-8e84-6b8a7c617055', '2', '2025-04-29 19:11:15.539316 +00:00', 'What is a matrix?', 'S', null, '2025-04-29 19:11:15.539316 +00:00', '718717e6-158d-46a7-b140-dc7c1c904da5');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('f4066057-789b-497e-9dd1-2c815122b26f', '2', '2025-04-29 19:30:59.793514 +00:00', 'What is a matrix?', 'S', null, '2025-04-29 19:30:59.860071 +00:00', '6257fec1-a5d3-4256-bd73-08355513b8ba');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('b910bc20-8933-4322-8d63-e6f91e07d19b', '2', '2025-04-29 19:39:39.642350 +00:00', 'What is a matrix?', 'S', null, '2025-04-29 19:39:39.642350 +00:00', '4d63d886-7c37-4a36-9caa-5f34a0de764f');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('d1078f6e-89ff-43c2-b06b-13ed892fe238', '2', '2025-04-29 20:02:53.101510 +00:00', 'What is a matrix?', 'S', null, '2025-04-29 20:02:53.101510 +00:00', '14143585-a879-41c9-bfa2-3d6852db6ed9');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('c3f96ab8-de5c-4fe1-ba98-0c320e98321b', '2', '2025-04-29 20:07:30.974404 +00:00', 'What is a matrix?', 'S', null, '2025-04-29 20:07:30.974404 +00:00', '1e751a05-0b4c-438d-98a5-e277b6f651b6');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('44193b8d-442c-4bd0-8346-1c699f777033', '2', '2025-04-29 22:18:53.949887 +00:00', 'What is a matrix?', 'S', null, '2025-04-29 22:18:53.949887 +00:00', '75682f09-e8d4-49eb-b64c-bd91a3079028');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('aedab96c-86ef-4cae-8be1-1db2a58a01c9', '3', '2025-04-29 22:18:53.966291 +00:00', 'What is the time complexity of multiplying two matrices?', 'S', null, '2025-04-29 22:18:53.966291 +00:00', '75682f09-e8d4-49eb-b64c-bd91a3079028');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('e1598e4d-6f3b-4fe7-9b2c-aed1ef73ef06', '4', '2025-04-29 22:18:53.973655 +00:00', 'Which of the following operations is not efficient on a matrix?', 'S', null, '2025-04-29 22:18:53.973655 +00:00', '75682f09-e8d4-49eb-b64c-bd91a3079028');
+INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('7a245f70-ab9e-458c-a802-f6b5696b2ab6', '3', '2025-04-29 22:18:53.981719 +00:00', 'What is the space complexity of a matrix with n rows and m columns?', 'S', null, '2025-04-29 22:18:53.981719 +00:00', '75682f09-e8d4-49eb-b64c-bd91a3079028');
+
+
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'In arbitrary order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'In contiguous memory locations', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'In reverse order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'In random order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'f2d6151a-0fba-4117-934f-9f0496ea456d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deleting an element from the end', '707fc477-b79b-4065-b220-a79199e534ca');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', '707fc477-b79b-4065-b220-a79199e534ca');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Searching for an element', '707fc477-b79b-4065-b220-a79199e534ca');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Inserting an element at the beginning', '707fc477-b79b-4065-b220-a79199e534ca');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'a6330516-d682-4807-90c0-5893c31a2a77');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'a6330516-d682-4807-90c0-5893c31a2a77');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'a6330516-d682-4807-90c0-5893c31a2a77');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'a6330516-d682-4807-90c0-5893c31a2a77');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Data and a pointer to the next node', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Only a pointer', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Only data', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Data and a pointer to the previous node', 'c4bf4382-3d91-4f88-84ff-6e73b3c58a59');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'e00b2dbc-bf57-46fd-ba89-0d58ff3e751f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Searching for an element', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deleting an element from the end', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Inserting an element at the beginning', 'e43c4cb2-0cdd-43c9-b608-99f705d3a897');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '7192dff8-d333-42a7-86ed-43f14f041587');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '7192dff8-d333-42a7-86ed-43f14f041587');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '7192dff8-d333-42a7-86ed-43f14f041587');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '7192dff8-d333-42a7-86ed-43f14f041587');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'FILO (First In Last Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'LILO (Last In Last Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'FIFO (First In First Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'LIFO (Last In First Out)', 'ccf2ad8e-c660-4cac-a3ba-1a7a6ce93e27');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'enqueue()', '50b51410-e800-4ef0-8433-06aa3575b95d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'add()', '50b51410-e800-4ef0-8433-06aa3575b95d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'insert()', '50b51410-e800-4ef0-8433-06aa3575b95d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'push()', '50b51410-e800-4ef0-8433-06aa3575b95d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'remove()', '5d0938d2-2457-4491-a759-3b32818c164d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'delete()', '5d0938d2-2457-4491-a759-3b32818c164d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'dequeue()', '5d0938d2-2457-4491-a759-3b32818c164d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'pop()', '5d0938d2-2457-4491-a759-3b32818c164d');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '962c9fc6-db27-4ed1-8a05-eae5e2dab1e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'FIFO (First In First Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'LILO (Last In Last Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'LIFO (Last In First Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'FILO (First In Last Out)', 'd4c17fd9-83bc-4b1e-bfd7-114cfd755ce5');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'delete()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'remove()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'pop()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'dequeue()', 'bdeb7a18-1e34-49d2-8f04-9fcf91561bd0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'add()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'push()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'enqueue()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'insert()', 'f95e89ba-00d1-4e45-b566-a43aa34202f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'e6d03d99-6e22-4fb0-97c8-2d18131b8555');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Counting prime numbers', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Binary search', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Traveling salesman problem', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Quick sort', 'a5fb678a-0546-40f4-b17c-7e95a12fd6fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Writing code quickly', '46f75789-7fc5-44bd-a19a-de98668d4393');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Understanding the problem and designing the algorithm', '46f75789-7fc5-44bd-a19a-de98668d4393');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Using existing libraries', '46f75789-7fc5-44bd-a19a-de98668d4393');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Optimizing the code', '46f75789-7fc5-44bd-a19a-de98668d4393');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Random guessing', '1352cb96-7ad9-4a91-af36-102cb37966fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Divide and conquer', '1352cb96-7ad9-4a91-af36-102cb37966fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Ignoring the problem', '1352cb96-7ad9-4a91-af36-102cb37966fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Using brute force', '1352cb96-7ad9-4a91-af36-102cb37966fd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Using complex data structures', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Writing long code', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Breaking down the problem into smaller parts', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Memorizing solution', '99e0a84b-3a47-415d-b2a0-9335394d9ad3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Digital Structure and Algorithm', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Data Storage and Access', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Data System and Analysis', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Data Structure and Algorithm', 'd7cfdfe2-3a50-4c99-85fa-ce0dc633498f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'To increase debugging skills', '43dcf436-65e4-472d-9ece-17234c1bde58');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'To optimize algorithms and program performance', '43dcf436-65e4-472d-9ece-17234c1bde58');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'To increase the use of libraries', '43dcf436-65e4-472d-9ece-17234c1bde58');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'To increase coding speed', '43dcf436-65e4-472d-9ece-17234c1bde58');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Scripting', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Data abstraction', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Functional programming', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Object-oriented programming', 'e423c8a6-60f2-4e45-b71f-08ca35678003');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'To write more lines of code', '4661f08e-36f8-4599-9ec2-a18e6e837316');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'To learn new programming languages', '4661f08e-36f8-4599-9ec2-a18e6e837316');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'To understand how to organize and manipulate data efficiently', '4661f08e-36f8-4599-9ec2-a18e6e837316');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'To create graphical user interfaces', '4661f08e-36f8-4599-9ec2-a18e6e837316');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', '8973b0dd-ca0e-43fa-9f42-5fc16c4d6c7b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(n)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(log n)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n^3)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n^2)', '0a8f8813-b742-46e6-9f1a-e4499f6ccadb');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Inserting an element in the middle', '1a50cda2-bf99-467d-a835-394783c20787');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', '1a50cda2-bf99-467d-a835-394783c20787');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Adding two matrices', '1a50cda2-bf99-467d-a835-394783c20787');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Transposing a matrix', '1a50cda2-bf99-467d-a835-394783c20787');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n*m)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '8d26a566-aa07-414e-ace1-a7b21bb7074c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Only data', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Data and pointers to both the previous and next nodes', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Data and a pointer to the previous node', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Data and a pointer to the next node', 'f4b27993-6b3b-4c08-9028-bf4dc40504bd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '7d7f8f96-947c-4bdd-9a44-dc13ac5804a6');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Traversing the list in reverse order', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Inserting an element at the beginning', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deleting an element from the end', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', '626da05f-e658-4fe0-b7e9-9deba29e4d9e');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', 'e801c3ac-7931-4a9e-8ef9-c36093c14894');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Recursive property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Balanced tree property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Determinant property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Complete binary tree property', '4481dc50-aadc-41e8-b380-43eb9a3980ce');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '4854185c-c851-4865-b287-200036252a7f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '4854185c-c851-4865-b287-200036252a7f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '4854185c-c851-4865-b287-200036252a7f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '4854185c-c851-4865-b287-200036252a7f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Deleting the root element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Accessing the root element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Searching for an element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Inserting an element', 'ba2381e4-26d3-4324-a620-ee7c330f048b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(log n)', '1f837751-5482-4cc6-abaf-9f1b484ab0c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Random Access', '20453226-4074-4f81-a5d7-832f55181149');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'FIFO', '20453226-4074-4f81-a5d7-832f55181149');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'None of the above', '20453226-4074-4f81-a5d7-832f55181149');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'LIFO', '20453226-4074-4f81-a5d7-832f55181149');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'insert', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'pop', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'dequeue', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'enqueue', '76d412d0-9dbd-40ce-9fc5-da9b057e5c08');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Call Center System', '501b8db5-5608-412d-a0a2-a44572085c80');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Tree', '501b8db5-5608-412d-a0a2-a44572085c80');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Stack', '501b8db5-5608-412d-a0a2-a44572085c80');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Binary Search Tree', '501b8db5-5608-412d-a0a2-a44572085c80');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '973a3348-e394-4d3f-a597-35158aa51c74');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n^2)', '973a3348-e394-4d3f-a597-35158aa51c74');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n)', '973a3348-e394-4d3f-a597-35158aa51c74');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(log n)', '973a3348-e394-4d3f-a597-35158aa51c74');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'First In First Out', '1c708886-b0db-4910-b14a-97c860599c31');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'None of the above', '1c708886-b0db-4910-b14a-97c860599c31');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Last In First Out', '1c708886-b0db-4910-b14a-97c860599c31');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'File Input File Output', '1c708886-b0db-4910-b14a-97c860599c31');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Queue', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Binary Tree', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Hash Table', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Stack', '1470e07c-d79d-452d-ac5b-b131cccc2dae');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Stack', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Priority Queue', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deque', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Circular Queue', '4de9f1b5-4908-44c1-be16-0bd72e917a55');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Breadth-First Search', '41178b65-991e-478c-9f3b-873efbf30b56');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Undo operations in editors', '41178b65-991e-478c-9f3b-873efbf30b56');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Evaluating expressions', '41178b65-991e-478c-9f3b-873efbf30b56');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Task scheduling', '41178b65-991e-478c-9f3b-873efbf30b56');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Circular Queue', '44c275b0-f360-4676-8664-010bc0565861');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Priority Queue', '44c275b0-f360-4676-8664-010bc0565861');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Deque', '44c275b0-f360-4676-8664-010bc0565861');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Binary Search Queue', '44c275b0-f360-4676-8664-010bc0565861');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Adds a default value', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Dequeues another element', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Throws an exception or error', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Ignores the operation', '04b149c8-95ec-454c-9e6f-6d215d7c5d01');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Queue', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Binary Search Tree', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Browser back button', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Tree', '25ff1ed8-1171-4361-b5b1-df695e19c44c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Pop', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Enqueue', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Peek', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Push', '35eb528d-f31b-4d02-8f35-083fb12d4b9c');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Dequeue', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Push', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Pop', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Peek', '684fb820-a370-4d34-954f-ddaa11b4f0b4');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(n^2)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(1)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(log n)', 'd04af04d-8330-4b16-be86-313bb1df0cac');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Array', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Queue', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Tree', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Stack', '2114e6b6-1510-4b2f-b379-ed01f9e2b2f3');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Recursion', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Breadth First Search', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Sorting', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Graph traversal', '7e482eb8-a094-48b3-97a6-6c253045b3e0');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Inserts an element at the top', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Returns the top element without removing it', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Checks if the stack is full', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Removes the top element', 'c39095ad-0a08-4a7a-9f05-a4c6a319f170');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'The stack is resized', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Stack underflow occurs', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Stack overflow occurs', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'The element is added', '9dcaa8cb-d5d9-4f3f-a181-0ee9bf670dfd');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'The stack is empty', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'The stack is full', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'The stack is half full', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'The stack has one element', '5ada76a4-9e1c-4f93-8e26-653430a2eb10');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Tree', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Stack', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Queue', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Array', 'f0a148ac-4c4e-4306-8957-d9de760351e8');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(n)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(log n)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n^2)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(1)', '72ce8429-4c6f-46ff-9029-6fc69150ce4a');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Peek', '720aea7e-824a-46cd-acae-627157c68c16');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Pop', '720aea7e-824a-46cd-acae-627157c68c16');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Push', '720aea7e-824a-46cd-acae-627157c68c16');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Traversal', '720aea7e-824a-46cd-acae-627157c68c16');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', '26a22ae7-efeb-42ec-8dd3-cdabb86369ea');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', '26a22ae7-efeb-42ec-8dd3-cdabb86369ea');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', '26a22ae7-efeb-42ec-8dd3-cdabb86369ea');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', '26a22ae7-efeb-42ec-8dd3-cdabb86369ea');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', '037f4fcf-035b-444b-8e84-6b8a7c617055');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', '037f4fcf-035b-444b-8e84-6b8a7c617055');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', '037f4fcf-035b-444b-8e84-6b8a7c617055');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', '037f4fcf-035b-444b-8e84-6b8a7c617055');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', 'f4066057-789b-497e-9dd1-2c815122b26f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', 'f4066057-789b-497e-9dd1-2c815122b26f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', 'f4066057-789b-497e-9dd1-2c815122b26f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', 'f4066057-789b-497e-9dd1-2c815122b26f');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', 'b910bc20-8933-4322-8d63-e6f91e07d19b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', 'b910bc20-8933-4322-8d63-e6f91e07d19b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', 'b910bc20-8933-4322-8d63-e6f91e07d19b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', 'b910bc20-8933-4322-8d63-e6f91e07d19b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', 'd1078f6e-89ff-43c2-b06b-13ed892fe238');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', 'd1078f6e-89ff-43c2-b06b-13ed892fe238');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', 'd1078f6e-89ff-43c2-b06b-13ed892fe238');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', 'd1078f6e-89ff-43c2-b06b-13ed892fe238');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', 'c3f96ab8-de5c-4fe1-ba98-0c320e98321b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', 'c3f96ab8-de5c-4fe1-ba98-0c320e98321b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', 'c3f96ab8-de5c-4fe1-ba98-0c320e98321b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', 'c3f96ab8-de5c-4fe1-ba98-0c320e98321b');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'A binary tree', '44193b8d-442c-4bd0-8346-1c699f777033');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'A one-dimensional array', '44193b8d-442c-4bd0-8346-1c699f777033');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'A two-dimensional array', '44193b8d-442c-4bd0-8346-1c699f777033');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'A linked list', '44193b8d-442c-4bd0-8346-1c699f777033');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(n)', 'aedab96c-86ef-4cae-8be1-1db2a58a01c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(log n)', 'aedab96c-86ef-4cae-8be1-1db2a58a01c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n^3)', 'aedab96c-86ef-4cae-8be1-1db2a58a01c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n^2)', 'aedab96c-86ef-4cae-8be1-1db2a58a01c9');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'Inserting an element in the middle', 'e1598e4d-6f3b-4fe7-9b2c-aed1ef73ef06');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'Accessing an element by index', 'e1598e4d-6f3b-4fe7-9b2c-aed1ef73ef06');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'Adding two matrices', 'e1598e4d-6f3b-4fe7-9b2c-aed1ef73ef06');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'Transposing a matrix', 'e1598e4d-6f3b-4fe7-9b2c-aed1ef73ef06');
+INSERT INTO public.options (option_order, content, question_id) VALUES (1, 'O(1)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
+INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^2)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
+INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n*m)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
+INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
 
 
 

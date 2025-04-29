@@ -13,12 +13,6 @@ import org.mapstruct.MappingTarget;
 public interface LessonMapper {
     //@Mapping(target = "content", source = "content")
 
-    @Mapping(target = "course", ignore = true)
-    @Mapping(target = "lessonId", ignore = true)
-    @Mapping(target = "exercise", ignore = true)
-    @Mapping(target = "learningLessons", ignore = true)
-    @Mapping(target = "content", source = "request.content")
-    Lesson toLesson(LessonCreationRequest request);
 
     @Mapping(target = "course", ignore = true)
     Lesson toLesson(LessonUpdateRequest request);
@@ -30,7 +24,7 @@ public interface LessonMapper {
     void updateLesson(@MappingTarget Lesson lesson, LessonUpdateRequest request);
 
     @Mapping(target = "courseId", source = "course.courseId")
-    @Mapping(target = "exerciseId", source = "exercise.exerciseId")
+    @Mapping(target = "quizId", source = "exercise.exerciseId")
     LessonResponse toLessonResponse(Lesson lesson);
 
 

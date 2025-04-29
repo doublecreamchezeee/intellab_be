@@ -8,6 +8,7 @@ import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.mapper.QuestionMapper;
 import com.example.courseservice.model.Exercise;
+import com.example.courseservice.model.Lesson;
 import com.example.courseservice.model.Question;
 import com.example.courseservice.repository.ExerciseRepository;
 import com.example.courseservice.repository.LessonRepository;
@@ -30,46 +31,4 @@ public class QuestionService {
     QuestionMapper questionMapper;
     LessonRepository lessonRepository;
     ExerciseRepository exerciseRepository;
-
-
-    public Page<QuestionResponse> getAllQuestions(Pageable pageable) {
-        Page<Question> questions = questionRepository.findAll(pageable);
-        return questions.map(questionMapper::toQuestionResponse);
-    }
-
-    public QuestionResponse getQuestionById(UUID id) {
-        Question question = questionRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
-
-        return questionMapper.toQuestionResponse(question);
-    }
-
-    public QuestionResponse createQuestion(QuestionCreationRequest request) {
-        Question question = questionMapper.toQuestion(request);
-        question = questionRepository.save(question);
-        return questionMapper.toQuestionResponse(question);
-    }
-
-    public QuestionResponse updateQuestion(UUID questionId, QuestionUpdateRequest request) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
-        questionMapper.updateQuestion(question, request);
-
-        question = questionRepository.save(question);
-        return questionMapper.toQuestionResponse(question);
-    }
-
-    public void deleteQuestion(UUID questionId) {
-        questionRepository.deleteById(questionId);
-    }
-
-    public List<QuestionResponse> getQuestionsByExerciseId(UUID exerciseId) {
-        Exercise exercise = exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
-        List<Exercise> exercises = List.of(exercise);
-        //List<Question> questions  //questionMapper.toQuestionResponse(questions);
-        return questionRepository.findAllByExercises(exercises)
-                .stream().map(questionMapper::toQuestionResponse).toList();
-
-    }
-
 }

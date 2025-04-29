@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,12 +52,13 @@ public class Question {
 
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    List<Option> options;
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Option> options = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "questionList", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    List<Exercise> exercises;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "exercise_id")
+    Exercise exercise;
 
     @JsonIgnore
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
@@ -69,7 +71,7 @@ public class Question {
             joinColumns = @JoinColumn(name = "question_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    List<Category> categories;
+    List<Category> categories = new ArrayList<>();
 
 }
 

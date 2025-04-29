@@ -1,7 +1,7 @@
-package com.example.courseservice.dto.request.Question;
+package com.example.courseservice.dto.response.Question;
 
 
-import com.example.courseservice.dto.request.Option.OptionRequest;
+import com.example.courseservice.dto.response.Option.OptionResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,10 +13,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class QuestionUpdateRequest {
+public class QuestionCreationResponse {
     UUID questionId;
     String questionContent;
+    String status;
     String correctAnswer;
     Character questionType;
-    List<OptionRequest> optionRequests;
+    List<OptionResponse> options;
 }
