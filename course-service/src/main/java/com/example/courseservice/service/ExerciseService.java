@@ -104,8 +104,6 @@ public class ExerciseService {
 
         exercise = exerciseRepository.save(exercise);
 
-        exercise = exerciseRepository.findById(exercise.getExerciseId()).orElse(null);
-
         // tạo mới nếu bằng null
         if (questions == null) {
             questions = new ArrayList<>();
@@ -128,7 +126,6 @@ public class ExerciseService {
                 // lưu question để lấy id cho option
                 question = questionRepository.save(question);
 
-                questionIds.add(question.getQuestionId());
                 List<Option> options = new ArrayList<>();
                 for (OptionRequest optionRequest : q.getOptionRequests())
                 {
@@ -142,7 +139,12 @@ public class ExerciseService {
                     options.add(option);
                 }
                 question.setOptions(options);
-                questionRepository.save(question);
+//                question = questionRepository.save(question);
+                question.setExercise(exercise);
+                exercise.getQuestionList().add(question);
+                questionIds.add(question.getQuestionId());
+
+//                questionRepository.updateExerciseIdForQuestion(exercise.getExerciseId(), question.getQuestionId());
             }
             else {
                 question.setQuestionContent(q.getQuestionContent());
@@ -164,21 +166,28 @@ public class ExerciseService {
                     options.add(option);
                 }
                 question.setOptions(options);
-                questionRepository.save(question);
+//                question = questionRepository.save(question);
+                question.setExercise(exercise);
+                exercise.getQuestionList().add(question);
+
                 questionIds.add(question.getQuestionId());
-                questions.add(question);
+
+//                questionRepository.updateExerciseIdForQuestion(exercise.getExerciseId(), question.getQuestionId());
             }
         }
-
-        exercise.setQuestionList(questions);
-        questionRepository.updateExerciseIdForQuestions(exercise.getExerciseId(), questionIds);
         exercise = exerciseRepository.save(exercise);
 
         System.out.println(exercise.getExerciseId());
         System.out.println(questionIds);
 
+//        questionRepository.updateExerciseIdForQuestions(exercise.getExerciseId(), questionIds);
+
+//        exercise = exerciseRepository.findById(exercise.getExerciseId())
+//                .orElseThrow(() -> new AppException(ErrorCode.EXERCISE_NOT_FOUND));
 
         return exerciseMapper.toExerciseResponse(exercise);
     }
+
+
 
 }
