@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,13 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     List<Question> findByExercise_ExerciseId(UUID quizId);
 
+    @Transactional
     @Modifying
     @Query(value = "UPDATE Question q SET q.exercise.exerciseId = :exerciseId WHERE q.questionId IN :ids")
     void updateExerciseIdForQuestions(@Param("exerciseId") UUID exerciseId, @Param("ids") List<UUID> ids);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE Question q SET q.exercise.exerciseId = :exerciseId WHERE q.questionId = :id")
+    void updateExerciseIdForQuestion(@Param("exerciseId") UUID exerciseId, @Param("id") UUID id);
 }

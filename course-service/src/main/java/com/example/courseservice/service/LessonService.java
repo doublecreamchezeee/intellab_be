@@ -183,6 +183,7 @@ public class LessonService {
 //            newExercise.getQuestionList().add(newQuestion);
         }
         newExercise = exerciseRepository.save(newExercise);
+
         System.out.println(questionIds);
         questionRepository.updateExerciseIdForQuestions(newExercise.getExerciseId(),questionIds);
         return newExercise;
