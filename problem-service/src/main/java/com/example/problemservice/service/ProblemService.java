@@ -7,10 +7,7 @@ import com.example.problemservice.dto.request.course.CheckingUserCourseExistedRe
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
-import com.example.problemservice.dto.response.Problem.CategoryResponse;
-import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
-import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
-import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
+import com.example.problemservice.dto.response.Problem.*;
 import com.example.problemservice.enums.PremiumPackage;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
@@ -63,6 +60,29 @@ public class ProblemService {
         return new PageImpl<>(subList, pageable, list.size());
     }
 
+    public List<ProblemDescriptionResponse> getProblemsDescription(String keyword, List<Integer> categoryIds, String level){
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.categoriesFilter(categoryIds)
+                        .and(ProblemSpecification.levelFilter(level))
+                        .and(ProblemSpecification.NameFilter(keyword)));
+
+        List<Problem> problems = problemRepository.findAll(specification);
+        return problems.stream().map(
+                problem -> {
+                    ProblemDescriptionResponse problemDescriptionResponse = new ProblemDescriptionResponse();
+                    problemDescriptionResponse.setDescription(problem.getDescription());
+                    problemDescriptionResponse.setLevel(problem.getProblemLevel());
+                    List<Category> categories = courseClient.categories(
+                            problem.getCategories()
+                                    .stream()
+                                    .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
+                                    .toList()
+                    ).getResult();
+                    problemDescriptionResponse.setCategories(categories);
+                    return problemDescriptionResponse;
+                }).toList();
+    }
+
     public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
         Problem problem = problemMapper.toProblem(request);
 
@@ -107,7 +127,8 @@ public class ProblemService {
                 problem.getCategories()
                         .stream()
                         .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
-                        .toList()).getResult();
+                        .toList()
+        ).getResult();
 
         response.setCategories(category);
 

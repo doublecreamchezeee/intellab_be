@@ -21,6 +21,7 @@ public enum ErrorCode {
     COURSE_NOT_EXISTED(404, "Course not existed", HttpStatus.NOT_FOUND),
     USER_COURSE_NOT_EXISTED(404, "User course not existed", HttpStatus.NOT_FOUND),
     LESSON_NOT_FOUND(404, "Lesson not found", HttpStatus.NOT_FOUND),
+    INVALID_LESSON_COURSE(404, "Lesson is not in course", HttpStatus.NOT_FOUND),
     EXERCISE_NOT_FOUND(404, "Exercise not found", HttpStatus.NOT_FOUND),
     QUESTION_NOT_FOUND(404, "Question not found", HttpStatus.NOT_FOUND),
     OPTION_NOT_FOUND(404, "Option not found", HttpStatus.NOT_FOUND),

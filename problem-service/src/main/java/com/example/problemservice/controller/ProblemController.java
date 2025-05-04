@@ -10,6 +10,7 @@ import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
 import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
+import com.example.problemservice.dto.response.Problem.ProblemDescriptionResponse;
 import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.problemComment.DetailsProblemCommentResponse;
 import com.example.problemservice.dto.response.solution.DetailsSolutionResponse;
@@ -60,6 +61,19 @@ public class ProblemController {
         return ResponseEntity.ok(problemService.createProblem(problem));
     }
 
+    @Operation(
+            summary = "Get problem's description list for create lesson"
+    )
+    @GetMapping("/createLesson/problemList")
+    public ApiResponse<List<ProblemDescriptionResponse>> getProblemDescriptions(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) List<Integer> categories
+    ){
+        return ApiResponse.<List<ProblemDescriptionResponse>>builder()
+                .result(problemService.getProblemsDescription(keyword,categories,level))
+                .build();
+    }
 
 
     @Operation(

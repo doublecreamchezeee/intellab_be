@@ -201,6 +201,10 @@ public class LessonService {
             List<Lesson> lessons = lessonRepository.findAllById(lessonIds);
 
             for (Lesson lesson : lessons) {
+                if (!lesson.getCourse().getCourseId().equals(courseId)){
+                    System.out.println("Lesson is not in course");
+                   throw new AppException(ErrorCode.INVALID_LESSON_COURSE);
+                }
                 lesson.setLessonOrder(lessonIdMap.get(lesson.getLessonId()));
             }
             lessonRepository.saveAll(lessons);
