@@ -13,4 +13,5 @@ import java.util.UUID;
 public class FinalCourseCreationRequest {
     float price;
     String unitPrice;
+    Integer templateCode = 1;
 }

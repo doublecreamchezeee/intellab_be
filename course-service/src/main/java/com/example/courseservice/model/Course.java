@@ -75,6 +75,8 @@ public class Course {
     @JoinColumn(name = "user_id")
     UUID userId;
 
+    Integer templateCode = 1;
+
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)

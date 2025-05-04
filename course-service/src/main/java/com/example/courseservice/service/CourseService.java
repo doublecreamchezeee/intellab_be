@@ -26,14 +26,14 @@ import com.example.courseservice.repository.*;
 import com.example.courseservice.specification.CourseSpecification;
 import com.example.courseservice.specification.LessonSpecification;
 import com.example.courseservice.specification.UserCoursesSpecification;
-import com.example.courseservice.utils.CertificateTemplate;
+import com.example.courseservice.utils.Certificate.CertificateTemplate1;
+import com.example.courseservice.utils.Certificate.CertificateTemplate2;
 import com.example.courseservice.utils.ParseUUID;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -712,7 +712,6 @@ public class CourseService {
         System.out.println("userid: " + userId + "\n" +
                 "courseId: " + courseId);
 
-
         UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_COURSE_NOT_EXISTED));
 
@@ -741,14 +740,22 @@ public class CourseService {
         String courseName = course.getCourseName();
 
 
-        String directorName = "Phạm Nguyễn Sơn Tùng";
-        Image sign = null;
+//        String directorName = "Phạm Nguyễn Sơn Tùng";
+//        Image sign = null;
         try
         {
-            byte[] certificateImage = CertificateTemplate.createCertificate(completedDate
-                    ,userName,courseName,sign,directorName);
+            byte[] certificateImage;
+            if (course.getTemplateCode() == 2)
+            {
+                certificateImage = CertificateTemplate2.createCertificate(completedDate,userName,courseName);
+            }
+            else
+            {
+                certificateImage = CertificateTemplate1.createCertificate(completedDate,userName,courseName);
+            }
+
             String fileName = courseId + "-" + userId.toString();
-            Map upload = CertificateTemplate.uploadCertificateImage(certificateImage, fileName);
+            Map upload = CertificateTemplate1.uploadCertificateImage(certificateImage, fileName);
 
             String url = (String) upload.get("secure_url");
             Certificate newCertificate = new Certificate();
@@ -844,6 +851,15 @@ public class CourseService {
         certificateResponse.setUsername(username);
 
         return certificateResponse;
+    }
+
+    public String GetCertificateTemplateExample(Integer templateId){
+        if (templateId == 1) {
+            return CertificateTemplate1.linkExample;
+        } else if (templateId == 2) {
+            return CertificateTemplate2.linkExample;
+        }
+        return null;
     }
 
     private AuthorCourseResponse toAuthorCourseResponse(Course course)
