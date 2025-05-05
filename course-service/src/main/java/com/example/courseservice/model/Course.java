@@ -75,6 +75,7 @@ public class Course {
     @JoinColumn(name = "user_id")
     UUID userId;
 
+    @Column(name = "template_code", columnDefinition = "integer default 1")
     Integer templateCode = 1;
 
 

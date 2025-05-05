@@ -30,6 +30,7 @@ public class AdminCourseCreationResponse {
     String currentCreationStepDescription;
     Boolean isCompletedCreation;
     String courseImage;
+    Integer templateCode;
 
     @Nullable
     Integer numberOfEnrolledStudents;

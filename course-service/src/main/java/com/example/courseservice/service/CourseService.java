@@ -107,12 +107,12 @@ public class CourseService {
         Page<Course> courses = courseRepository.findAll(specification, pageable);
 
         return courses.map(course -> {
-            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
             List<Section> sections = course.getSections();
             //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
 
             AdminCourseCreationResponse response = courseMapper.toAdminCourseCreationResponse(course);
-            response.setLessonCount(lessonCount);
+            //response.setLessonCount(lessonCount);
             response.setSections(sections);
             //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
             return response;
@@ -172,12 +172,12 @@ public class CourseService {
 
         return result.map(
                 course -> {
-                    int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+                    //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
                     List<Section> sections = course.getSections();
                     //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
 
                     AdminCourseCreationResponse response = courseMapper.toAdminCourseCreationResponse(course);
-                    response.setLessonCount(lessonCount);
+                    //response.setLessonCount(lessonCount);
                     response.setSections(sections);
                     //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
                     return response;
@@ -357,8 +357,8 @@ public class CourseService {
         return result.map(course -> {
             AdminCourseSearchResponse response = courseMapper.toAdminCourseSearchResponse(course);
 
-            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;  //lessonRepository.countByCourse_CourseId(course.getCourseId());
-            response.setLessonCount(lessonCount);
+            //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;  //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            //response.setLessonCount(lessonCount);
 
             List<Section> sections = course.getSections();
             response.setSections(sections);
