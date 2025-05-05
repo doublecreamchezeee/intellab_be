@@ -72,7 +72,8 @@ public class CourseController {
     @Operation(
             summary = "Create course",
             description = "- Create a new course.\n" +
-                    "- Only admin."
+                    "- Only admin.",
+            hidden = true
     )
     @PostMapping("")
     ApiResponse<CourseCreationResponse> createCourse(
@@ -249,31 +250,10 @@ public class CourseController {
                 .build();
     }
 
-    @Operation(
-            summary = "Delete a course by id"
-    )
-    @DeleteMapping("/{courseId}")
-    ApiResponse<String> deleteCourseById(
-            @PathVariable("courseId") UUID courseId,
-            @RequestHeader("X-UserID") String userUid,
-            @RequestHeader("X-UserRole") String role) {
-        if (!isAdmin(role)) {
-            return ApiResponse.<String>builder()
-                    .code(201)
-                    .result("You are not allowed to delete this course")
-                    .message("Forbidden").build();
-        }
-        userUid = userUid.split(",")[0];
-        courseService.deleteCourseById(courseId, userUid);
-        return ApiResponse.<String>builder()
-                .code(204)
-                .message("Delete course by id: " + courseId)
-                .result("Course has been deleted")
-                .build();
-    }
 
     @Operation(
-            summary = "Update a course by id"
+            summary = "Update a course by id",
+            hidden = true
     )
     @PutMapping("/{courseId}")
     ApiResponse<CourseCreationResponse> updateCourse(
@@ -466,6 +446,9 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get all courses that user has enrolled and completed by user id"
+    )
     @GetMapping("/courseList/me")
     public ApiResponse<List<CompleteCourseResponse>> getCourseByUserId(
             @RequestHeader(name = "X-UserId", required = false) String userUid,
@@ -566,7 +549,7 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
+            summary = "(Testing only) Tự động tạo khi (progress - 100 <= 1e-6f)"
     )
     @PostMapping("{courseId}/certificate")
     public ApiResponse<CertificateCreationResponse> generateCertificate(
@@ -948,193 +931,5 @@ public class CourseController {
                 .build();
     }
 
-    @Operation(
-            summary = "Create general information in creating a course"
-    )
-    @PostMapping("/general-step")
-    public ApiResponse<CourseCreationResponse> createGeneralStepInCreatingCourse(
-            @RequestBody GeneralCourseCreationRequest request,
-            @RequestHeader(value = "X-UserId", required = true) String userUid,
-            @RequestHeader(value = "X-UserRole", required = true) String userRole
-    ) {
-        userUid = userUid.split(",")[0];
-        UUID userUUid = ParseUUID.normalizeUID(userUid);
 
-        userRole = userRole.split(",")[0];
-
-        return ApiResponse.<CourseCreationResponse>builder()
-                .message("Create course successfully")
-                .result(courseService.createGeneralStepInCourseCreation(
-                            request, userUUid, userRole
-                        )
-                )
-                .build();
-    }
-
-    @Operation(
-            summary = "Create final step in creating a course",
-            description = "Provide price and unit price"
-    )
-    @PostMapping("/final-step/{courseId}")
-    public ApiResponse<CourseCreationResponse> createFinalStepInCreatingCourse(
-            @RequestBody FinalCourseCreationRequest request,
-            @PathVariable("courseId") UUID courseId,
-            @RequestHeader(value = "X-UserId", required = true) String userUid,
-            @RequestHeader(value = "X-UserRole", required = true) String userRole
-    ) {
-        userUid = userUid.split(",")[0];
-        UUID userUUid = ParseUUID.normalizeUID(userUid);
-
-        userRole = userRole.split(",")[0];
-
-        return ApiResponse.<CourseCreationResponse>builder()
-                .message("Create course successfully")
-                .result(courseService.createFinalStepInCourseCreation(
-                            request, courseId, userUUid, userRole
-                        )
-                )
-                .build();
-    }
-
-    @Operation(
-            summary = "Update general information of course"
-    )
-    @PutMapping("/general-step/{courseId}")
-    public ApiResponse<CourseCreationResponse> updateGeneralStepInCreatingCourse(
-            @RequestBody GeneralCourseCreationRequest request,
-            @PathVariable("courseId") UUID courseId,
-            @RequestHeader(value = "X-UserId", required = true) String userUid,
-            @RequestHeader(value = "X-UserRole", required = true) String userRole
-    ) {
-        userUid = userUid.split(",")[0];
-        UUID userUUid = ParseUUID.normalizeUID(userUid);
-
-        userRole = userRole.split(",")[0];
-
-        return ApiResponse.<CourseCreationResponse>builder()
-                .message("Update course successfully")
-                .result(courseService.updateGeneralStepInCourseCreation(
-                                request, courseId, userUUid, userRole
-                        )
-                )
-                .build();
-    }
-
-    @Operation(
-            summary = "Update final step in creating a course",
-            description = "Update price"
-    )
-    @PutMapping("final-step/{courseId}")
-    public ApiResponse<CourseCreationResponse> updateFinalStepInCreatingCourse(
-            @RequestBody FinalCourseCreationRequest request,
-            @PathVariable("courseId") UUID courseId,
-            @RequestHeader(value = "X-UserId", required = true) String userUid,
-            @RequestHeader(value = "X-UserRole", required = true) String userRole
-    ) {
-        userUid = userUid.split(",")[0];
-        UUID userUUid = ParseUUID.normalizeUID(userUid);
-
-        userRole = userRole.split(",")[0];
-
-        return ApiResponse.<CourseCreationResponse>builder()
-                .message("Update course successfully")
-                .result(courseService.updateFinalStepInCourseCreation(
-                                request, courseId, userUUid, userRole
-                        )
-                )
-                .build();
-    }
-
-    @Operation(
-            summary = "Update available status of a course"
-    )
-    @PutMapping("/update-available-status/{courseId}")
-    public ApiResponse<CourseCreationResponse> updateAvailableStatusOfCourse(
-            @RequestParam(value = "availableStatus", required = true) Boolean availableStatus,
-            @PathVariable("courseId") UUID courseId,
-            @RequestHeader(value = "X-UserId", required = true) String userUid,
-            @RequestHeader(value = "X-UserRole", required = true) String userRole
-    ) {
-        userUid = userUid.split(",")[0];
-        UUID userUUid = ParseUUID.normalizeUID(userUid);
-
-        userRole = userRole.split(",")[0];
-
-        return ApiResponse.<CourseCreationResponse>builder()
-                .message("Update course successfully")
-                .result(courseService.updateCourseAvailableStatus(
-                                availableStatus, courseId, userUUid, userRole
-                        )
-                )
-                .build();
-    }
-
-    @Operation(
-            summary = "Update course completed creation status by course id"
-    )
-    @PutMapping("/update-completed-creation-status/{courseId}")
-    public ApiResponse<CourseCreationResponse> updateCompletedCreationStatus(
-            @RequestParam(value = "completedCreation", required = true) Boolean completedCreation,
-            @PathVariable("courseId") UUID courseId,
-            @RequestHeader(value = "X-UserId", required = true) String userUid,
-            @RequestHeader(value = "X-UserRole", required = true) String userRole
-    ) {
-        userUid = userUid.split(",")[0];
-        UUID userUUid = ParseUUID.normalizeUID(userUid);
-
-        userRole = userRole.split(",")[0];
-
-        return ApiResponse.<CourseCreationResponse>builder()
-                .message("Update course successfully")
-                .result(courseService.updateCourseCompletedCreationStatus(
-                                completedCreation, courseId, userUUid, userRole
-                        )
-                )
-                .build();
-    }
-
-    @Operation(
-            summary = "Upload course image file"
-    )
-    @PostMapping(value = "/{courseId}/image/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<String> uploadCourseImage(
-            @PathVariable("courseId") UUID courseId,
-            @RequestPart(value = "file", required = true) MultipartFile file
-    ) {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("Uploaded file is empty!");
-        }
-
-        return ApiResponse.<String>builder()
-                .message("Upload image success!")
-                .result(courseService.uploadCourseAvatarImage(file, courseId))
-                .build();
-    }
-
-    @Operation(
-            summary = "Change course image link"
-    )
-    @PostMapping(value = "/{courseId}/image/link")
-    public ApiResponse<String> uploadCourseImageLink(
-            @PathVariable("courseId") UUID courseId,
-            @RequestBody String link
-    ) {
-        return ApiResponse.<String>builder()
-                .message("Upload image success!")
-                .result(courseService.uploadCourseAvatarLink(link, courseId))
-                .build();
-    }
-
-    @Operation(
-            summary = "Delete course image"
-    )
-    @DeleteMapping(value = "/{courseId}/image")
-    public ApiResponse<Boolean> deleteCourseImage(
-            @PathVariable("courseId") UUID courseId
-    ) {
-        return ApiResponse.<Boolean>builder()
-                .message("Delete image success!")
-                .result(courseService.deleteCourseAvatarImage(courseId))
-                .build();
-    }
 }

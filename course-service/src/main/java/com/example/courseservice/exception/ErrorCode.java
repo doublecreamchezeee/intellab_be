@@ -46,6 +46,7 @@ public enum ErrorCode {
     COURSE_NOT_COMPLETED(409, "Course is not created completely", HttpStatus.CONFLICT),
     COURSE_ALREADY_ENROLLED(409, "Course already was enrolled by a user so it must be available", HttpStatus.CONFLICT),
     CANNOT_UPLOAD_IMAGE(500, "Cannot upload image", HttpStatus.INTERNAL_SERVER_ERROR),
+    USER_NOT_OWN_COURSE(403, "User not own course", HttpStatus.FORBIDDEN),
 
     ;
     ErrorCode(int code, String message) {
