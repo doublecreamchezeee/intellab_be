@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.lang.Math.abs;
 
@@ -214,6 +215,32 @@ public class LessonService {
         System.out.println(questionIds);
         questionRepository.updateExerciseIdForQuestions(newExercise.getExerciseId(),questionIds);
         return newExercise;
+    }
+
+    public Boolean updateLessonsOrder(UUID courseId, List<UUID> lessonIds)
+    {
+        try {
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+            Map<UUID, Integer> lessonIdMap = IntStream.range(0, lessonIds.size()).boxed().collect(Collectors.toMap(lessonIds::get, i -> i));
+
+            List<Lesson> lessons = lessonRepository.findAllById(lessonIds);
+
+            for (Lesson lesson : lessons) {
+                if (!lesson.getCourse().getCourseId().equals(courseId)){
+                    System.out.println("Lesson is not in course");
+                   throw new AppException(ErrorCode.INVALID_LESSON_COURSE);
+                }
+                lesson.setLessonOrder(lessonIdMap.get(lesson.getLessonId()));
+            }
+            lessonRepository.saveAll(lessons);
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     public LessonResponse updateLesson(LessonUpdateRequest request)

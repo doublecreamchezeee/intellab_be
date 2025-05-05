@@ -6,6 +6,7 @@ import com.example.courseservice.dto.request.learningLesson.LearningLessonCreati
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
 import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
+import com.example.courseservice.dto.request.lesson.UpdateOrderRequest;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.learningLesson.LearningLessonResponse;
 import com.example.courseservice.dto.response.lesson.DetailsLessonResponse;
@@ -90,6 +91,14 @@ public class LessonController {
     ApiResponse<LessonResponse> updateLesson(@RequestBody LessonUpdateRequest request){
         return ApiResponse.<LessonResponse>builder()
                 .result(lessonService.updateLesson(request))
+                .build();
+    }
+
+    @PutMapping("/lessonsOrder")
+    ApiResponse<Boolean> updateLessonsOrder(@RequestBody UpdateOrderRequest request)
+    {
+        return ApiResponse.<Boolean>builder()
+                .result(lessonService.updateLessonsOrder(request.getCourseId(),request.getLessonIds()))
                 .build();
     }
 

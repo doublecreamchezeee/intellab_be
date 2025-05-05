@@ -1,8 +1,10 @@
-package com.example.courseservice.dto.request.course;
+package com.example.courseservice.dto.request.lesson;
+
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -10,8 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FinalCourseCreationRequest {
-    float price;
-    String unitPrice;
-    Integer templateCode = 1;
+public class UpdateOrderRequest {
+    UUID courseId;
+    List<UUID> lessonIds;
 }

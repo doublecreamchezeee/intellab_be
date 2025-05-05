@@ -27,6 +27,8 @@ import com.example.courseservice.service.CommentService;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
 import com.example.courseservice.service.ReviewService;
+import com.example.courseservice.utils.Certificate.CertificateTemplate1;
+import com.example.courseservice.utils.Certificate.CertificateTemplate2;
 import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,14 +40,19 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -549,7 +556,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "(Testing only) Tự động tạo khi (progress - 100 <= 1e-6f)"
+            summary = "Used for test: be only",
+            hidden = true
     )
     @PostMapping("{courseId}/certificate")
     public ApiResponse<CertificateCreationResponse> generateCertificate(
@@ -567,6 +575,42 @@ public class CourseController {
 
         return ApiResponse.<CertificateCreationResponse>builder()
                 .result(result).build();
+    }
+    @Operation()
+    @GetMapping("/certificate/template/{templateId}")
+    public ResponseEntity<String> generateCertificate(
+            @PathVariable Integer templateId
+    ) {
+        return ResponseEntity.ok().body(courseService.GetCertificateTemplateExample(templateId));
+    }
+
+
+    @Operation(
+            summary = "Using for test, be only",
+            hidden = true
+    )
+    @PostMapping("/certificate/test")
+    public ResponseEntity<ByteArrayResource> generateCertificate(
+            @RequestParam String courseName,
+            @RequestParam String studentName,
+            @RequestParam Integer templateId
+    ) throws IOException {
+
+        String date = "26th May, 2024";
+
+        byte[] certificateBytes = switch (templateId) {
+            case 1 -> CertificateTemplate1.createCertificate(date, studentName, courseName);
+            case 2 -> CertificateTemplate2.createCertificate(studentName, courseName, date);
+            default -> CertificateTemplate1.createCertificate(studentName, courseName, date);
+        };
+
+        assert certificateBytes != null;
+        ByteArrayResource resource = new ByteArrayResource(certificateBytes);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .contentLength(certificateBytes.length)
+                .body(resource);
     }
 
     @GetMapping("{certificateId}/certificate")
