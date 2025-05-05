@@ -27,8 +27,8 @@ public class DetailCourseResponse {
     String unitPrice;
     UUID userUid;
     int lessonCount;
-    float averageRating;
-    int reviewCount;
+    Double averageRating;
+    Integer reviewCount;
     boolean isUserEnrolled;
     UUID latestLessonId;
     Float progressPercent;

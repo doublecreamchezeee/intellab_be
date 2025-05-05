@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CourseCreationResponse {
+public class AdminCourseSearchResponse {
     UUID courseId;
     String courseName;
     String description;

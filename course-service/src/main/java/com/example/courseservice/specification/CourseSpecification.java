@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
+import java.util.UUID;
 
 
 public class CourseSpecification {
@@ -134,6 +135,15 @@ public class CourseSpecification {
                 return null;
             }
             return criteriaBuilder.equal(root.get("isCompletedCreation"), isCompletedCreation);
+        };
+    }
+
+    public static Specification<Course> userIdSpecification(UUID userId) {
+        return (root, query, criteriaBuilder) -> {
+            if (userId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("userId"), userId);
         };
     }
 }

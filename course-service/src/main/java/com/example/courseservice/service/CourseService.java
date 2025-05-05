@@ -73,7 +73,10 @@ public class CourseService {
     CloudinaryService cloudinaryService;
 
 
-    public Page<CourseCreationResponse> getAllCourses(Boolean isAvailable, Boolean isCompletedCreation, Pageable pageable) {
+    public Page<CourseCreationResponse> getAllCourses(
+            Boolean isAvailable, Boolean isCompletedCreation,
+            Pageable pageable
+    ) {
         Specification<Course> specification = Specification.where(
                 CourseSpecification.isAvailableSpecification(isAvailable)
                         .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
@@ -82,11 +85,36 @@ public class CourseService {
         Page<Course> courses = courseRepository.findAll(specification, pageable);
 
         return courses.map(course -> {
-            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
             List<Section> sections = course.getSections();
             CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
             response.setLessonCount(lessonCount);
             response.setSections(sections);
+            return response;
+        });
+    }
+
+    public Page<AdminCourseCreationResponse> getAllCoursesOfAdmin(
+            Boolean isAvailable, Boolean isCompletedCreation,
+            UUID userUuid, Pageable pageable
+    ) {
+        Specification<Course> specification = Specification.where(
+                CourseSpecification.isAvailableSpecification(isAvailable)
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                        .and(CourseSpecification.userIdSpecification(userUuid))
+        );
+
+        Page<Course> courses = courseRepository.findAll(specification, pageable);
+
+        return courses.map(course -> {
+            //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            List<Section> sections = course.getSections();
+            //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+
+            AdminCourseCreationResponse response = courseMapper.toAdminCourseCreationResponse(course);
+            //response.setLessonCount(lessonCount);
+            response.setSections(sections);
+            //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
             return response;
         });
     }
@@ -115,11 +143,43 @@ public class CourseService {
 
         return result.map(
                 course -> {
-                    int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+                    int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
                     List<Section> sections = course.getSections();
                     CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
                     response.setLessonCount(lessonCount);
                     response.setSections(sections);
+                    return response;
+                }
+        );
+    }
+
+    public Page<AdminCourseCreationResponse> getAllCoursesOfAdminByCategory(
+            Integer section, Boolean isAvailable,
+            Boolean isCompletedCreation, UUID userUuid,
+            Pageable pageable
+    ) {
+
+        Specification<Course> courseSpecification = Specification.where(
+                CourseSpecification.isAvailableSpecification(isAvailable)
+                        .and(CourseSpecification.sectionSpecification(section))
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                        .and(CourseSpecification.userIdSpecification(userUuid))
+        );
+
+        Page<Course> result = courseRepository.findAll(courseSpecification, pageable);
+
+        //Page<Course> result = courseRepository.findAllBySections_Id(section, pageable);
+
+        return result.map(
+                course -> {
+                    //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+                    List<Section> sections = course.getSections();
+                    //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+
+                    AdminCourseCreationResponse response = courseMapper.toAdminCourseCreationResponse(course);
+                    //response.setLessonCount(lessonCount);
+                    response.setSections(sections);
+                    //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
                     return response;
                 }
         );
@@ -141,7 +201,7 @@ public class CourseService {
             courses = courseRepository.findAllCoursesExceptEnrolledByUser(userId, pageable);
         }
         return courses.map(course -> {
-            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
             CourseCreationResponse response = courseMapper.toCourseCreationResponse(course);
             response.setLessonCount(lessonCount);
 
@@ -154,10 +214,14 @@ public class CourseService {
     public void deleteCourseById(UUID id, String userUid) {
         UUID userId = ParseUUID.normalizeUID(userUid);
         Course course = courseRepository.findByCourseIdAndUserId(id, userId);
-        if (course == null)
-        {
+        if (course == null) {
             throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
         }
+
+        if (course.getCourseImage() != null) {
+            cloudinaryService.deleteImage(course.getCourseImage());
+        }
+
         courseRepository.deleteById(id);
     }
 
@@ -214,7 +278,7 @@ public class CourseService {
                         .and(CourseSpecification.categoriesSpecification(categories)
                         .and(CourseSpecification.isAvailableSpecification(isAvailable))
                         .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
-                        )
+                    )
                 ));
 
         Page<Course> result = courseRepository.findAll(specification, pageable);
@@ -222,10 +286,36 @@ public class CourseService {
         return getCourseSearchResponses(userUid, result);
     }
 
+    public Page<AdminCourseSearchResponse> searchCoursesOfAdminWithFilter(UUID userUid,
+                                                              String keyword,
+                                                              Float rating,
+                                                              List<String> levels,
+                                                              Boolean price,
+                                                              List<Integer> categories,
+                                                              Boolean isAvailable,
+                                                              Boolean isCompletedCreation,
+                                                              Pageable pageable) {
+        Specification<Course> specification = Specification.where(
+                (CourseSpecification.nameSpecification(keyword).or(CourseSpecification.descriptionSpecification(keyword))
+                        .and(CourseSpecification.ratingSpecification(rating))
+                        .and(CourseSpecification.levelsSpecification(levels))
+                        .and(CourseSpecification.priceSpecification(price))
+                        .and(CourseSpecification.categoriesSpecification(categories)
+                        .and(CourseSpecification.isAvailableSpecification(isAvailable))
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                        .and(CourseSpecification.userIdSpecification(userUid))
+                    )
+                ));
+
+        Page<Course> result = courseRepository.findAll(specification, pageable);
+
+        return getCourseSearchResponsesOfAdmin(result);
+    }
+
     @NotNull
     private Page<CourseSearchResponse> getCourseSearchResponses(UUID userUid, Page<Course> result) {
         return result.map(course -> {
-            int lessonCount = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;  //lessonRepository.countByCourse_CourseId(course.getCourseId());
             CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
             response.setLessonCount(lessonCount);
 
@@ -262,6 +352,24 @@ public class CourseService {
         });
     }
 
+    @NotNull
+    private Page<AdminCourseSearchResponse> getCourseSearchResponsesOfAdmin(Page<Course> result) {
+        return result.map(course -> {
+            AdminCourseSearchResponse response = courseMapper.toAdminCourseSearchResponse(course);
+
+            //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;  //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            //response.setLessonCount(lessonCount);
+
+            List<Section> sections = course.getSections();
+            response.setSections(sections);
+
+            //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+            //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+
+            return response;
+        });
+    }
+
     public Page<CourseSearchResponse> searchCourses(
             UUID userUid, String keyword,
             Boolean isAvailable, Boolean isCompletedCreation,
@@ -281,22 +389,44 @@ public class CourseService {
         return getCourseSearchResponses(userUid, courses);
     }
 
+    public Page<AdminCourseSearchResponse> searchCoursesOfAdmin(
+            UUID userUid, String keyword,
+            Boolean isAvailable, Boolean isCompletedCreation,
+            Pageable pageable
+    ) {
+
+        Specification<Course> specification = Specification.where(
+                CourseSpecification.isAvailableSpecification(isAvailable)
+                        .and(CourseSpecification.courseNameOrDescriptionSpecification(keyword, keyword))
+                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                        .and(CourseSpecification.userIdSpecification(userUid))
+        );
+
+        Page<Course>  courses = courseRepository.findAll(specification, pageable);
+
+        //Page<Course>  courses = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
+
+        return getCourseSearchResponsesOfAdmin(courses);
+    }
+
+
     public DetailCourseResponse getCourseById(UUID courseId, UUID userUid) {
         // Fetch the course by ID or throw an exception if it doesn't exist
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
         // Count the number of lessons in the course
-        int lessonCount = lessonRepository.countByCourse_CourseId(courseId);
+        //int lessonCount = lessonRepository.countByCourse_CourseId(courseId);
+        int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
 
         // Calculate the average rating for the course
-        double averageRating = course.getReviews().stream()
+        /*double averageRating = course.getReviews().stream()
                 .mapToDouble(review -> Optional.of(review.getRating()).orElse(0))
                 .average()
-                .orElse(0.0);
+                .orElse(0.0);*/
 
         // Count the number of reviews for the course
-        int reviewCount = course.getReviews().size();
+        //int reviewCount = course.getReviews().size();
 
         // Check if the user is enrolled in the course
         boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
@@ -365,8 +495,8 @@ public class CourseService {
                 .unitPrice(course.getUnitPrice())
                 .userUid(course.getUserId())
                 .lessonCount(lessonCount)
-                .averageRating((float) averageRating)
-                .reviewCount(reviewCount)
+                .averageRating(course.getAverageRating())
+                .reviewCount(course.getReviewCount())
                 .isUserEnrolled(isUserEnrolled)
                 .latestLessonId(latestLessonId)
                 .progressPercent(completionRatio)
@@ -374,6 +504,22 @@ public class CourseService {
                 .certificateId(certificateId)
                 .courseImage(course.getCourseImage())
                 .build();
+    }
+
+    public AdminCourseCreationResponse getCourseOfAdminByCourseId(UUID courseId, UUID userUid, String userRole) {
+        if (!userRole.equals(PredefinedRole.admin)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+
+        // Fetch the course by ID or throw an exception if it doesn't exist
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        if (!course.getUserId().equals(userUid)) {
+            throw new AppException(ErrorCode.USER_NOT_OWN_COURSE);
+        }
+
+        return courseMapper.toAdminCourseCreationResponse(course);
     }
 
 
@@ -914,7 +1060,7 @@ public class CourseService {
         return response;
     }
 
-   public CourseCreationResponse createGeneralStepInCourseCreation(
+   public AdminCourseCreationResponse createGeneralStepInCourseCreation(
            GeneralCourseCreationRequest request,
            UUID userUuid, String userRole
    ) {
@@ -923,8 +1069,6 @@ public class CourseService {
         }
 
         Course course = courseMapper.toCourse(request);
-
-        course.setUserId(userUuid);
 
         List<Category> categories = categoryRepository
                 .findAllByIdIn(request.getCategoryIds());
@@ -941,10 +1085,10 @@ public class CourseService {
 
         Course savedCourse = courseRepository.save(course);
 
-        return courseMapper.toCourseCreationResponse(savedCourse);
+        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
-   public CourseCreationResponse createFinalStepInCourseCreation(
+   public AdminCourseCreationResponse createFinalStepInCourseCreation(
            FinalCourseCreationRequest request, UUID courseId,
            UUID userUuid, String userRole
    ) {
@@ -962,10 +1106,10 @@ public class CourseService {
 
         Course savedCourse = courseRepository.save(course);
 
-        return courseMapper.toCourseCreationResponse(savedCourse);
+        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
-   public CourseCreationResponse updateGeneralStepInCourseCreation(
+   public AdminCourseCreationResponse updateGeneralStepInCourseCreation(
               GeneralCourseCreationRequest request,
               UUID courseId, UUID userUuid, String userRole
     ) {
@@ -985,10 +1129,10 @@ public class CourseService {
 
        Course savedCourse = courseRepository.save(course);
 
-       return courseMapper.toCourseCreationResponse(savedCourse);
+       return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
-   public CourseCreationResponse updateFinalStepInCourseCreation(
+   public AdminCourseCreationResponse updateFinalStepInCourseCreation(
            FinalCourseCreationRequest request, UUID courseId,
            UUID userUuid, String userRole
    ) {
@@ -1003,10 +1147,10 @@ public class CourseService {
 
          Course savedCourse = courseRepository.save(course);
 
-         return courseMapper.toCourseCreationResponse(savedCourse);
+         return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
-   public CourseCreationResponse updateCourseAvailableStatus(
+   public AdminCourseCreationResponse updateCourseAvailableStatus(
            Boolean availableStatus, UUID courseId,
            UUID userUuid, String userRole
    ) {
@@ -1038,10 +1182,10 @@ public class CourseService {
 
         Course savedCourse = courseRepository.save(course);
 
-        return courseMapper.toCourseCreationResponse(savedCourse);
+        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
-   public CourseCreationResponse updateCourseCompletedCreationStatus(
+   public AdminCourseCreationResponse updateCourseCompletedCreationStatus(
               Boolean completedCreationStatus, UUID courseId,
               UUID userUuid, String userRole
    ) {
@@ -1070,7 +1214,7 @@ public class CourseService {
 
        Course savedCourse = courseRepository.save(course);
 
-       return courseMapper.toCourseCreationResponse(savedCourse);
+       return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
    public String uploadCourseAvatarImage(MultipartFile file, UUID courseId) {

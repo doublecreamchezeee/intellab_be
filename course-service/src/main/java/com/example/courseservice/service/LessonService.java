@@ -97,7 +97,21 @@ public class LessonService {
 
         lesson.setCourse(course);
 
+        if (course.getLessons() != null && !course.getLessons().isEmpty())
+        {
+            lesson.setLessonOrder(course.getLessons().size() + 1);
+        } else {
+            lesson.setLessonOrder(1);
+        }
+
         lesson = lessonRepository.save(lesson);
+
+        if (course.getCurrentCreationStep() < 2)
+        {
+            course.setCurrentCreationStep(2);
+            courseRepository.save(course);
+        }
+
         return lessonMapper.toLessonResponse(lesson);
     }
 
@@ -108,7 +122,7 @@ public class LessonService {
         );
 
         Course course = courseRepository.findById(courseId).orElseThrow(
-                () -> new AppException(ErrorCode.COMMENT_NOT_FOUND)
+                () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
         );
 
         Lesson newLesson = new Lesson();
@@ -118,8 +132,21 @@ public class LessonService {
         newLesson.setDescription(lesson.getDescription());
         newLesson.setContent(lesson.getContent());
         newLesson.setProblemId(lesson.getProblemId());
+
+        if (course.getLessons() != null && !course.getLessons().isEmpty())
+        {
+            newLesson.setLessonOrder(course.getLessons().size() + 1);
+        } else {
+            newLesson.setLessonOrder(1);
+        }
+
         newLesson = lessonRepository.save(newLesson);
 
+        if (course.getCurrentCreationStep() < 2)
+        {
+            course.setCurrentCreationStep(2);
+            courseRepository.save(course);
+        }
 
         Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
 

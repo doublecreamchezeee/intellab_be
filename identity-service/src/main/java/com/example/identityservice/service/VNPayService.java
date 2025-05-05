@@ -267,7 +267,7 @@ public class VNPayService {
                     )
 
                 ? request.getPremiumPackage().getPrice()
-                : (long) ((request.getPremiumPackage().getPrice()-100000L) * 12);   // cost only 11 months for yearly package
+                : (long) ((request.getPremiumPackage().getPrice()-200000L) * 12);   // cost only 11 months for yearly package
 
             int addingDuration = 0;
 
