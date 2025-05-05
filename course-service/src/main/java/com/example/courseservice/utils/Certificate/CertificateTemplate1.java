@@ -76,7 +76,7 @@ public class CertificateTemplate1 {
 
             // Điền tên người dùng
             drawText(g2d, userName, nameFont, new Color(79, 79, 79),
-                    leftMargin, yUserName, width - 200);
+                    leftMargin, yUserName, width - 700);
 
             // Điền tên khóa học
             drawText(g2d, courseName, courseFont, new Color(79, 79, 79),

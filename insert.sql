@@ -1,11 +1,11 @@
--- CREATE EXTENSION IF NOT EXISTS "vector";
+CREATE EXTENSION IF NOT EXISTS "vector";
 
--- CREATE TABLE IF NOT EXISTS embeddings (
---                                           id SERIAL PRIMARY KEY,
---                                           embedding vector,
---                                           text text,
---                                           created_at timestamptz DEFAULT now()
---     );
+CREATE TABLE IF NOT EXISTS embeddings (
+                                          id SERIAL PRIMARY KEY,
+                                          embedding vector,
+                                          text text,
+                                          created_at timestamptz DEFAULT now()
+    );
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -355,7 +355,8 @@ create table courses
     current_creation_step integer default 1,
     is_available boolean default false,
     course_image text,
-    is_completed_creation boolean default false
+    is_completed_creation boolean default false,
+    template_code         integer        default 1
 );
 
 alter table courses
