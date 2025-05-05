@@ -576,7 +576,10 @@ public class CourseController {
         return ApiResponse.<CertificateCreationResponse>builder()
                 .result(result).build();
     }
-    @Operation()
+    @Operation(
+            summary = "get ctificate template",
+            hidden = true
+    )
     @GetMapping("/certificate/template/{templateId}")
     public ResponseEntity<String> generateCertificate(
             @PathVariable Integer templateId

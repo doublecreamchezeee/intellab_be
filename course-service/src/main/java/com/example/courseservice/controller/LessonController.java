@@ -40,7 +40,8 @@ public class LessonController {
     AssignmentService assignmentService;
 
     @Operation(
-            summary = "Create lesson"
+            summary = "Create lesson",
+            hidden = true
     )
     @PostMapping
     ApiResponse<LessonResponse> createLesson(@RequestBody LessonCreationRequest request) {
@@ -74,7 +75,8 @@ public class LessonController {
     }
 
     @Operation(
-            summary = "Delete lesson by id"
+            summary = "Delete lesson by id",
+            hidden = true
     )
     @DeleteMapping("/{lessonId}")
     ApiResponse<String> deleteLesson(@PathVariable("lessonId") UUID lessonId){
@@ -85,7 +87,8 @@ public class LessonController {
     }
 
     @Operation(
-            summary = "Update lesson by id"
+            summary = "Update lesson by id",
+            hidden = true
     )
     @PutMapping
     ApiResponse<LessonResponse> updateLesson(@RequestBody LessonUpdateRequest request){
@@ -94,6 +97,10 @@ public class LessonController {
                 .build();
     }
 
+    @Operation(
+        summary = "update lessonOrder",
+        hidden = true
+    )
     @PutMapping("/lessonsOrder")
     ApiResponse<Boolean> updateLessonsOrder(@RequestBody UpdateOrderRequest request)
     {

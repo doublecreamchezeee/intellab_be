@@ -38,7 +38,8 @@ public class QuestionController {
 
     @Operation(
             summary = "Modify list Quiz",
-            description = ""
+            description = "",
+            hidden = true
     )
     @PutMapping("/quiz")
     ApiResponse<ExerciseResponse> modifyQuiz(@RequestBody ModifyQuizRequest request) {
@@ -47,12 +48,18 @@ public class QuestionController {
                 .build();
     }
 
+    @Operation(
+            summary = "delete question"
+    )
     @DeleteMapping("/removeQuestion/{questionId}")
     ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") UUID questionId) {
         exerciseService.removeQuestionFromQuiz(questionId);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = "get Quiz by lessonId"
+    )
     @GetMapping("/{lessonId}/quiz")
     ApiResponse<ExerciseResponse> getQuiz(@PathVariable("lessonId") UUID lessonId) {
         return ApiResponse.<ExerciseResponse>builder()
