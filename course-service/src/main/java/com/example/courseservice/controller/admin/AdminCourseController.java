@@ -6,6 +6,8 @@ import com.example.courseservice.dto.request.course.GeneralCourseCreationRequest
 import com.example.courseservice.dto.response.course.AdminCourseSearchResponse;
 import com.example.courseservice.dto.response.course.AdminCourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseSearchResponse;
+import com.example.courseservice.exception.AppException;
+import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.service.CommentService;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
@@ -20,6 +22,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -355,5 +358,19 @@ public class AdminCourseController {
                 .result(courseService.deleteCourseAvatarImage(courseId))
                 .build();
     }
+
+    @Operation()
+    @GetMapping("/certificate/template/{templateId}")
+    public ResponseEntity<String> generateCertificate(
+            @PathVariable Integer templateId,
+            @RequestHeader(value = "X-UserRole") String userRole
+    ) {
+        userRole = userRole.split(",")[0];
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+        return ResponseEntity.ok().body(courseService.GetCertificateTemplateExample(templateId));
+    }
+
 
 }

@@ -70,6 +70,7 @@ public class ProblemService {
         return problems.stream().map(
                 problem -> {
                     ProblemDescriptionResponse problemDescriptionResponse = new ProblemDescriptionResponse();
+                    problemDescriptionResponse.setProblemId(problem.getProblemId());
                     problemDescriptionResponse.setDescription(problem.getDescription());
                     problemDescriptionResponse.setLevel(problem.getProblemLevel());
                     List<Category> categories = courseClient.categories(
