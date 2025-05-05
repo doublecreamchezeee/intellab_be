@@ -37,7 +37,7 @@ public class AdminQuizController {
             summary = "Modify list Quiz",
             description = ""
     )
-    @PutMapping("/quiz")
+    @PutMapping()
     ApiResponse<ExerciseResponse> modifyQuiz(
             @RequestBody ModifyQuizRequest request,
             @RequestHeader(value = "X-UserRole") String userRole
@@ -66,7 +66,7 @@ public class AdminQuizController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{lessonId}/quiz")
+    @GetMapping("/{lessonId}")
     ApiResponse<ExerciseResponse> getQuiz(
             @PathVariable("lessonId") UUID lessonId,
             @RequestHeader(value = "X-UserRole") String userRole

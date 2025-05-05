@@ -6,6 +6,7 @@ import com.example.courseservice.dto.request.course.GeneralCourseCreationRequest
 import com.example.courseservice.dto.response.course.AdminCourseSearchResponse;
 import com.example.courseservice.dto.response.course.AdminCourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseSearchResponse;
+import com.example.courseservice.dto.response.lesson.LessonResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.service.CommentService;
@@ -372,5 +373,17 @@ public class AdminCourseController {
         return ResponseEntity.ok().body(courseService.GetCertificateTemplateExample(templateId));
     }
 
+    @Operation(
+            summary = "Get lesson list",
+            description = "trả về List thay vì page"
+    )
+    @GetMapping("/{courseId}/lessonsList")
+    ApiResponse<List<LessonResponse>> getCourseLessons(
+            @PathVariable("courseId") UUID courseId
+    ){
+        return ApiResponse.<List<LessonResponse>>builder()
+                .result(lessonService.getCourseLessons(courseId))
+                .build();
+    }
 
 }

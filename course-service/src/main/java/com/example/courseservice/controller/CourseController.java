@@ -120,7 +120,8 @@ public class CourseController {
 
     @Operation(
             summary = "Get lesson list",
-            description = "trả về List thay vì page"
+            description = "trả về List thay vì page",
+            hidden = true
     )
     @GetMapping("/{courseId}/lessonsList")
     ApiResponse<List<LessonResponse>> getCourseLessons(
