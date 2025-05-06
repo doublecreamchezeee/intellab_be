@@ -2,6 +2,7 @@ package com.example.courseservice.model;
 
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,6 +34,7 @@ public class Exercise {
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id")
+    //@JsonBackReference
     Lesson lesson;
 
     Integer questionsPerExercise;

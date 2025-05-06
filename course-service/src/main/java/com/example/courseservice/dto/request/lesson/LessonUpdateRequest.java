@@ -12,9 +12,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonUpdateRequest {
-    @Min(value = 0, message = "LESSON_ORDER_INVALID")
+    /*@Min(value = 0, message = "LESSON_ORDER_INVALID")
+    int lessonOrder;*/
+
     UUID lessonId;
-    int lessonOrder;
     String lessonName;
     String description;
     String content;

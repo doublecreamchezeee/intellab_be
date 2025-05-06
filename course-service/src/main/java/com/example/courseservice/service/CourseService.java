@@ -1136,18 +1136,22 @@ public class CourseService {
            FinalCourseCreationRequest request, UUID courseId,
            UUID userUuid, String userRole
    ) {
-         if (!userRole.equals(PredefinedRole.admin)) {
-              throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
-         }
+       if (!userRole.equals(PredefinedRole.admin)) {
+           throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+       }
 
-         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+       Course course = courseRepository.findById(courseId)
+               .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-         course = courseMapper.updateCourse(request, course);
+       if (course.getCurrentCreationStep() < 3) {
+           throw new AppException(ErrorCode.COMPLETE_PREVIOUS_STEP_FIRST);
+       }
 
-         Course savedCourse = courseRepository.save(course);
+       course = courseMapper.updateCourse(request, course);
 
-         return courseMapper.toAdminCourseCreationResponse(savedCourse);
+       Course savedCourse = courseRepository.save(course);
+
+       return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
    public AdminCourseCreationResponse updateCourseAvailableStatus(

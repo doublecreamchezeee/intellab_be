@@ -57,6 +57,8 @@ public class AdminCourseController {
         userUid = userUid.split(",")[0];
         UUID userUUid = ParseUUID.normalizeUID(userUid);
 
+        userRole = userRole.split(",")[0];
+
         return ApiResponse.<AdminCourseCreationResponse>builder()
                 .message("Get course successfully")
                 .result(courseService.getCourseOfAdminByCourseId(courseId, userUUid, userRole))
@@ -360,7 +362,10 @@ public class AdminCourseController {
                 .build();
     }
 
-    @Operation()
+    @Operation(
+            summary = "Get certificate template example by template id",
+            description = "Get certificate template example by template id"
+    )
     @GetMapping("/certificate/template/{templateId}")
     public ResponseEntity<String> generateCertificate(
             @PathVariable Integer templateId,
@@ -374,7 +379,7 @@ public class AdminCourseController {
     }
 
     @Operation(
-            summary = "Get lesson list",
+            summary = "Get lesson list of course by course id",
             description = "trả về List thay vì page"
     )
     @GetMapping("/{courseId}/lessonsList")

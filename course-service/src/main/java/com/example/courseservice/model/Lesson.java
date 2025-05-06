@@ -45,6 +45,7 @@ public class Lesson {
     Course course;
 
     @JsonIgnore
+    //@JsonManagedReference
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Exercise exercise;
 
