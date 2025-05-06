@@ -21,4 +21,10 @@ public interface VNPayPaymentPremiumPackageRepository extends JpaRepository<VNPa
 
    Optional<VNPayPaymentPremiumPackage> findFirstByUserUidAndStatusOrderByEndDateDesc(String userUid, String status);
    List<VNPayPaymentPremiumPackage> findAllByUserUidAndStatus(String userUid, String status);
+
+   @Query("SELECT COUNT(p) FROM VNPayPaymentPremiumPackage p WHERE p.status = 'ACTIVE'")
+   int countSuccessfulSubscriptions();
+
+   @Query("SELECT COUNT(p) FROM VNPayPaymentPremiumPackage p WHERE p.status = 'ACTIVE' AND MONTH(p.startDate) = :month AND YEAR(p.startDate) = :year")
+   int countNewSubscriptionsByMonth(@Param("month") int month, @Param("year") int year);
 }
