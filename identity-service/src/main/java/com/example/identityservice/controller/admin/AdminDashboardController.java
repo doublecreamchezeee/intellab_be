@@ -9,6 +9,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.courseservice.dto.ApiResponse;
+import com.example.identityservice.dto.response.chart.ChartResponse;
 import com.example.identityservice.service.AdminDashboardService;
 
 import java.util.UUID;
@@ -27,8 +29,8 @@ public class AdminLessonController {
         return role.contains("admin");
     }
 
-    @PostMapping
-    public ApiResponse<List<DashboardMetricResponse>> createLesson(
+    @GetMapping("/overview")
+    public ApiResponse<List<DashboardMetricResponse>> getOverview(
             @RequestHeader(value = "X-UserRole") String userRole) {
         userRole = userRole.split(",")[0];
         if (!isAdmin(userRole)) {
@@ -36,6 +38,34 @@ public class AdminLessonController {
         }
         return ApiResponse.<List<DashboardMetricResponse>>builder()
                 .result(dashboardService.getSystemOverview())
+                .build();
+    }
+
+    @GetMapping("/subscription-growth")
+    public ApiResponse<ChartResponse> getSubscriptionGrowth(
+            @RequestParam String type,
+            @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        userRole = userRole.split(",")[0];
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+        return ApiResponse.<ChartResponse>builder()
+                .result(dashboardService.getSubscriptionGrowth(type, startDate, endDate))
+                .build();
+    }
+
+    @GetMapping("/revenue")
+    public ApiResponse<ChartResponse> getSubscriptionGrowth(
+            @RequestParam String type,
+            @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        userRole = userRole.split(",")[0];
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+        return ApiResponse.<ChartResponse>builder()
+                .result(dashboardService.getRevenue(type, startDate, endDate))
                 .build();
     }
 }
