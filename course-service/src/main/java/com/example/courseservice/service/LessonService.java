@@ -79,11 +79,12 @@ public class LessonService {
 
     public List<LessonResponse> getCourseLessons(UUID courseId){
         boolean exits = courseRepository.existsById(courseId);
-        if (!exits)
-        {
+
+        if (!exits) {
             throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
         }
-        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseId(courseId);
+
+        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseIdOrderByLessonOrderAsc(courseId);
         return lessons.stream().map(lessonMapper::toLessonResponse).collect(Collectors.toList());
     }
 
@@ -146,6 +147,11 @@ public class LessonService {
         {
             course.setCurrentCreationStep(2);
             courseRepository.save(course);
+        }
+
+        if (lesson.getExercise() == null)
+        {
+           throw new AppException(ErrorCode.EXERCISE_NOT_FOUND);
         }
 
         Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
@@ -249,7 +255,7 @@ public class LessonService {
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
         lesson.setLessonName(request.getLessonName());
-        lesson.setLessonOrder(request.getLessonOrder());
+        //lesson.setLessonOrder(request.getLessonOrder());
         lesson.setContent(request.getContent());
         lesson.setDescription(request.getDescription());
         lesson.setProblemId(request.getProblemId());
@@ -266,12 +272,15 @@ public class LessonService {
 
         Exercise exercise = lesson.getExercise();
 
-        for (Question question: exercise.getQuestionList())
-        {
-            optionRepository.deleteAll(question.getOptions());
+        if (exercise != null) {
+            for (Question question : exercise.getQuestionList()) {
+                optionRepository.deleteAll(question.getOptions());
+            }
+
+            questionRepository.deleteAll(exercise.getQuestionList());
+            exerciseRepository.delete(exercise);
         }
-        questionRepository.deleteAll(exercise.getQuestionList());
-        exerciseRepository.delete(exercise);
+
 
         lessonRepository.delete(lesson);
     }

@@ -52,6 +52,10 @@ public class AdminQuizController {
                 .build();
     }
 
+    @Operation(
+            summary = "Remove question from quiz",
+            description = ""
+    )
     @DeleteMapping("/removeQuestion/{questionId}")
     ResponseEntity<Void> deleteQuestion(
             @PathVariable("questionId") UUID questionId,
@@ -66,6 +70,10 @@ public class AdminQuizController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = "Get quiz by lesson id",
+            description = ""
+    )
     @GetMapping("/{lessonId}")
     ApiResponse<ExerciseResponse> getQuiz(
             @PathVariable("lessonId") UUID lessonId,
