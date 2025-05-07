@@ -1,5 +1,6 @@
 package com.example.identityservice.service;
 
+import com.example.identityservice.client.CourseClient;
 import com.example.identityservice.dto.response.chart.ChartDataPoint;
 import com.example.identityservice.dto.response.chart.ChartResponse;
 import com.example.identityservice.dto.response.DashboardMetricResponse;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class AdminDashboardService {
     private final VNPayPaymentRepository vnpayPaymentRepository;
     private final VNPayPaymentPremiumPackageRepository premiumPackageRepository;
     private final VNPayPaymentCoursesRepository coursesRepository;
+    private final CourseClient courseClient;
 
     public List<DashboardMetricResponse> getSystemOverview() {
         int currentMonth = LocalDate.now().getMonthValue();
@@ -153,6 +156,35 @@ public class AdminDashboardService {
 
         return ChartResponse.builder()
                 .type(type)
+                .data(data)
+                .build();
+    }
+
+    public ChartResponse getCourseCompletionRate(String type, LocalDate startDate, LocalDate endDate) {
+        String unit = switch (type) {
+            case "hourly" -> "hour";
+            case "daily" -> "day";
+            case "weekly" -> "week";
+            case "monthly" -> "month";
+            case "custom" -> "day";
+            default -> throw new IllegalArgumentException("Invalid type: " + type);
+        };
+
+        // Get the data from courseClient
+        List<Object[]> rawData = Objects.requireNonNull(courseClient.getCourseCompleteRate(type, startDate, endDate).block()).getResult();
+
+        // Process the raw data into ChartDataPoint format
+        List<ChartDataPoint> data = rawData.stream()
+                .map(row -> {
+                    Instant timestamp = (Instant) row[0];
+                    Double completionRate = (Double) row[1];  // Assuming the completion rate is in the second column
+                    return new ChartDataPoint(unit, completionRate.intValue());
+                })
+                .toList();
+
+        // Return the chart response
+        return ChartResponse.builder()
+                .type(unit)
                 .data(data)
                 .build();
     }

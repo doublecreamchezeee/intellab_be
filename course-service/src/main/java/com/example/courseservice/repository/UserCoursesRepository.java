@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.rmi.server.UID;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,5 +48,19 @@ public interface UserCoursesRepository extends JpaRepository<UserCourses, Enroll
             @Param("problemId") UUID problemId,
             @Param("userId") UUID userId,
             @Param("accessStatus") String accessStatus
+    );
+
+    @Query("""
+    SELECT
+        FUNCTION('DATE_TRUNC', :unit, uc.lastAccessedDate) AS period,
+        SUM(CASE WHEN uc.status = 'Done' THEN 1 ELSE 0 END) * 1.0 / COUNT(uc) * 100
+    FROM UserCourses uc
+    WHERE uc.lastAccessedDate BETWEEN :start AND :end
+    GROUP BY period
+""")
+    List<Object[]> getCompletionRateByRange(
+            @Param("unit") String unit,
+            @Param("start") Instant start,
+            @Param("end") Instant end
     );
 }
