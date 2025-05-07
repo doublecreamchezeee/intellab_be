@@ -1,10 +1,11 @@
 package com.example.identityservice.dto.response.chart;
 
-import com.example.identityservice.dto.response.chart.ChartDataPoint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor

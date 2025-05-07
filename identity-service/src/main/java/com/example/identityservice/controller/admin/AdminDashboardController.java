@@ -1,5 +1,8 @@
 package com.example.identityservice.controller.admin;
 
+import com.example.identityservice.dto.response.DashboardMetricResponse;
+import com.example.identityservice.exception.AppException;
+import com.example.identityservice.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -7,12 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-
-import com.example.courseservice.dto.ApiResponse;
+import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.response.chart.ChartResponse;
 import com.example.identityservice.service.AdminDashboardService;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,7 +26,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 @Tag(name = "Admin Dashboard")
-public class AdminLessonController {
+public class AdminDashboardController {
     AdminDashboardService dashboardService;
     final String defaultRole = "myRole";
 
@@ -43,6 +48,7 @@ public class AdminLessonController {
 
     @GetMapping("/subscription-growth")
     public ApiResponse<ChartResponse> getSubscriptionGrowth(
+            @RequestHeader(value = "X-UserRole") String userRole,
             @RequestParam String type,
             @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -56,7 +62,8 @@ public class AdminLessonController {
     }
 
     @GetMapping("/revenue")
-    public ApiResponse<ChartResponse> getSubscriptionGrowth(
+    public ApiResponse<ChartResponse> getRevenue(
+            @RequestHeader(value = "X-UserRole") String userRole,
             @RequestParam String type,
             @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {

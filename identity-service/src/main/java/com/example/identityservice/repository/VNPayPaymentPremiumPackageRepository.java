@@ -3,6 +3,8 @@ package com.example.identityservice.repository;
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -39,7 +41,6 @@ public interface VNPayPaymentPremiumPackageRepository
             FROM VNPayPaymentPremiumPackage p
             WHERE p.status = 'ACTIVE' AND p.startDate BETWEEN :start AND :end
             GROUP BY period
-            ORDER BY period
             """)
     List<Object[]> countSubscriptionsByRange(
             @Param("unit") String unit,

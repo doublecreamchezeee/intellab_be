@@ -5,8 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,11 +32,10 @@ public interface VNPayPaymentRepository
     Float sumSuccessfulPaymentsByMonth(@Param("month") int month, @Param("year") int year);
 
     @Query("""
-                SELECT FUNCTION('DATE_TRUNC', :unit, p.createdAt) AS period, SUM(p.amount)
+                SELECT FUNCTION('DATE_TRUNC', :unit, p.createdAt) AS period, SUM(p.paidAmount)
                 FROM VNPayPayment p
-                WHERE p.status = 'PAID' AND p.createdAt BETWEEN :start AND :end
+                WHERE p.transactionStatus = 'PAID' AND p.createdAt BETWEEN :start AND :end
                 GROUP BY period
-                ORDER BY period
             """)
     List<Object[]> sumRevenueByRange(
             @Param("unit") String unit,

@@ -41,6 +41,7 @@ public enum ErrorCode {
     TOKEN_IS_EXPIRED(403, "Token is expired", HttpStatus.FORBIDDEN),
     CANNOT_UPDATE_PASSWORD(500, "Cannot update passowrd", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_WHEN_LOGIN(500, "Error when login", HttpStatus.INTERNAL_SERVER_ERROR),
+    USER_IS_NOT_ADMIN(403, "User is not admin", HttpStatus.FORBIDDEN),
 
     ;
     ErrorCode(int code, String message) {

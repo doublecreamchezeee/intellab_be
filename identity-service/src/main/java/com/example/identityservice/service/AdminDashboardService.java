@@ -1,14 +1,18 @@
 package com.example.identityservice.service;
 
+import com.example.identityservice.dto.response.chart.ChartDataPoint;
 import com.example.identityservice.dto.response.chart.ChartResponse;
-import com.example.identityservice.payload.response.DashboardMetricResponse;
+import com.example.identityservice.dto.response.DashboardMetricResponse;
 import com.example.identityservice.repository.VNPayPaymentCoursesRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.repository.VNPayPaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -109,8 +113,8 @@ public class AdminDashboardService {
                 .map(row -> {
                     Instant instant = (Instant) row[0];
                     Integer count = ((Number) row[1]).intValue();
-                    String label = formatLabel(instant, unit);
-                    return new ChartDataPoint(label, count);
+//                    String label = formatLabel(instant, unit);
+                    return new ChartDataPoint(unit, count);
                 })
                 .toList();
 
@@ -133,7 +137,7 @@ public class AdminDashboardService {
         LocalDate start = (startDate != null) ? startDate : LocalDate.now().minusMonths(6).withDayOfMonth(1);
         LocalDate end = (endDate != null) ? endDate : LocalDate.now().plusDays(1);
 
-        List<Object[]> raw = paymentRepo.sumRevenueByRange(
+        List<Object[]> raw = vnpayPaymentRepository.sumRevenueByRange(
                 unit,
                 start.atStartOfDay(ZoneId.systemDefault()).toInstant(),
                 end.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -142,8 +146,8 @@ public class AdminDashboardService {
                 .map(row -> {
                     Instant instant = (Instant) row[0];
                     Long amount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
-                    String label = formatLabel(instant, unit);
-                    return new ChartDataPoint(label, amount);
+//                    String label = formatLabel(instant, unit);
+                    return new ChartDataPoint(unit, Math.toIntExact(amount));
                 })
                 .toList();
 
@@ -153,14 +157,14 @@ public class AdminDashboardService {
                 .build();
     }
 
-    private String formatLabel(Instant timestamp, String unit) {
-        ZonedDateTime zdt = timestamp.atZone(ZoneId.systemDefault());
-        return switch (unit) {
-            case "hour" -> zdt.format(DateTimeFormatter.ofPattern("HH:mm dd/MM"));
-            case "day" -> zdt.format(DateTimeFormatter.ofPattern("dd MMM"));
-            case "week" -> "W" + zdt.get(WeekFields.ISO.weekOfWeekBasedYear()) + " " + zdt.getYear();
-            case "month" -> zdt.format(DateTimeFormatter.ofPattern("MMM yyyy"));
-            default -> zdt.toString();
-        };
-    }
+//    private String formatLabel(Instant timestamp, String unit) {
+//        ZonedDateTime zdt = timestamp.atZone(ZoneId.systemDefault());
+//        return switch (unit) {
+//            case "hour" -> zdt.format(DateTimeFormatter.ofPattern("HH:mm dd/MM"));
+//            case "day" -> zdt.format(DateTimeFormatter.ofPattern("dd MMM"));
+//            case "week" -> "W" + zdt.get(WeekFields.ISO.weekOfWeekBasedYear()) + " " + zdt.getYear();
+//            case "month" -> zdt.format(DateTimeFormatter.ofPattern("MMM yyyy"));
+//            default -> zdt.toString();
+//        };
+//    }
 }
