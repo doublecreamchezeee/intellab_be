@@ -71,6 +71,7 @@ public class ProblemService {
                 problem -> {
                     ProblemDescriptionResponse problemDescriptionResponse = new ProblemDescriptionResponse();
                     problemDescriptionResponse.setProblemId(problem.getProblemId());
+                    problemDescriptionResponse.setProblemName(problem.getProblemName());
                     problemDescriptionResponse.setDescription(problem.getDescription());
                     problemDescriptionResponse.setLevel(problem.getProblemLevel());
                     List<Category> categories = courseClient.categories(
