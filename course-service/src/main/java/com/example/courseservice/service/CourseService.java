@@ -222,7 +222,11 @@ public class CourseService {
             cloudinaryService.deleteImage(course.getCourseImage());
         }
 
-        courseRepository.deleteById(id);
+        course.setTopic(null);
+        course = courseRepository.save(course);
+        courseRepository.flush();
+
+        courseRepository.delete(course);
     }
 
     public CourseCreationResponse createCourse(UUID userUid, CourseCreationRequest request) {
