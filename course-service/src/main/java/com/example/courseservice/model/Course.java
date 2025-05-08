@@ -80,7 +80,7 @@ public class Course {
 
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "topic_id", nullable = true)
     Topic topic;
 
