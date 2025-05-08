@@ -7,7 +7,6 @@ import com.example.courseservice.configuration.DotenvConfig;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
-import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
 import com.example.courseservice.dto.response.Option.OptionResponse;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
@@ -22,6 +21,7 @@ import com.example.courseservice.mapper.*;
 import com.example.courseservice.model.*;
 import com.example.courseservice.model.compositeKey.OptionID;
 import com.example.courseservice.repository.*;
+import com.example.courseservice.specification.LessonSpecification;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -270,19 +271,31 @@ public class LessonService {
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
 
+        Course course = lesson.getCourse();
+        Integer lessonOrder = lesson.getLessonOrder();
+
         Exercise exercise = lesson.getExercise();
 
         if (exercise != null) {
             for (Question question : exercise.getQuestionList()) {
                 optionRepository.deleteAll(question.getOptions());
             }
-
             questionRepository.deleteAll(exercise.getQuestionList());
             exerciseRepository.delete(exercise);
         }
 
-
         lessonRepository.delete(lesson);
+        lessonRepository.flush();
+
+        Specification<Lesson> specification = Specification.where(
+                LessonSpecification.greaterThanLessonOrder(lessonOrder)
+                        .and(LessonSpecification.hasCourseId(course.getCourseId())));
+        // Update the lesson order for the remaining lessons in the course
+        List<Lesson> lessons = lessonRepository.findAll(specification);
+        for (Lesson lesson1 : lessons) {
+            lesson1.setLessonOrder(lessonOrder++);
+        }
+        lessonRepository.saveAll(lessons);
     }
 
 
