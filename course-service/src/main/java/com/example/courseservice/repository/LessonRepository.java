@@ -1,7 +1,7 @@
 package com.example.courseservice.repository;
 
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.Lesson;
-import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

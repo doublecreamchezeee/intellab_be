@@ -234,6 +234,11 @@ public class CourseService {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        /*course.setTopic(null);
+        course = courseRepository.save(course);
+        courseRepository.flush();
+
+        courseRepository.delete(course);*/
     }
 
     public CourseCreationResponse createCourse(UUID userUid, CourseCreationRequest request) {
@@ -1140,7 +1145,7 @@ public class CourseService {
            courseSummary = courseSummaryRepository.findById(courseId)
                    .orElse(
                            CourseSummary.builder()
-                                   .courseId(courseId)
+                                   //.courseId(courseId)
                                    .courseName(savedCourse.getCourseName())
                                    .summaryContent(request.getAiSummaryContent())
                                    .course(savedCourse)
@@ -1175,12 +1180,24 @@ public class CourseService {
 
        Course savedCourse = courseRepository.save(course);
 
-       CourseSummary courseSummary = savedCourse.getCourseSummary();
+       /*CourseSummary courseSummary = savedCourse.getCourseSummary();
 
        if (courseSummary != null) {
            courseSummary.setCourseName(savedCourse.getCourseName());
            courseSummaryRepository.save(courseSummary);
-       }
+       }*/
+
+       CourseSummary courseSummary = courseSummaryRepository.findById(courseId)
+               .orElse(
+                       CourseSummary.builder()
+                               .courseName(savedCourse.getCourseName())
+                               .summaryContent(null)
+                               .course(savedCourse)
+                               .build()
+               );
+
+       courseSummaryRepository.save(courseSummary);
+
 
        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
@@ -1212,11 +1229,12 @@ public class CourseService {
            courseSummary = courseSummaryRepository.findById(courseId)
                    .orElse(
                            CourseSummary.builder()
-                                   .courseId(courseId)
+                                   //.courseId(courseId)
                                    .courseName(savedCourse.getCourseName())
                                    .summaryContent(request.getAiSummaryContent())
                                    .course(savedCourse)
-                                   .build());
+                                   .build()
+                   );
 
            courseSummary.setSummaryContent(request.getAiSummaryContent());
            courseSummaryRepository.save(courseSummary);

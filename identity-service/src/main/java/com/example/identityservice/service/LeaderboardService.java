@@ -12,6 +12,7 @@ import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.model.CourseStat;
 import com.example.identityservice.model.Leaderboard;
 import com.example.identityservice.model.ProblemStat;
+import com.example.identityservice.model.User;
 import com.example.identityservice.repository.LeaderboardRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,8 @@ public class LeaderboardService {
     private final ProfileService profileService;
     private final FirebaseAuthClient firebaseAuthClient;
     private final LeaderboardRepository leaderboardRepository;
+    private final FirestoreService firestoreService;
+
     public Page<LeaderboardResponse> getLeaderboard(Pageable pageable, String filter) {
         List<Leaderboard> leaderboards;
 
@@ -42,12 +45,71 @@ public class LeaderboardService {
             leaderboards = leaderboardRepository.findByTypeOrderByScoreDesc("all", pageable);
         }
 
+
+
         List<LeaderboardResponse> responses = leaderboards.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
 
+        List<LeaderboardResponse> zeroPoints = zeroPoints(responses);
+
+        if (zeroPoints != null && zeroPoints.isEmpty()) {
+            responses.addAll(zeroPoints);
+        }
+
+        responses.addAll(zeroPoints);
+
         return new PageImpl<>(responses, pageable, responses.size());
 
+    }
+
+    private List<LeaderboardResponse> zeroPoints(List<LeaderboardResponse> leaderboards) {
+        List<String> uids = leaderboards.stream().map(LeaderboardResponse::getUserUid).toList();
+
+        List<String> userUids = null;
+
+
+        List<User> users = null;
+        try {
+            users = firestoreService.getAllUsers();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        users = users.stream().filter(user -> Objects.equals(user.getRole(), "user")).toList();
+
+
+        userUids = new ArrayList<>(users.stream().map(User::getUid).toList());
+        System.out.println(userUids);
+
+        if (userUids == null || userUids.isEmpty()) {
+            return null;
+        }
+
+        userUids.removeAll(uids);
+        userUids.remove(null);
+        userUids.remove("");
+
+
+
+        return userUids.stream().map(
+                uid -> {
+
+                    UserInfoResponse userInfoResponse = getUserInfoByUid(uid);
+
+
+                    return LeaderboardResponse.builder()
+                            .point(0L)
+                            .displayName(userInfoResponse.getDisplayName())
+                            .photoUrl(userInfoResponse.getPhotoUrl())
+                            .firstName(userInfoResponse.getFirstName())
+                            .lastName(userInfoResponse.getLastName())
+                            .problemStat(null)
+                            .courseStat(null)
+                            .userUid(userInfoResponse.getUserId())
+                            .build();
+                }
+        ).toList();
     }
 
     private LeaderboardResponse convertToResponse(Leaderboard leaderboard) {
@@ -70,6 +132,14 @@ public class LeaderboardService {
             return profileService.getUserInfo(firebaseAuthClient.getUid(UUID.fromString(userId)), "");
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private UserInfoResponse getUserInfoByUid(String userUid) {
+        try{
+            return profileService.getUserInfo(userUid, "");
+        } catch (Exception e) {
+            return UserInfoResponse.builder().build();
         }
     }
 
