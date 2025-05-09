@@ -56,6 +56,6 @@ public class Lesson {
 //    Problem problem;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<LearningLesson> learningLessons;
 }

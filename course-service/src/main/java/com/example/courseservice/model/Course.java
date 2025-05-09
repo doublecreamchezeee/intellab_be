@@ -30,17 +30,17 @@ public class Course {
     String courseName;
 
 //    @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     String description;
 
     // beginner, intermediate, advance
-    @Column(columnDefinition = "VARCHAR(20)")
+    @Column(name = "level", columnDefinition = "VARCHAR(20)")
     String level;
 
     @Column(name = "score")
     Integer score;
 
-    @Column(columnDefinition = "DECIMAL(11,2)")
+    @Column(name = "price", columnDefinition = "DECIMAL(11,2)")
     Float price;
 
     @Column(name = "unit_price", columnDefinition = "VARCHAR(10)")
@@ -80,7 +80,7 @@ public class Course {
 
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "topic_id", nullable = true)
     Topic topic;
 
@@ -105,5 +105,8 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "section_id")
     )
     List<Section> sections;
+
+    @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    CourseSummary courseSummary;
 
 }

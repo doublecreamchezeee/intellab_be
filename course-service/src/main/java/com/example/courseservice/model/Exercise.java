@@ -46,7 +46,7 @@ public class Exercise {
     List<Question> questionList = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Assignment> assignments;
 
 }

@@ -42,6 +42,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.transaction.Transactional;
 
 import java.awt.*;
 import java.time.Instant;
@@ -71,7 +72,8 @@ public class CourseService {
     private final LessonMapper lessonMapper;
     private final NotificationService notificationService;
     CloudinaryService cloudinaryService;
-
+    TopicRepository topicRepository;
+    CourseSummaryRepository courseSummaryRepository;
 
     public Page<CourseCreationResponse> getAllCourses(
             Boolean isAvailable, Boolean isCompletedCreation,
@@ -211,18 +213,27 @@ public class CourseService {
         });
     }
 
+    @Transactional
     public void deleteCourseById(UUID id, String userUid) {
         UUID userId = ParseUUID.normalizeUID(userUid);
         Course course = courseRepository.findByCourseIdAndUserId(id, userId);
+
         if (course == null) {
             throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
         }
+
+        log.info("Deleting course with ID: {}", id);
 
         if (course.getCourseImage() != null) {
             cloudinaryService.deleteImage(course.getCourseImage());
         }
 
-        courseRepository.deleteById(id);
+        try {
+            courseRepository.delete(course);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     public CourseCreationResponse createCourse(UUID userUid, CourseCreationRequest request) {
@@ -519,7 +530,16 @@ public class CourseService {
             throw new AppException(ErrorCode.USER_NOT_OWN_COURSE);
         }
 
-        return courseMapper.toAdminCourseCreationResponse(course);
+        AdminCourseCreationResponse response = courseMapper.toAdminCourseCreationResponse(course);
+
+       /* if (course.getCourseSummary() != null && course.getCourseSummary().getSummaryContent()!= null) {
+            CourseSummary courseSummary = course.getCourseSummary();
+            response.setAiSummaryContent(courseSummary.getSummaryContent());
+        }*/
+
+
+
+        return response;
     }
 
 
@@ -1008,8 +1028,7 @@ public class CourseService {
         return null;
     }
 
-    private AuthorCourseResponse toAuthorCourseResponse(Course course)
-    {
+    private AuthorCourseResponse toAuthorCourseResponse(Course course) {
         return AuthorCourseResponse.builder()
                 .courseId(course.getCourseId())
                 .courseName(course.getCourseName())
@@ -1085,6 +1104,15 @@ public class CourseService {
 
         Course savedCourse = courseRepository.save(course);
 
+        CourseSummary courseSummary = CourseSummary.builder()
+                        //.courseId(savedCourse.getCourseId())
+                        .courseName(savedCourse.getCourseName())
+                        .summaryContent(null)
+                        .course(savedCourse)
+                        .build();
+
+        courseSummaryRepository.save(courseSummary);
+
         return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
@@ -1092,27 +1120,45 @@ public class CourseService {
            FinalCourseCreationRequest request, UUID courseId,
            UUID userUuid, String userRole
    ) {
-        if (!userRole.equals(PredefinedRole.admin)) {
-            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
-        }
+       if (!userRole.equals(PredefinedRole.admin)) {
+           throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+       }
 
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+       Course course = courseRepository.findById(courseId)
+               .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-        course = courseMapper.updateCourse(request, course);
+       course = courseMapper.updateCourse(request, course);
 
-        course.setCurrentCreationStep(3);
-        course.setIsAvailable(false);
+       course.setCurrentCreationStep(3);
+       course.setIsAvailable(false);
 
-        Course savedCourse = courseRepository.save(course);
+       Course savedCourse = courseRepository.save(course);
 
-        return courseMapper.toAdminCourseCreationResponse(savedCourse);
+       CourseSummary courseSummary = null;
+
+       if (request.getAiSummaryContent() != null) {
+           courseSummary = courseSummaryRepository.findById(courseId)
+                   .orElse(
+                           CourseSummary.builder()
+                                   .courseId(courseId)
+                                   .courseName(savedCourse.getCourseName())
+                                   .summaryContent(request.getAiSummaryContent())
+                                   .course(savedCourse)
+                                   .build());
+
+           courseSummary.setSummaryContent(request.getAiSummaryContent());
+           courseSummaryRepository.save(courseSummary);
+       }
+
+       savedCourse.setCourseSummary(courseSummary);
+
+       return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
    public AdminCourseCreationResponse updateGeneralStepInCourseCreation(
               GeneralCourseCreationRequest request,
               UUID courseId, UUID userUuid, String userRole
-    ) {
+   ) {
        if (!userRole.equals(PredefinedRole.admin)) {
            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
        }
@@ -1128,6 +1174,13 @@ public class CourseService {
        course.setCategories(categories);
 
        Course savedCourse = courseRepository.save(course);
+
+       CourseSummary courseSummary = savedCourse.getCourseSummary();
+
+       if (courseSummary != null) {
+           courseSummary.setCourseName(savedCourse.getCourseName());
+           courseSummaryRepository.save(courseSummary);
+       }
 
        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
@@ -1150,6 +1203,26 @@ public class CourseService {
        course = courseMapper.updateCourse(request, course);
 
        Course savedCourse = courseRepository.save(course);
+
+       //CourseSummary courseSummary = savedCourse.getCourseSummary();
+
+       CourseSummary courseSummary = null;
+
+       if (request.getAiSummaryContent() != null) {
+           courseSummary = courseSummaryRepository.findById(courseId)
+                   .orElse(
+                           CourseSummary.builder()
+                                   .courseId(courseId)
+                                   .courseName(savedCourse.getCourseName())
+                                   .summaryContent(request.getAiSummaryContent())
+                                   .course(savedCourse)
+                                   .build());
+
+           courseSummary.setSummaryContent(request.getAiSummaryContent());
+           courseSummaryRepository.save(courseSummary);
+       }
+
+       savedCourse.setCourseSummary(courseSummary);
 
        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }

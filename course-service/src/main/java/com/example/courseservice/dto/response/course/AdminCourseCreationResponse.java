@@ -35,6 +35,12 @@ public class AdminCourseCreationResponse {
     @Nullable
     Integer numberOfEnrolledStudents;
 
+    @Nullable
+    String aiSummaryContent;
+
+    @Nullable
+    String templateLink;
+
     List<CategoryResponse> categories;
     List<Section> sections;
 }
