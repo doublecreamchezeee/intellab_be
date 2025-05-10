@@ -49,6 +49,7 @@ public enum ErrorCode {
     CANNOT_UPLOAD_IMAGE(500, "Cannot upload image", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_NOT_OWN_COURSE(403, "User not own course", HttpStatus.FORBIDDEN),
     COMPLETE_PREVIOUS_STEP_FIRST(409, "Please complete previous steps first", HttpStatus.CONFLICT),
+    COURSE_ALREADY_ENROLLED_CANNOT_DELETE(409, "Course already was enrolled by user so it cannot be deleted", HttpStatus.CONFLICT),
 
     ;
     ErrorCode(int code, String message) {

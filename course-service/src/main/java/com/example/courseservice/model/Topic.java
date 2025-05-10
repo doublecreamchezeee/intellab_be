@@ -25,7 +25,7 @@ public class Topic {
     @Column(name = "title")
     String title;
 
-    @Lob
+    //@Lob
     @Column(columnDefinition = "TEXT", name = "content")
     String content;
 
@@ -52,6 +52,6 @@ public class Topic {
     List<Comment> comments;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<OtherObjectReport> otherObjectReports;
 }

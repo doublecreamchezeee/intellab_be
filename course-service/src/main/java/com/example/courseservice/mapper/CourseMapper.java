@@ -7,6 +7,8 @@ import com.example.courseservice.dto.request.course.GeneralCourseCreationRequest
 import com.example.courseservice.dto.response.course.*;
 import com.example.courseservice.enums.course.CourseLevel;
 import com.example.courseservice.model.Course;
+import com.example.courseservice.utils.Certificate.CertificateTemplate1;
+import com.example.courseservice.utils.Certificate.CertificateTemplate2;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -48,6 +50,8 @@ public interface CourseMapper {
     @Mapping(target = "teacherUuid", source = "userId")
     @Mapping(target = "numberOfEnrolledStudents", expression = "java((course.getEnrollCourses() != null) ? course.getEnrollCourses().size() : 0)")
     @Mapping(target = "lessonCount", expression = "java((course.getLessons() != null) ? course.getLessons().size() : 0)")
+    @Mapping(target = "aiSummaryContent", expression = "java((course.getCourseSummary() != null && course.getCourseSummary().getSummaryContent()!=null) ? course.getCourseSummary().getSummaryContent() : null)")
+    @Mapping(target = "templateLink", source = "templateCode", qualifiedByName = "mapCertificateTemplateEnums")
     AdminCourseCreationResponse toAdminCourseCreationResponse(Course course);
 
     @Mapping(target = "categories",source = "categories")
@@ -117,5 +121,18 @@ public interface CourseMapper {
             default:
                 return "unknown";
         }
+    }
+
+    @Named("mapCertificateTemplateEnums")
+    default String mapCertificateTemplateEnums(Integer templateId) {
+        if (templateId == null) {
+            return null;
+        }
+
+        return switch (templateId) {
+            case 1 -> CertificateTemplate1.linkExample;
+            case 2 -> CertificateTemplate2.linkExample;
+            default -> null;
+        };
     }
 }
