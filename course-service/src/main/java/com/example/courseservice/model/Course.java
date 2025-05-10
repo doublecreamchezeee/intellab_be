@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -78,6 +80,9 @@ public class Course {
     @Column(name = "template_code", columnDefinition = "integer default 1")
     Integer templateCode = 1;
 
+    @CreationTimestamp
+    @Column(name = "created_at")
+    Instant createdAt;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true, cascade = CascadeType.ALL)
@@ -85,7 +90,7 @@ public class Course {
     Topic topic;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) //, fetch = FetchType.EAGER
     List<UserCourses> enrollCourses = new ArrayList<>();
 
     @JsonManagedReference

@@ -44,7 +44,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.transaction.Transactional;
 
-import java.awt.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -109,14 +108,17 @@ public class CourseService {
         Page<Course> courses = courseRepository.findAll(specification, pageable);
 
         return courses.map(course -> {
-            //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
-            List<Section> sections = course.getSections();
-            //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
-
             AdminCourseCreationResponse response = courseMapper.toAdminCourseCreationResponse(course);
-            //response.setLessonCount(lessonCount);
+
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            response.setLessonCount(lessonCount);
+
+            List<Section> sections = course.getSections();
             response.setSections(sections);
-            //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+
+            int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+            response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+
             return response;
         });
     }
@@ -174,14 +176,17 @@ public class CourseService {
 
         return result.map(
                 course -> {
-                    //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
-                    List<Section> sections = course.getSections();
-                    //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
-
                     AdminCourseCreationResponse response = courseMapper.toAdminCourseCreationResponse(course);
-                    //response.setLessonCount(lessonCount);
+
+                    int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+                    response.setLessonCount(lessonCount);
+
+                    List<Section> sections = course.getSections();
                     response.setSections(sections);
-                    //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+
+                    int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+                    response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+
                     return response;
                 }
         );
@@ -214,15 +219,21 @@ public class CourseService {
     }
 
     @Transactional
-    public void deleteCourseById(UUID id, String userUid) {
+    public void deleteCourseById(UUID courseId, String userUid) {
         UUID userId = ParseUUID.normalizeUID(userUid);
-        Course course = courseRepository.findByCourseIdAndUserId(id, userId);
+        Course course = courseRepository.findByCourseIdAndUserId(courseId, userId);
 
         if (course == null) {
             throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
         }
 
-        log.info("Deleting course with ID: {}", id);
+        // Check if the course is already enrolled by any user
+        boolean existedUserEnrolled = userCoursesRepository.existsByEnrollId_CourseId(courseId);
+        if (existedUserEnrolled) {
+            throw new AppException(ErrorCode.COURSE_ALREADY_ENROLLED_CANNOT_DELETE);
+        }
+
+        log.info("Deleting course with ID: {}", courseId);
 
         if (course.getCourseImage() != null) {
             cloudinaryService.deleteImage(course.getCourseImage());
@@ -325,7 +336,22 @@ public class CourseService {
 
         Page<Course> result = courseRepository.findAll(specification, pageable);
 
-        return getCourseSearchResponsesOfAdmin(result);
+        return result.map(course -> {
+            AdminCourseSearchResponse response = courseMapper.toAdminCourseSearchResponse(course);
+
+            List<Section> sections = course.getSections();
+            response.setSections(sections);
+
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            response.setLessonCount(lessonCount);
+
+            int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+            response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+
+            return response;
+        });
+
+        //return getCourseSearchResponsesOfAdmin(result);
     }
 
     @NotNull
@@ -373,14 +399,14 @@ public class CourseService {
         return result.map(course -> {
             AdminCourseSearchResponse response = courseMapper.toAdminCourseSearchResponse(course);
 
-            //int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;  //lessonRepository.countByCourse_CourseId(course.getCourseId());
-            //response.setLessonCount(lessonCount);
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;  //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            response.setLessonCount(lessonCount);
 
             List<Section> sections = course.getSections();
             response.setSections(sections);
 
-            //int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
-            //response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+            int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+            response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
 
             return response;
         });
@@ -422,7 +448,22 @@ public class CourseService {
 
         //Page<Course>  courses = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
 
-        return getCourseSearchResponsesOfAdmin(courses);
+        return courses.map(course -> {
+            AdminCourseSearchResponse response = courseMapper.toAdminCourseSearchResponse(course);
+
+            List<Section> sections = course.getSections();
+            response.setSections(sections);
+
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0; //lessonRepository.countByCourse_CourseId(course.getCourseId());
+            response.setLessonCount(lessonCount);
+
+            int numberOfEnrolledStudents = course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0;
+            response.setNumberOfEnrolledStudents(numberOfEnrolledStudents);
+
+            return response;
+        });
+
+        //return getCourseSearchResponsesOfAdmin(courses);
     }
 
 
