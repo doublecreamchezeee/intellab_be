@@ -25,10 +25,10 @@ public interface VNPayPaymentRepository
 
     Page<VNPayPayment> findAllByUserUuid(UUID userUuid, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = 'SUCCESS'")
+    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = 'PAID'")
     Float sumSuccessfulPayments();
 
-    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = 'SUCCESS' AND MONTH(p.createdAt) = :month AND YEAR(p.createdAt) = :year")
+    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = 'PAID' AND MONTH(p.createdAt) = :month AND YEAR(p.createdAt) = :year")
     Float sumSuccessfulPaymentsByMonth(@Param("month") int month, @Param("year") int year);
 
     @Query("""

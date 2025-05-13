@@ -30,7 +30,7 @@ public class TestCaseController {
     @Operation(
             summary = "Create test case"
     )
-    @PostMapping
+    @PostMapping("/admin/create-testcase")
     public ResponseEntity<TestCase> createTestCase(
             @RequestBody TestCaseCreationRequest request,
             @RequestHeader("X-UserId") String userUid

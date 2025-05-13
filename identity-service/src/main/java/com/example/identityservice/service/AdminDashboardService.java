@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.Objects;
 
@@ -116,8 +118,8 @@ public class AdminDashboardService {
                 .map(row -> {
                     Instant instant = (Instant) row[0];
                     Integer count = ((Number) row[1]).intValue();
-//                    String label = formatLabel(instant, unit);
-                    return new ChartDataPoint(unit, count);
+                    String label = formatLabel(instant, unit);
+                    return new ChartDataPoint(label, count);
                 })
                 .toList();
 
@@ -149,8 +151,8 @@ public class AdminDashboardService {
                 .map(row -> {
                     Instant instant = (Instant) row[0];
                     Long amount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
-//                    String label = formatLabel(instant, unit);
-                    return new ChartDataPoint(unit, Math.toIntExact(amount));
+                    String label = formatLabel(instant, unit);
+                    return new ChartDataPoint(label, Math.toIntExact(amount));
                 })
                 .toList();
 
@@ -178,7 +180,7 @@ public class AdminDashboardService {
                 .map(row -> {
                     Instant timestamp = (Instant) row[0];
                     Double completionRate = (Double) row[1];  // Assuming the completion rate is in the second column
-                    return new ChartDataPoint(unit, completionRate.intValue());
+                    return new ChartDataPoint(formatLabel(timestamp, unit), completionRate.intValue());
                 })
                 .toList();
 
@@ -189,14 +191,14 @@ public class AdminDashboardService {
                 .build();
     }
 
-//    private String formatLabel(Instant timestamp, String unit) {
-//        ZonedDateTime zdt = timestamp.atZone(ZoneId.systemDefault());
-//        return switch (unit) {
-//            case "hour" -> zdt.format(DateTimeFormatter.ofPattern("HH:mm dd/MM"));
-//            case "day" -> zdt.format(DateTimeFormatter.ofPattern("dd MMM"));
-//            case "week" -> "W" + zdt.get(WeekFields.ISO.weekOfWeekBasedYear()) + " " + zdt.getYear();
-//            case "month" -> zdt.format(DateTimeFormatter.ofPattern("MMM yyyy"));
-//            default -> zdt.toString();
-//        };
-//    }
+    private String formatLabel(Instant timestamp, String unit) {
+        ZonedDateTime zdt = timestamp.atZone(ZoneId.systemDefault());
+        return switch (unit) {
+            case "hour" -> zdt.format(DateTimeFormatter.ofPattern("HH:mm dd/MM"));
+            case "day" -> zdt.format(DateTimeFormatter.ofPattern("dd MMM"));
+            case "week" -> "W" + zdt.get(WeekFields.ISO.weekOfWeekBasedYear()) + " " + zdt.getYear();
+            case "month" -> zdt.format(DateTimeFormatter.ofPattern("MMM yyyy"));
+            default -> zdt.toString();
+        };
+    }
 }

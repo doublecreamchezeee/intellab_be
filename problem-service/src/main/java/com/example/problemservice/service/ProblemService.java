@@ -17,6 +17,7 @@ import com.example.problemservice.mapper.ProblemcategoryMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.ViewSolutionBehavior;
 import com.example.problemservice.model.composite.DefaultCodeId;
+import com.example.problemservice.model.composite.ProblemCategoryID;
 import com.example.problemservice.model.course.Category;
 import com.example.problemservice.repository.*;
 import com.example.problemservice.model.Problem;
@@ -52,7 +53,6 @@ public class ProblemService {
     private final ProblemCategoryRepository problemCategoryRepository;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
 
-
     private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), list.size());
@@ -85,34 +85,54 @@ public class ProblemService {
     }
 
     public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
+        // 1. Map DTO to entity
         Problem problem = problemMapper.toProblem(request);
 
+        // 2. Serialize problemStructure to String for DB
         problem.setProblemStructure(
-                ProblemStructureConverter.convertObjectToString(
-                        request.getProblemStructure()
-                )
+                ProblemStructureConverter.convertObjectToString(request.getProblemStructure())
         );
 
-        Problem savedProblem =  problemRepository.save(problem);
+        // 3. Save initial problem to get UUID
+        Problem savedProblem = problemRepository.save(problem);
 
+        // 4. Generate ProblemCategory entities directly from request.getCategories()
+        List<ProblemCategory> problemCategories = request.getCategories().stream()
+                .map(categoryId -> {
+                    return ProblemCategory.builder()
+                            .problemCategoryID(
+                                    ProblemCategoryID.builder()
+                                            .categoryId(categoryId)
+                                            .problemId(savedProblem.getProblemId())
+                                            .build()
+                            )
+                            .problem(savedProblem)
+                            .build();
+                })
+                .toList();
+
+        // 5. Save associations
+        problemCategoryRepository.saveAll(problemCategories);
+
+        // 6. Optionally set categories in the saved entity (not strictly necessary unless used later)
+        savedProblem.setCategories(problemCategories);
+
+        // 7. Save problem markdown file
         MarkdownUtility.saveProblemAsMarkdown(savedProblem);
 
-
-        //return response
-        ProblemCreationResponse response = problemMapper
-                .toProblemCreationResponse(savedProblem);
-
-        response.setProblemStructure(
-                request.getProblemStructure()
-        );
-
+        // 8. Generate default boilerplate code
         generateDefaultCodes(
                 savedProblem.getProblemId(),
                 savedProblem.getProblemStructure()
         );
 
+        // 9. Map to response and return
+        ProblemCreationResponse response = problemMapper.toProblemCreationResponse(savedProblem);
+        response.setProblemStructure(request.getProblemStructure());
+
         return response;
     }
+
 
     public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan, UUID userUuid) {
         Problem problem = problemRepository.findById(problemId)

@@ -4,6 +4,8 @@ import com.example.problemservice.core.ProblemStructure;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,8 +16,7 @@ public class ProblemCreationRequest {
     String description;
     String problemLevel;
     Integer score;
-    Float acceptanceRate;
-    Boolean isAvailable;
     Boolean isPublished;
     ProblemStructure problemStructure;
+    List<Integer> categories;
 }
