@@ -14,6 +14,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProblemDescriptionResponse {
     UUID problemId;
+    String problemName;
     String description;
     String level;
     List<Category> categories;

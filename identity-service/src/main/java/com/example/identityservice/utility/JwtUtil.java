@@ -78,7 +78,7 @@ public class JwtUtil {
                     .build();
         } catch (Exception e) {
             log.error("Error extracting user UID and expiration: {}", e.getMessage());
-            throw new RuntimeException("Invalid JWT token", e);
+            throw new RuntimeException("Invalid JWT token or session token expired", e);
         }
     }
 

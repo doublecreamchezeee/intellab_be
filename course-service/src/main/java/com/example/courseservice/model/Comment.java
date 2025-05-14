@@ -70,7 +70,7 @@ public class Comment {
 
 
     @JsonIgnore
-    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<CommentReport> commentReports = new ArrayList<>();
 
     @JsonIgnore
