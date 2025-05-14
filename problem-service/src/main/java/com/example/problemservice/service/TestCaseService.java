@@ -7,6 +7,7 @@ import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationR
 import com.example.problemservice.dto.request.testcase.TestCasesGenerationRequest;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import com.example.problemservice.mapper.TestCaseMapper;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.TestCase;
 import com.example.problemservice.repository.ProblemRepository;
@@ -25,7 +26,9 @@ import java.util.UUID;
 public class TestCaseService {
     private final TestCaseRepository testCaseRepository;
     private final ProblemRepository problemRepository;
-    public TestCase createTestCase(UUID userUid, TestCaseCreationRequest request) {
+    private final TestCaseMapper testCaseMapper;
+    
+    public TestCaseCreationResponse createTestCase(TestCaseCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
@@ -33,7 +36,6 @@ public class TestCaseService {
                 .problem(problem)
                 .input(request.getInput())
                 .output(request.getOutput())
-                .userId(userUid)
                 .build();
 
         if (problem.getTestCases() != null){
@@ -54,8 +56,7 @@ public class TestCaseService {
                 testCase.getInput(),
                 testCase.getOutput()
         );
-
-        return testCase;
+        return testCaseMapper.toTestCaseResponse(testCase);
     }
 
     public TestCase getTestCase(UUID testCaseId) {
