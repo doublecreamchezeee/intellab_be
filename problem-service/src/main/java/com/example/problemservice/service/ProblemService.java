@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,14 +62,14 @@ public class ProblemService {
     }
 
     public List<CategoryResponse> getCategories() {
-        List<Category> courseCategories = courseClient.categories();
+        List<Category> courseCategories = courseClient.categories().getResult();
 
         return courseCategories.stream()
             .map(category -> CategoryResponse.builder()
                 .categoryId(category.getCategoryId())
                 .name(category.getName())
                 .build())
-            .collect(Collector.toList());
+            .collect(Collectors.toList());
     }
 
     public List<ProblemDescriptionResponse> getProblemsDescription(String keyword, List<Integer> categoryIds,

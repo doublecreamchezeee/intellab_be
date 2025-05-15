@@ -1,21 +1,16 @@
 package com.example.problemservice.controller;
 
-import com.example.courseservice.dto.ApiResponse;
 import com.example.problemservice.dto.request.TestCaseCreationRequest;
 import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationRequest;
 import com.example.problemservice.dto.request.testcase.TestCasesGenerationRequest;
+import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.testcase.TestCaseCreationResponse;
-import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.TestCase;
 import com.example.problemservice.service.TestCaseService;
-import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,8 +40,7 @@ public class TestCaseController {
           .code(403)
           .message("Forbidden").build();
     }
-    TestCase response = testCaseService.createTestCase(
-        ParseUUID.normalizeUID(userUid),
+    TestCaseCreationResponse response = testCaseService.createTestCase(
         request);
     return ApiResponse.<TestCaseCreationResponse>builder()
         .result(response)
@@ -57,16 +51,19 @@ public class TestCaseController {
 
   @Operation(summary = "Create multiple test case")
   @PostMapping("/multiple")
-  public ResponseEntity<List<TestCase>> createMultipleProblem(
+  public ApiResponse<List<TestCaseCreationResponse>> createMultipleProblem(
       @RequestBody TestCaseMultipleCreationRequest request,
-      @RequestHeader("X-UserId") String userUid) {
-    userUid = userUid.split(",")[0];
 
-    List<TestCase> response = testCaseService.createMultipleTestCases(
-        ParseUUID.normalizeUID(userUid),
+      @RequestHeader("X-UserId") String userUid) {
+
+    List<TestCaseCreationResponse> response = testCaseService.createMultipleTestCases(
         request);
 
-    return ResponseEntity.ok(response);
+    return ApiResponse.<List<TestCaseCreationResponse>>builder()
+            .result(response)
+            .code(200)
+            .message("Created")
+            .build();
   }
 
   @Operation(summary = "Get supported data types")
