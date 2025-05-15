@@ -8,6 +8,7 @@ import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
+import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.Problem.DetailsProblemResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
 import com.example.problemservice.dto.response.Problem.ProblemDescriptionResponse;
@@ -120,6 +121,13 @@ public class ProblemController {
       }
       throw e;
     }
+  }
+
+  @GetMapping("/categories")
+  public ApiResponse<List<CategoryResponse>> getCategories(){
+    return ApiResponse.<List<CategoryResponse>>builder()
+        .result(problemService.getCategories())
+        .build();
   }
 
   @Operation(summary = "Get problem page")
