@@ -230,7 +230,7 @@ public class LessonService {
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-            Map<UUID, Integer> lessonIdMap = IntStream.range(0, lessonIds.size()).boxed().collect(Collectors.toMap(lessonIds::get, i -> i));
+            Map<UUID, Integer> lessonIdMap = IntStream.range(0, lessonIds.size()).boxed().collect(Collectors.toMap(lessonIds::get, i -> i + 1));
 
             List<Lesson> lessons = lessonRepository.findAllById(lessonIds);
 
