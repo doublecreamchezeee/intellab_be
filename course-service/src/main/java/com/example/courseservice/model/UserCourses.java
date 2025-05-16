@@ -27,6 +27,7 @@ public class UserCourses {
 
     @ManyToOne
     @JsonIgnore
+    //@JsonBackReference
     @MapsId("courseId")
     @JoinColumn(name = "course_id",nullable = false)
     Course course;

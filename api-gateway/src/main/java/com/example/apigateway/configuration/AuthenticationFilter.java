@@ -135,6 +135,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                     role += "," + premium;
                 }
 
+                if (role.equals("admin"))
+                {
+                    role = "admin,PREMIUM_PLAN";
+                }
+
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
                         .header("X-UserRole", role)
@@ -183,7 +188,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     Mono<Void> unauthenticated(ServerHttpResponse response) {
-        String message = "Unauthenticated";
+        String message = "Unauthenticated occurred in API gateway";
 
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -196,7 +201,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     Mono<Void> unknownErrorOccurred(ServerHttpResponse response) {
-        String message = "Unauthenticated or unknown error occurred in services";
+        String message = "Unauthenticated occurred in API gateway or unknown error occurred in services";
 
         response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
