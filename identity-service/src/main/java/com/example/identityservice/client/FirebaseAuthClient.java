@@ -1,10 +1,14 @@
 package com.example.identityservice.client;
 
+import com.example.identityservice.annotation.ExecutionTiming;
 import com.example.identityservice.configuration.firebase.FirebaseConfigurationProperties;
 import com.example.identityservice.dto.request.auth.FirebaseSignInRequest;
 import com.example.identityservice.dto.request.auth.UserLoginRequest;
+import com.example.identityservice.dto.response.admin.AdminUserResponse;
 import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.enums.account.PremiumPackageStatus;
+import com.example.identityservice.exception.AppException;
+import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.exception.FirebaseAuthenticationException;
 import com.example.identityservice.exception.InvalidLoginCredentialsException;
 import com.example.identityservice.mapper.UserMapper;
@@ -18,8 +22,12 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.auth.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -32,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 @Component
 @RequiredArgsConstructor
 @EnableConfigurationProperties(FirebaseConfigurationProperties.class)
+@Slf4j
 public class FirebaseAuthClient {
 
     private final FirebaseConfigurationProperties firebaseConfigurationProperties;
@@ -330,6 +339,93 @@ public class FirebaseAuthClient {
             return true;
         } catch (FirebaseAuthException e) {
             throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
+        }
+    }
+
+    @ExecutionTiming
+    public void getAllListUsers(Integer size, String pageIndex) {
+        try {
+            int countTotalUsers = 0;
+            List<AdminUserResponse> adminUserResponses = new ArrayList<>();
+            ListUsersPage userPage = firebaseAuth.listUsers(null);
+
+            // Iterate through all users
+            while (userPage != null) {
+                for (ExportedUserRecord user : userPage.getValues()) {
+                    System.out.println("User UID: " + user.getUid());
+                    System.out.println("Email: " + user.getEmail());
+                    // Add more user details as needed
+                    countTotalUsers++;
+
+
+                    /*if (countTotalUsers < size && countTotalUsers > Integer.parseInt(pageIndex)) {
+                        adminUserResponses.add(UserMapper.INSTANCE.fromRecordToResponse(user));
+                    }*/
+                }
+                userPage = userPage.getNextPage();
+            }
+            log.info("Total users: {}", countTotalUsers);
+
+
+
+        } catch (FirebaseAuthException e) {
+            throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION);
+        }
+    }
+
+    public Page<AdminUserResponse> getAllUsers2(Integer size, Integer pageIndex) {
+        try {
+            List<AdminUserResponse> allUsers = new ArrayList<>();
+            ListUsersPage userPage = firebaseAuth.listUsers(null);
+
+            // Collect all users
+            while (userPage != null) {
+                for (ExportedUserRecord user : userPage.getValues()) {
+                    allUsers.add(UserMapper.INSTANCE.fromRecordToResponse(user));
+                }
+                userPage = userPage.getNextPage();
+            }
+
+            // Pagination logic
+            int start = pageIndex * size;
+            int end = Math.min(start + size, allUsers.size());
+            if (start > allUsers.size()) {
+                return new PageImpl<>(Collections.emptyList(), PageRequest.of(pageIndex, size), allUsers.size());
+            }
+
+            List<AdminUserResponse> paginatedUsers = allUsers.subList(start, end);
+            return new PageImpl<>(paginatedUsers, PageRequest.of(pageIndex, size), allUsers.size());
+        } catch (FirebaseAuthException e) {
+            throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION);
+        }
+    }
+
+    public Page<AdminUserResponse> getAllUsers(Integer pageSize, Integer pageNumber) {
+        try {
+            List<AdminUserResponse> paginatedUsers = new ArrayList<>();
+            int start = pageNumber * pageSize;
+            int end = start + pageSize;
+            int currentIndex = 0;
+
+            ListUsersPage userPage = firebaseAuth.listUsers(null);
+
+            // Collect only the necessary users for the requested page
+            while (userPage != null ) { //&& currentIndex < end
+                for (ExportedUserRecord user : userPage.getValues()) {
+                    if (currentIndex >= start && currentIndex < end) {
+                        paginatedUsers.add(UserMapper.INSTANCE.fromRecordToResponse(user));
+                    }
+                    currentIndex++;
+                    /*if (currentIndex >= end) {
+                        break;
+                    }*/
+                }
+                userPage = userPage.getNextPage();
+            }
+
+            return new PageImpl<>(paginatedUsers, PageRequest.of(pageNumber, pageSize), currentIndex);
+        } catch (FirebaseAuthException e) {
+            throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION);
         }
     }
 }
