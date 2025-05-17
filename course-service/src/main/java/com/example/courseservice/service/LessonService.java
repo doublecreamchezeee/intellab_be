@@ -224,8 +224,7 @@ public class LessonService {
         return newExercise;
     }
 
-    public Boolean updateLessonsOrder(UUID courseId, List<UUID> lessonIds)
-    {
+    public Boolean updateLessonsOrder(UUID courseId, List<UUID> lessonIds) {
         try {
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
@@ -250,8 +249,7 @@ public class LessonService {
         return true;
     }
 
-    public LessonResponse updateLesson(LessonUpdateRequest request)
-    {
+    public LessonResponse updateLesson(LessonUpdateRequest request) {
         Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
@@ -265,8 +263,7 @@ public class LessonService {
         return  lessonMapper.toLessonResponse(lesson);
     }
 
-    public void removeLesson(UUID lessonId)
-    {
+    public void removeLesson(UUID lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );

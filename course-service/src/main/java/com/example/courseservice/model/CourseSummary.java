@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "\"courses_summary\"")
+@Table(name = "\"course_summary\"")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CourseSummary {
     @Id
