@@ -5,8 +5,10 @@ import com.example.problemservice.core.NumberTestCaseGenerator;
 import com.example.problemservice.dto.request.TestCaseCreationRequest;
 import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationRequest;
 import com.example.problemservice.dto.request.testcase.TestCasesGenerationRequest;
+import com.example.problemservice.dto.response.testcase.TestCaseCreationResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
+import com.example.problemservice.mapper.TestCaseMapper;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.TestCase;
 import com.example.problemservice.repository.ProblemRepository;
@@ -19,13 +21,16 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TestCaseService {
     private final TestCaseRepository testCaseRepository;
     private final ProblemRepository problemRepository;
-    public TestCase createTestCase(UUID userUid, TestCaseCreationRequest request) {
+    private final TestCaseMapper testCaseMapper;
+    
+    public TestCaseCreationResponse createTestCase(TestCaseCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
@@ -33,7 +38,6 @@ public class TestCaseService {
                 .problem(problem)
                 .input(request.getInput())
                 .output(request.getOutput())
-                .userId(userUid)
                 .build();
 
         if (problem.getTestCases() != null){
@@ -54,8 +58,7 @@ public class TestCaseService {
                 testCase.getInput(),
                 testCase.getOutput()
         );
-
-        return testCase;
+        return testCaseMapper.toTestCaseResponse(testCase);
     }
 
     public TestCase getTestCase(UUID testCaseId) {
@@ -73,7 +76,7 @@ public class TestCaseService {
         return testCaseRepository.findAllByProblem_ProblemId(problemId);
     }
 
-    public List<TestCase> createMultipleTestCases(UUID userUid, TestCaseMultipleCreationRequest request) {
+    public List<TestCaseCreationResponse> createMultipleTestCases(TestCaseMultipleCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
@@ -87,17 +90,15 @@ public class TestCaseService {
                     .problem(problem)
                     .input(request.getInputs().get(i))
                     .output(request.getOutputs().get(i))
-                    .userId(userUid)
                     .build();
             testCases.add(testCase);
         }
 
-        if (problem.getTestCases() != null){
+        if (problem.getTestCases() != null) {
             List<TestCase> newListTestCase = problem.getTestCases();
             newListTestCase.addAll(testCases);
             problem.setTestCases(newListTestCase);
-        }
-        else {
+        } else {
             problem.setTestCases(testCases);
         }
 
@@ -107,9 +108,12 @@ public class TestCaseService {
         TestCaseFileReader.saveTestCases(
                 problem.getProblemName(),
                 request.getInputs(),
-                request.getOutputs());
+                request.getOutputs()
+        );
 
-        return testCases;
+        return testCases.stream()
+                .map(testCaseMapper::toTestCaseResponse)
+                .collect(Collectors.toList());
     }
 
     public List<String> getSupportedDataTypes() {

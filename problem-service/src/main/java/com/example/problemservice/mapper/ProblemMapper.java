@@ -24,6 +24,7 @@ public interface ProblemMapper {
     ProblemRowResponse toProblemRowResponse(Problem problem);
 
     @Mapping(target = "problemStructure", ignore = true)
+    @Mapping(target = "categories", ignore = true)
     Problem toProblem(ProblemCreationRequest problemCreationRequest);
 
     @Mapping(target = "hasSolution", expression = "java(problem.getSolution() != null)")
@@ -34,5 +35,6 @@ public interface ProblemMapper {
     DetailsProblemResponse toProblemDetailsResponse(Problem problem);
 
     @Mapping(target = "problemStructure", ignore = true)
+    @Mapping(target = "categories", ignore = true)
     void updateProblemFromRequest(ProblemCreationRequest request, @MappingTarget Problem problem);
 }

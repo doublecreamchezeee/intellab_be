@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springdoc.core.parsers.ReturnTypeParser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.transaction.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -190,6 +192,22 @@ public class CourseService {
                     return response;
                 }
         );
+    }
+
+    public List<Object[]> getCompletionRate(String type, LocalDate startDate, LocalDate endDate){
+        String unit = switch (type) {
+            case "hourly" -> "hour";
+            case "daily" -> "day";
+            case "weekly" -> "week";
+            case "monthly" -> "month";
+            case "custom" -> "day";
+            default -> throw new IllegalArgumentException("Invalid type: " + type);
+        };
+
+        LocalDate start = (startDate != null) ? startDate : LocalDate.now().minusMonths(6).withDayOfMonth(1);
+        LocalDate end = (endDate != null) ? endDate : LocalDate.now().plusDays(1);
+
+        return userCoursesRepository.getCompletionRateByRange(unit, start.atStartOfDay(ZoneId.systemDefault()).toInstant(), end.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public Page<CourseCreationResponse> getAllCoursesExceptEnrolledByUser(UUID userId, Pageable pageable) {
