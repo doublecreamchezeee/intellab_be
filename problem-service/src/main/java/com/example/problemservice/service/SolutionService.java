@@ -30,23 +30,30 @@ public class SolutionService {
 
     public SolutionCreationResponse createSolution(SolutionCreationRequest request) {
 
+        // Step 1: Fetch the related problem
         Problem problem = problemRepository.findById(
-                     UUID.fromString(
-                             request.getProblemId()
-                     )
-                ).orElseThrow(() -> new AppException(
-                        ErrorCode.PROBLEM_NOT_EXIST)
-                );
+                UUID.fromString(request.getProblemId())
+        ).orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
+        // Step 2: Build composite key
+        SolutionID solutionId = SolutionID.builder()
+                .problemId(UUID.fromString(request.getProblemId()))
+                .authorId(UUID.fromString(request.getAuthorId()))
+                .build();
+
+        // Step 3: Map request to entity and assign IDs + relationship
         Solution solution = solutionMapper.toSolution(request);
-
+        solution.setId(solutionId);
         solution.setProblem(problem);
 
-
+        // Step 4: Save to DB
         solution = solutionRepository.save(solution);
 
+        // Step 5: Return response
         return solutionMapper.toSolutionCreationResponse(solution);
     }
+
+
 
     public Solution getSolution(SolutionID solutionId) {
         return solutionRepository.findById(solutionId)
@@ -70,7 +77,7 @@ public class SolutionService {
     }
 
     public DetailsSolutionResponse getSolutionByProblemId(UUID problemId) {
-        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByProblemId(problemId));
+        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByIdProblemId(problemId));
     }
 
     public SolutionUpdateResponse updateSolution(String problemId, String authorId, SolutionUpdateRequest request) {

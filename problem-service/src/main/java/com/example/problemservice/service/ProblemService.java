@@ -145,6 +145,77 @@ public class ProblemService {
         return response;
     }
 
+    public ProblemCreationResponse generalStep(ProblemCreationRequest request) {
+        // 1. Map DTO to entity
+        Problem problem = problemMapper.toProblem(request);
+
+        // 3. Save initial problem to get UUID
+        Problem savedProblem = problemRepository.save(problem);
+
+        // 4. Generate ProblemCategory entities directly from request.getCategories()
+        List<ProblemCategory> problemCategories = request.getCategories().stream()
+                .map(categoryId -> {
+                    return ProblemCategory.builder()
+                            .problemCategoryID(
+                                    ProblemCategoryID.builder()
+                                            .categoryId(categoryId)
+                                            .problemId(savedProblem.getProblemId())
+                                            .build())
+                            .problem(savedProblem)
+                            .build();
+                })
+                .toList();
+
+        // 5. Save associations
+        problemCategoryRepository.saveAll(problemCategories);
+
+        // 6. Optionally set categories in the saved entity (not strictly necessary
+        // unless used later)
+        savedProblem.setCategories(problemCategories);
+        return problemMapper.toProblemCreationResponse(savedProblem);
+    }
+
+    public ProblemCreationResponse descriptionStep(ProblemCreationRequest request) {
+        if (request.getProblemId() == null) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
+        }
+
+        Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
+                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+        );
+
+        problem.setDescription(request.getDescription());
+        Problem savedProblem = problemRepository.save(problem);
+        return problemMapper.toProblemCreationResponse(savedProblem);
+    }
+
+    public ProblemCreationResponse structureStep(ProblemCreationRequest request) {
+        if (request.getProblemId() == null) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
+        }
+        Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
+                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+        );
+
+        // 2. Serialize problemStructure to String for DB
+        problem.setProblemStructure(
+                ProblemStructureConverter.convertObjectToString(request.getProblemStructure()));
+
+        // 7. Save problem markdown file
+        MarkdownUtility.saveProblemAsMarkdown(problem);
+
+        // 8. Generate default boilerplate code
+        generateDefaultCodes(
+                problem.getProblemId(),
+                problem.getProblemStructure());
+
+        Problem savedProblem = problemRepository.save(problem);
+        ProblemCreationResponse response = problemMapper.toProblemCreationResponse(savedProblem);
+        response.setProblemStructure(request.getProblemStructure());
+
+        return response;
+    }
+
     public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan, UUID userUuid) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));

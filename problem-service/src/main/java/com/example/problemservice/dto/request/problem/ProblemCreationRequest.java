@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProblemCreationRequest {
+    String problemId;
     String problemName;
     String description;
     String problemLevel;
