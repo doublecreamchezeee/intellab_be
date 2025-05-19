@@ -41,6 +41,9 @@ public enum ErrorCode {
     TOKEN_IS_EXPIRED(403, "Token is expired", HttpStatus.FORBIDDEN),
     CANNOT_UPDATE_PASSWORD(500, "Cannot update passowrd", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_WHEN_LOGIN(500, "Error when login", HttpStatus.INTERNAL_SERVER_ERROR),
+    ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION(500, "Error when retrieving user from firebase authentication", HttpStatus.INTERNAL_SERVER_ERROR),
+    ERROR_WHEN_RETRIEVING_USER_FROM_FIRESTORE(500, "Error when retrieving user from firestore", HttpStatus.INTERNAL_SERVER_ERROR),
+    ERROR_WHEN_RETRIEVING_USER_FROM_DATABASE(500, "Error when retrieving user from database", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_IS_NOT_ADMIN(403, "User is not admin", HttpStatus.FORBIDDEN),
 
     ;
