@@ -19,6 +19,7 @@ import com.example.problemservice.model.ViewSolutionBehavior;
 import com.example.problemservice.model.composite.DefaultCodeId;
 import com.example.problemservice.model.composite.ProblemCategoryID;
 import com.example.problemservice.model.course.Category;
+import com.example.problemservice.model.course.Course;
 import com.example.problemservice.repository.*;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
@@ -148,7 +149,6 @@ public class ProblemService {
     public ProblemCreationResponse generalStep(ProblemCreationRequest request) {
         // 1. Map DTO to entity
         Problem problem = problemMapper.toProblem(request);
-
         // 3. Save initial problem to get UUID
         Problem savedProblem = problemRepository.save(problem);
 
@@ -183,6 +183,8 @@ public class ProblemService {
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
+        problem.setCurrentCreationStep(2);
+
 
         problem.setDescription(request.getDescription());
         Problem savedProblem = problemRepository.save(problem);
@@ -196,7 +198,7 @@ public class ProblemService {
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
-
+        problem.setCurrentCreationStep(3);
         // 2. Serialize problemStructure to String for DB
         problem.setProblemStructure(
                 ProblemStructureConverter.convertObjectToString(request.getProblemStructure()));
@@ -214,6 +216,52 @@ public class ProblemService {
         response.setProblemStructure(request.getProblemStructure());
 
         return response;
+    }
+
+    public ProblemCreationResponse updateCourseCompletedCreationStatus(
+            Boolean completedCreationStatus, UUID problemId
+    ) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+
+        if (problem.getCurrentCreationStep() < 5) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_COMPLETE);
+        }
+
+        if (!completedCreationStatus) {
+            problem.setIsAvailable(false);
+        }
+
+        problem.setIsCompletedCreation(completedCreationStatus);
+
+        Problem savedProblem = problemRepository.save(problem);
+
+        return problemMapper.toProblemCreationResponse(savedProblem);
+    }
+
+    public ProblemCreationResponse updateCourseAvailableStatus(
+            Boolean availableStatus, UUID problemId
+    ) {
+        Problem problem = problemRepository.findById(problemId).orElseThrow(
+                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+        );
+
+        if (problem.getCurrentCreationStep() < 5) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_COMPLETE);
+        }
+
+
+        if (availableStatus) {
+            // auto update completed creation status to true
+            problem.setCurrentCreationStep(6);
+            problem.setIsCompletedCreation(true);
+
+        }
+        problem.setIsAvailable(availableStatus);
+
+        Problem savedProblem = problemRepository.save(problem);
+
+        return problemMapper.toProblemCreationResponse(savedProblem);
     }
 
     public DetailsProblemResponse getProblem(UUID problemId, String subscriptionPlan, UUID userUuid) {

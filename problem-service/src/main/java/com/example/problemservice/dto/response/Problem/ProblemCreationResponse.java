@@ -20,4 +20,6 @@ public class ProblemCreationResponse {
     Boolean isPublished;
     ProblemStructure problemStructure;
     Boolean hasSolution;
+    Boolean isCompletedCreation;
+    Integer currentCreationStep;
 }

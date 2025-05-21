@@ -12,6 +12,7 @@ import com.example.problemservice.dto.response.testcase.TestCaseCreationResponse
 import com.example.problemservice.service.ProblemService;
 import com.example.problemservice.service.SolutionService;
 import com.example.problemservice.service.TestCaseService;
+import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin/problems")
@@ -35,7 +37,7 @@ public class AdminProblemController {
     }
 
     @Operation(summary = "Create problem")
-    @PostMapping("/create-problem")
+    @PostMapping
     public ApiResponse<ProblemCreationResponse> createProblem(
             @RequestHeader("X-UserRole") String role,
             @RequestBody ProblemCreationRequest problem) {
@@ -52,8 +54,8 @@ public class AdminProblemController {
                 .build();
     }
 
-    @Operation(summary = "Create problem")
-    @PostMapping("/create-problem/general-step")
+    @Operation(summary = "Create general")
+    @PostMapping("/general-step")
     public ApiResponse<ProblemCreationResponse> createProblemGeneralStep(
             @RequestHeader("X-UserRole") String role,
             @RequestBody ProblemCreationRequest problem) {
@@ -70,8 +72,8 @@ public class AdminProblemController {
                 .build();
     }
 
-    @Operation(summary = "Create problem")
-    @PostMapping("/create-problem/description-step")
+    @Operation(summary = "Create description")
+    @PostMapping("/description-step")
     public ApiResponse<ProblemCreationResponse> createProblemDescriptionStep(
             @RequestHeader("X-UserRole") String role,
             @RequestBody ProblemCreationRequest problem) {
@@ -88,8 +90,8 @@ public class AdminProblemController {
                 .build();
     }
 
-    @Operation(summary = "Create problem")
-    @PostMapping("/create-problem/structure-step")
+    @Operation(summary = "Create structure")
+    @PostMapping("/structure-step")
     public ApiResponse<ProblemCreationResponse> createProblemStructureStep(
             @RequestHeader("X-UserRole") String role,
             @RequestBody ProblemCreationRequest problem) {
@@ -107,7 +109,7 @@ public class AdminProblemController {
     }
 
     @Operation(summary = "Create test case")
-    @PostMapping("/create-problem/testcase-step")
+    @PostMapping("/testcase-step")
     public ApiResponse<TestCaseCreationResponse> createTestCaseStep(
             @RequestBody TestCaseCreationRequest request,
             @RequestHeader("X-UserRole") String role) {
@@ -127,7 +129,7 @@ public class AdminProblemController {
     }
 
     @Operation(summary = "Create test case")
-    @PostMapping("/create-problem/multiple-testcase-step")
+    @PostMapping("/multiple-testcase-step")
     public ApiResponse<List<TestCaseCreationResponse>> createMultipleTestCaseStep(
             @RequestBody TestCaseMultipleCreationRequest request,
             @RequestHeader("X-UserRole") String role) {
@@ -150,7 +152,7 @@ public class AdminProblemController {
     @Operation(
             summary = "Create solution"
     )
-    @PostMapping("/create-problem/solution-step")
+    @PostMapping("/solution-step")
     public ApiResponse<SolutionCreationResponse> createSolutionStep(
             @RequestHeader("X-UserRole") String role,
             @RequestBody  SolutionCreationRequest request) {
@@ -172,6 +174,56 @@ public class AdminProblemController {
     public ApiResponse<List<CategoryResponse>> getCategories(){
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(problemService.getCategories())
+                .build();
+    }
+
+    @Operation(
+            summary = "Update available status of a problem"
+    )
+    @PutMapping("/update-available-status/{problemId}")
+    public ApiResponse<ProblemCreationResponse> updateAvailableStatusOfCourse(
+            @RequestParam(value = "availableStatus", required = true) Boolean availableStatus,
+            @PathVariable("problemId") UUID problemId,
+            @RequestHeader(value = "X-UserRole", required = true) String role
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<ProblemCreationResponse>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+
+        return ApiResponse.<ProblemCreationResponse>builder()
+                .message("Update course successfully")
+                .result(problemService.updateCourseAvailableStatus(
+                                availableStatus, problemId
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Update problem completed creation status by problem id"
+    )
+    @PutMapping("/update-completed-creation-status/{problemId}")
+    public ApiResponse<ProblemCreationResponse> updateCompletedCreationStatus(
+            @RequestParam(value = "completedCreation", required = true) Boolean completedCreation,
+            @PathVariable("problemId") UUID problemId,
+            @RequestHeader(value = "X-UserRole", required = true) String role
+
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<ProblemCreationResponse>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        return ApiResponse.<ProblemCreationResponse>builder()
+                .message("Update course successfully")
+                .result(problemService.updateCourseCompletedCreationStatus(
+                                completedCreation, problemId
+                        )
+                )
                 .build();
     }
 }

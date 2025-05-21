@@ -49,6 +49,9 @@ public class SolutionService {
         // Step 4: Save to DB
         solution = solutionRepository.save(solution);
 
+        problem.setCurrentCreationStep(5);
+        problemRepository.save(problem);
+
         // Step 5: Return response
         return solutionMapper.toSolutionCreationResponse(solution);
     }
