@@ -7,17 +7,17 @@ import com.example.identityservice.dto.response.DashboardMetricResponse;
 import com.example.identityservice.repository.VNPayPaymentCoursesRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.repository.VNPayPaymentRepository;
+import com.google.firebase.auth.ExportedUserRecord;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.ListUsersPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class AdminDashboardService {
     private final VNPayPaymentCoursesRepository coursesRepository;
     private final CourseClient courseClient;
 
-    public List<DashboardMetricResponse> getSystemOverview() {
+    public List<DashboardMetricResponse> getSystemOverview() throws FirebaseAuthException {
         int currentMonth = LocalDate.now().getMonthValue();
         int currentYear = LocalDate.now().getYear();
         int lastMonth = (currentMonth == 1) ? 12 : currentMonth - 1;
@@ -48,6 +48,11 @@ public class AdminDashboardService {
         int lastMonthCourses = coursesRepository.countSuccessfulCoursePurchasesByMonth(lastMonth, lastMonthYear);
         String courseChange = formatChange(totalCoursesPurchased, lastMonthCourses);
 
+        // --- New user ---
+        int currentMonthNewUsers = countUsersByMonth(currentMonth, currentYear);
+        int lastMonthNewUsers = countUsersByMonth(lastMonth, lastMonthYear);
+        String userChange = formatChange(currentMonthNewUsers, lastMonthNewUsers);
+
         return List.of(
                 DashboardMetricResponse.builder()
                         .title("Total Revenue")
@@ -63,6 +68,14 @@ public class AdminDashboardService {
                         .change("+" + newThisMonth)
                         .changeNote("new users this month")
                         .changeType("increase")
+                        .build(),
+
+                DashboardMetricResponse.builder()
+                        .title("New Users")
+                        .value(currentMonthNewUsers)
+                        .change(userChange)
+                        .changeNote("new users this month")
+                        .changeType(getChangeType(userChange))
                         .build(),
 
                 DashboardMetricResponse.builder()
@@ -201,4 +214,71 @@ public class AdminDashboardService {
             default -> zdt.toString();
         };
     }
+
+    public ChartResponse getUserGrowth(String type, LocalDate startDate, LocalDate endDate) throws FirebaseAuthException {
+        String unit = switch (type) {
+            case "hourly" -> "hour";
+            case "daily" -> "day";
+            case "weekly" -> "week";
+            case "monthly" -> "month";
+            case "custom" -> "day";
+            default -> throw new IllegalArgumentException("Invalid type: " + type);
+        };  
+
+        List<ExportedUserRecord> allUsers = new ArrayList<>();
+        ListUsersPage page = FirebaseAuth.getInstance().listUsers(null);
+
+        while (page != null) {
+            for (ExportedUserRecord user : page.getValues()) {
+                allUsers.add(user);
+            }
+            page = page.getNextPage();
+        }
+
+        ZoneId zoneId = ZoneId.systemDefault();
+        Instant startInstant = (startDate != null) ? startDate.atStartOfDay(zoneId).toInstant() : Instant.EPOCH;
+        Instant endInstant = (endDate != null) ? endDate.plusDays(1).atStartOfDay(zoneId).toInstant() : Instant.now();
+
+        Map<String, Integer> groupedCounts = new TreeMap<>();
+
+        for (ExportedUserRecord user : allUsers) {
+            Instant creation = Instant.ofEpochMilli(user.getUserMetadata().getCreationTimestamp());
+
+            if (!creation.isBefore(startInstant) && creation.isBefore(endInstant)) {
+                String label = formatLabel(creation, unit);
+                groupedCounts.put(label, groupedCounts.getOrDefault(label, 0) + 1);
+            }
+        }
+
+        List<ChartDataPoint> chartData = groupedCounts.entrySet().stream()
+                .map(entry -> new ChartDataPoint(entry.getKey(), entry.getValue()))
+                .toList();
+
+        return ChartResponse.builder()
+                .type(unit)
+                .data(chartData)
+                .build();
+    }
+
+    public int countUsersByMonth(int month, int year) throws FirebaseAuthException {
+        int count = 0;
+        ListUsersPage page = FirebaseAuth.getInstance().listUsers(null);
+
+        while (page != null) {
+            for (ExportedUserRecord user : page.getValues()) {
+                long creationMillis = user.getUserMetadata().getCreationTimestamp();
+                LocalDateTime creationDate = Instant.ofEpochMilli(creationMillis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+
+                if (creationDate.getYear() == year && creationDate.getMonthValue() == month) {
+                    count++;
+                }
+            }
+            page = page.getNextPage();
+        }
+        return count;
+    }
+
+
 }

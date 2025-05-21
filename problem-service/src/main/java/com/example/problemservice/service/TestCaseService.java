@@ -51,6 +51,9 @@ public class TestCaseService {
             problem.setTestCases(newListTestCase);
         }
 
+        problem.setCurrentCreationStep(4);
+        problemRepository.save(problem);
+
         testCase = testCaseRepository.save(testCase);
 
         TestCaseFileReader.saveOneTestCase(

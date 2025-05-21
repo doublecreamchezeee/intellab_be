@@ -54,27 +54,8 @@ public class ProblemController {
   private final ProblemCommentService problemCommentService;
   final String defaultRole = "myRole";
 
-  private Boolean isAdmin(String role) {
-    return role.contains("admin");
-  }
 
-  @Operation(summary = "Create problem")
-  @PostMapping("/admin/create-problem")
-  public ApiResponse<ProblemCreationResponse> createProblem(
-      @RequestHeader("X-UserRole") String role,
-      @RequestBody ProblemCreationRequest problem) {
-    if (!isAdmin(role)) {
-      return ApiResponse.<ProblemCreationResponse>builder()
-          .result(null)
-          .code(403)
-          .message("Forbidden").build();
-    }
-    return ApiResponse.<ProblemCreationResponse>builder()
-        .result(problemService.createProblem(problem))
-        .code(200)
-        .message("Created")
-        .build();
-  }
+
 
   @Operation(summary = "Get problem's description list for create lesson")
   @GetMapping("/createLesson/problemList")
