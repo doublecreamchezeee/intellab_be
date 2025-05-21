@@ -30,16 +30,16 @@ public interface VNPayPaymentPremiumPackageRepository
 
     List<VNPayPaymentPremiumPackage> findAllByUserUidAndStatus(String userUid, String status);
 
-    @Query("SELECT COUNT(p) FROM VNPayPaymentPremiumPackage p WHERE p.status = 'ACTIVE'")
+    @Query("SELECT COUNT(p) FROM VNPayPaymentPremiumPackage p WHERE p.status = 'Active'")
     int countSuccessfulSubscriptions();
 
-    @Query("SELECT COUNT(p) FROM VNPayPaymentPremiumPackage p WHERE p.status = 'ACTIVE' AND MONTH(p.startDate) = :month AND YEAR(p.startDate) = :year")
+    @Query("SELECT COUNT(p) FROM VNPayPaymentPremiumPackage p WHERE p.status = 'Active' AND MONTH(p.startDate) = :month AND YEAR(p.startDate) = :year")
     int countNewSubscriptionsByMonth(@Param("month") int month, @Param("year") int year);
 
     @Query("""
             SELECT FUNCTION('DATE_TRUNC', :unit, p.startDate) AS period, COUNT(p)
             FROM VNPayPaymentPremiumPackage p
-            WHERE p.status = 'ACTIVE' AND p.startDate BETWEEN :start AND :end
+            WHERE p.status = 'Active' AND p.startDate BETWEEN :start AND :end
             GROUP BY period
             """)
     List<Object[]> countSubscriptionsByRange(

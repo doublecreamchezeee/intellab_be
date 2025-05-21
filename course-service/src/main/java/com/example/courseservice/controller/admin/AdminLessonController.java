@@ -36,6 +36,9 @@ public class AdminLessonController {
         return role.contains("admin");
     }
 
+    @Operation(
+            summary = "Create blank lesson OR clone lesson by id"
+    )
     @PostMapping
     public ApiResponse<LessonResponse> createLesson(
             @RequestBody LessonCreationRequest request,
@@ -107,6 +110,24 @@ public class AdminLessonController {
         lessonService.removeLesson(lessonId);
         return ApiResponse.<String>builder()
                 .result("Lesson has been deleted")
+                .build();
+    }
+
+    @Operation(
+            summary = "Get one lesson by id"
+    )
+    @GetMapping("/{lessonId}")
+    ApiResponse<LessonResponse> getLesson(
+            @PathVariable("lessonId") UUID lessonId,
+            @RequestHeader(value = "X-UserRole") String userRole
+    ) {
+
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+
+        return ApiResponse.<LessonResponse>builder()
+                .result(lessonService.getLessonInformation(lessonId))
                 .build();
     }
 }

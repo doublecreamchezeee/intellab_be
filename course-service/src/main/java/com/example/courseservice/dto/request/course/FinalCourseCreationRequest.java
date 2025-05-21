@@ -1,5 +1,6 @@
 package com.example.courseservice.dto.request.course;
 
+import jakarta.annotation.Nullable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,4 +15,7 @@ public class FinalCourseCreationRequest {
     float price;
     String unitPrice;
     Integer templateCode = 1;
+
+    @Nullable
+    String aiSummaryContent;
 }

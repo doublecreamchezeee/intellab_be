@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,17 +32,17 @@ public class Course {
     String courseName;
 
 //    @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     String description;
 
     // beginner, intermediate, advance
-    @Column(columnDefinition = "VARCHAR(20)")
+    @Column(name = "level", columnDefinition = "VARCHAR(20)")
     String level;
 
     @Column(name = "score")
     Integer score;
 
-    @Column(columnDefinition = "DECIMAL(11,2)")
+    @Column(name = "price", columnDefinition = "DECIMAL(11,2)")
     Float price;
 
     @Column(name = "unit_price", columnDefinition = "VARCHAR(10)")
@@ -78,14 +80,17 @@ public class Course {
     @Column(name = "template_code", columnDefinition = "integer default 1")
     Integer templateCode = 1;
 
+    @CreationTimestamp
+    @Column(name = "created_at")
+    Instant createdAt;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "topic_id", nullable = true)
     Topic topic;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) //, fetch = FetchType.EAGER
     List<UserCourses> enrollCourses = new ArrayList<>();
 
     @JsonManagedReference
@@ -105,5 +110,8 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "section_id")
     )
     List<Section> sections;
+
+    @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    CourseSummary courseSummary;
 
 }

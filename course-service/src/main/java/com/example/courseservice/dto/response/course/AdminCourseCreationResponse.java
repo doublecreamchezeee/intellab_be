@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,9 +32,16 @@ public class AdminCourseCreationResponse {
     Boolean isCompletedCreation;
     String courseImage;
     Integer templateCode;
+    Instant createdAt;
 
     @Nullable
     Integer numberOfEnrolledStudents;
+
+    @Nullable
+    String aiSummaryContent;
+
+    @Nullable
+    String templateLink;
 
     List<CategoryResponse> categories;
     List<Section> sections;

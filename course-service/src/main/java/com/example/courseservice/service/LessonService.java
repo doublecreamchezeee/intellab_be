@@ -7,7 +7,6 @@ import com.example.courseservice.configuration.DotenvConfig;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonCreationRequest;
 import com.example.courseservice.dto.request.learningLesson.LearningLessonUpdateRequest;
-import com.example.courseservice.dto.request.lesson.LessonCreationRequest;
 import com.example.courseservice.dto.request.lesson.LessonUpdateRequest;
 import com.example.courseservice.dto.response.Option.OptionResponse;
 import com.example.courseservice.dto.response.Question.QuestionResponse;
@@ -22,6 +21,7 @@ import com.example.courseservice.mapper.*;
 import com.example.courseservice.model.*;
 import com.example.courseservice.model.compositeKey.OptionID;
 import com.example.courseservice.repository.*;
+import com.example.courseservice.specification.LessonSpecification;
 import com.example.courseservice.utils.ParseUUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,11 +80,12 @@ public class LessonService {
 
     public List<LessonResponse> getCourseLessons(UUID courseId){
         boolean exits = courseRepository.existsById(courseId);
-        if (!exits)
-        {
+
+        if (!exits) {
             throw new AppException(ErrorCode.COURSE_NOT_EXISTED);
         }
-        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseId(courseId);
+
+        List<Lesson> lessons = lessonRepository.findAllByCourse_CourseIdOrderByLessonOrderAsc(courseId);
         return lessons.stream().map(lessonMapper::toLessonResponse).collect(Collectors.toList());
     }
 
@@ -146,6 +148,11 @@ public class LessonService {
         {
             course.setCurrentCreationStep(2);
             courseRepository.save(course);
+        }
+
+        if (lesson.getExercise() == null)
+        {
+           throw new AppException(ErrorCode.EXERCISE_NOT_FOUND);
         }
 
         Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
@@ -217,13 +224,12 @@ public class LessonService {
         return newExercise;
     }
 
-    public Boolean updateLessonsOrder(UUID courseId, List<UUID> lessonIds)
-    {
+    public Boolean updateLessonsOrder(UUID courseId, List<UUID> lessonIds) {
         try {
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-            Map<UUID, Integer> lessonIdMap = IntStream.range(0, lessonIds.size()).boxed().collect(Collectors.toMap(lessonIds::get, i -> i));
+            Map<UUID, Integer> lessonIdMap = IntStream.range(0, lessonIds.size()).boxed().collect(Collectors.toMap(lessonIds::get, i -> i + 1));
 
             List<Lesson> lessons = lessonRepository.findAllById(lessonIds);
 
@@ -243,13 +249,12 @@ public class LessonService {
         return true;
     }
 
-    public LessonResponse updateLesson(LessonUpdateRequest request)
-    {
+    public LessonResponse updateLesson(LessonUpdateRequest request) {
         Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
         lesson.setLessonName(request.getLessonName());
-        lesson.setLessonOrder(request.getLessonOrder());
+        //lesson.setLessonOrder(request.getLessonOrder());
         lesson.setContent(request.getContent());
         lesson.setDescription(request.getDescription());
         lesson.setProblemId(request.getProblemId());
@@ -258,22 +263,36 @@ public class LessonService {
         return  lessonMapper.toLessonResponse(lesson);
     }
 
-    public void removeLesson(UUID lessonId)
-    {
+    public void removeLesson(UUID lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
 
+        Course course = lesson.getCourse();
+        Integer lessonOrder = lesson.getLessonOrder();
+
         Exercise exercise = lesson.getExercise();
 
-        for (Question question: exercise.getQuestionList())
-        {
-            optionRepository.deleteAll(question.getOptions());
+        if (exercise != null) {
+            for (Question question : exercise.getQuestionList()) {
+                optionRepository.deleteAll(question.getOptions());
+            }
+            questionRepository.deleteAll(exercise.getQuestionList());
+            exerciseRepository.delete(exercise);
         }
-        questionRepository.deleteAll(exercise.getQuestionList());
-        exerciseRepository.delete(exercise);
 
         lessonRepository.delete(lesson);
+        lessonRepository.flush();
+
+        Specification<Lesson> specification = Specification.where(
+                LessonSpecification.greaterThanLessonOrder(lessonOrder)
+                        .and(LessonSpecification.hasCourseId(course.getCourseId())));
+        // Update the lesson order for the remaining lessons in the course
+        List<Lesson> lessons = lessonRepository.findAll(specification);
+        for (Lesson lesson1 : lessons) {
+            lesson1.setLessonOrder(lessonOrder++);
+        }
+        lessonRepository.saveAll(lessons);
     }
 
 
