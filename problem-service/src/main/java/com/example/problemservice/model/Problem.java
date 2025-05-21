@@ -89,6 +89,4 @@ public class Problem {
 
     @Column(name = "is_completed_creation", columnDefinition = "boolean default false")
     Boolean isCompletedCreation;
-
-
 }
