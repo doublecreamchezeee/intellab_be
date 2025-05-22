@@ -3,6 +3,7 @@ package com.example.identityservice.controller.admin;
 import com.example.identityservice.dto.response.DashboardMetricResponse;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
+import com.google.firebase.auth.FirebaseAuthException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.response.chart.ChartResponse;
@@ -28,7 +30,6 @@ import java.util.UUID;
 @Tag(name = "Admin Dashboard")
 public class AdminDashboardController {
     AdminDashboardService dashboardService;
-    final String defaultRole = "myRole";
 
     private Boolean isAdmin(String role) {
         return role.contains("admin");
@@ -36,7 +37,7 @@ public class AdminDashboardController {
 
     @GetMapping("/overview")
     public ApiResponse<List<DashboardMetricResponse>> getOverview(
-            @RequestHeader(value = "X-UserRole") String userRole) {
+            @RequestHeader(value = "X-UserRole") String userRole) throws FirebaseAuthException {
         userRole = userRole.split(",")[0];
         if (!isAdmin(userRole)) {
             throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
@@ -73,6 +74,21 @@ public class AdminDashboardController {
         }
         return ApiResponse.<ChartResponse>builder()
                 .result(dashboardService.getRevenue(type, startDate, endDate))
+                .build();
+    }
+
+    @GetMapping("/user-growth")
+    public ApiResponse<ChartResponse> getUserGrowth(
+            @RequestHeader(value = "X-UserRole") String userRole,
+            @RequestParam String type,
+            @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) throws FirebaseAuthException {
+        userRole = userRole.split(",")[0];
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+        return ApiResponse.<ChartResponse>builder()
+                .result(dashboardService.getUserGrowth(type, startDate, endDate))
                 .build();
     }
 
