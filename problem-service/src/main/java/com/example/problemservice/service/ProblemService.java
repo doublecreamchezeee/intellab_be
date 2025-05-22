@@ -99,6 +99,12 @@ public class ProblemService {
                 }).toList();
     }
 
+    public Page<ProblemCreationResponse> getCompleteCreationProblem(Boolean isCompleted, Pageable pageable){
+        Page<Problem> problems = problemRepository.findAllByIsCompletedCreation(isCompleted, pageable);
+    
+        return problems.map(problemMapper::toProblemCreationResponse);
+    }
+
     public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
         // 1. Map DTO to entity
         Problem problem = problemMapper.toProblem(request);

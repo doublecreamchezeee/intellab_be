@@ -26,6 +26,8 @@ public interface ProblemRepository extends JpaRepository<Problem, UUID>, JpaSpec
 
     List<Problem> findByProblemLevel(String level);
 
+    Page<Problem> findAllByIsCompletedCreation(Boolean isCompleteCreation, Pageable pageable);
+    
     @NotNull
     @Override
     Page<Problem> findAll(Specification<Problem> specification, @NotNull Pageable pageable);

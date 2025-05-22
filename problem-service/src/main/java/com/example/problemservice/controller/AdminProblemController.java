@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +52,30 @@ public class AdminProblemController {
                 .result(problemService.createProblem(problem))
                 .code(200)
                 .message("Created")
+                .build();
+    }
+
+    @Operation(
+            summary = "Get problems list"
+    )
+    @GetMapping
+    public ApiResponse<Page<ProblemCreationResponse>> getProblem(
+            @RequestParam(value = "isComplete", required = true) Boolean isComplete,
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @ParameterObject Pageable pageable
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                .message("Get problems list success")
+                .result(problemService.getCompleteCreationProblem(
+                            isComplete, pageable
+                        )
+                )
                 .build();
     }
 
