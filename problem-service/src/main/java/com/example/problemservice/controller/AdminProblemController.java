@@ -7,6 +7,7 @@ import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationR
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
+import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.solution.SolutionCreationResponse;
 import com.example.problemservice.dto.response.testcase.TestCaseCreationResponse;
 import com.example.problemservice.service.ProblemService;
@@ -76,6 +77,33 @@ public class AdminProblemController {
                 .message("Get problems list success")
                 .result(problemService.getCompleteCreationProblem(
                             isComplete, pageable
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get problems list"
+    )
+    @GetMapping
+    public ApiResponse<List<ProblemRowResponse>> getPrivateProblem(
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @ParameterObject Pageable pageable
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        if (!isAdmin(role)) {
+            return ApiResponse.<List<ProblemRowResponse>>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        return ApiResponse.<List<ProblemRowResponse>>builder()
+                .message("Get problems list success")
+                .result(problemService.getPrivateProblem(
+                                userId
                         )
                 )
                 .build();
@@ -253,4 +281,6 @@ public class AdminProblemController {
                 )
                 .build();
     }
+
+
 }

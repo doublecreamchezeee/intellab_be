@@ -105,6 +105,13 @@ public class ProblemService {
         return problems.map(problemMapper::toProblemCreationResponse);
     }
 
+    public List<ProblemRowResponse> getPrivateProblem(UUID userId)
+    {
+        List<Problem> problems = problemRepository.findAllByAuthorIdAndIsPublished(userId, false);
+
+        return problems.stream().map(problemMapper::toProblemRowResponse).collect(Collectors.toList());
+    }
+
     public ProblemCreationResponse createProblem(ProblemCreationRequest request) {
         // 1. Map DTO to entity
         Problem problem = problemMapper.toProblem(request);
