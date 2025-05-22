@@ -75,4 +75,5 @@ public class AdminDashboardController {
                 .result(dashboardService.getRevenue(type, startDate, endDate))
                 .build();
     }
+
 }
