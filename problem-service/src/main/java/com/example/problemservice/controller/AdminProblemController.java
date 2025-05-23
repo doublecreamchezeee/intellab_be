@@ -7,6 +7,7 @@ import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationR
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
+import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.solution.SolutionCreationResponse;
 import com.example.problemservice.dto.response.testcase.TestCaseCreationResponse;
 import com.example.problemservice.service.ProblemService;
@@ -17,7 +18,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +55,57 @@ public class AdminProblemController {
                 .result(problemService.createProblem(problem))
                 .code(200)
                 .message("Created")
+                .build();
+    }
+
+    @Operation(
+            summary = "Get problems list"
+    )
+    @GetMapping
+    public ApiResponse<Page<ProblemCreationResponse>> getProblem(
+            @RequestParam(value = "isComplete", required = true) Boolean isComplete,
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @ParameterObject Pageable pageable
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                .message("Get problems list success")
+                .result(problemService.getCompleteCreationProblem(
+                            isComplete, pageable
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get problems list"
+    )
+    @GetMapping
+    public ApiResponse<List<ProblemRowResponse>> getPrivateProblem(
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @ParameterObject Pageable pageable
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        if (!isAdmin(role)) {
+            return ApiResponse.<List<ProblemRowResponse>>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        return ApiResponse.<List<ProblemRowResponse>>builder()
+                .message("Get problems list success")
+                .result(problemService.getPrivateProblem(
+                                userId
+                        )
+                )
                 .build();
     }
 
@@ -226,4 +281,6 @@ public class AdminProblemController {
                 )
                 .build();
     }
+
+
 }

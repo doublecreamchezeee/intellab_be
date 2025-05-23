@@ -191,7 +191,7 @@ public class AdminDashboardService {
         // Process the raw data into ChartDataPoint format
         List<ChartDataPoint> data = rawData.stream()
                 .map(row -> {
-                    Instant timestamp = (Instant) row[0];
+                    Instant timestamp = Instant.parse(row[0].toString());
                     Double completionRate = (Double) row[1];  // Assuming the completion rate is in the second column
                     return new ChartDataPoint(formatLabel(timestamp, unit), completionRate.intValue());
                 })
