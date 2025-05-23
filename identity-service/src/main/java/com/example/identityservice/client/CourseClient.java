@@ -17,6 +17,7 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,4 +54,11 @@ public interface CourseClient {
 
     @GetExchange(url = "/courses/{courseId}/first-lesson")
     Mono<ApiResponse<CourseAndFirstLessonResponse>> getCourseAndFirstLessonByCourseId(@PathVariable UUID courseId);
+
+    @GetExchange(url = "/courses/admin/course-complete-rate")
+    Mono<ApiResponse<List<Object[]>>> getCourseCompleteRate(
+            @RequestParam("type") String type,
+            @RequestParam(value = "start_date", required = false) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) LocalDate endDate
+    );
 }

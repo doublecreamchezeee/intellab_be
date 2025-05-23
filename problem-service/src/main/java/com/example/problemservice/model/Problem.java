@@ -38,7 +38,7 @@ public class Problem {
     @Column(name = "acceptance_rate", columnDefinition = "DECIMAL(5,2)")
     Float acceptanceRate;
 
-    @Column(name = "is_available")
+    @Column(name = "is_available", columnDefinition = "boolean default false")
     Boolean isAvailable;
 
     @Column(name = "is_published")
@@ -84,4 +84,12 @@ public class Problem {
     @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
     List<ProblemComment> comments;
 
+    @Column(name = "current_creation_step", columnDefinition = "integer default 1") // start at 1, only increase
+    Integer currentCreationStep;
+
+    @Column(name = "is_completed_creation", columnDefinition = "boolean default false")
+    Boolean isCompletedCreation;
+
+    @Column(name = "author_id")
+    UUID authorId;
 }

@@ -14,22 +14,25 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface SolutionMapper {
 
+    @Mapping(target = "id", ignore = true) // handled manually in the service
     @Mapping(target = "problem", ignore = true)
     Solution toSolution(SolutionCreationRequest solutionCreationRequest);
 
-    @Mapping(target = "authorId", source = "authorId")
-    @Mapping(target = "problemId", source = "problemId")
+    // Entity → Response
+    @Mapping(target = "problemId", source = "id.problemId")
+    @Mapping(target = "authorId", source = "id.authorId")
     SolutionCreationResponse toSolutionCreationResponse(Solution solution);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "problem", ignore = true)
     Solution toSolution(SolutionUpdateRequest solutionUpdateRequest);
 
-    @Mapping(target = "authorId", source = "authorId")
-    @Mapping(target = "problemId", source = "problemId")
+    @Mapping(target = "problemId", source = "id.problemId")
+    @Mapping(target = "authorId", source = "id.authorId")
     SolutionUpdateResponse toSolutionUpdateResponse(Solution solution);
 
-    @Mapping(target = "authorId", source = "authorId")
-    @Mapping(target = "problemId", source = "problemId")
+    @Mapping(target = "problemId", source = "id.problemId")
+    @Mapping(target = "authorId", source = "id.authorId")
     DetailsSolutionResponse toDetailsSolutionResponse(Solution solution);
 
 }

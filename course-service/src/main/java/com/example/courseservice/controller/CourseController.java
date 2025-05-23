@@ -42,11 +42,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -98,6 +102,18 @@ public class CourseController {
                         request))
                 .build();
     }
+
+    @GetMapping("/admin/course-complete-rate")
+    ApiResponse<List<Object[]>> getCourseCompleteRate(
+            @RequestParam("type") String type,
+            @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
+        return ApiResponse.<List<Object[]>>builder()
+                .code(201)
+                .result(courseService.getCompletionRate(type, startDate, endDate))
+                .build();
+    }
+
 
     @Operation(
             summary = "Get all lessons of a course (using when user hasn't enrolled in course)"
@@ -576,7 +592,7 @@ public class CourseController {
                 .result(result).build();
     }
     @Operation(
-            summary = "get ctificate template",
+            summary = "get certificate template",
             hidden = true
     )
     @GetMapping("/certificate/template/{templateId}")
