@@ -60,6 +60,11 @@ public interface CourseMapper {
 
     @Mapping(target = "categories",source = "categories")
     @Mapping(target = "currentCreationStepDescription", source = "currentCreationStep", qualifiedByName = "mapCourseCreationStepEnums")
+    @Mapping(target = "teacherUuid", source = "userId")
+    @Mapping(target = "numberOfEnrolledStudents", expression = "java((course.getEnrollCourses() != null) ? course.getEnrollCourses().size() : 0)")
+    @Mapping(target = "lessonCount", expression = "java((course.getLessons() != null) ? course.getLessons().size() : 0)")
+    @Mapping(target = "aiSummaryContent", expression = "java((course.getCourseSummary() != null && course.getCourseSummary().getSummaryContent()!=null) ? course.getCourseSummary().getSummaryContent() : null)")
+    @Mapping(target = "templateLink", source = "templateCode", qualifiedByName = "mapCertificateTemplateEnums")
     AdminCourseSearchResponse toAdminCourseSearchResponse(Course course);
 
     @Mapping(target = "categories",source = "categories")

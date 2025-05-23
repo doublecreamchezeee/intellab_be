@@ -349,9 +349,9 @@ create table courses
             unique
         constraint fklljvfay1x0yv1gm2xmd6s7j9b
             references topics,
-    average_rating double precision default 0.0,
+    average_rating DECIMAL(3,2) default 0.00,
     review_count   integer default 0,
-	score          integer,
+	score          integer default 0,
     current_creation_step integer default 1,
     is_available boolean default false,
     course_image text,
