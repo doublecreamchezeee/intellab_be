@@ -83,9 +83,9 @@ public class AdminProblemController {
     }
 
     @Operation(
-            summary = "Get problems list"
+            summary = "Get private problems list"
     )
-    @GetMapping
+    @GetMapping("/private")
     public ApiResponse<List<ProblemRowResponse>> getPrivateProblem(
             @RequestHeader(value = "X-UserRole", required = true) String role,
             @RequestHeader(value = "X-UserId", required = true) String userUid,

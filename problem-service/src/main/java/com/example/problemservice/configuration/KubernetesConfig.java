@@ -1,5 +1,6 @@
 package com.example.problemservice.configuration;
 
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -12,12 +13,17 @@ public class KubernetesConfig {
     @Value("${k8s.server.url}")
     private String serverUrl;
 
+    @Value("${k8s.server.token}")
+    private String token;
+
     @Bean
     public KubernetesClient kubernetesClient() {
-        return new DefaultKubernetesClient(new ConfigBuilder()
+        Config config = new ConfigBuilder()
                 .withMasterUrl(serverUrl)
+                .withAuthorization("Bearer " + token)
                 .withTrustCerts(true)
-                .build()
-        );
+                .build();
+
+        return new DefaultKubernetesClient(config);
     }
 }
