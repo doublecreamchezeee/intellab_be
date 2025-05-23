@@ -85,6 +85,7 @@ public class Course {
     Instant createdAt;
 
     @JsonIgnore
+    @JsonIgnoreProperties("course")
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "topic_id", nullable = true)
     Topic topic;

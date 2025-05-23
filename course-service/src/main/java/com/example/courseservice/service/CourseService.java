@@ -1377,11 +1377,7 @@ public class CourseService {
                         () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
                 );
         try {
-            if (course.getCourseImage() != null) {
-                cloudinaryService.deleteImage(course.getCourseImage());
-            }
-
-            String newPhotoUrl = cloudinaryService.uploadImage(file, course.getCourseName(), "CourseAvatar");
+            String newPhotoUrl = cloudinaryService.uploadImage(file, course.getCourseId().toString(), "CourseAvatar");
 
             if (newPhotoUrl == null) {
                 throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
@@ -1432,21 +1428,26 @@ public class CourseService {
                .orElseThrow(
                        () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
                );
+
        try {
-           if (course != null && course.getCourseImage() != null) {
-               cloudinaryService.deleteImage(course.getCourseImage());
+           if (course.getCourseImage() != null) {
+               System.out.println("img url: "+course.getCourseImage());
+
+               boolean result = cloudinaryService.deleteImage(course.getCourseImage());
+
                course.setCourseImage(null);
                courseRepository.save(course);
-               return true;
+               courseRepository.flush();
+               return result;
            }
-
+              log.error("Course avatar image not found");
            return false;
        } catch (AppException e) {
            log.error(e.getMessage());
            throw e;
        } catch (Exception e) {
            log.error(e.getMessage());
-           throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+           throw new AppException(ErrorCode.CAN_NOT_DELETE_IMAGE);
        }
    }
 }

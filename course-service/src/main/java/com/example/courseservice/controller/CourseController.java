@@ -592,7 +592,7 @@ public class CourseController {
                 .result(result).build();
     }
     @Operation(
-            summary = "get ctificate template",
+            summary = "get certificate template",
             hidden = true
     )
     @GetMapping("/certificate/template/{templateId}")
