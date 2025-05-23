@@ -33,10 +33,10 @@ public class Comment {
 
 
     @CreationTimestamp
-    Instant created;
+    Instant created = Instant.now();
 
     @Column(name = "last_modified")
-    Instant lastModified;
+    Instant lastModified = Instant.now();
 
     @Column(name = "number_of_likes")
     Long numberOfLikes = 0L;
@@ -70,7 +70,7 @@ public class Comment {
 
 
     @JsonIgnore
-    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<CommentReport> commentReports = new ArrayList<>();
 
     @JsonIgnore

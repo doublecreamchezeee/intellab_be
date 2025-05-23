@@ -1,6 +1,7 @@
 package com.example.problemservice.client;
 
 import com.example.problemservice.dto.request.notification.NotificationRequest;
+import com.example.problemservice.dto.request.LeaderboardUpdateRequest;
 import com.example.problemservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.problemservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.problemservice.dto.response.ApiResponse;
@@ -27,4 +28,7 @@ public interface IdentityClient {
             @RequestBody NotificationRequest request
     );
 
+
+    @PostExchange(url = "/leaderboard/update", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<Void>> updateLeaderboard(@RequestBody LeaderboardUpdateRequest request);
 }

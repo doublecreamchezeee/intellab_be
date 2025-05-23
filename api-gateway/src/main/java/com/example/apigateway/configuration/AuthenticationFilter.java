@@ -44,7 +44,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String[] exploredEndpoints = {
             "/course/courses",
-            "/course/reviews",
             "/course/lessons",
             "/course/courses/categories",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/categories$",
@@ -53,7 +52,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/certificate$",
             "/problem/problems/search",
             "/problem/problems",
-            "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/partial-boilerplate$",
             "/course/reviews/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/reviews$",
@@ -67,9 +65,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/problem-comments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/children$",
             "/course/courses/enrollPaidCourse",
             "/course/courses/disenroll",
-            "/ai/global_chatbot/stream",
-            "/global_chatbot/stream",
-            "identity/leaderboard",
+            "/identity/leaderboard",
     };
 
     @NonFinal
@@ -92,6 +88,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/problem/statistics/progress/language",
             "/problem/statistics/progress/level",
             "/identity/leaderboard",
+            "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            //"/course/reviews",
     };
 
     @Value("${app.api-prefix}")
@@ -137,9 +135,15 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                     role += "," + premium;
                 }
 
+                if (role.equals("admin"))
+                {
+                    role = "admin,PREMIUM_PLAN";
+                }
+
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
                         .header("X-UserRole", role)
+                        .header("X-EmailVerified", response.getBody().getIsEmailVerified() != null ? response.getBody().getIsEmailVerified().toString() : "false")
                         .build();
 
 
@@ -149,7 +153,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             } else {
                 return unauthenticated(exchange.getResponse());
             }
-        }).onErrorResume(throwable -> isHybrid ? chain.filter(exchange) : unauthenticated(exchange.getResponse()));
+        }).onErrorResume(throwable -> isHybrid ? chain.filter(exchange) : unknownErrorOccurred(exchange.getResponse()));
     }
 
     private boolean isPublicEndpoint(ServerHttpRequest request) {
@@ -184,9 +188,22 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     Mono<Void> unauthenticated(ServerHttpResponse response) {
-        String message = "Unauthenticated";
+        String message = "Unauthenticated occurred in API gateway";
 
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        String body = "{\"message\":\"" + message + "\"}";
+
+        return response.writeWith(
+                Mono.just(response.bufferFactory().wrap(body.getBytes()))
+        );
+    }
+
+    Mono<Void> unknownErrorOccurred(ServerHttpResponse response) {
+        String message = "Unauthenticated occurred in API gateway or unknown error occurred in services";
+
+        response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
         String body = "{\"message\":\"" + message + "\"}";

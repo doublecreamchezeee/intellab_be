@@ -16,10 +16,16 @@ public class RedirectUrlConfig {
     String feUrl;
 
     String redirectUrl;// = feUrl + "/payment-result?paymentId=";
-    
+
+    String updateAccessTokenUrl;// = feUrl + "/update-access-token";
+
+    @Value("${CALLBACK_DOMAIN}")
+    String callbackDomain;
+
     @PostConstruct
     public void init(){
         this.redirectUrl = feUrl + "/payment-result?paymentId=";
+        this.updateAccessTokenUrl = feUrl + "/profile/update-access-token";
     }
     /*String successUrl = "http://localhost:3000/payment-result";
     String failedUrl = "http://localhost:3000/payment-result";

@@ -20,4 +20,5 @@ public class CourseResponse {
     UUID userUid;
     int numberOfReviews;
     float averageRating;
+    String courseImage;
 }

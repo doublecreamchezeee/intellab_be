@@ -5,6 +5,8 @@ import com.example.courseservice.dto.request.review.ReviewCreationRequest;
 import com.example.courseservice.dto.request.review.ReviewUpdateRequest;
 import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.rerview.ReviewCreationResponse;
+import com.example.courseservice.exception.AppException;
+import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.service.ReviewService;
 import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +40,12 @@ public class ReviewController {
             @RequestHeader("X-UserId") String userUid,
             BindingResult bindingResult
     ) {
+        log.info("userUid: {}", userUid);
         userUid = userUid.split(",")[0];
+
+        if (userUid == null || userUid.isEmpty()) {
+            throw new AppException(ErrorCode.USER_ID_IS_NULL);
+        }
 
         if (bindingResult.hasErrors()) {
             log.error("Error in creating review: {}", bindingResult.getAllErrors());

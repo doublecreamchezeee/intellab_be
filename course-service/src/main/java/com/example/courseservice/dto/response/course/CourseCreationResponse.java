@@ -2,6 +2,7 @@ package com.example.courseservice.dto.response.course;
 
 import com.example.courseservice.dto.response.category.CategoryResponse;
 import com.example.courseservice.model.Section;
+import jakarta.annotation.Nullable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -24,6 +25,14 @@ public class CourseCreationResponse {
     Integer reviewCount;
     Double averageRating;
     int lessonCount;
+    Boolean isAvailable;
+    Integer currentCreationStep;
+    String currentCreationStepDescription;
+    Boolean isCompletedCreation;
+    String courseImage;
+
+    @Nullable
+    Integer numberOfEnrolledStudents;
 
     List<CategoryResponse> categories;
     List<Section> sections;

@@ -23,7 +23,7 @@ import java.util.UUID;
 public class Lesson {
     @Id
     @Column(name = "lesson_id")
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     UUID lessonId;
 
     @Column(name = "lesson_name")
@@ -45,8 +45,8 @@ public class Lesson {
     Course course;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "exercise_id")
+    //@JsonManagedReference
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Exercise exercise;
 
     @Column(name = "problem_id", nullable = true)
@@ -56,6 +56,6 @@ public class Lesson {
 //    Problem problem;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<LearningLesson> learningLessons;
 }

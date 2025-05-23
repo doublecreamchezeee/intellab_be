@@ -1,5 +1,6 @@
 package com.example.identityservice.service;
 
+import com.example.identityservice.dto.request.notification.NotificationRequest;
 import com.example.identityservice.dto.response.notification.NotificationResponse;
 import com.example.identityservice.event.WebSocketEvent;
 import com.example.identityservice.handler.NotificationWebSocketHandler;
@@ -33,25 +34,31 @@ public class NotificationService {
     private final FirestoreService firestoreService;
 
     public Page<NotificationResponse> fetchNotifications(Pageable pageable, UUID userId) {
+        System.out.println("fetch noti."+userId);
         Page<Notification> userNotification = notificationRepository.findAllByRecipientId(userId,pageable);
 
         return userNotification.map(notificationMapper::toNotificationResponse);
     }
 
-    public NotificationResponse postNotification(String title, String body, Notification.NotificationType type, UUID userId) {
+    public NotificationResponse postNotification(NotificationRequest request) {
         Notification notification = new Notification();
-        notification.setTitle(title);
-        notification.setMessage(body);
-        notification.setType(type);
-        notification.setRecipientId(userId);
+        notification.setTitle(request.getTitle());
+        notification.setMessage(request.getMessage());
+        notification.setType(request.getType());
+        notification.setRecipientId(request.getUserid());
         notification.setMarkAsRead(false);
-        notification = notificationRepository.save(notification);
+        notification.setRedirectType(request.getRedirectType());
+        notification.setRedirectContent(request.getRedirectContent());
+        
+        final Notification savedNotification = notificationRepository.save(notification);
 
-        Optional<WebSocketSession> userSession = notificationWebSocketHandler.getUserSessionIfConnected(userId);
+        Optional<WebSocketSession> userSession = notificationWebSocketHandler.getUserSessionIfConnected(request.getUserid());
+        // userSession.ifPresent(webSocketSession
+        //         -> notificationWebSocketHandler.sendNotification(title + "\n" +body, webSocketSession));
+
         userSession.ifPresent(webSocketSession
-                -> notificationWebSocketHandler.sendNotification(title + "\n" +body, webSocketSession));
-
-        return notificationMapper.toNotificationResponse(notification);
+                   -> notificationWebSocketHandler.sendNotification(savedNotification, webSocketSession));
+        return notificationMapper.toNotificationResponse(savedNotification);
     }
 
     @EventListener
@@ -61,14 +68,10 @@ public class NotificationService {
         List<Notification> unreadNotifications = notificationRepository.findAllByRecipientIdAndMarkAsRead(UUID.fromString(userId), false);
 
         for (Notification notification : unreadNotifications) {
-            try {
-                session.sendMessage(new TextMessage(notification.getMessage()));
-            } catch (IOException e) {
-                System.err.println("Failed to send notification: " + e.getMessage());
-            }
+                notificationWebSocketHandler.sendNotification(notification, session);
+                // session.sendMessage(new TextMessage(notification.getMessage()));
         }
             // Mark notifications as read after sending
-            unreadNotifications.forEach(notification -> notification.setMarkAsRead(true));
             notificationRepository.saveAll(unreadNotifications);
         }
 

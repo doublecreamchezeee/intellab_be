@@ -14,6 +14,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class NotificationWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final ApplicationEventPublisher eventPublisher;
@@ -93,10 +96,20 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void sendNotification(Notification notification, WebSocketSession session){
+        try {
+            ObjectMapper notificationObject = new ObjectMapper();
+            String json = notificationObject.writeValueAsString(notification);
+            session.sendMessage(new TextMessage(json));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to send WebSocket message", e);
+        }
+    }
+
     private String getUserIdFromSession(WebSocketSession session) {
         String query = session.getUri().getQuery();
         if (query != null && query.startsWith("userId=")) {
-            return query.substring(7);
+            return ParseUUID.normalizeUID(query.substring(7)).toString();
         }
         return null;
     }

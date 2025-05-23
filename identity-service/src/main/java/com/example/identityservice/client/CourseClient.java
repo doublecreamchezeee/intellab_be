@@ -3,9 +3,12 @@ package com.example.identityservice.client;
 
 import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.course.DisenrollCourseRequest;
+import com.example.identityservice.dto.request.course.DisenrollCoursesEnrolledUsingSubscriptionPlanRequest;
 import com.example.identityservice.dto.request.course.EnrollCourseRequest;
+import com.example.identityservice.dto.request.course.ReEnrollCoursesUsingSubscriptionPlanRequest;
 import com.example.identityservice.dto.response.LeaderboardCourseResponse;
 import com.example.identityservice.dto.response.course.CompleteCourseResponse;
+import com.example.identityservice.dto.response.course.CourseAndFirstLessonResponse;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
 import org.springframework.http.MediaType;
@@ -14,6 +17,7 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,4 +46,19 @@ public interface CourseClient {
     @GetExchange("/courses/courseList/me")
     Mono<ApiResponse<List<CompleteCourseResponse>>> getCourseByUserId();
 
+    @PostExchange(url = "/courses/disenroll-courses-enrolled-using-subscription-plan")
+    Mono<ApiResponse<Boolean>> disenrollCoursesEnrolledUsingSubscriptionPlan(@RequestBody DisenrollCoursesEnrolledUsingSubscriptionPlanRequest request);
+
+    @PostExchange(url = "/courses/re-enroll-courses-enrolled-using-subscription-plan")
+    Mono<ApiResponse<Boolean>> reEnrollCoursesEnrolledUsingSubscriptionPlan(@RequestBody ReEnrollCoursesUsingSubscriptionPlanRequest request);
+
+    @GetExchange(url = "/courses/{courseId}/first-lesson")
+    Mono<ApiResponse<CourseAndFirstLessonResponse>> getCourseAndFirstLessonByCourseId(@PathVariable UUID courseId);
+
+    @GetExchange(url = "/courses/admin/course-complete-rate")
+    Mono<ApiResponse<List<Object[]>>> getCourseCompleteRate(
+            @RequestParam("type") String type,
+            @RequestParam(value = "start_date", required = false) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) LocalDate endDate
+    );
 }

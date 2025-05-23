@@ -4,7 +4,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -21,7 +20,7 @@ public class SingleProfileInformationResponse {
 
     String firstName;
     String lastName;
-    boolean emailVerified;
+    Boolean isEmailVerified;
     String role;
     boolean isDisabled;
     Date lastSignIn;

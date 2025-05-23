@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package proto;
+
+option java_multiple_files = true;
+option java_package = "com.example.identityservice.proto";
+option java_outer_classname = "AuthProto";
+
+service AuthService {
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool isValidated = 1;
+  string message = 2;
+  string userId = 3;
+  string email = 4;
+  string name = 5;
+  string role = 6;
+  string premium = 7;
+  bool isEmailVerified = 8;
+}

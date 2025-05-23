@@ -3,12 +3,10 @@ package com.example.courseservice.controller;
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
-import com.example.courseservice.dto.request.course.CourseCreationRequest;
-import com.example.courseservice.dto.request.course.CourseUpdateRequest;
-import com.example.courseservice.dto.request.course.DisenrollCourseRequest;
-import com.example.courseservice.dto.request.course.EnrollCourseRequest;
+import com.example.courseservice.dto.request.course.*;
 import com.example.courseservice.dto.response.Comment.CommentResponse;
 import com.example.courseservice.dto.response.category.CategoryResponse;
+import com.example.courseservice.dto.response.course.CourseAndFirstLessonResponse;
 import com.example.courseservice.dto.response.course.CourseCreationResponse;
 import com.example.courseservice.dto.response.course.CourseSearchResponse;
 import com.example.courseservice.dto.response.course.DetailCourseResponse;
@@ -23,11 +21,14 @@ import com.example.courseservice.dto.response.userCourses.UserCoursesResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.model.Comment;
+import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CommentService;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
 import com.example.courseservice.service.ReviewService;
+import com.example.courseservice.utils.Certificate.CertificateTemplate1;
+import com.example.courseservice.utils.Certificate.CertificateTemplate2;
 import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,12 +40,21 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,6 +72,7 @@ public class CourseController {
     LessonService lessonService;
     ReviewService reviewService;
     private final CommentService commentService;
+    final String defaultRole = "myRole";
     private Boolean isAdmin(String role)
     {
         return role.contains("admin");
@@ -70,7 +81,8 @@ public class CourseController {
     @Operation(
             summary = "Create course",
             description = "- Create a new course.\n" +
-                    "- Only admin."
+                    "- Only admin.",
+            hidden = true
     )
     @PostMapping("")
     ApiResponse<CourseCreationResponse> createCourse(
@@ -92,6 +104,18 @@ public class CourseController {
                 .build();
     }
 
+    @GetMapping("/admin/course-complete-rate")
+    ApiResponse<List<Object[]>> getCourseCompleteRate(
+            @RequestParam("type") String type,
+            @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
+        return ApiResponse.<List<Object[]>>builder()
+                .code(201)
+                .result(courseService.getCompletionRate(type, startDate, endDate))
+                .build();
+    }
+
+
     @Operation(
             summary = "Get all lessons of a course (using when user hasn't enrolled in course)"
     )
@@ -105,6 +129,20 @@ public class CourseController {
                             pageable
                         )
                 )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get lesson list",
+            description = "trả về List thay vì page",
+            hidden = true
+    )
+    @GetMapping("/{courseId}/lessonsList")
+    ApiResponse<List<LessonResponse>> getCourseLessons(
+            @PathVariable("courseId") UUID courseId
+    ){
+        return ApiResponse.<List<LessonResponse>>builder()
+                .result(lessonService.getCourseLessons(courseId))
                 .build();
     }
 
@@ -155,12 +193,17 @@ public class CourseController {
     @GetMapping("")
     ApiResponse<Page<CourseCreationResponse>> getAllCourse(
             @ParameterObject Pageable pageable,
-            @RequestParam(required = false) Integer Section) {
+            @RequestParam(required = false) Integer Section,
+            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable,
+            @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation
+    ) {
         if (Section != null)
         {
             return ApiResponse.<Page<CourseCreationResponse>>builder()
                     .result(courseService.getAllByCategory(
                             Section,
+                            isAvailable,
+                            isCompletedCreation,
                             pageable
                             )
                     )
@@ -169,6 +212,8 @@ public class CourseController {
 
         return ApiResponse.<Page<CourseCreationResponse>>builder()
                 .result(courseService.getAllCourses(
+                            isAvailable,
+                            isCompletedCreation,
                             pageable
                         )
                 )
@@ -204,12 +249,13 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Get all courses except enrolled courses by user"
+            summary = "Get all courses except enrolled courses by user (default get available course)"
     )
     @GetMapping("/exceptEnrolled")
     ApiResponse<Page<CourseCreationResponse>> getAllCourseExceptEnrolledByUser(
             @RequestHeader(required = false, name = "X-UserId") String userUid,
-            @ParameterObject Pageable pageable) {
+            @ParameterObject Pageable pageable
+    ) {
 
         UUID userUUID = null;
 
@@ -226,31 +272,10 @@ public class CourseController {
                 .build();
     }
 
-    @Operation(
-            summary = "Delete a course by id"
-    )
-    @DeleteMapping("/{courseId}")
-    ApiResponse<String> deleteCourseById(
-            @PathVariable("courseId") UUID courseId,
-            @RequestHeader("X-UserID") String userUid,
-            @RequestHeader("X-UserRole") String role) {
-        if (!isAdmin(role)) {
-            return ApiResponse.<String>builder()
-                    .code(201)
-                    .result("You are not allowed to delete this course")
-                    .message("Forbidden").build();
-        }
-        userUid = userUid.split(",")[0];
-        courseService.deleteCourseById(courseId, userUid);
-        return ApiResponse.<String>builder()
-                .code(204)
-                .message("Delete course by id: " + courseId)
-                .result("Course has been deleted")
-                .build();
-    }
 
     @Operation(
-            summary = "Update a course by id"
+            summary = "Update a course by id",
+            hidden = true
     )
     @PutMapping("/{courseId}")
     ApiResponse<CourseCreationResponse> updateCourse(
@@ -280,6 +305,8 @@ public class CourseController {
             @RequestParam(required = false) List<String> levels,
             @RequestParam(required = false) Boolean price,
             @RequestParam(required = false) List<Integer> categories,
+            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable,
+            @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation,
             @ParameterObject Pageable pageable) {
 
         UUID normalizedUserId = null;
@@ -293,7 +320,8 @@ public class CourseController {
             return ApiResponse.<Page<CourseSearchResponse>>builder()
                     .result(courseService.searchCoursesWithFilter(
                             normalizedUserId,
-                            keyword,ratings,levels,price,categories, pageable
+                            keyword, ratings, levels, price, categories, isAvailable, isCompletedCreation,
+                            pageable
                             )
                     ).build();
         }
@@ -301,19 +329,33 @@ public class CourseController {
         return ApiResponse.<Page<CourseSearchResponse>>builder()
                 .result(courseService.searchCourses(
                             normalizedUserId,
-                            keyword, pageable
+                            keyword,
+                            isAvailable,
+                            isCompletedCreation,
+                            pageable
                         )
                 )
                 .build();
     }
 
     @Operation(
-            summary = "Enroll a free course"
+            summary = "Enroll a course (both free and paid - BE auto check condition)",
+            description = """
+                This API is used to enroll a course.
+                If the course is free, the user will be enrolled immediately.
+                If the course is paid, the user will be enrolled if the user has a subscription plan.
+                """
     )
     @PostMapping("/enroll")
     public ApiResponse<UserCourses> enrollCourse(
             @RequestBody @Valid EnrollCourseRequest request,
-            @RequestHeader("X-UserRole") String role) {
+            @RequestHeader("X-UserRole") String role,
+            @RequestHeader("X-EmailVerified") Boolean isEmailVerified
+    ) {
+        if (isEmailVerified == null || !isEmailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         if (isAdmin(role)) {
             return ApiResponse.<UserCourses>builder()
                     .code(201)
@@ -321,8 +363,22 @@ public class CourseController {
                     .result(null)
                     .build();
         }
+
+        if (role == null || role.equals(defaultRole)) {
+            role = "user,free";
+        }
+
+        //log.info("role: {}", (Object) role.split(","));
+        String subscriptionPlan = role.split(",")[1];
+
         return ApiResponse.<UserCourses>builder()
-                .result(courseService.enrollCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .result(
+                        courseService.enrollCourse(
+                                ParseUUID.normalizeUID(request.getUserUid()),
+                                request.getCourseId(),
+                                subscriptionPlan
+                        )
+                )
                 .build();
     }
 
@@ -344,12 +400,49 @@ public class CourseController {
 
         return ApiResponse.<UserCourses>builder()
                 .message("Course has been enrolled successfully")
-                .result(courseService.enrollPaidCourse(ParseUUID.normalizeUID(request.getUserUid()), request.getCourseId()))
+                .result(courseService.enrollPaidCourse(
+                            ParseUUID.normalizeUID(request.getUserUid()),
+                            request.getCourseId(),
+                            false // user enroll by purchase exactly this course
+                        )
+                )
                 .build();
     }
 
     @Operation(
-            summary = "(BE only) Disenroll a course by user id and course id"
+            summary = "Re-enroll courses that user has enrolled by using subscription plan",
+            hidden = true
+    )
+    @PostMapping("/re-enroll-courses-enrolled-using-subscription-plan")
+    public ApiResponse<Boolean> reEnrollCoursesUsingSubscriptionPlan(
+            @RequestBody ReEnrollCoursesUsingSubscriptionPlanRequest request) {
+
+        List<UserCourses> userCourses = courseService.reEnrollPaidCourseWhenResubscribePlan(
+                request.getUserUuid(),
+                request.getSubscriptionPlan()
+        );
+
+
+       userCourses.stream()
+                .map(UserCourses::getCourse)
+                .map(Course::getCourseId)
+                .forEach(courseId -> {
+                    log.info("CourseId: {}", courseId);
+                    /*lessonService.restartAllLessonByCourseId(
+                            courseId,
+                            ParseUUID.normalizeUID(request.getUserUuid())
+                    );*/
+                });
+
+        return ApiResponse.<Boolean>builder()
+                .message("All courses have been re-enrolled")
+                .result(true)
+                .build();
+    }
+
+    @Operation(
+            summary = "(BE only) Disenroll a course by user id and course id",
+            hidden = true
     )
     @PostMapping("/disenroll")
     public ApiResponse<Boolean> disenrollCourse(@RequestBody @Valid DisenrollCourseRequest request) {
@@ -375,6 +468,9 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get all courses that user has enrolled and completed by user id"
+    )
     @GetMapping("/courseList/me")
     public ApiResponse<List<CompleteCourseResponse>> getCourseByUserId(
             @RequestHeader(name = "X-UserId", required = false) String userUid,
@@ -387,17 +483,17 @@ public class CourseController {
 //                    .result(null)
 //                    .build();
 //        }
+        userUid = userUid.split(",")[0];
+
         if (userUid == null && UserUid == null) {
             throw new AppException(ErrorCode.INVALID_USER);
         }
 
-        if (userUid != null) {
+        if (UserUid != null) {
             return ApiResponse.<List<CompleteCourseResponse>>builder()
-                    .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(userUid)))
+                    .result(courseService.getCompleteCourseByUserId(ParseUUID.normalizeUID(UserUid)))
                     .build();
         }
-
-        userUid = userUid.split(",")[0];
 
         System.out.println(userUid);
         System.out.println(ParseUUID.normalizeUID(userUid));
@@ -475,7 +571,8 @@ public class CourseController {
     }
 
     @Operation(
-            summary = "Tự động tạo khi (progress - 100 <= 1e-6f)"
+            summary = "Used for test: be only",
+            hidden = true
     )
     @PostMapping("{courseId}/certificate")
     public ApiResponse<CertificateCreationResponse> generateCertificate(
@@ -493,6 +590,45 @@ public class CourseController {
 
         return ApiResponse.<CertificateCreationResponse>builder()
                 .result(result).build();
+    }
+    @Operation(
+            summary = "get ctificate template",
+            hidden = true
+    )
+    @GetMapping("/certificate/template/{templateId}")
+    public ResponseEntity<String> generateCertificate(
+            @PathVariable Integer templateId
+    ) {
+        return ResponseEntity.ok().body(courseService.GetCertificateTemplateExample(templateId));
+    }
+
+
+    @Operation(
+            summary = "Using for test, be only",
+            hidden = true
+    )
+    @PostMapping("/certificate/test")
+    public ResponseEntity<ByteArrayResource> generateCertificate(
+            @RequestParam String courseName,
+            @RequestParam String studentName,
+            @RequestParam Integer templateId
+    ) throws IOException {
+
+        String date = "26th May, 2024";
+
+        byte[] certificateBytes = switch (templateId) {
+            case 1 -> CertificateTemplate1.createCertificate(date, studentName, courseName);
+            case 2 -> CertificateTemplate2.createCertificate(studentName, courseName, date);
+            default -> CertificateTemplate1.createCertificate(studentName, courseName, date);
+        };
+
+        assert certificateBytes != null;
+        ByteArrayResource resource = new ByteArrayResource(certificateBytes);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .contentLength(certificateBytes.length)
+                .body(resource);
     }
 
     @GetMapping("{certificateId}/certificate")
@@ -577,7 +713,7 @@ public class CourseController {
             @ParameterObject Pageable pageable,
             @RequestParam(name = "childrenPage", required = false, defaultValue = "0") Integer childrenPage,
             @RequestParam(name = "childrenSize", required = false, defaultValue = "5") Integer childrenSize,
-            @RequestParam(defaultValue = "lastModified", required = false) String childrenSortBy,
+            @RequestParam(defaultValue = "created", required = false) String childrenSortBy,
             @RequestParam(defaultValue = "asc", required = false) String childrenSortOrder
     ) {
         UUID userId = null;
@@ -601,7 +737,6 @@ public class CourseController {
                 : Sort.by(childrenSortBy).ascending();
 
         Pageable childrenPageable = PageRequest.of(childrenPage, childrenSize, sort);
-
 
         return ApiResponse.<Page<CommentResponse>>builder()
                 .result(commentService.getComments(courseId, userId, pageable, childrenPageable))
@@ -681,11 +816,27 @@ public class CourseController {
     }
 
 
+    @Operation(
+            summary = "Add comment to course",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    - Nếu parentId không tồn tại thì trả về lỗi 404
+                    - Nếu parentId là null thì tạo comment gốc
+                    """
+    )
     @PostMapping("/{courseId}/comments")
     public ApiResponse<CommentResponse> addComment(
             @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("X-EmailVerified") Boolean emailVerified,
             @PathVariable("courseId") UUID courseId,
-            @RequestBody CommentCreationRequest creationRequest ){
+            @RequestBody CommentCreationRequest creationRequest
+    ){
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+        System.out.println(userUid);
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
@@ -693,29 +844,59 @@ public class CourseController {
                 .result(commentService.addComment(courseId, creationRequest, userId)).build();
     }
 
+    @Operation(
+            summary = "Upvote comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @PutMapping("/comments/{commentId}/upvote")
-    public ApiResponse<CommentResponse> upVoteComment(
+    public ApiResponse<Long> upVoteComment(
             @RequestHeader("X-UserId") String userUid,
-            @PathVariable("commentId") UUID commentId){
+            @RequestHeader("X-EmailVerified") Boolean emailVerified,
+            @PathVariable("commentId") UUID commentId
+    ){
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
-        return ApiResponse.<CommentResponse>builder()
+        return ApiResponse.<Long>builder()
                 .result(commentService.upvoteComment(userId, commentId)).build();
     }
 
 
+    @Operation(
+            summary = "Cancel upvote comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @PutMapping("/comments/{commentId}/cancelUpvote")
-    public ApiResponse<CommentResponse> cancelUpvoteComment(
+    public ApiResponse<Long> cancelUpvoteComment(
             @RequestHeader("X-UserId") String userUid,
             @PathVariable("commentId") UUID commentId ) {
         userUid = userUid.split(",")[0];
         UUID userId = ParseUUID.normalizeUID(userUid);
 
-        return ApiResponse.<CommentResponse>builder()
+        return ApiResponse.<Long>builder()
                 .result(commentService.cancelUpvoteComment(userId, commentId)).build();
     }
 
+    @Operation(
+            summary = "Modify comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @PutMapping("/comments/modify")
     public ApiResponse<CommentResponse> modifyComment(
             @RequestHeader("X-UserId") String userUid,
@@ -726,6 +907,14 @@ public class CourseController {
                 .result(commentService.ModifyComment(userId, modifyRequest)).build();
     }
 
+    @Operation(
+            summary = "Delete comment",
+            description = """
+                    - Nếu courseId không tồn tại thì trả về lỗi 404
+                    - Nếu userId không tồn tại thì trả về lỗi 404
+                    - Nếu commentId không tồn tại thì trả về lỗi 404
+                    """
+    )
     @DeleteMapping("/comments/{commentId}/delete")
     public ApiResponse<Boolean> deleteComment(
             @RequestHeader("X-UserId") String userUid,
@@ -736,6 +925,10 @@ public class CourseController {
                 .result(commentService.removeComment(commentId, userId)).build();
     }
 
+    @Operation(
+            summary = "testing only",
+            hidden = true
+    )
     @GetMapping("/role")
     public String getRole(
             @RequestHeader("X-UserRole") String role
@@ -744,7 +937,61 @@ public class CourseController {
         return role;
     }
 
+    @Operation(
+            summary = "testing only",
+            hidden = true
+    )
+    @GetMapping("/emailVerified")
+    public Boolean getRole(
+            @RequestHeader("X-EmailVerified") Boolean emailVerified
+    )
+    {
+        return emailVerified;
+    }
 
+    @Operation(
+            summary = "Disenroll all courses that user has enrolled using subscription plan",
+            hidden =   true
+    )
+    @PostMapping("disenroll-courses-enrolled-using-subscription-plan")
+    public ApiResponse<Boolean> disenrollCoursesEnrolledUsingSubscriptionPlan(
+            @RequestBody DisenrollCoursesEnrolledUsingSubscriptionPlanRequest request) {
+        return ApiResponse.<Boolean>builder()
+                .message("All courses have been disenrolled")
+                .result(courseService.disenrollCoursesEnrolledUsingSubscriptionPlan(
+                            request.getListUserUuid()
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Check if user already enrolled in course",
+            hidden = true
+    )
+    @PostMapping("/check-enrolled")
+    public ApiResponse<Boolean> checkUserCourseExisted(
+            @RequestBody CheckingUserCourseExistedRequest request) {
+        return ApiResponse.<Boolean>builder()
+                .result(courseService.hasUserAlreadyEnrollCourse(
+                        request
+                    )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get a course and its first lesson by course id",
+            hidden = true
+    )
+    @GetMapping("/{courseId}/first-lesson")
+    public ApiResponse<CourseAndFirstLessonResponse> getCourseAndFirstLessonByCourseId(
+            @PathVariable("courseId") UUID courseId
+    ) {
+        return ApiResponse.<CourseAndFirstLessonResponse>builder()
+                .result(courseService.getCourseAndFirstLessonByCourseId(courseId))
+                .build();
+    }
 
 
 }

@@ -7,6 +7,8 @@ import com.example.problemservice.dto.response.problemComment.DetailsProblemComm
 import com.example.problemservice.dto.response.problemComment.ProblemCommentCreationResponse;
 import com.example.problemservice.dto.response.problemComment.ProblemCommentUpdateResponse;
 import com.example.problemservice.dto.response.problemComment.SingleProblemCommentResponse;
+import com.example.problemservice.exception.AppException;
+import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.service.ProblemCommentService;
 import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,8 +37,13 @@ public class ProblemCommentController {
     @PostMapping
     public ApiResponse<ProblemCommentCreationResponse> createProblemComment(
             @RequestBody ProblemCommentCreationRequest request,
-            @RequestHeader("X-UserId") String userUid
+            @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("X-EmailVerified") Boolean emailVerified
     ) {
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         userUid = userUid.split(",")[0];
 
         return ApiResponse.<ProblemCommentCreationResponse>builder()
@@ -208,13 +215,14 @@ public class ProblemCommentController {
     @PostMapping("/{commentId}/upvote")
     public ApiResponse<Integer> upvoteProblemComment(
             @PathVariable String commentId,
-            @RequestHeader("X-UserId") String userUid
+            @RequestHeader("X-UserId") String userUid,
+            @RequestHeader("X-EmailVerified") Boolean emailVerified
     ) {
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
         userUid = userUid.split(",")[0];
 
-        UUID userUuid = ParseUUID.normalizeUID(
-                userUid
-        );
 
         UUID problemCommentId = UUID.fromString(
                 commentId
@@ -222,7 +230,7 @@ public class ProblemCommentController {
 
         return ApiResponse.<Integer>builder()
                 .message("Problem comment upvoted successfully")
-                .result(problemCommentService.upvoteProblemComment(userUuid, problemCommentId))
+                .result(problemCommentService.upvoteProblemComment(userUid, problemCommentId))
                 .build();
     }
 

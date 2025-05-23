@@ -324,7 +324,7 @@
 --
 -- CREATE OR REPLACE PROCEDURE mark_theory_of_lesson_as_done(
 --     IN learningID UUID,
---     IN exerciseId UUID,
+--     IN quizId UUID,
 --     OUT is_done_theory BOOLEAN
 -- )
 -- LANGUAGE plpgsql
@@ -355,7 +355,7 @@
 --                        ON e.exercise_id = QL.exercise_id
 --                   JOIN questions AS Q
 --                        ON Q.question_id = QL.question_id
---          WHERE e.exercise_id = exerciseId) AS res
+--          WHERE e.exercise_id = quizId) AS res
 --         ON res.question_id = ans.question_id
 --             AND res.correct_answer = ans.answer
 -- ) INTO is_done_theory;

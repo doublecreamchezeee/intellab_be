@@ -15,4 +15,5 @@ public class ValidatedTokenResponse {
     String name;
     String role;
     String premium;
+    Boolean isEmailVerified;
 }

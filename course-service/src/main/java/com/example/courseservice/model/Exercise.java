@@ -2,11 +2,13 @@ package com.example.courseservice.model;
 
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,20 +32,21 @@ public class Exercise {
     String description;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "exercise", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_id")
+    //@JsonBackReference
     Lesson lesson;
 
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "question_list",
-            joinColumns = @JoinColumn(name = "exercise_id"),
-            inverseJoinColumns = @JoinColumn(name = "question_id")
-    )
-    List<Question> questionList;
+    Integer questionsPerExercise;
+
+    Integer passingQuestions;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<Question> questionList = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Assignment> assignments;
 
 }

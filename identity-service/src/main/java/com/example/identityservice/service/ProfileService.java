@@ -5,17 +5,20 @@ import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.client.GooglePeopleApiClient;
 import com.example.identityservice.client.ProblemClient;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
+import com.example.identityservice.dto.response.admin.AdminUserResponse;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.course.CompleteCourseResponse;
 import com.example.identityservice.dto.response.profile.MultipleProfileInformationResponse;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
 import com.example.identityservice.dto.response.profile.SingleProfileInformationResponse;
+import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.model.User;
+import com.example.identityservice.model.VNPayPaymentPremiumPackage;
+import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.utility.CloudinaryUtil;
-import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
@@ -23,6 +26,8 @@ import com.google.firebase.auth.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,6 +49,7 @@ public class ProfileService {
     private final CourseClient courseClient;
     private final CloudinaryService cloudinaryService;
     private final FirestoreService firestoreService;
+    private final VNPayPaymentPremiumPackageRepository vnPayPaymentPremiumPackageRepository;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userUid
@@ -61,7 +67,7 @@ public class ProfileService {
                     .email(userRecord.getEmail())
                     .phoneNumber(userRecord.getPhoneNumber())
                     .photoUrl(userRecord.getPhotoUrl())
-                    .emailVerified(userRecord.isEmailVerified())
+                    .isEmailVerified(userRecord.isEmailVerified())
                     .isDisabled(userRecord.isDisabled())
                     .lastSignIn(new Date(userRecord.getUserMetadata().getLastSignInTimestamp()))
                     .firstName(userFirestore.getFirstName())
@@ -74,6 +80,7 @@ public class ProfileService {
             throw new RuntimeException(e);
         }
     }
+
 
     public String getProfilePictureUrlByEmail(String userId) {
         try {
@@ -158,5 +165,62 @@ public class ProfileService {
 
     public ProgressLanguageResponse getProgressLanguage() {
         return problemClient.getProgressLanguage().block();
+    }
+
+    public Page<AdminUserResponse> adminGetListUsers(Pageable pageable) {
+        Page<AdminUserResponse> responses = firebaseAuthClient.getAllUsers(pageable.getPageSize(), pageable.getPageNumber());
+
+        return responses.map(
+                user -> {
+                    try {
+                        // Get user information from Firestore
+                        User userFirestore = firestoreService.getUserByUid(user.getUserUid());
+
+                        if (userFirestore == null) {
+                            log.error("User not found in Firestore - uid: {} - email: {}", user.getUserUid(), user.getEmail());
+                            return user;
+                        }
+
+                        user.setFirstName(userFirestore.getFirstName());
+                        user.setLastName(userFirestore.getLastName());
+                        user.setRole(userFirestore.getRole());
+
+                        // Get user premium package information from database
+                        if (user.getRole()!=null && user.getRole().equals("user")) {
+                            VNPayPaymentPremiumPackage pre = vnPayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
+                                            user.getUserUid(),
+                                            PremiumPackageStatus.ACTIVE.getCode()
+                                    ).orElse(null);
+
+                            String premium = null;
+
+                            if (pre != null) {
+                                premium = pre.getPackageType();
+                            } else {
+                                premium = "free";
+                            }
+
+                            user.setPremiumType(premium);
+                            user.setPackageDuration(
+                                    pre != null
+                                            ? (
+                                            pre.getDuration() == 30
+                                                    ? "MONTHLY_PACKAGE"
+                                                    : (
+                                                    pre.getDuration() == 365
+                                                            ? "YEARLY_PACKAGE"
+                                                            : null
+                                            )
+                                    )
+                                            : null
+                            );
+                        }
+
+                        return user;
+                    } catch (ExecutionException | InterruptedException e) {
+                        throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIRESTORE);
+                    }
+                }
+        );
     }
 }

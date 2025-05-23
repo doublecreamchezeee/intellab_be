@@ -29,6 +29,7 @@ public class NotificationController {
     @PublicEndpoint
     @PostMapping
     public ApiResponse<NotificationResponse> createNotification(@RequestBody NotificationRequest request) {
+        System.out.println("Request: " + request.getRedirectType());
         // nếu userid = null thì broadcast
         if (request.getUserid() == null) {
             return ApiResponse.<NotificationResponse>builder()
@@ -39,11 +40,7 @@ public class NotificationController {
                     .build();
         }
         return ApiResponse.<NotificationResponse>builder()
-                .result(notificationService.postNotification(
-                        request.getTitle()
-                        ,request.getMessage()
-                        ,INFO
-                        ,request.getUserid()))
+                .result(notificationService.postNotification(request))
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.example.courseservice.model;
+package com.example.identityservice.model;
 
 
 
@@ -20,20 +20,20 @@ import java.util.UUID;
 public class Streak {
     @Id
     @JoinColumn(name = "user_id")
-    UUID userId;
+    String userUid;
 
     @Column(name = "streak_score")
     Integer streakScore;
 
-    @Column(columnDefinition = "VARCHAR(10)")
-    String status;
+//    @Column(columnDefinition = "VARCHAR(10)")
+//    String status;
 
     @UpdateTimestamp
     @Column(name = "last_access")
     Instant lastAccess;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medal_id")
-    Medal medal;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "medal_id")
+//    Medal medal;
 
 }

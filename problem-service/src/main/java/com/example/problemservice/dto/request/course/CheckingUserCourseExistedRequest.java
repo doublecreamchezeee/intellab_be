@@ -1,10 +1,8 @@
-package com.example.courseservice.dto.request.exercise;
-
+package com.example.problemservice.dto.request.course;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -12,7 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ModifyQuesstionListRequest {
-    List<UUID> addQuestions;
-    List<UUID> removeQuestions;
+public class CheckingUserCourseExistedRequest {
+    UUID problemId;
+    UUID userUuid;
 }

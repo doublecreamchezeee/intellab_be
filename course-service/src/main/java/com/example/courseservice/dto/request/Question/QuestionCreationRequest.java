@@ -13,11 +13,10 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class QuestionCreationRequest {
+    UUID lessonId;
     String questionContent;
-    // enable, disable
-    String status;
+
     String correctAnswer;
     Character questionType;
-
 }
 

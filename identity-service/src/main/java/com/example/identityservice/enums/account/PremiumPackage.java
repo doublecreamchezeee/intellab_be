@@ -10,13 +10,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public enum PremiumPackage {
 
-    PREMIUM_PLAN("premium plan", 1000000L, "VND"),
-    PROBLEM_PLAN("problem plan", 600000L, "VND"),
-    COURSE_PLAN("course plan", 600000L, "VND")
+    PREMIUM_PLAN("PREMIUM_PLAN", 499000L, "VND", "Premium Plan"),
+    ALGORITHM_PLAN("ALGORITHM_PLAN", 299000L, "VND", "Algorithm Plan"),
+    COURSE_PLAN("COURSE_PLAN", 299000L, "VND", "Course Plan"),
     ;
     String code;
     Long price;
     String unitPrice;
+    String name;
 
     static String VND = "VND";
 }

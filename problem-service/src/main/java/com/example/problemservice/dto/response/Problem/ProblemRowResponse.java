@@ -19,5 +19,7 @@ public class ProblemRowResponse {
     Float acceptanceRate;
     Boolean isDone;
     Integer hintCount;
+    Boolean hasSolution;
+    Boolean isPublished;
     List<CategoryResponse> categories;
 }

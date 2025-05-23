@@ -5,12 +5,14 @@ import javax.sql.rowset.Predicate;
 
 import com.example.courseservice.model.Category;
 import com.example.courseservice.model.Course;
+import com.example.courseservice.model.Section;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
+import java.util.UUID;
 
 
 public class CourseSpecification {
@@ -80,5 +82,68 @@ public class CourseSpecification {
             }
         };
 
+    }
+
+    public static Specification<Course> isAvailableSpecification(Boolean isAvailable) {
+        return (root, query, criteriaBuilder) -> {
+            if (isAvailable == null) {
+                return null;//criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("isAvailable"), isAvailable);
+        };
+    }
+
+    public static Specification<Course> sectionSpecification(Integer sectionId) {
+        return (root, query, criteriaBuilder) -> {
+            if (sectionId == null || sectionId <= 0) {
+                return criteriaBuilder.conjunction();
+            }
+
+            Join<Course, Section> join = root.join("sections", JoinType.INNER);
+            return criteriaBuilder.equal(join.get("id"), sectionId);
+        };
+    }
+
+    public static Specification<Course> courseNameOrDescriptionSpecification(String name, String description) {
+        return (root, query, criteriaBuilder) -> {
+            if ((name == null || name.isEmpty()) && (description == null || description.isEmpty())) {
+                return criteriaBuilder.conjunction();
+            }
+
+            if (name == null || name.isEmpty()) {
+                return criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("description")), "%" + description.toLowerCase() + "%"
+                );
+            }
+
+            if (description == null || description.isEmpty()) {
+                return criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("courseName")), "%" + name.toLowerCase() + "%"
+                );
+            }
+
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("courseName")), "%" + name.toLowerCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + description.toLowerCase() + "%")
+            );
+        };
+    }
+
+    public static Specification<Course> isCompletedCreationSpecification(Boolean isCompletedCreation) {
+        return (root, query, criteriaBuilder) -> {
+            if (isCompletedCreation == null) {
+                return null;
+            }
+            return criteriaBuilder.equal(root.get("isCompletedCreation"), isCompletedCreation);
+        };
+    }
+
+    public static Specification<Course> userIdSpecification(UUID userId) {
+        return (root, query, criteriaBuilder) -> {
+            if (userId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("userId"), userId);
+        };
     }
 }

@@ -10,5 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface SolutionRepository extends JpaRepository<Solution, SolutionID> {
-    List<Solution> findAllBySolutionId_ProblemId(UUID problemId);
+    List<Solution> findAllByIdProblemId(UUID problemId); // id.problemId
+    Solution findByIdProblemId(UUID problemId);
 }

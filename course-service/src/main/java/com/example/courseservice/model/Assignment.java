@@ -47,7 +47,7 @@ public class Assignment {
     LearningLesson learningLesson;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<AssignmentDetail> assignmentDetails;
 
 }

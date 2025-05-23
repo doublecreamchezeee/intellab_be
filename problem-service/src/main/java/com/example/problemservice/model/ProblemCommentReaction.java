@@ -17,6 +17,8 @@ public class ProblemCommentReaction {
     @EmbeddedId
     ProblemCommentReactionId reactionId;
 
+    Boolean isActive = true;
+
     @JsonIgnore
     @MapsId("commentId")
     @ManyToOne(fetch = FetchType.LAZY)

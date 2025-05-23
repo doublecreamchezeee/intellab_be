@@ -15,6 +15,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 #        generate_statistics: true
     #show-sql: true
 server:
@@ -39,3 +43,5 @@ springdoc:
     use-root-path: true
     enabled: true
 
+cloudinary:
+  url: ${CLOUDINARY_URL}

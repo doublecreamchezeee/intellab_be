@@ -1,8 +1,5 @@
 package com.example.courseservice.dto.response.lesson;
 
-import jakarta.persistence.ColumnResult;
-import jakarta.persistence.ConstructorResult;
-import jakarta.persistence.SqlResultSetMapping;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,6 +17,6 @@ public class LessonResponse {
     int lessonOrder;
     String lessonName;
     UUID courseId;
-    UUID exerciseId;
+    UUID quizId;
     UUID problemId;
 }

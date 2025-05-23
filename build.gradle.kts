@@ -1,9 +1,11 @@
+//import com.google.protobuf.gradle.id
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.0.5.RELEASE"
     id("com.bmuschko.docker-spring-boot-application") version "9.4.0"
+    id("com.google.protobuf") version "0.9.3"
     kotlin("jvm") version "1.9.0"
 }
 
@@ -51,7 +53,7 @@ subprojects {
     }
 
     tasks.withType<Test> {
-        enabled = false;
+        enabled = false
     }
 }
 
@@ -67,6 +69,26 @@ docker {
         jvmArgs.set(listOf("-Dspring.profiles.active=prod"))
     }
 }
+
+/*
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.23.0"
+    }
+    plugins {
+        id("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.56.0"
+        }
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                id("grpc")
+            }
+        }
+    }
+}
+*/
 
 tasks.withType<BootJar> {
     enabled = false

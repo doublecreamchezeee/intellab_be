@@ -32,6 +32,9 @@ public enum ErrorCode {
     BAD_REQUEST(400,"Bad request", HttpStatus.BAD_REQUEST),
     REACTION_EXISTED(409,"Reaction existed", HttpStatus.CONFLICT),
     REACTION_NOT_EXISTED(404,"Reaction not existed", HttpStatus.NOT_FOUND),
+    PROBLEM_NOT_PUBLISHED(403,"Problem not published. Please upgrade your account to access.", HttpStatus.FORBIDDEN),
+    EMAIL_NOT_VERIFIED(403,"Email is not verified", HttpStatus.FORBIDDEN),
+    PROBLEM_NOT_COMPLETE(409, "Problem is not created completely", HttpStatus.CONFLICT)
     ;
     ErrorCode(int code, String message) {
         this.code = code;
