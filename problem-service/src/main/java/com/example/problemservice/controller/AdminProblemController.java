@@ -83,9 +83,9 @@ public class AdminProblemController {
     }
 
     @Operation(
-            summary = "Get problems list"
+            summary = "Get private problems list"
     )
-    @GetMapping
+    @GetMapping("/private")
     public ApiResponse<List<ProblemRowResponse>> getPrivateProblem(
             @RequestHeader(value = "X-UserRole", required = true) String role,
             @RequestHeader(value = "X-UserId", required = true) String userUid,
@@ -113,7 +113,12 @@ public class AdminProblemController {
     @PostMapping("/general-step")
     public ApiResponse<ProblemCreationResponse> createProblemGeneralStep(
             @RequestHeader("X-UserRole") String role,
+            @RequestHeader("X-UserId") String userUid,
             @RequestBody ProblemCreationRequest problem) {
+
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
         if (!isAdmin(role)) {
             return ApiResponse.<ProblemCreationResponse>builder()
                     .result(null)
@@ -121,7 +126,7 @@ public class AdminProblemController {
                     .message("Forbidden").build();
         }
         return ApiResponse.<ProblemCreationResponse>builder()
-                .result(problemService.generalStep(problem))
+                .result(problemService.generalStep(problem, userId))
                 .code(200)
                 .message("Created")
                 .build();

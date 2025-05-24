@@ -159,10 +159,11 @@ public class ProblemService {
         return response;
     }
 
-    public ProblemCreationResponse generalStep(ProblemCreationRequest request) {
+    public ProblemCreationResponse generalStep(ProblemCreationRequest request, UUID userId) {
         // 1. Map DTO to entity
         Problem problem = problemMapper.toProblem(request);
         // 3. Save initial problem to get UUID
+        problem.setAuthorId(userId);
         Problem savedProblem = problemRepository.save(problem);
 
         // 4. Generate ProblemCategory entities directly from request.getCategories()

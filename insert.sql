@@ -21,7 +21,10 @@ create table problems
     score              integer,
     is_available       boolean       default false,
     is_published       boolean       default false,
-    problem_structure text
+    problem_structure text,
+	author_id             uuid,
+    current_creation_step integer       default 1,
+    is_completed_creation boolean       default false
 );
 
 alter table problems
@@ -79332,8 +79335,7 @@ INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^
 INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n*m)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
 INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
 
-
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
 
 **Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
 
@@ -79366,37 +79368,8 @@ Input Field: int m
 Input Field: list<int> num2
 Input Field: int n
 Output Structure:
-Output Field: list<int> result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
-
-Increment the large integer by one and return the resulting array of digits.
-
-#### Example 1:
-
-```
-Input: digits = [1,2,3]
-Output: [1,2,4]
-```
-
-#### Example 2:
-
-```
-Input: digits = [4,3,2,1]
-Output: [4,3,2,2]
-```
-
-#### Example 3:
-
-```
-Input: digits = [9]
-Output: [1,0]
-```', 'easy', 'Plus one', 2, false, true, e'Problem Name: Plus One
-Function Name: plusOne
-Input Structure:
-Input Field: list<int> digits
-Output Structure:
-Output Field: list<int> result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
 
 You must write an algorithm with `O(log n)` runtime complexity.
 
@@ -79426,37 +79399,8 @@ Input Field: list<int> nums
 Input Field: int target
 Output Structure:
 Output Field: int result
-');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
-
-You must implement a solution with a linear runtime complexity and use only constant extra space.
-
-#### Example 1:
-
-```
-Input: nums = [2,2,1]
-Output: 1
-```
-
-#### Example 2:
-
-```
-Input: nums = [4,1,2,1,2]
-Output: 4
-```
-
-#### Example 3:
-
-```
-Input: nums = [1]
-Output: 1
-```', 'easy', 'Single Number', 2, false, true, e'Problem Name: Single Number
-Function Name: singleNumber
-Input Structure:
-Input Field: list<int> nums
-Output Structure:
-Output Field: int result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
+', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
 
 You may assume that each input would have exactly one solution, and you may not use the same element twice.
 
@@ -79486,8 +79430,66 @@ Input Structure:
 Input Field: list<int> nums
 Input Field: int target
 Output Structure:
-Output Field: list<int> result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('c3756efe-d408-4e99-844e-a55021fb7c02', 0.00, 0.00, e'Given a string `s` containing just the characters \'(\', \')\', \'{\', \'}\', \'[\', and \']\', determine if the input string is valid.
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
+
+Increment the large integer by one and return the resulting array of digits.
+
+#### Example 1:
+
+```
+Input: digits = [1,2,3]
+Output: [1,2,4]
+```
+
+#### Example 2:
+
+```
+Input: digits = [4,3,2,1]
+Output: [4,3,2,2]
+```
+
+#### Example 3:
+
+```
+Input: digits = [9]
+Output: [1,0]
+```', 'easy', 'Plus one', 2, false, true, e'Problem Name: Plus One
+Function Name: plusOne
+Input Structure:
+Input Field: list<int> digits
+Output Structure:
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
+
+You must implement a solution with a linear runtime complexity and use only constant extra space.
+
+#### Example 1:
+
+```
+Input: nums = [2,2,1]
+Output: 1
+```
+
+#### Example 2:
+
+```
+Input: nums = [4,1,2,1,2]
+Output: 4
+```
+
+#### Example 3:
+
+```
+Input: nums = [1]
+Output: 1
+```', 'easy', 'Single Number', 2, false, true, e'Problem Name: Single Number
+Function Name: singleNumber
+Input Structure:
+Input Field: list<int> nums
+Output Structure:
+Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('c3756efe-d408-4e99-844e-a55021fb7c02', 0.00, 0.00, e'Given a string `s` containing just the characters \'(\', \')\', \'{\', \'}\', \'[\', and \']\', determine if the input string is valid.
 
        An input string is valid if:
        1. Open brackets must be closed by the same type of brackets.
@@ -79534,8 +79536,8 @@ INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, descri
        Input Structure:
        Input Field: string s
        Output Structure:
-       Output Field: boolean result');
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure) VALUES ('feb01aba-eefe-4220-9242-729f52935cd7', 0.00, 0.00, e'You are given a string `s` consisting of lowercase English letters, an integer `t` representing the number of **transformations** to perform, and an array `nums` of size 26. In one **transformation**, every character in `s` is replaced according to the following rules:
+       Output Field: boolean result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('feb01aba-eefe-4220-9242-729f52935cd7', 0.00, 0.00, e'You are given a string `s` consisting of lowercase English letters, an integer `t` representing the number of **transformations** to perform, and an array `nums` of size 26. In one **transformation**, every character in `s` is replaced according to the following rules:
 
 -   Replace `s[i]` with the **next** `nums[s[i] - \'a\']` consecutive characters in the alphabet. For example, if `s[i] = \'a\'` and `nums[0] = 3`, the character `\'a\'` transforms into the next 3 consecutive characters ahead of it, which results in `"bcd"`.
 -   The transformation **wraps** around the alphabet if it exceeds `\'z\'`. For example, if `s[i] = \'y\'` and `nums[24] = 3`, the character `\'y\'` transforms into the next 3 consecutive characters ahead of it, which results in `"zab"`.
@@ -79603,7 +79605,8 @@ Input Field: string s
 Input Field: int t
 Input Field: list<int> nums
 Output Structure:
-Output Field: int result');
+Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+
 
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
 1

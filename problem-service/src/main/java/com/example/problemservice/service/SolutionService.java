@@ -15,6 +15,7 @@ import com.example.problemservice.model.composite.SolutionID;
 import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.model.composite.SolutionID;
 import com.example.problemservice.repository.SolutionRepository;
+import com.example.problemservice.utils.ParseUUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class SolutionService {
         // Step 2: Build composite key
         SolutionID solutionId = SolutionID.builder()
                 .problemId(UUID.fromString(request.getProblemId()))
-                .authorId(UUID.fromString(request.getAuthorId()))
+                .authorId(ParseUUID.normalizeUID(request.getAuthorId()))
                 .build();
 
         // Step 3: Map request to entity and assign IDs + relationship
