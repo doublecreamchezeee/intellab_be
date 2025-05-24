@@ -1573,6 +1573,24 @@ public class CourseService {
        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
+    public String uploadImage(MultipartFile file, UUID imageId) {
+        try {
+            String newPhotoUrl = cloudinaryService.uploadImage(file, imageId.toString(), "LessonAvatar");
+
+            if (newPhotoUrl == null) {
+                throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+            }
+
+            return newPhotoUrl;
+        } catch (AppException e) {
+            log.error(e.getMessage());
+            throw  e;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+        }
+    }
+
    public String uploadCourseAvatarImage(MultipartFile file, UUID courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(
