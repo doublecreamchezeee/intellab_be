@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+import java.util.Map;
+
 @Configuration
 public class KubernetesConfig {
     @Value("${k8s.server.url}")
@@ -20,7 +23,7 @@ public class KubernetesConfig {
     public KubernetesClient kubernetesClient() {
         Config config = new ConfigBuilder()
                 .withMasterUrl(serverUrl)
-                .withAuthorization("Bearer " + token)
+                .withOauthToken(token)
                 .withTrustCerts(true)
                 .build();
 
