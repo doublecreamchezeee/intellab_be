@@ -2,6 +2,7 @@ package com.example.courseservice.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.courseservice.client.AiServiceClient;
 import com.example.courseservice.client.ProblemClient;
 import com.example.courseservice.configuration.DotenvConfig;
 import com.example.courseservice.constant.PredefinedLearningStatus;
@@ -32,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,6 +73,7 @@ public class LessonService {
     private final QuestionRepository questionRepository;
     private final ExerciseRepository exerciseRepository;
     private final OptionRepository optionRepository;
+    AiServiceClient aiServiceClient;
 
     public LessonResponse getLessonInformation(UUID lessonId){
         Lesson lesson = lessonRepository.findById(lessonId)
@@ -158,6 +161,8 @@ public class LessonService {
         Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
 
         newLesson.setExercise(cloneQuiz);
+
+        sendRequestToInsertNewLessonVectorEmbedding(newLesson.getLessonId());
 
         return lessonMapper.toLessonResponse(newLesson);
     }
@@ -253,6 +258,7 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
+
         lesson.setLessonName(request.getLessonName());
         //lesson.setLessonOrder(request.getLessonOrder());
         lesson.setContent(request.getContent());
@@ -260,7 +266,9 @@ public class LessonService {
         lesson.setProblemId(request.getProblemId());
         lesson = lessonRepository.save(lesson);
 
-        return  lessonMapper.toLessonResponse(lesson);
+        sendRequestToUpdateExistedLessonVectorEmbedding(lesson.getLessonId());
+
+        return lessonMapper.toLessonResponse(lesson);
     }
 
     public void removeLesson(UUID lessonId) {
@@ -295,14 +303,9 @@ public class LessonService {
         lessonRepository.saveAll(lessons);
     }
 
-
-
-
-
     public Lesson getNextLessonId(Lesson lesson) {
         return lessonRepository.findByLessonOrderAndCourse_CourseId(lesson.getLessonOrder()+1, lesson.getCourse().getCourseId()).orElse(null);
     }
-
 
     public DetailsLessonResponse getLessonById(UUID lessonId, UUID userId) {
         // Fetch the lesson by its ID
@@ -340,8 +343,6 @@ public class LessonService {
                 .isDonePractice(isDonePractice)
                 .build();
     }
-
-
 
     //Quy trình flow làm bài tập: Get quiz -> làm bài
     // subflow1-làm chưa xong rồi thoát ra: Post Assignment với score là null(chưa làm xong), các câu chưa làm thì
@@ -391,7 +392,6 @@ public class LessonService {
                 .collect(Collectors.toList());
 
     }
-
 
     public List<QuestionResponse> getQuestion(UUID lessonId, Integer numberOfQuestions)
     {
@@ -446,9 +446,6 @@ public class LessonService {
 //
 //        return lessonMapper.toLessonResponse(lessonRepository.save(lesson));
 //    }
-
-
-
     public LearningLessonResponse createLearningLesson(UUID userUid, LearningLessonCreationRequest request) {
 
         Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
@@ -546,7 +543,6 @@ public class LessonService {
                     .build();
         });
     }
-
 
 
     public Boolean doneTheoryOfLesson(UUID learningLessonId,
@@ -754,6 +750,7 @@ public class LessonService {
 
         return true;
     }
+
     public String uploadFile(MultipartFile file, UUID courseId, UUID userId) throws IOException {
         Cloudinary cloudinary = new Cloudinary(DotenvConfig.get("CLOUDINARY_URL"));
         String path = "CourseImages/"+ userId + "/" + courseId;
@@ -761,6 +758,29 @@ public class LessonService {
                 ObjectUtils.asMap("folder", path));
         return uploadResult.get("secure_url").toString(); // Trả về đường dẫn ảnh đã upload
     }
+
+    @Async
+    public void sendRequestToInsertNewLessonVectorEmbedding(UUID lessonId) {
+        try {
+            aiServiceClient.insertLessonEmbeddingData(lessonId).block();
+        } catch (Exception e) {
+            log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage());
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendRequestToUpdateExistedLessonVectorEmbedding(UUID lessonId) {
+        try {
+            aiServiceClient.updateLessonEmbeddingData(lessonId).block();
+        } catch (Exception e) {
+            log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage());
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
 }
 
 
