@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface TestCaseRepository extends JpaRepository<TestCase, UUID> {
     List<TestCase> findAllByProblem_ProblemId(UUID problemId);
+
+    void deleteAllByProblem_ProblemId(UUID problemId);
 }
