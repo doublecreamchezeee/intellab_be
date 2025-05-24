@@ -83,7 +83,7 @@ public class AdminProblemController {
     }
 
     @Operation(
-            summary = "Get problems list"
+            summary = "Get private problems list"
     )
     @GetMapping("/private")
     public ApiResponse<List<ProblemRowResponse>> getPrivateProblem(

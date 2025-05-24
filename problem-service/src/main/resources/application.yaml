@@ -34,6 +34,11 @@ judge0:
     callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
     run_code_callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-run-code/update/run-code/callback"
 
+k8s:
+  server:
+    url: ${K8S_SERVER_URL}
+    token: ${K8S_TOKEN}
+
 #logging:
 #  level:
 #    root: TRACE

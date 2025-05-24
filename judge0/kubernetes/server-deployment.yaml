@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: server-container
-          image: judge0/judge0:1.13.0
+          image: judge0/judge0:1.13.1
           securityContext:
             privileged: true
           envFrom:
