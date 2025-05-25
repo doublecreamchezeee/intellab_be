@@ -3,6 +3,7 @@ package com.example.problemservice.mapper;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
+import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemCategory;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.model.TestCaseOutput;
@@ -26,6 +27,14 @@ public interface ProblemSubmissionMapper {
     @Mapping(target = "userUid", source = "userId")
     @Mapping(target = "testCasesOutput", source = "testCasesOutput")
     DetailsProblemSubmissionResponse toDetailsProblemSubmissionResponse(ProblemSubmission problemSubmission);
+
+    @Mapping(target = "submissionId", source = "submissionId")
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "submitDate", source = "createdAt")
+    @Mapping(target = "programmingLanguage", ignore = true)
+    @Mapping(target = "runtime", ignore = true)
+    @Mapping(target = "memory", ignore = true)
+    ProblemSubmissionResponse toProblemSubmissionResponse(ProblemSubmission problemSubmission);
 
     @Mapping(target = "programmingLanguage", ignore = true)
     @Mapping(target = "scoreAchieved", ignore = true)

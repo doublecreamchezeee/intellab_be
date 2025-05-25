@@ -40,11 +40,11 @@ public class TestCase {
     // @JoinColumn(name = "user_id")
     // UUID userId;
 
-    @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference("testcase-output")
     List<TestCaseOutput> submitOutputs;
 
-    @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "testcase", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference("runCode-output")
     List<TestCaseRunCodeOutput> runCodeOutputs;
 }
