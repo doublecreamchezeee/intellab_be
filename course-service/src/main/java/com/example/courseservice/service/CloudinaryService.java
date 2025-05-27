@@ -28,6 +28,7 @@ public class CloudinaryService {
                     "use_filename", true,
                     "unique_filename", true,
                     "overwrite", true,
+                    "invalidate", true,
                     "folder", folderName
             );
 
