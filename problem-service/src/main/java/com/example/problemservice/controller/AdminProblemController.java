@@ -7,6 +7,7 @@ import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationR
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.Problem.ProblemCreationResponse;
+import com.example.problemservice.dto.response.Problem.ProblemRowResponse;
 import com.example.problemservice.dto.response.solution.SolutionCreationResponse;
 import com.example.problemservice.dto.response.testcase.TestCaseCreationResponse;
 import com.example.problemservice.service.ProblemService;
@@ -17,7 +18,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,11 +58,89 @@ public class AdminProblemController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get problems list"
+    )
+    @GetMapping
+    public ApiResponse<Page<ProblemCreationResponse>> getProblem(
+            @RequestParam(value = "isComplete", required = true) Boolean isComplete,
+            @RequestParam(value = "searchKey", required = false) String searchKey,
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @ParameterObject Pageable pageable
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                .message("Get problems list success")
+                .result(problemService.getCompleteCreationProblem(
+                            isComplete, searchKey ,pageable
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Get problems list"
+    )
+    @DeleteMapping("/{problemId}")
+    public ApiResponse<String> deleteProblem(
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @PathVariable(value = "problemId", required = true) String problemId
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<String>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        problemService.deleteProblem(UUID.fromString(problemId));
+
+        return ApiResponse.<String>builder()
+                .message("Delete success")
+                .result("").build();
+    }
+
+    @Operation(
+            summary = "Get private problems list"
+    )
+    @GetMapping("/private")
+    public ApiResponse<List<ProblemRowResponse>> getPrivateProblem(
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @RequestHeader(value = "X-UserId", required = true) String userUid,
+            @ParameterObject Pageable pageable
+    ) {
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
+        if (!isAdmin(role)) {
+            return ApiResponse.<List<ProblemRowResponse>>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        return ApiResponse.<List<ProblemRowResponse>>builder()
+                .message("Get problems list success")
+                .result(problemService.getPrivateProblem(
+                                userId
+                        )
+                )
+                .build();
+    }
+
     @Operation(summary = "Create general")
     @PostMapping("/general-step")
     public ApiResponse<ProblemCreationResponse> createProblemGeneralStep(
             @RequestHeader("X-UserRole") String role,
+            @RequestHeader("X-UserId") String userUid,
             @RequestBody ProblemCreationRequest problem) {
+
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
         if (!isAdmin(role)) {
             return ApiResponse.<ProblemCreationResponse>builder()
                     .result(null)
@@ -66,7 +148,7 @@ public class AdminProblemController {
                     .message("Forbidden").build();
         }
         return ApiResponse.<ProblemCreationResponse>builder()
-                .result(problemService.generalStep(problem))
+                .result(problemService.generalStep(problem, userId))
                 .code(200)
                 .message("Created")
                 .build();
@@ -181,7 +263,7 @@ public class AdminProblemController {
             summary = "Update available status of a problem"
     )
     @PutMapping("/update-available-status/{problemId}")
-    public ApiResponse<ProblemCreationResponse> updateAvailableStatusOfCourse(
+    public ApiResponse<ProblemCreationResponse> updateAvailableStatusOfProblem(
             @RequestParam(value = "availableStatus", required = true) Boolean availableStatus,
             @PathVariable("problemId") UUID problemId,
             @RequestHeader(value = "X-UserRole", required = true) String role
@@ -195,8 +277,33 @@ public class AdminProblemController {
 
         return ApiResponse.<ProblemCreationResponse>builder()
                 .message("Update course successfully")
-                .result(problemService.updateCourseAvailableStatus(
+                .result(problemService.updateProblemAvailableStatus(
                                 availableStatus, problemId
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Update available status of a problem"
+    )
+    @PutMapping("/update-publish-status/{problemId}")
+    public ApiResponse<ProblemCreationResponse> updatePublishStatusOfProblem(
+            @RequestParam(value = "publishStatus", required = true) Boolean publishStatus,
+            @PathVariable("problemId") UUID problemId,
+            @RequestHeader(value = "X-UserRole", required = true) String role
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<ProblemCreationResponse>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+
+        return ApiResponse.<ProblemCreationResponse>builder()
+                .message("Update course successfully")
+                .result(problemService.updateProblemPublishStatus(
+                        publishStatus, problemId
                         )
                 )
                 .build();
@@ -220,10 +327,12 @@ public class AdminProblemController {
         }
         return ApiResponse.<ProblemCreationResponse>builder()
                 .message("Update course successfully")
-                .result(problemService.updateCourseCompletedCreationStatus(
+                .result(problemService.updateProblemCompletedCreationStatus(
                                 completedCreation, problemId
                         )
                 )
                 .build();
     }
+
+
 }

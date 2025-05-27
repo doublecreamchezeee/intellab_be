@@ -45,8 +45,6 @@ public class LeaderboardService {
             leaderboards = leaderboardRepository.findByTypeOrderByScoreDesc("all", pageable);
         }
 
-
-
         List<LeaderboardResponse> responses = leaderboards.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
@@ -58,8 +56,10 @@ public class LeaderboardService {
         }
 
         responses.addAll(zeroPoints);
-
-        return new PageImpl<>(responses, pageable, responses.size());
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), responses.size());
+        List<LeaderboardResponse> pageContent = responses.subList(start, end);
+        return new PageImpl<>(pageContent, pageable, responses.size());
 
     }
 

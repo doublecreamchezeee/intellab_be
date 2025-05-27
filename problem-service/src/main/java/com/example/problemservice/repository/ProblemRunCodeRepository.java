@@ -13,4 +13,6 @@ public interface ProblemRunCodeRepository extends JpaRepository<ProblemRunCode, 
     Optional<ProblemRunCode> findProblemRunCodeByProblem_ProblemIdAndUserId(UUID problemId, UUID userUid);
 
     List<ProblemRunCode> findProblemRunCodeByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
+
+    void deleteProblemRunCodeByProblem_ProblemId(UUID problemId);
 }

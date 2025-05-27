@@ -93,6 +93,21 @@ public class AdminDashboardController {
                 .build();
     }
 
+    @GetMapping("/course-completion-rate")
+    public ApiResponse<ChartResponse> getCourseCompletionRate(
+            @RequestHeader(value = "X-UserRole") String userRole,
+            @RequestParam String type,
+            @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) throws FirebaseAuthException {
+        userRole = userRole.split(",")[0];
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+        return ApiResponse.<ChartResponse>builder()
+                .result(dashboardService.getCourseCompletionRate(type, startDate, endDate))
+                .build();
+    }
+
     @GetMapping("/transactions")
     public ApiResponse<List<DashboardTableResponse>> getTransactions(
             @RequestHeader(value = "X-UserRole") String userRole){

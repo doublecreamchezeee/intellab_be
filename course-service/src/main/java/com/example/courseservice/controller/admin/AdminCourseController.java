@@ -336,6 +336,24 @@ public class AdminCourseController {
     }
 
     @Operation(
+            summary = "Upload course image file"
+    )
+    @PostMapping(value = "/image/{imageId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<String> uploadImage(
+            @PathVariable("imageId") UUID imageId,
+            @RequestPart(value = "file", required = true) MultipartFile file
+    ) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Uploaded file is empty!");
+        }
+
+        return ApiResponse.<String>builder()
+                .message("Upload image success!")
+                .result(courseService.uploadImage(file, imageId))
+                .build();
+    }
+
+    @Operation(
             summary = "Change course image link"
     )
     @PostMapping(value = "/{courseId}/image/link")

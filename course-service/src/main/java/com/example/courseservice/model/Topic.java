@@ -40,8 +40,8 @@ public class Topic {
     @JoinColumn(name = "user_id")
     String userId = null;
 
-    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
     @JsonIgnore
+    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)
     Course course;
 
 //    @OneToOne(mappedBy = "topic", fetch = FetchType.LAZY)

@@ -1,4 +1,5 @@
 package com.example.courseservice.configuration;
+import com.example.courseservice.client.AiServiceClient;
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.client.ProblemClient;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +21,6 @@ public class ClientConfiguration {
                 .build();
     }
 
-
     @Bean
     WebClient identityWebClient(){
         String hostname = DotenvConfig.get("HOST_NAME");
@@ -28,6 +28,17 @@ public class ClientConfiguration {
         String port = DotenvConfig.get("IDENTITY_PORT");
 
         String baseUrl = "http://" + hostname + ":" + port + "/identity";
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+    }
+
+    @Bean
+    WebClient aiServiceWebClient(){
+        String hostname = DotenvConfig.get("HOST_NAME");
+        String port = DotenvConfig.get("AI_PORT");
+
+        String baseUrl = "http://" + hostname + ":" + port + "/ai";
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .build();
@@ -53,4 +64,12 @@ public class ClientConfiguration {
 
     }
 
+    @Bean
+    AiServiceClient aiServiceClient(WebClient aiServiceWebClient) {
+        HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
+                .builderFor(
+                        WebClientAdapter.create(aiServiceWebClient)
+                ).build();
+        return httpServiceProxyFactory.createClient(AiServiceClient.class);
+    }
 }
