@@ -29,6 +29,7 @@ import com.example.problemservice.utils.TestCaseFileReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.mapstruct.Named;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +55,9 @@ public class ProblemService {
     private final CourseClient courseClient;
     private final ProblemCategoryRepository problemCategoryRepository;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
+    private final TestCaseRepository testCaseRepository;
+    private final SolutionRepository solutionRepository;
+    private final ProblemRunCodeRepository problemRunCodeRepository;
 
     private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
         int start = (int) pageable.getOffset();
@@ -99,10 +103,66 @@ public class ProblemService {
                 }).toList();
     }
 
-    public Page<ProblemCreationResponse> getCompleteCreationProblem(Boolean isCompleted, Pageable pageable){
-        Page<Problem> problems = problemRepository.findAllByIsCompletedCreation(isCompleted, pageable);
-    
-        return problems.map(problemMapper::toProblemCreationResponse);
+    private List<CategoryResponse> mapCategories(List<ProblemCategory> problemCategories, List<CategoryResponse> categoryResponses) {
+        if (problemCategories == null || categoryResponses == null) return List.of();
+
+        Map<Integer, String> categoryMap = categoryResponses.stream()
+                .collect(Collectors.toMap(CategoryResponse::getCategoryId, CategoryResponse::getName));
+
+        return problemCategories.stream()
+                .map(pc -> {
+                    Integer id = pc.getProblemCategoryID().getCategoryId();
+                    return new CategoryResponse(id, categoryMap.getOrDefault(id, null));
+                })
+                .toList();
+    }
+
+
+    public Page<ProblemCreationResponse> getCompleteCreationProblem(Boolean isCompleted, String search, Pageable pageable) {
+        // Fetch all problems without paging
+        List<Problem> allProblems = problemRepository.findAllByIsCompletedCreation(isCompleted, Pageable.unpaged());
+
+        // Filter by problemName if search is provided
+        if (search != null && !search.trim().isEmpty()) {
+            String lowerSearch = search.toLowerCase();
+            allProblems = allProblems.stream()
+                    .filter(problem -> problem.getProblemName() != null &&
+                            problem.getProblemName().toLowerCase().contains(lowerSearch))
+                    .toList();
+        }
+
+        // Manual pagination
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allProblems.size());
+        List<Problem> paginatedProblems = allProblems.subList(start, end);
+
+        List<CategoryResponse> allCategories = getCategories();
+
+        // Map to response
+        List<ProblemCreationResponse> responses = paginatedProblems.stream().map(problem -> {
+            ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problem);
+
+            // Map categories
+            List<CategoryResponse> matchedCategories = mapCategories(problem.getCategories(), allCategories);
+            response.setCategories(matchedCategories);
+
+            // Compute submission stats
+            int total = problem.getSubmissions().size();
+            int pass = (int) problem.getSubmissions().stream().filter(ProblemSubmission::getIsSolved).count();
+            int fail = total - pass;
+
+            ProblemCreationResponse.ProblemSubmissionStat stat = ProblemCreationResponse.ProblemSubmissionStat.builder()
+                    .total(total)
+                    .pass(pass)
+                    .fail(fail)
+                    .build();
+            response.setProblemSubmissionStat(stat);
+
+            return response;
+        }).toList();
+
+        // Return as Page
+        return new PageImpl<>(responses, pageable, allProblems.size());
     }
 
     public List<ProblemRowResponse> getPrivateProblem(UUID userId)
@@ -159,10 +219,13 @@ public class ProblemService {
         return response;
     }
 
-    public ProblemCreationResponse generalStep(ProblemCreationRequest request) {
+    public ProblemCreationResponse generalStep(ProblemCreationRequest request, UUID userId) {
         // 1. Map DTO to entity
         Problem problem = problemMapper.toProblem(request);
         // 3. Save initial problem to get UUID
+        problem.setAuthorId(userId);
+        problem.setIsCompletedCreation(false);
+        problem.setCreatedAt(new Date());
         Problem savedProblem = problemRepository.save(problem);
 
         // 4. Generate ProblemCategory entities directly from request.getCategories()
@@ -231,7 +294,7 @@ public class ProblemService {
         return response;
     }
 
-    public ProblemCreationResponse updateCourseCompletedCreationStatus(
+    public ProblemCreationResponse updateProblemCompletedCreationStatus(
             Boolean completedCreationStatus, UUID problemId
     ) {
         Problem problem = problemRepository.findById(problemId)
@@ -252,7 +315,7 @@ public class ProblemService {
         return problemMapper.toProblemCreationResponse(savedProblem);
     }
 
-    public ProblemCreationResponse updateCourseAvailableStatus(
+    public ProblemCreationResponse updateProblemAvailableStatus(
             Boolean availableStatus, UUID problemId
     ) {
         Problem problem = problemRepository.findById(problemId).orElseThrow(
@@ -271,6 +334,24 @@ public class ProblemService {
 
         }
         problem.setIsAvailable(availableStatus);
+
+        Problem savedProblem = problemRepository.save(problem);
+
+        return problemMapper.toProblemCreationResponse(savedProblem);
+    }
+
+    public ProblemCreationResponse updateProblemPublishStatus(
+            Boolean publishStatus, UUID problemId
+    ) {
+        Problem problem = problemRepository.findById(problemId).orElseThrow(
+                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+        );
+
+        if (problem.getCurrentCreationStep() < 5) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_COMPLETE);
+        }
+
+        problem.setIsPublished(publishStatus);
 
         Problem savedProblem = problemRepository.save(problem);
 
@@ -438,10 +519,17 @@ public class ProblemService {
         });
     }
 
+    @Transactional
     public void deleteProblem(UUID problemId) {
         Problem problem = problemRepository.findById(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
-        MarkdownUtility.deleteProblemFolder(problem.getProblemName());
+//        MarkdownUtility.deleteProblemFolder(problem.getProblemName());
+
+        problemRunCodeRepository.deleteProblemRunCodeByProblem_ProblemId(problemId);
+        testCaseRepository.deleteAllByProblem_ProblemId(problemId);
+        problemSubmissionRepository.deleteAllByProblem_ProblemId(problemId);
+        solutionRepository.deleteByIdProblemId(problemId);
+        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(problemId);
         problemRepository.deleteById(problemId);
     }
 

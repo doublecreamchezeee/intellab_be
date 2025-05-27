@@ -428,4 +428,46 @@ public class FirebaseAuthClient {
             throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION);
         }
     }
+
+    public List<ExportedUserRecord> findUsersByDisplayName(String targetDisplayName) {
+        try {
+            List<ExportedUserRecord> matchedUsers = new ArrayList<>();
+            ListUsersPage page = firebaseAuth.listUsers(null);
+
+            targetDisplayName = targetDisplayName.toLowerCase();
+
+            while (page != null) {
+                for (ExportedUserRecord user : page.getValues()) {
+                    if (user.getDisplayName().toLowerCase().contains(targetDisplayName)) {
+                        matchedUsers.add(user);
+                    }
+                }
+                page = page.getNextPage();
+            }
+            return matchedUsers;
+        } catch (FirebaseAuthException e) {
+            throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION);
+        }
+    }
+
+    public Page<AdminUserResponse> getAllUsersByDisplayName(String targetDisplayName, Integer pageSize, Integer pageNumber) {
+        try {
+            List<ExportedUserRecord> matchedUsers = findUsersByDisplayName(targetDisplayName);
+
+            int start = pageNumber * pageSize;
+            int end = Math.min(start + pageSize, matchedUsers.size());
+
+            if (start > matchedUsers.size()) {
+                return new PageImpl<>(Collections.emptyList(), PageRequest.of(pageNumber, pageSize), matchedUsers.size());
+            }
+
+            List<AdminUserResponse> paginatedUsers = matchedUsers.subList(start, end).stream()
+                    .map(UserMapper.INSTANCE::fromRecordToResponse)
+                    .toList();
+
+            return new PageImpl<>(paginatedUsers, PageRequest.of(pageNumber, pageSize), matchedUsers.size());
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION);
+        }
+    }
 }

@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface SolutionRepository extends JpaRepository<Solution, SolutionID> {
     List<Solution> findAllByIdProblemId(UUID problemId); // id.problemId
     Solution findByIdProblemId(UUID problemId);
+
+    void deleteByIdProblemId(UUID problemId);
 }

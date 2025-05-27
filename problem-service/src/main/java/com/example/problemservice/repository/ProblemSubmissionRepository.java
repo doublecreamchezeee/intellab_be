@@ -16,7 +16,7 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
     Optional<List<ProblemSubmission>> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
 
     List<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid);
-
+    void deleteAllByProblem_ProblemId(UUID problemId);
     List<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
 
     @Query("SELECT COUNT(DISTINCT ps.problem.problemId) " +

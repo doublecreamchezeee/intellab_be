@@ -484,6 +484,18 @@ public class CourseService {
         //return getCourseSearchResponsesOfAdmin(courses);
     }
 
+    private String mapCertificateTemplateEnums(Integer templateId) {
+        if (templateId == null) {
+            return null;
+        }
+
+        return switch (templateId) {
+            case 1 -> CertificateTemplate1.linkExample;
+            case 2 -> CertificateTemplate2.linkExample;
+            default -> null;
+        };
+    }
+
 
     public DetailCourseResponse getCourseById(UUID courseId, UUID userUid) {
         // Fetch the course by ID or throw an exception if it doesn't exist
@@ -578,6 +590,127 @@ public class CourseService {
                 .certificateUrl(certificateUrl)
                 .certificateId(certificateId)
                 .courseImage(course.getCourseImage())
+                .templateCode(course.getTemplateCode())
+                .createdAt(course.getCreatedAt())
+                .numberOfEnrolledStudents(course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0)
+                .aiSummaryContent(course.getCourseSummary() != null && course.getCourseSummary().getSummaryContent() != null ? course.getCourseSummary().getSummaryContent() : null)
+                .templateLink(course.getTemplateCode() != null ? mapCertificateTemplateEnums(course.getTemplateCode()) : null)
+                .categories(course.getCategories() != null ? course.getCategories().stream()
+                        .map(categoryMapper::categoryToCategoryResponse)
+                        .collect(Collectors.toList()) : new ArrayList<>())
+                .build();
+    }
+
+    public DetailCourseResponse getDetailsCourseById(UUID courseId, UUID userUid) {
+        // Fetch the course by ID or throw an exception if it doesn't exist
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        // Count the number of lessons in the course
+        //int lessonCount = lessonRepository.countByCourse_CourseId(courseId);
+        int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+
+        // Calculate the average rating for the course
+        /*double averageRating = course.getReviews().stream()
+                .mapToDouble(review -> Optional.of(review.getRating()).orElse(0))
+                .average()
+                .orElse(0.0);*/
+
+        // Count the number of reviews for the course
+        //int reviewCount = course.getReviews().size();
+
+        // Check if the user is enrolled in the course
+        boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
+                userUid, courseId, UserCourseAccessStatus.ACCESSIBLE.getCode()
+        );
+
+        // Get the latest lesson ID for the user (if enrolled)
+        UUID latestLessonId = null;
+        if (isUserEnrolled) {
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+                    .orElse(null);
+            latestLessonId = (userCourse != null) ? userCourse.getLatestLessonId() : null;
+        }
+
+        // Calculate the completion ratio for the user
+        float completionRatio = 0.0f;
+        if (isUserEnrolled) {
+
+            /*Specification<Lesson> hasExerciseSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasExerciseId()
+            );*/
+
+            Specification<Lesson> hasProblemSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasProblemId()
+            );
+
+            int totalLessonsHasExercise = lessonRepository.countByCourse_CourseId(courseId);
+            int totalLessonsHasProblem = (int) lessonRepository.count(hasProblemSpecification);
+
+            log.info("Total lessons has exercise: {}", totalLessonsHasExercise);
+            log.info("Total lessons has problem: {}", totalLessonsHasProblem);
+
+            int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
+            int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUid, courseId, true);
+            completedLessons += completedPractices;
+
+            log.info("Completed lessons: {}", completedLessons);
+
+            if (totalLessonsHasProblem + totalLessonsHasExercise > 0) {
+                completionRatio = (completedLessons / (float) (totalLessonsHasExercise + totalLessonsHasProblem)) * 100;
+            }
+        }
+
+        String certificateUrl = null;
+        String certificateId = null;
+
+        if (isUserEnrolled) {
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+                    .orElse(null);
+
+            certificateId = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+            certificateUrl = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateUrl() : null;
+        }
+
+        // Map course details to the response DTO
+        return DetailCourseResponse.builder()
+                .courseId(course.getCourseId())
+                .courseName(course.getCourseName())
+                .description(course.getDescription())
+                .level(course.getLevel())
+                .price(course.getPrice())
+                .unitPrice(course.getUnitPrice())
+                .userUid(course.getUserId())
+                .lessonCount(lessonCount)
+                .averageRating(course.getAverageRating())
+                .reviewCount(course.getReviewCount())
+                .isUserEnrolled(isUserEnrolled)
+                .latestLessonId(latestLessonId)
+                .progressPercent(completionRatio)
+                .certificateUrl(certificateUrl)
+                .certificateId(certificateId)
+                .courseImage(course.getCourseImage())
+                .templateCode(course.getTemplateCode())
+                .createdAt(course.getCreatedAt())
+                .numberOfEnrolledStudents(course.getEnrollCourses() != null
+                        ? course.getEnrollCourses().size()
+                        : 0)
+                .aiSummaryContent(course.getCourseSummary() != null
+                        && course.getCourseSummary().getSummaryContent() != null
+                        ? course.getCourseSummary().getSummaryContent()
+                        : null)
+                .templateLink(course.getTemplateCode() != null
+                        ? mapCertificateTemplateEnums(course.getTemplateCode())
+                        : null)
+                .categories(course.getCategories() != null
+                        ? course.getCategories().stream()
+                            .map(categoryMapper::categoryToCategoryResponse)
+                            .collect(Collectors.toList())
+                        : new ArrayList<>())
                 .build();
     }
 
@@ -877,21 +1010,90 @@ public class CourseService {
         return listEnrolledUsersResponse;
     }
 
-    public Page<UserCourses> getEnrolledCoursesOfUser(UUID userUid, Pageable pageable) {
-        if (userUid == null) {
+    public Page<DetailCourseResponse> getEnrolledCoursesOfUser(UUID userUuid, Pageable pageable) {
+        if (userUuid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
-        Specification<UserCourses> specification = Specification.where(
-                UserCoursesSpecification.hasUserUid(userUid)
+        /*int count = courseRepository.countAllEnrolledByUser(userUuid);
+        log.info("Count of enrolled courses: {}", count);*/
+
+        Page<Course> courses = courseRepository.findAllCoursesEnrolledByUser(userUuid, pageable);
+
+        return courses.map(course -> {
+
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+            UUID latestLessonId = null;
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUuid, course.getCourseId())
+                    .orElse(null);
+            latestLessonId = (userCourse != null) ? userCourse.getLatestLessonId() : null;
+            float completionRatio = 0.0f;
+
+            Specification<Lesson> hasProblemSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(course.getCourseId())
+            ).and(
+                    LessonSpecification.hasProblemId()
+            );
+
+            int totalLessonsHasExercise = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            int totalLessonsHasProblem = (int) lessonRepository.count(hasProblemSpecification);
+
+            log.info("Total lessons has exercise: {}", totalLessonsHasExercise);
+            log.info("Total lessons has problem: {}", totalLessonsHasProblem);
+
+            int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUuid, course.getCourseId(), true);
+            int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUuid, course.getCourseId(), true);
+            completedLessons += completedPractices;
+
+            log.info("Completed lessons: {}", completedLessons);
+
+            if (totalLessonsHasProblem + totalLessonsHasExercise > 0) {
+                completionRatio = (completedLessons / (float) (totalLessonsHasExercise + totalLessonsHasProblem)) * 100;
+            }
+
+            String certificateId = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+            String certificateUrl = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateUrl() : null;
+
+            return DetailCourseResponse.builder()
+                    .courseId(course.getCourseId())
+                    .courseName(course.getCourseName())
+                    .description(course.getDescription())
+                    .level(course.getLevel())
+                    .price(course.getPrice())
+                    .unitPrice(course.getUnitPrice())
+                    .userUid(course.getUserId())
+                    .lessonCount(lessonCount)
+                    .averageRating(course.getAverageRating())
+                    .reviewCount(course.getReviewCount())
+                    .isUserEnrolled(true) // Always true since this is for enrolled courses
+                    .latestLessonId(latestLessonId)
+                    .progressPercent(completionRatio)
+                    .certificateUrl(certificateUrl)
+                    .certificateId(certificateId)
+                    .courseImage(course.getCourseImage())
+                    .templateCode(course.getTemplateCode())
+                    .createdAt(course.getCreatedAt())
+                    .aiSummaryContent(course.getCourseSummary() != null
+                            && course.getCourseSummary().getSummaryContent() != null
+                            ? course.getCourseSummary().getSummaryContent()
+                            : null)
+                    .templateLink(course.getTemplateCode() != null
+                            ? mapCertificateTemplateEnums(course.getTemplateCode())
+                            : null)
+                    .categories(null)
+                    .build();
+        });
+
+        /*Specification<UserCourses> specification = Specification.where(
+                UserCoursesSpecification.hasUserUid(userUuid)
                         .and(UserCoursesSpecification.hasAccessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode()))
         );
 
-        return userCoursesRepository.findAll(specification, pageable);
-        //return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+        return userCoursesRepository.findAll(specification, pageable);*/
+        //return userCoursesRepository.findAllByEnrollId_UserUid(userUuid, pageable);
         /*return userCourses.map(userCourse -> {
             DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
-                    .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUid)
+                    .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUuid)
                     .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
             userCourse.setProgressPercent(detailCourseResponse.getProgressPercent());
             return userCourse;
@@ -1371,17 +1573,31 @@ public class CourseService {
        return courseMapper.toAdminCourseCreationResponse(savedCourse);
    }
 
+    public String uploadImage(MultipartFile file, UUID imageId) {
+        try {
+            String newPhotoUrl = cloudinaryService.uploadImage(file, imageId.toString(), "LessonAvatar");
+
+            if (newPhotoUrl == null) {
+                throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+            }
+
+            return newPhotoUrl;
+        } catch (AppException e) {
+            log.error(e.getMessage());
+            throw  e;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+        }
+    }
+
    public String uploadCourseAvatarImage(MultipartFile file, UUID courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(
                         () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
                 );
         try {
-            if (course.getCourseImage() != null) {
-                cloudinaryService.deleteImage(course.getCourseImage());
-            }
-
-            String newPhotoUrl = cloudinaryService.uploadImage(file, course.getCourseName(), "CourseAvatar");
+            String newPhotoUrl = cloudinaryService.uploadImage(file, course.getCourseId().toString(), "CourseAvatar");
 
             if (newPhotoUrl == null) {
                 throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
@@ -1432,21 +1648,82 @@ public class CourseService {
                .orElseThrow(
                        () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
                );
+
        try {
-           if (course != null && course.getCourseImage() != null) {
-               cloudinaryService.deleteImage(course.getCourseImage());
+           if (course.getCourseImage() != null) {
+               System.out.println("img url: "+course.getCourseImage());
+
+               boolean result = cloudinaryService.deleteImage(course.getCourseImage());
+
                course.setCourseImage(null);
                courseRepository.save(course);
-               return true;
+               courseRepository.flush();
+               return result;
            }
-
+              log.error("Course avatar image not found");
            return false;
        } catch (AppException e) {
            log.error(e.getMessage());
            throw e;
        } catch (Exception e) {
            log.error(e.getMessage());
-           throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+           throw new AppException(ErrorCode.CAN_NOT_DELETE_IMAGE);
        }
+   }
+
+   public List<CourseSearchResponse> getTopPaidCoursesByNumberOfEnrolledStudents(UUID userUuid, Integer limit) {
+       if (limit == null) {
+           limit = 10;
+       }
+
+       List<Course> courses = null;
+
+       if (userUuid == null) {
+           courses = courseRepository.findTopPaidCoursesByIsAvailableTrueOrderByNumberOfEnrolledStudentsDesc(limit);
+       } else {
+           courses = courseRepository.findTopPaidCoursesByIsAvailableTrueOrderAndExcludeUserEnrolledCoursesByNumberOfEnrolledStudentsDesc(userUuid, limit);
+       }
+
+       //courseRepository.findTop10ByIsAvailableTrueAndPriceGreaterThanOrderByAverageRatingDesc(0);
+
+       List<CourseSearchResponse> responses = courses.stream()
+               .map(course -> {
+                   CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
+                   int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+                   response.setLessonCount(lessonCount);
+
+                   response.setSections(null);
+
+                   // because query course exclude course enrolled by user
+                   response.setCertificateId(null);
+                   response.setCertificateUrl(null);
+                   return response;
+               })
+               .collect(Collectors.toList());
+
+
+       return responses;
+   }
+
+   public Page<CourseSearchResponse> getFreeCourses(UUID userUuid, Pageable pageable) {
+       Page<Course> courses = null;
+
+       if (userUuid == null) {
+           courses = courseRepository.findByIsAvailableTrueAndPriceEqualsZero(pageable);
+       } else {
+           courses  = courseRepository.findByIsAvailableTrueAndPriceEqualsZeroAndExcludeUserEnrolledCourses(userUuid, pageable);
+       }
+
+       return courses.map(course -> {
+           CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
+           int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+           response.setLessonCount(lessonCount);
+           response.setSections(null);
+
+           // because query course exclude course enrolled by user
+           response.setCertificateId(null);
+           response.setCertificateUrl(null);
+           return response;
+       });
    }
 }

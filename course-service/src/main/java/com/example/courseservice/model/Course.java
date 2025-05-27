@@ -39,7 +39,7 @@ public class Course {
     @Column(name = "level", columnDefinition = "VARCHAR(20)")
     String level;
 
-    @Column(name = "score")
+    @Column(name = "score", columnDefinition = "integer default 0")
     Integer score;
 
     @Column(name = "price", columnDefinition = "DECIMAL(11,2)")
@@ -48,10 +48,10 @@ public class Course {
     @Column(name = "unit_price", columnDefinition = "VARCHAR(10)")
     String unitPrice;
 
-    @Column(name = "average_rating")
+    @Column(name = "average_rating", columnDefinition = "DECIMAL(3,2) default 0.00")
     Double averageRating;
 
-    @Column(name = "review_count")
+    @Column(name = "review_count", columnDefinition = "integer default 0")
     Integer reviewCount;
 
     @Column(name = "current_creation_step", columnDefinition = "integer default 1") // start at 1, only increase
@@ -85,6 +85,7 @@ public class Course {
     Instant createdAt;
 
     @JsonIgnore
+    @JsonIgnoreProperties("course")
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "topic_id", nullable = true)
     Topic topic;
