@@ -3,6 +3,7 @@ package com.example.problemservice.service;
 import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.converter.ProblemStructureConverter;
 import com.example.problemservice.client.BoilerplateClient;
+import com.example.problemservice.core.ProblemStructure;
 import com.example.problemservice.dto.request.course.CheckingUserCourseExistedRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
@@ -14,6 +15,7 @@ import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.DefaultCodeMapper;
 import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.mapper.ProblemcategoryMapper;
+import com.example.problemservice.mapper.SolutionMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.ViewSolutionBehavior;
 import com.example.problemservice.model.composite.DefaultCodeId;
@@ -51,7 +53,7 @@ public class ProblemService {
     private final DefaultCodeRepository defaultCodeRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
     private final DefaultCodeMapper defaultCodeMapper;
-    private final ProblemcategoryMapper problemcategoryMapper;
+    private final SolutionMapper solutionMapper;
     private final CourseClient courseClient;
     private final ProblemCategoryRepository problemCategoryRepository;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
@@ -141,7 +143,9 @@ public class ProblemService {
         // Map to response
         List<ProblemCreationResponse> responses = paginatedProblems.stream().map(problem -> {
             ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problem);
-
+            ProblemStructure problemStructure = ProblemStructureConverter.convertStringToObject(problem.getProblemStructure());
+            response.setProblemStructure(problemStructure);
+            response.setSolution(solutionMapper.toSolutionCreationResponse(problem.getSolution()));
             // Map categories
             List<CategoryResponse> matchedCategories = mapCategories(problem.getCategories(), allCategories);
             response.setCategories(matchedCategories);

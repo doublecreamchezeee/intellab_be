@@ -2,6 +2,7 @@ package com.example.problemservice.dto.response.Problem;
 
 import com.example.problemservice.core.ProblemStructure;
 import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
+import com.example.problemservice.dto.response.solution.SolutionCreationResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,6 +29,7 @@ public class ProblemCreationResponse {
     Integer currentCreationStep;
     List<CategoryResponse> categories;
     ProblemSubmissionStat problemSubmissionStat;
+    SolutionCreationResponse solution;
 
     @Data
     @AllArgsConstructor
