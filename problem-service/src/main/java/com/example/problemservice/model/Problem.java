@@ -69,7 +69,7 @@ public class Problem {
     Solution solution;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<ProblemCategory> categories;
 
     @JsonIgnore

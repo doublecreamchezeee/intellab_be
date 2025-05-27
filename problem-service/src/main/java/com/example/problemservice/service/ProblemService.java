@@ -150,6 +150,8 @@ public class ProblemService {
         // 1. Map DTO to entity
         Problem problem = problemMapper.toProblem(request);
         // 3. Save initial problem to get UUID
+        problem.setIsCompletedCreation(false);
+        problem.setCreatedAt(new Date());
         Problem savedProblem = problemRepository.save(problem);
 
         // 4. Generate ProblemCategory entities directly from request.getCategories()
