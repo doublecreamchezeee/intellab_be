@@ -25,20 +25,22 @@ public interface VNPayPaymentRepository
 
     Page<VNPayPayment> findAllByUserUuid(UUID userUuid, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = 'Active'")
+    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = '00'")
     Float sumSuccessfulPayments();
 
-    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = 'Active' AND MONTH(p.createdAt) = :month AND YEAR(p.createdAt) = :year")
+    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) FROM VNPayPayment p WHERE p.transactionStatus = '00' AND MONTH(p.createdAt) = :month AND YEAR(p.createdAt) = :year")
     Float sumSuccessfulPaymentsByMonth(@Param("month") int month, @Param("year") int year);
 
     @Query("""
                 SELECT FUNCTION('DATE_TRUNC', :unit, p.createdAt) AS period, SUM(p.paidAmount)
                 FROM VNPayPayment p
-                WHERE p.transactionStatus = 'Active' AND p.createdAt BETWEEN :start AND :end
+                WHERE p.transactionStatus = '00' AND p.createdAt BETWEEN :start AND :end
                 GROUP BY period
             """)
     List<Object[]> sumRevenueByRange(
             @Param("unit") String unit,
             @Param("start") Instant start,
             @Param("end") Instant end);
+
+    List<VNPayPayment> findTop10ByOrderByCreatedAtDesc();
 }

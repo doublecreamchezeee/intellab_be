@@ -1,9 +1,13 @@
 package com.example.identityservice.service;
 
 import com.example.identityservice.client.CourseClient;
+import com.example.identityservice.client.FirebaseAuthClient;
+import com.example.identityservice.dto.response.DashboardTableResponse;
+import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.chart.ChartDataPoint;
 import com.example.identityservice.dto.response.chart.ChartResponse;
 import com.example.identityservice.dto.response.DashboardMetricResponse;
+import com.example.identityservice.model.VNPayPayment;
 import com.example.identityservice.repository.VNPayPaymentCoursesRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.repository.VNPayPaymentRepository;
@@ -18,6 +22,8 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +33,7 @@ public class AdminDashboardService {
     private final VNPayPaymentPremiumPackageRepository premiumPackageRepository;
     private final VNPayPaymentCoursesRepository coursesRepository;
     private final CourseClient courseClient;
+    private final FirebaseAuthClient firebaseAuthClient;
 
     public List<DashboardMetricResponse> getSystemOverview() throws FirebaseAuthException {
         int currentMonth = LocalDate.now().getMonthValue();
@@ -280,5 +287,66 @@ public class AdminDashboardService {
         return count;
     }
 
+    public List<DashboardTableResponse> getRecentTransaction() {
+        List<VNPayPayment> recentPayments = vnpayPaymentRepository
+                .findTop10ByOrderByCreatedAtDesc();
+
+        List<DashboardTableResponse> responses = new ArrayList<>();
+
+        for (VNPayPayment payment : recentPayments) {
+            UserInfoResponse user = firebaseAuthClient.getUserInfo(payment.getUserUid(), "");
+
+            DashboardTableResponse response = DashboardTableResponse.builder()
+                    .user(user)
+                    .date(Date.from(payment.getCreatedAt()))
+                    .amount(payment.getTotalPaymentAmount().doubleValue())
+                    .status(payment.getTransactionStatus())
+                    .type(resolveType(payment))
+                    .build();
+
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
+    private String resolveType(VNPayPayment payment) {
+        if (payment.getVnPayPaymentPremiumPackage() != null) {
+            return "Premium";
+        } else if (!payment.getPaymentCourses().isEmpty()) {
+            return "Course";
+        }
+        return "Unknown";
+    }
+
+    public List<DashboardTableResponse> getTopPurchases() {
+        List<VNPayPayment> payments = vnpayPaymentRepository.findAll();
+
+        // Group by userUuid and sum total payment amount
+        Map<String, Double> totalAmountPerUser = payments.stream()
+                .filter(p -> p.getTransactionStatus().equalsIgnoreCase("00")) // Optional: only successful ones
+                .collect(Collectors.groupingBy(
+                        VNPayPayment::getUserUid,
+                        Collectors.summingDouble(p -> p.getTotalPaymentAmount() != null ? p.getTotalPaymentAmount() : 0)
+                ));
+
+        List<DashboardTableResponse> topPurchases = new ArrayList<>();
+
+        for (Map.Entry<String, Double> entry : totalAmountPerUser.entrySet()) {
+            UserInfoResponse user = firebaseAuthClient.getUserInfo(entry.getKey(), "");
+
+            topPurchases.add(DashboardTableResponse.builder()
+                    .user(user)
+                    .amount(entry.getValue())
+                    .build());
+
+        }
+
+        // Sort descending by totalAmount
+        return topPurchases.stream()
+                .sorted(Comparator.comparing(DashboardTableResponse::getAmount).reversed())
+                .limit(10) // Optional: top 10
+                .collect(Collectors.toList());
+    }
 
 }
