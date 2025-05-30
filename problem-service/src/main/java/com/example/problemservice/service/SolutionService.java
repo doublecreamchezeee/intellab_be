@@ -51,6 +51,7 @@ public class SolutionService {
         solution = solutionRepository.save(solution);
 
         problem.setCurrentCreationStep(5);
+        problem.setCurrentCreationStepDescription("Solution Step");
         problemRepository.save(problem);
 
         // Step 5: Return response

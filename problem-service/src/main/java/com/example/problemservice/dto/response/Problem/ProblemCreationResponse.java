@@ -27,6 +27,7 @@ public class ProblemCreationResponse {
     Boolean hasSolution;
     Boolean isCompletedCreation;
     Integer currentCreationStep;
+    String currentCreationStepDescription;
     List<CategoryResponse> categories;
     ProblemSubmissionStat problemSubmissionStat;
     SolutionCreationResponse solution;

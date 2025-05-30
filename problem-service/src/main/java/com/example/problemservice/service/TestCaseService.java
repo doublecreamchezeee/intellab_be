@@ -52,6 +52,7 @@ public class TestCaseService {
         }
 
         problem.setCurrentCreationStep(4);
+        problem.setCurrentCreationStepDescription("Testcase Step");
         problemRepository.save(problem);
 
         testCase = testCaseRepository.save(testCase);
