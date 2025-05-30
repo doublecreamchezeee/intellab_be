@@ -540,10 +540,10 @@ public class ProblemService {
 //        MarkdownUtility.deleteProblemFolder(problem.getProblemName());
 
         problemRunCodeRepository.deleteProblemRunCodeByProblem_ProblemId(problemId);
-        testCaseRepository.deleteAllByProblem_ProblemId(problemId);
-        problemSubmissionRepository.deleteAllByProblem_ProblemId(problemId);
-        solutionRepository.deleteByIdProblemId(problemId);
-        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(problemId);
+//        testCaseRepository.deleteAllByProblem_ProblemId(problemId);
+//        problemSubmissionRepository.deleteAllByProblem_ProblemId(problemId);
+//        solutionRepository.deleteByIdProblemId(problemId);
+//        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(problemId);
         problemRepository.deleteById(problemId);
     }
 
