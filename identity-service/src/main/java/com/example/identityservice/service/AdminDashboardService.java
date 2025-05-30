@@ -135,6 +135,7 @@ public class AdminDashboardService {
                 end.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         List<ChartDataPoint> data = raw.stream()
+                .sorted(Comparator.comparing(row -> (Instant) row[0]))
                 .map(row -> {
                     Instant instant = (Instant) row[0];
                     Integer count = ((Number) row[1]).intValue();
@@ -168,6 +169,7 @@ public class AdminDashboardService {
                 end.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         List<ChartDataPoint> data = raw.stream()
+                .sorted(Comparator.comparing(row -> (Instant) row[0]))
                 .map(row -> {
                     Instant instant = (Instant) row[0];
                     Long amount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
@@ -197,6 +199,7 @@ public class AdminDashboardService {
 
         // Process the raw data into ChartDataPoint format
         List<ChartDataPoint> data = rawData.stream()
+                .sorted(Comparator.comparing(row -> Instant.parse(row[0].toString())))
                 .map(row -> {
                     Instant timestamp = Instant.parse(row[0].toString());
                     Double completionRate = (Double) row[1];  // Assuming the completion rate is in the second column
