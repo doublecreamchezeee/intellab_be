@@ -143,9 +143,14 @@ public class ProblemService {
         // Map to response
         List<ProblemCreationResponse> responses = paginatedProblems.stream().map(problem -> {
             ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problem);
-            ProblemStructure problemStructure = ProblemStructureConverter.convertStringToObject(problem.getProblemStructure());
-            response.setProblemStructure(problemStructure);
-            response.setSolution(solutionMapper.toSolutionCreationResponse(problem.getSolution()));
+            if (problem.getProblemStructure() != null){
+                ProblemStructure problemStructure = ProblemStructureConverter.convertStringToObject(problem.getProblemStructure());
+                response.setProblemStructure(problemStructure);
+            }
+            if (problem.getSolution() != null){
+                response.setSolution(solutionMapper.toSolutionCreationResponse(problem.getSolution()));
+            }
+
             // Map categories
             List<CategoryResponse> matchedCategories = mapCategories(problem.getCategories(), allCategories);
             response.setCategories(matchedCategories);
@@ -230,6 +235,8 @@ public class ProblemService {
         problem.setAuthorId(userId);
         problem.setIsCompletedCreation(false);
         problem.setCreatedAt(new Date());
+        problem.setCurrentCreationStep(1);
+        problem.setCurrentCreationStepDescription("General Step");
         Problem savedProblem = problemRepository.save(problem);
 
         // 4. Generate ProblemCategory entities directly from request.getCategories()
@@ -264,6 +271,7 @@ public class ProblemService {
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
         problem.setCurrentCreationStep(2);
+        problem.setCurrentCreationStepDescription("Description Step");
 
 
         problem.setDescription(request.getDescription());
@@ -279,6 +287,7 @@ public class ProblemService {
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
         problem.setCurrentCreationStep(3);
+        problem.setCurrentCreationStepDescription("Structure Step");
         // 2. Serialize problemStructure to String for DB
         problem.setProblemStructure(
                 ProblemStructureConverter.convertObjectToString(request.getProblemStructure()));
@@ -313,7 +322,8 @@ public class ProblemService {
         }
 
         problem.setIsCompletedCreation(completedCreationStatus);
-
+        problem.setCurrentCreationStep(6);
+        problem.setCurrentCreationStepDescription("Final Step");
         Problem savedProblem = problemRepository.save(problem);
 
         return problemMapper.toProblemCreationResponse(savedProblem);
@@ -530,10 +540,10 @@ public class ProblemService {
 //        MarkdownUtility.deleteProblemFolder(problem.getProblemName());
 
         problemRunCodeRepository.deleteProblemRunCodeByProblem_ProblemId(problemId);
-        testCaseRepository.deleteAllByProblem_ProblemId(problemId);
-        problemSubmissionRepository.deleteAllByProblem_ProblemId(problemId);
-        solutionRepository.deleteByIdProblemId(problemId);
-        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(problemId);
+//        testCaseRepository.deleteAllByProblem_ProblemId(problemId);
+//        problemSubmissionRepository.deleteAllByProblem_ProblemId(problemId);
+//        solutionRepository.deleteByIdProblemId(problemId);
+//        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(problemId);
         problemRepository.deleteById(problemId);
     }
 

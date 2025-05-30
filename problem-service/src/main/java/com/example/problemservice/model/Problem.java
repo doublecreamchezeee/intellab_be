@@ -71,7 +71,7 @@ public class Problem {
     Solution solution;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     List<ProblemCategory> categories;
 
     @JsonIgnore
@@ -88,6 +88,9 @@ public class Problem {
 
     @Column(name = "current_creation_step", columnDefinition = "integer default 1") // start at 1, only increase
     Integer currentCreationStep;
+
+    @Column(name = "current_creation_step_description")
+    String currentCreationStepDescription;
 
     @Column(name = "is_completed_creation", columnDefinition = "boolean default false")
     Boolean isCompletedCreation;
