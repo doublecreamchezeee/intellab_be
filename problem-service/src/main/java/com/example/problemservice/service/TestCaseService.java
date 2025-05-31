@@ -65,6 +65,33 @@ public class TestCaseService {
         return testCaseMapper.toTestCaseResponse(testCase);
     }
 
+    public TestCaseCreationResponse updateTestCase(UUID testCaseId, TestCaseCreationRequest request) {
+        TestCase testCase = testCaseRepository.findById(testCaseId).orElseThrow(
+                () -> new AppException(ErrorCode.TESTCASE_NOT_EXIST));
+
+        Problem problem = testCase.getProblem();
+        if (problem == null || !problem.getProblemId().equals(request.getProblemId())) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
+        }
+
+        // Update fields
+        testCase.setInput(request.getInput());
+        testCase.setOutput(request.getOutput());
+
+        // Save updated test case
+        testCase = testCaseRepository.save(testCase);
+
+        // Re-write updated testcase to file (overwrite)
+        TestCaseFileReader.saveOneTestCase(
+                problem.getProblemName(),
+                testCase.getInput(),
+                testCase.getOutput()
+        );
+
+        return testCaseMapper.toTestCaseResponse(testCase);
+    }
+
+
     public TestCase getTestCase(UUID testCaseId) {
         return testCaseRepository.findById(testCaseId)
                 .orElseThrow(() -> new AppException(

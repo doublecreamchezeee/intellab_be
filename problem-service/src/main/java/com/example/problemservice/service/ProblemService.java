@@ -229,38 +229,50 @@ public class ProblemService {
     }
 
     public ProblemCreationResponse generalStep(ProblemCreationRequest request, UUID userId) {
-        // 1. Map DTO to entity
-        Problem problem = problemMapper.toProblem(request);
-        // 3. Save initial problem to get UUID
-        problem.setAuthorId(userId);
-        problem.setIsCompletedCreation(false);
-        problem.setCreatedAt(new Date());
+        Problem problem;
+
+        if (request.getProblemId() == null || request.getProblemId().isEmpty()) {
+            // Create new problem
+            problem = problemMapper.toProblem(request);
+            problem.setAuthorId(userId);
+            problem.setCreatedAt(new Date());
+        } else {
+            // Update existing
+            problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
+                    () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
+            );
+        }
+
+        // Update fields for general step
+        problem.setProblemName(request.getProblemName());
+        problem.setProblemLevel(request.getProblemLevel());
+        problem.setScore(request.getScore());
+        problem.setIsPublished(request.getIsPublished());
         problem.setCurrentCreationStep(1);
         problem.setCurrentCreationStepDescription("General Step");
+
         Problem savedProblem = problemRepository.save(problem);
 
-        // 4. Generate ProblemCategory entities directly from request.getCategories()
+        // Update categories
+        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(savedProblem.getProblemId());
+
         List<ProblemCategory> problemCategories = request.getCategories().stream()
-                .map(categoryId -> {
-                    return ProblemCategory.builder()
-                            .problemCategoryID(
-                                    ProblemCategoryID.builder()
-                                            .categoryId(categoryId)
-                                            .problemId(savedProblem.getProblemId())
-                                            .build())
-                            .problem(savedProblem)
-                            .build();
-                })
+                .map(categoryId -> ProblemCategory.builder()
+                        .problemCategoryID(
+                                ProblemCategoryID.builder()
+                                        .categoryId(categoryId)
+                                        .problemId(savedProblem.getProblemId())
+                                        .build())
+                        .problem(savedProblem)
+                        .build())
                 .toList();
 
-        // 5. Save associations
         problemCategoryRepository.saveAll(problemCategories);
-
-        // 6. Optionally set categories in the saved entity (not strictly necessary
-        // unless used later)
         savedProblem.setCategories(problemCategories);
+
         return problemMapper.toProblemCreationResponse(savedProblem);
     }
+
 
     public ProblemCreationResponse descriptionStep(ProblemCreationRequest request) {
         if (request.getProblemId() == null) {
@@ -272,7 +284,6 @@ public class ProblemService {
         );
         problem.setCurrentCreationStep(2);
         problem.setCurrentCreationStepDescription("Description Step");
-
 
         problem.setDescription(request.getDescription());
         Problem savedProblem = problemRepository.save(problem);
