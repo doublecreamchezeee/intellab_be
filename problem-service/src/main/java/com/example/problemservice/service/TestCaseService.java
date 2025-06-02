@@ -70,9 +70,15 @@ public class TestCaseService {
                 () -> new AppException(ErrorCode.TESTCASE_NOT_EXIST));
 
         Problem problem = testCase.getProblem();
+
         if (problem == null || !problem.getProblemId().equals(request.getProblemId())) {
             throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
         }
+
+        problem.setIsCompletedCreation(false);
+        problem.setCurrentCreationStep(4);
+        problem.setCurrentCreationStepDescription("Testcase Step");
+        problemRepository.save(problem);
 
         // Update fields
         testCase.setInput(request.getInput());

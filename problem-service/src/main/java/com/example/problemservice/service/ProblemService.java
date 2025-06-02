@@ -57,8 +57,6 @@ public class ProblemService {
     private final CourseClient courseClient;
     private final ProblemCategoryRepository problemCategoryRepository;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
-    private final TestCaseRepository testCaseRepository;
-    private final SolutionRepository solutionRepository;
     private final ProblemRunCodeRepository problemRunCodeRepository;
 
     private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
@@ -228,6 +226,7 @@ public class ProblemService {
         return response;
     }
 
+    @Transactional
     public ProblemCreationResponse generalStep(ProblemCreationRequest request, UUID userId) {
         Problem problem;
 
@@ -238,41 +237,46 @@ public class ProblemService {
             problem.setCreatedAt(new Date());
         } else {
             // Update existing
-            problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
-                    () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
-            );
+            problem = problemRepository.findById(UUID.fromString(request.getProblemId()))
+                    .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+
+            // Clear existing categories properly, so Hibernate can track removals
+            if (problem.getCategories() != null) {
+                problem.getCategories().clear();
+            }
         }
 
-        // Update fields for general step
+        // Update other fields
         problem.setProblemName(request.getProblemName());
         problem.setProblemLevel(request.getProblemLevel());
         problem.setScore(request.getScore());
         problem.setIsPublished(request.getIsPublished());
         problem.setCurrentCreationStep(1);
+        problem.setIsCompletedCreation(false);
         problem.setCurrentCreationStepDescription("General Step");
 
-        Problem savedProblem = problemRepository.save(problem);
+        // Initialize categories if null (should be avoided if problem entity is properly initialized)
+        if (problem.getCategories() == null) {
+            problem.setCategories(new ArrayList<>());
+        } else {
+            // Clear to remove old categories for update (redundant if done above, but safe)
+            problem.getCategories().clear();
+        }
 
-        // Update categories
-        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(savedProblem.getProblemId());
-
-        List<ProblemCategory> problemCategories = request.getCategories().stream()
+        // Create new ProblemCategory list
+        List<ProblemCategory> newCategories = request.getCategories().stream()
                 .map(categoryId -> ProblemCategory.builder()
-                        .problemCategoryID(
-                                ProblemCategoryID.builder()
-                                        .categoryId(categoryId)
-                                        .problemId(savedProblem.getProblemId())
-                                        .build())
-                        .problem(savedProblem)
+                        .problemCategoryID(new ProblemCategoryID(categoryId, problem.getProblemId()))
+                        .problem(problem)
                         .build())
                 .toList();
-
-        problemCategoryRepository.saveAll(problemCategories);
-        savedProblem.setCategories(problemCategories);
+        problemCategoryRepository.saveAll(newCategories);
+        // Add new categories to the existing persistent collection
+        problem.getCategories().addAll(newCategories);
+        Problem savedProblem = problemRepository.save(problem);
 
         return problemMapper.toProblemCreationResponse(savedProblem);
     }
-
 
     public ProblemCreationResponse descriptionStep(ProblemCreationRequest request) {
         if (request.getProblemId() == null) {
@@ -284,7 +288,7 @@ public class ProblemService {
         );
         problem.setCurrentCreationStep(2);
         problem.setCurrentCreationStepDescription("Description Step");
-
+        problem.setIsCompletedCreation(false);
         problem.setDescription(request.getDescription());
         Problem savedProblem = problemRepository.save(problem);
         return problemMapper.toProblemCreationResponse(savedProblem);
@@ -299,6 +303,7 @@ public class ProblemService {
         );
         problem.setCurrentCreationStep(3);
         problem.setCurrentCreationStepDescription("Structure Step");
+        problem.setIsCompletedCreation(false);
         // 2. Serialize problemStructure to String for DB
         problem.setProblemStructure(
                 ProblemStructureConverter.convertObjectToString(request.getProblemStructure()));

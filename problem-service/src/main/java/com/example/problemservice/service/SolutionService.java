@@ -83,6 +83,7 @@ public class SolutionService {
         if (problem != null) {
             problem.setCurrentCreationStep(5);
             problem.setCurrentCreationStepDescription("Solution Step");
+            problem.setIsCompletedCreation(false);
             problemRepository.save(problem);
         }
 
