@@ -73,9 +73,9 @@ public class AssignmentService {
         addDetail(result.getAssignmentId(), detailRequests);
 
         if(request.getScore() != null) {
-            if(request.getScore() >= 8) {
+            if(request.getScore() >= exercise.getPassingQuestions()) {
                 learningLesson.setIsDoneTheory(true);
-            } else if (request.getScore() < 8) {
+            } else if (request.getScore() < exercise.getPassingQuestions()) {
                 learningLesson.setIsDoneTheory(false);
             }
             learningLessonRepository.save(learningLesson);

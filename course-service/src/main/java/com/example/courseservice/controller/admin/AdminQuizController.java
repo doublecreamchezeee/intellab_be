@@ -35,7 +35,10 @@ public class AdminQuizController {
 
     @Operation(
             summary = "Modify list Quiz",
-            description = ""
+            description = "Các case dùng:" +
+                    "1. Lesson vừa mới tạo or lesson CHƯA CÓ QUIZ VÀ ĐANG TẮT QUIZ: " +
+                    "   - truyền isQuizVisible = true, để bật + danh sách list câu hỏi. Để tạo list câu hỏi và bật quiz visible" +
+                    "2. Lesson đã có quiz và đang bật quiz visible: chỉ cần isQuizVisible = false để tắt"
     )
     @PutMapping()
     ApiResponse<ExerciseResponse> modifyQuiz(

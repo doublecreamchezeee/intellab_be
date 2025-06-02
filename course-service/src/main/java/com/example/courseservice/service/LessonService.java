@@ -325,6 +325,13 @@ public class LessonService {
         UUID nextLessonId = (nextLesson != null) ? nextLesson.getLessonId() : null;
         String nextLessonName = (nextLesson != null) ? nextLesson.getLessonName() : null;
 
+        UUID exerciseId = null;
+
+        if (lesson.getIsQuizVisible() && lesson.getExercise() != null )
+        {
+            exerciseId = lesson.getExercise().getExerciseId();
+        }
+
         // Build the response with all the lesson details
 
         return DetailsLessonResponse.builder()
@@ -334,7 +341,7 @@ public class LessonService {
                 .lessonOrder(lesson.getLessonOrder())
                 .lessonName(lesson.getLessonName())
                 .courseId(lesson.getCourse().getCourseId())
-                .exerciseId(lesson.getExercise() != null ? lesson.getExercise().getExerciseId() : null) // Check if exercise is null
+                .exerciseId(exerciseId) // Check if exercise is null
                 .problemId(lesson.getProblemId())
                 .learningId(learningLesson.getLearningId())
                 .nextLessonId(nextLessonId)
@@ -363,6 +370,7 @@ public class LessonService {
         if(assignments.isEmpty()){
             throw new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND);
         }
+        Exercise exercise = assignments.get(0).getExercise();
 
         Assignment lastEdited = null;
 
@@ -370,12 +378,12 @@ public class LessonService {
         {
             if (lastEdited == null)
                 lastEdited = assignment;
-            else if (lastEdited.getScore() >= 8)
+            else if (lastEdited.getScore() >= exercise.getPassingQuestions())
             {
                 if(assignment.getScore()>=lastEdited.getScore())
                     lastEdited = assignment;
             }
-            else if (lastEdited.getScore() < 8)
+            else if (lastEdited.getScore() < exercise.getPassingQuestions())
                 lastEdited = assignment;
         }
 
@@ -397,9 +405,13 @@ public class LessonService {
     {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
+
         Exercise exercise = lesson.getExercise();
+
         if (exercise == null)
             return null;
+
+        numberOfQuestions = exercise.getQuestionsPerExercise();
         List<Question> questions = exercise.getQuestionList();
 
         if(questions == null || questions.isEmpty())
@@ -556,12 +568,15 @@ public class LessonService {
                 courseId
         ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
-//        Lesson lesson = learningLesson.getLesson();
+        Lesson lesson = learningLesson.getLesson();
+        if (lesson.getExercise() == null || !lesson.getIsQuizVisible()) {
+            learningLesson.setIsDoneTheory(true);
+        }
 
-        learningLesson.setIsDoneTheory(true);
+        learningLesson.setIsDoneTheory(null);
 
         if (learningLesson.getIsDonePractice() != null
-                && learningLesson.getIsDonePractice()) {
+                && learningLesson.getIsDonePractice() && learningLesson.getIsDoneTheory() != null) {
             learningLesson.setStatus(PredefinedLearningStatus.DONE);
         }
 
