@@ -222,19 +222,23 @@ public class ProblemSubmissionService {
                                 notificationService.updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
                                 // Thông báo
                                 notificationService.solveProblemNotification(problem, result.getUserId());
+                                // xóa hành vi xem lời giải
+                                viewSolutionBehaviorRepository.delete(viewSolutionBehavior);
                             }
                             else if ( submissions.stream()
                                     .noneMatch(ProblemSubmission::getIsSolved)) {
                                 // cộng điểm
                                 Problem problem = result.getProblem();
                                 notificationService.updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
+                                // Thông báo
+                                notificationService.solveProblemNotification(problem, result.getUserId());
+                                // xóa hành vi xem lời giải
+                                viewSolutionBehaviorRepository.delete(viewSolutionBehavior);
                             }
                         } catch (Exception e) {
                             System.out.println("Error while update leaderboard: " + e.getMessage());
                         }
-                        viewSolutionBehaviorRepository.delete(viewSolutionBehavior);
                     }
-
                     problemSubmissionRepository.save(result);
                 }
 

@@ -580,6 +580,10 @@ public class ProblemService {
     public List<DefaultCodeResponse> generateDefaultCodes(UUID problemId, String structure) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+        if (problem.getCurrentCreationStep() < 6 || !problem.getIsCompletedCreation() || problem.getProblemStructure() == null) {
+            log.error("Problem is not ready for boilerplate generation: {}", problemId);
+            return Collections.emptyList();
+        }
 
         List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepository.findAll();
 
