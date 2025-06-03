@@ -48,36 +48,32 @@ public class LeaderboardService {
         List<LeaderboardResponse> responses = leaderboards.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
-
-        List<LeaderboardResponse> zeroPoints = zeroPoints(responses);
-
-        if (zeroPoints != null && zeroPoints.isEmpty()) {
-            responses.addAll(zeroPoints);
-        }
-
-        responses.addAll(zeroPoints);
+        // Xác định offset và số lượng phần tử cần lấy từ danh sách responses
+        // Nếu không có phần tử nào trong responses, ta cần thêm những người dùng có điểm số bằng 0
         int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), responses.size());
-        List<LeaderboardResponse> pageContent = responses.subList(start, end);
-        return new PageImpl<>(pageContent, pageable, responses.size());
+        int end = start + pageable.getPageSize();
 
+        // Nếu responses đủ, ta trả về trang với nội dung từ start đến end
+        if (responses.size() > end)
+        {
+            List<LeaderboardResponse> pageContent = responses.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, responses.size());
+        }
+        // Nếu responses không đủ, ta cần thêm những người dùng có điểm số bằng 0
+        return addZero(responses, start, end);
     }
 
-    private List<LeaderboardResponse> zeroPoints(List<LeaderboardResponse> leaderboards) {
+    private Page<LeaderboardResponse> addZero(List<LeaderboardResponse> leaderboards, int start, int end) {
         List<String> uids = leaderboards.stream().map(LeaderboardResponse::getUserUid).toList();
 
         List<String> userUids = null;
-
-
         List<User> users = null;
         try {
             users = firestoreService.getAllUsers();
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         users = users.stream().filter(user -> Objects.equals(user.getRole(), "user")).toList();
-
 
         userUids = new ArrayList<>(users.stream().map(User::getUid).toList());
         System.out.println(userUids);
@@ -89,14 +85,23 @@ public class LeaderboardService {
         userUids.removeAll(uids);
         userUids.remove(null);
         userUids.remove("");
+        int totalSize = leaderboards.size() + userUids.size();
+        System.out.println("Total size: " + totalSize);
+        System.out.println("Page size: " + (end - start));
+
+        if(start > totalSize) {
+            return new PageImpl<>(Collections.emptyList(), Pageable.ofSize(end - start), totalSize);
+        }
+        int startIndex = Math.max(leaderboards.size(), start);
+        int endIndex = Math.min(totalSize, end);
+
+        userUids = userUids.subList(startIndex, endIndex);
 
 
-
-        return userUids.stream().map(
+        List<LeaderboardResponse> zeroList =  userUids.stream().map(
                 uid -> {
 
                     UserInfoResponse userInfoResponse = getUserInfoByUid(uid);
-
 
                     return LeaderboardResponse.builder()
                             .point(0L)
@@ -110,6 +115,15 @@ public class LeaderboardService {
                             .build();
                 }
         ).toList();
+
+        if (leaderboards.size() > start)
+        {
+            List<LeaderboardResponse> pageContent = new ArrayList<>(leaderboards.subList(start, Math.min(leaderboards.size(), end)));
+            pageContent.addAll(zeroList);
+            return new PageImpl<>(pageContent, Pageable.ofSize(end - start), totalSize);
+        } else {
+            return new PageImpl<>(zeroList, Pageable.ofSize(end - start), totalSize);
+        }
     }
 
     private LeaderboardResponse convertToResponse(Leaderboard leaderboard) {
@@ -136,10 +150,15 @@ public class LeaderboardService {
     }
 
     private UserInfoResponse getUserInfoByUid(String userUid) {
+        if (userUid == null || userUid.isEmpty()) {
+            return UserInfoResponse.builder()
+                    .displayName("Ambiguous User").build();
+        }
         try{
             return profileService.getUserInfo(userUid, "");
         } catch (Exception e) {
-            return UserInfoResponse.builder().build();
+            return UserInfoResponse.builder()
+                    .displayName("Ambiguous User").build();
         }
     }
 

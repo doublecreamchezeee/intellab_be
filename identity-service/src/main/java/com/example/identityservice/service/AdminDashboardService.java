@@ -1,9 +1,13 @@
 package com.example.identityservice.service;
 
 import com.example.identityservice.client.CourseClient;
+import com.example.identityservice.client.FirebaseAuthClient;
+import com.example.identityservice.dto.response.DashboardTableResponse;
+import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.chart.ChartDataPoint;
 import com.example.identityservice.dto.response.chart.ChartResponse;
 import com.example.identityservice.dto.response.DashboardMetricResponse;
+import com.example.identityservice.model.VNPayPayment;
 import com.example.identityservice.repository.VNPayPaymentCoursesRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.repository.VNPayPaymentRepository;
@@ -16,8 +20,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +34,7 @@ public class AdminDashboardService {
     private final VNPayPaymentPremiumPackageRepository premiumPackageRepository;
     private final VNPayPaymentCoursesRepository coursesRepository;
     private final CourseClient courseClient;
+    private final FirebaseAuthClient firebaseAuthClient;
 
     public List<DashboardMetricResponse> getSystemOverview() throws FirebaseAuthException {
         int currentMonth = LocalDate.now().getMonthValue();
@@ -108,32 +116,97 @@ public class AdminDashboardService {
         return current < previous ? "decrease" : "increase";
     }
 
-    public ChartResponse getSubscriptionGrowth(String type, LocalDate startDate, LocalDate endDate) {
-        String unit = switch (type) {
-            case "hourly" -> "hour";
-            case "daily" -> "day";
-            case "weekly" -> "week";
-            case "monthly" -> "month";
-            case "custom" -> "day"; // use day granularity for custom
+    private String resolveUnit(String type, LocalDate startDate, LocalDate endDate) {
+        return switch (type) {
+            case "monthly" -> "week"; // show 4 weeks
+            case "yearly" -> "month"; // show 12 months
+            case "custom" -> {
+                if (startDate != null && endDate != null) {
+                    long days = ChronoUnit.DAYS.between(startDate, endDate);
+                    if (days < 7) yield "day";
+                    else if (days <= 30) yield "week";
+                    else yield "month";
+                } else {
+                    yield "day"; // default fallback
+                }
+            }
             default -> throw new IllegalArgumentException("Invalid type: " + type);
         };
+    }
 
-        // if custom, use provided dates; else auto range
-        LocalDate start = (startDate != null) ? startDate : LocalDate.now().minusMonths(6).withDayOfMonth(1);
-        LocalDate end = (endDate != null) ? endDate : LocalDate.now().plusDays(1);
+    private String formatLabel(Instant instant, String unit) {
+        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+        return switch (unit) {
+            case "week" -> "W" + zdt.get(WeekFields.ISO.weekOfWeekBasedYear()) + " " + zdt.getYear();
+            case "month" -> zdt.format(DateTimeFormatter.ofPattern("MMM"));
+            case "day" -> zdt.format(DateTimeFormatter.ofPattern("dd-MMM"));
+//            case "custom" -> zdt.format(DateTimeFormatter.ofPattern("dd-MM")); // Optional
+            default -> throw new IllegalArgumentException("Unsupported unit: " + unit);
+        };
+    }
+
+    private List<String> generateTimeline(String unit, LocalDate start, LocalDate end) {
+        List<String> timeline = new ArrayList<>();
+        LocalDate current = start;
+
+        while (!current.isAfter(end)) {
+            Instant instant = current.atStartOfDay(ZoneId.systemDefault()).toInstant();
+            timeline.add(formatLabel(instant, unit));
+
+            switch (unit) {
+                case "day" -> current = current.plusDays(1);
+                case "week" -> current = current.plusWeeks(1);
+                case "month" -> current = current.plusMonths(1);
+                default -> throw new IllegalArgumentException("Unsupported unit: " + unit);
+            }
+        }
+
+        return timeline;
+    }
+
+    private List<LocalDate> resolveDateRange(String unit, LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null) {
+            return List.of(startDate, endDate);
+        }
+
+        LocalDate now = LocalDate.now();
+
+        return switch (unit) {
+            case "day" -> List.of(
+                    now.with(DayOfWeek.MONDAY),
+                    now.with(DayOfWeek.MONDAY).plusDays(6)
+            );
+            case "week" -> List.of(
+                    now.withDayOfMonth(1),
+                    now.withDayOfMonth(1).plusWeeks(4).minusDays(1)
+            );
+            case "month" -> List.of(
+                    now.withDayOfYear(1),
+                    now.withMonth(12).withDayOfMonth(31)
+            );
+            default -> throw new IllegalArgumentException("Unsupported unit: " + unit);
+        };
+    }
+
+    public ChartResponse getSubscriptionGrowth(String type, LocalDate startDate, LocalDate endDate) {
+        String unit = resolveUnit(type, startDate, endDate);
+
+        List<LocalDate> range = resolveDateRange(unit, startDate, endDate);
+        LocalDate start = range.get(0);
+        LocalDate end = range.get(1);
 
         List<Object[]> raw = premiumPackageRepository.countSubscriptionsByRange(
                 unit,
                 start.atStartOfDay(ZoneId.systemDefault()).toInstant(),
                 end.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        List<ChartDataPoint> data = raw.stream()
-                .map(row -> {
-                    Instant instant = (Instant) row[0];
-                    Integer count = ((Number) row[1]).intValue();
-                    String label = formatLabel(instant, unit);
-                    return new ChartDataPoint(label, count);
-                })
+        Map<String, Integer> rawMap = raw.stream().collect(Collectors.toMap(
+                row -> formatLabel((Instant) row[0], unit),
+                row -> ((Number) row[1]).intValue()
+        ));
+
+        List<ChartDataPoint> data = generateTimeline(unit, start, end).stream()
+                .map(label -> new ChartDataPoint(label, rawMap.getOrDefault(label, 0)))
                 .toList();
 
         return ChartResponse.builder()
@@ -143,30 +216,24 @@ public class AdminDashboardService {
     }
 
     public ChartResponse getRevenue(String type, LocalDate startDate, LocalDate endDate) {
-        String unit = switch (type) {
-            case "hourly" -> "hour";
-            case "daily" -> "day";
-            case "weekly" -> "week";
-            case "monthly" -> "month";
-            case "custom" -> "day";
-            default -> throw new IllegalArgumentException("Invalid type: " + type);
-        };
+        String unit = resolveUnit(type, startDate, endDate);
 
-        LocalDate start = (startDate != null) ? startDate : LocalDate.now().minusMonths(6).withDayOfMonth(1);
-        LocalDate end = (endDate != null) ? endDate : LocalDate.now().plusDays(1);
+        List<LocalDate> range = resolveDateRange(unit, startDate, endDate);
+        LocalDate start = range.get(0);
+        LocalDate end = range.get(1);
 
         List<Object[]> raw = vnpayPaymentRepository.sumRevenueByRange(
                 unit,
                 start.atStartOfDay(ZoneId.systemDefault()).toInstant(),
                 end.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        List<ChartDataPoint> data = raw.stream()
-                .map(row -> {
-                    Instant instant = (Instant) row[0];
-                    Long amount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
-                    String label = formatLabel(instant, unit);
-                    return new ChartDataPoint(label, Math.toIntExact(amount));
-                })
+        Map<String, Integer> rawMap = raw.stream().collect(Collectors.toMap(
+                row -> formatLabel((Instant) row[0], unit),
+                row -> ((row[1] != null) ? ((Number) row[1]).intValue() : 0)
+        ));
+
+        List<ChartDataPoint> data = generateTimeline(unit, start, end).stream()
+                .map(label -> new ChartDataPoint(label, rawMap.getOrDefault(label, 0)))
                 .toList();
 
         return ChartResponse.builder()
@@ -176,87 +243,63 @@ public class AdminDashboardService {
     }
 
     public ChartResponse getCourseCompletionRate(String type, LocalDate startDate, LocalDate endDate) {
-        String unit = switch (type) {
-            case "hourly" -> "hour";
-            case "daily" -> "day";
-            case "weekly" -> "week";
-            case "monthly" -> "month";
-            case "custom" -> "day";
-            default -> throw new IllegalArgumentException("Invalid type: " + type);
-        };
+        String unit = resolveUnit(type, startDate, endDate);
 
-        // Get the data from courseClient
-        List<Object[]> rawData = Objects.requireNonNull(courseClient.getCourseCompleteRate(type, startDate, endDate).block()).getResult();
+        List<LocalDate> range = resolveDateRange(unit, startDate, endDate);
+        LocalDate start = range.get(0);
+        LocalDate end = range.get(1);
 
-        // Process the raw data into ChartDataPoint format
-        List<ChartDataPoint> data = rawData.stream()
-                .map(row -> {
-                    Instant timestamp = Instant.parse(row[0].toString());
-                    Double completionRate = (Double) row[1];  // Assuming the completion rate is in the second column
-                    return new ChartDataPoint(formatLabel(timestamp, unit), completionRate.intValue());
-                })
+        List<Object[]> rawData = Objects.requireNonNull(courseClient.getCourseCompleteRate(type, start, end).block()).getResult();
+
+        Map<String, Integer> rawMap = rawData.stream().collect(Collectors.toMap(
+                row -> formatLabel(Instant.parse(row[0].toString()), unit),
+                row -> ((Double) row[1]).intValue()
+        ));
+
+        List<ChartDataPoint> data = generateTimeline(unit, start, end).stream()
+                .map(label -> new ChartDataPoint(label, rawMap.getOrDefault(label, 0)))
                 .toList();
 
-        // Return the chart response
         return ChartResponse.builder()
-                .type(unit)
+                .type(type)
                 .data(data)
                 .build();
     }
 
-    private String formatLabel(Instant timestamp, String unit) {
-        ZonedDateTime zdt = timestamp.atZone(ZoneId.systemDefault());
-        return switch (unit) {
-            case "hour" -> zdt.format(DateTimeFormatter.ofPattern("HH:mm dd/MM"));
-            case "day" -> zdt.format(DateTimeFormatter.ofPattern("dd MMM"));
-            case "week" -> "W" + zdt.get(WeekFields.ISO.weekOfWeekBasedYear()) + " " + zdt.getYear();
-            case "month" -> zdt.format(DateTimeFormatter.ofPattern("MMM yyyy"));
-            default -> zdt.toString();
-        };
-    }
-
     public ChartResponse getUserGrowth(String type, LocalDate startDate, LocalDate endDate) throws FirebaseAuthException {
-        String unit = switch (type) {
-            case "hourly" -> "hour";
-            case "daily" -> "day";
-            case "weekly" -> "week";
-            case "monthly" -> "month";
-            case "custom" -> "day";
-            default -> throw new IllegalArgumentException("Invalid type: " + type);
-        };  
+        String unit = resolveUnit(type, startDate, endDate);
+
+        List<LocalDate> range = resolveDateRange(unit, startDate, endDate);
+        LocalDate start = range.get(0);
+        LocalDate end = range.get(1);
+
+        ZoneId zoneId = ZoneId.systemDefault();
+        Instant startInstant = start.atStartOfDay(zoneId).toInstant();
+        Instant endInstant = end.atStartOfDay(zoneId).toInstant();
 
         List<ExportedUserRecord> allUsers = new ArrayList<>();
         ListUsersPage page = FirebaseAuth.getInstance().listUsers(null);
-
         while (page != null) {
-            for (ExportedUserRecord user : page.getValues()) {
-                allUsers.add(user);
-            }
+            page.getValues().forEach(allUsers::add);
             page = page.getNextPage();
         }
 
-        ZoneId zoneId = ZoneId.systemDefault();
-        Instant startInstant = (startDate != null) ? startDate.atStartOfDay(zoneId).toInstant() : Instant.EPOCH;
-        Instant endInstant = (endDate != null) ? endDate.plusDays(1).atStartOfDay(zoneId).toInstant() : Instant.now();
-
-        Map<String, Integer> groupedCounts = new TreeMap<>();
-
+        Map<String, Integer> groupedCounts = new HashMap<>();
         for (ExportedUserRecord user : allUsers) {
             Instant creation = Instant.ofEpochMilli(user.getUserMetadata().getCreationTimestamp());
-
             if (!creation.isBefore(startInstant) && creation.isBefore(endInstant)) {
                 String label = formatLabel(creation, unit);
                 groupedCounts.put(label, groupedCounts.getOrDefault(label, 0) + 1);
             }
         }
 
-        List<ChartDataPoint> chartData = groupedCounts.entrySet().stream()
-                .map(entry -> new ChartDataPoint(entry.getKey(), entry.getValue()))
+        List<ChartDataPoint> data = generateTimeline(unit, start, end).stream()
+                .map(label -> new ChartDataPoint(label, groupedCounts.getOrDefault(label, 0)))
                 .toList();
 
         return ChartResponse.builder()
-                .type(unit)
-                .data(chartData)
+                .type(type)
+                .data(data)
                 .build();
     }
 
@@ -280,5 +323,66 @@ public class AdminDashboardService {
         return count;
     }
 
+    public List<DashboardTableResponse> getRecentTransaction() {
+        List<VNPayPayment> recentPayments = vnpayPaymentRepository
+                .findTop10ByOrderByCreatedAtDesc();
+
+        List<DashboardTableResponse> responses = new ArrayList<>();
+
+        for (VNPayPayment payment : recentPayments) {
+            UserInfoResponse user = firebaseAuthClient.getUserInfo(payment.getUserUid(), "");
+
+            DashboardTableResponse response = DashboardTableResponse.builder()
+                    .user(user)
+                    .date(Date.from(payment.getCreatedAt()))
+                    .amount(payment.getTotalPaymentAmount().doubleValue())
+                    .status(payment.getTransactionStatus())
+                    .type(resolveType(payment))
+                    .build();
+
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
+    private String resolveType(VNPayPayment payment) {
+        if (payment.getVnPayPaymentPremiumPackage() != null) {
+            return "Premium";
+        } else if (!payment.getPaymentCourses().isEmpty()) {
+            return "Course";
+        }
+        return "Unknown";
+    }
+
+    public List<DashboardTableResponse> getTopPurchases() {
+        List<VNPayPayment> payments = vnpayPaymentRepository.findAll();
+
+        // Group by userUuid and sum total payment amount
+        Map<String, Double> totalAmountPerUser = payments.stream()
+                .filter(p -> p.getTransactionStatus().equalsIgnoreCase("00")) // Optional: only successful ones
+                .collect(Collectors.groupingBy(
+                        VNPayPayment::getUserUid,
+                        Collectors.summingDouble(p -> p.getTotalPaymentAmount() != null ? p.getTotalPaymentAmount() : 0)
+                ));
+
+        List<DashboardTableResponse> topPurchases = new ArrayList<>();
+
+        for (Map.Entry<String, Double> entry : totalAmountPerUser.entrySet()) {
+            UserInfoResponse user = firebaseAuthClient.getUserInfo(entry.getKey(), "");
+
+            topPurchases.add(DashboardTableResponse.builder()
+                    .user(user)
+                    .amount(entry.getValue())
+                    .build());
+
+        }
+
+        // Sort descending by totalAmount
+        return topPurchases.stream()
+                .sorted(Comparator.comparing(DashboardTableResponse::getAmount).reversed())
+                .limit(10) // Optional: top 10
+                .collect(Collectors.toList());
+    }
 
 }

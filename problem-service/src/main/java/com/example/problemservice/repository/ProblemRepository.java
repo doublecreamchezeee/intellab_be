@@ -26,7 +26,9 @@ public interface ProblemRepository extends JpaRepository<Problem, UUID>, JpaSpec
 
     List<Problem> findByProblemLevel(String level);
 
-    Page<Problem> findAllByIsCompletedCreation(Boolean isCompleteCreation, Pageable pageable);
+//    Page<Problem> findAllByIsCompletedCreation(Boolean isCompleteCreation, Pageable pageable);
+
+    List<Problem> findAllByIsCompletedCreation(Boolean isCompleteCreation, Pageable pageable);
 
     List<Problem> findAllByAuthorIdAndIsPublished(UUID authorId, Boolean isPublished);
 

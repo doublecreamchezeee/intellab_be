@@ -6,8 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface ProblemCategoryRepository extends JpaRepository<ProblemCategory, ProblemCategoryID> {
     List<ProblemCategory> findAllByProblemCategoryID_CategoryIdIn(List<Integer> problemCategoryID_categoryId);
+
+    void deleteAllByProblemCategoryID_ProblemId(UUID problemID);
 }

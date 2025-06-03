@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 import java.time.Instant;
@@ -49,7 +50,7 @@ public class Course {
     String unitPrice;
 
     @Column(name = "average_rating", columnDefinition = "DECIMAL(3,2)")
-    Double averageRating;
+    Double averageRating = 0.0;
 
     @Column(name = "review_count", columnDefinition = "integer default 0")
     Integer reviewCount;

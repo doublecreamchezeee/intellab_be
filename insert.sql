@@ -374,6 +374,7 @@ create table lessons
     description  text,
     lesson_name  varchar(255),
     lesson_order integer not null default 1,
+    is_quiz_visible boolean DEFAULT false,
     problem_id   uuid,
     course_id    uuid                            not null
         constraint fk2uhy91p0gnptep0xxwaal7gnu
@@ -392,6 +393,7 @@ create table exercises
     exercise_name varchar(255),
     passing_questions      integer,
     questions_per_exercise integer,
+
     lesson_id              uuid
         constraint uk9yqkdn70s99mfseuswi0mspbi
             unique
@@ -442,11 +444,11 @@ create table learning_lesson
     is_done_practice   boolean,
     is_done_theory     boolean,
     last_accessed_date timestamp(6) with time zone,
-    status             varchar(10) check(status in ('New','Done','Learning')),
+    status             varchar(10),
     user_id            uuid,
     lesson_id          uuid
         constraint fktl0duxtv32rt2myr59sv7d3r3
-            references lessons
+            references lessons ON DELETE CASCADE
 );
 
 alter table learning_lesson
@@ -79368,7 +79370,7 @@ Input Field: int m
 Input Field: list<int> num2
 Input Field: int n
 Output Structure:
-Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
 INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
 
 You must write an algorithm with `O(log n)` runtime complexity.
@@ -79399,7 +79401,7 @@ Input Field: list<int> nums
 Input Field: int target
 Output Structure:
 Output Field: int result
-', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
 INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
 
 You may assume that each input would have exactly one solution, and you may not use the same element twice.
@@ -79430,7 +79432,7 @@ Input Structure:
 Input Field: list<int> nums
 Input Field: int target
 Output Structure:
-Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
 INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
 
 Increment the large integer by one and return the resulting array of digits.
@@ -79459,7 +79461,7 @@ Function Name: plusOne
 Input Structure:
 Input Field: list<int> digits
 Output Structure:
-Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
 INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
 
 You must implement a solution with a linear runtime complexity and use only constant extra space.
@@ -79488,7 +79490,7 @@ Function Name: singleNumber
 Input Structure:
 Input Field: list<int> nums
 Output Structure:
-Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
 INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('c3756efe-d408-4e99-844e-a55021fb7c02', 0.00, 0.00, e'Given a string `s` containing just the characters \'(\', \')\', \'{\', \'}\', \'[\', and \']\', determine if the input string is valid.
 
        An input string is valid if:
@@ -79536,7 +79538,7 @@ INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, descri
        Input Structure:
        Input Field: string s
        Output Structure:
-       Output Field: boolean result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+       Output Field: boolean result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
 INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('feb01aba-eefe-4220-9242-729f52935cd7', 0.00, 0.00, e'You are given a string `s` consisting of lowercase English letters, an integer `t` representing the number of **transformations** to perform, and an array `nums` of size 26. In one **transformation**, every character in `s` is replaced according to the following rules:
 
 -   Replace `s[i]` with the **next** `nums[s[i] - \'a\']` consecutive characters in the alphabet. For example, if `s[i] = \'a\'` and `nums[0] = 3`, the character `\'a\'` transforms into the next 3 consecutive characters ahead of it, which results in `"bcd"`.
@@ -79605,7 +79607,7 @@ Input Field: string s
 Input Field: int t
 Input Field: list<int> nums
 Output Structure:
-Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 5, true);
+Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
 
 
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
@@ -81267,3 +81269,179 @@ Let n be the length of the string s, and let $∣Σ∣$ denote the size of the c
     
     This is the space required to store the transformation matrix.', 'feb01aba-eefe-4220-9242-729f52935cd7');
 
+
+-- Tạo bảng audit log
+CREATE TABLE audit_logs (
+    id SERIAL PRIMARY KEY,
+    table_name VARCHAR(100) NOT NULL,
+    record_id uuid NOT NULL,
+    action VARCHAR(20) NOT NULL, -- 'INSERT', 'UPDATE', 'DELETE'
+    user_id VARCHAR(100) NOT NULL,
+	user_role varchar(100) NOT NULL,
+    changed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    old_data JSONB,
+    new_data JSONB
+);
+
+-- Hàm trigger
+CREATE OR REPLACE FUNCTION audit_courses_trigger_function()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_user_id TEXT;
+	current_user_role TEXT;
+BEGIN
+    current_user_id := current_setting('audit.user_id', true);
+	current_user_role := current_setting('audit.user_role', true);
+
+    IF (current_user_id IS NULL) THEN
+		current_user_id := 'AMBIGOUS_USER';
+		current_user_role := 'AMBIGOUS_ROLE';
+	END IF;
+
+	IF (current_user_role = 'user' and TG_OP = 'UPDATE') THEN
+		RETURN NEW;
+	END IF;
+
+    IF (TG_OP = 'DELETE') THEN
+        INSERT INTO audit_logs (table_name, record_id, action, user_id, user_role, old_data)
+        VALUES (TG_TABLE_NAME, OLD.course_id, 'DELETE', current_user_id, current_user_role, to_jsonb(OLD));
+        RETURN OLD;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO audit_logs (table_name, record_id, action, user_id, user_role, old_data, new_data)
+        VALUES (TG_TABLE_NAME, NEW.course_id, 'UPDATE', current_user_id, current_user_role, to_jsonb(OLD), to_jsonb(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'INSERT') THEN
+        INSERT INTO audit_logs (table_name, record_id, action, user_id, user_role, new_data)
+        VALUES (TG_TABLE_NAME, NEW.course_id, 'INSERT', current_user_id, current_user_role, to_jsonb(NEW));
+        RETURN NEW;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Áp dụng trigger cho bảng courses
+CREATE TRIGGER courses_audit_trigger
+AFTER INSERT OR UPDATE OR DELETE ON courses
+FOR EACH ROW EXECUTE FUNCTION audit_courses_trigger_function();
+
+CREATE TRIGGER lessons_audit_trigger
+AFTER INSERT OR UPDATE OR DELETE ON lessons
+FOR EACH ROW EXECUTE FUNCTION audit_courses_trigger_function();
+
+
+-- Hàm trigger
+CREATE OR REPLACE FUNCTION audit_problems_trigger_function()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_user_id TEXT;
+	current_user_role TEXT;
+BEGIN
+    current_user_id := current_setting('audit.user_id', true);
+	current_user_role := current_setting('audit.user_role', true);
+
+
+
+    IF (current_user_id IS NULL) THEN
+		current_user_id := 'AMBIGOUS_USER';
+		current_user_role := 'AMBIGOUS_ROLE';
+	END IF;
+
+	IF (current_user_role = 'user' and TG_OP = 'UPDATE') THEN
+		RETURN NEW;
+	END IF;
+
+    IF (TG_OP = 'DELETE') THEN
+        INSERT INTO audit_logs (table_name, record_id, action, user_id, user_role, old_data)
+        VALUES (TG_TABLE_NAME, OLD.problem_id, 'DELETE', current_user_id, current_user_role, to_jsonb(OLD));
+        RETURN OLD;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO audit_logs (table_name, record_id, action, user_id, user_role, old_data, new_data)
+        VALUES (TG_TABLE_NAME, NEW.problem_id, 'UPDATE', current_user_id, current_user_role, to_jsonb(OLD), to_jsonb(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'INSERT') THEN
+        INSERT INTO audit_logs (table_name, record_id, action, user_id, user_role, new_data)
+        VALUES (TG_TABLE_NAME, NEW.problem_id, 'INSERT', current_user_id, current_user_role, to_jsonb(NEW));
+        RETURN NEW;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- DROP TRIGGER problems_audit_trigger ON PROBLEMS
+CREATE TRIGGER problems_audit_trigger
+AFTER INSERT OR UPDATE OR DELETE ON problems
+FOR EACH ROW EXECUTE FUNCTION audit_problems_trigger_function();
+
+-- CREATE TRIGGER test_cases_audit_trigger
+-- AFTER INSERT OR UPDATE OR DELETE ON test_cases
+-- FOR EACH ROW EXECUTE FUNCTION audit_problems_trigger_function();
+--
+-- CREATE TRIGGER solutions_audit_trigger
+-- AFTER INSERT OR UPDATE OR DELETE ON solutions
+-- FOR EACH ROW EXECUTE FUNCTION audit_problems_trigger_function();
+
+
+
+CREATE OR REPLACE FUNCTION create_problem_trigger_function()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF (NEW.current_creation_step < 6) THEN
+		RETURN NEW;
+	END IF;
+
+	IF (NEW.current_creation_step = OLD.current_creation_step) THEN
+		RETURN NEW;
+	END IF;
+
+	IF (NEW.current_creation_step = 6) THEN
+		IF NEW.problem_structure IS NULL THEN
+			RAISE EXCEPTION 'VALIDATE DATA: %', 'problem_structure MUST NOT BE NULL';
+		END IF;
+	END IF;
+
+	IF (NOT OLD.is_completed_creation AND NEW.is_completed_creation) THEN
+		IF NEW.problem_structure IS NULL THEN
+			RAISE EXCEPTION 'VALIDATE DATA: %', 'problem_structure MUST NOT BE NULL';
+		END IF;
+	END IF;
+
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_problem_step
+AFTER UPDATE ON problems
+FOR EACH ROW EXECUTE FUNCTION create_problem_trigger_function();
+
+
+
+CREATE OR REPLACE FUNCTION public.set_lesson_order()
+    RETURNS trigger AS $$
+DECLARE
+	has_quiz BOOLEAN;
+BEGIN
+
+	IF (NOT NEW.is_quiz_visible) THEN
+		RETURN NEW;
+	END IF;
+
+
+    IF (NEW.is_quiz_visible) THEN
+		SELECT EXISTS
+			(SELECT 1
+			FROM EXERCISES WHERE LESSON_ID = NEW.LESSON_ID)
+		INTO has_quiz;
+	END IF;
+
+	IF (NOT has_quiz) THEN
+		RAISE EXCEPTION 'VALIDATE DATA: %', 'lesson doesn''s have quiz to make visible';
+	END IF;
+	RETURN NEW;
+END;
+$$ language plpgsql;
+
+
+CREATE TRIGGER set_lesson_is_quiz_visible
+BEFORE INSERT OR UPDATE ON lessons
+FOR EACH ROW EXECUTE FUNCTION set_lesson_order()

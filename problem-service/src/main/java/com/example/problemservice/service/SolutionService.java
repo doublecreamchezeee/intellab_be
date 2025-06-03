@@ -51,12 +51,45 @@ public class SolutionService {
         solution = solutionRepository.save(solution);
 
         problem.setCurrentCreationStep(5);
+        problem.setCurrentCreationStepDescription("Solution Step");
         problemRepository.save(problem);
 
         // Step 5: Return response
         return solutionMapper.toSolutionCreationResponse(solution);
     }
 
+    public SolutionCreationResponse updateSolution(SolutionCreationRequest request) {
+        UUID problemId = UUID.fromString(request.getProblemId());
+        UUID authorId = ParseUUID.normalizeUID(request.getAuthorId());
+
+        // Step 1: Build composite key and fetch existing solution
+        SolutionID solutionId = SolutionID.builder()
+                .problemId(problemId)
+                .authorId(authorId)
+                .build();
+
+        Solution existingSolution = solutionRepository.findById(solutionId).orElseThrow(
+                () -> new AppException(ErrorCode.SOLUTION_NOT_EXIST)
+        );
+
+        // Step 2: Update fields from request
+        existingSolution.setContent(request.getContent());
+
+        // Step 3: Save updated solution
+        existingSolution = solutionRepository.save(existingSolution);
+
+        // Optional: update creation step if needed
+        Problem problem = existingSolution.getProblem();
+        if (problem != null) {
+            problem.setCurrentCreationStep(5);
+            problem.setCurrentCreationStepDescription("Solution Step");
+            problem.setIsCompletedCreation(false);
+            problemRepository.save(problem);
+        }
+
+        // Step 4: Return response
+        return solutionMapper.toSolutionCreationResponse(existingSolution);
+    }
 
 
     public Solution getSolution(SolutionID solutionId) {

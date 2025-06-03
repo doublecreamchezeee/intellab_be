@@ -1,6 +1,7 @@
 package com.example.identityservice.controller.admin;
 
 import com.example.identityservice.dto.response.DashboardMetricResponse;
+import com.example.identityservice.dto.response.DashboardTableResponse;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -107,4 +108,27 @@ public class AdminDashboardController {
                 .build();
     }
 
+    @GetMapping("/transactions")
+    public ApiResponse<List<DashboardTableResponse>> getTransactions(
+            @RequestHeader(value = "X-UserRole") String userRole){
+        userRole = userRole.split(",")[0];
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+        return ApiResponse.<List<DashboardTableResponse>>builder()
+                .result(dashboardService.getRecentTransaction())
+                .build();
+    }
+
+    @GetMapping("/top-purchased")
+    public ApiResponse<List<DashboardTableResponse>> getTopPurchased(
+            @RequestHeader(value = "X-UserRole") String userRole){
+        userRole = userRole.split(",")[0];
+        if (!isAdmin(userRole)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
+        return ApiResponse.<List<DashboardTableResponse>>builder()
+                .result(dashboardService.getTopPurchases())
+                .build();
+    }
 }
