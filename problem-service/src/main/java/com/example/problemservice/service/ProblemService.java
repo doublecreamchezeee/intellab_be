@@ -526,7 +526,12 @@ public class ProblemService {
     public void generateBoilerplate() {
         defaultCodeRepository.deleteAll();
 
-        List<Problem> problems = problemRepository.findAll();
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.problemStructureNotNullSpecification(true)
+        );
+
+        List<Problem> problems = problemRepository.findAll(specification);
+
         for (Problem problem : problems) {
             // String problemStructure = MarkdownUtility.readMarkdownFromFile(
             // problem.getProblemName(), "Structure.md");

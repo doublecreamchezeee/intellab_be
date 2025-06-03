@@ -45,6 +45,9 @@ public enum ErrorCode {
     ERROR_WHEN_RETRIEVING_USER_FROM_FIRESTORE(500, "Error when retrieving user from firestore", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_WHEN_RETRIEVING_USER_FROM_DATABASE(500, "Error when retrieving user from database", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_IS_NOT_ADMIN(403, "User is not admin", HttpStatus.FORBIDDEN),
+    USER_WITH_EMAIL_NOT_EXISTED(404, "User with email not existed! Please register first!", HttpStatus.NOT_FOUND),
+    ERROR_WHEN_SIGNUP_WITH_GOOGLE(500, "Error when sign up with Google", HttpStatus.INTERNAL_SERVER_ERROR),
+    CANNOT_FIND_USER_ROLE_IN_FIRESTORE(500, "Cannot find user role in firestore", HttpStatus.INTERNAL_SERVER_ERROR),
 
     ;
     ErrorCode(int code, String message) {

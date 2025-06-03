@@ -67,4 +67,17 @@ public class ProblemSpecification {
             }
         };
     }
+
+    public static Specification<Problem> problemStructureNotNullSpecification(Boolean problemStructureNotNull) {
+        return (root, query, criteriaBuilder) -> {
+            if (problemStructureNotNull == null) {
+                return criteriaBuilder.conjunction();
+            }
+            if (problemStructureNotNull) {
+                return criteriaBuilder.isNotNull(root.get("problemStructure"));
+            } else {
+                return criteriaBuilder.isNull(root.get("problemStructure"));
+            }
+        };
+    }
 }

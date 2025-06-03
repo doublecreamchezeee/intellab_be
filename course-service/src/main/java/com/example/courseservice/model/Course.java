@@ -48,7 +48,7 @@ public class Course {
     @Column(name = "unit_price", columnDefinition = "VARCHAR(10)")
     String unitPrice;
 
-    @Column(name = "average_rating", columnDefinition = "DECIMAL(3,2) default 0.00")
+    @Column(name = "average_rating", columnDefinition = "DECIMAL(3,2)")
     Double averageRating;
 
     @Column(name = "review_count", columnDefinition = "integer default 0")

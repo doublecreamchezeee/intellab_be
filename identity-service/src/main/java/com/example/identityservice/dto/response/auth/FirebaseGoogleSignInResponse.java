@@ -10,4 +10,6 @@ import lombok.Setter;
 public class FirebaseGoogleSignInResponse {
     private String uid;
     private String email;
+    private Boolean isLoginSuccessful;
+    private String message;
 }

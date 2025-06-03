@@ -83,8 +83,16 @@ public class FirebaseAuthClient {
         try {
             FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
             String userId = decodeToken.getUid(); // Correct way to get user ID
+
+            log.info("Decoded token userId: {} - email: {}", userId, decodeToken.getEmail());
 //            String role = (String) decodeToken.getClaims().getOrDefault("role", "USER"); // Default to "USER" if missing
             String role = firestoreService.getRoleByUid(userId);
+
+            if (role == null) {
+                firestoreService.createUserByUid(userId, "User");
+                role = "user"; // Default role if not found
+            }
+
             String premium = null;
 
             if (role.equals("user")) {
@@ -101,17 +109,17 @@ public class FirebaseAuthClient {
                                 )
                         .orElse(null);
 
-                if (pre != null)
-                {
+                if (pre != null) {
                     premium = pre.getPackageType();
                     //premium = pre.getPlanType();
                 }
-                else
-                {
+                else {
                     premium = "free";
                 }
             }
             String email = decodeToken.getEmail(); // Get email if available
+
+            log.info("Decoded token for userId: {}, role: {}, premium: {}, email: {}", userId, role, premium, email);
 
             return ValidatedTokenResponse.builder()
                     .userId(userId)
@@ -123,11 +131,13 @@ public class FirebaseAuthClient {
                     .isEmailVerified(decodeToken.isEmailVerified())
                     .build();
         } catch (FirebaseAuthException e) {
+            log.error("FirebaseAuthException while verifying token: {}", e.getMessage());
             return ValidatedTokenResponse.builder()
                     .isValidated(false)
                     .message("Invalid token: " + e.getMessage())
                     .build();
         } catch (Exception e) {
+            log.error("Unexpected error while verifying token: {}", e.getMessage());
             return ValidatedTokenResponse.builder()
                     .isValidated(false)
                     .message("An unexpected error occurred: " + e.getMessage())
@@ -468,6 +478,16 @@ public class FirebaseAuthClient {
             return new PageImpl<>(paginatedUsers, PageRequest.of(pageNumber, pageSize), matchedUsers.size());
         } catch (Exception e) {
             throw new AppException(ErrorCode.ERROR_WHEN_RETRIEVING_USER_FROM_FIREBASE_AUTHENTICATION);
+        }
+    }
+
+    public boolean checkIfUserExistsByEmail(String email) {
+        try {
+            UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+            return userRecord != null;
+        } catch (FirebaseAuthException e) {
+            log.error("Error checking if user exists by email: {}", e.getMessage());
+            return false;
         }
     }
 }
