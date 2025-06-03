@@ -290,6 +290,9 @@ public class LessonService {
         }
 
         lessonRepository.delete(lesson);
+
+        sendRequestToDeleteLessonVectorEmbedding(lessonId);
+
         lessonRepository.flush();
 
         Specification<Lesson> specification = Specification.where(
@@ -791,6 +794,17 @@ public class LessonService {
             aiServiceClient.updateLessonEmbeddingData(lessonId).block();
         } catch (Exception e) {
             log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage());
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendRequestToDeleteLessonVectorEmbedding(UUID lessonId) {
+        try {
+            aiServiceClient.deleteLessonEmbeddingData(lessonId).block();
+        } catch (Exception e) {
+            log.error("Error while sending request to delete lesson vector embedding: {}", e.getMessage());
             //throw new RuntimeException(e);
             e.printStackTrace();
         }

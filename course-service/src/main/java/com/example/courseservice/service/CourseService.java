@@ -1,6 +1,7 @@
 package com.example.courseservice.service;
 
 import com.example.courseservice.annotation.ExecutionTiming;
+import com.example.courseservice.client.AiServiceClient;
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.constant.PredefinedRole;
@@ -41,6 +42,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +77,7 @@ public class CourseService {
     CloudinaryService cloudinaryService;
     TopicRepository topicRepository;
     CourseSummaryRepository courseSummaryRepository;
+    AiServiceClient aiServiceClient;
 
     public Page<CourseCreationResponse> getAllCourses(
             Boolean isAvailable, Boolean isCompletedCreation,
@@ -259,6 +262,7 @@ public class CourseService {
 
         try {
             courseRepository.delete(course);
+            deleteCourseVectorEmbedding(courseId);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -1368,6 +1372,8 @@ public class CourseService {
 
         courseSummaryRepository.save(courseSummary);
 
+        insertCourseVectorEmbedding(savedCourse.getCourseId());
+
         return courseMapper.toAdminCourseCreationResponse(savedCourse);
     }
 
@@ -1450,6 +1456,7 @@ public class CourseService {
 
         courseSummaryRepository.save(courseSummary);
 
+        updateExistedCourseVectorEmbedding(courseId);
 
         return courseMapper.toAdminCourseCreationResponse(savedCourse);
     }
@@ -1703,7 +1710,6 @@ public class CourseService {
         return responses;
     }
 
-
     public Page<CourseSearchResponse> getFreeCourses(UUID userUuid, Pageable pageable) {
         Page<Course> courses = null;
 
@@ -1724,5 +1730,44 @@ public class CourseService {
             response.setCertificateUrl(null);
             return response;
         });
+    }
+
+    @Async
+    public void updateExistedCourseVectorEmbedding(UUID courseId) {
+        log.info("Updating embedding data for course: {}", courseId);
+        try {
+            aiServiceClient.updateCourseEmbeddingData(courseId)
+                    .doOnError(error -> log.error("Error updating embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Failed to update embedding data for course {}: {}", courseId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void deleteCourseVectorEmbedding(UUID courseId) {
+        log.info("Deleting embedding data for course: {}", courseId);
+        try {
+            aiServiceClient.deleteCourseEmbeddingData(courseId)
+                    .doOnError(error -> log.error("Error deleting embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Failed to delete embedding data for course {}: {}", courseId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void insertCourseVectorEmbedding(UUID courseId) {
+        log.info("Inserting embedding data for course: {}", courseId);
+        try {
+            aiServiceClient.insertCourseEmbeddingData(courseId)
+                    .doOnError(error -> log.error("Error inserting embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Failed to insert embedding data for course {}: {}", courseId, e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
