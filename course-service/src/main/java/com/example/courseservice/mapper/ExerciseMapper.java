@@ -11,6 +11,7 @@ public interface ExerciseMapper {
     @Mapping(target = "questionsPerExercise",source = "questionsPerExercise")
     @Mapping(target = "passingQuestions",source = "passingQuestions")
     @Mapping(target = "questionList",source = "questionList")
+    @Mapping(target = "isQuizVisible", source = "lesson.isQuizVisible")
     ExerciseResponse toExerciseResponse(Exercise exercise);
 
 }

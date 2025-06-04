@@ -57,8 +57,6 @@ public class ProblemService {
     private final CourseClient courseClient;
     private final ProblemCategoryRepository problemCategoryRepository;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
-    private final TestCaseRepository testCaseRepository;
-    private final SolutionRepository solutionRepository;
     private final ProblemRunCodeRepository problemRunCodeRepository;
 
     private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
@@ -228,37 +226,55 @@ public class ProblemService {
         return response;
     }
 
+    @Transactional
     public ProblemCreationResponse generalStep(ProblemCreationRequest request, UUID userId) {
-        // 1. Map DTO to entity
-        Problem problem = problemMapper.toProblem(request);
-        // 3. Save initial problem to get UUID
-        problem.setAuthorId(userId);
-        problem.setIsCompletedCreation(false);
-        problem.setCreatedAt(new Date());
+        Problem problem;
+
+        if (request.getProblemId() == null || request.getProblemId().isEmpty()) {
+            // Create new problem
+            problem = problemMapper.toProblem(request);
+            problem.setAuthorId(userId);
+            problem.setCreatedAt(new Date());
+        } else {
+            // Update existing
+            problem = problemRepository.findById(UUID.fromString(request.getProblemId()))
+                    .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+
+            // Clear existing categories properly, so Hibernate can track removals
+            if (problem.getCategories() != null) {
+                problem.getCategories().clear();
+            }
+        }
+
+        // Update other fields
+        problem.setProblemName(request.getProblemName());
+        problem.setProblemLevel(request.getProblemLevel());
+        problem.setScore(request.getScore());
+        problem.setIsPublished(request.getIsPublished());
         problem.setCurrentCreationStep(1);
+        problem.setIsCompletedCreation(false);
         problem.setCurrentCreationStepDescription("General Step");
+
+        // Initialize categories if null (should be avoided if problem entity is properly initialized)
+        if (problem.getCategories() == null) {
+            problem.setCategories(new ArrayList<>());
+        } else {
+            // Clear to remove old categories for update (redundant if done above, but safe)
+            problem.getCategories().clear();
+        }
+
+        // Create new ProblemCategory list
+        List<ProblemCategory> newCategories = request.getCategories().stream()
+                .map(categoryId -> ProblemCategory.builder()
+                        .problemCategoryID(new ProblemCategoryID(categoryId, problem.getProblemId()))
+                        .problem(problem)
+                        .build())
+                .toList();
+        problemCategoryRepository.saveAll(newCategories);
+        // Add new categories to the existing persistent collection
+        problem.getCategories().addAll(newCategories);
         Problem savedProblem = problemRepository.save(problem);
 
-        // 4. Generate ProblemCategory entities directly from request.getCategories()
-        List<ProblemCategory> problemCategories = request.getCategories().stream()
-                .map(categoryId -> {
-                    return ProblemCategory.builder()
-                            .problemCategoryID(
-                                    ProblemCategoryID.builder()
-                                            .categoryId(categoryId)
-                                            .problemId(savedProblem.getProblemId())
-                                            .build())
-                            .problem(savedProblem)
-                            .build();
-                })
-                .toList();
-
-        // 5. Save associations
-        problemCategoryRepository.saveAll(problemCategories);
-
-        // 6. Optionally set categories in the saved entity (not strictly necessary
-        // unless used later)
-        savedProblem.setCategories(problemCategories);
         return problemMapper.toProblemCreationResponse(savedProblem);
     }
 
@@ -272,8 +288,7 @@ public class ProblemService {
         );
         problem.setCurrentCreationStep(2);
         problem.setCurrentCreationStepDescription("Description Step");
-
-
+        problem.setIsCompletedCreation(false);
         problem.setDescription(request.getDescription());
         Problem savedProblem = problemRepository.save(problem);
         return problemMapper.toProblemCreationResponse(savedProblem);
@@ -288,6 +303,7 @@ public class ProblemService {
         );
         problem.setCurrentCreationStep(3);
         problem.setCurrentCreationStepDescription("Structure Step");
+        problem.setIsCompletedCreation(false);
         // 2. Serialize problemStructure to String for DB
         problem.setProblemStructure(
                 ProblemStructureConverter.convertObjectToString(request.getProblemStructure()));
@@ -569,6 +585,10 @@ public class ProblemService {
     public List<DefaultCodeResponse> generateDefaultCodes(UUID problemId, String structure) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+        if (problem.getCurrentCreationStep() < 6 || !problem.getIsCompletedCreation() || problem.getProblemStructure() == null) {
+            log.error("Problem is not ready for boilerplate generation: {}", problemId);
+            return Collections.emptyList();
+        }
 
         List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepository.findAll();
 

@@ -49,6 +49,9 @@ public class Lesson {
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Exercise exercise;
 
+    @Column(name = "is_quiz_visible", columnDefinition = "boolean default false")
+    Boolean isQuizVisible = false;
+
     @Column(name = "problem_id", nullable = true)
     UUID problemId;
 //    @ManyToOne(fetch = FetchType.LAZY)
