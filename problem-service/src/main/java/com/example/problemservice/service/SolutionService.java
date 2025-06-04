@@ -68,7 +68,7 @@ public class SolutionService {
                 .authorId(authorId)
                 .build();
 
-        Solution existingSolution = solutionRepository.findById(solutionId).orElseThrow(
+        Solution existingSolution = solutionRepository.findByIdProblemId(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.SOLUTION_NOT_EXIST)
         );
 
@@ -114,7 +114,9 @@ public class SolutionService {
     }
 
     public DetailsSolutionResponse getSolutionByProblemId(UUID problemId) {
-        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByIdProblemId(problemId));
+        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByIdProblemId(problemId).orElseThrow(
+                () -> new AppException(ErrorCode.SOLUTION_NOT_EXIST)
+        ));
     }
 
     public SolutionUpdateResponse updateSolution(String problemId, String authorId, SolutionUpdateRequest request) {

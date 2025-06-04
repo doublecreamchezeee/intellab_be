@@ -193,6 +193,8 @@ public class AdminProblemController {
     @Operation(summary = "Create test case")
     @PostMapping("/testcase-step")
     public ApiResponse<TestCaseCreationResponse> createTestCaseStep(
+            @RequestParam Boolean isUpdate,
+            @RequestParam String testCaseId,
             @RequestBody TestCaseCreationRequest request,
             @RequestHeader("X-UserRole") String role) {
         if (!isAdmin(role)) {
@@ -201,12 +203,20 @@ public class AdminProblemController {
                     .code(403)
                     .message("Forbidden").build();
         }
-        TestCaseCreationResponse response = testCaseService.createTestCase(
-                request);
+        if (!isUpdate) {
+            TestCaseCreationResponse response = testCaseService.createTestCase(
+                    request);
+            return ApiResponse.<TestCaseCreationResponse>builder()
+                    .result(response)
+                    .code(200)
+                    .message("Created")
+                    .build();
+        }
+        TestCaseCreationResponse response = testCaseService.updateTestCase(UUID.fromString(testCaseId), request);
         return ApiResponse.<TestCaseCreationResponse>builder()
                 .result(response)
                 .code(200)
-                .message("Created")
+                .message("Updated")
                 .build();
     }
 
@@ -236,6 +246,7 @@ public class AdminProblemController {
     )
     @PostMapping("/solution-step")
     public ApiResponse<SolutionCreationResponse> createSolutionStep(
+            @RequestParam Boolean isUpdate,
             @RequestHeader("X-UserRole") String role,
             @RequestBody  SolutionCreationRequest request) {
         if (!isAdmin(role)) {
@@ -244,10 +255,16 @@ public class AdminProblemController {
                     .code(403)
                     .message("Forbidden").build();
         }
-
+        if (!isUpdate) {
+            return ApiResponse.<SolutionCreationResponse>builder()
+                    .result(solutionService.createSolution(request))
+                    .message("Solution created successfully")
+                    .code(201)
+                    .build();
+        }
         return ApiResponse.<SolutionCreationResponse>builder()
-                .result(solutionService.createSolution(request))
-                .message("Solution created successfully")
+                .result(solutionService.updateSolution(request))
+                .message("Solution updated successfully")
                 .code(201)
                 .build();
     }

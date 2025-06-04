@@ -229,7 +229,6 @@ public class ProblemService {
     @Transactional
     public ProblemCreationResponse generalStep(ProblemCreationRequest request, UUID userId) {
         Problem problem;
-
         if (request.getProblemId() == null || request.getProblemId().isEmpty()) {
             // Create new problem
             problem = problemMapper.toProblem(request);
@@ -263,11 +262,12 @@ public class ProblemService {
             problem.getCategories().clear();
         }
 
+        Problem cateProblem = problemRepository.save(problem);
         // Create new ProblemCategory list
         List<ProblemCategory> newCategories = request.getCategories().stream()
                 .map(categoryId -> ProblemCategory.builder()
-                        .problemCategoryID(new ProblemCategoryID(categoryId, problem.getProblemId()))
-                        .problem(problem)
+                        .problemCategoryID(new ProblemCategoryID(categoryId, cateProblem.getProblemId()))
+                        .problem(cateProblem)
                         .build())
                 .toList();
         problemCategoryRepository.saveAll(newCategories);

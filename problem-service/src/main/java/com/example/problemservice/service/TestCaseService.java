@@ -71,7 +71,7 @@ public class TestCaseService {
 
         Problem problem = testCase.getProblem();
 
-        if (problem == null || !problem.getProblemId().equals(request.getProblemId())) {
+        if (problem == null) {
             throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
         }
 
@@ -96,7 +96,6 @@ public class TestCaseService {
 
         return testCaseMapper.toTestCaseResponse(testCase);
     }
-
 
     public TestCase getTestCase(UUID testCaseId) {
         return testCaseRepository.findById(testCaseId)
