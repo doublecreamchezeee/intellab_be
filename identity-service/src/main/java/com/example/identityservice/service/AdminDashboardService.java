@@ -122,10 +122,8 @@ public class AdminDashboardService {
             case "yearly" -> "month"; // show 12 months
             case "custom" -> {
                 if (startDate != null && endDate != null) {
-                    long days = ChronoUnit.DAYS.between(startDate, endDate);
-                    if (days < 7) yield "day";
-                    else if (days <= 30) yield "week";
-                    else yield "month";
+//                    long days = ChronoUnit.DAYS.between(startDate, endDate);
+                    yield "day";
                 } else {
                     yield "day"; // default fallback
                 }

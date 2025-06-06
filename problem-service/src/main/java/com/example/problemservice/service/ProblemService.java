@@ -73,15 +73,15 @@ public class ProblemService {
         List<Category> courseCategories = courseClient.categories().getResult();
 
         return courseCategories.stream()
-            .map(category -> CategoryResponse.builder()
-                .categoryId(category.getCategoryId())
-                .name(category.getName())
-                .build())
-            .collect(Collectors.toList());
+                .map(category -> CategoryResponse.builder()
+                        .categoryId(category.getCategoryId())
+                        .name(category.getName())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     public List<ProblemDescriptionResponse> getProblemsDescription(String keyword, List<Integer> categoryIds,
-            String level) {
+                                                                   String level) {
         Specification<Problem> specification = Specification.where(
                 ProblemSpecification.categoriesFilter(categoryIds)
                         .and(ProblemSpecification.levelFilter(level))
@@ -96,10 +96,10 @@ public class ProblemService {
                     problemDescriptionResponse.setDescription(problem.getDescription());
                     problemDescriptionResponse.setLevel(problem.getProblemLevel());
                     List<Category> categories = courseClient.categories(
-                            problem.getCategories()
-                                    .stream()
-                                    .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
-                                    .toList())
+                                    problem.getCategories()
+                                            .stream()
+                                            .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
+                                            .toList())
                             .getResult();
                     problemDescriptionResponse.setCategories(categories);
                     return problemDescriptionResponse;
@@ -144,11 +144,11 @@ public class ProblemService {
         // Map to response
         List<ProblemCreationResponse> responses = paginatedProblems.stream().map(problem -> {
             ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problem);
-            if (problem.getProblemStructure() != null){
+            if (problem.getProblemStructure() != null) {
                 ProblemStructure problemStructure = ProblemStructureConverter.convertStringToObject(problem.getProblemStructure());
                 response.setProblemStructure(problemStructure);
             }
-            if (problem.getSolution() != null){
+            if (problem.getSolution() != null) {
                 response.setSolution(solutionMapper.toSolutionCreationResponse(problem.getSolution()));
             }
 
@@ -175,8 +175,7 @@ public class ProblemService {
         return new PageImpl<>(responses, pageable, allProblems.size());
     }
 
-    public List<ProblemRowResponse> getPrivateProblem(UUID userId)
-    {
+    public List<ProblemRowResponse> getPrivateProblem(UUID userId) {
         List<Problem> problems = problemRepository.findAllByAuthorIdAndIsPublished(userId, false);
 
         return problems.stream().map(problemMapper::toProblemRowResponse).collect(Collectors.toList());
@@ -232,12 +231,14 @@ public class ProblemService {
     @Transactional
     public ProblemCreationResponse generalStep(ProblemCreationRequest request, UUID userId) {
         Problem problem;
-
         if (request.getProblemId() == null || request.getProblemId().isEmpty()) {
             // Create new problem
             problem = problemMapper.toProblem(request);
             problem.setAuthorId(userId);
             problem.setCreatedAt(new Date());
+            problem.setIsCompletedCreation(false);
+            problem.setCurrentCreationStep(1);
+            problem.setCurrentCreationStepDescription("General Step");
         } else {
             // Update existing
             problem = problemRepository.findById(UUID.fromString(request.getProblemId()))
@@ -254,23 +255,21 @@ public class ProblemService {
         problem.setProblemLevel(request.getProblemLevel());
         problem.setScore(request.getScore());
         problem.setIsPublished(request.getIsPublished());
-        problem.setCurrentCreationStep(1);
-        problem.setIsCompletedCreation(false);
-        problem.setCurrentCreationStepDescription("General Step");
 
         // Initialize categories if null (should be avoided if problem entity is properly initialized)
         if (problem.getCategories() == null) {
-            problem.setCategories(new ArrayList<>());
+            problem.setCategories(new ArrayList<>(  ));
         } else {
             // Clear to remove old categories for update (redundant if done above, but safe)
             problem.getCategories().clear();
         }
 
+        Problem cateProblem = problemRepository.save(problem);
         // Create new ProblemCategory list
         List<ProblemCategory> newCategories = request.getCategories().stream()
                 .map(categoryId -> ProblemCategory.builder()
-                        .problemCategoryID(new ProblemCategoryID(categoryId, problem.getProblemId()))
-                        .problem(problem)
+                        .problemCategoryID(new ProblemCategoryID(categoryId, cateProblem.getProblemId()))
+                        .problem(cateProblem)
                         .build())
                 .toList();
         problemCategoryRepository.saveAll(newCategories);
@@ -289,9 +288,10 @@ public class ProblemService {
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
-        problem.setCurrentCreationStep(2);
-        problem.setCurrentCreationStepDescription("Description Step");
-        problem.setIsCompletedCreation(false);
+        if (!problem.getIsCompletedCreation()) {
+            problem.setCurrentCreationStep(2);
+            problem.setCurrentCreationStepDescription("Description Step");
+        }
         problem.setDescription(request.getDescription());
         Problem savedProblem = problemRepository.save(problem);
 
@@ -307,9 +307,10 @@ public class ProblemService {
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
-        problem.setCurrentCreationStep(3);
-        problem.setCurrentCreationStepDescription("Structure Step");
-        problem.setIsCompletedCreation(false);
+        if (!problem.getIsCompletedCreation()) {
+            problem.setCurrentCreationStep(3);
+            problem.setCurrentCreationStepDescription("Structure Step");
+        }
         // 2. Serialize problemStructure to String for DB
         problem.setProblemStructure(
                 ProblemStructureConverter.convertObjectToString(request.getProblemStructure()));
@@ -404,10 +405,10 @@ public class ProblemService {
                 viewSolutionBehaviorRepository.findByProblemIdAndUserId(problemId, userUuid) != null);
 
         List<Category> category = courseClient.categories(
-                problem.getCategories()
-                        .stream()
-                        .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
-                        .toList())
+                        problem.getCategories()
+                                .stream()
+                                .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
+                                .toList())
                 .getResult();
 
         response.setCategories(category);
@@ -425,10 +426,10 @@ public class ProblemService {
         if (subscriptionPlan.equals(
                 PremiumPackage.COURSE_PLAN.getCode())) {
             Boolean hasUserAlreadyEnrollCourse = courseClient.checkEnrolled(
-                    CheckingUserCourseExistedRequest.builder()
-                            .problemId(problemId)
-                            .userUuid(userUuid)
-                            .build())
+                            CheckingUserCourseExistedRequest.builder()
+                                    .problemId(problemId)
+                                    .userUuid(userUuid)
+                                    .build())
                     .getResult();
 
             log.info("hasUserAlreadyEnrollCourse: {}", hasUserAlreadyEnrollCourse);
@@ -446,9 +447,9 @@ public class ProblemService {
     }
 
     public Page<ProblemRowResponse> searchProblems(List<Integer> categories,
-            String level,
-            Pageable pageable,
-            String keyword) {
+                                                   String level,
+                                                   Pageable pageable,
+                                                   String keyword) {
         Specification<Problem> specification = Specification.where(
                 ProblemSpecification.categoriesFilter(categories)
                         .and(ProblemSpecification.levelFilter(level))
@@ -460,7 +461,7 @@ public class ProblemService {
     }
 
     public Page<ProblemRowResponse> searchProblems(List<Integer> categories, String level, Boolean status,
-            Pageable pageable, String keyword, UUID userId) {
+                                                   Pageable pageable, String keyword, UUID userId) {
         Specification<Problem> specification = Specification.where(
                 ProblemSpecification.categoriesFilter(categories)
                         .and(ProblemSpecification.levelFilter(level))
@@ -491,7 +492,7 @@ public class ProblemService {
     }
 
     public Page<ProblemRowResponse> getAllProblems(List<Integer> categories, String level, Boolean status,
-            Pageable pageable, UUID userId) {
+                                                   Pageable pageable, UUID userId) {
         Specification<Problem> specification = Specification.where(
                 ProblemSpecification.categoriesFilter(categories)
                         .and(ProblemSpecification.levelFilter(level))

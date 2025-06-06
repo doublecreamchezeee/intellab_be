@@ -40,7 +40,7 @@ public class TestCaseController {
           .code(403)
           .message("Forbidden").build();
     }
-    TestCaseCreationResponse response = testCaseService.createTestCase(
+    TestCaseCreationResponse response = testCaseService.createTestCase(true,
         request);
     return ApiResponse.<TestCaseCreationResponse>builder()
         .result(response)
