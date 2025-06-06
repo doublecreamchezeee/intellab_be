@@ -30,7 +30,7 @@ public class TestCaseService {
     private final ProblemRepository problemRepository;
     private final TestCaseMapper testCaseMapper;
     
-    public TestCaseCreationResponse createTestCase(TestCaseCreationRequest request) {
+    public TestCaseCreationResponse createTestCase(Boolean isCreate, TestCaseCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
@@ -51,8 +51,10 @@ public class TestCaseService {
             problem.setTestCases(newListTestCase);
         }
 
-        problem.setCurrentCreationStep(4);
-        problem.setCurrentCreationStepDescription("Testcase Step");
+        if (isCreate){
+            problem.setCurrentCreationStep(4);
+            problem.setCurrentCreationStepDescription("Testcase Step");
+        }
         problemRepository.save(problem);
 
         testCase = testCaseRepository.save(testCase);
@@ -75,9 +77,10 @@ public class TestCaseService {
             throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
         }
 
-        problem.setIsCompletedCreation(false);
-        problem.setCurrentCreationStep(4);
-        problem.setCurrentCreationStepDescription("Testcase Step");
+        if (!problem.getIsCompletedCreation()){
+            problem.setCurrentCreationStep(4);
+            problem.setCurrentCreationStepDescription("Testcase Step");
+        }
         problemRepository.save(problem);
 
         // Update fields

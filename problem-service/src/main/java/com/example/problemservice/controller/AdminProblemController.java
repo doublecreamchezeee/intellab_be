@@ -194,7 +194,8 @@ public class AdminProblemController {
     @PostMapping("/testcase-step")
     public ApiResponse<TestCaseCreationResponse> createTestCaseStep(
             @RequestParam Boolean isUpdate,
-            @RequestParam String testCaseId,
+            @RequestParam Boolean isCreate,
+            @RequestParam(required = false) String testCaseId,
             @RequestBody TestCaseCreationRequest request,
             @RequestHeader("X-UserRole") String role) {
         if (!isAdmin(role)) {
@@ -204,7 +205,7 @@ public class AdminProblemController {
                     .message("Forbidden").build();
         }
         if (!isUpdate) {
-            TestCaseCreationResponse response = testCaseService.createTestCase(
+            TestCaseCreationResponse response = testCaseService.createTestCase(isCreate,
                     request);
             return ApiResponse.<TestCaseCreationResponse>builder()
                     .result(response)
