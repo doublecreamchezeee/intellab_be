@@ -28,6 +28,8 @@ public class Question {
     @GeneratedValue
     UUID questionId;
 
+    Integer questionOrder = 1;
+
     @Column(name = "question_content", columnDefinition = "TEXT")
     String questionContent;
 
