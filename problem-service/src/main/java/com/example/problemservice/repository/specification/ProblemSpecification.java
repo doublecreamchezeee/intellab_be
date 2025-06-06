@@ -38,6 +38,24 @@ public class ProblemSpecification {
                                 "%" + title.toLowerCase() + "%");
     }
 
+    public static Specification<Problem> isPublicFilter(Boolean isPublic) {
+        return (root, query, criteriaBuilder) -> {
+            if (isPublic == null) {
+                return null;
+            }
+            return criteriaBuilder.equal(root.get("isPublished"), isPublic);
+        };
+    }
+
+    public static Specification<Problem> isCompletedCreationFilter(Boolean isComplete) {
+        return (root, query, criteriaBuilder) -> {
+            if (isComplete == null) {
+                return null;
+            }
+            return criteriaBuilder.equal(root.get("isCompletedCreation"), isComplete);
+        };
+    }
+
     public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
         return (root, query, criteriaBuilder) ->{
             if(status == null) {
