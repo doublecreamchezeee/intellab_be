@@ -15,6 +15,7 @@ import com.google.cloud.firestore.Firestore;
 import lombok.AllArgsConstructor;
 import com.example.identityservice.utility.ParseUUID;
 import com.google.cloud.firestore.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class FirestoreService {
     @Autowired
     private final Firestore firestore;
@@ -141,10 +143,19 @@ public class FirestoreService {
 
 
 
-    public String getRoleByUid(String uid) throws ExecutionException, InterruptedException {
-        DocumentSnapshot docRef = firestore.collection("users").document(ParseUUID.normalizeUID(uid).toString()).get().get();
-        return Objects.requireNonNull(docRef.get("role")).toString();
-
+    public String getRoleByUid(String uid)  {
+        try {
+            DocumentSnapshot docRef = firestore.collection("users").document(ParseUUID.normalizeUID(uid).toString()).get().get();
+            return Objects.requireNonNull(docRef.get("role")).toString();
+        } catch (NotFoundException | ExecutionException | InterruptedException e) {
+            //throw new AppException(ErrorCode.CANNOT_FIND_USER_ROLE_IN_FIRESTORE);
+            log.error("Error retrieving user role for UID {}: {}", uid, e.getMessage());
+        } catch (Exception e) {
+            //throw new AppException(ErrorCode.CANNOT_FIND_USER_ROLE_IN_FIRESTORE);
+            log.error("Error retrieving user role for UID {}: {}", uid, e.getMessage());
+        } finally {
+            return null;
+        }
     }
 
 

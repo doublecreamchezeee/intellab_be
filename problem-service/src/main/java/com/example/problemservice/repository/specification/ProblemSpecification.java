@@ -67,4 +67,35 @@ public class ProblemSpecification {
             }
         };
     }
+
+    public static Specification<Problem> problemStructureNotNullSpecification(Boolean problemStructureNotNull) {
+        return (root, query, criteriaBuilder) -> {
+            if (problemStructureNotNull == null) {
+                return criteriaBuilder.conjunction();
+            }
+            if (problemStructureNotNull) {
+                return criteriaBuilder.isNotNull(root.get("problemStructure"));
+            } else {
+                return criteriaBuilder.isNull(root.get("problemStructure"));
+            }
+        };
+    }
+
+    public static Specification<Problem> currentCreationStepGreaterThanOrEqualTo(Integer currentCreationStep) {
+        return (root, query, criteriaBuilder) -> {
+            if (currentCreationStep == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.greaterThanOrEqualTo(root.get("currentCreationStep"), currentCreationStep);
+        };
+    }
+
+    public static Specification<Problem> isCompletedCreationEqualTo(Boolean isCompletedCreation) {
+        return (root, query, criteriaBuilder) -> {
+            if (isCompletedCreation == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("isCompletedCreation"), isCompletedCreation);
+        };
+    }
 }

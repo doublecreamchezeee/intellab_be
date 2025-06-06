@@ -1,5 +1,6 @@
 package com.example.problemservice.service;
 
+import com.example.problemservice.client.AiServiceClient;
 import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.converter.ProblemStructureConverter;
 import com.example.problemservice.client.BoilerplateClient;
@@ -36,6 +37,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +60,7 @@ public class ProblemService {
     private final ProblemCategoryRepository problemCategoryRepository;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
     private final ProblemRunCodeRepository problemRunCodeRepository;
+    private final AiServiceClient aiServiceClient;
 
     private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
         int start = (int) pageable.getOffset();
@@ -291,6 +294,23 @@ public class ProblemService {
         }
         problem.setDescription(request.getDescription());
         Problem savedProblem = problemRepository.save(problem);
+
+        problemRepository.flush();
+        //insertProblemEmbeddingData(savedProblem.getProblemId());
+
+        aiServiceClient.insertProblemEmbeddingData(savedProblem.getProblemId())
+                .doOnSuccess(response -> {
+                    if (response.getResult()) {
+                        log.info("Successfully inserted embedding data for problem: {}", savedProblem.getProblemId());
+                    } else {
+                        log.warn("Failed to insert embedding data for problem: {}", savedProblem.getProblemId());
+                    }
+                })
+                .doOnError(e -> {
+                    log.error("Failed to insert embedding data for problem {}: {}", savedProblem.getProblemId(), e.getMessage());
+                })
+                .subscribe();
+
         return problemMapper.toProblemCreationResponse(savedProblem);
     }
 
@@ -562,6 +582,20 @@ public class ProblemService {
 //        solutionRepository.deleteByIdProblemId(problemId);
 //        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(problemId);
         problemRepository.deleteById(problemId);
+
+        //deleteProblemEmbeddingData(problemId);
+        aiServiceClient.deleteProblemEmbeddingData(problemId)
+                .doOnSuccess(response -> {
+                    if (response.getResult()) {
+                        log.info("Successfully deleted embedding data for problem: {}", problemId);
+                    } else {
+                        log.warn("Failed to delete embedding data for problem: {}", problemId);
+                    }
+                })
+                .doOnError(e -> {
+                    log.error("Failed to delete embedding data for problem {}: {}", problemId, e.getMessage());
+                })
+                .subscribe();
     }
 
     public ProblemCreationResponse updateProblem(UUID problemId, ProblemCreationRequest request) {
@@ -647,8 +681,15 @@ public class ProblemService {
     @Transactional
     public void generateBoilerplate() {
         defaultCodeRepository.deleteAll();
+//problem.getCurrentCreationStep() < 6 || !problem.getIsCompletedCreation() ||
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.problemStructureNotNullSpecification(true)
+                        .and(ProblemSpecification.currentCreationStepGreaterThanOrEqualTo(6)
+                                .and(ProblemSpecification.isCompletedCreationEqualTo(true)))
+        );
 
-        List<Problem> problems = problemRepository.findAll();
+        List<Problem> problems = problemRepository.findAll(specification);
+
         for (Problem problem : problems) {
             // String problemStructure = MarkdownUtility.readMarkdownFromFile(
             // problem.getProblemName(), "Structure.md");
@@ -664,7 +705,81 @@ public class ProblemService {
         return true;
     }
 
+    @Async
+    public void insertProblemEmbeddingData(UUID problemId) {
+        // Call the AI service to insert embedding data
+
+        try {
+            log.info("Inserting embedding data for problem: {}", problemId);
+            aiServiceClient.insertProblemEmbeddingData(problemId)
+                    .doOnSuccess(response -> {
+                        if (response.getResult()) {
+                            log.info("Successfully inserted embedding data for problem: {}", problemId);
+                        } else {
+                            log.warn("Failed to insert embedding data for problem: {}", problemId);
+                        }
+                    })
+                    .doOnError(e -> {
+                        log.error("Failed to insert embedding data for problem {}: {}", problemId, e.getMessage());
+                    })
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Failed to insert embedding data for problem {}: {}", problemId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void updateProblemEmbeddingData(UUID problemId) {
+        // Call the AI service to update embedding data
+
+        try {
+            log.info("Updating embedding data for problem: {}", problemId);
+            aiServiceClient.updateProblemEmbeddingData(problemId)
+                    .doOnSuccess(response -> {
+                        if (response.getResult()) {
+                            log.info("Successfully updated embedding data for problem: {}", problemId);
+                        } else {
+                            log.warn("Failed to update embedding data for problem: {}", problemId);
+                        }
+                    })
+                    .doOnError(e -> {
+                        log.error("Failed to update embedding data for problem {}: {}", problemId, e.getMessage());
+                    })
+                    .subscribe();
+
+        } catch (Exception e) {
+            log.error("Failed to update embedding data for problem {}: {}", problemId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void deleteProblemEmbeddingData(UUID problemId) {
+        // Call the AI service to delete embedding data
+
+        try {
+            log.info("Deleting embedding data for problem: {}", problemId);
+            aiServiceClient.deleteProblemEmbeddingData(problemId)
+                    .doOnSuccess(response -> {
+                        if (response.getResult()) {
+                            log.info("Successfully deleted embedding data for problem: {}", problemId);
+                        } else {
+                            log.warn("Failed to delete embedding data for problem: {}", problemId);
+                        }
+                    })
+                    .doOnError(e -> {
+                        log.error("Failed to delete embedding data for problem {}: {}", problemId, e.getMessage());
+                    })
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Failed to delete embedding data for problem {}: {}", problemId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     /*
+
      * @EventListener(ApplicationReadyEvent.class)
      * public void generateData() {
      * generateBoilerplate();
