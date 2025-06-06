@@ -3,8 +3,6 @@ package com.example.courseservice.service;
 import com.example.courseservice.dto.request.Option.OptionRequest;
 import com.example.courseservice.dto.request.Question.QuestionUpdateRequest;
 import com.example.courseservice.dto.request.exercise.ModifyQuizRequest;
-import com.example.courseservice.dto.response.exercise.AddQuestionToExerciseResponse;
-import com.example.courseservice.dto.response.exercise.ExerciseDetailResponse;
 import com.example.courseservice.dto.response.exercise.ExerciseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +49,12 @@ public class ExerciseService {
             System.out.println("exercise is null");
             return new ExerciseResponse();
         }
+        // sort questions by order
+        List<Question> sortedQuestions = exercise.getQuestionList().stream()
+                .sorted(Comparator.comparingInt(Question::getQuestionOrder))
+                .toList();
+
+        exercise.setQuestionList(sortedQuestions);
 
         return exerciseMapper.toExerciseResponse(exercise);
 
@@ -124,6 +127,8 @@ public class ExerciseService {
         }
 
         List<UUID> questionIds = new ArrayList<>();
+
+        int order = 1;
         for (QuestionUpdateRequest q : request.getQuestions()) {
             Question question = null;
             if (q.getQuestionId() != null) {
@@ -136,6 +141,7 @@ public class ExerciseService {
                 question.setQuestionContent(q.getQuestionContent());
                 question.setQuestionType(q.getQuestionType());
                 question.setCorrectAnswer(q.getCorrectAnswer());
+                question.setQuestionOrder(order++);
 
                 // lưu question để lấy id cho option
                 question = questionRepository.save(question);
@@ -164,6 +170,7 @@ public class ExerciseService {
                 question.setQuestionContent(q.getQuestionContent());
                 question.setQuestionType(q.getQuestionType());
                 question.setCorrectAnswer(q.getCorrectAnswer());
+                question.setQuestionOrder(order++);
 
                 List<Option> options = question.getOptions();
 

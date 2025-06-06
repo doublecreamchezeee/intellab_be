@@ -415,6 +415,7 @@ create table questions
     question_type    char check(question_type in ('S','M')),
     status           varchar(10) check (status in ('active', 'unavailable')),
     updated_at       timestamp(6) with time zone,
+    question_order integer DEFAULT 1,
     exercise_id      uuid
         constraint fkostmdcxvqgrn6vvu29bkbyfjp
             references exercises
@@ -79063,6 +79064,17 @@ INSERT INTO public.questions (question_id, correct_answer, created_at, question_
 INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('e1598e4d-6f3b-4fe7-9b2c-aed1ef73ef06', '4', '2025-04-29 22:18:53.973655 +00:00', 'Which of the following operations is not efficient on a matrix?', 'S', null, '2025-04-29 22:18:53.973655 +00:00', '75682f09-e8d4-49eb-b64c-bd91a3079028');
 INSERT INTO public.questions (question_id, correct_answer, created_at, question_content, question_type, status, updated_at, exercise_id) VALUES ('7a245f70-ab9e-458c-a802-f6b5696b2ab6', '3', '2025-04-29 22:18:53.981719 +00:00', 'What is the space complexity of a matrix with n rows and m columns?', 'S', null, '2025-04-29 22:18:53.981719 +00:00', '75682f09-e8d4-49eb-b64c-bd91a3079028');
 
+
+WITH ordered_questions AS (
+  SELECT
+    question_id,
+    ROW_NUMBER() OVER (PARTITION BY exercise_id ORDER BY question_id) AS new_order
+  FROM questions
+)
+UPDATE questions q
+SET question_order = o.new_order
+FROM ordered_questions o
+WHERE q.question_id = o.question_id;
 
 INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'In arbitrary order', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
 INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'In contiguous memory locations', 'dfa51df3-225e-42c9-82b4-7ffd179ced23');
