@@ -1,5 +1,6 @@
 package com.example.courseservice.controller;
 
+import com.example.courseservice.client.AiServiceClient;
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
@@ -68,6 +69,8 @@ public class CourseController {
     LessonService lessonService;
     ReviewService reviewService;
     private final CommentService commentService;
+    AiServiceClient aiServiceClient;
+
     final String defaultRole = "myRole";
     private Boolean isAdmin(String role)
     {
@@ -1036,6 +1039,16 @@ public class CourseController {
         return ApiResponse.<Page<CourseSearchResponse>>builder()
                 .message("Get all free courses successfully!")
                 .result(courseService.getFreeCourses(userUUID, pageable))
+                .build();
+    }
+
+    @Operation(
+            summary = "Check health of ai service"
+    )
+    @GetMapping("/ai-service/health")
+    public ApiResponse<Object> checkAiServiceHealth() {
+        return ApiResponse.<Object>builder()
+                .result(aiServiceClient.getAiServiceInfo().block())
                 .build();
     }
 

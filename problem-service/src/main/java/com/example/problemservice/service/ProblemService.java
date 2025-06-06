@@ -295,7 +295,21 @@ public class ProblemService {
         problem.setDescription(request.getDescription());
         Problem savedProblem = problemRepository.save(problem);
 
-        insertProblemEmbeddingData(savedProblem.getProblemId());
+        problemRepository.flush();
+        //insertProblemEmbeddingData(savedProblem.getProblemId());
+
+        aiServiceClient.insertProblemEmbeddingData(savedProblem.getProblemId())
+                .doOnSuccess(response -> {
+                    if (response.getResult()) {
+                        log.info("Successfully inserted embedding data for problem: {}", savedProblem.getProblemId());
+                    } else {
+                        log.warn("Failed to insert embedding data for problem: {}", savedProblem.getProblemId());
+                    }
+                })
+                .doOnError(e -> {
+                    log.error("Failed to insert embedding data for problem {}: {}", savedProblem.getProblemId(), e.getMessage());
+                })
+                .subscribe();
 
         return problemMapper.toProblemCreationResponse(savedProblem);
     }
@@ -568,7 +582,19 @@ public class ProblemService {
 //        problemCategoryRepository.deleteAllByProblemCategoryID_ProblemId(problemId);
         problemRepository.deleteById(problemId);
 
-        deleteProblemEmbeddingData(problemId);
+        //deleteProblemEmbeddingData(problemId);
+        aiServiceClient.deleteProblemEmbeddingData(problemId)
+                .doOnSuccess(response -> {
+                    if (response.getResult()) {
+                        log.info("Successfully deleted embedding data for problem: {}", problemId);
+                    } else {
+                        log.warn("Failed to delete embedding data for problem: {}", problemId);
+                    }
+                })
+                .doOnError(e -> {
+                    log.error("Failed to delete embedding data for problem {}: {}", problemId, e.getMessage());
+                })
+                .subscribe();
     }
 
     public ProblemCreationResponse updateProblem(UUID problemId, ProblemCreationRequest request) {
@@ -684,7 +710,18 @@ public class ProblemService {
 
         try {
             log.info("Inserting embedding data for problem: {}", problemId);
-            aiServiceClient.insertProblemEmbeddingData(problemId);
+            aiServiceClient.insertProblemEmbeddingData(problemId)
+                    .doOnSuccess(response -> {
+                        if (response.getResult()) {
+                            log.info("Successfully inserted embedding data for problem: {}", problemId);
+                        } else {
+                            log.warn("Failed to insert embedding data for problem: {}", problemId);
+                        }
+                    })
+                    .doOnError(e -> {
+                        log.error("Failed to insert embedding data for problem {}: {}", problemId, e.getMessage());
+                    })
+                    .subscribe();
         } catch (Exception e) {
             log.error("Failed to insert embedding data for problem {}: {}", problemId, e.getMessage());
             e.printStackTrace();
@@ -697,7 +734,19 @@ public class ProblemService {
 
         try {
             log.info("Updating embedding data for problem: {}", problemId);
-            aiServiceClient.updateProblemEmbeddingData(problemId);
+            aiServiceClient.updateProblemEmbeddingData(problemId)
+                    .doOnSuccess(response -> {
+                        if (response.getResult()) {
+                            log.info("Successfully updated embedding data for problem: {}", problemId);
+                        } else {
+                            log.warn("Failed to update embedding data for problem: {}", problemId);
+                        }
+                    })
+                    .doOnError(e -> {
+                        log.error("Failed to update embedding data for problem {}: {}", problemId, e.getMessage());
+                    })
+                    .subscribe();
+
         } catch (Exception e) {
             log.error("Failed to update embedding data for problem {}: {}", problemId, e.getMessage());
             e.printStackTrace();
@@ -710,7 +759,18 @@ public class ProblemService {
 
         try {
             log.info("Deleting embedding data for problem: {}", problemId);
-            aiServiceClient.deleteProblemEmbeddingData(problemId);
+            aiServiceClient.deleteProblemEmbeddingData(problemId)
+                    .doOnSuccess(response -> {
+                        if (response.getResult()) {
+                            log.info("Successfully deleted embedding data for problem: {}", problemId);
+                        } else {
+                            log.warn("Failed to delete embedding data for problem: {}", problemId);
+                        }
+                    })
+                    .doOnError(e -> {
+                        log.error("Failed to delete embedding data for problem {}: {}", problemId, e.getMessage());
+                    })
+                    .subscribe();
         } catch (Exception e) {
             log.error("Failed to delete embedding data for problem {}: {}", problemId, e.getMessage());
             e.printStackTrace();

@@ -262,7 +262,11 @@ public class CourseService {
 
         try {
             courseRepository.delete(course);
-            deleteCourseVectorEmbedding(courseId);
+            //deleteCourseVectorEmbedding(courseId);
+            aiServiceClient.deleteCourseEmbeddingData(courseId)
+                    .doOnSuccess(response -> log.info("Successfully deleted embedding data for course {}", courseId))
+                    .doOnError(error -> log.error("Error deleting embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -1372,7 +1376,15 @@ public class CourseService {
 
         courseSummaryRepository.save(courseSummary);
 
-        insertCourseVectorEmbedding(savedCourse.getCourseId());
+        // Update the course with the course summary immediately before embedding
+        courseRepository.flush();
+        courseSummaryRepository.flush();
+
+        //insertCourseVectorEmbedding(savedCourse.getCourseId());
+        aiServiceClient.insertCourseEmbeddingData(savedCourse.getCourseId())
+                .doOnSuccess(response -> log.info("Embedding data inserted for course {}", savedCourse.getCourseId()))
+                .doOnError(error -> log.error("Error inserting embedding data for course {}: {}", savedCourse.getCourseId(), error.getMessage()))
+                .subscribe();
 
         return courseMapper.toAdminCourseCreationResponse(savedCourse);
     }
@@ -1456,7 +1468,14 @@ public class CourseService {
 
         courseSummaryRepository.save(courseSummary);
 
-        updateExistedCourseVectorEmbedding(courseId);
+        courseRepository.flush();
+        courseSummaryRepository.flush();
+
+        //updateExistedCourseVectorEmbedding(courseId);
+        aiServiceClient.updateCourseEmbeddingData(courseId)
+                .doOnSuccess(response -> log.info("Embedding data updated for course {}", courseId))
+                .doOnError(error -> log.error("Error updating embedding data for course {}: {}", courseId, error.getMessage()))
+                .subscribe();
 
         return courseMapper.toAdminCourseCreationResponse(savedCourse);
     }
@@ -1765,6 +1784,8 @@ public class CourseService {
             aiServiceClient.insertCourseEmbeddingData(courseId)
                     .doOnError(error -> log.error("Error inserting embedding data for course {}: {}", courseId, error.getMessage()))
                     .subscribe();
+                    //.block(); // Use block() to wait for completion in async context
+
         } catch (Exception e) {
             log.error("Failed to insert embedding data for course {}: {}", courseId, e.getMessage());
             e.printStackTrace();

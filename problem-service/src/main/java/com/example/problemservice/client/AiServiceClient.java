@@ -2,19 +2,20 @@ package com.example.problemservice.client;
 
 import com.example.problemservice.dto.response.ApiResponse;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.DeleteExchange;
+import org.springframework.web.service.annotation.PutExchange;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
 public interface AiServiceClient {
-    @PutMapping(value = "/problem/insert-embedding-data", consumes =  MediaType.APPLICATION_JSON_VALUE)
-    ApiResponse<Boolean> insertProblemEmbeddingData(@RequestParam UUID problemId);
+    @PutExchange(value = "/problem/insert-embedding-data", accept = MediaType.APPLICATION_JSON_VALUE, contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ApiResponse<Boolean>> insertProblemEmbeddingData(@RequestParam UUID problem_id);
 
-    @PutMapping(value = "/problem/update-embedding-data", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ApiResponse<Boolean> updateProblemEmbeddingData(@RequestParam UUID problemId);
+    @PutExchange(value = "/problem/update-embedding-data", accept = MediaType.APPLICATION_JSON_VALUE, contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ApiResponse<Boolean>> updateProblemEmbeddingData(@RequestParam UUID problem_id);
 
-    @DeleteMapping(value = "/problem/delete-embedding-data", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ApiResponse<Boolean> deleteProblemEmbeddingData(@RequestParam UUID problemId);
+    @DeleteExchange(value = "/problem/delete-embedding-data", accept = MediaType.APPLICATION_JSON_VALUE, contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ApiResponse<Boolean>> deleteProblemEmbeddingData(@RequestParam UUID problem_id);
 }

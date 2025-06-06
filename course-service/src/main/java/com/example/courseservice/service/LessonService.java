@@ -153,18 +153,27 @@ public class LessonService {
             courseRepository.save(course);
         }
 
-        if (lesson.getExercise() == null)
+        if (lesson.getExercise() != null)
         {
-           throw new AppException(ErrorCode.EXERCISE_NOT_FOUND);
+           //throw new AppException(ErrorCode.EXERCISE_NOT_FOUND);
+            Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
+
+            newLesson.setExercise(cloneQuiz);
+        } else {
+            newLesson.setExercise(null);
         }
 
-        Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
+        Lesson savedLesson = lessonRepository.save(newLesson);
 
-        newLesson.setExercise(cloneQuiz);
+        lessonRepository.flush();
 
-        sendRequestToInsertNewLessonVectorEmbedding(newLesson.getLessonId());
+        //sendRequestToInsertNewLessonVectorEmbedding(newLesson.getLessonId());
+        aiServiceClient.insertLessonEmbeddingData(savedLesson.getLessonId())
+                .doOnSuccess(response -> log.info("Successfully sent request to insert new lesson vector embedding for lessonId: {}", savedLesson.getLessonId()))
+                .doOnError(e -> log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage()))
+                .subscribe();
 
-        return lessonMapper.toLessonResponse(newLesson);
+        return lessonMapper.toLessonResponse(savedLesson);
     }
 
     @Transactional
@@ -264,11 +273,17 @@ public class LessonService {
         lesson.setContent(request.getContent());
         lesson.setDescription(request.getDescription());
         lesson.setProblemId(request.getProblemId());
-        lesson = lessonRepository.save(lesson);
+        Lesson finalLesson = lessonRepository.save(lesson);
 
-        sendRequestToUpdateExistedLessonVectorEmbedding(lesson.getLessonId());
+        lessonRepository.flush();
+        //sendRequestToUpdateExistedLessonVectorEmbedding(lesson.getLessonId());
 
-        return lessonMapper.toLessonResponse(lesson);
+        aiServiceClient.updateLessonEmbeddingData(finalLesson.getLessonId())
+                .doOnSuccess(response -> log.info("Successfully sent request to update lesson vector embedding for lessonId: {}", finalLesson.getLessonId()))
+                .doOnError(e -> log.error("Error while sending request to update lesson vector embedding: {}", e.getMessage()))
+                .subscribe();
+
+        return lessonMapper.toLessonResponse(finalLesson);
     }
 
     public void removeLesson(UUID lessonId) {
@@ -291,9 +306,13 @@ public class LessonService {
 
         lessonRepository.delete(lesson);
 
-        sendRequestToDeleteLessonVectorEmbedding(lessonId);
-
         lessonRepository.flush();
+
+        //sendRequestToDeleteLessonVectorEmbedding(lessonId);
+        aiServiceClient.deleteLessonEmbeddingData(lessonId)
+                .doOnSuccess(response -> log.info("Successfully sent request to delete lesson vector embedding for lessonId: {}", lessonId))
+                .doOnError(e -> log.error("Error while sending request to delete lesson vector embedding: {}", e.getMessage()))
+                .subscribe();
 
         Specification<Lesson> specification = Specification.where(
                 LessonSpecification.greaterThanLessonOrder(lessonOrder)
@@ -780,7 +799,10 @@ public class LessonService {
     @Async
     public void sendRequestToInsertNewLessonVectorEmbedding(UUID lessonId) {
         try {
-            aiServiceClient.insertLessonEmbeddingData(lessonId).block();
+            aiServiceClient.insertLessonEmbeddingData(lessonId)
+                    .doOnError(e -> log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage()))
+                    .subscribe();
+
         } catch (Exception e) {
             log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage());
             //throw new RuntimeException(e);
@@ -791,7 +813,10 @@ public class LessonService {
     @Async
     public void sendRequestToUpdateExistedLessonVectorEmbedding(UUID lessonId) {
         try {
-            aiServiceClient.updateLessonEmbeddingData(lessonId).block();
+            aiServiceClient.updateLessonEmbeddingData(lessonId)
+                    .doOnError(e -> log.error("Error while sending request to update lesson vector embedding: {}", e.getMessage()))
+                    .subscribe();
+
         } catch (Exception e) {
             log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage());
             //throw new RuntimeException(e);
@@ -802,7 +827,10 @@ public class LessonService {
     @Async
     public void sendRequestToDeleteLessonVectorEmbedding(UUID lessonId) {
         try {
-            aiServiceClient.deleteLessonEmbeddingData(lessonId).block();
+            aiServiceClient.deleteLessonEmbeddingData(lessonId)
+                    .doOnError(e -> log.error("Error while sending request to delete lesson vector embedding: {}", e.getMessage()))
+                    .subscribe();
+
         } catch (Exception e) {
             log.error("Error while sending request to delete lesson vector embedding: {}", e.getMessage());
             //throw new RuntimeException(e);
