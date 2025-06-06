@@ -68,7 +68,7 @@ public class SolutionService {
                 .authorId(authorId)
                 .build();
 
-        Solution existingSolution = solutionRepository.findById(solutionId).orElseThrow(
+        Solution existingSolution = solutionRepository.findByIdProblemId(problemId).orElseThrow(
                 () -> new AppException(ErrorCode.SOLUTION_NOT_EXIST)
         );
 
@@ -81,9 +81,10 @@ public class SolutionService {
         // Optional: update creation step if needed
         Problem problem = existingSolution.getProblem();
         if (problem != null) {
-            problem.setCurrentCreationStep(5);
-            problem.setCurrentCreationStepDescription("Solution Step");
-            problem.setIsCompletedCreation(false);
+            if (!problem.getIsCompletedCreation()){
+                problem.setCurrentCreationStepDescription("Solution Step");
+                problem.setCurrentCreationStep(5);
+            }
             problemRepository.save(problem);
         }
 
@@ -114,7 +115,9 @@ public class SolutionService {
     }
 
     public DetailsSolutionResponse getSolutionByProblemId(UUID problemId) {
-        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByIdProblemId(problemId));
+        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByIdProblemId(problemId).orElseThrow(
+                () -> new AppException(ErrorCode.SOLUTION_NOT_EXIST)
+        ));
     }
 
     public SolutionUpdateResponse updateSolution(String problemId, String authorId, SolutionUpdateRequest request) {
