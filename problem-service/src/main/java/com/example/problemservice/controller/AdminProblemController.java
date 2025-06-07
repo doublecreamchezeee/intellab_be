@@ -84,7 +84,7 @@ public class AdminProblemController {
     }
 
     @Operation(
-            summary = "Get problems list"
+            summary = "Delete problems"
     )
     @DeleteMapping("/{problemId}")
     public ApiResponse<String> deleteProblem(
@@ -103,6 +103,28 @@ public class AdminProblemController {
                 .message("Delete success")
                 .result("").build();
     }
+
+    @Operation(
+            summary = "Delete testcase"
+    )
+    @DeleteMapping("/testcase/{testcaseId}")
+    public ApiResponse<String> deleteTestcase(
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @PathVariable(value = "testcaseId", required = true) String testcaseId
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<String>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        testCaseService.deleteTestCaseById(UUID.fromString(testcaseId));
+
+        return ApiResponse.<String>builder()
+                .message("Delete success")
+                .result("").build();
+    }
+
 
     @Operation(
             summary = "Get private problems list"
@@ -194,7 +216,7 @@ public class AdminProblemController {
     @PostMapping("/testcase-step")
     public ApiResponse<TestCaseCreationResponse> createTestCaseStep(
             @RequestParam Boolean isUpdate,
-            @RequestParam Boolean isCreate,
+            @RequestParam(required = false) Boolean isCreate,
             @RequestParam(required = false) String testCaseId,
             @RequestBody TestCaseCreationRequest request,
             @RequestHeader("X-UserRole") String role) {

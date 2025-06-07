@@ -288,7 +288,7 @@ public class ProblemService {
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
-        if (!problem.getIsCompletedCreation()) {
+        if (!problem.getIsCompletedCreation() && problem.getCurrentCreationStep() <= 2) {
             problem.setCurrentCreationStep(2);
             problem.setCurrentCreationStepDescription("Description Step");
         }
@@ -321,7 +321,7 @@ public class ProblemService {
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
         );
-        if (!problem.getIsCompletedCreation()) {
+        if (!problem.getIsCompletedCreation() && problem.getCurrentCreationStep() <= 3) {
             problem.setCurrentCreationStep(3);
             problem.setCurrentCreationStepDescription("Structure Step");
         }

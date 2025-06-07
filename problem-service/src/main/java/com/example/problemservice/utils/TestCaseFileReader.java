@@ -174,4 +174,28 @@ public class TestCaseFileReader {
         }
     }
 
+    public static void deleteOneTestCaseFile(String problemId, int index) {
+        try {
+            Path testsDir = Paths.get(
+                    appConfig.getMountPath(),
+                    slugify(problemId),
+                    "tests");
+
+            Path inputPath = testsDir.resolve(INPUT).resolve(index + ".txt");
+            Path outputPath = testsDir.resolve(OUTPUT).resolve(index + ".txt");
+
+            boolean inputDeleted = Files.deleteIfExists(inputPath);
+            boolean outputDeleted = Files.deleteIfExists(outputPath);
+
+            if (!inputDeleted || !outputDeleted) {
+                log.warn("Test case file not found for problem '{}' at index {}", problemId, index);
+            } else {
+                log.info("Successfully deleted test case files for problem '{}' at index {}", problemId, index);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete one test case file", e);
+        }
+    }
+
 }
