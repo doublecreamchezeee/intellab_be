@@ -624,7 +624,8 @@ public class ProblemService {
     public List<DefaultCodeResponse> generateDefaultCodes(UUID problemId, String structure) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
-        if (problem.getCurrentCreationStep() < 6 || !problem.getIsCompletedCreation() || problem.getProblemStructure() == null) {
+        //problem.getCurrentCreationStep() < 6 || !problem.getIsCompletedCreation() ||
+        if (problem.getProblemStructure() == null) {
             log.error("Problem is not ready for boilerplate generation: {}", problemId);
             return Collections.emptyList();
         }
@@ -688,8 +689,8 @@ public class ProblemService {
 //problem.getCurrentCreationStep() < 6 || !problem.getIsCompletedCreation() ||
         Specification<Problem> specification = Specification.where(
                 ProblemSpecification.problemStructureNotNullSpecification(true)
-                        .and(ProblemSpecification.currentCreationStepGreaterThanOrEqualTo(6)
-                                .and(ProblemSpecification.isCompletedCreationEqualTo(true)))
+                        /*.and(ProblemSpecification.currentCreationStepGreaterThanOrEqualTo(6)
+                                .and(ProblemSpecification.isCompletedCreationEqualTo(true)))*/
         );
 
         List<Problem> problems = problemRepository.findAll(specification);
