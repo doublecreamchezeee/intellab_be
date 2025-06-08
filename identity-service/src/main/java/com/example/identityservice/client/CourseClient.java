@@ -11,6 +11,7 @@ import com.example.identityservice.dto.response.course.CompleteCourseResponse;
 import com.example.identityservice.dto.response.course.CourseAndFirstLessonResponse;
 import com.example.identityservice.dto.response.course.DetailCourseResponse;
 import com.example.identityservice.dto.response.userCourse.UserCoursesResponse;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.service.annotation.GetExchange;
@@ -58,7 +59,7 @@ public interface CourseClient {
     @GetExchange(url = "/courses/admin/course-complete-rate")
     Mono<ApiResponse<List<Object[]>>> getCourseCompleteRate(
             @RequestParam("type") String type,
-            @RequestParam(value = "start_date", required = false) LocalDate startDate,
-            @RequestParam(value = "end_date", required = false) LocalDate endDate
+            @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     );
 }
