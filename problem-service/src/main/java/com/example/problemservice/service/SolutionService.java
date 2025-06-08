@@ -49,9 +49,10 @@ public class SolutionService {
 
         // Step 4: Save to DB
         solution = solutionRepository.save(solution);
-
-        problem.setCurrentCreationStep(5);
-        problem.setCurrentCreationStepDescription("Solution Step");
+        if (!problem.getIsCompletedCreation() && problem.getCurrentCreationStep() <= 5) {
+            problem.setCurrentCreationStep(5);
+            problem.setCurrentCreationStepDescription("Solution Step");
+        }
         problemRepository.save(problem);
 
         // Step 5: Return response
@@ -81,7 +82,7 @@ public class SolutionService {
         // Optional: update creation step if needed
         Problem problem = existingSolution.getProblem();
         if (problem != null) {
-            if (!problem.getIsCompletedCreation()){
+            if (!problem.getIsCompletedCreation() || problem.getCurrentCreationStep() <= 2){
                 problem.setCurrentCreationStepDescription("Solution Step");
                 problem.setCurrentCreationStep(5);
             }

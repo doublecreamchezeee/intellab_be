@@ -14,4 +14,5 @@ public class TestCaseCreationRequest {
     String input;
     String output;
     UUID problemId;
+    Integer order;
 }
