@@ -20,4 +20,5 @@ public class VNPayUpgradeAccountRequest {
     PremiumPackage premiumPackage;
     PremiumDuration premiumDuration;
     Boolean isChangePlan = false;
+    String callbackDomain;
 }

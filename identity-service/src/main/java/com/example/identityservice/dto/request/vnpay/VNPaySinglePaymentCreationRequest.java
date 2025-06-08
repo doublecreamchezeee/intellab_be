@@ -18,4 +18,5 @@ public class VNPaySinglePaymentCreationRequest {
     VNPayCurrencyCode VNPayCurrencyCode;
     VNPayLocale language;
     UUID courseId;
+    String callbackDomain;
 }

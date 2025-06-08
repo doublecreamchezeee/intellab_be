@@ -150,6 +150,7 @@ public class VNPayService {
                     .createdAt(paymentUrlResponse.getCurrentDate().toInstant())
                     .orderDescription(orderDescription)
                     .paymentFor(PaymentFor.COURSE.getCode())
+                    .feCallbackDomain(request.getCallbackDomain())
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -340,6 +341,7 @@ public class VNPayService {
                     .vnPayPaymentPremiumPackage(paymentPremiumPackage)
                     .orderDescription(orderDescription)
                     .paymentFor(PaymentFor.SUBSCRIPTION.getCode())
+                    .feCallbackDomain(request.getCallbackDomain())
                     .build();
 
             payment = vnPayPaymentRepository.save(payment);
@@ -939,6 +941,11 @@ public class VNPayService {
         VNPayPayment payment = vnPayPaymentRepository.findByTransactionReference(transactionReference)
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
         return payment.getPaymentId();
+    }
+
+    public VNPayPayment getPaymentByTransactionReference(String transactionReference) {
+        return vnPayPaymentRepository.findByTransactionReference(transactionReference)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
     public CourseAndFirstLessonResponse getCourseAndFirstLessonByPaymentId(UUID paymentId) {

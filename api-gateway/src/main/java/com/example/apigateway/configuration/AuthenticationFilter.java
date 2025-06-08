@@ -66,6 +66,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses/enrollPaidCourse",
             "/course/courses/disenroll",
             "/identity/leaderboard",
+            "/identity/auth/callback-set-verified-email",
+            "/identity/payment/vnpay/vnpay-return",
+
     };
 
     @NonFinal
@@ -155,7 +158,16 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             } else {
                 return unauthenticated(exchange.getResponse());
             }
-        }).onErrorResume(throwable -> isHybrid ? chain.filter(exchange) : unknownErrorOccurred(exchange.getResponse()));
+        }).onErrorResume(throwable -> {
+            log.error("Error occurred during token validation. Request path: {}, Method: {}, Headers: {}, Error: {}",
+                    request.getURI().getPath(),
+                    request.getMethod(),
+                    request.getHeaders(),
+                    throwable.getMessage(),
+                    throwable);
+            return isHybrid ? chain.filter(exchange) : unknownErrorOccurred(exchange.getResponse());
+        });
+
     }
 
     private boolean isPublicEndpoint(ServerHttpRequest request) {
