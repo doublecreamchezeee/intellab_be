@@ -2,6 +2,7 @@ package com.example.courseservice.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.courseservice.client.AiServiceClient;
 import com.example.courseservice.client.ProblemClient;
 import com.example.courseservice.configuration.DotenvConfig;
 import com.example.courseservice.constant.PredefinedLearningStatus;
@@ -32,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,6 +73,7 @@ public class LessonService {
     private final QuestionRepository questionRepository;
     private final ExerciseRepository exerciseRepository;
     private final OptionRepository optionRepository;
+    AiServiceClient aiServiceClient;
 
     public LessonResponse getLessonInformation(UUID lessonId){
         Lesson lesson = lessonRepository.findById(lessonId)
@@ -150,16 +153,27 @@ public class LessonService {
             courseRepository.save(course);
         }
 
-        if (lesson.getExercise() == null)
+        if (lesson.getExercise() != null)
         {
-           throw new AppException(ErrorCode.EXERCISE_NOT_FOUND);
+           //throw new AppException(ErrorCode.EXERCISE_NOT_FOUND);
+            Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
+
+            newLesson.setExercise(cloneQuiz);
+        } else {
+            newLesson.setExercise(null);
         }
 
-        Exercise cloneQuiz = cloneQuiz(lesson.getExercise(), newLesson);
+        Lesson savedLesson = lessonRepository.save(newLesson);
 
-        newLesson.setExercise(cloneQuiz);
+        lessonRepository.flush();
 
-        return lessonMapper.toLessonResponse(newLesson);
+        //sendRequestToInsertNewLessonVectorEmbedding(newLesson.getLessonId());
+        aiServiceClient.insertLessonEmbeddingData(savedLesson.getLessonId())
+                .doOnSuccess(response -> log.info("Successfully sent request to insert new lesson vector embedding for lessonId: {}", savedLesson.getLessonId()))
+                .doOnError(e -> log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage()))
+                .subscribe();
+
+        return lessonMapper.toLessonResponse(savedLesson);
     }
 
     @Transactional
@@ -253,14 +267,23 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
                 () -> new AppException(ErrorCode.LESSON_NOT_FOUND)
         );
+
         lesson.setLessonName(request.getLessonName());
         //lesson.setLessonOrder(request.getLessonOrder());
         lesson.setContent(request.getContent());
         lesson.setDescription(request.getDescription());
         lesson.setProblemId(request.getProblemId());
-        lesson = lessonRepository.save(lesson);
+        Lesson finalLesson = lessonRepository.save(lesson);
 
-        return  lessonMapper.toLessonResponse(lesson);
+        lessonRepository.flush();
+        //sendRequestToUpdateExistedLessonVectorEmbedding(lesson.getLessonId());
+
+        aiServiceClient.updateLessonEmbeddingData(finalLesson.getLessonId())
+                .doOnSuccess(response -> log.info("Successfully sent request to update lesson vector embedding for lessonId: {}", finalLesson.getLessonId()))
+                .doOnError(e -> log.error("Error while sending request to update lesson vector embedding: {}", e.getMessage()))
+                .subscribe();
+
+        return lessonMapper.toLessonResponse(finalLesson);
     }
 
     public void removeLesson(UUID lessonId) {
@@ -282,7 +305,14 @@ public class LessonService {
         }
 
         lessonRepository.delete(lesson);
+
         lessonRepository.flush();
+
+        //sendRequestToDeleteLessonVectorEmbedding(lessonId);
+        aiServiceClient.deleteLessonEmbeddingData(lessonId)
+                .doOnSuccess(response -> log.info("Successfully sent request to delete lesson vector embedding for lessonId: {}", lessonId))
+                .doOnError(e -> log.error("Error while sending request to delete lesson vector embedding: {}", e.getMessage()))
+                .subscribe();
 
         Specification<Lesson> specification = Specification.where(
                 LessonSpecification.greaterThanLessonOrder(lessonOrder)
@@ -295,14 +325,9 @@ public class LessonService {
         lessonRepository.saveAll(lessons);
     }
 
-
-
-
-
     public Lesson getNextLessonId(Lesson lesson) {
         return lessonRepository.findByLessonOrderAndCourse_CourseId(lesson.getLessonOrder()+1, lesson.getCourse().getCourseId()).orElse(null);
     }
-
 
     public DetailsLessonResponse getLessonById(UUID lessonId, UUID userId) {
         // Fetch the lesson by its ID
@@ -322,6 +347,13 @@ public class LessonService {
         UUID nextLessonId = (nextLesson != null) ? nextLesson.getLessonId() : null;
         String nextLessonName = (nextLesson != null) ? nextLesson.getLessonName() : null;
 
+        UUID exerciseId = null;
+
+        if (lesson.getIsQuizVisible() && lesson.getExercise() != null )
+        {
+            exerciseId = lesson.getExercise().getExerciseId();
+        }
+
         // Build the response with all the lesson details
 
         return DetailsLessonResponse.builder()
@@ -331,7 +363,7 @@ public class LessonService {
                 .lessonOrder(lesson.getLessonOrder())
                 .lessonName(lesson.getLessonName())
                 .courseId(lesson.getCourse().getCourseId())
-                .exerciseId(lesson.getExercise() != null ? lesson.getExercise().getExerciseId() : null) // Check if exercise is null
+                .exerciseId(exerciseId) // Check if exercise is null
                 .problemId(lesson.getProblemId())
                 .learningId(learningLesson.getLearningId())
                 .nextLessonId(nextLessonId)
@@ -340,8 +372,6 @@ public class LessonService {
                 .isDonePractice(isDonePractice)
                 .build();
     }
-
-
 
     //Quy trình flow làm bài tập: Get quiz -> làm bài
     // subflow1-làm chưa xong rồi thoát ra: Post Assignment với score là null(chưa làm xong), các câu chưa làm thì
@@ -362,6 +392,7 @@ public class LessonService {
         if(assignments.isEmpty()){
             throw new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND);
         }
+        Exercise exercise = assignments.get(0).getExercise();
 
         Assignment lastEdited = null;
 
@@ -369,12 +400,12 @@ public class LessonService {
         {
             if (lastEdited == null)
                 lastEdited = assignment;
-            else if (lastEdited.getScore() >= 8)
+            else if (lastEdited.getScore() >= exercise.getPassingQuestions())
             {
                 if(assignment.getScore()>=lastEdited.getScore())
                     lastEdited = assignment;
             }
-            else if (lastEdited.getScore() < 8)
+            else if (lastEdited.getScore() < exercise.getPassingQuestions())
                 lastEdited = assignment;
         }
 
@@ -392,14 +423,17 @@ public class LessonService {
 
     }
 
-
     public List<QuestionResponse> getQuestion(UUID lessonId, Integer numberOfQuestions)
     {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
+
         Exercise exercise = lesson.getExercise();
+
         if (exercise == null)
             return null;
+
+        numberOfQuestions = exercise.getQuestionsPerExercise();
         List<Question> questions = exercise.getQuestionList();
 
         if(questions == null || questions.isEmpty())
@@ -446,9 +480,6 @@ public class LessonService {
 //
 //        return lessonMapper.toLessonResponse(lessonRepository.save(lesson));
 //    }
-
-
-
     public LearningLessonResponse createLearningLesson(UUID userUid, LearningLessonCreationRequest request) {
 
         Lesson lesson = lessonRepository.findById(request.getLessonId()).orElseThrow(
@@ -548,7 +579,6 @@ public class LessonService {
     }
 
 
-
     public Boolean doneTheoryOfLesson(UUID learningLessonId,
                                       UUID courseId,
                                       UUID userUid) throws Exception {
@@ -560,12 +590,15 @@ public class LessonService {
                 courseId
         ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_ENROLLED));
 
-//        Lesson lesson = learningLesson.getLesson();
+        Lesson lesson = learningLesson.getLesson();
+        if (lesson.getExercise() == null || !lesson.getIsQuizVisible()) {
+            learningLesson.setIsDoneTheory(true);
+        }
 
-        learningLesson.setIsDoneTheory(true);
+        learningLesson.setIsDoneTheory(null);
 
         if (learningLesson.getIsDonePractice() != null
-                && learningLesson.getIsDonePractice()) {
+                && learningLesson.getIsDonePractice() && learningLesson.getIsDoneTheory() != null) {
             learningLesson.setStatus(PredefinedLearningStatus.DONE);
         }
 
@@ -754,6 +787,7 @@ public class LessonService {
 
         return true;
     }
+
     public String uploadFile(MultipartFile file, UUID courseId, UUID userId) throws IOException {
         Cloudinary cloudinary = new Cloudinary(DotenvConfig.get("CLOUDINARY_URL"));
         String path = "CourseImages/"+ userId + "/" + courseId;
@@ -761,6 +795,49 @@ public class LessonService {
                 ObjectUtils.asMap("folder", path));
         return uploadResult.get("secure_url").toString(); // Trả về đường dẫn ảnh đã upload
     }
+
+    @Async
+    public void sendRequestToInsertNewLessonVectorEmbedding(UUID lessonId) {
+        try {
+            aiServiceClient.insertLessonEmbeddingData(lessonId)
+                    .doOnError(e -> log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage()))
+                    .subscribe();
+
+        } catch (Exception e) {
+            log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage());
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendRequestToUpdateExistedLessonVectorEmbedding(UUID lessonId) {
+        try {
+            aiServiceClient.updateLessonEmbeddingData(lessonId)
+                    .doOnError(e -> log.error("Error while sending request to update lesson vector embedding: {}", e.getMessage()))
+                    .subscribe();
+
+        } catch (Exception e) {
+            log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage());
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendRequestToDeleteLessonVectorEmbedding(UUID lessonId) {
+        try {
+            aiServiceClient.deleteLessonEmbeddingData(lessonId)
+                    .doOnError(e -> log.error("Error while sending request to delete lesson vector embedding: {}", e.getMessage()))
+                    .subscribe();
+
+        } catch (Exception e) {
+            log.error("Error while sending request to delete lesson vector embedding: {}", e.getMessage());
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
 }
 
 

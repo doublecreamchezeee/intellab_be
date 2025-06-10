@@ -64,6 +64,7 @@ public class AdminProblemController {
     @GetMapping
     public ApiResponse<Page<ProblemCreationResponse>> getProblem(
             @RequestParam(value = "isComplete", required = true) Boolean isComplete,
+            @RequestParam(value = "searchKey", required = false) String searchKey,
             @RequestHeader(value = "X-UserRole", required = true) String role,
             @ParameterObject Pageable pageable
     ) {
@@ -76,11 +77,54 @@ public class AdminProblemController {
         return ApiResponse.<Page<ProblemCreationResponse>>builder()
                 .message("Get problems list success")
                 .result(problemService.getCompleteCreationProblem(
-                            isComplete, pageable
+                            isComplete, searchKey ,pageable
                         )
                 )
                 .build();
     }
+
+    @Operation(
+            summary = "Delete problems"
+    )
+    @DeleteMapping("/{problemId}")
+    public ApiResponse<String> deleteProblem(
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @PathVariable(value = "problemId", required = true) String problemId
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<String>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        problemService.deleteProblem(UUID.fromString(problemId));
+
+        return ApiResponse.<String>builder()
+                .message("Delete success")
+                .result("").build();
+    }
+
+    @Operation(
+            summary = "Delete testcase"
+    )
+    @DeleteMapping("/testcase/{testcaseId}")
+    public ApiResponse<String> deleteTestcase(
+            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @PathVariable(value = "testcaseId", required = true) String testcaseId
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<String>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+        testCaseService.deleteTestCaseById(UUID.fromString(testcaseId));
+
+        return ApiResponse.<String>builder()
+                .message("Delete success")
+                .result("").build();
+    }
+
 
     @Operation(
             summary = "Get private problems list"
@@ -113,7 +157,12 @@ public class AdminProblemController {
     @PostMapping("/general-step")
     public ApiResponse<ProblemCreationResponse> createProblemGeneralStep(
             @RequestHeader("X-UserRole") String role,
+            @RequestHeader("X-UserId") String userUid,
             @RequestBody ProblemCreationRequest problem) {
+
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
+
         if (!isAdmin(role)) {
             return ApiResponse.<ProblemCreationResponse>builder()
                     .result(null)
@@ -121,7 +170,7 @@ public class AdminProblemController {
                     .message("Forbidden").build();
         }
         return ApiResponse.<ProblemCreationResponse>builder()
-                .result(problemService.generalStep(problem))
+                .result(problemService.generalStep(problem, userId))
                 .code(200)
                 .message("Created")
                 .build();
@@ -166,6 +215,9 @@ public class AdminProblemController {
     @Operation(summary = "Create test case")
     @PostMapping("/testcase-step")
     public ApiResponse<TestCaseCreationResponse> createTestCaseStep(
+            @RequestParam Boolean isUpdate,
+            @RequestParam(required = false) Boolean isCreate,
+            @RequestParam(required = false) String testCaseId,
             @RequestBody TestCaseCreationRequest request,
             @RequestHeader("X-UserRole") String role) {
         if (!isAdmin(role)) {
@@ -174,12 +226,20 @@ public class AdminProblemController {
                     .code(403)
                     .message("Forbidden").build();
         }
-        TestCaseCreationResponse response = testCaseService.createTestCase(
-                request);
+        if (!isUpdate) {
+            TestCaseCreationResponse response = testCaseService.createTestCase(isCreate,
+                    request);
+            return ApiResponse.<TestCaseCreationResponse>builder()
+                    .result(response)
+                    .code(200)
+                    .message("Created")
+                    .build();
+        }
+        TestCaseCreationResponse response = testCaseService.updateTestCase(UUID.fromString(testCaseId), request);
         return ApiResponse.<TestCaseCreationResponse>builder()
                 .result(response)
                 .code(200)
-                .message("Created")
+                .message("Updated")
                 .build();
     }
 
@@ -209,6 +269,7 @@ public class AdminProblemController {
     )
     @PostMapping("/solution-step")
     public ApiResponse<SolutionCreationResponse> createSolutionStep(
+            @RequestParam Boolean isUpdate,
             @RequestHeader("X-UserRole") String role,
             @RequestBody  SolutionCreationRequest request) {
         if (!isAdmin(role)) {
@@ -217,10 +278,16 @@ public class AdminProblemController {
                     .code(403)
                     .message("Forbidden").build();
         }
-
+        if (!isUpdate) {
+            return ApiResponse.<SolutionCreationResponse>builder()
+                    .result(solutionService.createSolution(request))
+                    .message("Solution created successfully")
+                    .code(201)
+                    .build();
+        }
         return ApiResponse.<SolutionCreationResponse>builder()
-                .result(solutionService.createSolution(request))
-                .message("Solution created successfully")
+                .result(solutionService.updateSolution(request))
+                .message("Solution updated successfully")
                 .code(201)
                 .build();
     }
@@ -236,7 +303,7 @@ public class AdminProblemController {
             summary = "Update available status of a problem"
     )
     @PutMapping("/update-available-status/{problemId}")
-    public ApiResponse<ProblemCreationResponse> updateAvailableStatusOfCourse(
+    public ApiResponse<ProblemCreationResponse> updateAvailableStatusOfProblem(
             @RequestParam(value = "availableStatus", required = true) Boolean availableStatus,
             @PathVariable("problemId") UUID problemId,
             @RequestHeader(value = "X-UserRole", required = true) String role
@@ -250,8 +317,33 @@ public class AdminProblemController {
 
         return ApiResponse.<ProblemCreationResponse>builder()
                 .message("Update course successfully")
-                .result(problemService.updateCourseAvailableStatus(
+                .result(problemService.updateProblemAvailableStatus(
                                 availableStatus, problemId
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
+            summary = "Update available status of a problem"
+    )
+    @PutMapping("/update-publish-status/{problemId}")
+    public ApiResponse<ProblemCreationResponse> updatePublishStatusOfProblem(
+            @RequestParam(value = "publishStatus", required = true) Boolean publishStatus,
+            @PathVariable("problemId") UUID problemId,
+            @RequestHeader(value = "X-UserRole", required = true) String role
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<ProblemCreationResponse>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+
+        return ApiResponse.<ProblemCreationResponse>builder()
+                .message("Update course successfully")
+                .result(problemService.updateProblemPublishStatus(
+                        publishStatus, problemId
                         )
                 )
                 .build();
@@ -275,7 +367,7 @@ public class AdminProblemController {
         }
         return ApiResponse.<ProblemCreationResponse>builder()
                 .message("Update course successfully")
-                .result(problemService.updateCourseCompletedCreationStatus(
+                .result(problemService.updateProblemCompletedCreationStatus(
                                 completedCreation, problemId
                         )
                 )

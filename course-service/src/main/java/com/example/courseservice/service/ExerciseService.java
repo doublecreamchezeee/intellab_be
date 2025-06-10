@@ -3,8 +3,6 @@ package com.example.courseservice.service;
 import com.example.courseservice.dto.request.Option.OptionRequest;
 import com.example.courseservice.dto.request.Question.QuestionUpdateRequest;
 import com.example.courseservice.dto.request.exercise.ModifyQuizRequest;
-import com.example.courseservice.dto.response.exercise.AddQuestionToExerciseResponse;
-import com.example.courseservice.dto.response.exercise.ExerciseDetailResponse;
 import com.example.courseservice.dto.response.exercise.ExerciseResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +49,12 @@ public class ExerciseService {
             System.out.println("exercise is null");
             return new ExerciseResponse();
         }
+        // sort questions by order
+        List<Question> sortedQuestions = exercise.getQuestionList().stream()
+                .sorted(Comparator.comparingInt(Question::getQuestionOrder))
+                .toList();
+
+        exercise.setQuestionList(sortedQuestions);
 
         return exerciseMapper.toExerciseResponse(exercise);
 
@@ -84,11 +87,24 @@ public class ExerciseService {
         Lesson lesson = lessonRepository.findById(request.getLessonId())
                 .orElseThrow(() -> new AppException(ErrorCode.LESSON_NOT_FOUND));
 
-        // xóa exercise nếu
+        if (!request.getIsQuizVisible()) {
+            lesson.setIsQuizVisible(false);
+            lessonRepository.save(lesson);
+
+            Exercise e = lesson.getExercise();
+            if (e != null) {
+                return exerciseMapper.toExerciseResponse(e);
+            }
+            return new ExerciseResponse();
+        }
+
+        // exercise nếu rỗng hoặc null
         if(request.getQuestions() == null || request.getQuestions().isEmpty()) {
-            Exercise exercise = lesson.getExercise();
-            if (exercise != null) {
-                exerciseRepository.delete(exercise);
+            lesson.setIsQuizVisible(request.getIsQuizVisible());
+            lessonRepository.save(lesson);
+            Exercise e = lesson.getExercise();
+            if (e != null) {
+                return exerciseMapper.toExerciseResponse(e);
             }
             return new ExerciseResponse();
         }
@@ -100,6 +116,7 @@ public class ExerciseService {
         }
         exercise.setQuestionsPerExercise(request.getQuestionsPerExercise());
         exercise.setPassingQuestions(request.getPassingQuestions());
+
         List<Question> questions = exercise.getQuestionList();
 
         exercise = exerciseRepository.save(exercise);
@@ -110,6 +127,8 @@ public class ExerciseService {
         }
 
         List<UUID> questionIds = new ArrayList<>();
+
+        int order = 1;
         for (QuestionUpdateRequest q : request.getQuestions()) {
             Question question = null;
             if (q.getQuestionId() != null) {
@@ -122,6 +141,7 @@ public class ExerciseService {
                 question.setQuestionContent(q.getQuestionContent());
                 question.setQuestionType(q.getQuestionType());
                 question.setCorrectAnswer(q.getCorrectAnswer());
+                question.setQuestionOrder(order++);
 
                 // lưu question để lấy id cho option
                 question = questionRepository.save(question);
@@ -150,20 +170,31 @@ public class ExerciseService {
                 question.setQuestionContent(q.getQuestionContent());
                 question.setQuestionType(q.getQuestionType());
                 question.setCorrectAnswer(q.getCorrectAnswer());
+                question.setQuestionOrder(order++);
 
                 List<Option> options = question.getOptions();
-                optionRepository.deleteAll(options);
 
-                options = new ArrayList<>();
                 for (OptionRequest optionRequest : q.getOptionRequests()) {
-                    Option option = new Option();
-                    option.setOptionId(OptionID.builder()
-                            .questionId(question.getQuestionId())
-                            .optionOrder(optionRequest.getOrder())
-                            .build());
-                    option.setQuestion(question);
-                    option.setContent(optionRequest.getContent());
-                    options.add(option);
+                    Option option = options.stream()
+                            .filter(o -> o.getOptionId().getOptionOrder().equals(optionRequest.getOrder()))
+                            .findFirst()
+                            .orElse(null);
+                    if (option == null) {
+                        option = new Option();
+                        option.setOptionId(OptionID.builder()
+                                .questionId(question.getQuestionId())
+                                .optionOrder(optionRequest.getOrder())
+                                .build());
+                        option.setQuestion(question);
+                        option.setContent(optionRequest.getContent());
+                        options.add(option);
+                    }
+                    else {
+                        option.setContent(optionRequest.getContent());
+                        option.setQuestion(question);
+                        option.setContent(optionRequest.getContent());
+
+                    }
                 }
                 question.setOptions(options);
 //                question = questionRepository.save(question);
@@ -176,6 +207,9 @@ public class ExerciseService {
             }
         }
         exercise = exerciseRepository.save(exercise);
+
+        lesson.setIsQuizVisible(request.getIsQuizVisible());
+        lessonRepository.save(lesson);
 
         System.out.println(exercise.getExerciseId());
         System.out.println(questionIds);

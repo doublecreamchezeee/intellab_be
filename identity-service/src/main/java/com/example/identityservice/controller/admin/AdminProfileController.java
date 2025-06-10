@@ -16,10 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,13 +28,24 @@ public class AdminProfileController {
     ProfileService profileService;
 
     @Operation(
-            summary = "Get list user information"
+            summary = "Get or search list user's information",
+            description = """
+                    Keyword is optional. If keyword is not null, it will search for users by display name.
+                    If keyword is null, it will return all users.
+                    """
     )
     @PublicEndpoint
     @GetMapping(value = "/list-users")
     public ApiResponse<Page<AdminUserResponse>> getListUsers(
+            @RequestParam(value = "keyword", required = false) String keyword,
             @ParameterObject Pageable pageable
     ) {
+        if (keyword != null) {
+            return ApiResponse.<Page<AdminUserResponse>>builder()
+                    .message("Search list user information successfully")
+                    .result(profileService.adminFindUsersByDisplayName(keyword, pageable))
+                    .build();
+        }
         return ApiResponse.<Page<AdminUserResponse>>builder()
                 .message("Get list user information successfully")
                 .result(profileService.adminGetListUsers(pageable))

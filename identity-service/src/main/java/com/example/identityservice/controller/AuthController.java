@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -84,6 +85,17 @@ public class AuthController {
     public ResponseEntity<FirebaseGoogleSignInResponse> loginWithGoogle(@RequestBody final Map<String, String> body) throws FirebaseAuthException {
         String idToken = body.get("idToken");
         FirebaseGoogleSignInResponse response = authService.loginWithGoogle(idToken);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Sign up with Google"
+    )
+    @PublicEndpoint
+    @PostMapping(value = "/signup/google")
+    public ResponseEntity<FirebaseGoogleSignUpResponse> signUpWithGoogle(@RequestBody final Map<String, String> body) throws FirebaseAuthException {
+        String idToken = body.get("idToken");
+        FirebaseGoogleSignUpResponse response = authService.signUpWithGoogle(idToken);
         return ResponseEntity.ok(response);
     }
 

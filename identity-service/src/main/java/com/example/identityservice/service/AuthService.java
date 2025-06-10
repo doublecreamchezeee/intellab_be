@@ -99,13 +99,78 @@ public class AuthService {
             response.setUserRole(role);
 
             return response;
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (AppException e) {
             log.error(e.getMessage());
             throw new AppException(ErrorCode.ERROR_WHEN_LOGIN);
         }
     }
 
+    public FirebaseGoogleSignUpResponse signUpWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
+
+        FirebaseToken decodeToken = firebaseAuth.verifyIdToken(idToken);
+
+        if (decodeToken == null || decodeToken.getUid() == null) {
+            throw new AppException(ErrorCode.ERROR_WHEN_SIGNUP_WITH_GOOGLE);
+
+            /*return FirebaseGoogleSignUpResponse.builder()
+                    .uid(null)
+                    .email(null)
+                    .isSignUpSuccessful(false)
+                    .message("Invalid ID token.")
+                    .build();*/
+        }
+
+        try {
+            User user = firestoreService.getUserByUid(decodeToken.getUid());
+
+            if (user == null || user.getFirstName() == null || user.getLastName() == null) {
+                firestoreService.createUserByUid(decodeToken.getUid(), "User");
+            }
+
+            return FirebaseGoogleSignUpResponse.builder()
+                    .uid(decodeToken.getUid())
+                    .email(decodeToken.getEmail())
+                    .isSignUpSuccessful(true)
+                    .message("User sign up successfully.")
+                    .build();
+
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("Error finding user by uid: {}", e.getMessage(), e);
+        }
+
+        return FirebaseGoogleSignUpResponse.builder()
+                .uid(decodeToken.getUid())
+                .email(decodeToken.getEmail())
+                .isSignUpSuccessful(true)
+                .message("User sign up successfully! However, there was a minor error creating user information in firestore.")
+                .build();
+
+    }
+
+    /**
+     * Login with Google using Firebase Authentication.
+     *
+     * @param idToken The ID token from Google Sign-In.
+     * @return A response containing user information and login status.
+     * @throws FirebaseAuthException If there is an error during Firebase authentication.
+     */
+
     public FirebaseGoogleSignInResponse loginWithGoogle(@NonNull final String idToken) throws FirebaseAuthException {
+        /*FirebaseToken decodeToken = firebaseAuth.verifyIdToken(idToken);
+        boolean isUseExisted = firebaseAuthClient.checkIfUserExistsByEmail(decodeToken.getEmail());
+        log.info("User with email {} exists: {}", decodeToken.getEmail(), isUseExisted);
+        log.info("User with uid {} exists: {}", decodeToken.getUid(), isUseExisted);
+
+        if (!isUseExisted) {
+            throw new AppException(ErrorCode.USER_WITH_EMAIL_NOT_EXISTED);
+            *//*return FirebaseGoogleSignInResponse.builder()
+                    .uid(null)
+                    .email(null)
+                    .isLoginSuccessful(false)
+                    .message("User with this email does not exist. Please register first.")
+                    .build();*//*
+        }*/
+
         ValidatedTokenResponse firebaseToken = firebaseAuthClient.verifyToken(idToken);
 
         try {
@@ -117,11 +182,13 @@ public class AuthService {
                 return FirebaseGoogleSignInResponse.builder()
                         .uid(firebaseToken.getUserId())
                         .email(firebaseToken.getEmail())
+                        .isLoginSuccessful(true)
+                        .message("User logins successfully.")
                         .build();
             }
 
         } catch (ExecutionException | InterruptedException e) {
-            log.error("Error finding user by uid: {}", e.getMessage(), e);
+            log.error("Error finding user by uid (ExecutionException): {}", e.getMessage(), e);
 
         } catch (Exception e) {
             log.error("Error finding user by uid: {}", e.getMessage(), e);
@@ -130,6 +197,8 @@ public class AuthService {
         return FirebaseGoogleSignInResponse.builder()
                 .uid(firebaseToken.getUserId())
                 .email(firebaseToken.getEmail())
+                .isLoginSuccessful(true)
+                .message("User logins successfully.")
                 .build();
     }
 

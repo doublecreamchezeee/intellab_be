@@ -15,6 +15,7 @@ import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.repository.TestCaseRepository;
 import com.example.problemservice.utils.TestCaseFileReader;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,7 @@ public class TestCaseService {
     private final ProblemRepository problemRepository;
     private final TestCaseMapper testCaseMapper;
     
-    public TestCaseCreationResponse createTestCase(TestCaseCreationRequest request) {
+    public TestCaseCreationResponse createTestCase(Boolean isCreate, TestCaseCreationRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId()).orElseThrow(
                 () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
@@ -38,6 +39,7 @@ public class TestCaseService {
                 .problem(problem)
                 .input(request.getInput())
                 .output(request.getOutput())
+                .order(request.getOrder())
                 .build();
 
         if (problem.getTestCases() != null){
@@ -51,7 +53,10 @@ public class TestCaseService {
             problem.setTestCases(newListTestCase);
         }
 
-        problem.setCurrentCreationStep(4);
+        if (isCreate || problem.getCurrentCreationStep() <= 4){
+            problem.setCurrentCreationStep(4);
+            problem.setCurrentCreationStepDescription("Testcase Step");
+        }
         problemRepository.save(problem);
 
         testCase = testCaseRepository.save(testCase);
@@ -62,6 +67,68 @@ public class TestCaseService {
                 testCase.getOutput()
         );
         return testCaseMapper.toTestCaseResponse(testCase);
+    }
+
+    public TestCaseCreationResponse updateTestCase(UUID testCaseId, TestCaseCreationRequest request) {
+        TestCase testCase = testCaseRepository.findById(testCaseId).orElseThrow(
+                () -> new AppException(ErrorCode.TESTCASE_NOT_EXIST));
+
+        Problem problem = testCase.getProblem();
+
+        if (problem == null) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
+        }
+
+        if (!problem.getIsCompletedCreation() && problem.getCurrentCreationStep() <= 4){
+            problem.setCurrentCreationStep(4);
+            problem.setCurrentCreationStepDescription("Testcase Step");
+        }
+        problemRepository.save(problem);
+
+        // Update fields
+        testCase.setInput(request.getInput());
+        testCase.setOutput(request.getOutput());
+        testCase.setOrder(request.getOrder());
+
+        // Save updated test case
+        testCase = testCaseRepository.save(testCase);
+
+        // Re-write updated testcase to file (overwrite)
+        TestCaseFileReader.saveOneTestCase(
+                problem.getProblemName(),
+                testCase.getInput(),
+                testCase.getOutput()
+        );
+
+        return testCaseMapper.toTestCaseResponse(testCase);
+    }
+
+    @Transactional
+    public void deleteTestCaseById(UUID testCaseId) {
+        // Find test case
+        TestCase testCase = testCaseRepository.findById(testCaseId).orElseThrow(
+                () -> new AppException(ErrorCode.TESTCASE_NOT_EXIST)
+        );
+
+        // Get associated problem
+        Problem problem = testCase.getProblem();
+        if (problem == null) {
+            throw new AppException(ErrorCode.PROBLEM_NOT_EXIST);
+        }
+
+        // Remove test case from problem's test case list
+        if (problem.getTestCases() != null) {
+            problem.getTestCases().removeIf(tc -> tc.getTestcaseId().equals(testCaseId));
+        }
+
+        // Persist changes to problem (if needed)
+        problemRepository.save(problem);
+
+        // Delete testcase
+        testCaseRepository.deleteById(testCaseId);
+
+        // Optionally: delete saved file if stored
+        TestCaseFileReader.deleteOneTestCaseFile(problem.getProblemName(), testCase.getOrder());
     }
 
     public TestCase getTestCase(UUID testCaseId) {

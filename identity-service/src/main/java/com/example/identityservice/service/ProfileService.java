@@ -26,6 +26,7 @@ import com.google.firebase.auth.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -170,6 +171,10 @@ public class ProfileService {
     public Page<AdminUserResponse> adminGetListUsers(Pageable pageable) {
         Page<AdminUserResponse> responses = firebaseAuthClient.getAllUsers(pageable.getPageSize(), pageable.getPageNumber());
 
+        return mappingAdminUserResponseWithFirestoreData(responses);
+    }
+
+    private @NotNull Page<AdminUserResponse> mappingAdminUserResponseWithFirestoreData(Page<AdminUserResponse> responses) {
         return responses.map(
                 user -> {
                     try {
@@ -186,11 +191,11 @@ public class ProfileService {
                         user.setRole(userFirestore.getRole());
 
                         // Get user premium package information from database
-                        if (user.getRole()!=null && user.getRole().equals("user")) {
+                        if (user.getRole() != null && user.getRole().equals("user")) {
                             VNPayPaymentPremiumPackage pre = vnPayPaymentPremiumPackageRepository.findFirstByUserUidAndStatusOrderByEndDateDesc(
-                                            user.getUserUid(),
-                                            PremiumPackageStatus.ACTIVE.getCode()
-                                    ).orElse(null);
+                                    user.getUserUid(),
+                                    PremiumPackageStatus.ACTIVE.getCode()
+                            ).orElse(null);
 
                             String premium = null;
 
@@ -222,5 +227,12 @@ public class ProfileService {
                     }
                 }
         );
+    }
+
+    public Page<AdminUserResponse> adminFindUsersByDisplayName(
+            String keyword, Pageable pageable
+    ) {
+        Page<AdminUserResponse> responses = firebaseAuthClient.getAllUsersByDisplayName(keyword, pageable.getPageSize(), pageable.getPageNumber());
+        return mappingAdminUserResponseWithFirestoreData(responses);
     }
 }

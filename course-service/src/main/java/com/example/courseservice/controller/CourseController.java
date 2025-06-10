@@ -1,5 +1,6 @@
 package com.example.courseservice.controller;
 
+import com.example.courseservice.client.AiServiceClient;
 import com.example.courseservice.dto.ApiResponse;
 import com.example.courseservice.dto.request.comment.CommentCreationRequest;
 import com.example.courseservice.dto.request.comment.CommentModifyRequest;
@@ -17,10 +18,8 @@ import com.example.courseservice.dto.response.rerview.DetailsReviewResponse;
 import com.example.courseservice.dto.response.userCourses.CertificateCreationResponse;
 import com.example.courseservice.dto.response.userCourses.CompleteCourseResponse;
 import com.example.courseservice.dto.response.userCourses.EnrolledCourseResponse;
-import com.example.courseservice.dto.response.userCourses.UserCoursesResponse;
 import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
-import com.example.courseservice.model.Comment;
 import com.example.courseservice.model.Course;
 import com.example.courseservice.model.UserCourses;
 import com.example.courseservice.service.CommentService;
@@ -39,7 +38,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +47,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -72,10 +69,15 @@ public class CourseController {
     LessonService lessonService;
     ReviewService reviewService;
     private final CommentService commentService;
+    AiServiceClient aiServiceClient;
+
     final String defaultRole = "myRole";
     private Boolean isAdmin(String role)
     {
         return role.contains("admin");
+    }
+    private Boolean isDefaultUserId(String userUid) {
+        return userUid.equals("myUserId");
     }
 
     @Operation(
@@ -507,21 +509,22 @@ public class CourseController {
             summary = "Get all courses that a user has enrolled"
     )
     @GetMapping("/me/enrolledCourses")
-    public ApiResponse<Page<UserCourses>> getEnrolledCoursesOfUser(
+    public ApiResponse<Page<DetailCourseResponse>> getEnrolledCoursesOfUser(
             //@PathVariable("userUid") String userUid,
             @RequestHeader("X-UserId") String userUid,
             @RequestHeader("X-UserRole") String role,
             @ParameterObject Pageable pageable) {
         if(isAdmin(role)) {
-            return ApiResponse.<Page<UserCourses>>builder()
+            return ApiResponse.<Page<DetailCourseResponse>>builder()
                     .result(null)
                     .message("Forbidden: this is admin account")
-                    .code(201)
+                    .code(403)
                     .build();
         }
         userUid = userUid.split(",")[0];
         log.info("UserUid: " + ParseUUID.normalizeUID(userUid));
-        return ApiResponse.<Page<UserCourses>>builder()
+
+        return ApiResponse.<Page<DetailCourseResponse>>builder()
                 .result(courseService.getEnrolledCoursesOfUser(
                             ParseUUID.normalizeUID(userUid),
                             pageable
@@ -592,7 +595,7 @@ public class CourseController {
                 .result(result).build();
     }
     @Operation(
-            summary = "get ctificate template",
+            summary = "get certificate template",
             hidden = true
     )
     @GetMapping("/certificate/template/{templateId}")
@@ -993,5 +996,60 @@ public class CourseController {
                 .build();
     }
 
+    @Operation(
+            summary = "Get list featured courses, exclude courses that user has enrolled"
+    )
+    @GetMapping("/featured-courses")
+    public ApiResponse<List<CourseSearchResponse>> getFeaturedCourses(
+            @RequestHeader(required = false, name = "X-UserId") String userUid,
+            @RequestParam(required = false) Integer limit
+    ) {
+        UUID userUUID = null;
+
+        if (userUid != null && !isDefaultUserId(userUid)) {
+            log.info("userUid in getFeaturedCourses: " + userUid);
+            userUid = userUid.split(",")[0];
+            userUUID = ParseUUID.normalizeUID(userUid);
+        }
+
+        return ApiResponse.<List<CourseSearchResponse>>builder()
+                .message("Get all featured courses successfully!")
+                .result(courseService.getTopPaidCoursesByNumberOfEnrolledStudents(userUUID, limit))
+                .build();
+    }
+
+
+
+    @Operation(
+            summary = "Get all free courses, exclude courses that user has enrolled"
+    )
+    @GetMapping("/free-courses")
+    public ApiResponse<Page<CourseSearchResponse>> getFreeCourses(
+            @RequestHeader(required = false, name = "X-UserId") String userUid,
+            @ParameterObject Pageable pageable
+    ) {
+        UUID userUUID = null;
+
+        if (userUid != null && !isDefaultUserId(userUid)) {
+            log.info("userUid in getFreeCourses: " + userUid);
+            userUid = userUid.split(",")[0];
+            userUUID = ParseUUID.normalizeUID(userUid);
+        }
+
+        return ApiResponse.<Page<CourseSearchResponse>>builder()
+                .message("Get all free courses successfully!")
+                .result(courseService.getFreeCourses(userUUID, pageable))
+                .build();
+    }
+
+    @Operation(
+            summary = "Check health of ai service"
+    )
+    @GetMapping("/ai-service/health")
+    public ApiResponse<Object> checkAiServiceHealth() {
+        return ApiResponse.<Object>builder()
+                .result(aiServiceClient.getAiServiceInfo().block())
+                .build();
+    }
 
 }

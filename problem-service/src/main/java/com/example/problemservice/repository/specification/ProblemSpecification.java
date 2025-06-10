@@ -38,6 +38,24 @@ public class ProblemSpecification {
                                 "%" + title.toLowerCase() + "%");
     }
 
+    public static Specification<Problem> isPublicFilter(Boolean isPublic) {
+        return (root, query, criteriaBuilder) -> {
+            if (isPublic == null) {
+                return null;
+            }
+            return criteriaBuilder.equal(root.get("isPublished"), isPublic);
+        };
+    }
+
+    public static Specification<Problem> isCompletedCreationFilter(Boolean isComplete) {
+        return (root, query, criteriaBuilder) -> {
+            if (isComplete == null) {
+                return null;
+            }
+            return criteriaBuilder.equal(root.get("isCompletedCreation"), isComplete);
+        };
+    }
+
     public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
         return (root, query, criteriaBuilder) ->{
             if(status == null) {
@@ -65,6 +83,37 @@ public class ProblemSpecification {
 
                 return criteriaBuilder.or(noSubmissions, notCorrect);
             }
+        };
+    }
+
+    public static Specification<Problem> problemStructureNotNullSpecification(Boolean problemStructureNotNull) {
+        return (root, query, criteriaBuilder) -> {
+            if (problemStructureNotNull == null) {
+                return criteriaBuilder.conjunction();
+            }
+            if (problemStructureNotNull) {
+                return criteriaBuilder.isNotNull(root.get("problemStructure"));
+            } else {
+                return criteriaBuilder.isNull(root.get("problemStructure"));
+            }
+        };
+    }
+
+    public static Specification<Problem> currentCreationStepGreaterThanOrEqualTo(Integer currentCreationStep) {
+        return (root, query, criteriaBuilder) -> {
+            if (currentCreationStep == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.greaterThanOrEqualTo(root.get("currentCreationStep"), currentCreationStep);
+        };
+    }
+
+    public static Specification<Problem> isCompletedCreationEqualTo(Boolean isCompletedCreation) {
+        return (root, query, criteriaBuilder) -> {
+            if (isCompletedCreation == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("isCompletedCreation"), isCompletedCreation);
         };
     }
 }

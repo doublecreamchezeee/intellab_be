@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,27 +71,33 @@ public class Problem {
     Solution solution;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, orphanRemoval = true)
     List<ProblemCategory> categories;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Hint> hints;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<DefaultCode> defaultCodes;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<ProblemComment> comments;
 
     @Column(name = "current_creation_step", columnDefinition = "integer default 1") // start at 1, only increase
     Integer currentCreationStep;
+
+    @Column(name = "current_creation_step_description")
+    String currentCreationStepDescription;
 
     @Column(name = "is_completed_creation", columnDefinition = "boolean default false")
     Boolean isCompletedCreation;
 
     @Column(name = "author_id")
     UUID authorId;
+
+    @Column(name = "created_at")
+    Date createdAt;
 }

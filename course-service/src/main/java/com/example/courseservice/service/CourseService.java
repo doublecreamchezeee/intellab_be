@@ -1,6 +1,7 @@
 package com.example.courseservice.service;
 
 import com.example.courseservice.annotation.ExecutionTiming;
+import com.example.courseservice.client.AiServiceClient;
 import com.example.courseservice.client.IdentityClient;
 import com.example.courseservice.constant.PredefinedLearningStatus;
 import com.example.courseservice.constant.PredefinedRole;
@@ -41,9 +42,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -75,6 +77,7 @@ public class CourseService {
     CloudinaryService cloudinaryService;
     TopicRepository topicRepository;
     CourseSummaryRepository courseSummaryRepository;
+    AiServiceClient aiServiceClient;
 
     public Page<CourseCreationResponse> getAllCourses(
             Boolean isAvailable, Boolean isCompletedCreation,
@@ -194,7 +197,7 @@ public class CourseService {
         );
     }
 
-    public List<Object[]> getCompletionRate(String type, LocalDate startDate, LocalDate endDate){
+    public List<Object[]> getCompletionRate(String type, LocalDate startDate, LocalDate endDate) {
         String unit = switch (type) {
             case "hourly" -> "hour";
             case "daily" -> "day";
@@ -259,6 +262,11 @@ public class CourseService {
 
         try {
             courseRepository.delete(course);
+            //deleteCourseVectorEmbedding(courseId);
+            aiServiceClient.deleteCourseEmbeddingData(courseId)
+                    .doOnSuccess(response -> log.info("Successfully deleted embedding data for course {}", courseId))
+                    .doOnError(error -> log.error("Error deleting embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -291,8 +299,7 @@ public class CourseService {
     public CourseCreationResponse updateCourse(UUID courseId, CourseUpdateRequest request, String userUid) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
-        if (course.getUserId().equals(ParseUUID.normalizeUID(userUid)))
-        {
+        if (course.getUserId().equals(ParseUUID.normalizeUID(userUid))) {
             throw new AppException(ErrorCode.INVALID_USER);
         }
 
@@ -307,31 +314,6 @@ public class CourseService {
     }
 
     public Page<CourseSearchResponse> searchCoursesWithFilter(UUID userUid,
-                                                                String keyword,
-                                                                Float rating,
-                                                                List<String> levels,
-                                                                Boolean price,
-                                                                List<Integer> categories,
-                                                                Boolean isAvailable,
-                                                                Boolean isCompletedCreation,
-                                                                Pageable pageable) {
-        Specification<Course> specification = Specification.where(
-                (CourseSpecification.nameSpecification(keyword).or(CourseSpecification.descriptionSpecification(keyword))
-                        .and(CourseSpecification.ratingSpecification(rating))
-                        .and(CourseSpecification.levelsSpecification(levels))
-                        .and(CourseSpecification.priceSpecification(price))
-                        .and(CourseSpecification.categoriesSpecification(categories)
-                        .and(CourseSpecification.isAvailableSpecification(isAvailable))
-                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
-                    )
-                ));
-
-        Page<Course> result = courseRepository.findAll(specification, pageable);
-
-        return getCourseSearchResponses(userUid, result);
-    }
-
-    public Page<AdminCourseSearchResponse> searchCoursesOfAdminWithFilter(UUID userUid,
                                                               String keyword,
                                                               Float rating,
                                                               List<String> levels,
@@ -346,10 +328,35 @@ public class CourseService {
                         .and(CourseSpecification.levelsSpecification(levels))
                         .and(CourseSpecification.priceSpecification(price))
                         .and(CourseSpecification.categoriesSpecification(categories)
-                        .and(CourseSpecification.isAvailableSpecification(isAvailable))
-                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
-                        .and(CourseSpecification.userIdSpecification(userUid))
-                    )
+                                .and(CourseSpecification.isAvailableSpecification(isAvailable))
+                                .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                        )
+                ));
+
+        Page<Course> result = courseRepository.findAll(specification, pageable);
+
+        return getCourseSearchResponses(userUid, result);
+    }
+
+    public Page<AdminCourseSearchResponse> searchCoursesOfAdminWithFilter(UUID userUid,
+                                                                          String keyword,
+                                                                          Float rating,
+                                                                          List<String> levels,
+                                                                          Boolean price,
+                                                                          List<Integer> categories,
+                                                                          Boolean isAvailable,
+                                                                          Boolean isCompletedCreation,
+                                                                          Pageable pageable) {
+        Specification<Course> specification = Specification.where(
+                (CourseSpecification.nameSpecification(keyword).or(CourseSpecification.descriptionSpecification(keyword))
+                        .and(CourseSpecification.ratingSpecification(rating))
+                        .and(CourseSpecification.levelsSpecification(levels))
+                        .and(CourseSpecification.priceSpecification(price))
+                        .and(CourseSpecification.categoriesSpecification(categories)
+                                .and(CourseSpecification.isAvailableSpecification(isAvailable))
+                                .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                                .and(CourseSpecification.userIdSpecification(userUid))
+                        )
                 ));
 
         Page<Course> result = courseRepository.findAll(specification, pageable);
@@ -402,8 +409,8 @@ public class CourseService {
                 UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId())
                         .orElse(null);
 
-                certificateId = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateId().toString() : null;
-                certificateUrl = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateUrl() : null;
+                certificateId = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+                certificateUrl = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateUrl() : null;
             }
 
             response.setCertificateUrl(certificateUrl);
@@ -442,7 +449,7 @@ public class CourseService {
                         .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
         );
 
-        Page<Course>  courses = courseRepository.findAll(specification, pageable);
+        Page<Course> courses = courseRepository.findAll(specification, pageable);
 
         //Page<Course>  courses = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
 
@@ -462,7 +469,7 @@ public class CourseService {
                         .and(CourseSpecification.userIdSpecification(userUid))
         );
 
-        Page<Course>  courses = courseRepository.findAll(specification, pageable);
+        Page<Course> courses = courseRepository.findAll(specification, pageable);
 
         //Page<Course>  courses = courseRepository.findAllByCourseNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
 
@@ -482,6 +489,18 @@ public class CourseService {
         });
 
         //return getCourseSearchResponsesOfAdmin(courses);
+    }
+
+    private String mapCertificateTemplateEnums(Integer templateId) {
+        if (templateId == null) {
+            return null;
+        }
+
+        return switch (templateId) {
+            case 1 -> CertificateTemplate1.linkExample;
+            case 2 -> CertificateTemplate2.linkExample;
+            default -> null;
+        };
     }
 
 
@@ -556,8 +575,8 @@ public class CourseService {
             UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
                     .orElse(null);
 
-            certificateId = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateId().toString() : null;
-            certificateUrl = (userCourse != null && userCourse.getCertificate()!=null) ? userCourse.getCertificate().getCertificateUrl() : null;
+            certificateId = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+            certificateUrl = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateUrl() : null;
         }
 
         // Map course details to the response DTO
@@ -578,6 +597,127 @@ public class CourseService {
                 .certificateUrl(certificateUrl)
                 .certificateId(certificateId)
                 .courseImage(course.getCourseImage())
+                .templateCode(course.getTemplateCode())
+                .createdAt(course.getCreatedAt())
+                .numberOfEnrolledStudents(course.getEnrollCourses() != null ? course.getEnrollCourses().size() : 0)
+                .aiSummaryContent(course.getCourseSummary() != null && course.getCourseSummary().getSummaryContent() != null ? course.getCourseSummary().getSummaryContent() : null)
+                .templateLink(course.getTemplateCode() != null ? mapCertificateTemplateEnums(course.getTemplateCode()) : null)
+                .categories(course.getCategories() != null ? course.getCategories().stream()
+                        .map(categoryMapper::categoryToCategoryResponse)
+                        .collect(Collectors.toList()) : new ArrayList<>())
+                .build();
+    }
+
+    public DetailCourseResponse getDetailsCourseById(UUID courseId, UUID userUid) {
+        // Fetch the course by ID or throw an exception if it doesn't exist
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+
+        // Count the number of lessons in the course
+        //int lessonCount = lessonRepository.countByCourse_CourseId(courseId);
+        int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+
+        // Calculate the average rating for the course
+        /*double averageRating = course.getReviews().stream()
+                .mapToDouble(review -> Optional.of(review.getRating()).orElse(0))
+                .average()
+                .orElse(0.0);*/
+
+        // Count the number of reviews for the course
+        //int reviewCount = course.getReviews().size();
+
+        // Check if the user is enrolled in the course
+        boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
+                userUid, courseId, UserCourseAccessStatus.ACCESSIBLE.getCode()
+        );
+
+        // Get the latest lesson ID for the user (if enrolled)
+        UUID latestLessonId = null;
+        if (isUserEnrolled) {
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+                    .orElse(null);
+            latestLessonId = (userCourse != null) ? userCourse.getLatestLessonId() : null;
+        }
+
+        // Calculate the completion ratio for the user
+        float completionRatio = 0.0f;
+        if (isUserEnrolled) {
+
+            /*Specification<Lesson> hasExerciseSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasExerciseId()
+            );*/
+
+            Specification<Lesson> hasProblemSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(courseId)
+            ).and(
+                    LessonSpecification.hasProblemId()
+            );
+
+            int totalLessonsHasExercise = lessonRepository.countByCourse_CourseId(courseId);
+            int totalLessonsHasProblem = (int) lessonRepository.count(hasProblemSpecification);
+
+            log.info("Total lessons has exercise: {}", totalLessonsHasExercise);
+            log.info("Total lessons has problem: {}", totalLessonsHasProblem);
+
+            int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUid, courseId, true);
+            int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUid, courseId, true);
+            completedLessons += completedPractices;
+
+            log.info("Completed lessons: {}", completedLessons);
+
+            if (totalLessonsHasProblem + totalLessonsHasExercise > 0) {
+                completionRatio = (completedLessons / (float) (totalLessonsHasExercise + totalLessonsHasProblem)) * 100;
+            }
+        }
+
+        String certificateUrl = null;
+        String certificateId = null;
+
+        if (isUserEnrolled) {
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, courseId)
+                    .orElse(null);
+
+            certificateId = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+            certificateUrl = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateUrl() : null;
+        }
+
+        // Map course details to the response DTO
+        return DetailCourseResponse.builder()
+                .courseId(course.getCourseId())
+                .courseName(course.getCourseName())
+                .description(course.getDescription())
+                .level(course.getLevel())
+                .price(course.getPrice())
+                .unitPrice(course.getUnitPrice())
+                .userUid(course.getUserId())
+                .lessonCount(lessonCount)
+                .averageRating(course.getAverageRating())
+                .reviewCount(course.getReviewCount())
+                .isUserEnrolled(isUserEnrolled)
+                .latestLessonId(latestLessonId)
+                .progressPercent(completionRatio)
+                .certificateUrl(certificateUrl)
+                .certificateId(certificateId)
+                .courseImage(course.getCourseImage())
+                .templateCode(course.getTemplateCode())
+                .createdAt(course.getCreatedAt())
+                .numberOfEnrolledStudents(course.getEnrollCourses() != null
+                        ? course.getEnrollCourses().size()
+                        : 0)
+                .aiSummaryContent(course.getCourseSummary() != null
+                        && course.getCourseSummary().getSummaryContent() != null
+                        ? course.getCourseSummary().getSummaryContent()
+                        : null)
+                .templateLink(course.getTemplateCode() != null
+                        ? mapCertificateTemplateEnums(course.getTemplateCode())
+                        : null)
+                .categories(course.getCategories() != null
+                        ? course.getCategories().stream()
+                        .map(categoryMapper::categoryToCategoryResponse)
+                        .collect(Collectors.toList())
+                        : new ArrayList<>())
                 .build();
     }
 
@@ -600,7 +740,6 @@ public class CourseService {
             CourseSummary courseSummary = course.getCourseSummary();
             response.setAiSummaryContent(courseSummary.getSummaryContent());
         }*/
-
 
 
         return response;
@@ -641,7 +780,7 @@ public class CourseService {
             // check if user has subscription plan
             if (subscriptionPlan != null &&
                     (subscriptionPlan.equals(PremiumPackage.COURSE_PLAN.getCode())
-                        || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
+                            || subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
                     )
             ) {
                 // enroll course using subscription plan
@@ -688,8 +827,8 @@ public class CourseService {
                 });
 
         if (userCoursesResponse.getEnrollUsingSubscription()
-         || !userCoursesResponse.getAccessStatus().equals(
-                 UserCourseAccessStatus.ACCESSIBLE.getCode())
+                || !userCoursesResponse.getAccessStatus().equals(
+                UserCourseAccessStatus.ACCESSIBLE.getCode())
         ) {
             userCoursesResponse.setAccessStatus(
                     UserCourseAccessStatus.ACCESSIBLE.getCode()
@@ -766,7 +905,7 @@ public class CourseService {
 
         if (!subscriptionPlan.equals(PremiumPackage.COURSE_PLAN.getCode())
                 && !subscriptionPlan.equals(PremiumPackage.PREMIUM_PLAN.getCode())
-        ){
+        ) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
@@ -843,11 +982,11 @@ public class CourseService {
         for (UserCourses userCourses : listEnrolledUserInCourse) {
             userCourses.setCourse(course);
             listEnrolledUsersResponse.add(EnrolledCourseResponse.builder()
-                        .course(course)
-                        .enrollId(userCourses.getEnrollId())
-                        .lastAccessedDate(userCourses.getLastAccessedDate())
-                        .progressPercent(userCourses.getProgressPercent())
-                        .status(userCourses.getStatus())
+                    .course(course)
+                    .enrollId(userCourses.getEnrollId())
+                    .lastAccessedDate(userCourses.getLastAccessedDate())
+                    .progressPercent(userCourses.getProgressPercent())
+                    .status(userCourses.getStatus())
                     .build());
         }
         return listEnrolledUsersResponse;
@@ -867,9 +1006,9 @@ public class CourseService {
                         .certificateId(userCourses.getCertificate() != null ?
                                 userCourses.getCertificate().getCertificateId()
                                 : null)
-                        .completedDate(userCourses.getCertificate() != null ?(
-                                Date.from(userCourses.getCertificate().getCompletedDate())
-                            ) : null
+                        .completedDate(userCourses.getCertificate() != null ? (
+                                        Date.from(userCourses.getCertificate().getCompletedDate())
+                                ) : null
                         )
                         .build());
             }
@@ -877,21 +1016,90 @@ public class CourseService {
         return listEnrolledUsersResponse;
     }
 
-    public Page<UserCourses> getEnrolledCoursesOfUser(UUID userUid, Pageable pageable) {
-        if (userUid == null) {
+    public Page<DetailCourseResponse> getEnrolledCoursesOfUser(UUID userUuid, Pageable pageable) {
+        if (userUuid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
-        Specification<UserCourses> specification = Specification.where(
-                UserCoursesSpecification.hasUserUid(userUid)
+        /*int count = courseRepository.countAllEnrolledByUser(userUuid);
+        log.info("Count of enrolled courses: {}", count);*/
+
+        Page<Course> courses = courseRepository.findAllCoursesEnrolledByUser(userUuid, pageable);
+
+        return courses.map(course -> {
+
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+            UUID latestLessonId = null;
+            UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUuid, course.getCourseId())
+                    .orElse(null);
+            latestLessonId = (userCourse != null) ? userCourse.getLatestLessonId() : null;
+            float completionRatio = 0.0f;
+
+            Specification<Lesson> hasProblemSpecification = Specification.where(
+                    LessonSpecification.hasCourseId(course.getCourseId())
+            ).and(
+                    LessonSpecification.hasProblemId()
+            );
+
+            int totalLessonsHasExercise = lessonRepository.countByCourse_CourseId(course.getCourseId());
+            int totalLessonsHasProblem = (int) lessonRepository.count(hasProblemSpecification);
+
+            log.info("Total lessons has exercise: {}", totalLessonsHasExercise);
+            log.info("Total lessons has problem: {}", totalLessonsHasProblem);
+
+            int completedLessons = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDoneTheory(userUuid, course.getCourseId(), true);
+            int completedPractices = learningLessonRepository.countCompletedLessonsByUserIdAndLesson_Course_CourseIdAndIsDonePractice(userUuid, course.getCourseId(), true);
+            completedLessons += completedPractices;
+
+            log.info("Completed lessons: {}", completedLessons);
+
+            if (totalLessonsHasProblem + totalLessonsHasExercise > 0) {
+                completionRatio = (completedLessons / (float) (totalLessonsHasExercise + totalLessonsHasProblem)) * 100;
+            }
+
+            String certificateId = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateId().toString() : null;
+            String certificateUrl = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateUrl() : null;
+
+            return DetailCourseResponse.builder()
+                    .courseId(course.getCourseId())
+                    .courseName(course.getCourseName())
+                    .description(course.getDescription())
+                    .level(course.getLevel())
+                    .price(course.getPrice())
+                    .unitPrice(course.getUnitPrice())
+                    .userUid(course.getUserId())
+                    .lessonCount(lessonCount)
+                    .averageRating(course.getAverageRating())
+                    .reviewCount(course.getReviewCount())
+                    .isUserEnrolled(true) // Always true since this is for enrolled courses
+                    .latestLessonId(latestLessonId)
+                    .progressPercent(completionRatio)
+                    .certificateUrl(certificateUrl)
+                    .certificateId(certificateId)
+                    .courseImage(course.getCourseImage())
+                    .templateCode(course.getTemplateCode())
+                    .createdAt(course.getCreatedAt())
+                    .aiSummaryContent(course.getCourseSummary() != null
+                            && course.getCourseSummary().getSummaryContent() != null
+                            ? course.getCourseSummary().getSummaryContent()
+                            : null)
+                    .templateLink(course.getTemplateCode() != null
+                            ? mapCertificateTemplateEnums(course.getTemplateCode())
+                            : null)
+                    .categories(null)
+                    .build();
+        });
+
+        /*Specification<UserCourses> specification = Specification.where(
+                UserCoursesSpecification.hasUserUid(userUuid)
                         .and(UserCoursesSpecification.hasAccessStatus(UserCourseAccessStatus.ACCESSIBLE.getCode()))
         );
 
-        return userCoursesRepository.findAll(specification, pageable);
-        //return userCoursesRepository.findAllByEnrollId_UserUid(userUid, pageable);
+        return userCoursesRepository.findAll(specification, pageable);*/
+        //return userCoursesRepository.findAllByEnrollId_UserUid(userUuid, pageable);
         /*return userCourses.map(userCourse -> {
             DetailCourseResponse detailCourseResponse = detailsCourseRepositoryCustom
-                    .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUid)
+                    .getDetailsCourse(userCourse.getEnrollId().getCourseId(), userUuid)
                     .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
             userCourse.setProgressPercent(detailCourseResponse.getProgressPercent());
             return userCourse;
@@ -912,7 +1120,7 @@ public class CourseService {
 
     public CategoryResponse getCategory(Integer categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(()-> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         return categoryMapper.categoryToCategoryResponse(category);
     }
@@ -925,7 +1133,7 @@ public class CourseService {
         ResponseEntity<ValidatedTokenResponse> tokenResponse = identityClient.validateToken(token).block();
 
         assert tokenResponse != null;
-        if(!tokenResponse.getBody().isValidated())
+        if (!tokenResponse.getBody().isValidated())
             throw new AppException(ErrorCode.BAD_REQUEST);
 
         return tokenResponse.getBody().getName();
@@ -942,7 +1150,7 @@ public class CourseService {
         System.out.println("userid: " + userId + "\n" +
                 "courseId: " + courseId);
 
-        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId,courseId)
+        UserCourses userCourses = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId, courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_COURSE_NOT_EXISTED));
 
         Instant instant = Instant.now();
@@ -954,7 +1162,6 @@ public class CourseService {
                 getDaySuffix(zonedDateTime.getDayOfMonth()),
                 zonedDateTime.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
         );
-
 
 
         User user = firestoreService.getUserById(userCourses.getEnrollId().getUserUid().toString());
@@ -972,16 +1179,12 @@ public class CourseService {
 
 //        String directorName = "Phạm Nguyễn Sơn Tùng";
 //        Image sign = null;
-        try
-        {
+        try {
             byte[] certificateImage;
-            if (course.getTemplateCode() == 2)
-            {
-                certificateImage = CertificateTemplate2.createCertificate(completedDate,userName,courseName);
-            }
-            else
-            {
-                certificateImage = CertificateTemplate1.createCertificate(completedDate,userName,courseName);
+            if (course.getTemplateCode() == 2) {
+                certificateImage = CertificateTemplate2.createCertificate(completedDate, userName, courseName);
+            } else {
+                certificateImage = CertificateTemplate1.createCertificate(completedDate, userName, courseName);
             }
 
             String fileName = courseId + "-" + userId.toString();
@@ -1005,17 +1208,15 @@ public class CourseService {
             certificateCreationResponse.setCourseId(courseId);
             certificateCreationResponse.setUserId(userId);
 
-            try{
+            try {
                 notificationService.uploadLeaderBoard(userId, course);
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 log.error("Error while uploading leader board: " + e.getMessage());
             }
-
-            try{
+            try {
                 NotificationRequest notificationRequest = new NotificationRequest();
                 notificationRequest.setTitle("Congratulations on Completing Your Course!");
-                notificationRequest.setMessage("Dear [@"+ userName +"],\n" +
+                notificationRequest.setMessage("Dear [@" + userName + "],\n" +
                         "\n" +
                         "Congratulations on successfully completing the \"" + courseName + "\" on [Platform/Institution Name]! We recognize your dedication and commitment to learning.\n" +
                         "\n" +
@@ -1036,15 +1237,12 @@ public class CourseService {
                 notificationRequest.setRedirectType("COURSE_COMPLETE");
                 notificationRequest.setRedirectContent("/certificate/" + certificate.getCertificateId());
                 identityClient.postNotifications(notificationRequest).block().getResult().getMessage();
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 System.out.println("Error in creating notification: " + e);
             }
             return certificateCreationResponse;
 
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             String msg = "Error creating certificate";
             log.error(msg, ex);
             throw ex;
@@ -1083,7 +1281,7 @@ public class CourseService {
         return certificateResponse;
     }
 
-    public String GetCertificateTemplateExample(Integer templateId){
+    public String GetCertificateTemplateExample(Integer templateId) {
         if (templateId == 1) {
             return CertificateTemplate1.linkExample;
         } else if (templateId == 2) {
@@ -1143,10 +1341,11 @@ public class CourseService {
         return response;
     }
 
-   public AdminCourseCreationResponse createGeneralStepInCourseCreation(
-           GeneralCourseCreationRequest request,
-           UUID userUuid, String userRole
-   ) {
+    @Transactional
+    public AdminCourseCreationResponse createGeneralStepInCourseCreation(
+            GeneralCourseCreationRequest request,
+            UUID userUuid, String userRole
+    ) {
         if (!userRole.equals(PredefinedRole.admin)) {
             throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
         }
@@ -1169,75 +1368,87 @@ public class CourseService {
         Course savedCourse = courseRepository.save(course);
 
         CourseSummary courseSummary = CourseSummary.builder()
-                        //.courseId(savedCourse.getCourseId())
-                        .courseName(savedCourse.getCourseName())
-                        .summaryContent(null)
-                        .course(savedCourse)
-                        .build();
+                //.courseId(savedCourse.getCourseId())
+                .courseName(savedCourse.getCourseName())
+                .summaryContent(null)
+                .course(savedCourse)
+                .build();
 
         courseSummaryRepository.save(courseSummary);
 
+        // Update the course with the course summary immediately before embedding
+        courseRepository.flush();
+        courseSummaryRepository.flush();
+
+        //insertCourseVectorEmbedding(savedCourse.getCourseId());
+        aiServiceClient.insertCourseEmbeddingData(savedCourse.getCourseId())
+                .doOnSuccess(response -> log.info("Embedding data inserted for course {}", savedCourse.getCourseId()))
+                .doOnError(error -> log.error("Error inserting embedding data for course {}: {}", savedCourse.getCourseId(), error.getMessage()))
+                .subscribe();
+
         return courseMapper.toAdminCourseCreationResponse(savedCourse);
-   }
+    }
 
-   public AdminCourseCreationResponse createFinalStepInCourseCreation(
-           FinalCourseCreationRequest request, UUID courseId,
-           UUID userUuid, String userRole
-   ) {
-       if (!userRole.equals(PredefinedRole.admin)) {
-           throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
-       }
+    @Transactional
+    public AdminCourseCreationResponse createFinalStepInCourseCreation(
+            FinalCourseCreationRequest request, UUID courseId,
+            UUID userUuid, String userRole
+    ) {
+        if (!userRole.equals(PredefinedRole.admin)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
 
-       Course course = courseRepository.findById(courseId)
-               .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-       course = courseMapper.updateCourse(request, course);
+        course = courseMapper.updateCourse(request, course);
 
-       course.setCurrentCreationStep(3);
-       course.setIsAvailable(false);
+        course.setCurrentCreationStep(3);
+        course.setIsAvailable(false);
 
-       Course savedCourse = courseRepository.save(course);
+        Course savedCourse = courseRepository.save(course);
 
-       CourseSummary courseSummary = null;
+        CourseSummary courseSummary = null;
 
-       if (request.getAiSummaryContent() != null) {
-           courseSummary = courseSummaryRepository.findById(courseId)
-                   .orElse(
-                           CourseSummary.builder()
-                                   //.courseId(courseId)
-                                   .courseName(savedCourse.getCourseName())
-                                   .summaryContent(request.getAiSummaryContent())
-                                   .course(savedCourse)
-                                   .build());
+        if (request.getAiSummaryContent() != null) {
+            courseSummary = courseSummaryRepository.findById(courseId)
+                    .orElse(
+                            CourseSummary.builder()
+                                    //.courseId(courseId)
+                                    .courseName(savedCourse.getCourseName())
+                                    .summaryContent(request.getAiSummaryContent())
+                                    .course(savedCourse)
+                                    .build());
 
-           courseSummary.setSummaryContent(request.getAiSummaryContent());
-           courseSummaryRepository.save(courseSummary);
-       }
+            courseSummary.setSummaryContent(request.getAiSummaryContent());
+            courseSummaryRepository.save(courseSummary);
+        }
 
-       savedCourse.setCourseSummary(courseSummary);
+        savedCourse.setCourseSummary(courseSummary);
 
-       return courseMapper.toAdminCourseCreationResponse(savedCourse);
-   }
+        return courseMapper.toAdminCourseCreationResponse(savedCourse);
+    }
 
-   public AdminCourseCreationResponse updateGeneralStepInCourseCreation(
-              GeneralCourseCreationRequest request,
-              UUID courseId, UUID userUuid, String userRole
-   ) {
-       if (!userRole.equals(PredefinedRole.admin)) {
-           throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
-       }
+    @Transactional
+    public AdminCourseCreationResponse updateGeneralStepInCourseCreation(
+            GeneralCourseCreationRequest request,
+            UUID courseId, UUID userUuid, String userRole
+    ) {
+        if (!userRole.equals(PredefinedRole.admin)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
 
-       Course course = courseRepository.findById(courseId)
-               .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-       course = courseMapper.updateCourse(request, course);
+        course = courseMapper.updateCourse(request, course);
 
-       List<Category> categories = categoryRepository
-               .findAllByIdIn(request.getCategoryIds());
+        List<Category> categories = categoryRepository
+                .findAllByIdIn(request.getCategoryIds());
 
-       course.setCategories(categories);
+        course.setCategories(categories);
 
-       Course savedCourse = courseRepository.save(course);
+        Course savedCourse = courseRepository.save(course);
 
        /*CourseSummary courseSummary = savedCourse.getCourseSummary();
 
@@ -1246,68 +1457,78 @@ public class CourseService {
            courseSummaryRepository.save(courseSummary);
        }*/
 
-       CourseSummary courseSummary = courseSummaryRepository.findById(courseId)
-               .orElse(
-                       CourseSummary.builder()
-                               .courseName(savedCourse.getCourseName())
-                               .summaryContent(null)
-                               .course(savedCourse)
-                               .build()
-               );
+        CourseSummary courseSummary = courseSummaryRepository.findById(courseId)
+                .orElse(
+                        CourseSummary.builder()
+                                .courseName(savedCourse.getCourseName())
+                                .summaryContent(null)
+                                .course(savedCourse)
+                                .build()
+                );
 
-       courseSummaryRepository.save(courseSummary);
+        courseSummaryRepository.save(courseSummary);
 
+        courseRepository.flush();
+        courseSummaryRepository.flush();
 
-       return courseMapper.toAdminCourseCreationResponse(savedCourse);
-   }
+        //updateExistedCourseVectorEmbedding(courseId);
+        aiServiceClient.updateCourseEmbeddingData(courseId)
+                .doOnSuccess(response -> log.info("Embedding data updated for course {}", courseId))
+                .doOnError(error -> log.error("Error updating embedding data for course {}: {}", courseId, error.getMessage()))
+                .subscribe();
 
-   public AdminCourseCreationResponse updateFinalStepInCourseCreation(
-           FinalCourseCreationRequest request, UUID courseId,
-           UUID userUuid, String userRole
-   ) {
-       if (!userRole.equals(PredefinedRole.admin)) {
-           throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
-       }
+        return courseMapper.toAdminCourseCreationResponse(savedCourse);
+    }
 
-       Course course = courseRepository.findById(courseId)
-               .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+    @Transactional
+    public AdminCourseCreationResponse updateFinalStepInCourseCreation(
+            FinalCourseCreationRequest request, UUID courseId,
+            UUID userUuid, String userRole
+    ) {
+        if (!userRole.equals(PredefinedRole.admin)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
 
-       if (course.getCurrentCreationStep() < 3) {
-           throw new AppException(ErrorCode.COMPLETE_PREVIOUS_STEP_FIRST);
-       }
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-       course = courseMapper.updateCourse(request, course);
+        if (course.getCurrentCreationStep() < 3) {
+            throw new AppException(ErrorCode.COMPLETE_PREVIOUS_STEP_FIRST);
+        }
 
-       Course savedCourse = courseRepository.save(course);
+        course = courseMapper.updateCourse(request, course);
 
-       //CourseSummary courseSummary = savedCourse.getCourseSummary();
+        Course savedCourse = courseRepository.save(course);
 
-       CourseSummary courseSummary = null;
+        //CourseSummary courseSummary = savedCourse.getCourseSummary();
 
-       if (request.getAiSummaryContent() != null) {
-           courseSummary = courseSummaryRepository.findById(courseId)
-                   .orElse(
-                           CourseSummary.builder()
-                                   //.courseId(courseId)
-                                   .courseName(savedCourse.getCourseName())
-                                   .summaryContent(request.getAiSummaryContent())
-                                   .course(savedCourse)
-                                   .build()
-                   );
+        CourseSummary courseSummary = null;
 
-           courseSummary.setSummaryContent(request.getAiSummaryContent());
-           courseSummaryRepository.save(courseSummary);
-       }
+        if (request.getAiSummaryContent() != null) {
+            courseSummary = courseSummaryRepository.findById(courseId)
+                    .orElse(
+                            CourseSummary.builder()
+                                    //.courseId(courseId)
+                                    .courseName(savedCourse.getCourseName())
+                                    .summaryContent(request.getAiSummaryContent())
+                                    .course(savedCourse)
+                                    .build()
+                    );
 
-       savedCourse.setCourseSummary(courseSummary);
+            courseSummary.setSummaryContent(request.getAiSummaryContent());
+            courseSummaryRepository.save(courseSummary);
+        }
 
-       return courseMapper.toAdminCourseCreationResponse(savedCourse);
-   }
+        savedCourse.setCourseSummary(courseSummary);
 
-   public AdminCourseCreationResponse updateCourseAvailableStatus(
-           Boolean availableStatus, UUID courseId,
-           UUID userUuid, String userRole
-   ) {
+        return courseMapper.toAdminCourseCreationResponse(savedCourse);
+    }
+
+    @Transactional
+    public AdminCourseCreationResponse updateCourseAvailableStatus(
+            Boolean availableStatus, UUID courseId,
+            UUID userUuid, String userRole
+    ) {
         if (!userRole.equals(PredefinedRole.admin)) {
             throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
         }
@@ -1337,51 +1558,68 @@ public class CourseService {
         Course savedCourse = courseRepository.save(course);
 
         return courseMapper.toAdminCourseCreationResponse(savedCourse);
-   }
+    }
 
-   public AdminCourseCreationResponse updateCourseCompletedCreationStatus(
-              Boolean completedCreationStatus, UUID courseId,
-              UUID userUuid, String userRole
-   ) {
-       if (!userRole.equals(PredefinedRole.admin)) {
-           throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
-       }
+    @Transactional
+    public AdminCourseCreationResponse updateCourseCompletedCreationStatus(
+            Boolean completedCreationStatus, UUID courseId,
+            UUID userUuid, String userRole
+    ) {
+        if (!userRole.equals(PredefinedRole.admin)) {
+            throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
+        }
 
-       Course course = courseRepository.findById(courseId)
-               .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_EXISTED));
 
-       if (course.getCurrentCreationStep() < 3) {
-           throw new AppException(ErrorCode.COURSE_NOT_COMPLETED);
-       }
+        if (course.getCurrentCreationStep() < 3) {
+            throw new AppException(ErrorCode.COURSE_NOT_COMPLETED);
+        }
 
-       if (!completedCreationStatus) {
-           course.setIsAvailable(false);
+        if (!completedCreationStatus) {
+            course.setIsAvailable(false);
 
-           boolean existedUserEnrolled = userCoursesRepository.existsByEnrollId_CourseId(courseId);
+            boolean existedUserEnrolled = userCoursesRepository.existsByEnrollId_CourseId(courseId);
 
-           if (existedUserEnrolled) {
-               throw new AppException(ErrorCode.COURSE_ALREADY_ENROLLED);
-           }
-       }
+            if (existedUserEnrolled) {
+                throw new AppException(ErrorCode.COURSE_ALREADY_ENROLLED);
+            }
+        }
 
-       course.setIsCompletedCreation(completedCreationStatus);
+        course.setIsCompletedCreation(completedCreationStatus);
 
-       Course savedCourse = courseRepository.save(course);
+        Course savedCourse = courseRepository.save(course);
 
-       return courseMapper.toAdminCourseCreationResponse(savedCourse);
-   }
+        return courseMapper.toAdminCourseCreationResponse(savedCourse);
+    }
 
-   public String uploadCourseAvatarImage(MultipartFile file, UUID courseId) {
+    @Transactional
+    public String uploadImage(MultipartFile file, UUID imageId) {
+        try {
+            String newPhotoUrl = cloudinaryService.uploadImage(file, imageId.toString(), "LessonAvatar");
+
+            if (newPhotoUrl == null) {
+                throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+            }
+
+            return newPhotoUrl;
+        } catch (AppException e) {
+            log.error(e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
+        }
+    }
+
+    @Transactional
+    public String uploadCourseAvatarImage(MultipartFile file, UUID courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(
                         () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
                 );
         try {
-            if (course.getCourseImage() != null) {
-                cloudinaryService.deleteImage(course.getCourseImage());
-            }
-
-            String newPhotoUrl = cloudinaryService.uploadImage(file, course.getCourseName(), "CourseAvatar");
+            String newPhotoUrl = cloudinaryService.uploadImage(file, course.getCourseId().toString(), "CourseAvatar");
 
             if (newPhotoUrl == null) {
                 throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
@@ -1395,14 +1633,15 @@ public class CourseService {
             //firebaseAuthClient.updateUserProfilePicture(userId, newPhotoUrl);
         } catch (AppException e) {
             log.error(e.getMessage());
-            throw  e;
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
         }
-   }
+    }
 
-   public String uploadCourseAvatarLink(String fileLink, UUID courseId) {
+    @Transactional
+    public String uploadCourseAvatarLink(String fileLink, UUID courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(
                         () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
@@ -1420,33 +1659,136 @@ public class CourseService {
             //firebaseAuthClient.updateUserProfilePicture(userId, newPhotoUrl);
         } catch (AppException e) {
             log.error(e.getMessage());
-            throw  e;
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
         }
-   }
+    }
 
-   public Boolean deleteCourseAvatarImage(UUID courseId) {
-       Course course = courseRepository.findById(courseId)
-               .orElseThrow(
-                       () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
-               );
-       try {
-           if (course != null && course.getCourseImage() != null) {
-               cloudinaryService.deleteImage(course.getCourseImage());
-               course.setCourseImage(null);
-               courseRepository.save(course);
-               return true;
-           }
+    @Transactional
+    public Boolean deleteCourseAvatarImage(UUID courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(
+                        () -> new AppException(ErrorCode.COURSE_NOT_EXISTED)
+                );
 
-           return false;
-       } catch (AppException e) {
-           log.error(e.getMessage());
-           throw e;
-       } catch (Exception e) {
-           log.error(e.getMessage());
-           throw new AppException(ErrorCode.CANNOT_UPLOAD_IMAGE);
-       }
-   }
+        try {
+            if (course.getCourseImage() != null) {
+                System.out.println("img url: " + course.getCourseImage());
+
+                boolean result = cloudinaryService.deleteImage(course.getCourseImage());
+
+                course.setCourseImage(null);
+                courseRepository.save(course);
+                courseRepository.flush();
+                return result;
+            }
+            log.error("Course avatar image not found");
+            return false;
+        } catch (AppException e) {
+            log.error(e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(ErrorCode.CAN_NOT_DELETE_IMAGE);
+        }
+    }
+
+    public List<CourseSearchResponse> getTopPaidCoursesByNumberOfEnrolledStudents(UUID userUuid, Integer limit) {
+        if (limit == null) {
+            limit = 10;
+        }
+
+        List<Course> courses = null;
+
+        if (userUuid == null) {
+            courses = courseRepository.findTopPaidCoursesByIsAvailableTrueOrderByNumberOfEnrolledStudentsDesc(limit);
+        } else {
+            courses = courseRepository.findTopPaidCoursesByIsAvailableTrueOrderAndExcludeUserEnrolledCoursesByNumberOfEnrolledStudentsDesc(userUuid, limit);
+        }
+
+        //courseRepository.findTop10ByIsAvailableTrueAndPriceGreaterThanOrderByAverageRatingDesc(0);
+
+        List<CourseSearchResponse> responses = courses.stream()
+                .map(course -> {
+                    CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
+                    int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+                    response.setLessonCount(lessonCount);
+
+                    response.setSections(null);
+
+                    // because query course exclude course enrolled by user
+                    response.setCertificateId(null);
+                    response.setCertificateUrl(null);
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+
+        return responses;
+    }
+
+    public Page<CourseSearchResponse> getFreeCourses(UUID userUuid, Pageable pageable) {
+        Page<Course> courses = null;
+
+        if (userUuid == null) {
+            courses = courseRepository.findByIsAvailableTrueAndPriceEqualsZero(pageable);
+        } else {
+            courses = courseRepository.findByIsAvailableTrueAndPriceEqualsZeroAndExcludeUserEnrolledCourses(userUuid, pageable);
+        }
+
+        return courses.map(course -> {
+            CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
+            int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;
+            response.setLessonCount(lessonCount);
+            response.setSections(null);
+
+            // because query course exclude course enrolled by user
+            response.setCertificateId(null);
+            response.setCertificateUrl(null);
+            return response;
+        });
+    }
+
+    @Async
+    public void updateExistedCourseVectorEmbedding(UUID courseId) {
+        log.info("Updating embedding data for course: {}", courseId);
+        try {
+            aiServiceClient.updateCourseEmbeddingData(courseId)
+                    .doOnError(error -> log.error("Error updating embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Failed to update embedding data for course {}: {}", courseId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void deleteCourseVectorEmbedding(UUID courseId) {
+        log.info("Deleting embedding data for course: {}", courseId);
+        try {
+            aiServiceClient.deleteCourseEmbeddingData(courseId)
+                    .doOnError(error -> log.error("Error deleting embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Failed to delete embedding data for course {}: {}", courseId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void insertCourseVectorEmbedding(UUID courseId) {
+        log.info("Inserting embedding data for course: {}", courseId);
+        try {
+            aiServiceClient.insertCourseEmbeddingData(courseId)
+                    .doOnError(error -> log.error("Error inserting embedding data for course {}: {}", courseId, error.getMessage()))
+                    .subscribe();
+                    //.block(); // Use block() to wait for completion in async context
+
+        } catch (Exception e) {
+            log.error("Failed to insert embedding data for course {}: {}", courseId, e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

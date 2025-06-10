@@ -2,28 +2,18 @@ package com.example.courseservice.controller;
 
 
 import com.example.courseservice.dto.ApiResponse;
-import com.example.courseservice.dto.request.Option.OptionRequest;
-import com.example.courseservice.dto.request.Question.QuestionCreationRequest;
-import com.example.courseservice.dto.request.Question.QuestionUpdateRequest;
 import com.example.courseservice.dto.request.exercise.ModifyQuizRequest;
-import com.example.courseservice.dto.response.Option.OptionResponse;
-import com.example.courseservice.dto.response.Question.QuestionResponse;
 import com.example.courseservice.dto.response.exercise.ExerciseResponse;
 import com.example.courseservice.service.ExerciseService;
 import com.example.courseservice.service.OptionService;
-import com.example.courseservice.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,7 +22,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Tag(name = "Question")
 public class QuestionController {
-    QuestionService questionService;
+
     OptionService optionService;
     private final ExerciseService exerciseService;
 

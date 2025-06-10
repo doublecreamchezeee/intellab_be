@@ -10,6 +10,7 @@ import com.example.courseservice.exception.AppException;
 import com.example.courseservice.exception.ErrorCode;
 import com.example.courseservice.service.CourseService;
 import com.example.courseservice.service.LessonService;
+import com.example.courseservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -18,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -129,5 +132,29 @@ public class AdminLessonController {
         return ApiResponse.<LessonResponse>builder()
                 .result(lessonService.getLessonInformation(lessonId))
                 .build();
+    }
+
+
+    @PostMapping("/upload")
+    ApiResponse<String> uploadFile(
+            @RequestPart MultipartFile file,
+            @RequestParam UUID courseId,
+            @RequestHeader("X-UserId") String userUid
+    )
+    {
+        UUID userId = ParseUUID.normalizeUID(userUid.split(",")[0]);
+        try{
+            return ApiResponse.<String>builder()
+                    .code(201)
+                    .message("File uploaded successfully")
+                    .result(lessonService.uploadFile(file,courseId,userId))
+                    .build();
+        } catch (IOException e) {
+            log.error("lessons/upload" + e.getMessage());
+            return ApiResponse.<String>builder()
+                    .code(401)
+                    .message("File upload failed")
+                    .build();
+        }
     }
 }

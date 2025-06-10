@@ -15,6 +15,7 @@ import com.example.problemservice.model.composite.SolutionID;
 import com.example.problemservice.repository.ProblemRepository;
 import com.example.problemservice.model.composite.SolutionID;
 import com.example.problemservice.repository.SolutionRepository;
+import com.example.problemservice.utils.ParseUUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class SolutionService {
         // Step 2: Build composite key
         SolutionID solutionId = SolutionID.builder()
                 .problemId(UUID.fromString(request.getProblemId()))
-                .authorId(UUID.fromString(request.getAuthorId()))
+                .authorId(ParseUUID.normalizeUID(request.getAuthorId()))
                 .build();
 
         // Step 3: Map request to entity and assign IDs + relationship
@@ -48,14 +49,49 @@ public class SolutionService {
 
         // Step 4: Save to DB
         solution = solutionRepository.save(solution);
-
-        problem.setCurrentCreationStep(5);
+        if (!problem.getIsCompletedCreation() && problem.getCurrentCreationStep() <= 5) {
+            problem.setCurrentCreationStep(5);
+            problem.setCurrentCreationStepDescription("Solution Step");
+        }
         problemRepository.save(problem);
 
         // Step 5: Return response
         return solutionMapper.toSolutionCreationResponse(solution);
     }
 
+    public SolutionCreationResponse updateSolution(SolutionCreationRequest request) {
+        UUID problemId = UUID.fromString(request.getProblemId());
+        UUID authorId = ParseUUID.normalizeUID(request.getAuthorId());
+
+        // Step 1: Build composite key and fetch existing solution
+        SolutionID solutionId = SolutionID.builder()
+                .problemId(problemId)
+                .authorId(authorId)
+                .build();
+
+        Solution existingSolution = solutionRepository.findByIdProblemId(problemId).orElseThrow(
+                () -> new AppException(ErrorCode.SOLUTION_NOT_EXIST)
+        );
+
+        // Step 2: Update fields from request
+        existingSolution.setContent(request.getContent());
+
+        // Step 3: Save updated solution
+        existingSolution = solutionRepository.save(existingSolution);
+
+        // Optional: update creation step if needed
+        Problem problem = existingSolution.getProblem();
+        if (problem != null) {
+            if (!problem.getIsCompletedCreation() || problem.getCurrentCreationStep() <= 2){
+                problem.setCurrentCreationStepDescription("Solution Step");
+                problem.setCurrentCreationStep(5);
+            }
+            problemRepository.save(problem);
+        }
+
+        // Step 4: Return response
+        return solutionMapper.toSolutionCreationResponse(existingSolution);
+    }
 
 
     public Solution getSolution(SolutionID solutionId) {
@@ -80,7 +116,9 @@ public class SolutionService {
     }
 
     public DetailsSolutionResponse getSolutionByProblemId(UUID problemId) {
-        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByIdProblemId(problemId));
+        return solutionMapper.toDetailsSolutionResponse(solutionRepository.findByIdProblemId(problemId).orElseThrow(
+                () -> new AppException(ErrorCode.SOLUTION_NOT_EXIST)
+        ));
     }
 
     public SolutionUpdateResponse updateSolution(String problemId, String authorId, SolutionUpdateRequest request) {
