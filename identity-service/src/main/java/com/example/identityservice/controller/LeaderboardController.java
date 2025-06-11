@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,5 +42,16 @@ public class LeaderboardController {
                 request.getCourseStat()
         );
         return ResponseEntity.ok().build();
+    }
+
+    @PublicEndpoint
+    @GetMapping("/myPoint")
+    public ResponseEntity<Integer> getMyPoint( Authentication authentication ) {
+        String userId = (String) authentication.getPrincipal();
+        if (userId == null || userId.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        Integer points = leaderboardService.getMyPoint(userId);
+        return ResponseEntity.ok(points);
     }
 }

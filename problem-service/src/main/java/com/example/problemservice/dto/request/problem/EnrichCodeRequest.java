@@ -3,6 +3,8 @@ package com.example.problemservice.dto.request.problem;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -10,6 +12,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EnrichCodeRequest {
     String code;
-    String structure;
+    UUID problemId;
     Integer languageId;
 }
