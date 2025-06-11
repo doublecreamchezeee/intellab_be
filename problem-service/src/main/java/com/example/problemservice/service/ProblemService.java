@@ -481,7 +481,6 @@ public class ProblemService {
                         .and(ProblemSpecification.levelFilter(level))
                         .and(ProblemSpecification.NameFilter(keyword))
                         .and(ProblemSpecification.StatusFilter(status, userId))
-                        .and(ProblemSpecification.isPublicFilter(true))
                         .and(ProblemSpecification.isCompletedCreationFilter(true)));
 
         Page<Problem> problems = problemRepository.findAll(specification, pageable);
