@@ -32,6 +32,7 @@ public class LoginStreakService {
                     .lastLogin(streak.getLastAccess())
                     .userUid(userUid)
                     .isLostStreak(false)
+                    .isUpStreak(true)
                     .build();
         }
 
@@ -40,8 +41,22 @@ public class LoginStreakService {
 
         if (lastLoginDate.isEqual(now))
         {
-            // same day ->
-            return null;
+            // No change in streak, just return the current streak
+            streak.setLastAccess(Instant.now());
+            streak = streakRepository.save(streak);
+            return LoginStreakResponse.builder()
+                    .streakLogin(streak.getStreakScore())
+                    .lastLogin(streak.getLastAccess())
+                    .userUid(userUid)
+                    .isLostStreak(false)
+                    .isUpStreak(false)
+                    .build();
+        }
+        else if (lastLoginDate.isBefore(now) && ChronoUnit.DAYS.between(lastLoginDate, now) == 1) {
+            // Continue the streak
+            streak.setStreakScore(streak.getStreakScore() + 1);
+            streak.setLastAccess(Instant.now());
+            streak = streakRepository.save(streak);
         }
         else if (now.isEqual(lastLoginDate.plusDays(1)))
         {
@@ -61,6 +76,7 @@ public class LoginStreakService {
                 .lastLogin(streak.getLastAccess())
                 .userUid(userUid)
                 .isLostStreak(streak.getStreakScore() == 1)
+                .isUpStreak(streak.getStreakScore() > 1)
                 .build();
     }
 }

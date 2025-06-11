@@ -14,6 +14,7 @@ import com.example.identityservice.model.Leaderboard;
 import com.example.identityservice.model.ProblemStat;
 import com.example.identityservice.model.User;
 import com.example.identityservice.repository.LeaderboardRepository;
+import com.example.identityservice.utility.ParseUUID;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -266,6 +267,15 @@ public class LeaderboardService {
 
             leaderboardRepository.save(newLeaderboard);
         }
+    }
+
+    public Integer getMyPoint(String userId) {
+        UUID userUUID = ParseUUID.normalizeUID(userId);
+
+        Optional<Leaderboard> leaderboard = leaderboardRepository.findByUserIdAndType(userUUID, "all");
+
+        // Return 0 if no leaderboard entry exists for the user
+        return leaderboard.map(value -> value.getScore().intValue()).orElse(0);
     }
 
 //    private Page<LeaderboardResponse> getProblemLeaderboard(Pageable pageable) {

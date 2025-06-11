@@ -128,9 +128,29 @@ public class BoilerplateClient {
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", ")) + ");";
 
             String outputWrite =  null;
-            if (outputFields.get(0).getType().startsWith("list<")) {
+
+            if (outputFields.get(0).getType().startsWith("list<list<")) {
+                outputWrite = """
+                        bool isFirstSublist = true;
+                            for (const auto &sublist : result) {
+                                if (!isFirstSublist) std::cout << "\\n";
+                                isFirstSublist = false;
+                        
+                                std::cout << "[";
+                                // Duyệt qua từng phần tử trong sublist
+                                bool isFirstItem = true;
+                                for (const auto &item : sublist) {
+                                    if (!isFirstItem) std::cout << ", ";
+                                    isFirstItem = false;
+                                    std::cout << item;
+                                }
+                                std::cout << "]";
+                            }""";
+            }
+            else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "for (const auto &item : result) std::cout << item << ' ';\nstd::cout << std::endl;";
-            } else {
+            }
+            else {
                 outputWrite = "std::cout << result << std::endl;";
             }
 
@@ -138,6 +158,8 @@ public class BoilerplateClient {
                     #include <iostream>
                     #include <vector>
                     #include <string>
+                    using namespace std;
+                    
 
                     ##USER_CODE_HERE##
 
@@ -165,6 +187,16 @@ public class BoilerplateClient {
         }
 
         private String mapTypeToCpp(String type) {
+            if (type.startsWith("list<list<")) {
+                String innerType = type.substring(10, type.length() - 2);
+                return "std::vector<std::vector<" + mapTypeToCpp(innerType) + ">>";
+            }
+
+            if (type.startsWith("list<")) {
+                String innerType = type.substring(5, type.length() - 1);
+                return "std::vector<" + mapTypeToCpp(innerType) + ">";
+            }
+
             return switch (type) {
                 case "int" -> "int";
                 case "float" -> "float";
@@ -185,7 +217,7 @@ public class BoilerplateClient {
                         if (field.getType().startsWith("list<")) {
                             return """
                                     int size_%1$s = scanner.nextInt();
-                                    List<%2$s> %1$s = new ArrayList<>();
+                                    %2$s %1$s = new ArrayList<>();
                                     for (int i = 0; i < size_%1$s; i++) {
                                         %1$s.add(scanner.next%3$s());
                                     }
@@ -200,7 +232,21 @@ public class BoilerplateClient {
                     functionName,
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
             );
-            String outputWrite = "System.out.println(result);";
+            String outputWrite = "";
+            if (outputFields.get(0).getType().startsWith("list<list<")) {
+                outputWrite = """
+                        for(List<?> sublist : result) {
+                                        System.out.println(sublist);
+                                    }
+                        """;
+            }
+            else if (outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "System.out.println(result.stream().map(Object::toString).collect(Collectors.joining(\" \")));";
+            }
+            else {
+                // For single value output
+                outputWrite = "System.out.println(result);";
+            }
 
             return """
                     import java.util.*;
@@ -239,6 +285,16 @@ public class BoilerplateClient {
 
 
         private String mapTypeToJava(String type) {
+            // Handle list types separately
+            if (type.startsWith("list<list<")) {
+                String innerType = type.substring(10, type.length() - 2);
+                return "List<List<" + mapTypeToJava(innerType) + ">>";
+            }
+            else if (type.startsWith("list<")) {
+                String innerType = type.substring(5, type.length() - 1);
+                return "List<" + mapTypeToJava(innerType) + ">";
+            }
+
             return switch (type) {
                 case "int" -> "int";
                 case "float" -> "double"; // Java uses double for floating-point numbers by default
@@ -281,6 +337,9 @@ public class BoilerplateClient {
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
             );
             String outputWrite = null;
+            if (outputFields.get(0).getType().startsWith("list<list<")) {
+                outputWrite = "for sublist in result: print(sublist)\n";
+            } else
             if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "print(' '.join(map(str, result)))";
             } else {
@@ -315,6 +374,7 @@ public class BoilerplateClient {
         }
 
         private String mapTypeToPython(String type) {
+
             return switch (type) {
                 case "int", "list<int>" -> "int";
                 case "float", "list<float>" -> "float";
@@ -330,7 +390,7 @@ public class BoilerplateClient {
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
                             return """
-                                    const size_%1$s = parseInt(input.shift());
+                                    const size_%1$s = Number(input.shift());
                                     const %1$s = input.splice(0, size_%1$s).map(%2$s);
                                     """.formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         } else {
@@ -342,18 +402,21 @@ public class BoilerplateClient {
                     functionName,
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
             );
-            String outputWrite = null;// "console.log(result);";
+            String outputWrite = "";// "console.log(result);";
 
-            if (outputFields.get(0).getType().startsWith("list<")) {
+            if (outputFields.get(0).getType().startsWith("list<list<")) {
+                outputWrite = "result.forEach(sublist => {console.log(`[${sublist.join(\", \")}]`);});";
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "console.log(result.join(' '));";
-            } else {
+            }
+            else {
                 outputWrite = "console.log(result);";
             }
 
             return """
                     ##USER_CODE_HERE##
 
-                    const input = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n').join(' ').split(' ');
+                    const input = require('fs').readFileSync(0, 'utf8').trim().split(/\\s+/);
                     %s
                     %s
                     %s
@@ -390,18 +453,37 @@ public class BoilerplateClient {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
+                            String interType = field.getType().replace("list<", "").replace(">", "");
+                            if (interType.equals("string")) {
+                                return """
+                                        const size_%1$s: number = parseInt(input.shift());
+                                        const %1$s: string[] = input.splice(0, size_%1$s);"""
+                                        .formatted(field.getName());
+
+                            }
+                            else if (interType.equals("bool")) {
+                                return """
+                                        const size_%1$s: number = parseInt(input.shift());
+                                        const %1$s: bool[] = input.splice(0, size_%1$s).map(str => str === 'true');
+                                        """.formatted(field.getName());
+                            }
                             return """
-                                    const size_%1$s: number = parseInt(input.shift() as string);
-                                    const %1$s: %2$s[] = input.splice(0, size_%1$s).map(%3$s);
-                                    """.formatted(field.getName(), mapTypeToTypeScript(field.getType()), mapTypeToTypeScript(field.getType()).toLowerCase());
-                        } else {
-                            return "const %s: %s = %s(input.shift() as string);".formatted(
-                                    field.getName(),
-                                    mapTypeToTypeScript(field.getType()),
-                                    mapTypeToTypeScript(field.getType()).toLowerCase()
+                                    const size_%1$s: number = parseInt(input.shift());
+                                    const %1$s: number[] = input.splice(0, size_%1$s).map(Number);
+                                    """.formatted(field.getName());
+                        }
+                        else if (field.getType().startsWith("str")) {
+                            return "const %s: string = input.shift();".formatted(field.getName());
+                        }
+                        else if (field.getType().startsWith("bool")) {
+                            return "const %s: boolean = input.shift() === 'true';".formatted(field.getName());
+                        }
+                        else {
+                            return "const %s: number = Number(input.shift());".formatted(
+                                    field.getName()
                             );
                         }
-                    }).collect(Collectors.joining("\n  "));
+                    }).collect(Collectors.joining("\n    "));
 
             String functionCall = "const result: %s = %s(%s);".formatted(
                     mapTypeToTypeScript(outputFields.get(0).getType()),
@@ -409,6 +491,14 @@ public class BoilerplateClient {
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
             );
             String outputWrite = "console.log(result);";
+            if (outputFields.get(0).getType().startsWith("list<list<")) {
+                outputWrite = "result.forEach((sublist: number[]) => {console.log(`[${sublist.join(\", \")}]`);});";
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "console.log(result.join(' '));";
+            }
+            else {
+                outputWrite = "console.log(result);";
+            }
 
             return """
                     ##USER_CODE_HERE##
@@ -437,18 +527,21 @@ public class BoilerplateClient {
         }
 
         private String mapTypeToTypeScript(String type) {
+            if (type.startsWith("list<list")) {
+                String innerType = type.substring(10, type.length() - 2);
+                return mapTypeToTypeScript(innerType); // Assuming 2D list of the same type
+            }
             return switch (type) {
-                case "int" -> "number";
-                case "float" -> "number";
+                case "int", "float" -> "number";
                 case "string" -> "string";
                 case "bool" -> "boolean";
-                case "list<int>" -> "number[]";
-                case "list<float>" -> "number[]";
+                case "list<int>", "list<float>" -> "number[]";
                 case "list<string>" -> "string[]";
                 case "list<bool>" -> "boolean[]";
                 default -> "any"; // Default for unknown types
             };
         }
+
 
         //================================ C =====================================
         public String generateC() {
@@ -458,11 +551,11 @@ public class BoilerplateClient {
                     inputReads.append("""
                             int size_%1$s;
                             scanf("%%d", &size_%1$s);
-                            int %1$s[size_%1$s];
+                            %2$s %1$s[size_%1$s];
                             for (int i = 0; i < size_%1$s; ++i) {
                                 scanf("%%d", &%1$s[i]);
                             }
-                            """.formatted(field.getName()));
+                            """.formatted(field.getName(), mapTypeToC(field.getType().replace("list<", "").replace(">", ""))));
                 } else {
                     inputReads.append("""
                             %s %s;
@@ -471,15 +564,26 @@ public class BoilerplateClient {
                 }
             }
 
-            String functionCall = "%s result = %s(%s);".formatted(
+            for (Field field : inputFields) {
+                if (field.getType().startsWith("list<")) {
+                    inputFields.add(new Field("size_" + field.getName(), "int"));
+                }
+            }
+
+            String functionCall = "\nint size_result = 0;\n%s result = %s(%s);".formatted(
                     mapTypeToC(outputFields.get(0).getType()),
                     functionName,
-                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
+                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))+ ", size_result"
             );
 
             String outputWrite = """
                     printf("%%d\\n", result);
                     """;
+            if (outputFields.get(0).getType().startsWith("list<list<")) {
+                outputWrite = "printf(\"Currently Not Support 2D array for C.\\n\");";
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "for (int i = 0; i < size_result; ++i) printf(\"%d \", result[i]);\nprintf(\"\\n\");";
+            }
 
             return """
                     #include <stdio.h>
@@ -502,6 +606,14 @@ public class BoilerplateClient {
             String inputs = inputFields.stream()
                     .map(field -> mapTypeToC(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining(", "));
+            for (Field field : inputFields) {
+                if (field.getType().startsWith("list<")) {
+                    inputs += String.format(", int size_%s", field.getName());
+                }
+            }
+
+            inputs += ", int size_result"; // For output size if needed
+
             String outputType = mapTypeToC(outputFields.get(0).getType());
             cCode.append(String.format("%s %s(%s) {\n", outputType, functionName, inputs));
             cCode.append("    // Implementation goes here\n");
@@ -562,6 +674,12 @@ public class BoilerplateClient {
 
             String outputWrite = "Console.WriteLine(result);";
 
+            if (outputFields.get(0).getType().startsWith("list<list<")) {
+                outputWrite = "foreach (var list in result){Console.WriteLine($\"[{string.Join(\", \", list)}]\");}";
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "Console.WriteLine(string.Join(\" \", result));";
+            }
+
             return """
                     using System;
                     using System.Collections.Generic;
@@ -595,6 +713,10 @@ public class BoilerplateClient {
         }
 
         private String mapTypeToCSharp(String type) {
+            if (type.startsWith("list<list<")) {
+                String innerType = type.substring(10, type.length() - 2);
+                return "List<List<" + mapTypeToCSharp(innerType) + ">>";
+            }
             return switch (type) {
                 case "int" -> "int";
                 case "float" -> "float";

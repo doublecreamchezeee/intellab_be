@@ -38,7 +38,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String[] publicEndpoints = {
             "/identity/auth/.*",
-
     };
 
     @NonFinal
@@ -66,6 +65,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/courses/enrollPaidCourse",
             "/course/courses/disenroll",
             "/identity/leaderboard",
+            "/identity/leaderboard/myPoint",
+            "/identity/profile/loginStreak",
     };
 
     @NonFinal
