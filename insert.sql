@@ -24,6 +24,8 @@ create table problems
     problem_structure text,
 	author_id             uuid,
     current_creation_step integer       default 1,
+	created_at timestamp(6) without time zone,
+	current_creation_step_description character varying(255) COLLATE pg_catalog."default",
     is_completed_creation boolean       default false
 );
 
@@ -576,7 +578,7 @@ create table course_category
 (
     course_id   uuid    not null
         constraint fkl4r5vdloyu8rtqoh4ei49y2x2
-            references courses,
+            references courses ON DELETE CASCADE,
     category_id integer not null
         constraint fky6fhus0rcvwiik7rk5l99j3j
             references categories
@@ -612,7 +614,7 @@ create table course_section
 (
     course_id  uuid    not null
         constraint fk61t4e9fdsniv4cui65oih8sr3
-            references courses,
+            references courses ON DELETE CASCADE,
     section_id integer not null
         constraint fkidr2cur1nxr2hy5pnf9rsplwi
             references sections
@@ -640,7 +642,7 @@ create table course_summary
     course_id       uuid not null
         primary key
         constraint fk_c_cs
-            references courses,
+            references courses ON DELETE CASCADE,
     course_name     varchar(255),
     summary_content text
 );
@@ -862,7 +864,7 @@ INSERT INTO public.courses (course_id, course_name, description, level, price, u
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score, current_creation_step, is_available, course_image, is_completed_creation, template_code, created_at) VALUES ('dc8c4016-8dba-4baf-afea-ada6f0c21ae4', e'Introduction to DSA I: Foundations & Linear Structures
 ', 'Master the building blocks of Data Structures! This course covers arrays, matrices, linked lists, stacks, and queues - the essential linear structures that power efficient data organization. Learn to implement, analyze, and apply these structures while solidifying your understanding of Big-O notation and algorithmic thinking.', 'Beginner', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'dbfea360-dda9-46a5-9487-ea624080bb60', null, null, 20, 4, true, 'https://img-c.udemycdn.com/course/480x270/2823615_ddab_2.jpg', true, 1, null);
 INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score, current_creation_step, is_available, course_image, is_completed_creation, template_code, created_at) VALUES ('6b76ba5c-548f-4dec-86d9-6d32f004f6b9', 'Guide on Graph Algorithms', 'An essential guide to exploring graph algorithms and their applications. Covers fundamental concepts like BFS, DFS, shortest path algorithms (Dijkstra, Bellman-Ford), and minimum spanning trees (Kruskal, Prim). Ideal for solving complex network-based problems in various domains.', 'Intermediate', 50000.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'dd29f271-a9df-4fcc-a742-127dd269f84b', null, null, 50, 4, true, 'https://img-c.udemycdn.com/course/480x270/1426692_2edd_2.jpg', true, 1, null);
-INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score, current_creation_step, is_available, course_image, is_completed_creation, template_code, created_at) VALUES ('2d282726-865b-41fb-8cf5-7a2116099466', 'Intermediate DSA III: Trees & Hierarchical Data', 'Explore hierarchical data with binary trees, BSTs, and self-balancing AVL trees. Learn traversal methods, collision handling in hashing, and tree-based optimizations. Ideal for tackling non-linear data scenarios like filesystems and database indexing.', 'Intermediate', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'a9e73bb9-21d3-445c-bd9d-6ed22eac6450', 0, 0, 50, 4, true, 'https://img-c.udemycdn.com/course/240x135/1248732_d2c9_3.jpg', true, 1, null);
+INSERT INTO public.courses (course_id, course_name, description, level, price, unit_price, user_id, topic_id, average_rating, review_count, score, current_creation_step, is_available, course_image, is_completed_creation, template_code, created_at) VALUES ('2d282726-865b-41fb-8cf5-7a2116099466', 'Intermediate DSA: Trees & Hierarchical Data', 'Explore hierarchical data with binary trees, BSTs, and self-balancing AVL trees. Learn traversal methods, collision handling in hashing, and tree-based optimizations. Ideal for tackling non-linear data scenarios like filesystems and database indexing.', 'Intermediate', 0.00, 'VND', '4d0c8d27-4509-402b-cf6f-58686cd47319', 'a9e73bb9-21d3-445c-bd9d-6ed22eac6450', 0, 0, 50, 4, true, 'https://img-c.udemycdn.com/course/240x135/1248732_d2c9_3.jpg', true, 1, null);
 
 
 
@@ -912,7 +914,6 @@ INSERT INTO public.course_section (course_id, section_id) VALUES ('dc8c4016-8dba
 INSERT INTO public.course_section (course_id, section_id) VALUES ('8ff4ea92-41f2-4d49-b230-0281874efb2d', 2);
 INSERT INTO public.course_section (course_id, section_id) VALUES ('c9b04774-3a81-43ab-ace6-5242360d9e07', 2);
 INSERT INTO public.course_section (course_id, section_id) VALUES ('95713603-63d1-4b75-8a89-1acdc0977459', 2);
-
 
 INSERT INTO public.lessons (lesson_id, content, description, lesson_name, lesson_order, problem_id, course_id, is_quiz_visible) VALUES ('bc7282ef-2185-47e3-acbc-5b5597cbbbfc', e'****Examples :****
 
@@ -74405,7 +74406,9 @@ INSERT INTO public.options (option_order, content, question_id) VALUES (4, 'O(n^
 INSERT INTO public.options (option_order, content, question_id) VALUES (3, 'O(n*m)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
 INSERT INTO public.options (option_order, content, question_id) VALUES (2, 'O(n)', '7a245f70-ab9e-458c-a802-f6b5696b2ab6');
 
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
+
+-- problems
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('7328995b-6079-4bd9-8be0-7c9152d5a73b', 0.00, 0.00, e'You are given two integer arrays `nums1` and `nums2`, **sorted in non-decreasing order**, and two integers `m` and `n`, representing the number of elements in `nums1` and `nums2` respectively.
 
 **Merge** `nums1` and `nums2` into a single array sorted in non-decreasing order.
 
@@ -74438,128 +74441,8 @@ Input Field: int m
 Input Field: list<int> num2
 Input Field: int n
 Output Structure:
-Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
-
-You must write an algorithm with `O(log n)` runtime complexity.
-
-#### Example 1:
-
-```
-Input: nums = [1,3,5,6], target = 5
-Output: 2
-```
-
-#### Example 2:
-
-```
-Input: nums = [1,3,5,6], target = 2
-Output: 1
-```
-
-#### Example 3:
-
-```
-Input: nums = [1,3,5,6], target = 7
-Output: 4
-```', 'easy', 'Search Insert Position', 2, false, true, e'Problem Name: Search Insert Position
-Function Name: searchInsertPosition
-Input Structure:
-Input Field: list<int> nums
-Input Field: int target
-Output Structure:
-Output Field: int result
-', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
-
-You may assume that each input would have exactly one solution, and you may not use the same element twice.
-
-You can return the answer in any order.
-
-#### Example 1:
-
-```
-Input: nums = [2,7,11,15], target = 9
-Output: [0,1]
-```
-
-#### Example 2:
-
-```
-Input: nums = [3,2,4], target = 6
-Output: [1,2]
-```
-
-#### Example 3:
-
-```
-Input: nums = [3,3], target = 6
-Output: [0,1]
-```', 'easy', 'Two sum', 2, false, true, e'Function Name: twoSum
-Input Structure:
-Input Field: list<int> nums
-Input Field: int target
-Output Structure:
-Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
-
-Increment the large integer by one and return the resulting array of digits.
-
-#### Example 1:
-
-```
-Input: digits = [1,2,3]
-Output: [1,2,4]
-```
-
-#### Example 2:
-
-```
-Input: digits = [4,3,2,1]
-Output: [4,3,2,2]
-```
-
-#### Example 3:
-
-```
-Input: digits = [9]
-Output: [1,0]
-```', 'easy', 'Plus one', 2, false, true, e'Problem Name: Plus One
-Function Name: plusOne
-Input Structure:
-Input Field: list<int> digits
-Output Structure:
-Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
-
-You must implement a solution with a linear runtime complexity and use only constant extra space.
-
-#### Example 1:
-
-```
-Input: nums = [2,2,1]
-Output: 1
-```
-
-#### Example 2:
-
-```
-Input: nums = [4,1,2,1,2]
-Output: 4
-```
-
-#### Example 3:
-
-```
-Input: nums = [1]
-Output: 1
-```', 'easy', 'Single Number', 2, false, true, e'Problem Name: Single Number
-Function Name: singleNumber
-Input Structure:
-Input Field: list<int> nums
-Output Structure:
-Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('c3756efe-d408-4e99-844e-a55021fb7c02', 0.00, 0.00, e'Given a string `s` containing just the characters \'(\', \')\', \'{\', \'}\', \'[\', and \']\', determine if the input string is valid.
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('c3756efe-d408-4e99-844e-a55021fb7c02', 0.00, 0.00, e'Given a string `s` containing just the characters \'(\', \')\', \'{\', \'}\', \'[\', and \']\', determine if the input string is valid.
 
        An input string is valid if:
        1. Open brackets must be closed by the same type of brackets.
@@ -74606,8 +74489,70 @@ INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, descri
        Input Structure:
        Input Field: string s
        Output Structure:
-       Output Field: boolean result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
-INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation) VALUES ('feb01aba-eefe-4220-9242-729f52935cd7', 0.00, 0.00, e'You are given a string `s` consisting of lowercase English letters, an integer `t` representing the number of **transformations** to perform, and an array `nums` of size 26. In one **transformation**, every character in `s` is replaced according to the following rules:
+       Output Field: boolean result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('82978535-a8da-46e1-a39a-31a232e3fffc', 0.00, 0.00, e'Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+
+You must write an algorithm with `O(log n)` runtime complexity.
+
+#### Example 1:
+
+```
+Input: nums = [1,3,5,6], target = 5
+Output: 2
+```
+
+#### Example 2:
+
+```
+Input: nums = [1,3,5,6], target = 2
+Output: 1
+```
+
+#### Example 3:
+
+```
+Input: nums = [1,3,5,6], target = 7
+Output: 4
+```', 'easy', 'Search Insert Position', 2, false, true, e'Problem Name: Search Insert Position
+Function Name: searchInsertPosition
+Input Structure:
+Input Field: list<int> nums
+Input Field: int target
+Output Structure:
+Output Field: int result
+', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('591b3457-2157-4d61-b03d-d53f8666342c', 0.00, 0.00, e'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.
+
+#### Example 1:
+
+```
+Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+```
+
+#### Example 2:
+
+```
+Input: nums = [3,2,4], target = 6
+Output: [1,2]
+```
+
+#### Example 3:
+
+```
+Input: nums = [3,3], target = 6
+Output: [0,1]
+```', 'easy', 'Two sum', 2, false, true, e'Function Name: twoSum
+Input Structure:
+Input Field: list<int> nums
+Input Field: int target
+Output Structure:
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('feb01aba-eefe-4220-9242-729f52935cd7', 0.00, 0.00, e'You are given a string `s` consisting of lowercase English letters, an integer `t` representing the number of **transformations** to perform, and an array `nums` of size 26. In one **transformation**, every character in `s` is replaced according to the following rules:
 
 -   Replace `s[i]` with the **next** `nums[s[i] - \'a\']` consecutive characters in the alphabet. For example, if `s[i] = \'a\'` and `nums[0] = 3`, the character `\'a\'` transforms into the next 3 consecutive characters ahead of it, which results in `"bcd"`.
 -   The transformation **wraps** around the alphabet if it exceeds `\'z\'`. For example, if `s[i] = \'y\'` and `nums[24] = 3`, the character `\'y\'` transforms into the next 3 consecutive characters ahead of it, which results in `"zab"`.
@@ -74675,15 +74620,225 @@ Input Field: string s
 Input Field: int t
 Input Field: list<int> nums
 Output Structure:
-Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true);
+Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('73c532f9-4d55-4737-ae19-3006e02864cc', 0.00, 0.00, e'You are given a large integer represented as an integer array `digits`, where each `digits[i]` is the i<sup>th</sup> digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading `0`\'s.
+
+Increment the large integer by one and return the resulting array of digits.
+
+#### Example 1:
+
+```
+Input: digits = [1,2,3]
+Output: [1,2,4]
+```
+
+#### Example 2:
+
+```
+Input: digits = [4,3,2,1]
+Output: [4,3,2,2]
+```
+
+#### Example 3:
+
+```
+Input: digits = [9]
+Output: [1,0]
+```', 'easy', 'Plus one', 2, false, true, e'Problem Name: Plus One
+Function Name: plusOne
+Input Structure:
+Input Field: list<int> digits
+Output Structure:
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('e608ebb7-07ef-4a2f-8081-92e5993e6118', 0.00, 0.00, e'Given a **non-empty** array of integers `nums`, every element appears _twice_ except for one. Find that single one.
+
+You must implement a solution with a linear runtime complexity and use only constant extra space.
+
+#### Example 1:
+
+```
+Input: nums = [2,2,1]
+Output: 1
+```
+
+#### Example 2:
+
+```
+Input: nums = [4,1,2,1,2]
+Output: 4
+```
+
+#### Example 3:
+
+```
+Input: nums = [1]
+Output: 1
+```', 'easy', 'Single Number', 2, false, true, e'Problem Name: Single Number
+Function Name: singleNumber
+Input Structure:
+Input Field: list<int> nums
+Output Structure:
+Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('5c078d66-5e74-402b-8216-04ac197477a9', 0.00, 0.00, e'A **permutation** of an array of integers is an arrangement of its members into a sequence or linear order.
+
+-   For example, for `arr = [1,2,3]`, the following are all the permutations of `arr`: `[1,2,3], [1,3,2], [2, 1, 3], [2, 3, 1], [3,1,2], [3,2,1]`.
+
+The **next permutation** of an array of integers is the next lexicographically greater permutation of its integer. More formally, if all the permutations of the array are sorted in one container according to their lexicographical order, then the **next permutation** of that array is the permutation that follows it in the sorted container. If such arrangement is not possible, the array must be rearranged as the lowest possible order (i.e., sorted in ascending order).
+
+-   For example, the next permutation of `arr = [1,2,3]` is `[1,3,2]`.
+-   Similarly, the next permutation of `arr = [2,3,1]` is `[3,1,2]`.
+-   While the next permutation of `arr = [3,2,1]` is `[1,2,3]` because `[3,2,1]` does not have a lexicographical larger rearrangement.
+
+Given an array of integers `nums`, *find the next permutation of* `nums`.
+
+The replacement must be **[in place](http://en.wikipedia.org/wiki/In-place_algorithm)** and use only constant extra memory.
+
+**Example 1:**
 
 
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
-1
-1
-0
-																										
-0', '1', null, 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+Input: nums = [1,2,3]
+Output: [1,3,2]
+
+
+**Example 2:**
+
+
+Input: nums = [3,2,1]
+Output: [1,2,3]
+
+
+**Example 3:**
+
+
+Input: nums = [1,1,5]
+Output: [1,5,1]
+
+
+**Constraints:**
+
+-   `1 <= nums.length <= 100`
+-   `0 <= nums[i] <= 100`', 'medium', 'Next Permutation', 5, true, true, e'Problem Name: Next Permutation
+Function Name: nextPermutation
+Input Structure:
+Input Field: list<int> num
+Output Structure:
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('992e6551-1c96-4362-b9f9-7cb08afca28d', 0.00, 0.00, e'Given an integer array nums, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.
+
+Notice that the solution set must not contain duplicate triplets.
+
+**Example 1:**
+
+
+Input: nums = [-1,0,1,2,-1,-4]
+Output: [[-1,-1,2],[-1,0,1]]
+Explanation: 
+nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.
+nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.
+nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.
+The distinct triplets are [-1,0,1] and [-1,-1,2].
+Notice that the order of the output and the order of the triplets does not matter.
+
+
+**Example 2:**
+
+Input: nums = [0,1,1]
+Output: []
+Explanation: The only possible triplet does not sum up to 0.
+
+
+**Example 3:**
+
+Input: nums = [0,0,0]
+Output: [[0,0,0]]
+Explanation: The only possible triplet sums up to 0.
+', 'medium', '3Sum', 5, false, false, e'Problem Name: 3Sum
+Function Name: threeSum
+Input Structure:
+Input Field: list<int> num
+Output Structure:
+Output Field: list<list<int>> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('f3248456-acbf-46ae-9888-8bd0fad9cd91', 0.00, 0.00, e'The **next greater element** of some element `x` in an array is the **first greater** element that is **to the right** of `x` in the same array.
+
+You are given two **distinct 0-indexed** integer arrays `nums1` and `nums2`, where `nums1` is a subset of `nums2`.
+
+For each `0 <= i < nums1.length`, find the index `j` such that `nums1[i] == nums2[j]` and determine the **next greater element** of `nums2[j]` in `nums2`. If there is no next greater element, then the answer for this query is `-1`.
+
+Return *an array* `ans` *of length* `nums1.length` *such that* `ans[i]` *is the **next greater element** as described above.*
+
+**Example 1:**
+
+**Input:** `nums1 = [4,1,2], nums2 = [1,3,4,2]`
+
+ **Output:** `[-1,3,-1]` 
+
+**Explanation:** The next greater element for each value of nums1 is as follows: 
+- 4 is underlined in nums2 = [1,3,4,2]. There is no next greater element, so the answer is -1. 
+- 1 is underlined in nums2 = [1,3,4,2]. The next greater element is 3. 
+- 2 is underlined in nums2 = [1,3,4,2]. There is no next greater element, so the answer is -1.
+
+**Example 2:**
+
+**Input:** `nums1 = [2,4], nums2 = [1,2,3,4] `
+
+**Output:** `[3,-1]` 
+
+**Explanation:** The next greater element for each value of nums1 is as follows: 
+- 2 is underlined in nums2 = [1,2,3,4]. The next greater element is 3. 
+- 4 is underlined in nums2 = [1,2,3,4]. There is no next greater element, so the answer is -1.
+
+**Constraints:**
+
+-   1 <= nums1.length <= nums2.length <= 1000
+-   0 <= nums1[i], nums2[i] <= 10$^4$
+-   All integers in `nums1` and `nums2` are **unique**.
+-   All the integers of `nums1` also appear in `nums2`.', 'easy', 'Next Greater Element I', 3, true, true, e'Problem Name: Next Greater Element I
+Function Name: nextGreaterElement
+Input Structure:
+Input Field: list<int> nums1
+Input Field: list<int> nums2
+Output Structure:
+Output Field: list<int> result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+INSERT INTO public.problems (problem_id, acceptance_rate, average_rating, description, problem_level, problem_name, score, is_available, is_published, problem_structure, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description) VALUES ('a1964481-4927-4946-bd13-cee87f00a952', 0.00, 0.00, e'Suppose LeetCode will start its **IPO** soon. In order to sell a good price of its shares to Venture Capital, LeetCode would like to work on some projects to increase its capital before the **IPO**. Since it has limited resources, it can only finish at most `k` distinct projects before the **IPO**. Help LeetCode design the best way to maximize its total capital after finishing at most `k` distinct projects.
+
+You are given `n` projects where the `i<sup>th</sup>` project has a pure profit `profits[i]` and a minimum capital of `capital[i]` is needed to start it.
+
+Initially, you have `w` capital. When you finish a project, you will obtain its pure profit and the profit will be added to your total capital.
+
+Pick a list of **at most** `k` distinct projects from given projects to **maximize your final capital**, and return *the final maximized capital*.
+
+The answer is guaranteed to fit in a 32-bit signed integer.
+
+**Example 1:**
+
+**Input:** k = 2, w = 0, profits = [1,2,3], capital = [0,1,1]
+
+**Output:** 4
+
+**Explanation:** Since your initial capital is 0, you can only start the project indexed 0.
+After finishing it you will obtain profit 1 and your capital becomes 1.
+With capital 1, you can either start the project indexed 1 or the project indexed 2.
+Since you can choose at most 2 projects, you need to finish the project indexed 2 to get the maximum capital.
+Therefore, output the final maximized capital, which is 0 + 1 + 3 = 4.
+
+
+**Example 2:**
+
+**Input:** k = 3, w = 0, profits = [1,2,3], capital = [0,1,2]
+
+**Output:** 6', 'hard', 'IPO', 8, true, true, e'Problem Name: IPO
+Function Name: findMaximizedCapital
+Input Structure:
+Input Field: int k
+Input Field: int w
+Input Field: list<int> profits
+Input Field: list<int> capital
+Output Structure:
+Output Field: int result', '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, null, 'Final Step');
+
+
+
+-- test_cases
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('eb1f21cf-b8fa-41cc-aea8-7224a85998c6', e'7
 1 3 5 0 0 0 0
 3
@@ -74778,542 +74933,376 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_ord
 9
 26
 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2', '8704', null, 5, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('2a780b15-8e6c-4ce1-bcca-09cd93ec9be4', e'3
+1 2 3', '1 3 2', null, 1, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('eae3123e-c834-4779-be4a-954495b2dbad', e'3
+3 2 1', '1 2 3', null, 2, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('e24ec0a8-cc08-41f9-8fee-354744d2dc3d', e'3
+1 1 5', '1 5 1', null, 3, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('c6a4be62-1c13-4314-a57b-284c0f0d9b3d', e'3
+6 7 7', '7 6 7', null, 4, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('9526e520-d2fd-45be-aa15-c17b58f2bca8', e'3
+0 3 4', '0 4 3', null, 5, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('3023b13d-5542-49e3-9bc1-2a268d9b7958', e'3
+0 2 7', '0 7 2', null, 6, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('42018af1-6259-4030-a798-4d7b10614cd0', e'3
+9 7 2', '2 7 9', null, 7, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('74280ed8-db86-4b49-b747-87ea08c701ea', e'3
+4 1 2
+4
+1 3 4 2', '-1 3 -1', null, 1, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('8fd1fddd-c3f7-4f1b-a8ff-5afdaa728841', e'2
+2 4
+4
+1 2 3 4', '3 -1', null, 2, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('15172638-0f5b-4206-a979-9b75c425653e', e'3
+1 0 2
+4
+1 0 2 7', '2 2 7', null, 3, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('9a27902a-596a-4e37-b7f6-65ebb4d38d5f', e'3
+1 0 6
+5
+1 6 0 7 3', '6 7 7', null, 4, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('b01d8dc4-2dcd-40f5-92c5-a07011c33837', e'2
+0
+3
+1 2 3
+3
+0 1 1', '4', null, 1, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('f50d5d2d-6c69-49f1-84d6-beadf5f27b03', e'3
+0
+3
+1 2 3
+3
+0 1 2', '6', null, 2, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('98bcd4f0-eeb4-4176-a9f5-541bc9b4e071', e'5
+0
+3
+1 2 3
+3
+0 1 1', '6', null, 3, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('c9415e88-e3f7-4dff-ad58-59518bd6a103', e'10
+0
+3
+1 2 3
+3
+0 1 2', '6', null, 4, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('beba8151-d2e7-4cdc-851b-053aec059352', e'11
+0
+3
+1 2 3
+3
+0 1 2', '6', null, 5, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d363f914-f3d8-4b53-a770-2c31e0c74ea2', e'13
+0
+3
+1 2 3
+3
+0 1 2', '6', null, 6, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('ce9ce4a1-e19e-4cd3-91cf-bdb9047b50b3', e'1
+0
+3
+1 2 3
+3
+0 1 2', '1', null, 7, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('2484336b-c5d5-4b95-9cb4-09c2a245cd34', e'2
+0
+3
+2 3 8
+3
+3 1 2', '0', null, 8, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('630888c6-b2e6-4e6e-b8e1-ea19cc79a008', e'6
+-1 0 1 2 -1 -4', e'[-1, -1, 2]
+[-1, 0, 1]', null, 1, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('ee4de00e-cd8f-4ce3-9901-3ce98f40ae67', e'3
+0 1 1', null, null, 2, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d79abe99-f3f1-4dd9-8452-4ca78c4459c0', e'3
+0 0 0', '[0, 0, 0]', null, 3, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('af2e10d1-479e-48a5-b2f8-15ead574cece', e'11
+0 1 2 5 1 1 0 2 5 7 1', null, null, 4, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('d9bd9994-38a7-4882-8d43-661c82190209', e'18
+4 5 6 -1 0 1 2 -1 -4 0 0 0 2 2 2 2 2 2', e'[-4, -1, 5]
+[-4, 0, 4]
+[-4, 2, 2]
+[-1, -1, 2]
+[-1, 0, 1]
+[0, 0, 0]', null, 5, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('23f35de8-7a82-4688-9253-6b5330894296', e'1
+1
+1
+0
+
+0', '1', null, 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
 
 
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (50, 'C (GCC 9.2.0)', 'C');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (54, 'C++ (GCC 9.2.0)', 'C++');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (51, 'C# (Mono 6.6.0.161)', 'C#');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (63, 'JavaScript (Node.js 12.14.0)', 'JavaScript');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (71, 'Python (3.8.1)', 'Python');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
-INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (91, 'Java (JDK 17.0.6)', 'Java');
+
+-- Solutions
+
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Approach: Matrix Multiplication + Matrix Exponentiation By Squaring
+
+#### Intuition
+
+We use $f(i,c)$ to represent the number of occurrences of the character c in the string after i transformations. For convenience, we let the value range of c be [0,26), corresponding to the 26 characters from a to z in sequence.
+
+Initially, all $f(0,c)$ values are equal to the number of occurrences of c in the given string s. When we iterate from $f(i−1,⋯)$ to $f(i,⋯)$, we use the recurrence:
+
+$$ f(i,c)=∑_{c′=0}^{25}[f(i−1,c′)×T(c,c′)]$$
+
+Here, the value of $T(c,c′)$ is either 0 or 1. If c′ is included in the substitution set of c during a single transformation, the value is 1; otherwise, it is 0. The values of $T(c,c′)$ can be obtained from the given array ***nums***.
+
+The time complexity of directly using the recurrence is high, so optimization is necessary. Notice that $T(c,c′)$ is independent of i; it remains fixed in each round of iteration. Therefore, if we express $f(i,c)$ and $f(i−1,c′)$ as *n×1* column vectors, and $T(c,c′)$ as an *n×n* matrix, the recurrence becomes a matrix multiplication:
 
 
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '591b3457-2157-4d61-b03d-d53f8666342c');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (5, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '82978535-a8da-46e1-a39a-31a232e3fffc');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '591b3457-2157-4d61-b03d-d53f8666342c');
-
-INSERT INTO public.problem_comments(
-    comment_id, content, created_at, last_modified_at, user_uid, user_uuid,
-    parent_comment_id, problem_id, replied_comment_id, number_of_likes, is_modified
-) VALUES
-('3177f55e-8fca-459c-96d4-90e51dae4588', 'i run now 7',
- '2025-02-21 16:43:00.683279+07', '2025-02-22 15:13:23.367305+07',
- 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
- NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
-
-('0dc0dfa1-cca9-42b4-bfad-f9379fdd139e', 'i run now 5',
- '2025-02-22 16:13:31.790966+07', '2025-02-22 16:13:58.301744+07',
- 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
- NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
-
-('1db65ea6-4237-4219-86ad-1f8bcee67e29', 'i run now 8',
- '2025-02-21 16:46:37.991912+07', '2025-02-22 13:07:38.136802+07',
- 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
- '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
- '3177f55e-8fca-459c-96d4-90e51dae4588', 0, NULL),
-
-('9be6a2bc-e4b1-4b56-ac5d-77c06ac1b6df', 'i run now 3',
- '2025-02-21 22:02:03.547642+07', '2025-02-21 22:02:03.547642+07',
- 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
- NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
-
-('5ddd3184-4713-419c-8611-9cfd5e984c96', 'i run now 4',
- '2025-02-21 16:45:50.394167+07', '2025-02-22 17:56:49.763188+07',
- 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
- '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
- '3177f55e-8fca-459c-96d4-90e51dae4588', 0, NULL),
-
-('c3265443-b55a-4f3b-b9b5-f00886ae409a', 'i run now 2',
- '2025-02-21 16:46:08.087696+07', '2025-02-22 18:11:22.526227+07',
- 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
- '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
- '5ddd3184-4713-419c-8611-9cfd5e984c96', 0, NULL);
 
 
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### **Problem Description**  
-You are given two integer arrays `nums1` and `nums2`, sorted in **non-decreasing order**, and two integers `m` and `n` representing the number of elements in each array. Merge the two arrays so that `nums1` becomes a single array sorted in **non-decreasing order**.  
-
-- `nums1` has a size of `m + n` with the last `n` slots set to `0`, which will store elements from `nums2`.  
-- Modify `nums1` **in-place**, without returning anything.  
-
----
-
-### **Approach**  
-
-To merge the arrays in-place, we can solve this problem efficiently by merging from **right to left**, starting at the end of `nums1` and `nums2` (this prevents overwriting elements that haven’t been processed yet).  
-
-**Optimal Solution:**  
-1. Use three pointers:  
-   - `p1`: Last valid element in `nums1` (`m - 1`)  
-   - `p2`: Last element in `nums2` (`n - 1`)  
-   - `p`: Points to the last position in `nums1` (`m + n - 1`)  
-2. Compare the elements from `nums1[p1]` and `nums2[p2]`, and place the larger element at `nums1[p]`, then decrement `p`, `p1`, or `p2` accordingly.  
-3. If there are any remaining elements in `nums2`, copy them to the beginning of `nums1`.  
-
----
-
-### **Solutions in Different Languages:**  
+![](https://res.cloudinary.com/diyn1vkim/image/upload/v1749642042/mwhnh7gpxwqazafiwtyo.png)
 
 
-```python
-def merge(nums1, m, nums2, n):
-    p1, p2, p = m - 1, n - 1, m + n - 1
-    
-    while p1 >= 0 and p2 >= 0:
-        if nums1[p1] > nums2[p2]:
-            nums1[p] = nums1[p1]
-            p1 -= 1
-        else:
-            nums1[p] = nums2[p2]
-            p2 -= 1
-        p -= 1
-    
-    # If there are remaining elements in nums2
-    while p2 >= 0:
-        nums1[p] = nums2[p2]
-        p2 -= 1
-        p -= 1
 
-# Example test cases
-nums1 = [1, 2, 3, 0, 0, 0]
-m = 3
-nums2 = [2, 5, 6]
-n = 3
-merge(nums1, m, nums2, n)
-print(nums1)  # Output: [1, 2, 2, 3, 5, 6]
-```
-```java
-import java.util.Arrays;
+So, after t iterations:
 
-public class MergeSortedArray {
-    public static void merge(int[] nums1, int m, int[] nums2, int n) {
-        int p1 = m - 1, p2 = n - 1, p = m + n - 1;
-        
-        while (p1 >= 0 && p2 >= 0) {
-            if (nums1[p1] > nums2[p2]) {
-                nums1[p--] = nums1[p1--];
-            } else {
-                nums1[p--] = nums2[p2--];
-            }
-        }
-        
-        // Copy remaining elements from nums2 (if any)
-        while (p2 >= 0) {
-            nums1[p--] = nums2[p2--];
-        }
-    }
+$$ \\mathbf{f}_t = \\mathbf{T}^t \\cdot \\mathbf{f}_0 $$
 
-    public static void main(String[] args) {
-        int[] nums1 = {1, 2, 3, 0, 0, 0};
-        int m = 3;
-        int[] nums2 = {2, 5, 6};
-        int n = 3;
-        merge(nums1, m, nums2, n);
-        System.out.println(Arrays.toString(nums1));  // Output: [1, 2, 2, 3, 5, 6]
-    }
-}
-```
+Thus, we can first compute the t-th power of the matrix corresponding to T(c,c′), and then multiply it by the initial column vector f(0,⋯) to obtain all values f(t,⋯). The sum of these values gives the final answer.
+
+The exponentiation of the transformation matrix can be efficiently performed using [matrix exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring), which we will not elaborate on here.
+
+# Implementation
+
 ```cpp
-#include <iostream>
-#include <vector>
-using namespace std;
+static constexpr int L = 26;
+static constexpr int mod = 1000000007;
 
-void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
-    int p1 = m - 1, p2 = n - 1, p = m + n - 1;
-    
-    while (p1 >= 0 && p2 >= 0) {
-        if (nums1[p1] > nums2[p2]) {
-            nums1[p--] = nums1[p1--];
-        } else {
-            nums1[p--] = nums2[p2--];
-        }
+struct Mat {
+Mat() { memset(a, 0, sizeof(a)); }
+Mat(const Mat& that) {
+  for (int i = 0; i < L; ++i) {
+    for (int j = 0; j < L; ++j) {
+      a[i][j] = that.a[i][j];
     }
-    
-    // Copy remaining elements from nums2
-    while (p2 >= 0) {
-        nums1[p--] = nums2[p2--];
+  }
+}
+Mat& operator=(const Mat& that) {
+  if (this != &that) {
+    for (int i = 0; i < L; ++i) {
+      for (int j = 0; j < L; ++j) {
+        a[i][j] = that.a[i][j];
+      }
     }
+  }
+  return *this;
 }
 
-int main() {
-    vector<int> nums1 = {1, 2, 3, 0, 0, 0};
-    int m = 3;
-    vector<int> nums2 = {2, 5, 6};
-    int n = 3;
-    merge(nums1, m, nums2, n);
-    for (int num : nums1) {
-        cout << num << " ";
+int a[L][L];
+};
+
+Mat operator*(const Mat& u, const Mat& v) {
+  Mat w;
+  for (int i = 0; i < L; ++i) {
+    for (int j = 0; j < L; ++j) {
+      for (int k = 0; k < L; ++k) {
+        w.a[i][j] =
+          (w.a[i][j] + (long long)u.a[i][k] * v.a[k][j]) % mod;
+      }
     }
-    // Output: 1 2 2 3 5 6
+  }
+  return w;
 }
+
+// identity matrix
+Mat I() {
+  Mat w;
+  for (int i = 0; i < L; ++i) {
+    w.a[i][i] = 1;
+  }
+  return w;
+}
+
+// matrix exponentiation by squaring
+Mat quickmul(const Mat& x, int y) {
+  Mat ans = I(), cur = x;
+  while (y) {
+    if (y & 1) {
+      ans = ans * cur;
+    }
+    cur = cur * cur;
+    y >>= 1;
+  }
+  return ans;
+}
+
+int lengthAfterTransformations(string s, int t, vector<int>& nums) {
+  Mat T;
+  for (int i = 0; i < 26; ++i) {
+    for (int j = 1; j <= nums[i]; ++j) {
+      T.a[(i + j) % 26][i] = 1;
+    }
+  }
+  Mat res = quickmul(T, t);
+  int ans = 0;
+  vector<int> f(26);
+  for (char ch : s) {
+    ++f[ch - \'a\'];
+  }
+  for (int i = 0; i < 26; ++i) {
+    for (int j = 0; j < 26; ++j) {
+      ans = (ans + (long long)res.a[i][j] * f[j]) % mod;
+    }
+  }
+  return ans;
+}
+};
+```
+```python
+MOD = 10**9 + 7
+L = 26
+
+
+class Mat:
+  def __init__(self, copy_from: "Mat" = None) -> None:
+    self.a: List[List[int]] = [[0] * L for _ in range(L)]
+    if copy_from:
+      for i in range(L):
+        for j in range(L):
+          self.a[i][j] = copy_from.a[i][j]
+
+    def __mul__(self, other: "Mat") -> "Mat":
+      result = Mat()
+      for i in range(L):
+        for j in range(L):
+          for k in range(L):
+            result.a[i][j] = (
+              result.a[i][j] + self.a[i][k] * other.a[k][j]
+            ) % MOD
+        return result
+
+
+# identity matrix
+def I() -> Mat:
+  m = Mat()
+  for i in range(L):
+    m.a[i][i] = 1
+    return m
+
+
+# matrix exponentiation by squaring
+def quickmul(x: Mat, y: int) -> Mat:
+  ans = I()
+  cur = x
+  while y:
+    if y & 1:
+      ans = ans * cur
+      cur = cur * cur
+    y >>= 1
+    return ans
+
+
+def lengthAfterTransformations(self, s: str, t: int, nums: List[int]) -> int:
+  T = Mat()
+  for i in range(26):
+    for j in range(1, nums[i] + 1):
+      T.a[(i + j) % 26][i] = 1
+
+      res = quickmul(T, t)
+
+    f = [0] * 26
+  for ch in s:
+    f[ord(ch) - ord("a")] += 1
+
+    ans = 0
+    for i in range(26):
+      for j in range(26):
+        ans = (ans + res.a[i][j] * f[j]) % MOD
+
+        return ans
 ```
 ```javascript
-function merge(nums1, m, nums2, n) {
-    let p1 = m - 1, p2 = n - 1, p = m + n - 1;
-
-    while (p1 >= 0 && p2 >= 0) {
-        if (nums1[p1] > nums2[p2]) {
-            nums1[p--] = nums1[p1--];
-        } else {
-            nums1[p--] = nums2[p2--];
-        }
-    }
-
-    // Copy remaining elements from nums2 (if any)
-    while (p2 >= 0) {
-        nums1[p--] = nums2[p2--];
-    }
-}
-
-// Example test case
-let nums1 = [1, 2, 3, 0, 0, 0];
-let m = 3;
-let nums2 = [2, 5, 6];
-let n = 3;
-merge(nums1, m, nums2, n);
-console.log(nums1);  // Output: [1, 2, 2, 3, 5, 6]
-```
-```typescript
-function merge(nums1: number[], m: number, nums2: number[], n: number): void {
-    let p1 = m - 1, p2 = n - 1, p = m + n - 1;
-
-    while (p1 >= 0 && p2 >= 0) {
-        if (nums1[p1] > nums2[p2]) {
-            nums1[p--] = nums1[p1--];
-        } else {
-            nums1[p--] = nums2[p2--];
-        }
-    }
-
-    // Copy remaining elements from nums2 (if any)
-    while (p2 >= 0) {
-        nums1[p--] = nums2[p2--];
-    }
-}
-
-// Example test case
-let nums1 = [1, 2, 3, 0, 0, 0];
-let m = 3;
-let nums2 = [2, 5, 6];
-let n = 3;
-merge(nums1, m, nums2, n);
-console.log(nums1);  // Output: [1, 2, 2, 3, 5, 6]
-```
-
----
-
-### **Time Complexity:**  
-- **Time:** `O(m + n)` since we iterate through all the elements of `nums1` and `nums2`.  
-- **Space:** `O(1)` (in-place modification of `nums1`).  
-
-This is an optimal solution that efficiently merges the arrays in sorted order.', '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### Approach and Solution  
-To solve this problem, we can follow a simple digit-by-digit approach, incrementing the last digit of the array by one. If this increment leads to a carry (i.e., the digit becomes 10), we set the current position to 0 and move the carry to the next left digit. This process is repeated until there are no more carry values left.  
-
-If, after processing all the digits, we still have a carry (like `[9, 9, 9]` becoming `[0, 0, 0]` with a carry left), we insert `1` at the beginning of the array.  
-
----
-
-### Code Implementations  
-
-```python
-def plusOne(digits):
-    n = len(digits)
-    
-    # Traverse the array from the last digit to the first
-    for i in range(n - 1, -1, -1):
-        if digits[i] < 9:  # If the current digit is less than 9, increment it
-            digits[i] += 1
-            return digits
-        else:
-            digits[i] = 0  # Set the current digit to 0 if it becomes 10 and carry over
-    
-    # If all digits are 9, we need to add a 1 at the front (e.g., [9, 9] -> [1, 0, 0])
-    return [1] + digits
-
-# Example test cases
-print(plusOne([1, 2, 3]))  # Output: [1, 2, 4]
-print(plusOne([4, 3, 2, 1]))  # Output: [4, 3, 2, 2]
-print(plusOne([9]))  # Output: [1, 0]
-```
-```java
-import java.util.Arrays;
-
-public class PlusOne {
-    public static int[] plusOne(int[] digits) {
-        int n = digits.length;
-        
-        // Traverse from the last digit to the first
-        for (int i = n - 1; i >= 0; i--) {
-            if (digits[i] < 9) {
-                digits[i]++;
-                return digits;
+class Mat {
+    constructor(copyFrom = null) {
+        this.a = Array.from({ length: 26 }, () => new Array(26).fill(0n));
+        if (copyFrom) {
+            for (let i = 0; i < 26; i++) {
+                for (let j = 0; j < 26; j++) {
+                    this.a[i][j] = copyFrom.a[i][j];
+                }
             }
-            digits[i] = 0;  // Set to 0 and carry to the next digit
         }
-        
-        // If all digits were 9, we need to add an extra 1 at the beginning
-        int[] result = new int[n + 1];
-        result[0] = 1;
+    }
+
+    mul(other) {
+        const MOD = BigInt(1e9 + 7);
+        const result = new Mat();
+        for (let i = 0; i < 26; i++) {
+            for (let j = 0; j < 26; j++) {
+                for (let k = 0; k < 26; k++) {
+                    result.a[i][j] =
+                        (result.a[i][j] + this.a[i][k] * other.a[k][j]) % MOD;
+                }
+            }
+        }
         return result;
     }
-
-    public static void main(String[] args) {
-        System.out.println(Arrays.toString(plusOne(new int[]{1, 2, 3})));  // Output: [1, 2, 4]
-        System.out.println(Arrays.toString(plusOne(new int[]{4, 3, 2, 1})));  // Output: [4, 3, 2, 2]
-        System.out.println(Arrays.toString(plusOne(new int[]{9})));  // Output: [1, 0]
-    }
 }
-```
-```cpp
-#include <iostream>
-#include <vector>
-using namespace std;
 
-vector<int> plusOne(vector<int>& digits) {
-    int n = digits.size();
-    
-    // Traverse the array from last to first
-    for (int i = n - 1; i >= 0; i--) {
-        if (digits[i] < 9) {
-            digits[i]++;
-            return digits;  // Return result when no carry is left
+/* identity matrix */
+function I() {
+    const m = new Mat();
+    for (let i = 0; i < 26; i++) {
+        m.a[i][i] = 1n;
+    }
+    return m;
+}
+
+/* matrix exponentiation by squaring */
+function quickmul(x, y) {
+    let ans = I();
+    let cur = new Mat(x);
+    while (y > 0n) {
+        if (y & (1n != 0n)) {
+            ans = ans.mul(cur);
         }
-        digits[i] = 0;  // Set to 0 and propagate carry
+        cur = cur.mul(cur);
+        y >>= 1;
     }
-    
-    // If all digits are 9, add an extra 1 at the beginning
-    digits.insert(digits.begin(), 1);
-    return digits;
+    return ans;
 }
 
-int main() {
-    vector<int> digits1 = {1, 2, 3};
-    vector<int> digits2 = {4, 3, 2, 1};
-    vector<int> digits3 = {9};
-    
-    vector<int> result1 = plusOne(digits1);
-    vector<int> result2 = plusOne(digits2);
-    vector<int> result3 = plusOne(digits3);
-    
-    for (int num : result1) cout << num << " ";  // Output: 1 2 4
-    cout << endl;
-    
-    for (int num : result2) cout << num << " ";  // Output: 4 3 2 2
-    cout << endl;
-    
-    for (int num : result3) cout << num << " ";  // Output: 1 0
-    cout << endl;
-}
-```
-```javascript
-function plusOne(digits) {
-    let n = digits.length;
-    
-    // Traverse from the last digit to the first
-    for (let i = n - 1; i >= 0; i--) {
-        if (digits[i] < 9) {
-            digits[i]++;
-            return digits;  // Return result after incrementing
-        }
-        digits[i] = 0;  // Set to 0 if 9 and propagate carry
-    }
-    
-    // If all digits are 9, add a 1 at the front (e.g., [9, 9] -> [1, 0, 0])
-    digits.unshift(1);
-    return digits;
-}
-
-// Example test cases
-console.log(plusOne([1, 2, 3]));  // Output: [1, 2, 4]
-console.log(plusOne([4, 3, 2, 1]));  // Output: [4, 3, 2, 2]
-console.log(plusOne([9]));  // Output: [1, 0]
-```
-```typescript
-function plusOne(digits: number[]): number[] {
-    let n = digits.length;
-    
-    for (let i = n - 1; i >= 0; i--) {
-        if (digits[i] < 9) {
-            digits[i]++;
-            return digits;  // Return if increment is done without carry
-        }
-        digits[i] = 0;  // Handle carry by setting digit to 0
-    }
-    
-    // If carry remains after all digits, add 1 at the beginning
-    digits.unshift(1);
-    return digits;
-}
-
-// Example test cases
-console.log(plusOne([1, 2, 3]));  // Output: [1, 2, 4]
-console.log(plusOne([4, 3, 2, 1]));  // Output: [4, 3, 2, 2]
-console.log(plusOne([9]));  // Output: [1, 0]
-```
-
----
-
-### Time and Space Complexity:  
-- **Time Complexity:** `O(n)` because we traverse the array from right to left.  
-- **Space Complexity:** `O(1)` if the input array can be modified in-place. Otherwise, if new memory is allocated (like in Java or inserting elements in Python), the space complexity is `O(n)`.', '73c532f9-4d55-4737-ae19-3006e02864cc');
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### Approach and Solution  
-To achieve `O(log n)` runtime complexity, we can use **binary search**, which is efficient for searching in sorted arrays. The goal is to find the index of the target or determine where the target would fit if it is not present in the array.  
-
-**Binary Search Approach:**  
-1. Initialize two pointers: `left` at the start of the array and `right` at the end.  
-2. Perform binary search:
-   - Calculate the middle index: `mid = (left + right) // 2`.  
-   - If `nums[mid] == target`, return `mid`.  
-   - If `nums[mid] > target`, move `right` to `mid - 1`.  
-   - If `nums[mid] < target`, move `left` to `mid + 1`.  
-3. If the target is not found, return the `left` pointer, which will be at the position where the target should be inserted.  
-
----
-
-### Code Implementations  
-```python
-def searchInsert(nums, target):
-    left, right = 0, len(nums) - 1
-    
-    while left <= right:
-        mid = (left + right) // 2
-        
-        if nums[mid] == target:
-            return mid
-        elif nums[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
-    
-    return left  # Return the index where the target should be inserted
-
-# Example test cases
-print(searchInsert([1, 3, 5, 6], 5))  # Output: 2
-print(searchInsert([1, 3, 5, 6], 2))  # Output: 1
-print(searchInsert([1, 3, 5, 6], 7))  # Output: 4
-```
-```java
-public class SearchInsertPosition {
-    public static int searchInsert(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            
-            if (nums[mid] == target) {
-                return mid;
-            } else if (nums[mid] < target) {
-                left = mid + 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-        
-        return left;  // Return the insertion position
-    }
-
-    public static void main(String[] args) {
-        System.out.println(searchInsert(new int[]{1, 3, 5, 6}, 5));  // Output: 2
-        System.out.println(searchInsert(new int[]{1, 3, 5, 6}, 2));  // Output: 1
-        System.out.println(searchInsert(new int[]{1, 3, 5, 6}, 7));  // Output: 4
-    }
-}
-```
-```cpp
-#include <iostream>
-#include <vector>
-using namespace std;
-
-int searchInsert(vector<int>& nums, int target) {
-    int left = 0, right = nums.size() - 1;
-    
-    while (left <= right) {
-        int mid = left + (right - left) / 2;
-        
-        if (nums[mid] == target) {
-            return mid;
-        } else if (nums[mid] < target) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
+var lengthAfterTransformations = function (s, t, nums) {
+    const MOD = BigInt(1e9 + 7);
+    const T = new Mat();
+    for (let i = 0; i < 26; i++) {
+        for (let j = 1; j <= nums[i]; j++) {
+            T.a[(i + j) % 26][i] = 1n;
         }
     }
-    
-    return left;  // Return the insertion index
-}
 
-int main() {
-    vector<int> nums = {1, 3, 5, 6};
-    
-    cout << searchInsert(nums, 5) << endl;  // Output: 2
-    cout << searchInsert(nums, 2) << endl;  // Output: 1
-    cout << searchInsert(nums, 7) << endl;  // Output: 4
-}
-```
-```javascript
-function searchInsert(nums, target) {
-    let left = 0, right = nums.length - 1;
-    
-    while (left <= right) {
-        let mid = Math.floor((left + right) / 2);
-        
-        if (nums[mid] === target) {
-            return mid;
-        } else if (nums[mid] < target) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
+    const res = quickmul(T, t);
+    const f = new Array(26).fill(0n);
+    for (const ch of s) {
+        f[ch.charCodeAt(0) - "a".charCodeAt(0)]++;
+    }
+
+    let ans = 0n;
+    for (let i = 0; i < 26; i++) {
+        for (let j = 0; j < 26; j++) {
+            ans = (ans + res.a[i][j] * f[j]) % MOD;
         }
     }
-    
-    return left;  // Return the insertion position
-}
-
-// Example test cases
-console.log(searchInsert([1, 3, 5, 6], 5));  // Output: 2
-console.log(searchInsert([1, 3, 5, 6], 2));  // Output: 1
-console.log(searchInsert([1, 3, 5, 6], 7));  // Output: 4
-```
-```typescript
-function searchInsert(nums: number[], target: number): number {
-    let left = 0, right = nums.length - 1;
-    
-    while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        
-        if (nums[mid] === target) {
-            return mid;
-        } else if (nums[mid] < target) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
-    }
-    
-    return left;  // Return the position to insert the target
-}
-
-// Example test cases
-console.log(searchInsert([1, 3, 5, 6], 5));  // Output: 2
-console.log(searchInsert([1, 3, 5, 6], 2));  // Output: 1
-console.log(searchInsert([1, 3, 5, 6], 7));  // Output: 4
+    return Number(ans);
+};
 ```
 
----
+#### Complexity Analysis
 
-### Time and Space Complexity  
-- **Time Complexity:** `O(log n)` because we are performing a binary search.  
-- **Space Complexity:** `O(1)` because we do not use any extra space, and the solution modifies pointers in place.  ', '82978535-a8da-46e1-a39a-31a232e3fffc');
+Let n be the length of the string s, and let $∣Σ∣$ denote the size of the character set, which is 26 in this case.
+
+-   Time complexity: $O(n+logt×∣Σ∣^3)$.
+    
+    We first traverse the string to count the occurrences of each character. Then, we apply matrix exponentiation by squaring to compute repeated matrix multiplication.
+    
+-   Space complexity: $O(∣Σ∣^2).$
+    
+    This is the space required to store the transformation matrix.', 'feb01aba-eefe-4220-9242-729f52935cd7');
 INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Solution Article  
 
 ## Approach 1: Brute Force  
@@ -75322,20 +75311,17 @@ The brute force approach is simple: loop through each element `x` and find if th
 
 ### Implementation  
 ``` C++
-class Solution {
-public:
-    vector<int> twoSum(vector<int> &nums, int target) {
-        for (int i = 0; i < nums.size(); i++) {
-            for (int j = i + 1; j < nums.size(); j++) {
-                if (nums[j] == target - nums[i]) {
-                    return {i, j};
-                }
+vector<int> twoSum(vector<int> &nums, int target) {
+    for (int i = 0; i < nums.size(); i++) {
+        for (int j = i + 1; j < nums.size(); j++) {
+            if (nums[j] == target - nums[i]) {
+                return {i, j};
             }
         }
-        // Return an empty vector if no solution is found
-        return {};
     }
-};
+        // Return an empty vector if no solution is found
+    return {};
+}
 ```  
 ```C
 int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
@@ -75386,7 +75372,7 @@ class Solution {
 }
 ```
 ```JavaScript
-var twoSum = function (nums, target) {
+function twoSum(nums, target) {
     for (let i = 0; i < nums.length; i++) {
         for (let j = i + 1; j < nums.length; j++) {
             if (nums[j] === target - nums[i]) {
@@ -75398,15 +75384,14 @@ var twoSum = function (nums, target) {
     return [];
 };
 ```
-```Python3
-class Solution:
-    def twoSum(self, nums: List[int], target: int) -> List[int]:
-        for i in range(len(nums)):
-            for j in range(i + 1, len(nums)):
-                if nums[j] == target - nums[i]:
-                    return [i, j]
-        # Return an empty list if no solution is found
-        return []
+```Python
+def twoSum(nums: list[int], target: int) -> list[int]:
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[j] == target - nums[i]:
+                return [i, j]
+    # Return an empty list if no solution is found
+    return []
 ```
 ```TypeScript
 function twoSum(nums: number[], target: number): number[] {
@@ -75722,620 +75707,461 @@ function twoSum(nums: number[], target: number): number[] {
 - **Space complexity**: O(n)  
   - The extra space required depends on the number of items stored in the hash table, which stores at most `n` elements.  
 ```  ', '591b3457-2157-4d61-b03d-d53f8666342c');
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'### Approach and Solution  
-To solve this problem in **linear time complexity** `O(n)` and using **constant extra space** `O(1)`, we can leverage **bitwise XOR**.  
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Approach 1: Brute Force
 
-#### XOR Properties:
-1. `a ^ a = 0` (XOR of a number with itself is 0).  
-2. `a ^ 0 = a` (XOR of a number with 0 is the number itself).  
-3. XOR is commutative and associative, so the order of operations doesn\'t matter.  
+**Algorithm**
 
-Using these properties, if we XOR all numbers in the array, the numbers that appear twice will cancel each other out, and the remaining number will be the single one.
+In this approach, we find out every possible permutation of list formed by the elements of the given array and find out the permutation which is  
+just larger than the given one. But this one will be a very naive approach, since it requires us to find out every possible permutation  
+which will take really long time and the implementation is complex.  
+Thus, this approach is not acceptable at all. Hence, we move on directly to the correct approach.
 
----
+**Complexity Analysis**
 
-### Code Implementations  
+-   Time complexity : O(n!). Total possible permutations is n!.
+-   Space complexity : O(n). Since an array will be used to store the permutations.  
+    
 
-```python
-def singleNumber(nums):
-    result = 0
-    for num in nums:
-        result ^= num  # XOR all numbers
-    return result
+# Approach 2: Single Pass Approach
 
-# Example test cases
-print(singleNumber([2, 2, 1]))       # Output: 1
-print(singleNumber([4, 1, 2, 1, 2]))  # Output: 4
-print(singleNumber([1]))              # Output: 1
+**Algorithm**
+
+First, we observe that for any given sequence that is in descending order, no next larger permutation is possible.  
+For example, no next permutation is possible for the following array:
+
 ```
-```java
-public class SingleNumber {
-    public static int singleNumber(int[] nums) {
-        int result = 0;
-        for (int num : nums) {
-            result ^= num;  // XOR all numbers
-        }
-        return result;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(singleNumber(new int[]{2, 2, 1}));       // Output: 1
-        System.out.println(singleNumber(new int[]{4, 1, 2, 1, 2}));  // Output: 4
-        System.out.println(singleNumber(new int[]{1}));              // Output: 1
-    }
-}
-```
-```cpp
-#include <iostream>
-#include <vector>
-using namespace std;
-
-int singleNumber(vector<int>& nums) {
-    int result = 0;
-    for (int num : nums) {
-        result ^= num;  // XOR all numbers
-    }
-    return result;
-}
-
-int main() {
-    vector<int> nums1 = {2, 2, 1};
-    vector<int> nums2 = {4, 1, 2, 1, 2};
-    vector<int> nums3 = {1};
-
-    cout << singleNumber(nums1) << endl;  // Output: 1
-    cout << singleNumber(nums2) << endl;  // Output: 4
-    cout << singleNumber(nums3) << endl;  // Output: 1
-}
-```
-```javascript
-function singleNumber(nums) {
-    let result = 0;
-    for (let num of nums) {
-        result ^= num;  // XOR all numbers
-    }
-    return result;
-}
-
-// Example test cases
-console.log(singleNumber([2, 2, 1]));       // Output: 1
-console.log(singleNumber([4, 1, 2, 1, 2]));  // Output: 4
-console.log(singleNumber([1]));              // Output: 1
-```
-```typescript
-function singleNumber(nums: number[]): number {
-    let result = 0;
-    for (const num of nums) {
-        result ^= num;  // XOR all numbers
-    }
-    return result;
-}
-
-// Example test cases
-console.log(singleNumber([2, 2, 1]));       // Output: 1
-console.log(singleNumber([4, 1, 2, 1, 2]));  // Output: 4
-console.log(singleNumber([1]));              // Output: 1
+[9, 5, 4, 3, 1]
 ```
 
----
+We need to find the first pair of two successive numbers a[i] and a[i−1], from the right, which satisfy  
+a[i]>a[i−1]. Now, no rearrangements to the right of a[i−1] can create a larger permutation since that subarray consists of numbers in descending order.  
+Thus, we need to rearrange the numbers to the right of a[i−1] including itself.
 
-### Time and Space Complexity  
-- **Time Complexity:** `O(n)` – We traverse the array once.  
-- **Space Complexity:** `O(1)` – Only a single variable `result` is used, which does not depend on the input size.  ', 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Solution
+Now, what kind of rearrangement will produce the next larger number? We want to create the permutation just larger than the current one. Therefore, we need to replace the number a[i−1] with the number which is just larger than itself among the numbers lying to its right section, say a[j].
 
+![ Next Permutation ](https://leetcode.com/media/original_images/31_nums_graph.png)
 
-### Approach: Matrix Multiplication + Matrix Exponentiation By Squaring
+We swap the numbers a[i−1] and a[j]. We now have the correct number at index i−1. But still the current permutation isn\'t the permutation  
+that we are looking for. We need the smallest permutation that can be formed by using the numbers only to the right of a[i−1]. Therefore, we need to place those  
+numbers in ascending order to get their smallest permutation.
 
-#### Intuition
+But, recall that while scanning the numbers from the right, we simply kept decrementing the index  
+until we found the pair a[i] and a[i−1] where, a[i]>a[i−1]. Thus, all numbers to the right of a[i−1] were already sorted in descending order.  
+Furthermore, swapping a[i−1] and a[j] didn\'t change that order.  
+Therefore, we simply need to reverse the numbers following a[i−1] to get the next smallest lexicographic permutation.
 
-We use $f(i,c)$ to represent the number of occurrences of the character c in the string after i transformations. For convenience, we let the value range of c be [0,26), corresponding to the 26 characters from a to z in sequence.
+The following animation will make things clearer:
 
-Initially, all $f(0,c)$ values are equal to the number of occurrences of c in the given string s. When we iterate from $f(i−1,⋯)$ to $f(i,⋯)$, we use the recurrence:
+![Next Permutation](https://leetcode.com/media/original_images/31_Next_Permutation.gif)
 
-$$ f(i,c)=∑_{c′=0}^{25}[f(i−1,c′)×T(c,c′)]$$
-
-Here, the value of $T(c,c′)$ is either 0 or 1. If c′ is included in the substitution set of c during a single transformation, the value is 1; otherwise, it is 0. The values of $T(c,c′)$ can be obtained from the given array ***nums***.
-
-The time complexity of directly using the recurrence is high, so optimization is necessary. Notice that $T(c,c′)$ is independent of i; it remains fixed in each round of iteration. Therefore, if we express $f(i,c)$ and $f(i−1,c′)$ as *n×1* column vectors, and $T(c,c′)$ as an *n×n* matrix, the recurrence becomes a matrix multiplication:
-
-
-
-$$ \\begin{aligned}
-\\mathbf{f}_i &= \\mathbf{T} \\cdot \\mathbf{f}_{i-1} \\\\
-\\end{aligned}$$
-In There:
-$$ \\begin{aligned}
-\\quad & \\\\
-\\mathbf{f}_i &= \\begin{pmatrix} f(i,0) \\\\ \\vdots \\\\ f(i,25) \\end{pmatrix}, \\quad
-\\mathbf{T} = \\begin{pmatrix} 
-T(0,0) & \\cdots & T(0,25) \\\\ 
-\\vdots & \\ddots & \\vdots \\\\ 
-T(25,0) & \\cdots & T(25,25) 
-\\end{pmatrix}
-\\end{aligned} $$
-
-
-
-
-So, after t iterations:
-
-$$ \\mathbf{f}_t = \\mathbf{T}^t \\cdot \\mathbf{f}_0 $$
-
-Thus, we can first compute the t-th power of the matrix corresponding to T(c,c′), and then multiply it by the initial column vector f(0,⋯) to obtain all values f(t,⋯). The sum of these values gives the final answer.
-
-The exponentiation of the transformation matrix can be efficiently performed using [matrix exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring), which we will not elaborate on here.
-
-#### Implementation
 
 ```cpp
-static constexpr int L = 26;
-static constexpr int mod = 1000000007;
 
-struct Mat {
-    Mat() { memset(a, 0, sizeof(a)); }
-    Mat(const Mat& that) {
-        for (int i = 0; i < L; ++i) {
-            for (int j = 0; j < L; ++j) {
-                a[i][j] = that.a[i][j];
+    void nextPermutation(vector<int>& nums) {
+        int i = nums.size() - 2;
+        while (i >= 0 && nums[i + 1] <= nums[i]) {
+            i--;
+        }
+        if (i >= 0) {
+            int j = nums.size() - 1;
+            while (nums[j] <= nums[i]) {
+                j--;
             }
+            swap(nums, i, j);
         }
-    }
-    Mat& operator=(const Mat& that) {
-        if (this != &that) {
-            for (int i = 0; i < L; ++i) {
-                for (int j = 0; j < L; ++j) {
-                    a[i][j] = that.a[i][j];
-                }
-            }
-        }
-        return *this;
+        reverse(nums.begin() + i + 1, nums.end());
     }
 
-    int a[L][L];
-};
-
-Mat operator*(const Mat& u, const Mat& v) {
-    Mat w;
-    for (int i = 0; i < L; ++i) {
-        for (int j = 0; j < L; ++j) {
-            for (int k = 0; k < L; ++k) {
-                w.a[i][j] =
-                    (w.a[i][j] + (long long)u.a[i][k] * v.a[k][j]) % mod;
-            }
-        }
+private:
+    void swap(vector<int>& nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
     }
-    return w;
-}
-
-// identity matrix
-Mat I() {
-    Mat w;
-    for (int i = 0; i < L; ++i) {
-        w.a[i][i] = 1;
-    }
-    return w;
-}
-
-// matrix exponentiation by squaring
-Mat quickmul(const Mat& x, int y) {
-    Mat ans = I(), cur = x;
-    while (y) {
-        if (y & 1) {
-            ans = ans * cur;
-        }
-        cur = cur * cur;
-        y >>= 1;
-    }
-    return ans;
-}
-
-class Solution {
-public:
-    int lengthAfterTransformations(string s, int t, vector<int>& nums) {
-        Mat T;
-        for (int i = 0; i < 26; ++i) {
-            for (int j = 1; j <= nums[i]; ++j) {
-                T.a[(i + j) % 26][i] = 1;
-            }
-        }
-        Mat res = quickmul(T, t);
-        int ans = 0;
-        vector<int> f(26);
-        for (char ch : s) {
-            ++f[ch - \'a\'];
-        }
-        for (int i = 0; i < 26; ++i) {
-            for (int j = 0; j < 26; ++j) {
-                ans = (ans + (long long)res.a[i][j] * f[j]) % mod;
-            }
-        }
-        return ans;
-    }
-};
 ```
 ```c
-#define MOD 1000000007
-#define L 26
-
-typedef struct {
-    int a[L][L];
-} Mat;
-
-/* identity matrix */
-Mat I() {
-    Mat m;
-    memset(&m, 0, sizeof(m));
-    for (int i = 0; i < L; i++) {
-        m.a[i][i] = 1;
-    }
-    return m;
+void swap(int* nums, int i, int j) {
+    int temp = nums[i];
+    nums[i] = nums[j];
+    nums[j] = temp;
 }
-
-Mat mul(Mat x, Mat y) {
-    Mat res;
-    memset(&res, 0, sizeof(res));
-    for (int i = 0; i < L; i++) {
-        for (int j = 0; j < L; j++) {
-            for (int k = 0; k < L; k++) {
-                res.a[i][j] =
-                    (res.a[i][j] + (long long)x.a[i][k] * y.a[k][j]) % MOD;
-            }
-        }
+void reverse(int* nums, int start, int numsSize) {
+    int i = start, j = numsSize - 1;
+    while (i < j) {
+        swap(nums, i, j);
+        i++;
+        j--;
     }
-    return res;
 }
-
-/* matrix exponentiation by squaring */
-Mat quickmul(Mat x, int y) {
-    Mat ans = I();
-    Mat cur = x;
-    while (y > 0) {
-        if (y & 1) {
-            ans = mul(ans, cur);
+void nextPermutation(int* nums, int numsSize) {
+    int i = numsSize - 2;
+    while (i >= 0 && nums[i + 1] <= nums[i]) {
+        i--;
+    }
+    if (i >= 0) {
+        int j = numsSize - 1;
+        while (nums[j] <= nums[i]) {
+            j--;
         }
-        cur = mul(cur, cur);
-        y >>= 1;
+        swap(nums, i, j);
     }
-    return ans;
-}
-
-int lengthAfterTransformations(char* s, int t, int* nums, int numsSize) {
-    Mat T;
-    memset(&T, 0, sizeof(T));
-    for (int i = 0; i < L; i++) {
-        for (int j = 1; j <= nums[i]; j++) {
-            T.a[(i + j) % L][i] = 1;
-        }
-    }
-
-    Mat res = quickmul(T, t);
-
-    int f[L] = {0};
-    for (char* p = s; *p; p++) {
-        f[*p - \'a\']++;
-    }
-
-    int ans = 0;
-    for (int i = 0; i < L; i++) {
-        for (int j = 0; j < L; j++) {
-            ans = (ans + (long long)res.a[i][j] * f[j]) % MOD;
-        }
-    }
-    return ans;
+    reverse(nums, i + 1, numsSize);
 }
 ```
 ```java
-class Solution {
-
-    private static final int MOD = (int) 1e9 + 7;
-    private static final int L = 26;
-
-    private static class Mat {
-
-        int[][] a = new int[L][L];
-
-        Mat() {}
-
-        Mat(Mat copyFrom) {
-            for (int i = 0; i < L; i++) {
-                System.arraycopy(copyFrom.a[i], 0, this.a[i], 0, L);
-            }
+public void nextPermutation(int[] nums) {
+        int i = nums.length - 2;
+        while (i >= 0 && nums[i + 1] <= nums[i]) {
+            i--;
         }
-
-        Mat mul(Mat other) {
-            Mat result = new Mat();
-            for (int i = 0; i < L; i++) {
-                for (int j = 0; j < L; j++) {
-                    for (int k = 0; k < L; k++) {
-                        result.a[i][j] = (int) ((result.a[i][j] +
-                                (long) this.a[i][k] * other.a[k][j]) %
-                            MOD);
-                    }
-                }
+        if (i >= 0) {
+            int j = nums.length - 1;
+            while (nums[j] <= nums[i]) {
+                j--;
             }
-            return result;
+            swap(nums, i, j);
+        }
+        reverse(nums, i + 1);
+    }
+
+    private void reverse(int[] nums, int start) {
+        int i = start, j = nums.length - 1;
+        while (i < j) {
+            swap(nums, i, j);
+            i++;
+            j--;
         }
     }
 
-    /* identity matrix */
-    private Mat I() {
-        Mat m = new Mat();
-        for (int i = 0; i < L; i++) {
-            m.a[i][i] = 1;
-        }
-        return m;
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
     }
-
-    /* matrix exponentiation by squaring */
-    private Mat quickmul(Mat x, int y) {
-        Mat ans = I();
-        Mat cur = new Mat(x);
-        while (y > 0) {
-            if ((y & 1) == 1) {
-                ans = ans.mul(cur);
-            }
-            cur = cur.mul(cur);
-            y >>= 1;
-        }
-        return ans;
+```
+```Go 
+func nextPermutation(nums []int) {
+    i := len(nums) - 2
+    for i >= 0 && nums[i+1] <= nums[i] {
+        i--
     }
+    if i >= 0 {
+        j := len(nums) - 1
+        for nums[j] <= nums[i] {
+            j--
+        }
+        swap(nums, i, j)
+    }
+    reverse(nums, i+1)
+}
 
-    public int lengthAfterTransformations(String s, int t, List<Integer> nums) {
-        Mat T = new Mat();
-        for (int i = 0; i < L; i++) {
-            for (int j = 1; j <= nums.get(i); j++) {
-                T.a[(i + j) % L][i] = 1;
-            }
-        }
-
-        Mat res = quickmul(T, t);
-        int[] f = new int[L];
-        for (char ch : s.toCharArray()) {
-            f[ch - \'a\']++;
-        }
-        int ans = 0;
-        for (int i = 0; i < L; i++) {
-            for (int j = 0; j < L; j++) {
-                ans = (int) ((ans + (long) res.a[i][j] * f[j]) % MOD);
-            }
-        }
-        return ans;
+func reverse(nums []int, start int) {
+    i, j := start, len(nums)-1
+    for i < j {
+        swap(nums, i, j)
+        i++
+        j--
     }
 }
+
+func swap(nums []int, i int, j int) {
+    temp := nums[i]
+    nums[i] = nums[j]
+    nums[j] = temp
+}
 ```
-```python
-MOD = 10**9 + 7
-L = 26
+```Python
+def nextPermutation(nums):
+	"""
+	:type nums: List[int]
+	:rtype: void Do not return anything, modify nums in-place instead.
+	"""
+	i = len(nums) - 2
+	while i >= 0 and nums[i + 1] <= nums[i]:
+	    i -= 1
+	if i >= 0:
+	    j = len(nums) - 1
+	    while nums[j] <= nums[i]:
+	        j -= 1
+	    self.swap(nums, i, j)
+	self.reverse(nums, i + 1)
 
+	def reverse(self, nums, start):
+	i, j = start, len(nums) - 1
+	while i < j:
+	    self.swap(nums, i, j)
+	    i += 1
+	    j -= 1
 
-class Mat:
-    def __init__(self, copy_from: "Mat" = None) -> None:
-        self.a: List[List[int]] = [[0] * L for _ in range(L)]
-        if copy_from:
-            for i in range(L):
-                for j in range(L):
-                    self.a[i][j] = copy_from.a[i][j]
-
-    def __mul__(self, other: "Mat") -> "Mat":
-        result = Mat()
-        for i in range(L):
-            for j in range(L):
-                for k in range(L):
-                    result.a[i][j] = (
-                        result.a[i][j] + self.a[i][k] * other.a[k][j]
-                    ) % MOD
-        return result
-
-
-# identity matrix
-def I() -> Mat:
-    m = Mat()
-    for i in range(L):
-        m.a[i][i] = 1
-    return m
-
-
-# matrix exponentiation by squaring
-def quickmul(x: Mat, y: int) -> Mat:
-    ans = I()
-    cur = x
-    while y:
-        if y & 1:
-            ans = ans * cur
-        cur = cur * cur
-        y >>= 1
-    return ans
-
-
-class Solution:
-    def lengthAfterTransformations(
-        self, s: str, t: int, nums: List[int]
-    ) -> int:
-        T = Mat()
-        for i in range(26):
-            for j in range(1, nums[i] + 1):
-                T.a[(i + j) % 26][i] = 1
-
-        res = quickmul(T, t)
-
-        f = [0] * 26
-        for ch in s:
-            f[ord(ch) - ord("a")] += 1
-
-        ans = 0
-        for i in range(26):
-            for j in range(26):
-                ans = (ans + res.a[i][j] * f[j]) % MOD
-
-        return ans
+	def swap(self, nums, i, j):
+	temp = nums[i]
+	nums[i] = nums[j]
+	nums[j] = temp
 ```
 ```csharp
 public class Solution {
-    private const int MOD = (int)1e9 + 7;
-    private const int L = 26;
+    public void NextPermutation(int[] nums) {
+        int i = nums.Length - 2;
+        while (i >= 0 && nums[i + 1] <= nums[i]) {
+            i--;
+        }
 
-    private class Mat {
-        public int[,] a = new int[L, L];
-
-        public Mat() {}
-
-        public Mat(Mat copyFrom) {
-            for (int i = 0; i < L; i++) {
-                for (int j = 0; j < L; j++) {
-                    this.a[i, j] = copyFrom.a[i, j];
-                }
+        if (i >= 0) {
+            int j = nums.Length - 1;
+            while (nums[j] <= nums[i]) {
+                j--;
             }
+
+            Swap(nums, i, j);
         }
 
-        public Mat Mul(Mat other) {
-            Mat result = new Mat();
-            for (int i = 0; i < L; i++) {
-                for (int j = 0; j < L; j++) {
-                    for (int k = 0; k < L; k++) {
-                        result.a[i, j] =
-                            (int)((result.a[i, j] +
-                                   (long)this.a[i, k] * other.a[k, j]) %
-                                  MOD);
-                    }
-                }
-            }
-            return result;
-        }
-    }
-    /* identity matrix */
-    private Mat I() {
-        Mat m = new Mat();
-        for (int i = 0; i < L; i++) {
-            m.a[i, i] = 1;
-        }
-        return m;
-    }
-    /* matrix exponentiation by squaring */
-    private Mat QuickMul(Mat x, int y) {
-        Mat ans = I();
-        Mat cur = new Mat(x);
-        while (y > 0) {
-            if ((y & 1) == 1) {
-                ans = ans.Mul(cur);
-            }
-            cur = cur.Mul(cur);
-            y >>= 1;
-        }
-        return ans;
+        Reverse(nums, i + 1);
     }
 
-    public int LengthAfterTransformations(string s, int t, IList<int> nums) {
-        Mat T = new Mat();
-        for (int i = 0; i < L; i++) {
-            for (int j = 1; j <= nums[i]; j++) {
-                T.a[(i + j) % L, i] = 1;
-            }
+    private void Reverse(int[] nums, int start) {
+        int i = start, j = nums.Length - 1;
+        while (i < j) {
+            Swap(nums, i, j);
+            i++;
+            j--;
         }
+    }
 
-        Mat res = QuickMul(T, t);
-        int[] f = new int[L];
-        foreach (char ch in s) {
-            f[ch - \'a\']++;
-        }
-
-        int ans = 0;
-        for (int i = 0; i < L; i++) {
-            for (int j = 0; j < L; j++) {
-                ans = (int)((ans + (long)res.a[i, j] * f[j]) % MOD);
-            }
-        }
-        return ans;
+    private void Swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
     }
 }
 ```
 ```javascript
-class Mat {
-    constructor(copyFrom = null) {
-        this.a = Array.from({ length: 26 }, () => new Array(26).fill(0n));
-        if (copyFrom) {
-            for (let i = 0; i < 26; i++) {
-                for (let j = 0; j < 26; j++) {
-                    this.a[i][j] = copyFrom.a[i][j];
-                }
-            }
+function nextPermutation (nums) {
+    let i = nums.length - 2;
+    while (i >= 0 && nums[i + 1] <= nums[i]) {
+        i--;
+    }
+    if (i >= 0) {
+        let j = nums.length - 1;
+        while (nums[j] <= nums[i]) {
+            j--;
+        }
+        swap(nums, i, j);
+    }
+    reverse(nums, i + 1);
+    function reverse(nums, start) {
+        let i = start,
+            j = nums.length - 1;
+        while (i < j) {
+            swap(nums, i, j);
+            i++;
+            j--;
         }
     }
-
-    mul(other) {
-        const MOD = BigInt(1e9 + 7);
-        const result = new Mat();
-        for (let i = 0; i < 26; i++) {
-            for (let j = 0; j < 26; j++) {
-                for (let k = 0; k < 26; k++) {
-                    result.a[i][j] =
-                        (result.a[i][j] + this.a[i][k] * other.a[k][j]) % MOD;
-                }
-            }
-        }
-        return result;
+    function swap(nums, i, j) {
+        let temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
     }
-}
-
-/* identity matrix */
-function I() {
-    const m = new Mat();
-    for (let i = 0; i < 26; i++) {
-        m.a[i][i] = 1n;
-    }
-    return m;
-}
-
-/* matrix exponentiation by squaring */
-function quickmul(x, y) {
-    let ans = I();
-    let cur = new Mat(x);
-    while (y > 0n) {
-        if (y & (1n != 0n)) {
-            ans = ans.mul(cur);
-        }
-        cur = cur.mul(cur);
-        y >>= 1;
-    }
-    return ans;
-}
-
-var lengthAfterTransformations = function (s, t, nums) {
-    const MOD = BigInt(1e9 + 7);
-    const T = new Mat();
-    for (let i = 0; i < 26; i++) {
-        for (let j = 1; j <= nums[i]; j++) {
-            T.a[(i + j) % 26][i] = 1n;
-        }
-    }
-
-    const res = quickmul(T, t);
-    const f = new Array(26).fill(0n);
-    for (const ch of s) {
-        f[ch.charCodeAt(0) - "a".charCodeAt(0)]++;
-    }
-
-    let ans = 0n;
-    for (let i = 0; i < 26; i++) {
-        for (let j = 0; j < 26; j++) {
-            ans = (ans + res.a[i][j] * f[j]) % MOD;
-        }
-    }
-    return Number(ans);
 };
 ```
 
-#### Complexity Analysis
 
-Let n be the length of the string s, and let $∣Σ∣$ denote the size of the character set, which is 26 in this case.
 
--   Time complexity: $O(n+logt×∣Σ∣^3)$.
+**Complexity Analysis**
+
+Let n be the size of the `nums` array.
+
+-   Time complexity: O(n)
     
-    We first traverse the string to count the occurrences of each character. Then, we apply matrix exponentiation by squaring to compute repeated matrix multiplication.
+    The first `while` loop runs at most n iterations, decrementing the variable `i` as it searches for the first decreasing element from the right. In the worst case, it checks all elements, so it takes O(n) time.
     
--   Space complexity: $O(∣Σ∣^2).$
+    The second `while` loop also runs at most n iterations, decrementing the variable `j` as it searches for the smallest element larger than `nums[i]`. Similarly, it can take O(n) time.
     
-    This is the space required to store the transformation matrix.', 'feb01aba-eefe-4220-9242-729f52935cd7');
+    The `reverse` function is called on a portion of the array, from index `i + 1` to the end. In the worst case, this can cover the entire array, leading to a time complexity of O(n).
+    
+    The `swap` function runs in constant time, O(1), since it only exchanges two elements.
+    
+    Therefore, the overall time complexity is O(n).
+    
+-   Space complexity: O(1)
+    
+    The function operates in-place on the `nums` array, meaning no extra space is used for storing additional data.
+    
+    Only a few constant space variables (`i`, `j`, and `temp`) are used.
+    
+    The built-in `swap` and `reverse` functions do not require additional space beyond what is already present in the input array.
+    
+    Hence, the space complexity is O(1).', '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Approach
+
+To merge the arrays in-place, we can solve this problem efficiently by merging from **right to left**, starting at the end of `nums1` and `nums2` (this prevents overwriting elements that haven’t been processed yet).  
+
+**Optimal Solution:**  
+1. Use three pointers:  
+   - `p1`: Last valid element in `nums1` (`m - 1`)  
+   - `p2`: Last element in `nums2` (`n - 1`)  
+   - `p`: Points to the last position in `nums1` (`m + n - 1`)  
+2. Compare the elements from `nums1[p1]` and `nums2[p2]`, and place the larger element at `nums1[p]`, then decrement `p`, `p1`, or `p2` accordingly.  
+3. If there are any remaining elements in `nums2`, copy them to the beginning of `nums1`.  
+
+---
+# Solutions code
+
+
+```python
+def mergeSortedArray(nums1, m, nums2, n):
+    p1, p2, p = m - 1, n - 1, m + n - 1
+    
+    while p1 >= 0 and p2 >= 0:
+        if nums1[p1] > nums2[p2]:
+            nums1[p] = nums1[p1]
+            p1 -= 1
+        else:
+            nums1[p] = nums2[p2]
+            p2 -= 1
+        p -= 1
+    
+    # If there are remaining elements in nums2
+    while p2 >= 0:
+        nums1[p] = nums2[p2]
+        p2 -= 1
+        p -= 1
+    return nums1
+```
+```cpp
+
+vector<int> mergeSortedArray(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+    int p1 = m - 1, p2 = n - 1, p = m + n - 1;
+    
+    while (p1 >= 0 && p2 >= 0) {
+        if (nums1[p1] > nums2[p2]) {
+            nums1[p--] = nums1[p1--];
+        } else {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+    
+    // Copy remaining elements from nums2
+    while (p2 >= 0) {
+        nums1[p--] = nums2[p2--];
+    }
+    return nums1;
+}
+
+
+```
+```javascript
+function mergeSortedArray(nums1, m, nums2, n) {
+    let p1 = m - 1, p2 = n - 1, p = m + n - 1;
+
+    while (p1 >= 0 && p2 >= 0) {
+        if (nums1[p1] > nums2[p2]) {
+            nums1[p--] = nums1[p1--];
+        } else {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+
+    // Copy remaining elements from nums2 (if any)
+    while (p2 >= 0) {
+        nums1[p--] = nums2[p2--];
+    }
+    return nums1;
+}
+
+```
+```typescript
+function mergeSortedArray(nums1: number[], m: number, nums2: number[], n: number): number[] {
+    let p1 = m - 1, p2 = n - 1, p = m + n - 1;
+
+    while (p1 >= 0 && p2 >= 0) {
+        if (nums1[p1] > nums2[p2]) {
+            nums1[p--] = nums1[p1--];
+        } else {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+
+    // Copy remaining elements from nums2 (if any)
+    while (p2 >= 0) {
+        nums1[p--] = nums2[p2--];
+    }
+    return nums1;
+}
+
+
+```
+
+---
+
+# Complexity
+- **Time:** `O(m + n)` since we iterate through all the elements of `nums1` and `nums2`.  
+- **Space:** `O(1)` (in-place modification of `nums1`).  
+
+This is an optimal solution that efficiently merges the arrays in sorted order.', '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+
+
+
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (50, 'C (GCC 9.2.0)', 'C');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (54, 'C++ (GCC 9.2.0)', 'C++');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (51, 'C# (Mono 6.6.0.161)', 'C#');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (63, 'JavaScript (Node.js 12.14.0)', 'JavaScript');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (71, 'Python (3.8.1)', 'Python');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (74, 'TypeScript (3.7.4)', 'TypeScript');
+INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (91, 'Java (JDK 17.0.6)', 'Java');
+
+
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (1, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (5, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (6, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (2, '591b3457-2157-4d61-b03d-d53f8666342c');
+
+INSERT INTO public.problem_comments(
+    comment_id, content, created_at, last_modified_at, user_uid, user_uuid,
+    parent_comment_id, problem_id, replied_comment_id, number_of_likes, is_modified
+) VALUES
+('3177f55e-8fca-459c-96d4-90e51dae4588', 'i run now 7',
+ '2025-02-21 16:43:00.683279+07', '2025-02-22 15:13:23.367305+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
+
+('0dc0dfa1-cca9-42b4-bfad-f9379fdd139e', 'i run now 5',
+ '2025-02-22 16:13:31.790966+07', '2025-02-22 16:13:58.301744+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
+
+('1db65ea6-4237-4219-86ad-1f8bcee67e29', 'i run now 8',
+ '2025-02-21 16:46:37.991912+07', '2025-02-22 13:07:38.136802+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', 0, NULL),
+
+('9be6a2bc-e4b1-4b56-ac5d-77c06ac1b6df', 'i run now 3',
+ '2025-02-21 22:02:03.547642+07', '2025-02-21 22:02:03.547642+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ NULL, '7328995b-6079-4bd9-8be0-7c9152d5a73b', NULL, 0, NULL),
+
+('5ddd3184-4713-419c-8611-9cfd5e984c96', 'i run now 4',
+ '2025-02-21 16:45:50.394167+07', '2025-02-22 17:56:49.763188+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', 0, NULL),
+
+('c3265443-b55a-4f3b-b9b5-f00886ae409a', 'i run now 2',
+ '2025-02-21 16:46:08.087696+07', '2025-02-22 18:11:22.526227+07',
+ 'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
+ '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
+ '5ddd3184-4713-419c-8611-9cfd5e984c96', 0, NULL);
+
+
+
 
 
 -- Tạo bảng audit log
