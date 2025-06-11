@@ -237,6 +237,9 @@ public class AuthService {
         try {
             FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
             String role = firestoreService.getRoleByUid(decodeToken.getUid());
+            if (role == null) {
+                role = "user"; // Default role if not found
+            }
             String premium = null;
             if (role.equals("user")) {
                 //PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
