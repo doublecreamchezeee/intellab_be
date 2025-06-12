@@ -7,7 +7,6 @@ import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.model.User;
 import com.google.api.core.ApiFuture;
-import com.google.api.core.ApiFuture;
 import com.google.api.gax.rpc.NotFoundException;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -17,7 +16,6 @@ import com.example.identityservice.utility.ParseUUID;
 import com.google.cloud.firestore.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -39,8 +36,15 @@ public class FirestoreService {
     public User getUserByUid(String uid) throws ExecutionException, InterruptedException {
         DocumentSnapshot document = firestore.collection("users").document(ParseUUID.normalizeUID(uid).toString()).get().get();
         if (document.exists()) {
-            return document.toObject(User.class);
+            User user = document.toObject(User.class);
+            if (user != null) {
+                System.out.println("firestore get role: " + user.getRole());
+                return user;
+            } else {
+                log.error("User object is null for UID: {}", uid);
+            }
         }
+        log.error("Document not found for userUid: {}", uid);
         return null;
     }
 
@@ -55,7 +59,7 @@ public class FirestoreService {
                 .map(document -> document.toObject(User.class)).toList();
     }
 
-    public User updateUserByUid(String uid, String firstName, String lastName) throws ExecutionException, InterruptedException {
+    public void updateUserByUid(String uid, String firstName, String lastName) throws ExecutionException, InterruptedException {
         DocumentReference documentRef = firestore.collection("users").document(ParseUUID.normalizeUID(uid).toString());
 
         Map<String, Object> updates = new HashMap<>();
@@ -67,7 +71,7 @@ public class FirestoreService {
         }
         documentRef.update(updates).get(); // Apply the updates
 
-        return getUserByUid(ParseUUID.normalizeUID(uid).toString()); // Fetch and return the updated user
+        getUserByUid(ParseUUID.normalizeUID(uid).toString());
     }
 
     public String createUserByUid(String uid, String role) throws ExecutionException, InterruptedException {
@@ -146,14 +150,17 @@ public class FirestoreService {
     public String getRoleByUid(String uid)  {
         try {
             DocumentSnapshot docRef = firestore.collection("users").document(ParseUUID.normalizeUID(uid).toString()).get().get();
-            return Objects.requireNonNull(docRef.get("role")).toString();
-        } catch (NotFoundException | ExecutionException | InterruptedException e) {
-            //throw new AppException(ErrorCode.CANNOT_FIND_USER_ROLE_IN_FIRESTORE);
-            log.error("Error retrieving user role for UID {}: {}", uid, e.getMessage());
+            if (!docRef.exists()) {
+                log.error("User with UID {} not found in Firestore", uid);
+                return null;
+            }
+
+            System.out.println("firestore get role: " + docRef.get("role"));
+            return (String)docRef.get("role");
         } catch (Exception e) {
             //throw new AppException(ErrorCode.CANNOT_FIND_USER_ROLE_IN_FIRESTORE);
             log.error("Error retrieving user role for UID {}: {}", uid, e.getMessage());
-        } finally {
+            System.out.println("Error retrieving user role for UID: " + uid + " - " + e.getMessage());
             return null;
         }
     }

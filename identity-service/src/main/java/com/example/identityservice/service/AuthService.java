@@ -123,9 +123,18 @@ public class AuthService {
         try {
             User user = firestoreService.getUserByUid(decodeToken.getUid());
 
-            if (user == null || user.getFirstName() == null || user.getLastName() == null) {
+            if (user == null) {
+                System.out.println("Write to firestore User with uid: " + decodeToken.getUid());
                 firestoreService.createUserByUid(decodeToken.getUid(), "User");
             }
+            else if (user.getFirstName() == null || user.getLastName() == null)
+            {
+                System.out.println("Update firestore User with uid: " + decodeToken.getUid());
+                firestoreService.updateUserByUid(decodeToken.getUid(), "User", decodeToken.getUid());
+            } else {
+                log.info("User with uid {} already exists in Firestore.", decodeToken.getUid());
+            }
+
 
             return FirebaseGoogleSignUpResponse.builder()
                     .uid(decodeToken.getUid())
@@ -238,6 +247,7 @@ public class AuthService {
             FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
             String role = firestoreService.getRoleByUid(decodeToken.getUid());
             if (role == null) {
+                System.out.println("Role not found for user with uid: " + decodeToken.getUid());
                 role = "user"; // Default role if not found
             }
             String premium = null;
