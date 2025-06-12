@@ -64,12 +64,22 @@ public class AuthService {
             log.info("User successfully created: {}", userCreationRequest.getEmail());
 
             firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
-            sendVerificationEmail(userRecord.getUid());
-            try{
-                firestoreService.createUserByUid(userRecord.getUid(), "User");
-            } catch (ExecutionException e) {
-                log.error("Error creating user's firestore document: {}", e.getMessage(), e);
+
+            int timeout = 20; // seconds
+            while (true) {
+                if (timeout-- <= 0) {
+                    log.error("Timeout while creating user's firestore document");
+                    throw new RuntimeException("Timeout while creating user's firestore document");
+                }
+                try {
+                    firestoreService.createUserByUid(userRecord.getUid(), "User");
+                    break;
+                } catch (ExecutionException e) {
+                    log.error("Error creating user's firestore document: {}", e.getMessage(), e);
+                }
             }
+
+            sendVerificationEmail(userRecord.getUid());
 
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
@@ -328,7 +338,13 @@ public class AuthService {
 
                 User userFirestore = firestoreService.getUserByUid(userRecord.getUid());
 
-                String name = userFirestore.getFirstName() + " " + userFirestore.getLastName();
+                String name = userRecord.getDisplayName();
+
+                if (userFirestore != null) {
+                    name = userFirestore.getFirstName() + " " + userFirestore.getLastName();
+                }
+
+
 
                 String feUrl = redirectUrlConfig.getFeUrl();
 
@@ -362,7 +378,7 @@ public class AuthService {
     </div>
 </body>
 </html>
-""", name, userFirestore.getUid(), link, feUrl);
+""", name, uid, link, feUrl);
 
                 emailService.sendMail(
                         email,
