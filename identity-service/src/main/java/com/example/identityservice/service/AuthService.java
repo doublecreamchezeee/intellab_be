@@ -64,12 +64,22 @@ public class AuthService {
             log.info("User successfully created: {}", userCreationRequest.getEmail());
 
             firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
-            sendVerificationEmail(userRecord.getUid());
-            try{
-                firestoreService.createUserByUid(userRecord.getUid(), "User");
-            } catch (ExecutionException e) {
-                log.error("Error creating user's firestore document: {}", e.getMessage(), e);
+
+            int timeout = 20; // seconds
+            while (true) {
+                if (timeout-- <= 0) {
+                    log.error("Timeout while creating user's firestore document");
+                    throw new RuntimeException("Timeout while creating user's firestore document");
+                }
+                try {
+                    firestoreService.createUserByUid(userRecord.getUid(), "User");
+                    break;
+                } catch (ExecutionException e) {
+                    log.error("Error creating user's firestore document: {}", e.getMessage(), e);
+                }
             }
+
+            sendVerificationEmail(userRecord.getUid());
 
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
@@ -123,9 +133,18 @@ public class AuthService {
         try {
             User user = firestoreService.getUserByUid(decodeToken.getUid());
 
-            if (user == null || user.getFirstName() == null || user.getLastName() == null) {
+            if (user == null) {
+                System.out.println("Write to firestore User with uid: " + decodeToken.getUid());
                 firestoreService.createUserByUid(decodeToken.getUid(), "User");
             }
+            else if (user.getFirstName() == null || user.getLastName() == null)
+            {
+                System.out.println("Update firestore User with uid: " + decodeToken.getUid());
+                firestoreService.updateUserByUid(decodeToken.getUid(), "User", decodeToken.getUid());
+            } else {
+                log.info("User with uid {} already exists in Firestore.", decodeToken.getUid());
+            }
+
 
             return FirebaseGoogleSignUpResponse.builder()
                     .uid(decodeToken.getUid())
@@ -237,6 +256,10 @@ public class AuthService {
         try {
             FirebaseToken decodeToken = firebaseAuth.verifyIdToken(token);
             String role = firestoreService.getRoleByUid(decodeToken.getUid());
+            if (role == null) {
+                System.out.println("Role not found for user with uid: " + decodeToken.getUid());
+                role = "user"; // Default role if not found
+            }
             String premium = null;
             if (role.equals("user")) {
                 //PremiumSubscription pre = firestoreService.getUserPremiumSubscriptionByUid(decodeToken.getUid());
@@ -315,7 +338,13 @@ public class AuthService {
 
                 User userFirestore = firestoreService.getUserByUid(userRecord.getUid());
 
-                String name = userFirestore.getFirstName() + " " + userFirestore.getLastName();
+                String name = userRecord.getDisplayName();
+
+                if (userFirestore != null) {
+                    name = userFirestore.getFirstName() + " " + userFirestore.getLastName();
+                }
+
+
 
                 String feUrl = redirectUrlConfig.getFeUrl();
 
@@ -349,7 +378,7 @@ public class AuthService {
     </div>
 </body>
 </html>
-""", name, userFirestore.getUid(), link, feUrl);
+""", name, uid, link, feUrl);
 
                 emailService.sendMail(
                         email,

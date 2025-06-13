@@ -89,7 +89,8 @@ public class FirebaseAuthClient {
             String role = firestoreService.getRoleByUid(userId);
 
             if (role == null) {
-                firestoreService.createUserByUid(userId, "User");
+//                firestoreService.createUserByUid(userId, "User");
+                System.out.println("(FirebaseAuth-verifyToken) Role is null for userId: " + userId);
                 role = "user"; // Default role if not found
             }
 
