@@ -593,9 +593,12 @@ public class LessonService {
         Lesson lesson = learningLesson.getLesson();
         if (lesson.getExercise() == null || !lesson.getIsQuizVisible()) {
             learningLesson.setIsDoneTheory(true);
+
+        }
+        else {
+            learningLesson.setIsDoneTheory(null);
         }
 
-        learningLesson.setIsDoneTheory(null);
 
         if (learningLesson.getIsDonePractice() != null
                 && learningLesson.getIsDonePractice() && learningLesson.getIsDoneTheory() != null) {
