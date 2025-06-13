@@ -1,67 +1,77 @@
 package com.example.problemservice.service;
 
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.metrics.v1beta1.PodMetricsList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class Judge0Service {
-    private final KubernetesClient kubernetesClient;
+    private final KubernetesClient client;
     private static final String NAMESPACE = "default";
-    private static final String DEPLOYMENT_NAME = "workers";
+    private static final String WORKER_DEPLOYMENT_NAME = "judge0-worker";
 
-    public Judge0Service(KubernetesClient kubernetesClient) {
-        this.kubernetesClient = kubernetesClient;
+    public Judge0Service(KubernetesClient client) {
+        this.client = client;
     }
 
-    public int getReplicas() {
-        Deployment deployment = kubernetesClient.apps().deployments()
-                .inNamespace(NAMESPACE)
-                .withName(DEPLOYMENT_NAME)
-                .get();
+    public List<Map<String, Object>> getSimplifiedPodMetrics() {
+        PodMetricsList podMetricsList = client.top().pods().metrics(NAMESPACE);
 
-        return (deployment != null && deployment.getSpec() != null) ? deployment.getSpec().getReplicas() : 0;
+        return podMetricsList.getItems().stream().map(podMetrics -> {
+            Pod pod = client.pods().inNamespace(NAMESPACE).withName(podMetrics.getMetadata().getName()).get();
+
+            Map<String, Object> podInfo = new HashMap<>();
+            podInfo.put("metadata", Map.of(
+                "name", podMetrics.getMetadata().getName(),
+                "namespace", podMetrics.getMetadata().getNamespace()
+            ));
+            podInfo.put("timestamp", podMetrics.getTimestamp());
+            podInfo.put("window", podMetrics.getWindow());
+
+            // Uptime in seconds
+            String creationTimestampStr = pod.getMetadata().getCreationTimestamp();
+            OffsetDateTime creationTime = OffsetDateTime.parse(creationTimestampStr);
+            Duration uptimeDuration = Duration.between(creationTime.toInstant(), Instant.now());
+            podInfo.put("uptime", uptimeDuration.getSeconds());
+
+            // Container usage
+            List<Map<String, Object>> containers = podMetrics.getContainers().stream().map(container -> {
+                Map<String, Object> containerInfo = new HashMap<>();
+                containerInfo.put("name", container.getName());
+                containerInfo.put("usage", container.getUsage());
+                return containerInfo;
+            }).collect(Collectors.toList());
+
+            podInfo.put("containers", containers);
+            return podInfo;
+        }).collect(Collectors.toList());
     }
 
-    public void scaleReplicas(int replicas) {
-        kubernetesClient.apps().deployments()
-                .inNamespace(NAMESPACE)
-                .withName(DEPLOYMENT_NAME)
-                .scale(replicas);
+    public void scaleJudge0Workers(int replicas) {
+        client.apps().deployments()
+              .inNamespace(NAMESPACE)
+              .withName(WORKER_DEPLOYMENT_NAME)
+              .scale(replicas, true);
     }
 
-    public List<String> getPods() {
-        List<Pod> pods = kubernetesClient.pods()
-                .inNamespace(NAMESPACE)
-                .list()
-                .getItems();
-
-        return pods.stream()
-                .map(pod -> String.format("%s - %s", pod.getMetadata().getName(), pod.getStatus().getPhase()))
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getNodes() {
-        List<Node> nodes = kubernetesClient.nodes()
-                .list()
-                .getItems();
-
-        return nodes.stream()
-                .map(node -> String.format("%s - %s", node.getMetadata().getName(), getNodeCondition(node)))
-                .collect(Collectors.toList());
-    }
-
-    private String getNodeCondition(Node node) {
-        // Return the "Ready" condition status or UNKNOWN if not found
-        return node.getStatus().getConditions().stream()
-                .filter(cond -> "Ready".equals(cond.getType()))
-                .findFirst()
-                .map(cond -> cond.getStatus())
-                .orElse("UNKNOWN");
+    public int getJudge0WorkerReplicas() {
+        Deployment deployment = client.apps().deployments()
+                                      .inNamespace(NAMESPACE)
+                                      .withName(WORKER_DEPLOYMENT_NAME)
+                                      .get();
+        if (deployment != null && deployment.getSpec() != null) {
+            return deployment.getSpec().getReplicas();
+        }
+        return -1;
     }
 }
