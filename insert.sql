@@ -802,7 +802,24 @@ BEGIN
             END IF;
         END IF;
     END IF;
-    
+
+	IF NOT EXISTS (
+	    SELECT 1 
+	    FROM user_courses 
+	    WHERE course_id = NEW.course_id
+	) THEN
+	    RETURN NEW;
+	END IF;
+
+	WITH user_ids AS(
+		SELECT user_uid as user_id
+		FROM user_courses
+		WHERE course_id = NEW.course_id
+	)
+	INSERT INTO learning_lesson(is_done_practice,status,user_id,lesson_id)
+	SELECT false, 'NEW', user_ids.user_id, NEW.lesson_id
+	FROM user_ids; 
+	
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -812,6 +829,39 @@ CREATE TRIGGER trigger_set_lesson_order
 BEFORE INSERT ON lessons
 FOR EACH ROW
 EXECUTE FUNCTION set_Lesson_order();
+
+-- Tự động cập nhật acceptance_rate khi be call_back để update kết quả trả về 
+CREATE OR REPLACE FUNCTION set_avg_acceptance()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+AS $BODY$
+DECLARE
+    new_avg_acceptance numeric(5,2);
+BEGIN
+
+	new_avg_acceptance := (
+		SELECT AVG(is_solved::int)
+		FROM problem_submissions
+		WHERE problem_id = NEW.problem_id
+		GROUP BY problem_id
+	);
+
+	UPDATE problems 
+	SET acceptance_rate = new_avg_acceptance 
+	WHERE problem_id = NEW.problem_id;
+	
+    RETURN NEW;
+END;
+$BODY$;
+
+CREATE TRIGGER update_problem_agv_acceptance
+AFTER UPDATE OR UPDATE ON problem_submissions
+FOR EACH ROW EXECUTE FUNCTION set_avg_acceptance();
+
+
+
+
+
 	
 
 
