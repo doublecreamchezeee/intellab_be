@@ -855,7 +855,7 @@ END;
 $BODY$;
 
 CREATE TRIGGER update_problem_agv_acceptance
-AFTER UPDATE OR UPDATE ON problem_submissions
+AFTER INSERT OR UPDATE ON problem_submissions
 FOR EACH ROW EXECUTE FUNCTION set_avg_acceptance();
 
 
