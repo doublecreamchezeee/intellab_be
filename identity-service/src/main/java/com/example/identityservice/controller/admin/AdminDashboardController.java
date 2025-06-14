@@ -12,6 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -109,26 +111,52 @@ public class AdminDashboardController {
     }
 
     @GetMapping("/transactions")
-    public ApiResponse<List<DashboardTableResponse>> getTransactions(
-            @RequestHeader(value = "X-UserRole") String userRole){
+    public ApiResponse<Page<DashboardTableResponse>> getTransactions(
+            @RequestHeader(value = "X-UserRole") String userRole,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "date") String sortBy,
+            @RequestParam(defaultValue = "desc") String order,
+            Pageable pageable
+    ) {
         userRole = userRole.split(",")[0];
         if (!isAdmin(userRole)) {
             throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
         }
-        return ApiResponse.<List<DashboardTableResponse>>builder()
-                .result(dashboardService.getRecentTransaction())
+
+        Page<DashboardTableResponse> transactions = dashboardService.getFilteredTransactions(
+                type, status, search, sortBy, order, pageable
+        );
+
+        return ApiResponse.<Page<DashboardTableResponse>>builder()
+                .result(transactions)
                 .build();
     }
 
+
     @GetMapping("/top-purchased")
-    public ApiResponse<List<DashboardTableResponse>> getTopPurchased(
-            @RequestHeader(value = "X-UserRole") String userRole){
+    public ApiResponse<Page<DashboardTableResponse>> getTopPurchased(
+            @RequestHeader(value = "X-UserRole") String userRole,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "amount") String sortBy,
+            @RequestParam(defaultValue = "desc") String order,
+            Pageable pageable
+    ) {
         userRole = userRole.split(",")[0];
         if (!isAdmin(userRole)) {
             throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
         }
-        return ApiResponse.<List<DashboardTableResponse>>builder()
-                .result(dashboardService.getTopPurchases())
+
+        Page<DashboardTableResponse> topPurchased = dashboardService.getTopPurchased(
+                type, search, sortBy, order, pageable
+        );
+
+        return ApiResponse.<Page<DashboardTableResponse>>builder()
+                .result(topPurchased)
                 .build();
     }
+
+
 }

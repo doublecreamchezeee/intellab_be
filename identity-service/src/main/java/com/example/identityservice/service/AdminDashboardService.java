@@ -16,6 +16,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.ListUsersPage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -301,6 +304,15 @@ public class AdminDashboardService {
                 .build();
     }
 
+    private String resolveType(VNPayPayment payment) {
+        if (payment.getVnPayPaymentPremiumPackage() != null) {
+            return "Premium";
+        } else if (!payment.getPaymentCourses().isEmpty()) {
+            return "Course";
+        }
+        return "Unknown";
+    }
+
     public int countUsersByMonth(int month, int year) throws FirebaseAuthException {
         int count = 0;
         ListUsersPage page = FirebaseAuth.getInstance().listUsers(null);
@@ -321,66 +333,157 @@ public class AdminDashboardService {
         return count;
     }
 
-    public List<DashboardTableResponse> getRecentTransaction() {
-        List<VNPayPayment> recentPayments = vnpayPaymentRepository
-                .findTop10ByOrderByCreatedAtDesc();
-
-        List<DashboardTableResponse> responses = new ArrayList<>();
-
-        for (VNPayPayment payment : recentPayments) {
-            UserInfoResponse user = firebaseAuthClient.getUserInfo(payment.getUserUid(), "");
-
-            DashboardTableResponse response = DashboardTableResponse.builder()
-                    .user(user)
-                    .date(Date.from(payment.getCreatedAt()))
-                    .amount(payment.getTotalPaymentAmount().doubleValue())
-                    .status(payment.getTransactionStatus())
-                    .type(resolveType(payment))
-                    .build();
-
-            responses.add(response);
-        }
-
-        return responses;
+    public <T> Page<T> paginate(List<T> items, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), items.size());
+        List<T> pagedList = (start <= end) ? items.subList(start, end) : List.of();
+        return new PageImpl<>(pagedList, pageable, items.size());
     }
 
-    private String resolveType(VNPayPayment payment) {
-        if (payment.getVnPayPaymentPremiumPackage() != null) {
-            return "Premium";
-        } else if (!payment.getPaymentCourses().isEmpty()) {
-            return "Course";
+    private Comparator<DashboardTableResponse> getComparator(String sortBy, String order) {
+        Comparator<DashboardTableResponse> comparator;
+
+        switch (sortBy != null ? sortBy.toLowerCase() : "") {
+            case "amount" -> comparator = Comparator.comparing(
+                    DashboardTableResponse::getAmount, Comparator.nullsLast(Double::compareTo)
+            );
+            case "status" -> comparator = Comparator.comparing(
+                    DashboardTableResponse::getStatus, Comparator.nullsLast(String::compareToIgnoreCase)
+            );
+            case "type" -> comparator = Comparator.comparing(
+                    DashboardTableResponse::getType, Comparator.nullsLast(String::compareToIgnoreCase)
+            );
+            case "date", "" -> comparator = Comparator.comparing(
+                    DashboardTableResponse::getDate, Comparator.nullsLast(Date::compareTo)
+            );
+            default -> throw new IllegalArgumentException("Invalid sortBy field: " + sortBy);
         }
-        return "Unknown";
+
+        // Apply direction
+        return "desc".equalsIgnoreCase(order) ? comparator.reversed() : comparator;
     }
 
-    public List<DashboardTableResponse> getTopPurchases() {
+
+    public Page<DashboardTableResponse> getFilteredTransactions(
+            String type, String status, String search, String sortBy, String order, Pageable pageable
+    ) {
+        List<VNPayPayment> allPayments = vnpayPaymentRepository.findAll();
+
+        List<DashboardTableResponse> filtered = allPayments.stream()
+                .filter(p -> {
+                    if (type == null) return true;
+                    if ("course".equalsIgnoreCase(type)) return p.getPaymentFor() != null && p.getPaymentFor().equalsIgnoreCase("course");
+                    if ("problem".equalsIgnoreCase(type)) return p.getPaymentFor() != null && p.getPaymentFor().equalsIgnoreCase("problem");
+                    return false;
+                })
+                .filter(p -> status == null || p.getTransactionStatus().equalsIgnoreCase(status))
+                .filter(p -> search == null || p.getUserUid().toLowerCase().contains(search.toLowerCase()))
+                .map(p -> DashboardTableResponse.builder()
+                        .user(firebaseAuthClient.getUserInfo(p.getUserUid(), ""))
+                        .date(Date.from(p.getCreatedAt()))
+                        .amount(p.getTotalPaymentAmount() != null ? p.getTotalPaymentAmount().doubleValue() : 0)
+                        .status(p.getTransactionStatus())
+                        .type(p.getPaymentFor()) // now showing actual "paymentFor" as type
+                        .build())
+                .sorted(getComparator(sortBy, order))
+                .toList();
+
+        return paginate(filtered, pageable);
+    }
+
+    public Page<DashboardTableResponse> getTopPurchased(
+            String type, String search, String sortBy, String order, Pageable pageable
+    ) {
         List<VNPayPayment> payments = vnpayPaymentRepository.findAll();
 
-        // Group by userUuid and sum total payment amount
-        Map<String, Double> totalAmountPerUser = payments.stream()
-                .filter(p -> p.getTransactionStatus().equalsIgnoreCase("00")) // Optional: only successful ones
+        // Filter successful only
+        List<VNPayPayment> successful = payments.stream()
+                .filter(p -> "00".equalsIgnoreCase(p.getTransactionStatus()))
+                .toList();
+
+        // Apply type filter first (course/problem)
+        if (type != null) {
+            successful = successful.stream()
+                    .filter(p -> p.getPaymentFor() != null && p.getPaymentFor().equalsIgnoreCase(type))
+                    .toList();
+        }
+
+        // Group by user and sum total amount
+        Map<String, Double> totalAmountPerUser = successful.stream()
                 .collect(Collectors.groupingBy(
                         VNPayPayment::getUserUid,
                         Collectors.summingDouble(p -> p.getTotalPaymentAmount() != null ? p.getTotalPaymentAmount() : 0)
                 ));
 
-        List<DashboardTableResponse> topPurchases = new ArrayList<>();
+        // Build DashboardTableResponse list
+        List<DashboardTableResponse> responses = totalAmountPerUser.entrySet().stream()
+                .filter(e -> search == null || e.getKey().toLowerCase().contains(search.toLowerCase()))
+                .map(entry -> {
+                    UserInfoResponse user = firebaseAuthClient.getUserInfo(entry.getKey(), "");
+                    return DashboardTableResponse.builder()
+                            .user(user)
+                            .amount(entry.getValue())
+                            .status("SUCCESS") // hardcoded status
+                            .type(type != null ? type : "All") // optional: show type filter
+                            .build();
+                })
+                .sorted(getComparator(sortBy, order))
+                .toList();
 
-        for (Map.Entry<String, Double> entry : totalAmountPerUser.entrySet()) {
-            UserInfoResponse user = firebaseAuthClient.getUserInfo(entry.getKey(), "");
-
-            topPurchases.add(DashboardTableResponse.builder()
-                    .user(user)
-                    .amount(entry.getValue())
-                    .build());
-
-        }
-
-        // Sort descending by totalAmount
-        return topPurchases.stream()
-                .sorted(Comparator.comparing(DashboardTableResponse::getAmount).reversed())
-                .limit(10) // Optional: top 10
-                .collect(Collectors.toList());
+        return paginate(responses, pageable);
     }
+
+//    public List<DashboardTableResponse> getRecentTransaction() {
+//        List<VNPayPayment> recentPayments = vnpayPaymentRepository
+//                .findTop10ByOrderByCreatedAtDesc();
+//
+//        List<DashboardTableResponse> responses = new ArrayList<>();
+//
+//        for (VNPayPayment payment : recentPayments) {
+//            UserInfoResponse user = firebaseAuthClient.getUserInfo(payment.getUserUid(), "");
+//
+//            DashboardTableResponse response = DashboardTableResponse.builder()
+//                    .user(user)
+//                    .date(Date.from(payment.getCreatedAt()))
+//                    .amount(payment.getTotalPaymentAmount().doubleValue())
+//                    .status(payment.getTransactionStatus())
+//                    .type(resolveType(payment))
+//                    .build();
+//
+//            responses.add(response);
+//        }
+//
+//        return responses;
+//    }
+
+//    public List<DashboardTableResponse> getTopPurchases() {
+//        List<VNPayPayment> payments = vnpayPaymentRepository.findAll();
+//
+//        // Group by userUuid and sum total payment amount
+//        Map<String, Double> totalAmountPerUser = payments.stream()
+//                .filter(p -> p.getTransactionStatus().equalsIgnoreCase("00")) // Optional: only successful ones
+//                .collect(Collectors.groupingBy(
+//                        VNPayPayment::getUserUid,
+//                        Collectors.summingDouble(p -> p.getTotalPaymentAmount() != null ? p.getTotalPaymentAmount() : 0)
+//                ));
+//
+//        List<DashboardTableResponse> topPurchases = new ArrayList<>();
+//
+//        for (Map.Entry<String, Double> entry : totalAmountPerUser.entrySet()) {
+//            UserInfoResponse user = firebaseAuthClient.getUserInfo(entry.getKey(), "");
+//
+//            topPurchases.add(DashboardTableResponse.builder()
+//                    .user(user)
+//                    .amount(entry.getValue())
+//                    .build());
+//
+//        }
+//
+//        // Sort descending by totalAmount
+//        return topPurchases.stream()
+//                .sorted(Comparator.comparing(DashboardTableResponse::getAmount).reversed())
+//                .limit(10) // Optional: top 10
+//                .collect(Collectors.toList());
+//    }
 
 }
