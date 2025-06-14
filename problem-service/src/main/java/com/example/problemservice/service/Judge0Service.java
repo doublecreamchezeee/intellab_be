@@ -27,34 +27,43 @@ public class Judge0Service {
     public List<Map<String, Object>> getSimplifiedPodMetrics() {
         PodMetricsList podMetricsList = client.top().pods().metrics(NAMESPACE);
 
-        return podMetricsList.getItems().stream().map(podMetrics -> {
-            Pod pod = client.pods().inNamespace(NAMESPACE).withName(podMetrics.getMetadata().getName()).get();
+        return podMetricsList.getItems().stream()
+                .filter(podMetrics -> podMetrics.getMetadata().getName().contains("worker"))
+                .map(podMetrics -> {
+                    String podName = podMetrics.getMetadata().getName();
+                    Pod pod = client.pods()
+                            .inNamespace(NAMESPACE)
+                            .withName(podName)
+                            .get();
 
-            Map<String, Object> podInfo = new HashMap<>();
-            podInfo.put("metadata", Map.of(
-                "name", podMetrics.getMetadata().getName(),
-                "namespace", podMetrics.getMetadata().getNamespace()
-            ));
-            podInfo.put("timestamp", podMetrics.getTimestamp());
-            podInfo.put("window", podMetrics.getWindow());
+                    Map<String, Object> podInfo = new HashMap<>();
+                    podInfo.put("metadata", Map.of(
+                            "name", podName,
+                            "namespace", podMetrics.getMetadata().getNamespace()
+                    ));
+                    podInfo.put("timestamp", podMetrics.getTimestamp());
+                    podInfo.put("window", podMetrics.getWindow());
 
-            // Uptime in seconds
-            String creationTimestampStr = pod.getMetadata().getCreationTimestamp();
-            OffsetDateTime creationTime = OffsetDateTime.parse(creationTimestampStr);
-            Duration uptimeDuration = Duration.between(creationTime.toInstant(), Instant.now());
-            podInfo.put("uptime", uptimeDuration.getSeconds());
+                    // Add pod status/health
+                    String podPhase = pod.getStatus() != null ? pod.getStatus().getPhase() : "Unknown";
+                    podInfo.put("status", podPhase); // Can be "Running", "Pending", "Failed", etc.
 
-            // Container usage
-            List<Map<String, Object>> containers = podMetrics.getContainers().stream().map(container -> {
-                Map<String, Object> containerInfo = new HashMap<>();
-                containerInfo.put("name", container.getName());
-                containerInfo.put("usage", container.getUsage());
-                return containerInfo;
-            }).collect(Collectors.toList());
+                    // Uptime in seconds
+                    String creationTimestampStr = pod.getMetadata().getCreationTimestamp();
+                    OffsetDateTime creationTime = OffsetDateTime.parse(creationTimestampStr);
+                    Duration uptimeDuration = Duration.between(creationTime.toInstant(), Instant.now());
+                    podInfo.put("uptime", uptimeDuration.getSeconds());
 
-            podInfo.put("containers", containers);
-            return podInfo;
-        }).collect(Collectors.toList());
+                    List<Map<String, Object>> containers = podMetrics.getContainers().stream().map(container -> {
+                        Map<String, Object> containerInfo = new HashMap<>();
+                        containerInfo.put("name", container.getName());
+                        containerInfo.put("usage", container.getUsage());
+                        return containerInfo;
+                    }).collect(Collectors.toList());
+
+                    podInfo.put("containers", containers);
+                    return podInfo;
+                }).collect(Collectors.toList());
     }
 
     public void scaleJudge0Workers(int replicas) {

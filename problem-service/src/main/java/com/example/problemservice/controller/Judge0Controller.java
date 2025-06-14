@@ -14,12 +14,7 @@ public class Judge0Controller {
     public Judge0Controller(Judge0Service judge0Service) {
         this.judge0Service = judge0Service;
     }
-
-    @GetMapping("/replicas")
-    public int getReplicas() {
-        return judge0Service.getJudge0WorkerReplicas();
-    }
-
+    
     @PostMapping("/scale")
     public String scale(@RequestParam int replicas) {
         judge0Service.scaleJudge0Workers(replicas);
