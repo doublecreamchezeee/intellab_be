@@ -16,4 +16,5 @@ public class LoginStreakResponse {
     Instant lastLogin;
     String userUid;
     Boolean isLostStreak = false;
+    Boolean isUpStreak = false;
 }

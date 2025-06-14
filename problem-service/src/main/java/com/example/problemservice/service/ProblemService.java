@@ -481,7 +481,6 @@ public class ProblemService {
                         .and(ProblemSpecification.levelFilter(level))
                         .and(ProblemSpecification.NameFilter(keyword))
                         .and(ProblemSpecification.StatusFilter(status, userId))
-                        .and(ProblemSpecification.isPublicFilter(true))
                         .and(ProblemSpecification.isCompletedCreationFilter(true)));
 
         Page<Problem> problems = problemRepository.findAll(specification, pageable);
@@ -648,7 +647,11 @@ public class ProblemService {
         return defaultCodes.stream().map(defaultCodeMapper::toResponse).toList();
     }
 
-    public String enrichCode(String structure, String code, Integer languageId) {
+    public String enrichCode(UUID problemId, String code, Integer languageId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+        String structure = problem.getProblemStructure();
+        System.out.println(structure);
         return boilerplateClient.enrich(code, languageId, structure);
     }
 

@@ -204,16 +204,9 @@ public class ProblemController {
   @PostMapping("/enrichCode")
   public ApiResponse<String> enrichCode(@RequestBody EnrichCodeRequest request) {
     // để test
-    request.setStructure("Problem Name: \"Sum of Two Numbers\"\n" +
-        "Function Name: sum\n" +
-        "Input Structure:\n" +
-        "Input Field: int num1\n" +
-        "Input Field: int num2\n" +
-        "Output Structure:\n" +
-        "Output Field: int result");
     return ApiResponse.<String>builder()
         .result(problemService.enrichCode(
-            request.getStructure(),
+            request.getProblemId(),
             request.getCode(),
             request.getLanguageId()))
         .build();
