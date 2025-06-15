@@ -372,8 +372,8 @@ public class AdminDashboardService {
         List<DashboardTableResponse> filtered = allPayments.stream()
                 .filter(p -> {
                     if (type == null) return true;
-                    if ("course".equalsIgnoreCase(type)) return p.getPaymentFor() != null && p.getPaymentFor().equalsIgnoreCase("course");
-                    if ("problem".equalsIgnoreCase(type)) return p.getPaymentFor() != null && p.getPaymentFor().equalsIgnoreCase("problem");
+                    if ("course".equalsIgnoreCase(type)) return p.getPaymentFor() != null && p.getPaymentFor().equalsIgnoreCase("Course");
+                    if ("subscription".equalsIgnoreCase(type)) return p.getPaymentFor() != null && p.getPaymentFor().equalsIgnoreCase("Subscription");
                     return false;
                 })
                 .filter(p -> status == null || p.getTransactionStatus().equalsIgnoreCase(status))
