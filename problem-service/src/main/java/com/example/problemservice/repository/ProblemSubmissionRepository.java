@@ -19,6 +19,8 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
     void deleteAllByProblem_ProblemId(UUID problemId);
     List<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
 
+
+
     @Query("SELECT COUNT(DISTINCT ps.problem.problemId) " +
             "FROM ProblemSubmission ps " +
             "WHERE ps.problem.problemLevel = :problemLevel " +

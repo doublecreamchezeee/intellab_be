@@ -46,7 +46,7 @@ public class AdminDashboardService {
         int lastMonthYear = (currentMonth == 1) ? currentYear - 1 : currentYear;
 
         // --- Total Revenue ---
-        Float totalRevenue = vnpayPaymentRepository.sumSuccessfulPayments();
+        Float totalRevenue = vnpayPaymentRepository.sumSuccessfulPaymentsByMonth(currentMonth, currentYear);
         Float lastMonthRevenue = vnpayPaymentRepository.sumSuccessfulPaymentsByMonth(lastMonth, lastMonthYear);
         String revenueChange = calculateChange(totalRevenue, lastMonthRevenue);
 

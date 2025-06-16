@@ -26,6 +26,11 @@ public class Judge0Controller {
         return judge0Service.getSimplifiedPodMetrics();
     }
 
+    @GetMapping("/submission")
+    public Long getSubmission() {
+        return judge0Service.getSubmissionInQueue();
+    }
+
     // @GetMapping("/nodes")
     // public List<String> getNodes() {
     //     return judge0Service.getNodes();

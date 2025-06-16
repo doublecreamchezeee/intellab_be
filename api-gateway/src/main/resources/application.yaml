@@ -11,12 +11,11 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: ${ALLOWED_ORIGINS:}
-              # - "http://localhost:3000"
-#            allowedOrigins: #${ALLOWED_ORIGINS:}
-#              - "http://localhost:3000"
-#              - "https://intellab.vercel.app/"
-#              - "https://intellab-julian-nguyens-projects.vercel.app/"
+            allowedOrigins:
+              - "http://localhost:3000/"
+              - "https://www.intellab.site/"
+              - "https://intellab.vercel.app/"
+              - "https://intellab-julian-nguyens-projects.vercel.app/"
             allowedMethods:
               - "*"
             allowedHeaders:

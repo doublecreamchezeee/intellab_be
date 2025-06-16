@@ -1,9 +1,12 @@
 package com.example.problemservice.service;
 
+import com.example.problemservice.repository.ProblemSubmissionRepository;
+import com.example.problemservice.repository.TestCaseOutputRepository;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.metrics.v1beta1.PodMetricsList;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -18,10 +21,12 @@ import java.util.stream.Collectors;
 public class Judge0Service {
     private final KubernetesClient client;
     private static final String NAMESPACE = "default";
-    private static final String WORKER_DEPLOYMENT_NAME = "judge0-worker";
+    private static final String WORKER_DEPLOYMENT_NAME = "workers";
+    private final TestCaseOutputRepository testCaseOutputRepository;
 
-    public Judge0Service(KubernetesClient client) {
+    public Judge0Service(KubernetesClient client, ProblemSubmissionRepository problemSubmissionRepository, TestCaseOutputRepository testCaseOutputRepository) {
         this.client = client;
+        this.testCaseOutputRepository = testCaseOutputRepository;
     }
 
     public List<Map<String, Object>> getSimplifiedPodMetrics() {
@@ -64,6 +69,10 @@ public class Judge0Service {
                     podInfo.put("containers", containers);
                     return podInfo;
                 }).collect(Collectors.toList());
+    }
+
+    public long getSubmissionInQueue(){
+        return testCaseOutputRepository.countByStatus("In Queue");
     }
 
     public void scaleJudge0Workers(int replicas) {
