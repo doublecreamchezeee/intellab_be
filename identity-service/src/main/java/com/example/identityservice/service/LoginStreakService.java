@@ -37,13 +37,11 @@ public class LoginStreakService {
         }
 
         LocalDate lastLoginDate = streak.getLastAccess().atZone(ZoneOffset.UTC).toLocalDate();
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.now(ZoneOffset.UTC);
 
         if (lastLoginDate.isEqual(now))
         {
             // No change in streak, just return the current streak
-            streak.setLastAccess(Instant.now());
-            streak = streakRepository.save(streak);
             return LoginStreakResponse.builder()
                     .streakLogin(streak.getStreakScore())
                     .lastLogin(streak.getLastAccess())
@@ -52,7 +50,7 @@ public class LoginStreakService {
                     .isUpStreak(false)
                     .build();
         }
-        else if (lastLoginDate.isBefore(now) && ChronoUnit.DAYS.between(lastLoginDate, now) == 1) {
+        else if (ChronoUnit.DAYS.between(lastLoginDate, now) == 1) {
             // Continue the streak
             streak.setStreakScore(streak.getStreakScore() + 1);
             streak.setLastAccess(Instant.now());
