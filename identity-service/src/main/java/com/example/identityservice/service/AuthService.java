@@ -2,10 +2,7 @@ package com.example.identityservice.service;
 
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.configuration.RedirectUrlConfig;
-import com.example.identityservice.dto.request.auth.ResetPasswordRequest;
-import com.example.identityservice.dto.request.auth.UserCreationRequest;
-import com.example.identityservice.dto.request.auth.UserLoginRequest;
-import com.example.identityservice.dto.request.auth.UserUpdateRequest;
+import com.example.identityservice.dto.request.auth.*;
 import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.exception.AccountAlreadyExistsException;
@@ -63,7 +60,7 @@ public class AuthService {
             UserRecord userRecord = firebaseAuth.createUser(request);
             log.info("User successfully created: {}", userCreationRequest.getEmail());
 
-            firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
+            //firebaseAuth.generatePasswordResetLink(userRecord.getEmail());
 
             int timeout = 20; // seconds
             while (true) {
@@ -79,7 +76,7 @@ public class AuthService {
                 }
             }
 
-            sendVerificationEmail(userRecord.getUid());
+            sendVerificationEmail(userRecord.getUid(), userCreationRequest.getCallbackDomain());
 
         } catch (final FirebaseAuthException exception) {
             if (exception.getMessage().contains("EMAIL_EXISTS")) {
@@ -313,17 +310,17 @@ public class AuthService {
         }
     }
 
-    public void resendVerificationEmail(@NonNull String email) {
+    public void resendVerificationEmail(@NonNull String email, @NonNull String callbackDomain) {
         try {
             UserRecord userRecord = firebaseAuth.getUserByEmail(email);
             String uid = userRecord.getUid();
-            sendVerificationEmail(uid);
+            sendVerificationEmail(uid, callbackDomain);
         } catch (FirebaseAuthException e) {
             throw new RuntimeException("Error finding user by email: " + e.getMessage(), e);
         }
     }
 
-    public void sendVerificationEmail(String uid) {
+    public void sendVerificationEmail(String uid, String callbackDomain) {
         try {
             UserRecord userRecord = firebaseAuth.getUser(uid);
             String email = userRecord.getEmail();
@@ -331,7 +328,7 @@ public class AuthService {
             if (email != null) {
                 //String link = firebaseAuthClient.generateEmailVerification(email);
 
-                String link = generateCustomVerificationLink(email);
+                String link = generateCustomVerificationLink(email, callbackDomain);
                 System.out.println("generate email to " + email + " with link: " + link);
 
                 //String htmlContent = "<a href=\"" + link + "\" target=\"_blank\" style=\"color: blue; text-decoration: underline;\">Click here to verify your email</a>";
@@ -346,7 +343,7 @@ public class AuthService {
 
 
 
-                String feUrl = redirectUrlConfig.getFeUrl();
+                String feUrl = callbackDomain;
 
                 String htmlContent = String.format("""
 <!DOCTYPE html>
@@ -390,15 +387,15 @@ public class AuthService {
         }
     }
 
-    public void sendPasswordResetLink(String email) {
+    public void sendPasswordResetLink(ResetPasswordAndDomainRequest request) {
         try {
-            UserRecord userRecord = firebaseAuth.getUserByEmail(email);
+            UserRecord userRecord = firebaseAuth.getUserByEmail(request.getEmail());
             String token = jwtUtil.generateJwtByUserUid(userRecord.getUid());
 
             //String link = firebaseAuthClient.generatePasswordResetLink(email);
-            String resetLink = generateCustomResetPasswordLink(token);
+            String resetLink = generateCustomResetPasswordLink(token, request.getCallbackDomain());
 
-            System.out.println("generate email to " + email + " with link: " + resetLink);
+            System.out.println("generate email to " + request.getEmail() + " with link: " + resetLink);
             //String htmlContent = "<a href=\"" + link + "\" style=\"color: blue; text-decoration: underline;\">Click here to reset your password</a>";
 
             //<img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Intellab" width="100" />
@@ -407,7 +404,7 @@ public class AuthService {
 
             String name = userFirestore.getFirstName() + " " + userFirestore.getLastName();
 
-            String feUrl = redirectUrlConfig.getFeUrl();
+            String feUrl = request.getCallbackDomain(); //redirectUrlConfig.getFeUrl();
 
             String htmlContent = String.format("""
 <!DOCTYPE html>
@@ -443,7 +440,7 @@ public class AuthService {
 
 
             emailService.sendMail(
-                    email,
+                    request.getEmail(),
                     "[Intellab] Reset password request",
                     htmlContent);
         } catch (Exception e) {
@@ -505,23 +502,25 @@ public class AuthService {
 
     }
 
-    public String generateCustomVerificationLink(String email) {
+    public String generateCustomVerificationLink(String email, String feCallbackDomain) {
         try {
             return new StringBuilder()
                     .append(redirectUrlConfig.getCallbackDomain())
                     .append("/identity/auth/callback-set-verified-email")
                     .append("?email=")
                     .append(email)
+                    .append("&callbackDomain=")
+                    .append(feCallbackDomain)
                     .toString();
         } catch (Exception e) {
             throw new SendingEmailFailedException();
         }
     }
 
-    public String generateCustomResetPasswordLink(String token) {
+    public String generateCustomResetPasswordLink(String token, String callbackDomain) {
         try {
             return new StringBuilder()
-                    .append(redirectUrlConfig.getFeUrl())
+                    .append(callbackDomain)
                     .append("/profile/reset-password")
                     .append("?token=")
                     .append(token)

@@ -11,6 +11,7 @@ import com.example.identityservice.dto.request.vnpay.VNPayUpgradeAccountRequest;
 import com.example.identityservice.dto.response.course.CourseAndFirstLessonResponse;
 import com.example.identityservice.dto.response.vnpay.*;
 import com.example.identityservice.enums.account.PaymentFor;
+import com.example.identityservice.model.VNPayPayment;
 import com.example.identityservice.service.VNPayService;
 import com.example.identityservice.utility.HashUtility;
 import io.swagger.v3.oas.annotations.Operation;
@@ -110,9 +111,12 @@ public class VNPayController {
         VNPayIPNReturnResponse handlingResponse = vnPayService.handleIPNCallback(params);
         log.info("handlingResponse ipn: {}", handlingResponse);
         log.info("params return from vnpay: {}", params);
-        UUID paymentId = vnPayService.getPaymentIdByTransactionReference(params.getVnp_TxnRef());
-        log.info("redirect to: {}", redirectUrlConfig.getRedirectUrl() + paymentId);
-        return new RedirectView(redirectUrlConfig.getRedirectUrl() + paymentId);
+        //UUID paymentId = vnPayService.getPaymentIdByTransactionReference(params.getVnp_TxnRef());
+
+        VNPayPayment payment = vnPayService.getPaymentByTransactionReference(params.getVnp_TxnRef());
+
+        log.info("redirect to: {}", payment.getFeCallbackDomain() + "/payment-result?paymentId=" + payment.getPaymentId());
+        return new RedirectView(payment.getFeCallbackDomain() + "/payment-result?paymentId=" + payment.getPaymentId());
     }
 
     @Operation(

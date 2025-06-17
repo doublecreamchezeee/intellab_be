@@ -4,10 +4,7 @@ import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.configuration.RedirectUrlConfig;
 import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.dto.ApiResponse;
-import com.example.identityservice.dto.request.auth.ListEmailsRequest;
-import com.example.identityservice.dto.request.auth.ResetPasswordRequest;
-import com.example.identityservice.dto.request.auth.UserCreationRequest;
-import com.example.identityservice.dto.request.auth.UserLoginRequest;
+import com.example.identityservice.dto.request.auth.*;
 import com.example.identityservice.dto.response.auth.*;
 import com.example.identityservice.configuration.PublicEndpoint;
 import com.example.identityservice.service.AuthService;
@@ -138,8 +135,8 @@ public class AuthController {
     )
     @PublicEndpoint
     @PostMapping("/reset-password")
-    public ResponseEntity<HttpStatus> sendPasswordResetLink(@RequestBody String email) {
-        authService.sendPasswordResetLink(email);
+    public ResponseEntity<HttpStatus> sendPasswordResetLink(@RequestBody ResetPasswordAndDomainRequest request) {
+        authService.sendPasswordResetLink(request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -170,10 +167,10 @@ public class AuthController {
     )
     @PublicEndpoint
     @GetMapping("/callback-set-verified-email")
-    public RedirectView callbackSetVerifiedEmail(@RequestParam String email) {
+    public RedirectView callbackSetVerifiedEmail(@RequestParam String email, @RequestParam String callbackDomain) {
         log.info("Callback set verified email: {}", email);
         authService.setVerifiedEmail(email);
-        return new RedirectView(redirectUrlConfig.getUpdateAccessTokenUrl());
+        return new RedirectView(callbackDomain + "/profile/update-access-token");
     }
 
     @Operation(
@@ -182,8 +179,8 @@ public class AuthController {
     )
     @PublicEndpoint
     @PostMapping("/resend-verification-email")
-    public ResponseEntity<HttpStatus> resendVerificationEmail(@RequestBody String email) {
-        authService.resendVerificationEmail(email);
+    public ResponseEntity<HttpStatus> resendVerificationEmail(@RequestBody ResendVerificationEmailRequest request) {
+        authService.resendVerificationEmail(request.getEmail(), request.getCallbackDomain());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

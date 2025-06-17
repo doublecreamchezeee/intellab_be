@@ -83,4 +83,7 @@ public class VNPayPayment {
     @JoinColumn(name = "payment_premium_package_id", nullable = true)
     VNPayPaymentPremiumPackage vnPayPaymentPremiumPackage;
 
+    @Column(name = "fe_callback_domain")
+    String feCallbackDomain;
+
 }

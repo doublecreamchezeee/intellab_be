@@ -727,7 +727,8 @@ create table vnpay_payment
         constraint uk4l2cq58r9gpl4h1f315p8e3ng
             unique
         constraint fkl1j58k29u0wph49ltbulycpwe
-            references vnpay_payment_premium_package
+            references vnpay_payment_premium_package,
+    fe_callback_domain text
 );
 
 alter table vnpay_payment
