@@ -38,8 +38,8 @@ create table solutions
     content    text,
     problem_id uuid not null
         constraint fkrm3misp2p4syk4tcnefnqspbl
-            references problems,
-    primary key (problem_id)
+            references problems ON DELETE CASCADE,
+    primary key (problem_id, author_id)
 );
 
 alter table solutions
@@ -768,42 +768,9 @@ alter table view_solution_behaviors
 --	Lessons	|	+	|	+	|	+ [Lessons(lesson_order)]
 --		  	|		|		|
 
-CREATE OR REPLACE FUNCTION set_Lesson_order()
+CREATE OR REPLACE FUNCTION gen_learning_lesson()
 RETURNS TRIGGER AS $$
-DECLARE
-    max_order INT;
-    order_exists BOOLEAN;
 BEGIN
-    -- Get the maximum lesson_order for this course
-    SELECT COALESCE(MAX(lesson_order), 0) INTO max_order
-    FROM lessons
-    WHERE course_id = NEW.course_id;
-    
-    -- If new.lesson_order is null, set it to max+1 (or 1 if no lessons exist)
-    IF NEW.lesson_order IS NULL THEN
-        NEW.lesson_order := max_order + 1;
-    ELSE
-        -- Check if there's already a lesson with this order in the same course
-        SELECT EXISTS (
-            SELECT 1 FROM lessons 
-            WHERE course_id = NEW.course_id 
-            AND lesson_order = NEW.lesson_order
-        ) INTO order_exists;
-        
-        IF order_exists THEN
-            -- Shift all lessons with order >= new.lesson_order up by 1
-            UPDATE lessons
-            SET lesson_order = lesson_order + 1
-            WHERE course_id = NEW.course_id
-            AND lesson_order >= NEW.lesson_order;
-        ELSE
-            -- If the requested order is higher than max+1, set to max+1
-            IF NEW.lesson_order > max_order + 1 THEN
-                NEW.lesson_order := max_order + 1;
-            END IF;
-        END IF;
-    END IF;
-
 	IF NOT EXISTS (
 	    SELECT 1 
 	    FROM user_courses 
@@ -826,10 +793,77 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger to automatically call the function before insert
-CREATE TRIGGER trigger_set_lesson_order
-BEFORE INSERT ON lessons
+-- CREATE TRIGGER trigger_set_lesson_order
+CREATE TRIGGER trigger_gen_learning_lesson
+AFTER INSERT ON lessons
 FOR EACH ROW
-EXECUTE FUNCTION set_Lesson_order();
+EXECUTE FUNCTION gen_learning_lesson();
+
+
+
+CREATE OR REPLACE FUNCTION public.set_lesson_order()
+    RETURNS trigger AS $$
+DECLARE
+	has_quiz BOOLEAN;
+	max_order INT;
+    order_exists BOOLEAN;
+BEGIN
+	-- Get the maximum lesson_order for this course
+    SELECT COALESCE(MAX(lesson_order), 0) INTO max_order
+    FROM lessons
+    WHERE course_id = NEW.course_id;
+    
+    -- If new.lesson_order is null, set it to max+1 (or 1 if no lessons exist)
+    IF NEW.lesson_order IS NULL THEN
+        NEW.lesson_order := max_order + 1;
+    ELSE
+        -- Check if there's already a lesson with this order in the same course
+        SELECT EXISTS (
+            SELECT 1 FROM lessons 
+            WHERE course_id = NEW.course_id 
+            AND lesson_order = NEW.lesson_order
+        ) INTO order_exists;
+        
+        IF order_exists THEN
+			-- Bring this condition into 
+            -- Shift all lessons with order >= new.lesson_order up by 1
+            UPDATE lessons
+            SET lesson_order = lesson_order + 1
+            WHERE course_id = NEW.course_id AND lesson_id != NEW.lesson_id
+            AND lesson_order >= NEW.lesson_order;
+        ELSE
+            -- If the requested order is higher than max+1, set to max+1
+            IF NEW.lesson_order > max_order + 1 THEN
+                NEW.lesson_order := max_order + 1;
+            END IF;
+        END IF;
+    END IF;
+
+	IF (NOT NEW.is_quiz_visible) THEN
+		RETURN NEW;
+	END IF;
+
+
+    IF (NEW.is_quiz_visible) THEN
+		SELECT EXISTS
+			(SELECT 1
+			FROM EXERCISES WHERE LESSON_ID = NEW.LESSON_ID)
+		INTO has_quiz;
+	END IF;
+
+	IF (NOT has_quiz) THEN
+		RAISE EXCEPTION 'VALIDATE DATA: %', 'lesson doesn''s have quiz to make visible';
+	END IF;
+	RETURN NEW;
+END;
+$$ language plpgsql;
+
+
+CREATE TRIGGER set_lesson_is_quiz_visible
+BEFORE INSERT OR UPDATE ON lessons
+FOR EACH ROW EXECUTE FUNCTION set_lesson_order();
+
+
 
 -- Tự động cập nhật acceptance_rate khi be call_back để update kết quả trả về 
 CREATE OR REPLACE FUNCTION set_avg_acceptance()
@@ -74900,10 +74934,6 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_ord
 3
 1 2 3
 3', '1 2 3 4 5 6', null, 3, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
-INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('285e81b0-b13c-4a30-b861-228edd8fa05a', e'0
-0
-1
-1', '1', null, 4, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
 INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('7d1d2398-47fd-480a-a662-b8bb892656a4', e'6
 1 2 3 0 0 0
 3
@@ -75082,12 +75112,17 @@ INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_ord
 0
 
 0', '1', null, 1, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.test_cases (testcase_id, input, output, user_id, testcase_order, problem_id) VALUES ('285e81b0-b13c-4a30-b861-228edd8fa05a', e'1
+0
+0
+1
+1
+1', '1', null, 4, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
 
 
 
 -- Solutions
-
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Approach: Matrix Multiplication + Matrix Exponentiation By Squaring
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES ('4d0c8d27-4509-402b-cf6f-58686cd47319', e'# Approach: Matrix Multiplication + Matrix Exponentiation By Squaring
 
 #### Intuition
 
@@ -75352,7 +75387,7 @@ Let n be the length of the string s, and let $∣Σ∣$ denote the size of the c
 -   Space complexity: $O(∣Σ∣^2).$
     
     This is the space required to store the transformation matrix.', 'feb01aba-eefe-4220-9242-729f52935cd7');
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Solution Article  
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES ('4d0c8d27-4509-402b-cf6f-58686cd47319', e'# Solution Article  
 
 ## Approach 1: Brute Force  
 ### Algorithm  
@@ -75756,7 +75791,7 @@ function twoSum(nums: number[], target: number): number[] {
 - **Space complexity**: O(n)  
   - The extra space required depends on the number of items stored in the hash table, which stores at most `n` elements.  
 ```  ', '591b3457-2157-4d61-b03d-d53f8666342c');
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Approach 1: Brute Force
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES ('4d0c8d27-4509-402b-cf6f-58686cd47319', e'# Approach 1: Brute Force
 
 **Algorithm**
 
@@ -76041,7 +76076,7 @@ Let n be the size of the `nums` array.
     The built-in `swap` and `reverse` functions do not require additional space beyond what is already present in the input array.
     
     Hence, the space complexity is O(1).', '5c078d66-5e74-402b-8216-04ac197477a9');
-INSERT INTO public.solutions (author_id, content, problem_id) VALUES (null, e'# Approach
+INSERT INTO public.solutions (author_id, content, problem_id) VALUES ('4d0c8d27-4509-402b-cf6f-58686cd47319', e'# Approach
 
 To merge the arrays in-place, we can solve this problem efficiently by merging from **right to left**, starting at the end of `nums1` and `nums2` (this prevents overwriting elements that haven’t been processed yet).  
 
@@ -76150,7 +76185,7 @@ function mergeSortedArray(nums1: number[], m: number, nums2: number[], n: number
 This is an optimal solution that efficiently merges the arrays in sorted order.', '7328995b-6079-4bd9-8be0-7c9152d5a73b');
 
 
-
+-- Programming language
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (50, 'C (GCC 9.2.0)', 'C');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (54, 'C++ (GCC 9.2.0)', 'C++');
 INSERT INTO public.programming_language (programming_language_id, long_name, short_name) VALUES (51, 'C# (Mono 6.6.0.161)', 'C#');
@@ -76208,6 +76243,451 @@ INSERT INTO public.problem_comments(
  'ZqrT4hQ0yLa3QlwZZITY2CQ6txG2', '573a0d23-196a-6b35-cf9c-6e168c18596a',
  '3177f55e-8fca-459c-96d4-90e51dae4588', '7328995b-6079-4bd9-8be0-7c9152d5a73b',
  '5ddd3184-4713-419c-8611-9cfd5e984c96', 0, NULL);
+
+
+
+-- boilerplate
+
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'void* isValid(char* s, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, 'c3756efe-d408-4e99-844e-a55021fb7c02');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+unknown isValid(std::string s) {
+    // Implementation goes here
+    return result;
+}
+', 54, 'c3756efe-d408-4e99-844e-a55021fb7c02');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public object isValid(string s) {
+    // Implementation goes here
+    return default;
+}
+', 51, 'c3756efe-d408-4e99-844e-a55021fb7c02');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function isValid(s) {
+    // Implementation goes here
+    return null;
+}
+', 63, 'c3756efe-d408-4e99-844e-a55021fb7c02');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def isValid(s):
+
+    # Implementation goes here
+    return None
+', 71, 'c3756efe-d408-4e99-844e-a55021fb7c02');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function isValid(s: string): any {
+    // Implementation goes here
+    return null;
+}
+', 74, 'c3756efe-d408-4e99-844e-a55021fb7c02');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static Object isValid(String s) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, 'c3756efe-d408-4e99-844e-a55021fb7c02');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int* mergeSortedArray(int* num1, int m, int* num2, int n, int size_num1, int size_num2, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+std::vector<int> mergeSortedArray(std::vector<int> num1, int m, std::vector<int> num2, int n) {
+    // Implementation goes here
+    return result;
+}
+', 54, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public List<int> mergeSortedArray(List<int> num1, int m, List<int> num2, int n) {
+    // Implementation goes here
+    return default;
+}
+', 51, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function mergeSortedArray(num1, m, num2, n) {
+    // Implementation goes here
+    return null;
+}
+', 63, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def mergeSortedArray(num1, m, num2, n):
+
+    # Implementation goes here
+    return None
+', 71, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function mergeSortedArray(num1: number[], m: number, num2: number[], n: number): number[] {
+    // Implementation goes here
+    return null;
+}
+', 74, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static List<int> mergeSortedArray(List<int> num1, int m, List<int> num2, int n) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, '7328995b-6079-4bd9-8be0-7c9152d5a73b');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int searchInsertPosition(int* nums, int target, int size_nums, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+int searchInsertPosition(std::vector<int> nums, int target) {
+    // Implementation goes here
+    return result;
+}
+', 54, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public int searchInsertPosition(List<int> nums, int target) {
+    // Implementation goes here
+    return default;
+}
+', 51, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function searchInsertPosition(nums, target) {
+    // Implementation goes here
+    return null;
+}
+', 63, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def searchInsertPosition(nums, target):
+
+    # Implementation goes here
+    return None
+', 71, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function searchInsertPosition(nums: number[], target: number): number {
+    // Implementation goes here
+    return null;
+}
+', 74, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static int searchInsertPosition(List<int> nums, int target) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, '82978535-a8da-46e1-a39a-31a232e3fffc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int* twoSum(int* nums, int target, int size_nums, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+std::vector<int> twoSum(std::vector<int> nums, int target) {
+    // Implementation goes here
+    return result;
+}
+', 54, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public List<int> twoSum(List<int> nums, int target) {
+    // Implementation goes here
+    return default;
+}
+', 51, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function twoSum(nums, target) {
+    // Implementation goes here
+    return null;
+}
+', 63, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def twoSum(nums, target):
+
+    # Implementation goes here
+    return None
+', 71, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function twoSum(nums: number[], target: number): number[] {
+    // Implementation goes here
+    return null;
+}
+', 74, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static List<int> twoSum(List<int> nums, int target) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, '591b3457-2157-4d61-b03d-d53f8666342c');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int lengthAfterTransformations(char* s, int t, int* nums, int size_nums, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+int lengthAfterTransformations(std::string s, int t, std::vector<int> nums) {
+    // Implementation goes here
+    return result;
+}
+', 54, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public int lengthAfterTransformations(string s, int t, List<int> nums) {
+    // Implementation goes here
+    return default;
+}
+', 51, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function lengthAfterTransformations(s, t, nums) {
+    // Implementation goes here
+    return null;
+}
+', 63, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def lengthAfterTransformations(s, t, nums):
+
+    # Implementation goes here
+    return None
+', 71, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function lengthAfterTransformations(s: string, t: number, nums: number[]): number {
+    // Implementation goes here
+    return null;
+}
+', 74, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static int lengthAfterTransformations(String s, int t, List<int> nums) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, 'feb01aba-eefe-4220-9242-729f52935cd7');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int singleNumber(int* nums, int size_nums, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+int singleNumber(std::vector<int> nums) {
+    // Implementation goes here
+    return result;
+}
+', 54, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public int singleNumber(List<int> nums) {
+    // Implementation goes here
+    return default;
+}
+', 51, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function singleNumber(nums) {
+    // Implementation goes here
+    return null;
+}
+', 63, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def singleNumber(nums):
+
+    # Implementation goes here
+    return None
+', 71, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function singleNumber(nums: number[]): number {
+    // Implementation goes here
+    return null;
+}
+', 74, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static int singleNumber(List<int> nums) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, 'e608ebb7-07ef-4a2f-8081-92e5993e6118');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int* plusOne(int* digits, int size_digits, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+std::vector<int> plusOne(std::vector<int> digits) {
+    // Implementation goes here
+    return result;
+}
+', 54, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public List<int> plusOne(List<int> digits) {
+    // Implementation goes here
+    return default;
+}
+', 51, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function plusOne(digits) {
+    // Implementation goes here
+    return null;
+}
+', 63, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def plusOne(digits):
+
+    # Implementation goes here
+    return None
+', 71, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function plusOne(digits: number[]): number[] {
+    // Implementation goes here
+    return null;
+}
+', 74, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static List<int> plusOne(List<int> digits) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, '73c532f9-4d55-4737-ae19-3006e02864cc');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int* nextPermutation(int* num, int size_num, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+std::vector<int> nextPermutation(std::vector<int> num) {
+    // Implementation goes here
+    return result;
+}
+', 54, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public List<int> nextPermutation(List<int> num) {
+    // Implementation goes here
+    return default;
+}
+', 51, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function nextPermutation(num) {
+    // Implementation goes here
+    return null;
+}
+', 63, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def nextPermutation(num):
+
+    # Implementation goes here
+    return None
+', 71, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function nextPermutation(num: number[]): number[] {
+    // Implementation goes here
+    return null;
+}
+', 74, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static List<int> nextPermutation(List<int> num) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, '5c078d66-5e74-402b-8216-04ac197477a9');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'void* threeSum(int* num, int size_num, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+std::vector<std::vector<int>> threeSum(std::vector<int> num) {
+    // Implementation goes here
+    return result;
+}
+', 54, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public List<List<int>> threeSum(List<int> num) {
+    // Implementation goes here
+    return default;
+}
+', 51, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function threeSum(num) {
+    // Implementation goes here
+    return null;
+}
+', 63, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def threeSum(num):
+
+    # Implementation goes here
+    return None
+', 71, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function threeSum(num: number[]): number {
+    // Implementation goes here
+    return null;
+}
+', 74, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static List<List<int>> threeSum(List<int> num) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, '992e6551-1c96-4362-b9f9-7cb08afca28d');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int* nextGreaterElement(int* nums1, int* nums2, int size_nums1, int size_nums2, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+std::vector<int> nextGreaterElement(std::vector<int> nums1, std::vector<int> nums2) {
+    // Implementation goes here
+    return result;
+}
+', 54, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public List<int> nextGreaterElement(List<int> nums1, List<int> nums2) {
+    // Implementation goes here
+    return default;
+}
+', 51, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function nextGreaterElement(nums1, nums2) {
+    // Implementation goes here
+    return null;
+}
+', 63, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def nextGreaterElement(nums1, nums2):
+
+    # Implementation goes here
+    return None
+', 71, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function nextGreaterElement(nums1: number[], nums2: number[]): number[] {
+    // Implementation goes here
+    return null;
+}
+', 74, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static List<int> nextGreaterElement(List<int> nums1, List<int> nums2) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, 'f3248456-acbf-46ae-9888-8bd0fad9cd91');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'int findMaximizedCapital(int k, int w, int* profits, int* capital, int size_profits, int size_capital, int size_result) {
+    // Implementation goes here
+    return result;
+}
+', 50, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'#include <iostream>
+#include <vector>
+#include <string>
+int findMaximizedCapital(int k, int w, std::vector<int> profits, std::vector<int> capital) {
+    // Implementation goes here
+    return result;
+}
+', 54, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public int findMaximizedCapital(int k, int w, List<int> profits, List<int> capital) {
+    // Implementation goes here
+    return default;
+}
+', 51, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function findMaximizedCapital(k, w, profits, capital) {
+    // Implementation goes here
+    return null;
+}
+', 63, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'import sys
+def findMaximizedCapital(k, w, profits, capital):
+
+    # Implementation goes here
+    return None
+', 71, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'function findMaximizedCapital(k: number, w: number, profits: number[], capital: number[]): number {
+    // Implementation goes here
+    return null;
+}
+', 74, 'a1964481-4927-4946-bd13-cee87f00a952');
+INSERT INTO public.default_code (code, language_id, problem_id) VALUES (e'public static int findMaximizedCapital(int k, int w, List<int> profits, List<int> capital) {
+
+    // Implementation goes here
+    return null;
+}
+', 91, 'a1964481-4927-4946-bd13-cee87f00a952');
 
 
 
@@ -76359,35 +76839,6 @@ FOR EACH ROW EXECUTE FUNCTION create_problem_trigger_function();
 
 
 
-CREATE OR REPLACE FUNCTION public.set_lesson_order()
-    RETURNS trigger AS $$
-DECLARE
-	has_quiz BOOLEAN;
-BEGIN
-
-	IF (NOT NEW.is_quiz_visible) THEN
-		RETURN NEW;
-	END IF;
-
-
-    IF (NEW.is_quiz_visible) THEN
-		SELECT EXISTS
-			(SELECT 1
-			FROM EXERCISES WHERE LESSON_ID = NEW.LESSON_ID)
-		INTO has_quiz;
-	END IF;
-
-	IF (NOT has_quiz) THEN
-		RAISE EXCEPTION 'VALIDATE DATA: %', 'lesson doesn''s have quiz to make visible';
-	END IF;
-	RETURN NEW;
-END;
-$$ language plpgsql;
-
-
-CREATE TRIGGER set_lesson_is_quiz_visible
-BEFORE INSERT OR UPDATE ON lessons
-FOR EACH ROW EXECUTE FUNCTION set_lesson_order();
 
 
 
