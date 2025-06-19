@@ -158,6 +158,7 @@ public class TestCaseService {
         for (int i = 0; i < request.getInputs().size(); i++) {
             TestCase testCase = TestCase.builder()
                     .problem(problem)
+                    .order(request.getOrders().get(i))
                     .input(request.getInputs().get(i))
                     .output(request.getOutputs().get(i))
                     .build();
