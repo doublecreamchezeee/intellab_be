@@ -800,67 +800,67 @@ EXECUTE FUNCTION gen_learning_lesson();
 
 
 
-CREATE OR REPLACE FUNCTION public.set_lesson_order()
-    RETURNS trigger AS $$
-DECLARE
-	has_quiz BOOLEAN;
-	max_order INT;
-    order_exists BOOLEAN;
-BEGIN
-	-- Get the maximum lesson_order for this course
-    SELECT COALESCE(MAX(lesson_order), 0) INTO max_order
-    FROM lessons
-    WHERE course_id = NEW.course_id;
+-- CREATE OR REPLACE FUNCTION public.set_lesson_order()
+--     RETURNS trigger AS $$
+-- DECLARE
+-- 	has_quiz BOOLEAN;
+-- 	max_order INT;
+--     order_exists BOOLEAN;
+-- BEGIN
+-- 	-- Get the maximum lesson_order for this course
+--     SELECT COALESCE(MAX(lesson_order), 0) INTO max_order
+--     FROM lessons
+--     WHERE course_id = NEW.course_id;
     
-    -- If new.lesson_order is null, set it to max+1 (or 1 if no lessons exist)
-    IF NEW.lesson_order IS NULL THEN
-        NEW.lesson_order := max_order + 1;
-    ELSE
-        -- Check if there's already a lesson with this order in the same course
-        SELECT EXISTS (
-            SELECT 1 FROM lessons 
-            WHERE course_id = NEW.course_id 
-            AND lesson_order = NEW.lesson_order
-        ) INTO order_exists;
+--     -- If new.lesson_order is null, set it to max+1 (or 1 if no lessons exist)
+--     IF NEW.lesson_order IS NULL THEN
+--         NEW.lesson_order := max_order + 1;
+--     ELSE
+--         -- Check if there's already a lesson with this order in the same course
+--         SELECT EXISTS (
+--             SELECT 1 FROM lessons 
+--             WHERE course_id = NEW.course_id 
+--             AND lesson_order = NEW.lesson_order
+--         ) INTO order_exists;
         
-        IF order_exists THEN
-			-- Bring this condition into 
-            -- Shift all lessons with order >= new.lesson_order up by 1
-            UPDATE lessons
-            SET lesson_order = lesson_order + 1
-            WHERE course_id = NEW.course_id AND lesson_id != NEW.lesson_id
-            AND lesson_order >= NEW.lesson_order;
-        ELSE
-            -- If the requested order is higher than max+1, set to max+1
-            IF NEW.lesson_order > max_order + 1 THEN
-                NEW.lesson_order := max_order + 1;
-            END IF;
-        END IF;
-    END IF;
+--         IF order_exists THEN
+-- 			-- Bring this condition into 
+--             -- Shift all lessons with order >= new.lesson_order up by 1
+--             -- UPDATE lessons
+--             -- SET lesson_order = lesson_order + 1
+--             -- WHERE course_id = NEW.course_id AND lesson_id != NEW.lesson_id
+--             -- AND lesson_order >= NEW.lesson_order;
+--         ELSE
+--             -- If the requested order is higher than max+1, set to max+1
+--             IF NEW.lesson_order > max_order + 1 THEN
+--                 NEW.lesson_order := max_order + 1;
+--             END IF;
+--         END IF;
+--     END IF;
 
-	IF (NOT NEW.is_quiz_visible) THEN
-		RETURN NEW;
-	END IF;
-
-
-    IF (NEW.is_quiz_visible) THEN
-		SELECT EXISTS
-			(SELECT 1
-			FROM EXERCISES WHERE LESSON_ID = NEW.LESSON_ID)
-		INTO has_quiz;
-	END IF;
-
-	IF (NOT has_quiz) THEN
-		RAISE EXCEPTION 'VALIDATE DATA: %', 'lesson doesn''s have quiz to make visible';
-	END IF;
-	RETURN NEW;
-END;
-$$ language plpgsql;
+-- 	IF (NOT NEW.is_quiz_visible) THEN
+-- 		RETURN NEW;
+-- 	END IF;
 
 
-CREATE TRIGGER set_lesson_is_quiz_visible
-BEFORE INSERT OR UPDATE ON lessons
-FOR EACH ROW EXECUTE FUNCTION set_lesson_order();
+--     IF (NEW.is_quiz_visible) THEN
+-- 		SELECT EXISTS
+-- 			(SELECT 1
+-- 			FROM EXERCISES WHERE LESSON_ID = NEW.LESSON_ID)
+-- 		INTO has_quiz;
+-- 	END IF;
+
+-- 	IF (NOT has_quiz) THEN
+-- 		RAISE EXCEPTION 'VALIDATE DATA: %', 'lesson doesn''s have quiz to make visible';
+-- 	END IF;
+-- 	RETURN NEW;
+-- END;
+-- $$ language plpgsql;
+
+
+-- CREATE TRIGGER set_lesson_is_quiz_visible
+-- BEFORE INSERT OR UPDATE ON lessons
+-- FOR EACH ROW EXECUTE FUNCTION set_lesson_order();
 
 
 
