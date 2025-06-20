@@ -424,7 +424,7 @@ public class ProblemService {
                                 .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
                                 .toList())
                 .getResult();
-
+        response.setTestCases(response.getTestCases().subList(0, 3));
         response.setCategories(category);
 
         response.setIsSolved(isDoneProblem(problemId, userUuid));

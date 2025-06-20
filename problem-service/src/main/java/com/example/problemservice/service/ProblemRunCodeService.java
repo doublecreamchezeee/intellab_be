@@ -93,7 +93,7 @@ public class ProblemRunCodeService {
 
         List<TestCaseRunCodeOutput> outputs = new ArrayList<>();
 
-        for (int i = 0; i < testCases.size() && i < NUMBER_OF_TEST_CASE; i++) {
+        for (int i = 0; i < 3 && i < NUMBER_OF_TEST_CASE; i++) {
             TestCase testCase = testCases.get(i);
 
             TestCaseRunCodeOutput output = judge0Client.runCode(
@@ -176,7 +176,7 @@ public class ProblemRunCodeService {
         );
 
         // Limit the number of test cases to NUMBER_OF_TEST_CASE
-        testCases = testCases.subList(0, Math.min(testCases.size(), NUMBER_OF_TEST_CASE));
+        testCases = testCases.subList(0, Math.min(3, NUMBER_OF_TEST_CASE));
 
         List<TestCaseRunCodeOutput> outputs = judge0Client.runCodeBatch(
                 problemRunCode,

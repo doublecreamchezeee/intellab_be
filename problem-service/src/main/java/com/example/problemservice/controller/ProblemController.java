@@ -54,9 +54,6 @@ public class ProblemController {
   private final ProblemCommentService problemCommentService;
   final String defaultRole = "myRole";
 
-
-
-
   @Operation(summary = "Get problem's description list for create lesson")
   @GetMapping("/createLesson/problemList")
   public ApiResponse<List<ProblemDescriptionResponse>> getProblemDescriptions(
