@@ -416,10 +416,22 @@ public class BoilerplateClient {
             return """
                     ##USER_CODE_HERE##
 
-                    const input = require('fs').readFileSync(0, 'utf8').trim().split(/\\s+/);
-                    %s
-                    %s
-                    %s
+                    const readline = require('readline');
+                    
+                    const rl = readline.createInterface({
+                         input: process.stdin,
+                         output: process.stdout,
+                    });
+                    
+                    let input = [];
+                    
+                    rl.on('line', (line) => {
+                         input.push(...line.trim().split(/\\s+/));
+                    }).on('close', () => {
+                        %s
+                        %s
+                        %s
+                    });
                             """.formatted(inputReads, functionCall, outputWrite);
         }
 
