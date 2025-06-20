@@ -71,7 +71,17 @@ public class Judge0Service {
                 }).collect(Collectors.toList());
     }
 
-    public long getSubmissionInQueue(){
+    public long getSubmissionInQueue() {
+        Date tenMinutesAgo = Date.from(Instant.now().minus(Duration.ofMinutes(10)));
+
+        List<TestCaseOutput> timedOut = testCaseOutputRepository.findTimedOutInQueue("In Queue", tenMinutesAgo);
+
+        for (TestCaseOutput t : timedOut) {
+            t.setResult_status("Time out");
+        }
+
+        testCaseOutputRepository.saveAll(timedOut);
+
         return testCaseOutputRepository.countByStatus("In Queue");
     }
 
