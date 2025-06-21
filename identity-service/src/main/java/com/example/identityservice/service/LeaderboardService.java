@@ -121,9 +121,9 @@ public class LeaderboardService {
         {
             List<LeaderboardResponse> pageContent = new ArrayList<>(leaderboards.subList(start, Math.min(leaderboards.size(), end)));
             pageContent.addAll(zeroList);
-            return new PageImpl<>(pageContent, Pageable.ofSize(end - start + 1), totalSize);
+            return new PageImpl<>(pageContent, Pageable.ofSize(end - start), totalSize);
         } else {
-            return new PageImpl<>(zeroList, Pageable.ofSize(end - start + 1), totalSize);
+            return new PageImpl<>(zeroList, Pageable.ofSize(end - start), totalSize);
         }
     }
 
