@@ -117,7 +117,7 @@ public class LeaderboardService {
                 }
         ).toList();
 
-        if (leaderboards.size() >= start)
+        if (leaderboards.size() > start)
         {
             List<LeaderboardResponse> pageContent = new ArrayList<>(leaderboards.subList(start, Math.min(leaderboards.size(), end)));
             pageContent.addAll(zeroList);
