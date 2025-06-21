@@ -487,23 +487,12 @@ public class ProblemService {
 
         Page<ProblemRowResponse> results = getProblemRowResponses(userId, problems);
 
-        results.forEach(problemRowResponse -> {
-            problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(), userId));
-        });
         return results;
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
-        List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId,
-                problemId);
-        if (submissions == null || submissions.isEmpty()) {
-            return false;
-        }
-        for (ProblemSubmission submission : submissions) {
-            if (submission.getIsSolved())
-                return true;
-        }
-        return false;
+        List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemIdAndIsSolved(userId, problemId, true);
+        return !(submissions == null ||  submissions.isEmpty());
     }
 
     public Page<ProblemRowResponse> getAllProblems(List<Integer> categories, String level, Boolean status,
