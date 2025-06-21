@@ -522,6 +522,7 @@ public class ProblemService {
             response.setCategories(categories);
 
             response.setIsDone(isDoneProblem(response.getProblemId(), userId));
+            System.out.println("problemId: " + response.getProblemId() + ", userId: " + userId + ", isDone: " + response.getIsDone());
             response.setHasSolution(problem.getSolution() != null);
 
             return response;

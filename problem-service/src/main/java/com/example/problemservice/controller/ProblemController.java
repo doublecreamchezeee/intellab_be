@@ -117,9 +117,9 @@ public class ProblemController {
       @RequestHeader(required = false, name = "X-UserId") String userUId,
       @ParameterObject Pageable pageable,
       @RequestParam(required = false) String keyword) {
+    userUId = userUId.split(",")[0];
     if (userUId != null) {
       UUID userId = ParseUUID.normalizeUID(userUId);
-      System.out.println("user id: " + userId);
       if (keyword != null) {
         return ApiResponse.<Page<ProblemRowResponse>>builder()
             .result(problemService.searchProblems(categories, level, status,

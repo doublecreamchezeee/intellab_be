@@ -49,7 +49,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/course/exceptEnrolled",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/lessons$",
             "/course/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/certificate$",
-            "/problem/problems/search",
             "/problem/problems",
             "/problem/problems/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/partial-boilerplate$",
             "/course/reviews/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
@@ -145,6 +144,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 {
                     role = "admin,PREMIUM_PLAN";
                 }
+                System.out.println("Add header userId: " + response.getBody().getUserId());
 
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-UserId", response.getBody().getUserId())
