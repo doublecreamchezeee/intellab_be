@@ -100,4 +100,10 @@ public class Problem {
 
     @Column(name = "created_at")
     Date createdAt;
+
+    @Column(name = "has_custom_checker", columnDefinition = "boolean default false")
+    Boolean hasCustomChecker;
+
+    @Column(name = "custom_checker_code", columnDefinition = "TEXT")
+    String customCheckerCode;
 }

@@ -50,3 +50,5 @@ Jenkinsfile
 
 judge0/judge0
 ai-service/intellab_ai
+/identity-service/gcp.env
+./identity-service/gcp.env

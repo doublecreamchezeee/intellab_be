@@ -112,6 +112,19 @@ public class BoilerplateClient {
 
             //log.info("inputs: {}", inputs);
 
+            /*
+            * "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) {\n    int size_sublist;\n    std::cin >> size_sublist;\n    " +
+                                    field.getName() + "[i].resize(size_sublist);\n    for(int j = 0; j < size_sublist; ++j) std::cin >> " + field.getName() + "[i][j];\n  }";
+            * */
+
+            /*if (field.getType().startsWith("list<string")) {
+                            return "int size_" + field.getName() + ";\n  std::cin >> size_" + field.getName() + ";\n  " +
+                                    mapTypeToCpp(field.getType()) + " "
+                                    + field.getName() + "(size_" + field.getName() + ");" +
+                                    "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) {\n    std::getline(std::cin, line);\n    std::istringstream sublistStream(line);\n    int size_sublist;\n    sublistStream >> size_sublist;\n    " +
+                                    field.getName() + "[i].resize(size_sublist);\n    for(int j = 0; j < size_sublist; ++j) sublistStream >> " + field.getName() + "[i][j];\n  }";
+                        } else */
+
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<")) {
@@ -146,11 +159,9 @@ public class BoilerplateClient {
                                 }
                                 std::cout << "]";
                             }""";
-            }
-            else if (outputFields.get(0).getType().startsWith("list<")) {
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "for (const auto &item : result) std::cout << item << ' ';\nstd::cout << std::endl;";
-            }
-            else {
+            } else {
                 outputWrite = "std::cout << result << std::endl;";
             }
 
@@ -158,6 +169,9 @@ public class BoilerplateClient {
                     #include <iostream>
                     #include <vector>
                     #include <string>
+                    #include <sstream>
+                    #include <unordered_map>
+                    #include <fstream>
                     using namespace std;
                     
 
