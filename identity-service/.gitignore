@@ -45,3 +45,5 @@ firebase-config.json
 ./docker.env
 ./deploy.env
 deploy.env
+gcp.env
+./gcp.env

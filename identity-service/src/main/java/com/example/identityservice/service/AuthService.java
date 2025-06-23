@@ -383,6 +383,7 @@ public class AuthService {
                         htmlContent);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new SendingEmailFailedException();
         }
     }
@@ -444,6 +445,7 @@ public class AuthService {
                     "[Intellab] Reset password request",
                     htmlContent);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new SendingEmailFailedException();
         }
     }
