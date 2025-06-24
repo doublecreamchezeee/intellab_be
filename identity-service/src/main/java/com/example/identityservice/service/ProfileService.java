@@ -132,7 +132,7 @@ public class ProfileService {
             User userFirestore = firestoreService.getUserByUid(userUid);
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
-
+            userInfoResponse.setPublic(userFirestore.getIsPublic());
             List<CompleteCourseResponse> completeCourseResponse = Objects.requireNonNull(courseClient.getCourseByUserId().block()).getResult();
             userInfoResponse.setCourseCount(completeCourseResponse.size());
 
@@ -234,5 +234,15 @@ public class ProfileService {
     ) {
         Page<AdminUserResponse> responses = firebaseAuthClient.getAllUsersByDisplayName(keyword, pageable.getPageSize(), pageable.getPageNumber());
         return mappingAdminUserResponseWithFirestoreData(responses);
+    }
+
+    public UserInfoResponse setPublic(String userUid, Boolean isPublic) throws ExecutionException, InterruptedException {
+        UserInfoResponse user = getUserInfo(userUid, "");
+        System.out.print("USER PUBLIC" + user);
+        if (isPublic != user.isPublic()) {
+            firestoreService.updatePublicUserByUid(userUid, isPublic);
+            user.setPublic(isPublic);
+        }
+        return user;
     }
 }
