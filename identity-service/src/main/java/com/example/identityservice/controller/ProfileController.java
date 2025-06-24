@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
@@ -158,5 +159,12 @@ public class ProfileController {
                 .result(loginStreakService.loginStreak(userUid)).build();
     }
 
+    @PostMapping("/public")
+    public ApiResponse<UserInfoResponse> setPublicProfile(Authentication authentication, @RequestParam Boolean isPublic) throws ExecutionException, InterruptedException {
+        String userUid = (String) authentication.getPrincipal();
+        return ApiResponse.<UserInfoResponse>builder()
+                .result(profileService.setPublic(userUid, isPublic))
+                .build();
+    }
 
 }
