@@ -105,7 +105,6 @@ public class LeaderboardService {
 
         System.out.println("Start index: " + startIndex + ", End index: " + endIndex);
 
-        int alreadyHave = leaderboards.size() - startIndex;
 
         userUids = userUids.subList(startIndex, endIndex);
 

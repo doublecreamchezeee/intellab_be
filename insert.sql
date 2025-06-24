@@ -863,14 +863,19 @@ EXECUTE FUNCTION gen_learning_lesson();
 -- FOR EACH ROW EXECUTE FUNCTION set_lesson_order();
 
 
+-- FUNCTION: public.set_avg_acceptance()
 
--- Tự động cập nhật acceptance_rate khi be call_back để update kết quả trả về 
-CREATE OR REPLACE FUNCTION set_avg_acceptance()
+-- DROP FUNCTION IF EXISTS public.set_avg_acceptance();
+
+CREATE OR REPLACE FUNCTION public.set_avg_acceptance()
     RETURNS trigger
     LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
 AS $BODY$
 DECLARE
     new_avg_acceptance numeric(5,2);
+	is_bonus boolean;
 BEGIN
 
 	new_avg_acceptance := (
@@ -883,14 +888,106 @@ BEGIN
 	UPDATE problems 
 	SET acceptance_rate = new_avg_acceptance 
 	WHERE problem_id = NEW.problem_id;
+
+	IF (NEW.is_solved) THEN
+		IF NOT EXISTS (	SELECT 1 
+						FROM view_solution_behaviors 
+						WHERE problem_id = NEW.problem_id
+							AND user_id = NEW.user_id) THEN
+			WITH accepted_submissions as(
+				SELECT *
+				FROM problem_submissions 
+				WHERE problem_id = NEW.problem_id
+					AND user_id = NEW.user_id AND is_solved = true
+			)
+			SELECT count(*) = 1
+			from  accepted_submissions ac_s
+			into is_bonus;
+
+			
+			WITH last_submit as
+			(
+				SELECT *
+				FROM problem_submissions 
+				WHERE problem_id = NEW.problem_id
+					AND user_id = NEW.user_id
+				ORDER BY created_at desc
+				LIMIT 1
+			)
+			SELECT is_bonus and (NEW.submission_id = last_submit.submission_id)
+			FROM last_submit into is_bonus;
+
+			IF (is_bonus) THEN
+				IF NOT EXISTS(SELECT 1 FROM leaderboard WHERE user_id = NEW.user_id AND type = 'problem') THEN 
+					INSERT INTO leaderboard (user_id, score, easy, hard, medium, total_problem, type)
+					SElECT NEW.user_id, p.score, 
+							case when p.problem_level = 'easy' then 1 else 0 end as easy, 
+							case when p.problem_level = 'medium' then 1 else 0 end as medium,
+							case when p.problem_level = 'hard' then 1 else 0 end as hard, 
+							1, 'problem'
+					FROM problems p 
+					where p.problem_id = NEW.problem_id;
+					IF NOT EXISTS(SELECT 1 FROM leaderboard WHERE user_id = NEW.user_id AND type = 'all') THEN 
+						INSERT INTO leaderboard (user_id, score, easy, hard, medium, total_problem, type)
+						SElECT NEW.user_id, p.score, 
+							case when p.problem_level = 'easy' then 1 else 0 end as easy, 
+							case when p.problem_level = 'medium' then 1 else 0 end as medium,
+							case when p.problem_level = 'hard' then 1 else 0 end as hard, 
+							1, 'all'
+						FROM problems p 
+						where p.problem_id = NEW.problem_id;
+					ELSE 
+						UPDATE leaderboard
+						SET score = leaderboard.score + p.score,
+						    easy = CASE WHEN p.problem_level = 'easy' THEN leaderboard.easy + 1 ELSE leaderboard.easy END,
+						    medium = CASE WHEN p.problem_level = 'medium' THEN leaderboard.medium + 1 ELSE leaderboard.medium END,
+						    hard = CASE WHEN p.problem_level = 'hard' THEN leaderboard.hard + 1 ELSE leaderboard.hard END,
+						    total_problem = leaderboard.total_problem + 1
+						FROM problems p
+						WHERE p.problem_id = NEW.problem_id
+					  		AND leaderboard.user_id = NEW.user_id
+					  		AND type = 'all';
+					END IF;
+				ELSE 
+					UPDATE leaderboard
+					SET score = leaderboard.score + p.score,
+					    easy = CASE WHEN p.problem_level = 'easy' THEN leaderboard.easy + 1 ELSE leaderboard.easy END,
+					    medium = CASE WHEN p.problem_level = 'medium' THEN leaderboard.medium + 1 ELSE leaderboard.medium END,
+					    hard = CASE WHEN p.problem_level = 'hard' THEN leaderboard.hard + 1 ELSE leaderboard.hard END,
+					    total_problem = leaderboard.total_problem + 1
+					FROM problems p
+					WHERE p.problem_id = NEW.problem_id
+					  AND leaderboard.user_id = NEW.user_id
+					  AND type = 'problem';
+
+					UPDATE leaderboard
+						SET score = leaderboard.score + p.score,
+						    easy = CASE WHEN p.problem_level = 'easy' THEN leaderboard.easy + 1 ELSE leaderboard.easy END,
+						    medium = CASE WHEN p.problem_level = 'medium' THEN leaderboard.medium + 1 ELSE leaderboard.medium END,
+						    hard = CASE WHEN p.problem_level = 'hard' THEN leaderboard.hard + 1 ELSE leaderboard.hard END,
+						    total_problem = leaderboard.total_problem + 1
+						FROM problems p
+						WHERE p.problem_id = NEW.problem_id
+					  		AND leaderboard.user_id = NEW.user_id
+					  		AND type = 'all';
+				END IF;
+			END IF;
+		END IF;
+	END IF;
+	
 	
     RETURN NEW;
 END;
 $BODY$;
 
+ALTER FUNCTION public.set_avg_acceptance()
+    OWNER TO postgres;
+
+
 CREATE TRIGGER update_problem_agv_acceptance
 AFTER INSERT OR UPDATE ON problem_submissions
 FOR EACH ROW EXECUTE FUNCTION set_avg_acceptance();
+
 
 
 
