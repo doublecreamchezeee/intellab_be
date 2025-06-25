@@ -67,7 +67,7 @@ public class ProblemSubmissionService {
                 .orElseThrow(() -> new AppException(ErrorCode.PROGRAMMING_LANGUAGE_NOT_EXIST));
 
 
-        if (base64!=null && base64) {
+        if (base64 != null && base64) {
             Base64.Decoder decoder = Base64.getDecoder();
             request.setCode(
                     new String(
@@ -139,6 +139,7 @@ public class ProblemSubmissionService {
         DetailsProblemSubmissionResponse response = problemSubmissionMapper.toDetailsProblemSubmissionResponse(result);
         List<TestCaseOutput> testCaseOutputs = result.getTestCasesOutput();
         response.setSubmitDate(result.getCreatedAt());
+
         if (testCaseOutputs != null && !testCaseOutputs.isEmpty()) {
             Float totalMemories = (float) result.getTestCasesOutput().stream().mapToDouble(testCaseOutput ->
                     testCaseOutput.getMemory() != null ? testCaseOutput.getMemory() : 0).sum();
@@ -151,21 +152,19 @@ public class ProblemSubmissionService {
         List<ProblemCategory> problemCategories = result.getProblem().getCategories();
 
         List<CategoryResponse> categories = problemCategories.stream()
-                .map(p-> courseClient.categories(p.getProblemCategoryID().getCategoryId()).getResult())
+                .map(p -> courseClient.categories(p.getProblemCategoryID().getCategoryId()).getResult())
                 .toList();
         response.getProblem().setCategories(categories);
         return response;
     }
 
 
-
-
-    public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request){
+    public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request) {
         TestCaseOutput output = testCaseOutputRepository.findByToken(UUID.fromString(request.getToken())).orElseThrow(
                 () -> new AppException(ErrorCode.TEST_CASE_OUTPUT_NOT_EXIST)
         );
 
-        if (request.getTime()!=null) {
+        if (request.getTime() != null) {
             output.setRuntime(Float.valueOf(request.getTime()));
         } else {
             output.setRuntime(null);
@@ -174,7 +173,7 @@ public class ProblemSubmissionService {
         output.setMemory(request.getMemory());
         Base64.Decoder decoder = Base64.getDecoder();
 
-        if (request.getStdout()!= null) {
+        if (request.getStdout() != null) {
 
             output.setSubmission_output(
                     new String(
@@ -199,62 +198,29 @@ public class ProblemSubmissionService {
         output.setResult_status(request.getStatus().getDescription());
         testCaseOutputRepository.save(output);
 
-        ProblemSubmission result = output.getSubmission();
-        if (result.getTestCasesOutput().size() == result.getProblem().getTestCases().size()) {
-            boolean allAccepted = result.getTestCasesOutput().stream()
-                    .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
+        //        if (result.getTestCasesOutput().size() == result.getProblem().getTestCases().size()) {
+//            boolean allAccepted = result.getTestCasesOutput().stream()
+//                    .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
+//
+//            if (allAccepted) {
+//                if (!result.getIsSolved())
+//                {
+//
+//                }
+//
+//                try {
+//                    courseClient.donePracticeByProblemId(
+//                            result.getProblem().getProblemId(),
+//                            result.getUserId()
+//                    );
+//                } catch (Exception e) {
+//                    log.error("Error while calling course service: {}", e.getMessage());
+//                }
+//
+//            }
+//        }
 
-            if (allAccepted) {
-                if (!result.getIsSolved())
-                {
-                    result.setIsSolved(true);
-                    ViewSolutionBehavior viewSolutionBehavior = viewSolutionBehaviorRepository
-                            .findByProblemIdAndUserId(result.getProblem().getProblemId(),result.getUserId());
-                    if (viewSolutionBehavior != null)
-                    {
-                        try
-                        {
-                            List<ProblemSubmission> submissions = problemSubmissionRepository
-                                    .findAllByUserIdAndProblem_ProblemId(result.getUserId(), result.getProblem().getProblemId());
-                            if (submissions == null || submissions.isEmpty()) {
-                                //cộng điểm
-                                Problem problem = result.getProblem();
-                                notificationService.updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
-                                // Thông báo
-                                notificationService.solveProblemNotification(problem, result.getUserId());
-                                // xóa hành vi xem lời giải
-                                viewSolutionBehaviorRepository.delete(viewSolutionBehavior);
-                            }
-                            else if ( submissions.stream()
-                                    .noneMatch(ProblemSubmission::getIsSolved)) {
-                                // cộng điểm
-                                Problem problem = result.getProblem();
-                                notificationService.updateLeaderboard(problem.getScore(),problem.getProblemLevel(), result.getUserId());
-                                // Thông báo
-                                notificationService.solveProblemNotification(problem, result.getUserId());
-                                // xóa hành vi xem lời giải
-                                viewSolutionBehaviorRepository.delete(viewSolutionBehavior);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Error while update leaderboard: " + e.getMessage());
-                        }
-                    }
-                    problemSubmissionRepository.save(result);
-                }
-
-                try {
-                    courseClient.donePracticeByProblemId(
-                            result.getProblem().getProblemId(),
-                            result.getUserId()
-                    );
-                } catch (Exception e) {
-                    log.error("Error while calling course service: {}", e.getMessage());
-                }
-
-            }
-        }
-
-        return result;
+        return output.getSubmission();
     }
 
     public ProblemSubmission updateSubmissionResult(UUID submissionId) {
@@ -302,22 +268,31 @@ public class ProblemSubmissionService {
                     .sum(); // Cộng tất cả memory
 
             boolean allAccepted = submission.getTestCasesOutput().stream()
-                    .allMatch(output -> "Accepted".equals(output.getResult_status())); // Kiểm tra nếu tất cả là Accepted
+                    .allMatch(output -> "Accepted".equals(output.getResult_status()));
 
-            String status = allAccepted ? "Accepted" : "Failed";
+            String status = "Failed";
 
+            if (allAccepted) {
+                status = "Accepted";
+                if (submission.getIsSolved() == null || !submission.getIsSolved()) {
+                    submission.setIsSolved(true);
+                    notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
+                    problemSubmissionRepository.save(submission);
+                }
+            }
             ProblemSubmissionResponse submissionResponse = ProblemSubmissionResponse.builder()
                     .submissionId(submission.getSubmissionId().toString())
                     .programmingLanguage(submission.getProgrammingLanguage())
                     .runtime(totalRuntime)
                     .memory(totalMemory)
+                    .submitDate(submission.getCreatedAt())
                     .status(status)
                     .build();
+
 
             responses.add(submissionResponse);
         }
         return responses;
-
     }
 
     public DetailsProblemSubmissionResponse getSubmission(UUID submissionId) {
@@ -329,11 +304,12 @@ public class ProblemSubmissionService {
         boolean allAccepted = submission.getTestCasesOutput().stream()
                 .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
 
+
         if (allAccepted) {
-            if (!submission.getIsSolved())
-            {
+            if (!submission.getIsSolved()) {
                 submission.setIsSolved(true);
                 problemSubmissionRepository.save(submission);
+                notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
             }
 
             try {
@@ -393,7 +369,7 @@ public class ProblemSubmissionService {
 
 
         //UUID userUid = ParseUUID.normalizeUID(userUid);
-            //UUID.fromString("4d0c8d27-4509-402b-cf6f-58686cd47319");
+        //UUID.fromString("4d0c8d27-4509-402b-cf6f-58686cd47319");
 
         List<DetailsProblemSubmissionResponse> submissions = getSubmissionDetailsByProblemIdAndUserUid(
                 request.getProblemId(),
@@ -407,11 +383,11 @@ public class ProblemSubmissionService {
         submission.setProblem(problem);
 
         submission.setCode(
-            boilerplateClient.enrich(
-                    submission.getCode(),
-                    request.getLanguageId(),
-                    problem.getProblemStructure()
-            )
+                boilerplateClient.enrich(
+                        submission.getCode(),
+                        request.getLanguageId(),
+                        problem.getProblemStructure()
+                )
         );
 
         submission.setProgrammingLanguage(language.getLongName());
@@ -424,8 +400,8 @@ public class ProblemSubmissionService {
             submission.setSubmitOrder(0);
         } else {
             submission.setSubmitOrder(
-                submissions.get(submissions.size()-1) // Lấy submission cuối cùng
-                        .getSubmissionOrder() + 1
+                    submissions.get(submissions.size() - 1) // Lấy submission cuối cùng
+                            .getSubmissionOrder() + 1
             );
         }
 

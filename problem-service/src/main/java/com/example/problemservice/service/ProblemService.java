@@ -424,7 +424,7 @@ public class ProblemService {
                                 .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
                                 .toList())
                 .getResult();
-
+        response.setTestCases(response.getTestCases().subList(0, 3));
         response.setCategories(category);
 
         response.setIsSolved(isDoneProblem(problemId, userUuid));
@@ -487,23 +487,12 @@ public class ProblemService {
 
         Page<ProblemRowResponse> results = getProblemRowResponses(userId, problems);
 
-        results.forEach(problemRowResponse -> {
-            problemRowResponse.setIsDone(isDoneProblem(problemRowResponse.getProblemId(), userId));
-        });
         return results;
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
-        List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId,
-                problemId);
-        if (submissions == null || submissions.isEmpty()) {
-            return false;
-        }
-        for (ProblemSubmission submission : submissions) {
-            if (submission.getIsSolved())
-                return true;
-        }
-        return false;
+        List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemIdAndIsSolved(userId, problemId, true);
+        return !(submissions == null ||  submissions.isEmpty());
     }
 
     public Page<ProblemRowResponse> getAllProblems(List<Integer> categories, String level, Boolean status,
@@ -533,6 +522,7 @@ public class ProblemService {
             response.setCategories(categories);
 
             response.setIsDone(isDoneProblem(response.getProblemId(), userId));
+            System.out.println("problemId: " + response.getProblemId() + ", userId: " + userId + ", isDone: " + response.getIsDone());
             response.setHasSolution(problem.getSolution() != null);
 
             return response;

@@ -52,7 +52,6 @@ public class AuthService {
         final var request = new UserRecord.CreateRequest()
                 .setEmail(userCreationRequest.getEmail())
                 .setPassword(userCreationRequest.getPassword())
-                .setEmailVerified(Boolean.TRUE)
                 .setDisplayName(userCreationRequest.getDisplayName())
                 .setEmailVerified(Boolean.FALSE);
 

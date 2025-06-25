@@ -1,5 +1,6 @@
 package com.example.problemservice.model;
 
+import org.hibernate.annotations.CreationTimestamp;
 import com.example.problemservice.model.composite.TestCaseOutputID;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -7,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.UUID;
+import java.util.Date;
 
 @Data
 @Builder
@@ -44,6 +46,11 @@ public class TestCaseOutput {
     @JoinColumn(name = "submission_id")
     @JsonBackReference("submission-output")
     ProblemSubmission submission;
+    
+    @CreationTimestamp
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date createdAt;
 
     // Helper method to initialize composite ID
     public void setSubmission(ProblemSubmission submission) {

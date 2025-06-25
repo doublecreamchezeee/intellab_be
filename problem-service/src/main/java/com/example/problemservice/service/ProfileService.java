@@ -55,5 +55,4 @@ public class ProfileService {
             throw new AppException(ErrorCode.IDENTITY_SERVER_ERROR);
         }
     }
-
 }

@@ -25,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
+
 @Service
 @AllArgsConstructor
 @Slf4j
 public class FirestoreService {
-    @Autowired
     private final Firestore firestore;
 
 
@@ -72,6 +73,15 @@ public class FirestoreService {
         documentRef.update(updates).get(); // Apply the updates
 
         getUserByUid(ParseUUID.normalizeUID(uid).toString());
+    }
+
+    public void updatePublicUserByUid(String uid, Boolean isPublic) throws ExecutionException, InterruptedException {
+        DocumentReference documentRef = firestore.collection("users").document(ParseUUID.normalizeUID(uid).toString());
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("isPublic", isPublic);
+
+        WriteResult result = documentRef.update(updates).get();
     }
 
     public String createUserByUid(String uid, String role) throws ExecutionException, InterruptedException {

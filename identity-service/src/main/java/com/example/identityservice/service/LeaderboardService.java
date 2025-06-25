@@ -86,15 +86,25 @@ public class LeaderboardService {
         userUids.removeAll(uids);
         userUids.remove(null);
         userUids.remove("");
+
         int totalSize = leaderboards.size() + userUids.size();
-        System.out.println("Total size: " + totalSize);
-        System.out.println("Page size: " + (end - start));
 
         if(start > totalSize) {
             return new PageImpl<>(Collections.emptyList(), Pageable.ofSize(end - start), totalSize);
         }
-        int startIndex = Math.max(leaderboards.size(), start);
-        int endIndex = Math.min(totalSize, end);
+
+        System.out.println("Start: " + start + ", End: " + end);
+        System.out.println("Total size: " + totalSize);
+        System.out.println("Leaderboards size: " + leaderboards.size());
+        System.out.println("Page size: " + (end - start));
+        System.out.println("user Uids size: " + userUids.size());
+
+        // Start and end index to cut uids
+        int startIndex = Math.max(0, start - leaderboards.size());
+        int endIndex = Math.min(userUids.size() - 1, end - leaderboards.size());
+
+        System.out.println("Start index: " + startIndex + ", End index: " + endIndex);
+
 
         userUids = userUids.subList(startIndex, endIndex);
 
@@ -117,7 +127,7 @@ public class LeaderboardService {
                 }
         ).toList();
 
-        if (leaderboards.size() > start)
+        if (leaderboards.size() >= start)
         {
             List<LeaderboardResponse> pageContent = new ArrayList<>(leaderboards.subList(start, Math.min(leaderboards.size(), end)));
             pageContent.addAll(zeroList);
