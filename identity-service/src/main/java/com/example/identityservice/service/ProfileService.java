@@ -64,6 +64,7 @@ public class ProfileService {
 
             return SingleProfileInformationResponse.builder()
                     .userId(userRecord.getUid())
+                    .isPublic(userFirestore.getIsPublic())
                     .displayName(userRecord.getDisplayName())
                     .email(userRecord.getEmail())
                     .phoneNumber(userRecord.getPhoneNumber())

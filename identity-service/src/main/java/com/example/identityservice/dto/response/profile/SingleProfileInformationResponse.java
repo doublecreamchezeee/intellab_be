@@ -24,6 +24,7 @@ public class SingleProfileInformationResponse {
     String role;
     boolean isDisabled;
     Date lastSignIn;
+    boolean isPublic;
 
     public Date getLastSignIn() {
         if (lastSignIn == null || lastSignIn.toString().contains("1970")) {
