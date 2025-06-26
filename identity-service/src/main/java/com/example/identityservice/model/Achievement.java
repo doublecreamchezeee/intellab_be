@@ -1,8 +1,6 @@
-package com.example.courseservice.model;
+package com.example.identityservice.model;
 
-
-
-import com.example.courseservice.model.compositeKey.AchievementID;
+import com.example.identityservice.model.composite.AchievementId;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,19 +14,18 @@ import java.time.Instant;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "achievements")
+@Table(name = "\"achievements\"")
 public class Achievement {
     @EmbeddedId
-    AchievementID achievementId;
+    AchievementId id;
 
     @CreationTimestamp
     @Column(name = "achieved_date")
     Instant achievedDate;
 
 
-//    @MapsId("medalId")
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "medal_id")
-//    Medal medal;
-
+    @MapsId("badgeId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "badge_id", referencedColumnName = "badge_id")
+    Badge badge;
 }

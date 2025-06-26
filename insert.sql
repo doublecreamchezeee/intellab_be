@@ -178,31 +178,49 @@ create table test_case_run_code_outputs
 alter table test_case_run_code_outputs
     owner to postgres;
 
-create table medals
-(
-    medal_id    uuid         not null default uuid_generate_v4()
-        primary key,
-    bonus_score integer,
-    image       text,
-    medal_name  varchar(255) not null,
-    type        varchar(20)
-);
 
-alter table medals
-    owner to postgres;
+-- Table: public.badges
 
-create table achievements
+-- DROP TABLE IF EXISTS public.badges;
+
+CREATE TABLE IF NOT EXISTS public.badges
 (
-    user_id       uuid not null,
+    image text COLLATE pg_catalog."default",
+    badge_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    type character varying(20) COLLATE pg_catalog."default",
+    badge_id integer NOT NULL DEFAULT nextval('badges_badge_id_seq'::regclass),
+    CONSTRAINT badges_pkey PRIMARY KEY (badge_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.badges
+    OWNER to postgres;
+
+
+
+-- Table: public.achievements
+
+-- DROP TABLE IF EXISTS public.achievements;
+
+CREATE TABLE IF NOT EXISTS public.achievements
+(
+    user_id uuid NOT NULL,
     achieved_date timestamp(6) with time zone,
-    medal_id      uuid not null
-        constraint fkn3w49fym60qqsvsectfeeojck
-            references medals,
-    primary key (medal_id, user_id)
-);
+    badge_id integer NOT NULL,
+    CONSTRAINT achievements_pkey PRIMARY KEY (badge_id, user_id),
+    CONSTRAINT fkj05i4hctg7rpv2d5w2bouiy0r FOREIGN KEY (badge_id)
+        REFERENCES public.badges (badge_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
 
-alter table achievements
-    owner to postgres;
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.achievements
+    OWNER to postgres;
+
+	
 
 create table leaderboard
 (
@@ -861,6 +879,7 @@ EXECUTE FUNCTION gen_learning_lesson();
 -- CREATE TRIGGER set_lesson_is_quiz_visible
 -- BEFORE INSERT OR UPDATE ON lessons
 -- FOR EACH ROW EXECUTE FUNCTION set_lesson_order();
+
 
 
 -- FUNCTION: public.set_avg_acceptance()
@@ -78163,5 +78182,131 @@ INSERT INTO public.vnpay_payment_courses (course_id, user_uid, payment_id) VALUE
 INSERT INTO public.vnpay_payment_courses (course_id, user_uid, payment_id) VALUES ('bd157822-862c-4b14-80e0-791fb1f7f1f6', 'WgPbP365QOfkZSfEmu6WG0Tpntx2', '9aa4aadc-2be2-46fa-b0e6-e15f6439b9d2');
 INSERT INTO public.vnpay_payment_courses (course_id, user_uid, payment_id) VALUES ('598d78e5-c34f-437f-88fb-31557168c07b', 'Dg12bGtwJHarGR8am1f9jleense2', '4117cc89-1e4c-4d48-b0f7-01f1af388089');
 INSERT INTO public.vnpay_payment_courses (course_id, user_uid, payment_id) VALUES ('575bd0a6-afca-439c-bb6f-f1a0caaa27b9', 'M7OzKUnPmraVgbyvKTgDtG35lLq1', 'e5ba8e99-da40-484b-b01c-37e5fd57a592');
+
+CREATE OR REPLACE FUNCTION create_first_point_badge()
+	RETURNS TRIGGER 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+	IF (NEW.type = 'course') THEN 
+		INSERT INTO achievements(user_id, badge_id, achieved_date)
+		SELECT NEW.user_id, b.badge_id, now()
+		FROM badges b WHERE badge_name = 'First Course';
+	ELSIF (NEW.type = 'problem') THEN
+		INSERT INTO achievements(user_id, badge_id, achieved_date)
+		SELECT NEW.user_id, b.badge_id, now()
+		FROM badges b WHERE badge_name = 'First Problem';
+	END IF;
+	RETURN NEW;
+END;
+$BODY$;
+
+CREATE TRIGGER add_point_badge
+AFTER INSERT ON leaderboard
+FOR EACH ROW
+EXECUTE FUNCTION create_first_point_badge();
+
+
+
+CREATE OR REPLACE FUNCTION public.create_premium_badge()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+	IF (NEW.payment_for = 'Subscription' AND NEW.transaction_status = '00') THEN
+		
+		IF NOT EXISTS(	SELECT 1 FROM achievements 
+						WHERE user_id = NEW.user_uuid 
+						AND badge_id = (	SELECT badge_id 
+											FROM badges 
+											WHERE badge_name = 'Premium User'
+										)
+			) THEN 
+			INSERT INTO achievements(user_id, badge_id, achieved_date)
+			SELECT NEW.user_uuid, b.badge_id, now()
+			FROM badges b
+			WHERE b.badge_name = 'Premium User';
+		END IF;
+	END IF;
+	
+	
+	RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.create_premium_badge()
+    OWNER TO postgres;
+
+
+CREATE OR REPLACE TRIGGER add_premium_badge
+    AFTER UPDATE 
+    ON public.vnpay_payment
+    FOR EACH ROW
+    EXECUTE FUNCTION public.create_premium_badge();
+
+
+
+CREATE OR REPLACE FUNCTION create_point_badge()
+	RETURNS TRIGGER 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+
+BEGIN
+	IF (NEW.type = 'all') THEN 
+		RETURN NEW;
+	END IF;
+	
+	IF (NEW.type = 'course') THEN
+		IF (NEW.total_course = 5) THEN 
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 6
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 6);
+			END IF;
+			
+		ELSIF (NEW.total_course = 10) THEN
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 5
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 5);
+			END IF;
+			
+		END IF;
+		
+	ELSIF (NEW.type = 'problem') THEN
+		IF (NEW.total_problem = 10) THEN 
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 8
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 8);
+			END IF;
+		ELSIF (NEW.total_problem = 20) THEN
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 7
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 7);
+			END IF;
+		END IF;
+	END IF;
+	
+	RETURN NEW;
+END;
+$BODY$;
+
+CREATE TRIGGER add_higher_point_badge
+AFTER UPDATE ON leaderboard
+FOR EACH ROW
+EXECUTE FUNCTION create_point_badge();
+
 
 

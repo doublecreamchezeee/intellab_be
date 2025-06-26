@@ -1,10 +1,7 @@
-package com.example.courseservice.model.compositeKey;
+package com.example.identityservice.model.composite;
 
 
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,9 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Embeddable
-public class AchievementID {
-    @Column(name = "medal_id")
-    UUID medalId;
-    @JoinColumn(name = "user_id")
+public class AchievementId {
     UUID userId;
+    Integer badgeId;
 }

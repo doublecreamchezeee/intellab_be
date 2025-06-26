@@ -5,6 +5,7 @@ import com.example.identityservice.client.FirebaseAuthClient;
 import com.example.identityservice.client.GooglePeopleApiClient;
 import com.example.identityservice.client.ProblemClient;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
+import com.example.identityservice.dto.response.BadgeResponse;
 import com.example.identityservice.dto.response.admin.AdminUserResponse;
 import com.example.identityservice.dto.response.auth.UserInfoResponse;
 import com.example.identityservice.dto.response.course.CompleteCourseResponse;
@@ -15,10 +16,15 @@ import com.example.identityservice.dto.response.profile.SingleProfileInformation
 import com.example.identityservice.enums.account.PremiumPackageStatus;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
+import com.example.identityservice.model.Achievement;
+import com.example.identityservice.model.Badge;
 import com.example.identityservice.model.User;
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
+import com.example.identityservice.model.composite.AchievementId;
+import com.example.identityservice.repository.AchievementRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.utility.CloudinaryUtil;
+import com.example.identityservice.utility.ParseUUID;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
@@ -29,14 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -51,6 +56,7 @@ public class ProfileService {
     private final CloudinaryService cloudinaryService;
     private final FirestoreService firestoreService;
     private final VNPayPaymentPremiumPackageRepository vnPayPaymentPremiumPackageRepository;
+    private final AchievementRepository achievementRepository;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userUid
@@ -245,5 +251,51 @@ public class ProfileService {
             user.setPublic(isPublic);
         }
         return user;
+    }
+    public List<BadgeResponse> getUserBadges(String userUid) {
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        List<Achievement> achievements = achievementRepository.findAllById_UserId(userId);
+
+        if (achievements == null || achievements.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<BadgeResponse> badgeResponses = new ArrayList<>();
+        for (Achievement achievement : achievements) {
+            Badge badge = achievement.getBadge();
+            BadgeResponse badgeResponse = BadgeResponse.builder()
+                    .name(badge.getName())
+                    .image(badge.getImage())
+                    .build();
+            badgeResponses.add(badgeResponse);
+        }
+        return badgeResponses;
+    }
+
+    @Async
+    public void createVerifiedUserBadge(@NonNull String email) {
+        // find uid by email
+        String userUid = firebaseAuthClient.getUserInfo(null, email).getUserId();
+        if (userUid == null || userUid.isEmpty()) {
+            return;
+        }
+        // check if user already has verified badge
+        UUID userId = ParseUUID.normalizeUID(userUid);
+        boolean hasVerifiedBadge = achievementRepository.existsById(
+                AchievementId.builder()
+                        .userId(userId)
+                        .badgeId(3).build()
+        );
+        if (!hasVerifiedBadge) {
+            // create verified badge
+            Achievement achievement = Achievement.builder()
+                    .id(AchievementId.builder()
+                            .userId(userId)
+                            .badgeId(3) // assuming 3 is the ID for verified badge
+                            .build())
+                    .achievedDate(Instant.now())
+                    .build();
+            achievementRepository.save(achievement);
+        }
     }
 }
