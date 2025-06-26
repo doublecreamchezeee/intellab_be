@@ -17,14 +17,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "\"medals\"")
-public class Medal {
+@Table(name = "\"badges\"")
+public class Badge {
     @Id
     @GeneratedValue
-    @Column(name = "medal_id")
-    UUID medalId;
+    @Column(name = "badge_id")
+    Integer badgeId;
 
-    @Column(name = "medal_name", nullable = false)
+    @Column(name = "badge_name", nullable = false)
     String name;
 
     @Column(columnDefinition = "TEXT")
@@ -32,8 +32,9 @@ public class Medal {
 
     @Column(columnDefinition = "VARCHAR(20)")
     String type;
-    @Column(name = "bonus_score")
-    Integer bonusScore;
+
+    @OneToMany(mappedBy = "badge")
+    List<Achievement> achievementList;
 
 //    @OneToMany(mappedBy = "medal",fetch = FetchType.LAZY)
 //    Set<Leaderboard> leaderboards;

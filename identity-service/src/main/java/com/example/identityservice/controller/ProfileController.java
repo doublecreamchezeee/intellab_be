@@ -5,6 +5,7 @@ import com.example.identityservice.dto.ApiResponse;
 import com.example.identityservice.dto.request.auth.UserUpdateRequest;
 import com.example.identityservice.dto.request.profile.MultipleProfileInformationRequest;
 import com.example.identityservice.dto.request.profile.SingleProfileInformationRequest;
+import com.example.identityservice.dto.response.BadgeResponse;
 import com.example.identityservice.dto.response.LoginStreakResponse;
 import com.example.identityservice.dto.response.profile.ProgressLanguageResponse;
 import com.example.identityservice.dto.response.profile.ProgressLevelResponse;
@@ -29,6 +30,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -165,6 +167,15 @@ public class ProfileController {
         return ApiResponse.<UserInfoResponse>builder()
                 .result(profileService.setPublic(userUid, isPublic))
                 .build();
+    }
+    @GetMapping("/myBadges")
+    public ApiResponse<List<BadgeResponse>> getMyBadges(Authentication authentication) {
+        String userUid = (String) authentication.getPrincipal();
+        if (userUid == null || userUid.isEmpty()) {
+            throw new IllegalArgumentException("User id is empty");
+        }
+        return ApiResponse.<List<BadgeResponse>>builder()
+                .result(profileService.getUserBadges(userUid)).build();
     }
 
 }

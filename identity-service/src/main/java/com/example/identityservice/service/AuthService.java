@@ -12,6 +12,8 @@ import com.example.identityservice.exception.SendingEmailFailedException;
 import com.example.identityservice.mapper.VNPayPaymentPremiumPackageMapper;
 import com.example.identityservice.model.User;
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
+import com.example.identityservice.model.composite.AchievementId;
+import com.example.identityservice.repository.AchievementRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.specification.VNPayPaymentPremiumPackageSpecification;
 import com.example.identityservice.utility.JwtUtil;
@@ -45,6 +47,7 @@ public class AuthService {
     private final VNPayPaymentPremiumPackageMapper vnpayPaymentPremiumPackageMapper;
     private final RedirectUrlConfig redirectUrlConfig;
     private final JwtUtil jwtUtil;
+    private final ProfileService profileService;
 
     @SneakyThrows
     public void create(@NonNull final UserCreationRequest userCreationRequest) {
@@ -460,6 +463,7 @@ public class AuthService {
     public void setVerifiedEmail(String email) {
         try {
             firebaseAuthClient.setVerifiedEmail(email);
+            profileService.createVerifiedUserBadge(email);
         } catch (Exception e) {
             throw new RuntimeException("Error verifying email: " + e.getMessage(), e);
         }
