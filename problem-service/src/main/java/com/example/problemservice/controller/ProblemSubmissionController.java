@@ -146,17 +146,19 @@ public class ProblemSubmissionController {
             summary = "Get submission details by problem id and user uid (to see all submission of user in a problem)"
     )
     @GetMapping("/details/{problemId}")
-    public ApiResponse<List<DetailsProblemSubmissionResponse>> getSubmissionDetailsByProblemIdAndUserUid(
+    public ApiResponse<Page<DetailsProblemSubmissionResponse>> getSubmissionDetailsByProblemIdAndUserUid(
             @PathVariable("problemId") UUID problemId,
-            @RequestHeader("X-UserId") String userUid
+            @RequestHeader("X-UserId") String userUid,
+            @ParameterObject Pageable pageable
             //@PathVariable("userId") UUID userUid
     ) {
         userUid = userUid.split(",")[0];
 
-        return ApiResponse.<List<DetailsProblemSubmissionResponse>>builder()
+        return ApiResponse.<Page<DetailsProblemSubmissionResponse>>builder()
                 .result(problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(
                                 problemId,
-                                ParseUUID.normalizeUID(userUid)
+                                ParseUUID.normalizeUID(userUid),
+                                pageable
                         )
                 )
                 .message("Submission details retrieved successfully")

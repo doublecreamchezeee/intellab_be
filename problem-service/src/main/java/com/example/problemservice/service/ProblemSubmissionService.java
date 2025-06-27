@@ -323,6 +323,21 @@ public class ProblemSubmissionService {
         return getDetailsProblemSubmissionResponse(submission);
     }
 
+    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUidInList(UUID problemId, UUID userUid) {
+        // Kiểm tra và lấy Problem từ repository
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+
+        // Tìm kiếm submission
+        List<ProblemSubmission> submissions = problemSubmissionRepository
+                .findProblemSubmissionByProblemAndUserId(problem, userUid);
+
+        // Chuyển đổi submissions thành response
+        return submissions.stream()
+                .map(this::getDetailsProblemSubmissionResponse)
+                .collect(Collectors.toList());
+    }
+
     public Page<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid, Pageable pageable) {
         // Kiểm tra và lấy Problem từ repository
         Problem problem = problemRepository.findById(problemId)
@@ -356,7 +371,7 @@ public class ProblemSubmissionService {
         //UUID userUid = ParseUUID.normalizeUID(userUid);
         //UUID.fromString("4d0c8d27-4509-402b-cf6f-58686cd47319");
 
-        List<DetailsProblemSubmissionResponse> submissions = getSubmissionDetailsByProblemIdAndUserUid(
+        List<DetailsProblemSubmissionResponse> submissions = getSubmissionDetailsByProblemIdAndUserUidInList(
                 request.getProblemId(),
                 userUid
         );

@@ -17,6 +17,8 @@ import java.util.UUID;
 public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmission, UUID> {
     Page<ProblemSubmission> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid, Pageable pageable);
 
+    List<ProblemSubmission> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
+
     Page<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid, Pageable pageable);
     void deleteAllByProblem_ProblemId(UUID problemId);
 //    List<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
