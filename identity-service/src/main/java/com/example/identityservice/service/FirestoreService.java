@@ -92,6 +92,7 @@ public class FirestoreService {
         userData.put("firstName", role);
         userData.put("lastName", uid);
         userData.put("uid", uid);
+        userData.put("isPublic", true);
 
         WriteResult result = docRef.set(userData).get();
         return "User added with ID: " + ParseUUID.normalizeUID(uid) + " at " + result.getUpdateTime();

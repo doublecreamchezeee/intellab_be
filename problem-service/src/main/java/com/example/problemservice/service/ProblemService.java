@@ -258,7 +258,7 @@ public class ProblemService {
 
         // Initialize categories if null (should be avoided if problem entity is properly initialized)
         if (problem.getCategories() == null) {
-            problem.setCategories(new ArrayList<>(  ));
+            problem.setCategories(new ArrayList<>());
         } else {
             // Clear to remove old categories for update (redundant if done above, but safe)
             problem.getCategories().clear();
@@ -460,6 +460,101 @@ public class ProblemService {
         return problemRepository.findAll();
     }
 
+    public Page<ProblemCreationResponse> searchProblemsWithAdminFilter(
+            UUID userId,
+            String keyword,
+            String level,
+            List<Integer> categories,
+            Boolean status,
+            Boolean isPublished,
+            Boolean isCompletedCreation,
+            Pageable pageable) {
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.categoriesFilter(categories)
+                        .and(ProblemSpecification.levelFilter(level))
+                        .and(ProblemSpecification.NameFilter(keyword))
+                        .and(ProblemSpecification.StatusFilter(status, userId))
+                        .and(ProblemSpecification.isCompletedCreationFilter(isCompletedCreation)
+                                .and(ProblemSpecification.isPublishedFilter(isPublished))
+                        ));
+
+        Page<Problem> problems = problemRepository.findAll(specification, pageable);
+        List<CategoryResponse> allCategories = getCategories();
+
+        return problems.map(problem -> {
+            ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problem);
+            if (problem.getProblemStructure() != null) {
+                ProblemStructure problemStructure = ProblemStructureConverter.convertStringToObject(problem.getProblemStructure());
+                response.setProblemStructure(problemStructure);
+            }
+            if (problem.getSolution() != null) {
+                response.setSolution(solutionMapper.toSolutionCreationResponse(problem.getSolution()));
+            }
+
+            // Map categories
+            List<CategoryResponse> matchedCategories = mapCategories(problem.getCategories(), allCategories);
+            response.setCategories(matchedCategories);
+
+            // Compute submission stats
+            int total = problem.getSubmissions().size();
+            int pass = (int) problem.getSubmissions().stream().filter(ProblemSubmission::getIsSolved).count();
+            int fail = total - pass;
+
+            ProblemCreationResponse.ProblemSubmissionStat stat = ProblemCreationResponse.ProblemSubmissionStat.builder()
+                    .total(total)
+                    .pass(pass)
+                    .fail(fail)
+                    .build();
+            response.setProblemSubmissionStat(stat);
+
+            return response;
+        });
+    }
+
+    public Page<ProblemCreationResponse> searchProblemsWithAdmin(
+            String keyword,
+            Boolean isPublished,
+            Boolean isCompletedCreation,
+            Pageable pageable) {
+        Specification<Problem> specification = Specification.where(
+                ProblemSpecification.NameFilter(keyword)
+                        .and(ProblemSpecification.isCompletedCreationFilter(isCompletedCreation)
+                                .and(ProblemSpecification.isPublishedFilter(isPublished))
+                        ));
+
+        Page<Problem> problems = problemRepository.findAll(specification, pageable);
+        List<CategoryResponse> allCategories = getCategories();
+
+        return problems.map(problem -> {
+            ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problem);
+            if (problem.getProblemStructure() != null) {
+                ProblemStructure problemStructure = ProblemStructureConverter.convertStringToObject(problem.getProblemStructure());
+                response.setProblemStructure(problemStructure);
+            }
+            if (problem.getSolution() != null) {
+                response.setSolution(solutionMapper.toSolutionCreationResponse(problem.getSolution()));
+            }
+
+            // Map categories
+            List<CategoryResponse> matchedCategories = mapCategories(problem.getCategories(), allCategories);
+            response.setCategories(matchedCategories);
+
+            // Compute submission stats
+            int total = problem.getSubmissions().size();
+            int pass = (int) problem.getSubmissions().stream().filter(ProblemSubmission::getIsSolved).count();
+            int fail = total - pass;
+
+            ProblemCreationResponse.ProblemSubmissionStat stat = ProblemCreationResponse.ProblemSubmissionStat.builder()
+                    .total(total)
+                    .pass(pass)
+                    .fail(fail)
+                    .build();
+            response.setProblemSubmissionStat(stat);
+
+            return response;
+        });
+    }
+
     public Page<ProblemRowResponse> searchProblems(List<Integer> categories,
                                                    String level,
                                                    Pageable pageable,
@@ -492,7 +587,7 @@ public class ProblemService {
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
         List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemIdAndIsSolved(userId, problemId, true);
-        return !(submissions == null ||  submissions.isEmpty());
+        return !(submissions == null || submissions.isEmpty());
     }
 
     public Page<ProblemRowResponse> getAllProblems(List<Integer> categories, String level, Boolean status,

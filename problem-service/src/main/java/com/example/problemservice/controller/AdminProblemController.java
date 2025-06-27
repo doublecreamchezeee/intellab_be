@@ -59,6 +59,50 @@ public class AdminProblemController {
     }
 
     @Operation(
+            summary = "Get all problems with search and filter"
+    )
+    @GetMapping("/search")
+    public ApiResponse<Page<ProblemCreationResponse>> searchProblems(
+            @RequestHeader(value = "X-UserID", required = false) String userUid,
+            @RequestParam("keyword") String keyword,
+            @RequestParam(required = false) Boolean status,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) Boolean isPublished,
+            @RequestParam(required = false) List<Integer> categories,
+            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable,
+            @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation,
+            @ParameterObject Pageable pageable) {
+
+        UUID normalizedUserId = null;
+
+        if (userUid != null) {
+            userUid = userUid.split(",")[0];
+            normalizedUserId = ParseUUID.normalizeUID(userUid);
+        }
+
+        System.out.println(userUid);
+        if ( status != null || isPublished != null  || level != null || categories != null) {
+            return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                    .result(problemService.searchProblemsWithAdminFilter(
+                                    normalizedUserId,
+                                    keyword, level, categories, status, isPublished, isCompletedCreation,
+                                    pageable
+                            )
+                    ).build();
+        }
+
+        return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                .result(problemService.searchProblemsWithAdmin(
+                                keyword,
+                                isAvailable,
+                                isCompletedCreation,
+                                pageable
+                        )
+                )
+                .build();
+    }
+
+    @Operation(
             summary = "Get problems list"
     )
     @GetMapping
