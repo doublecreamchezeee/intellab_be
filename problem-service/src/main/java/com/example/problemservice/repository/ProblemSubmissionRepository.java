@@ -2,6 +2,8 @@ package com.example.problemservice.repository;
 
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,11 +15,13 @@ import java.util.UUID;
 
 @Repository
 public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmission, UUID> {
-    Optional<List<ProblemSubmission>> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
+    Page<ProblemSubmission> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid, Pageable pageable);
 
-    List<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid);
+    Page<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid, Pageable pageable);
     void deleteAllByProblem_ProblemId(UUID problemId);
-    List<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
+//    List<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId);
+
+    Page<ProblemSubmission> findAllByUserIdAndProblem_ProblemId(UUID userUid, UUID problemId, Pageable pageable);
 
     List<ProblemSubmission> findAllByUserIdAndProblem_ProblemIdAndIsSolved(UUID userUid, UUID problemId, boolean isSolved);
 

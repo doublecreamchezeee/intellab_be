@@ -15,6 +15,9 @@ import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,18 +64,19 @@ public class ProblemSubmissionController {
             summary = "Get submission by user id"
     )
     @GetMapping("/submitList/me")
-    public ResponseEntity<List<DetailsProblemSubmissionResponse>> getSubmissionByUserId(
+    public ResponseEntity<Page<DetailsProblemSubmissionResponse>> getSubmissionByUserId(
             @RequestHeader(name = "X-UserId", required = false) String userUid,
-            @RequestParam(required = false) String UserUid) {
+            @RequestParam(required = false) String UserUid,
+            @ParameterObject Pageable pageable) {
 
         if (userUid == null && UserUid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
 
         if (UserUid != null) {
-            List<DetailsProblemSubmissionResponse> submission = problemSubmissionService
+            Page<DetailsProblemSubmissionResponse> submission = problemSubmissionService
                     .getSubmissionDetailsByUserUid(
-                        ParseUUID.normalizeUID(UserUid));
+                            ParseUUID.normalizeUID(UserUid), pageable);
 
             return ResponseEntity.ok(submission);
         }
@@ -81,7 +85,7 @@ public class ProblemSubmissionController {
         System.out.println(userUid);
         System.out.println(ParseUUID.normalizeUID(userUid));
 
-        List<DetailsProblemSubmissionResponse> submission = problemSubmissionService.getSubmissionDetailsByUserUid(ParseUUID.normalizeUID(userUid));
+        Page<DetailsProblemSubmissionResponse> submission = problemSubmissionService.getSubmissionDetailsByUserUid(ParseUUID.normalizeUID(userUid), pageable);
 
         return ResponseEntity.ok(submission);
     }
@@ -90,12 +94,12 @@ public class ProblemSubmissionController {
             summary = "List submission by userid & problemId (Show the problem submission in submission tab)"
     )
     @GetMapping("/submitList/{problemId}")
-    public ResponseEntity<List<ProblemSubmissionResponse>> getSubmissions(@PathVariable String problemId, @RequestHeader("X-UserId") String userId) {
+    public ResponseEntity<Page<ProblemSubmissionResponse>> getSubmissions(@PathVariable String problemId, @RequestHeader("X-UserId") String userId, @ParameterObject Pageable pageable) {
         userId = userId.split(",")[0];
 
         System.out.println(userId);
         System.out.println(ParseUUID.normalizeUID(userId));
-        List<ProblemSubmissionResponse> submissions = problemSubmissionService.getSubmissionsByUserId(UUID.fromString(problemId), ParseUUID.normalizeUID(userId));
+        Page<ProblemSubmissionResponse> submissions = problemSubmissionService.getSubmissionsByUserId(UUID.fromString(problemId), ParseUUID.normalizeUID(userId), pageable);
         return ResponseEntity.ok(submissions);
     }
 
@@ -142,7 +146,7 @@ public class ProblemSubmissionController {
             summary = "Get submission details by problem id and user uid (to see all submission of user in a problem)"
     )
     @GetMapping("/details/{problemId}")
-    public ApiResponse<List<DetailsProblemSubmissionResponse>>  getSubmissionDetailsByProblemIdAndUserUid(
+    public ApiResponse<List<DetailsProblemSubmissionResponse>> getSubmissionDetailsByProblemIdAndUserUid(
             @PathVariable("problemId") UUID problemId,
             @RequestHeader("X-UserId") String userUid
             //@PathVariable("userId") UUID userUid
@@ -151,8 +155,8 @@ public class ProblemSubmissionController {
 
         return ApiResponse.<List<DetailsProblemSubmissionResponse>>builder()
                 .result(problemSubmissionService.getSubmissionDetailsByProblemIdAndUserUid(
-                            problemId,
-                            ParseUUID.normalizeUID(userUid)
+                                problemId,
+                                ParseUUID.normalizeUID(userUid)
                         )
                 )
                 .message("Submission details retrieved successfully")

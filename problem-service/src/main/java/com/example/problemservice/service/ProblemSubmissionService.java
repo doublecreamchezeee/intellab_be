@@ -33,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -253,19 +255,17 @@ public class ProblemSubmissionService {
         return submission;
     }
 
-    public List<ProblemSubmissionResponse> getSubmissionsByUserId(UUID problemId, UUID userId) {
-        List<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId, problemId);
+    public Page<ProblemSubmissionResponse> getSubmissionsByUserId(UUID problemId, UUID userId, Pageable pageable) {
+        Page<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId, problemId, pageable);
 
-        List<ProblemSubmissionResponse> responses = new ArrayList<>();
-
-        for (ProblemSubmission submission : submissions) {
+        return submissions.map(submission -> {
             double totalRuntime = submission.getTestCasesOutput().stream()
                     .mapToDouble(TestCaseOutput::getRuntime)
-                    .sum(); // Cộng tất cả runtime
+                    .sum();
 
             double totalMemory = submission.getTestCasesOutput().stream()
                     .mapToDouble(TestCaseOutput::getMemory)
-                    .sum(); // Cộng tất cả memory
+                    .sum();
 
             boolean allAccepted = submission.getTestCasesOutput().stream()
                     .allMatch(output -> "Accepted".equals(output.getResult_status()));
@@ -280,7 +280,8 @@ public class ProblemSubmissionService {
                     problemSubmissionRepository.save(submission);
                 }
             }
-            ProblemSubmissionResponse submissionResponse = ProblemSubmissionResponse.builder()
+
+            return ProblemSubmissionResponse.builder()
                     .submissionId(submission.getSubmissionId().toString())
                     .programmingLanguage(submission.getProgrammingLanguage())
                     .runtime(totalRuntime)
@@ -288,11 +289,7 @@ public class ProblemSubmissionService {
                     .submitDate(submission.getCreatedAt())
                     .status(status)
                     .build();
-
-
-            responses.add(submissionResponse);
-        }
-        return responses;
+        });
     }
 
     public DetailsProblemSubmissionResponse getSubmission(UUID submissionId) {
@@ -326,38 +323,26 @@ public class ProblemSubmissionService {
         return getDetailsProblemSubmissionResponse(submission);
     }
 
-    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid) {
+    public Page<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid, Pageable pageable) {
         // Kiểm tra và lấy Problem từ repository
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
         // Tìm kiếm submission
-        List<ProblemSubmission> submissions = problemSubmissionRepository
-                .findProblemSubmissionByProblemAndUserId(problem, userUid)
-                .orElse(Collections.emptyList()); // Trả về danh sách trống nếu không tìm thấy
-
-        // Xử lý danh sách trống
-        if (submissions.isEmpty()) {
-            return Collections.emptyList(); // Trả về danh sách rỗng nếu không có submission nào
-        }
-
-        log.info("Submissions length: {}", submissions.size());
+        Page<ProblemSubmission> submissions = problemSubmissionRepository
+                .findProblemSubmissionByProblemAndUserId(problem, userUid, pageable);
 
         // Chuyển đổi submissions thành response
-        return submissions.stream()
-                .map(this::getDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
-                .collect(Collectors.toList());
+        return submissions
+                .map(this::getDetailsProblemSubmissionResponse);
     }
 
-    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByUserUid(UUID userUid) {
-        // Tìm kiếm submission
-        List<ProblemSubmission> submissions = problemSubmissionRepository
-                .findProblemSubmissionByUserId(userUid);
+    public Page<DetailsProblemSubmissionResponse> getSubmissionDetailsByUserUid(UUID userUid, Pageable pageable) {
+        Page<ProblemSubmission> submissions = problemSubmissionRepository
+                .findProblemSubmissionByUserId(userUid, pageable);
 
-        // Chuyển đổi submissions thành response
-        return submissions.stream()
-                .map(this::getDetailsProblemSubmissionResponse) // Gọi mapper từng đối tượng
-                .collect(Collectors.toList());
+        return submissions
+                .map(this::getDetailsProblemSubmissionResponse);
     }
 
     public ProblemSubmission submitProblemWithPartialBoilerplate(UUID userUid, DetailsProblemSubmissionRequest request) {
