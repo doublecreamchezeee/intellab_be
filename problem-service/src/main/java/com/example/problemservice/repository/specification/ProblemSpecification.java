@@ -56,6 +56,15 @@ public class ProblemSpecification {
         };
     }
 
+    public static Specification<Problem> isPublishedFilter(Boolean isPublish) {
+        return (root, query, criteriaBuilder) -> {
+            if (isPublish == null) {
+                return null;
+            }
+            return criteriaBuilder.equal(root.get("isPublished"), isPublish);
+        };
+    }
+
     public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
         return (root, query, criteriaBuilder) ->{
             if(status == null) {
