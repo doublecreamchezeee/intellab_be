@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS public.badges
     image text COLLATE pg_catalog."default",
     badge_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
     type character varying(20) COLLATE pg_catalog."default",
-    badge_id integer NOT NULL DEFAULT nextval('badges_badge_id_seq'::regclass),
+    badge_id serial,
     CONSTRAINT badges_pkey PRIMARY KEY (badge_id)
 )
 
