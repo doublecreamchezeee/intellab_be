@@ -118,6 +118,7 @@ public class AdminDashboardController {
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "date") String sortBy,
             @RequestParam(defaultValue = "desc") String order,
+            @RequestParam(required = false) String keyword,
             Pageable pageable
     ) {
         userRole = userRole.split(",")[0];
@@ -125,7 +126,7 @@ public class AdminDashboardController {
             throw new AppException(ErrorCode.USER_IS_NOT_ADMIN);
         }
 
-        Page<DashboardTableResponse> transactions = dashboardService.getFilteredTransactions(
+        Page<DashboardTableResponse> transactions = dashboardService.getFilteredTransactions(keyword,
                 type, status, search, sortBy, order, pageable
         );
 

@@ -365,9 +365,14 @@ public class AdminDashboardService {
 
 
     public Page<DashboardTableResponse> getFilteredTransactions(
-            String type, String status, String search, String sortBy, String order, Pageable pageable
+            String keyword, String type, String status, String search, String sortBy, String order, Pageable pageable
     ) {
-        List<VNPayPayment> allPayments = vnpayPaymentRepository.findAll();
+        List<VNPayPayment> allPayments;
+        if (keyword != null && !keyword.isEmpty()) {
+            allPayments = vnpayPaymentRepository.findAllById(Collections.singleton(UUID.fromString(keyword)));
+        } else {
+            allPayments = vnpayPaymentRepository.findAll();
+        }
 
         List<DashboardTableResponse> filtered = allPayments.stream()
                 .filter(p -> {

@@ -461,11 +461,9 @@ public class ProblemService {
     }
 
     public Page<ProblemCreationResponse> searchProblemsWithAdminFilter(
-            UUID userId,
             String keyword,
             String level,
             List<Integer> categories,
-            Boolean status,
             Boolean isPublished,
             Boolean isCompletedCreation,
             Pageable pageable) {
@@ -473,7 +471,6 @@ public class ProblemService {
                 ProblemSpecification.categoriesFilter(categories)
                         .and(ProblemSpecification.levelFilter(level))
                         .and(ProblemSpecification.NameFilter(keyword))
-                        .and(ProblemSpecification.StatusFilter(status, userId))
                         .and(ProblemSpecification.isCompletedCreationFilter(isCompletedCreation)
                                 .and(ProblemSpecification.isPublishedFilter(isPublished))
                         ));

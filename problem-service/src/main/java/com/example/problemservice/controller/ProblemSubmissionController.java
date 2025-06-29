@@ -1,5 +1,6 @@
 package com.example.problemservice.controller;
 
+import com.example.problemservice.client.MossClient;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
 import com.example.problemservice.dto.response.ApiResponse;
@@ -14,7 +15,9 @@ import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.utils.ParseUUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +36,7 @@ import java.util.logging.Logger;
 @Tag(name = "Submission")
 public class ProblemSubmissionController {
     private final ProblemSubmissionService problemSubmissionService;
+    private final MossClient mossClient;
 
     @Operation(
             summary = "Create submission (Submit code)"
@@ -187,4 +191,30 @@ public class ProblemSubmissionController {
         }
     }
 
+    @Getter
+    @Setter
+    public static class MossTestRequest{
+        List<String> codeSnippets;
+        String language;
+        String baseCode;
+    }
+
+    @Operation(
+            summary = "BE only"
+    )
+    @PostMapping("/check")
+    public ResponseEntity<?> runMossTest(
+            @RequestBody MossTestRequest request
+    ) {
+        try {
+            String reportUrl = mossClient.runMoss(
+                    request.getCodeSnippets(),
+                    request.getLanguage(),
+                    request.getBaseCode()
+            );
+            return ResponseEntity.ok().body(reportUrl);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed: " + e.getMessage());
+        }
+    }
 }

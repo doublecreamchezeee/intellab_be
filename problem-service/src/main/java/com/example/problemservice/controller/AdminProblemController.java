@@ -77,15 +77,13 @@ public class AdminProblemController {
 
         if (userUid != null) {
             userUid = userUid.split(",")[0];
-            normalizedUserId = ParseUUID.normalizeUID(userUid);
         }
 
         System.out.println(userUid);
         if ( status != null || isPublished != null  || level != null || categories != null) {
             return ApiResponse.<Page<ProblemCreationResponse>>builder()
                     .result(problemService.searchProblemsWithAdminFilter(
-                                    normalizedUserId,
-                                    keyword, level, categories, status, isPublished, isCompletedCreation,
+                                    keyword, level, categories, isPublished, isCompletedCreation,
                                     pageable
                             )
                     ).build();
@@ -107,9 +105,12 @@ public class AdminProblemController {
     )
     @GetMapping
     public ApiResponse<Page<ProblemCreationResponse>> getProblem(
-            @RequestParam(value = "isComplete", required = true) Boolean isComplete,
-            @RequestParam(value = "searchKey", required = false) String searchKey,
-            @RequestHeader(value = "X-UserRole", required = true) String role,
+            @RequestHeader(value = "X-UserRole") String role,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) Boolean isPublished,
+            @RequestParam(required = false) List<Integer> categories,
+            @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation,
             @ParameterObject Pageable pageable
     ) {
         if (!isAdmin(role)) {
@@ -118,10 +119,19 @@ public class AdminProblemController {
                     .code(403)
                     .message("Forbidden").build();
         }
+        if ( isPublished != null  || level != null || categories != null ) {
+            return ApiResponse.<Page<ProblemCreationResponse>>builder()
+                    .result(problemService.searchProblemsWithAdminFilter(
+                                    keyword, level, categories, isPublished, isCompletedCreation,
+                                    pageable
+                            )
+                    ).build();
+        }
+
         return ApiResponse.<Page<ProblemCreationResponse>>builder()
                 .message("Get problems list success")
                 .result(problemService.getCompleteCreationProblem(
-                            isComplete, searchKey ,pageable
+                            isCompletedCreation, keyword ,pageable
                         )
                 )
                 .build();
