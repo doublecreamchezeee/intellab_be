@@ -68,6 +68,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/profile/loginStreak",
             "/identity/auth/callback-set-verified-email",
             "/identity/payment/vnpay/vnpay-return",
+            "/identity/profile/badges",
 
     };
 

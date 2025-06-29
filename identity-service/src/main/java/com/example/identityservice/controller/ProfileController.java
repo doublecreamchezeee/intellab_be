@@ -168,18 +168,24 @@ public class ProfileController {
                 .result(profileService.setPublic(userUid, isPublic))
                 .build();
     }
+
+    @PublicEndpoint
     @GetMapping("/badges")
-    public ApiResponse<List<BadgeResponse>> getMyBadges(Authentication authentication, @RequestParam(required = false)  String uid) {
+    public ApiResponse<List<BadgeResponse>> getMyBadges(@RequestParam(required = false)  String uid) {
         if (uid != null && !uid.isEmpty()) {
             return ApiResponse.<List<BadgeResponse>>builder()
                     .result(profileService.getUserBadges(uid)).build();
         }
-        String userUid = (String) authentication.getPrincipal();
-        if (userUid == null || userUid.isEmpty()) {
-            throw new IllegalArgumentException("User id is empty");
-        }
         return ApiResponse.<List<BadgeResponse>>builder()
-                .result(profileService.getUserBadges(userUid)).build();
+                .result(null)
+                .code(400)
+                .message("Bad request").build();
+//        String userUid = (String) authentication.getPrincipal();
+//        if (userUid == null || userUid.isEmpty()) {
+//            throw new IllegalArgumentException("User id is empty");
+//        }
+//        return ApiResponse.<List<BadgeResponse>>builder()
+//                .result(profileService.getUserBadges(userUid)).build();
     }
 
 }
