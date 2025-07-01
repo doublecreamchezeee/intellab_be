@@ -118,27 +118,16 @@ public class ProblemController {
       @ParameterObject Pageable pageable,
       @RequestParam(required = false) String keyword) {
     userUId = userUId.split(",")[0];
-    if (userUId != null) {
-      UUID userId = ParseUUID.normalizeUID(userUId);
-      if (keyword != null) {
-        return ApiResponse.<Page<ProblemRowResponse>>builder()
-            .result(problemService.searchProblems(categories, level, status,
-                pageable, keyword, userId))
-            .build();
-      }
 
-      return ApiResponse.<Page<ProblemRowResponse>>builder()
-          .result(problemService.getAllProblems(categories, level, status, pageable,
-              userId))
-          .build();
+    UUID userId = null;
+    if (userUId != null) {
+      userId = ParseUUID.normalizeUID(userUId);
     }
-    if (keyword != null) {
-      return ApiResponse.<Page<ProblemRowResponse>>builder()
-          .result(problemService.searchProblems(categories, level, pageable, keyword))
-          .build();
-    }
+
     return ApiResponse.<Page<ProblemRowResponse>>builder()
-        .result(problemService.getAllProblems(categories, level, pageable)).build();
+        .result(problemService.searchProblems(categories, level, status,
+            pageable, keyword, userId))
+        .build();
   }
 
   @Operation(summary = "Get all problems")

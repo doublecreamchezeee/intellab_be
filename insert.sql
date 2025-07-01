@@ -179,23 +179,20 @@ alter table test_case_run_code_outputs
     owner to postgres;
 
 
--- Table: public.badges
 
--- DROP TABLE IF EXISTS public.badges;
-
-CREATE TABLE IF NOT EXISTS public.badges
+create table badges
 (
-    image text COLLATE pg_catalog."default",
-    badge_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    type character varying(20) COLLATE pg_catalog."default",
-    badge_id serial,
-    CONSTRAINT badges_pkey PRIMARY KEY (badge_id)
-)
+    image        text,
+    badge_name   varchar(255) not null,
+    type         varchar(20),
+    badge_id     serial
+        primary key,
+    condition    varchar(255),
+    locked_image text
+);
 
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.badges
-    OWNER to postgres;
+alter table badges
+    owner to postgres;
 
 
 
@@ -1010,6 +1007,18 @@ FOR EACH ROW EXECUTE FUNCTION set_avg_acceptance();
 
 
 
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1750833555/First_course_hbo8xs.png', 'First Course', 'Trigger', 1, 'Complete your first course to achieve this badge.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345907/First_course_not_achieved_a97ckg.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1750833556/First_prob_q8ioya.png', 'First Problem', 'Trigger', 2, 'Solve any problem to achieve this badge.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345907/First_prob_not_achieved_il2kfb.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1750833555/Verified_uyt0p6.png', 'Verified Email', 'BE', 3, 'Verify email to get this badge.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345908/Verified_not_achieved_qbdryo.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1750833555/Premium_r9qazv.png', 'Premium User', 'Trigger', 4, 'This badge is for users who have registered for premium.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345908/Premium_not_achieved_ladz9a.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1750833556/master_learner_eok7y7.png', 'Master Learner', 'Trigger', 5, 'Complete 10 courses to take this badge.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345907/master_learner_not_achieved_ubkbet.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751345907/course_climber_v2_d6ab4z.png', 'Course Climber', 'Trigger', 6, 'Complete 5 courses to take this badge.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345908/course_climber_not_achieved_synjp9.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1750833555/code_warrior_b7lqev.png', 'Code Warrior', 'Trigger', 7, 'Solve 20 Problem to get this badge.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345907/code_warrior_not_achieved_eaycbt.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751345908/Problem_solver_v2_dwzcjm.png', 'Problem Solver', 'Trigger', 8, 'Solve 10 Problem to get this badge.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751345908/Problem_solver_not_achived_arqlju.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/New_Flame_zte9n0.png', 'New Flame', 'Trigger', 9, 'Maintain a streak for 14 consecutive days.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/New_Flame-1_jg3wpt.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/Steady_Blaze_bnvn5w.png', 'Steady Blaze', 'Trigger', 10, 'Maintain a streak for 50 consecutive days.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751357927/Steady_Blaze-1_mtd6pw.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751358640/Fire_Holder_bhhkon.png', 'Fire Holder', 'Trigger', 11, 'Maintain a streak for 150 consecutive days.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751358640/Fire_Holder-2_djxci0.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/Steady_Blaze_bnvn5w.png', 'Badge Collector', 'Trigger', 12, 'Achieve at least 10 badges.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/Badge_Collector_blocked_cthxbx.png');
 
 
 	

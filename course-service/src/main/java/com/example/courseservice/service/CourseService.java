@@ -37,9 +37,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springdoc.core.parsers.ReturnTypeParser;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -313,36 +311,40 @@ public class CourseService {
         return courseMapper.toCourseCreationResponse(course);
     }
 
-    public Page<CourseSearchResponse> searchCoursesWithFilter(UUID userUid,
+    public Page<CourseSearchResponse> searchCoursesWithFilter(UUID userid,
                                                               String keyword,
                                                               Float rating,
                                                               List<String> levels,
-                                                              Boolean price,
+                                                              Float priceFrom,
+                                                              Float priceTo,
                                                               List<Integer> categories,
-                                                              Boolean isAvailable,
-                                                              Boolean isCompletedCreation,
                                                               Pageable pageable) {
+        if (pageable.getSort().isUnsorted() && rating != null) {
+            // set pageable sort by rating asc if rating is not null
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, "averageRating"));
+        }
         Specification<Course> specification = Specification.where(
                 (CourseSpecification.nameSpecification(keyword).or(CourseSpecification.descriptionSpecification(keyword))
                         .and(CourseSpecification.ratingSpecification(rating))
                         .and(CourseSpecification.levelsSpecification(levels))
-                        .and(CourseSpecification.priceSpecification(price))
+                        .and(CourseSpecification.priceRangeSpecification(priceFrom, priceTo))
                         .and(CourseSpecification.categoriesSpecification(categories)
-                                .and(CourseSpecification.isAvailableSpecification(isAvailable))
-                                .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                                .and(CourseSpecification.isAvailableSpecification(true))
+                                .and(CourseSpecification.isCompletedCreationSpecification(true))
                         )
                 ));
 
         Page<Course> result = courseRepository.findAll(specification, pageable);
 
-        return getCourseSearchResponses(userUid, result);
+        return getCourseSearchResponses(userid, result);
     }
 
     public Page<AdminCourseSearchResponse> searchCoursesOfAdminWithFilter(UUID userUid,
                                                                           String keyword,
                                                                           Float rating,
                                                                           List<String> levels,
-                                                                          Boolean price,
+                                                                          Float priceFrom,
+                                                                          Float priceTo,
                                                                           List<Integer> categories,
                                                                           Boolean isAvailable,
                                                                           Boolean isCompletedCreation,
@@ -351,7 +353,7 @@ public class CourseService {
                 (CourseSpecification.nameSpecification(keyword).or(CourseSpecification.descriptionSpecification(keyword))
                         .and(CourseSpecification.ratingSpecification(rating))
                         .and(CourseSpecification.levelsSpecification(levels))
-                        .and(CourseSpecification.priceSpecification(price))
+                        .and(CourseSpecification.priceRangeSpecification(priceFrom, priceTo))
                         .and(CourseSpecification.categoriesSpecification(categories)
                                 .and(CourseSpecification.isAvailableSpecification(isAvailable))
                                 .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
@@ -380,7 +382,7 @@ public class CourseService {
     }
 
     @NotNull
-    private Page<CourseSearchResponse> getCourseSearchResponses(UUID userUid, Page<Course> result) {
+    private Page<CourseSearchResponse> getCourseSearchResponses(UUID userId, Page<Course> result) {
         return result.map(course -> {
             int lessonCount = course.getLessons() != null ? course.getLessons().size() : 0;  //lessonRepository.countByCourse_CourseId(course.getCourseId());
             CourseSearchResponse response = courseMapper.toCourseSearchResponse(course);
@@ -393,20 +395,20 @@ public class CourseService {
             response.setCertificateId(null);
             response.setCertificateUrl(null);
 
-            if (userUid == null) {
+            if (userId == null) {
                 return response;
             }
 
             // Check if the user is enrolled in the course
             boolean isUserEnrolled = userCoursesRepository.existsByEnrollId_UserUidAndEnrollId_CourseIdAndAccessStatus(
-                    userUid, course.getCourseId(), UserCourseAccessStatus.ACCESSIBLE.getCode()
+                    userId, course.getCourseId(), UserCourseAccessStatus.ACCESSIBLE.getCode()
             );
 
             String certificateUrl = null;
             String certificateId = null;
 
             if (isUserEnrolled) {
-                UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userUid, course.getCourseId())
+                UserCourses userCourse = userCoursesRepository.findByEnrollId_UserUidAndEnrollId_CourseId(userId, course.getCourseId())
                         .orElse(null);
 
                 certificateId = (userCourse != null && userCourse.getCertificate() != null) ? userCourse.getCertificate().getCertificateId().toString() : null;
@@ -439,14 +441,13 @@ public class CourseService {
 
     public Page<CourseSearchResponse> searchCourses(
             UUID userUid, String keyword,
-            Boolean isAvailable, Boolean isCompletedCreation,
             Pageable pageable
     ) {
 
         Specification<Course> specification = Specification.where(
-                CourseSpecification.isAvailableSpecification(isAvailable)
+                CourseSpecification.isAvailableSpecification(true)
                         .and(CourseSpecification.courseNameOrDescriptionSpecification(keyword, keyword))
-                        .and(CourseSpecification.isCompletedCreationSpecification(isCompletedCreation))
+                        .and(CourseSpecification.isCompletedCreationSpecification(true))
         );
 
         Page<Course> courses = courseRepository.findAll(specification, pageable);

@@ -11,4 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class BadgeResponse {
     String name;
     String image;
+    String condition;
+    Boolean isAchieved;
 }

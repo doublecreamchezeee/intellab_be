@@ -301,43 +301,30 @@ public class CourseController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<CourseSearchResponse>> searchCourses(
-            @RequestHeader(value = "X-UserID", required = false) String userUid,
+            @RequestHeader(value = "X-UserId", required = false) String userUid,
             @RequestParam("keyword") String keyword,
             @RequestParam(required = false) Float ratings,
             @RequestParam(required = false) List<String> levels,
-            @RequestParam(required = false) Boolean price,
+            @RequestParam(required = false) Float priceFrom,
+            @RequestParam(required = false) Float priceTo,
             @RequestParam(required = false) List<Integer> categories,
-            @RequestParam(value = "isAvailable", required = false) Boolean isAvailable,
-            @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation,
             @ParameterObject Pageable pageable) {
 
         UUID normalizedUserId = null;
-        if (userUid != null) {
-            userUid = userUid.split(",")[0];
+        userUid = userUid.split(",")[0];
+        if (userUid != null && !userUid.isEmpty()) {
             normalizedUserId = ParseUUID.normalizeUID(userUid);
         }
 
         System.out.println(userUid);
-        if (ratings != null || levels != null || price != null || categories != null) {
-            return ApiResponse.<Page<CourseSearchResponse>>builder()
-                    .result(courseService.searchCoursesWithFilter(
-                            normalizedUserId,
-                            keyword, ratings, levels, price, categories, isAvailable, isCompletedCreation,
-                            pageable
-                            )
-                    ).build();
-        }
 
         return ApiResponse.<Page<CourseSearchResponse>>builder()
-                .result(courseService.searchCourses(
-                            normalizedUserId,
-                            keyword,
-                            isAvailable,
-                            isCompletedCreation,
-                            pageable
+                .result(courseService.searchCoursesWithFilter(
+                        normalizedUserId,
+                        keyword, ratings, levels, priceFrom, priceTo, categories,
+                        pageable
                         )
-                )
-                .build();
+                ).build();
     }
 
     @Operation(

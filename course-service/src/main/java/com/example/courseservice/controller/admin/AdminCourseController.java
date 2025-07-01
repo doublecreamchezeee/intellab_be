@@ -112,7 +112,8 @@ public class AdminCourseController {
             @RequestParam("keyword") String keyword,
             @RequestParam(required = false) Float ratings,
             @RequestParam(required = false) List<String> levels,
-            @RequestParam(required = false) Boolean price,
+            @RequestParam(required = false) Float priceFrom,
+            @RequestParam(required = false) Float priceTo,
             @RequestParam(required = false) List<Integer> categories,
             @RequestParam(value = "isAvailable", required = false) Boolean isAvailable,
             @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation,
@@ -126,11 +127,11 @@ public class AdminCourseController {
         }
 
         System.out.println(userUid);
-        if (ratings != null || levels != null || price != null || categories != null) {
+        if (ratings != null || levels != null || priceFrom != null || priceTo != null || categories != null) {
             return ApiResponse.<Page<AdminCourseSearchResponse>>builder()
                     .result(courseService.searchCoursesOfAdminWithFilter(
                                     normalizedUserId,
-                                    keyword, ratings, levels, price, categories, isAvailable, isCompletedCreation,
+                                    keyword, ratings, levels, priceFrom, priceTo, categories, isAvailable, isCompletedCreation,
                                     pageable
                             )
                     ).build();

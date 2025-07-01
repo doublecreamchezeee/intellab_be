@@ -33,9 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.Named;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -461,6 +459,7 @@ public class ProblemService {
     }
 
     public Page<ProblemCreationResponse> searchProblemsWithAdminFilter(
+            UUID userId,
             String keyword,
             String level,
             List<Integer> categories,
@@ -469,6 +468,7 @@ public class ProblemService {
             Pageable pageable) {
         Specification<Problem> specification = Specification.where(
                 ProblemSpecification.categoriesFilter(categories)
+                        .and(ProblemSpecification.authorIdSpecification(userId))
                         .and(ProblemSpecification.levelFilter(level))
                         .and(ProblemSpecification.NameFilter(keyword))
                         .and(ProblemSpecification.isCompletedCreationFilter(isCompletedCreation)
@@ -509,12 +509,14 @@ public class ProblemService {
     }
 
     public Page<ProblemCreationResponse> searchProblemsWithAdmin(
+            UUID userId,
             String keyword,
             Boolean isPublished,
             Boolean isCompletedCreation,
             Pageable pageable) {
         Specification<Problem> specification = Specification.where(
                 ProblemSpecification.NameFilter(keyword)
+                        .and(ProblemSpecification.authorIdSpecification(userId))
                         .and(ProblemSpecification.isCompletedCreationFilter(isCompletedCreation)
                                 .and(ProblemSpecification.isPublishedFilter(isPublished))
                         ));
@@ -577,9 +579,10 @@ public class ProblemService {
 
         Page<Problem> problems = problemRepository.findAll(specification, pageable);
 
-        Page<ProblemRowResponse> results = getProblemRowResponses(userId, problems);
-
-        return results;
+        if (userId != null) {
+            return getProblemRowResponses(userId, problems);
+        }
+        return getProblemRowResponses(problems);
     }
 
     public boolean isDoneProblem(UUID problemId, UUID userId) {
@@ -598,7 +601,11 @@ public class ProblemService {
 
         Page<Problem> problems = problemRepository.findAll(specification, pageable);
 
-        return getProblemRowResponses(userId, problems);
+        if (userId != null) {
+            return getProblemRowResponses(userId, problems);
+        }
+
+        return getProblemRowResponses(problems);
     }
 
     @NotNull

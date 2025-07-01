@@ -33,6 +33,12 @@ public class Badge {
     @Column(columnDefinition = "VARCHAR(20)")
     String type;
 
+    @Column(name = "condition")
+    String condition;
+
+    @Column(name = "locked_image")
+    String lockedImage;
+
     @OneToMany(mappedBy = "badge")
     List<Achievement> achievementList;
 

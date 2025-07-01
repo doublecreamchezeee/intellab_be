@@ -63,7 +63,7 @@ public class AdminProblemController {
     )
     @GetMapping("/search")
     public ApiResponse<Page<ProblemCreationResponse>> searchProblems(
-            @RequestHeader(value = "X-UserID", required = false) String userUid,
+            @RequestHeader(value = "X-UserId", required = false) String userUid,
             @RequestParam("keyword") String keyword,
             @RequestParam(required = false) Boolean status,
             @RequestParam(required = false) String level,
@@ -73,17 +73,18 @@ public class AdminProblemController {
             @RequestParam(value = "isCompletedCreation", required = false) Boolean isCompletedCreation,
             @ParameterObject Pageable pageable) {
 
-        UUID normalizedUserId = null;
+        UUID userId = null;
 
+        userUid = userUid.split(",")[0];
         if (userUid != null) {
-            userUid = userUid.split(",")[0];
+            userId = ParseUUID.normalizeUID(userUid);
         }
 
-        System.out.println(userUid);
+        System.out.println("get problem of: "+userId);
         if ( status != null || isPublished != null  || level != null || categories != null) {
             return ApiResponse.<Page<ProblemCreationResponse>>builder()
                     .result(problemService.searchProblemsWithAdminFilter(
-                                    keyword, level, categories, isPublished, isCompletedCreation,
+                                    userId, keyword, level, categories, isPublished, isCompletedCreation,
                                     pageable
                             )
                     ).build();
@@ -91,6 +92,7 @@ public class AdminProblemController {
 
         return ApiResponse.<Page<ProblemCreationResponse>>builder()
                 .result(problemService.searchProblemsWithAdmin(
+                                userId,
                                 keyword,
                                 isAvailable,
                                 isCompletedCreation,
@@ -101,11 +103,12 @@ public class AdminProblemController {
     }
 
     @Operation(
-            summary = "Get problems list"
+            summary = "Get problems page"
     )
     @GetMapping
     public ApiResponse<Page<ProblemCreationResponse>> getProblem(
             @RequestHeader(value = "X-UserRole") String role,
+            @RequestHeader(value = "X-UserId") String userUid,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(required = false) String level,
             @RequestParam(required = false) Boolean isPublished,
@@ -119,22 +122,16 @@ public class AdminProblemController {
                     .code(403)
                     .message("Forbidden").build();
         }
-        if ( isPublished != null  || level != null || categories != null ) {
-            return ApiResponse.<Page<ProblemCreationResponse>>builder()
-                    .result(problemService.searchProblemsWithAdminFilter(
-                                    keyword, level, categories, isPublished, isCompletedCreation,
-                                    pageable
-                            )
-                    ).build();
-        }
+        userUid = userUid.split(",")[0];
+        UUID userId = ParseUUID.normalizeUID(userUid);
 
         return ApiResponse.<Page<ProblemCreationResponse>>builder()
-                .message("Get problems list success")
-                .result(problemService.getCompleteCreationProblem(
-                            isCompletedCreation, keyword ,pageable
+                .result(problemService.searchProblemsWithAdminFilter(
+                                userId, keyword, level, categories, isPublished, isCompletedCreation,
+                                pageable
                         )
-                )
-                .build();
+                ).build();
+
     }
 
     @Operation(

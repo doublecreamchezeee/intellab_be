@@ -62,8 +62,7 @@ public class CourseSpecification {
             if (rating == null || (rating <= 0.0f || rating > 5.0f)) {
                 return criteriaBuilder.conjunction();
             }
-
-            return criteriaBuilder.greaterThanOrEqualTo(root.get("rating"), rating);
+            return criteriaBuilder.greaterThanOrEqualTo(root.get("averageRating"), rating);
         };
     }
 
@@ -71,18 +70,38 @@ public class CourseSpecification {
         return (root, query, criteriaBuilder) ->
         {
             if (price == null) {
-                return null;
+                return criteriaBuilder.conjunction();
             }
 
             if (price) {
                 return criteriaBuilder.greaterThan(root.get("price"), 0.0);
             }
             else {
-                return null;
+                return criteriaBuilder.equal(root.get("price"), 0.0);
             }
         };
 
     }
+
+    public static Specification<Course> priceRangeSpecification(Float minPrice, Float maxPrice) {
+        return (root, query, criteriaBuilder) -> {
+            if (minPrice == null && maxPrice == null) {
+                return criteriaBuilder.conjunction();
+            }
+
+            if (minPrice != null && maxPrice != null) {
+                if (minPrice == 0.0 && maxPrice == 0.0) {
+                    return criteriaBuilder.equal(root.get("price"), 0.0);
+                }
+                return criteriaBuilder.between(root.get("price"), minPrice, maxPrice);
+            } else if (minPrice != null) {
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice);
+            } else {
+                return criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice);
+            }
+        };
+    }
+
 
     public static Specification<Course> isAvailableSpecification(Boolean isAvailable) {
         return (root, query, criteriaBuilder) -> {

@@ -6,6 +6,8 @@ import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.model.course.Category;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -70,6 +72,7 @@ public class ProblemSpecification {
             if(status == null) {
                 return null;
             }
+
             if (status) {
                 Join<Problem, ProblemSubmission> join = root.join("submissions", JoinType.LEFT);
 
@@ -80,20 +83,19 @@ public class ProblemSpecification {
                 return criteriaBuilder.and(userSubmission, isSolved);
             }
             else {
-                Join<Problem, ProblemSubmission> join = root.join("submissions", JoinType.LEFT);
+                Subquery<ProblemSubmission> subquery = query.subquery(ProblemSubmission.class);
+                Root<ProblemSubmission> submission = subquery.from(ProblemSubmission.class);
+                subquery.select(submission)
+                        .where(
+                                criteriaBuilder.equal(submission.get("problem"), root),
+                                criteriaBuilder.equal(submission.get("isSolved"), status)
+                        );
 
-                var userSubmission = criteriaBuilder.equal(join.get("userId"), userId);
-
-                var isSolved = criteriaBuilder.equal(join.get("isSolved"), status);
-
-                var noSubmissions = criteriaBuilder.isNull(join.get("submissionId"));
-
-                var notCorrect = criteriaBuilder.and(isSolved, userSubmission);
-
-                return criteriaBuilder.or(noSubmissions, notCorrect);
+                return criteriaBuilder.not(criteriaBuilder.exists(subquery));
             }
         };
     }
+
 
     public static Specification<Problem> problemStructureNotNullSpecification(Boolean problemStructureNotNull) {
         return (root, query, criteriaBuilder) -> {
@@ -123,6 +125,15 @@ public class ProblemSpecification {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("isCompletedCreation"), isCompletedCreation);
+        };
+    }
+
+    public static Specification<Problem> authorIdSpecification(UUID userId) {
+        return (root, query, criteriaBuilder) -> {
+            if (userId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("authorId"), userId);
         };
     }
 }

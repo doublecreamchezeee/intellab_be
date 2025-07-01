@@ -22,6 +22,7 @@ import com.example.identityservice.model.User;
 import com.example.identityservice.model.VNPayPaymentPremiumPackage;
 import com.example.identityservice.model.composite.AchievementId;
 import com.example.identityservice.repository.AchievementRepository;
+import com.example.identityservice.repository.BadgeRepository;
 import com.example.identityservice.repository.VNPayPaymentPremiumPackageRepository;
 import com.example.identityservice.utility.CloudinaryUtil;
 import com.example.identityservice.utility.ParseUUID;
@@ -57,6 +58,7 @@ public class ProfileService {
     private final FirestoreService firestoreService;
     private final VNPayPaymentPremiumPackageRepository vnPayPaymentPremiumPackageRepository;
     private final AchievementRepository achievementRepository;
+    private final BadgeRepository badgeRepository;
 
     public SingleProfileInformationResponse getSingleProfileInformation(
             @NonNull String userUid
@@ -256,16 +258,41 @@ public class ProfileService {
         UUID userId = ParseUUID.normalizeUID(userUid);
         List<Achievement> achievements = achievementRepository.findAllById_UserId(userId);
 
+        List<Badge> badges = badgeRepository.findAll();
         if (achievements == null || achievements.isEmpty()) {
-            return Collections.emptyList();
+            List<BadgeResponse> badgeResponses = new ArrayList<>();
+            for (Badge badge : badges) {
+                BadgeResponse badgeResponse = BadgeResponse.builder()
+                        .name(badge.getName())
+                        .image(badge.getLockedImage())
+                        .condition(badge.getCondition())
+                        .isAchieved(false)
+                        .build();
+                badgeResponses.add(badgeResponse);
+            }
+            return badgeResponses;
         }
 
         List<BadgeResponse> badgeResponses = new ArrayList<>();
         for (Achievement achievement : achievements) {
             Badge badge = achievement.getBadge();
+            badges.remove(badge);// Remove the badge from the list of all badges
+
             BadgeResponse badgeResponse = BadgeResponse.builder()
                     .name(badge.getName())
                     .image(badge.getImage())
+                    .condition(badge.getCondition())
+                    .isAchieved(true)
+                    .build();
+            badgeResponses.add(badgeResponse);
+        }
+        // Add remaining badges as locked
+        for (Badge badge : badges) {
+            BadgeResponse badgeResponse = BadgeResponse.builder()
+                    .name(badge.getName())
+                    .image(badge.getLockedImage())
+                    .condition(badge.getCondition())
+                    .isAchieved(false)
                     .build();
             badgeResponses.add(badgeResponse);
         }
