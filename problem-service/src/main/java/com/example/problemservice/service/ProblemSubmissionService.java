@@ -1,9 +1,6 @@
 package com.example.problemservice.service;
 
-import com.example.problemservice.client.BoilerplateClient;
-import com.example.problemservice.client.CourseClient;
-import com.example.problemservice.client.IdentityClient;
-import com.example.problemservice.client.Judge0Client;
+import com.example.problemservice.client.*;
 import com.example.problemservice.dto.request.LeaderboardUpdateRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
@@ -29,6 +26,7 @@ import com.example.problemservice.repository.ProblemSubmissionRepository;
 import com.example.problemservice.repository.TestCaseOutputRepository;
 //import com.example.problemservice.utils.Base64Util;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.type.ListType;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,6 +48,7 @@ public class ProblemSubmissionService {
     private final ProblemRepository problemRepository;
     private final TestCaseOutputRepository testCaseOutputRepository;
     private final Judge0Client judge0Client;
+    private final MossClient mossClient;
     private final ProblemSubmissionMapper problemSubmissionMapper;
     private final BoilerplateClient boilerplateClient;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
@@ -136,6 +136,34 @@ public class ProblemSubmissionService {
         return getDetailsProblemSubmissionResponse(result);
     }
 
+    public String mossService(UUID submissionId) throws IOException, InterruptedException {
+        ProblemSubmission submission = problemSubmissionRepository.findById(submissionId)
+                .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
+
+        if (submission.getIsCheckedMoss() == null || !submission.getIsCheckedMoss()){
+            submission.setMossReportUrl(checkMoss(submission.getProgrammingLanguage(), submission.getProblem().getProblemId(), submission.getUserId()));
+        }
+        else {
+            submission.setMossReportUrl(submission.getMossReportUrl());
+        }
+        return submission.getMossReportUrl();
+    }
+
+    private String checkMoss(String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
+        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository.findByIsSolvedAndProgrammingLanguageAndProblem_ProblemId(true, language, problemId);
+
+        List<String> funcCode = acceptedSubmissions.stream().map(acceptedSubmission -> {
+            String acceptedLanguage = acceptedSubmission.getProgrammingLanguage().toLowerCase();
+
+            return boilerplateClient.extractFunctionCode(
+                    acceptedSubmission.getCode(),
+                    acceptedLanguage,
+                    acceptedSubmission.getProblem().getProblemStructure());
+        }).toList();
+
+        return mossClient.runMoss(funcCode, boilerplateClient.normalizeLanguage(language), null);
+    }
+
     @NotNull
     private DetailsProblemSubmissionResponse getDetailsProblemSubmissionResponse(ProblemSubmission result) {
         DetailsProblemSubmissionResponse response = problemSubmissionMapper.toDetailsProblemSubmissionResponse(result);
@@ -159,7 +187,6 @@ public class ProblemSubmissionService {
         response.getProblem().setCategories(categories);
         return response;
     }
-
 
     public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request) {
         TestCaseOutput output = testCaseOutputRepository.findByToken(UUID.fromString(request.getToken())).orElseThrow(

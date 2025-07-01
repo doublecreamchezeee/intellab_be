@@ -25,7 +25,7 @@ public class MossClient {
         // Use system temp directory for dynamic path
         String systemTemp = System.getProperty("java.io.tmpdir");
         File baseTempDir = new File(systemTemp, "moss-temp");
-
+        String mossLanguage = mapToMossLanguage(language);
         if (!baseTempDir.exists()) {
             if (!baseTempDir.mkdirs()) {
                 throw new IOException("Could not create base temp directory: " + baseTempDir.getAbsolutePath());
@@ -46,7 +46,7 @@ public class MossClient {
         // Save code files
         int i = 1;
         for (String content : codeSnippets) {
-            File f = new File(runDir, "Submission" + i + ".java");
+            File f = new File(runDir, "Submission" + i + "." + mossLanguage);
             Files.writeString(f.toPath(), content);
             codeFiles.add(f);
             i++;
@@ -54,7 +54,7 @@ public class MossClient {
 
         // Save base file if exists
         if (baseCode != null) {
-            baseFile = new File(runDir, "Base.java");
+            baseFile = new File(runDir, "Base." + mossLanguage);
             Files.writeString(baseFile.toPath(), baseCode);
         }
 
@@ -125,4 +125,22 @@ public class MossClient {
         }
         dir.delete();
     }
+
+    private String mapToMossLanguage(String normalized) {
+        if (normalized == null || normalized.isEmpty()) {
+            throw new IllegalArgumentException("Language cannot be null or empty");
+        }
+
+        return switch (normalized) {
+            case "cpp" -> "cc";         // MOSS expects "cc" for C++
+            case "csharp" -> "csharp";
+            case "javascript" -> "javascript";
+            case "typescript" -> "javascript"; // No "typescript" in MOSS, map to "javascript"
+            case "python" -> "python";
+            case "java" -> "java";
+            case "c" -> "c";
+            default -> throw new IllegalArgumentException("Unsupported language for MOSS: " + normalized);
+        };
+    }
+
 }

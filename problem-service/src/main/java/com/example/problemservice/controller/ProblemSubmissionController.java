@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -216,5 +217,17 @@ public class ProblemSubmissionController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed: " + e.getMessage());
         }
+    }
+
+    @Operation(
+            summary = "BE only"
+    )
+    @PostMapping("/moss/{submissionId}")
+    public ResponseEntity<?> runMoss(
+            @PathVariable String submissionId
+    ) throws IOException, InterruptedException {
+
+        String reportUrl = problemSubmissionService.mossService(UUID.fromString(submissionId));
+        return ResponseEntity.ok().body(reportUrl);
     }
 }

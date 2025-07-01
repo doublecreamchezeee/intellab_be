@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,7 +23,7 @@ public class BoilerplateClient {
     private static final Logger log = LoggerFactory.getLogger(BoilerplateClient.class);
 
 
-//    @Component
+    //    @Component
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
@@ -127,7 +129,7 @@ public class BoilerplateClient {
             String functionCall = outputType + " result = " + functionName + "(" +
                     inputFields.stream().map(Field::getName).collect(Collectors.joining(", ")) + ");";
 
-            String outputWrite =  null;
+            String outputWrite = null;
 
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = """
@@ -135,7 +137,7 @@ public class BoilerplateClient {
                             for (const auto &sublist : result) {
                                 if (!isFirstSublist) std::cout << "\\n";
                                 isFirstSublist = false;
-                        
+                                                
                                 std::cout << "[";
                                 // Duyệt qua từng phần tử trong sublist
                                 bool isFirstItem = true;
@@ -146,11 +148,9 @@ public class BoilerplateClient {
                                 }
                                 std::cout << "]";
                             }""";
-            }
-            else if (outputFields.get(0).getType().startsWith("list<")) {
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "for (const auto &item : result) std::cout << item << ' ';\nstd::cout << std::endl;";
-            }
-            else {
+            } else {
                 outputWrite = "std::cout << result << std::endl;";
             }
 
@@ -159,7 +159,7 @@ public class BoilerplateClient {
                     #include <vector>
                     #include <string>
                     using namespace std;
-                    
+                                        
 
                     ##USER_CODE_HERE##
 
@@ -178,11 +178,11 @@ public class BoilerplateClient {
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .toArray(String[]::new));
             return String.format("""
-                    #include <iostream>
-                    #include <vector>
-                    #include <string>
-                    %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
-                    """,
+                            #include <iostream>
+                            #include <vector>
+                            #include <string>
+                            %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
+                            """,
                     mapTypeToCpp(outputFields.get(0).getType()), functionName, inputs);
         }
 
@@ -239,11 +239,9 @@ public class BoilerplateClient {
                                         System.out.println(sublist);
                                     }
                         """;
-            }
-            else if (outputFields.get(0).getType().startsWith("list<")) {
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "System.out.println(result.stream().map(Object::toString).collect(Collectors.joining(\" \")));";
-            }
-            else {
+            } else {
                 // For single value output
                 outputWrite = "System.out.println(result);";
             }
@@ -289,8 +287,7 @@ public class BoilerplateClient {
             if (type.startsWith("list<list<")) {
                 String innerType = type.substring(10, type.length() - 2);
                 return "List<List<" + mapTypeToJava(innerType) + ">>";
-            }
-            else if (type.startsWith("list<")) {
+            } else if (type.startsWith("list<")) {
                 String innerType = type.substring(5, type.length() - 1);
                 return "List<" + mapTypeToJava(innerType) + ">";
             }
@@ -339,8 +336,7 @@ public class BoilerplateClient {
             String outputWrite = null;
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = "for sublist in result: print(sublist)\n";
-            } else
-            if (outputFields.get(0).getType().startsWith("list<")) {
+            } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "print(' '.join(map(str, result)))";
             } else {
                 outputWrite = "print(result)";
@@ -356,6 +352,7 @@ public class BoilerplateClient {
                         %s
                             """.formatted(inputReads, functionCall, outputWrite);
         }
+
         public String generateFunctionPython() {
             StringBuilder pythonCode = new StringBuilder();
 
@@ -408,8 +405,7 @@ public class BoilerplateClient {
                 outputWrite = "result.forEach(sublist => {console.log(`[${sublist.join(\", \")}]`);});";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "console.log(result.join(' '));";
-            }
-            else {
+            } else {
                 outputWrite = "console.log(result);";
             }
 
@@ -417,14 +413,14 @@ public class BoilerplateClient {
                     ##USER_CODE_HERE##
 
                     const readline = require('readline');
-                    
+                                        
                     const rl = readline.createInterface({
                          input: process.stdin,
                          output: process.stdout,
                     });
-                    
+                                        
                     let input = [];
-                    
+                                        
                     rl.on('line', (line) => {
                          input.push(...line.trim().split(/\\s+/));
                     }).on('close', () => {
@@ -472,8 +468,7 @@ public class BoilerplateClient {
                                         const %1$s: string[] = input.splice(0, size_%1$s);"""
                                         .formatted(field.getName());
 
-                            }
-                            else if (interType.equals("bool")) {
+                            } else if (interType.equals("bool")) {
                                 return """
                                         const size_%1$s: number = parseInt(input.shift());
                                         const %1$s: bool[] = input.splice(0, size_%1$s).map(str => str === 'true');
@@ -483,14 +478,11 @@ public class BoilerplateClient {
                                     const size_%1$s: number = parseInt(input.shift());
                                     const %1$s: number[] = input.splice(0, size_%1$s).map(Number);
                                     """.formatted(field.getName());
-                        }
-                        else if (field.getType().startsWith("str")) {
+                        } else if (field.getType().startsWith("str")) {
                             return "const %s: string = input.shift();".formatted(field.getName());
-                        }
-                        else if (field.getType().startsWith("bool")) {
+                        } else if (field.getType().startsWith("bool")) {
                             return "const %s: boolean = input.shift() === 'true';".formatted(field.getName());
-                        }
-                        else {
+                        } else {
                             return "const %s: number = Number(input.shift());".formatted(
                                     field.getName()
                             );
@@ -507,8 +499,7 @@ public class BoilerplateClient {
                 outputWrite = "result.forEach((sublist: number[]) => {console.log(`[${sublist.join(\", \")}]`);});";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "console.log(result.join(' '));";
-            }
-            else {
+            } else {
                 outputWrite = "console.log(result);";
             }
 
@@ -585,7 +576,7 @@ public class BoilerplateClient {
             String functionCall = "\nint size_result = 0;\n%s result = %s(%s);".formatted(
                     mapTypeToC(outputFields.get(0).getType()),
                     functionName,
-                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))+ ", size_result"
+                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", ")) + ", size_result"
             );
 
             String outputWrite = """
@@ -761,8 +752,6 @@ public class BoilerplateClient {
         }
 
 
-
-
         @AllArgsConstructor
         @NoArgsConstructor
         @Builder
@@ -775,7 +764,7 @@ public class BoilerplateClient {
 
 
     //
-    public String enrich(String code, int languageId, String structure){
+    public String enrich(String code, int languageId, String structure) {
         BoilerPlateGenerator parser = new BoilerPlateGenerator();
         parser.parse(structure);
 
@@ -794,11 +783,80 @@ public class BoilerplateClient {
 
     }
 
+    public String normalizeLanguage(String raw) {
+        if (raw == null || raw.isEmpty()) return "";
 
+        int spaceIdx = raw.indexOf(' ');
 
+        String cleaned = (spaceIdx >= 0) ? raw.substring(0, spaceIdx) : raw;
 
+        cleaned = cleaned.toLowerCase();
 
+        return switch (cleaned) {
+            case "c++", "cpp" -> "cpp";
+            case "c#", "csharp" -> "csharp";
+            case "javascript", "js" -> "javascript";
+            case "typescript" -> "typescript";
+            case "python" -> "python";
+            case "java" -> "java";
+            case "c" -> "c";
+            default -> cleaned;
+        };
     }
+
+    public String extractFunctionCode(String code, String language, String structure) {
+        BoilerPlateGenerator parser = new BoilerPlateGenerator();
+        parser.parse(structure);
+
+        String regex = null;
+
+        String functionName = parser.functionName;
+        String normalLanguage = normalizeLanguage(language);
+        regex = switch (normalLanguage.toLowerCase()) {
+            case "cpp", "c++" ->
+                // C++ function regex
+                    String.format(
+                            "(?s)([ \\t]*(?:[\\w:<>,\\s*&]+)[ \\t]+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
+                            Pattern.quote(functionName)
+                    );
+            case "java" -> String.format(
+                    "(?s)(public\\s+static\\s+[\\w<>\\[\\]]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
+                    Pattern.quote(functionName)
+            );
+            case "python" -> String.format(
+                    "(?m)(def\\s+%s\\s*\\([^\\)]*\\):\\n(?:[ \\t]+.*\\n)+)",
+                    Pattern.quote(functionName)
+            );
+            case "javascript", "js" -> String.format(
+                    "(?s)(function\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
+                    Pattern.quote(functionName)
+            );
+            case "typescript", "ts" -> String.format(
+                    "(?s)(function\\s+%s\\s*\\([^\\)]*\\)\\s*:\\s*[^\\s\\{]+\\s*\\{.*?\\})",
+                    Pattern.quote(functionName)
+            );
+            case "c" -> String.format(
+                    "(?s)([\\w\\*\\s]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
+                    Pattern.quote(functionName)
+            );
+            case "c#", "csharp" -> String.format(
+                    "(?s)(public\\s+[\\w<>\\[\\]]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
+                    Pattern.quote(functionName)
+            );
+            default -> throw new IllegalArgumentException("Unsupported language: " + normalLanguage);
+        };
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(code);
+
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        } else {
+            return "// Function not found.";
+        }
+    }
+
+}
     /*String enrich(String code, int languageId){
         return code;
     }*/

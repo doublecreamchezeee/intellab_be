@@ -38,6 +38,11 @@ public class ProblemSubmission {
     @Column(name = "is_solved")
     Boolean isSolved;
 
+    @Column(name = "moss_report_url")
+    String mossReportUrl;
+
+    @Column(name = "is_checked_moss")
+    Boolean isCheckedMoss;
 //    @CreationTimestamp
 //    Instant submit_date;
 
@@ -54,4 +59,5 @@ public class ProblemSubmission {
     List<TestCaseOutput> testCasesOutput;
 
     Date createdAt;
+
 }
