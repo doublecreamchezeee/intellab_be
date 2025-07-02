@@ -9,6 +9,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("com.fasterxml.jackson.core:jackson-core")
     implementation("io.fabric8:kubernetes-client:6.8.1")
+    implementation("org.jsoup:jsoup:1.17.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     runtimeOnly("org.postgresql:postgresql")
     compileOnly("org.projectlombok:lombok")
