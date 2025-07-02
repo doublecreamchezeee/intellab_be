@@ -1018,10 +1018,36 @@ INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_
 INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/New_Flame_zte9n0.png', 'New Flame', 'Trigger', 9, 'Maintain a streak for 14 consecutive days.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/New_Flame-1_jg3wpt.png');
 INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/Steady_Blaze_bnvn5w.png', 'Steady Blaze', 'Trigger', 10, 'Maintain a streak for 50 consecutive days.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751357927/Steady_Blaze-1_mtd6pw.png');
 INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751358640/Fire_Holder_bhhkon.png', 'Fire Holder', 'Trigger', 11, 'Maintain a streak for 150 consecutive days.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751358640/Fire_Holder-2_djxci0.png');
-INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/Steady_Blaze_bnvn5w.png', 'Badge Collector', 'Trigger', 12, 'Achieve at least 10 badges.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/Badge_Collector_blocked_cthxbx.png');
+INSERT INTO public.badges (image, badge_name, type, badge_id, condition, locked_image) VALUES ('https://res.cloudinary.com/diyn1vkim/image/upload/v1751357929/Fire_Holder-1_z2kww9.png', 'Badge Collector', 'Trigger', 12, 'Achieve at least 10 badges.', 'https://res.cloudinary.com/diyn1vkim/image/upload/v1751357926/Badge_Collector_blocked_cthxbx.png');
 
 
-	
+
+
+CREATE OR REPLACE FUNCTION gen_achievement_streak_badges()
+RETURNS TRIGGER AS $$
+DECLARE
+	user_uuid UUID;
+BEGIN
+	IF (NEW.streak_score = 14) THEN
+		user_uuid := uuid_in(encode(substring(digest(NEW.user_uid, 'sha256') for 16), 'hex')::cstring);
+		INSERT INTO achievements (user_id, achieved_date, badge_id)
+		SELECT user_uuid, now(), 9
+		WHERE NOT EXISTS (SELECT 1 FROM achievements where user_id = user_uuid and badge_id = 9);
+	ELSIF (NEW.streak_score = 50) THEN
+		user_uuid := uuid_in(encode(substring(digest(NEW.user_uid, 'sha256') for 16), 'hex')::cstring);
+		INSERT INTO achievements (user_id, achieved_date, badge_id)
+		SELECT user_uuid, now(), 10
+		WHERE NOT EXISTS (SELECT 1 FROM achievements where user_id = user_uuid and badge_id = 10);
+	ELSIF (NEW.streak_score = 150) THEN
+		user_uuid := uuid_in(encode(substring(digest(NEW.user_uid, 'sha256') for 16), 'hex')::cstring);
+		INSERT INTO achievements (user_id, achieved_date, badge_id)
+		SELECT user_uuid, now(), 11
+		WHERE NOT EXISTS (SELECT 1 FROM achievements where user_id = user_uuid and badge_id = 11);
+	END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 
 
 INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (1, 'Data Structure', null);
