@@ -1,15 +1,26 @@
 package com.example.problemservice.client;
 
+import com.example.problemservice.dto.response.problemSubmission.MossMatchResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import com.example.problemservice.dto.request.ProblemSubmission.MossRequest;
 
 import java.io.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.Comparator;
 
 @Slf4j
 @Service
@@ -17,7 +28,7 @@ public class MossClient {
 
     /**
      * Run MOSS check on code snippets.
-     * 
+     *
      * @param codeSnippets list of code content strings
      * @param language     e.g., "java"
      * @param baseCode     optional base code, can be null
@@ -133,7 +144,7 @@ public class MossClient {
         }
         log.info("Created temp folder: {}", runDir.getAbsolutePath());
 
-        List<File> codeFiles = new ArrayList<>();
+//        List<File> codeFiles = new ArrayList<>();
         File baseFile = null;
 
         // Save code files
@@ -145,20 +156,24 @@ public class MossClient {
         // i++;
         // }
 
-        requests.stream().map(request -> {
+        List<File> codeFiles = requests.stream().map(request -> {
             File f = new File(runDir,
                     request.getSubmissionId().toString() + "_" +
                             request.getUserId().toString() + "." +
                             mossLanguage);
-            Files.writeString(f.toPath(), content);
-            codeFiles.add(f);
-        });
+            try {
+                Files.writeString(f.toPath(), request.getFunctionCode());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return f;
+        }).toList();
 
         // Save base file if exists
-        if (baseCode != null) {
-            baseFile = new File(runDir, "Base." + mossLanguage);
-            Files.writeString(baseFile.toPath(), baseCode);
-        }
+//        if (baseCode != null) {
+//            baseFile = new File(runDir, "Base." + mossLanguage);
+//            Files.writeString(baseFile.toPath(), baseCode);
+//        }
 
         // Build Docker command
         List<String> cmd = new ArrayList<>();
@@ -246,7 +261,15 @@ public class MossClient {
     }
 
     public String fetchMossHtml(String url) throws Exception {
-        HttpClient client = HttpClient.newHttpClient();
+        // Ensure trailing slash to avoid redirect in the first place
+        if (!url.endsWith("/")) {
+            url = url + "/";
+        }
+
+        HttpClient client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
@@ -261,11 +284,11 @@ public class MossClient {
         }
     }
 
-    public List<MossMatchResult> parseMossHtml(String html) {
+    public List<MossMatchResponse> parseMossHtml(String html, String submissionId) {
         Document doc = Jsoup.parse(html);
 
         Elements rows = doc.select("table tbody tr");
-        List<MossMatchResult> results = new ArrayList<>();
+        List<MossMatchResponse> results = new ArrayList<>();
 
         for (int i = 1; i < rows.size(); i++) { // skip header row
             Element row = rows.get(i);
@@ -273,7 +296,6 @@ public class MossClient {
 
             String file1Text = cells.get(0).text(); // e.g., "/data/Submission1.java (94%)"
             String file2Text = cells.get(1).text();
-            // You can get linesMatched if you need: cells.get(2).text()
 
             int percent = extractPercent(file1Text);
 
@@ -284,7 +306,12 @@ public class MossClient {
             String[] file1Parts = splitFileName(file1Name);
             String[] file2Parts = splitFileName(file2Name);
 
-            MossMatchResult result = MossMatchResult.builder()
+            // Only keep rows where submissionId1 matches
+            if (!file1Parts[0].equals(submissionId)) {
+                continue;
+            }
+
+            MossMatchResponse result = MossMatchResponse.builder()
                     .submissionId1(file1Parts[0])
                     .userId1(file1Parts[1])
                     .submissionId2(file2Parts[0])
@@ -297,7 +324,7 @@ public class MossClient {
 
         // Sort by percent descending and limit to top 3
         return results.stream()
-                .sorted(Comparator.comparingInt(MossMatchResult::getPercent).reversed())
+                .sorted(Comparator.comparingInt(MossMatchResponse::getPercent).reversed())
                 .limit(3)
                 .collect(Collectors.toList());
     }
@@ -328,9 +355,9 @@ public class MossClient {
         if (underscoreIndex >= 0 && dotIndex > underscoreIndex) {
             String submissionId = filename.substring(0, underscoreIndex);
             String userId = filename.substring(underscoreIndex + 1, dotIndex);
-            return new String[] { submissionId, userId };
+            return new String[]{submissionId, userId};
         }
-        return new String[] { "unknown", "unknown" };
+        return new String[]{"unknown", "unknown"};
     }
 
 }

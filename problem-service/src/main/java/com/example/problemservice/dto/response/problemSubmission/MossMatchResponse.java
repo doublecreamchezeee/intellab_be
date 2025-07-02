@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MossMatchResult {
+public class MossMatchResponse {
     String submissionId1;
     String userId1;
     String submissionId2;

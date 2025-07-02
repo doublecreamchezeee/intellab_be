@@ -9,6 +9,7 @@ import com.example.problemservice.dto.request.lesson.DonePracticeRequest;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
+import com.example.problemservice.dto.response.problemSubmission.MossMatchResponse;
 import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
@@ -137,33 +138,38 @@ public class ProblemSubmissionService {
         return getDetailsProblemSubmissionResponse(result);
     }
 
-    public String mossService(UUID submissionId) throws IOException, InterruptedException {
+    public List<MossMatchResponse> mossService(UUID submissionId) throws IOException, InterruptedException {
         ProblemSubmission submission = problemSubmissionRepository.findById(submissionId)
                 .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
 
-        if (submission.getIsCheckedMoss() == null || !submission.getIsCheckedMoss()){
+        if (submission.getIsCheckedMoss() == null || !submission.getIsCheckedMoss()) {
             submission.setMossReportUrl(checkMoss(submission.getProgrammingLanguage(), submission.getProblem().getProblemId(), submission.getUserId()));
+            submission.setIsCheckedMoss(true);
         }
-        else {
-            submission.setMossReportUrl(submission.getMossReportUrl());
+        problemSubmissionRepository.save(submission);
+        try {
+            String resultHtml = mossClient.fetchMossHtml(submission.getMossReportUrl());
+            return mossClient.parseMossHtml(resultHtml, String.valueOf(submission.getSubmissionId()));
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return submission.getMossReportUrl();
     }
 
     private String checkMoss(String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
         List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository.findByIsSolvedAndProgrammingLanguageAndProblem_ProblemId(true, language, problemId);
-        
+
         List<MossRequest> requests = acceptedSubmissions.stream().map(submission -> {
-                String acceptedLanguage = acceptedSubmission.getProgrammingLanguage().toLowerCase();
-                String funcCode = boilerplateClient.extractFunctionCode(
-                                        acceptedSubmission.getCode(),
-                                        acceptedLanguage,
-                                        acceptedSubmission.getProblem().getProblemStructure());
-                return MossRequest.builder()
-                        .functionCode(funcCode)
-                        .submissionId(submission.getSubmissionId())
-                        .userId(submission.getUserId())
-                        .build();
+            String acceptedLanguage = submission.getProgrammingLanguage().toLowerCase();
+            String funcCode = boilerplateClient.extractFunctionCode(
+                    submission.getCode(),
+                    acceptedLanguage,
+                    submission.getProblem().getProblemStructure());
+            return MossRequest.builder()
+                    .functionCode(funcCode)
+                    .submissionId(submission.getSubmissionId())
+                    .userId(submission.getUserId())
+                    .build();
         }).toList();
 
         // List<String> funcCode = acceptedSubmissions.stream().map(acceptedSubmission -> {
@@ -175,7 +181,7 @@ public class ProblemSubmissionService {
         //             acceptedSubmission.getProblem().getProblemStructure());
         // }).toList();
 
-        return mossClient.runMoss(requests, boilerplateClient.normalizeLanguage(language));
+        return mossClient.moss(requests, boilerplateClient.normalizeLanguage(language));
     }
 
     @NotNull

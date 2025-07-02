@@ -6,6 +6,7 @@ import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeReques
 import com.example.problemservice.dto.response.ApiResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
+import com.example.problemservice.dto.response.problemSubmission.MossMatchResponse;
 import com.example.problemservice.dto.response.problemSubmission.ProblemSubmissionResponse;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.repository.ProblemSubmissionRepository;
@@ -223,11 +224,11 @@ public class ProblemSubmissionController {
             summary = "BE only"
     )
     @PostMapping("/moss/{submissionId}")
-    public ResponseEntity<?> runMoss(
+    public ResponseEntity<List<MossMatchResponse>> runMoss(
             @PathVariable String submissionId
     ) throws IOException, InterruptedException {
 
-        String reportUrl = problemSubmissionService.mossService(UUID.fromString(submissionId));
-        return ResponseEntity.ok().body(reportUrl);
+        List<MossMatchResponse> responses =  problemSubmissionService.mossService(UUID.fromString(submissionId));
+        return ResponseEntity.ok().body(responses);
     }
 }
