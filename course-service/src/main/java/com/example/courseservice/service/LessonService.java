@@ -117,6 +117,18 @@ public class LessonService {
             courseRepository.save(course);
         }
 
+        lessonRepository.flush();
+
+        //sendRequestToInsertNewLessonVectorEmbedding(newLesson.getLessonId());
+        Lesson finalLesson = lesson;
+        aiServiceClient.insertLessonEmbeddingData(lesson.getLessonId())
+                .doOnSuccess(response ->
+                        log.info("Successfully sent request to insert new lesson vector embedding for lessonId: {}",
+                                finalLesson.getLessonId()))
+                .doOnError(e ->
+                        log.error("Error while sending request to insert new lesson vector embedding: {}", e.getMessage()))
+                .subscribe();
+
         return lessonMapper.toLessonResponse(lesson);
     }
 
