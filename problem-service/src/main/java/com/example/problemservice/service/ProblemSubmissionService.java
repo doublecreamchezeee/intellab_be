@@ -3,6 +3,7 @@ package com.example.problemservice.service;
 import com.example.problemservice.client.*;
 import com.example.problemservice.dto.request.LeaderboardUpdateRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
+import com.example.problemservice.dto.request.ProblemSubmission.MossRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
 import com.example.problemservice.dto.request.lesson.DonePracticeRequest;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
@@ -151,17 +152,30 @@ public class ProblemSubmissionService {
 
     private String checkMoss(String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
         List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository.findByIsSolvedAndProgrammingLanguageAndProblem_ProblemId(true, language, problemId);
-
-        List<String> funcCode = acceptedSubmissions.stream().map(acceptedSubmission -> {
-            String acceptedLanguage = acceptedSubmission.getProgrammingLanguage().toLowerCase();
-
-            return boilerplateClient.extractFunctionCode(
-                    acceptedSubmission.getCode(),
-                    acceptedLanguage,
-                    acceptedSubmission.getProblem().getProblemStructure());
+        
+        List<MossRequest> requests = acceptedSubmissions.stream().map(submission -> {
+                String acceptedLanguage = acceptedSubmission.getProgrammingLanguage().toLowerCase();
+                String funcCode = boilerplateClient.extractFunctionCode(
+                                        acceptedSubmission.getCode(),
+                                        acceptedLanguage,
+                                        acceptedSubmission.getProblem().getProblemStructure());
+                return MossRequest.builder()
+                        .functionCode(funcCode)
+                        .submissionId(submission.getSubmissionId())
+                        .userId(submission.getUserId())
+                        .build();
         }).toList();
 
-        return mossClient.runMoss(funcCode, boilerplateClient.normalizeLanguage(language), null);
+        // List<String> funcCode = acceptedSubmissions.stream().map(acceptedSubmission -> {
+        //     String acceptedLanguage = acceptedSubmission.getProgrammingLanguage().toLowerCase();
+
+        //     return boilerplateClient.extractFunctionCode(
+        //             acceptedSubmission.getCode(),
+        //             acceptedLanguage,
+        //             acceptedSubmission.getProblem().getProblemStructure());
+        // }).toList();
+
+        return mossClient.runMoss(requests, boilerplateClient.normalizeLanguage(language));
     }
 
     @NotNull
