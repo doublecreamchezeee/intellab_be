@@ -33,7 +33,7 @@ public class CourseSpecification {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("name")), "%" + keyword.toLowerCase() + "%");
+                    criteriaBuilder.lower(root.get("courseName")), "%" + keyword.toLowerCase() + "%");
         };
     }
 
