@@ -260,10 +260,9 @@ public class MossClient {
         };
     }
 
-    public String fetchHighlightedCode(String baseUrl, Integer order) throws Exception {
-        // Convert .../ -> .../match<i>-1.html
-
-        String codeUrl = baseUrl + "match" + order.toString() + "-1.html";
+    public String fetchHighlightedCode(String baseUrl) throws Exception {
+        // Convert .../match0.html -> .../match0-1.html
+        String codeUrl = baseUrl.replace(".html", "-1.html");
 
         HttpClient client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -314,7 +313,7 @@ public class MossClient {
         }
     }
 
-    public List<MossMatchResponse> parseMossHtml(String url, String html, String submissionId) {
+    public List<MossMatchResponse> parseMossHtml(String html, String submissionId) {
         Document doc = Jsoup.parse(html);
 
         Elements rows = doc.select("table tbody tr");
@@ -326,6 +325,10 @@ public class MossClient {
 
             String file1Text = cells.get(0).text(); // e.g., "/data/Submission1.java (94%)"
             String file2Text = cells.get(1).text();
+
+            // Extract the <a> tag to get the base URL
+            Element file1Link = cells.get(0).selectFirst("a");
+            String baseUrl = file1Link != null ? file1Link.absUrl("href") : "";
 
             int percent = extractPercent(file1Text);
 
@@ -341,7 +344,7 @@ public class MossClient {
             }
 
             try {
-                String highlightedCode = fetchHighlightedCode(url, i);
+                String highlightedCode = fetchHighlightedCode(baseUrl);
                 MossMatchResponse result = MossMatchResponse.builder()
                         .submissionId1(file1Parts[0])
                         .userId1(file1Parts[1])
