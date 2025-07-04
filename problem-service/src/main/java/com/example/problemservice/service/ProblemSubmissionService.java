@@ -1,11 +1,14 @@
 package com.example.problemservice.service;
 
+import com.example.problemservice.dto.response.ApiResponse;
+import com.example.problemservice.dto.response.profile.SingleProfileInformationResponse;
 import com.example.problemservice.client.*;
 import com.example.problemservice.dto.request.LeaderboardUpdateRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.DetailsProblemSubmissionRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.MossRequest;
 import com.example.problemservice.dto.request.ProblemSubmission.SubmitCodeRequest;
 import com.example.problemservice.dto.request.lesson.DonePracticeRequest;
+import com.example.problemservice.dto.request.profile.SingleProfileInformationRequest;
 import com.example.problemservice.dto.response.Problem.CategoryResponse;
 import com.example.problemservice.dto.response.SubmissionCallbackResponse;
 import com.example.problemservice.dto.response.problemSubmission.DetailsProblemSubmissionResponse;
@@ -64,30 +67,24 @@ public class ProblemSubmissionService {
 
         // Lấy Problem
         Problem problem = problemRepository.findById(UUID.fromString(request.getProblemId())).orElseThrow(
-                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST)
-        );
+                () -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
         ProgrammingLanguage language = programmingLanguageRepository.findByLongName(request.getProgrammingLanguage())
                 .orElseThrow(() -> new AppException(ErrorCode.PROGRAMMING_LANGUAGE_NOT_EXIST));
-
 
         if (base64 != null && base64) {
             Base64.Decoder decoder = Base64.getDecoder();
             request.setCode(
                     new String(
                             decoder.decode(
-                                    request.getCode()
-                            )
-                    )
-            );
+                                    request.getCode())));
         }
 
         ProblemSubmission submission = ProblemSubmission.builder()
                 .code(boilerplateClient.enrich(
                         request.getCode(),
                         language.getId(),
-                        problem.getProblemStructure()
-                ))
+                        problem.getProblemStructure()))
                 .createdAt(new Date())
                 .isSolved(false)
                 .programmingLanguage(request.getProgrammingLanguage())
@@ -110,7 +107,6 @@ public class ProblemSubmissionService {
         for (TestCase testCase : testCases) {
             // Gửi mã nguồn và test case đến Judge0
             TestCaseOutput output = judge0Client.submitCode(submission, testCase);
-
 
             // Khởi tạo composite ID
             TestCaseOutputID outputId = new TestCaseOutputID();
@@ -143,21 +139,32 @@ public class ProblemSubmissionService {
                 .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
 
         if (submission.getIsCheckedMoss() == null || !submission.getIsCheckedMoss()) {
-            submission.setMossReportUrl(checkMoss(submission.getProgrammingLanguage(), submission.getProblem().getProblemId(), submission.getUserId()));
+            submission.setMossReportUrl(checkMoss(submission.getProgrammingLanguage(),
+                    submission.getProblem().getProblemId(), submission.getUserId()));
             submission.setIsCheckedMoss(true);
         }
         problemSubmissionRepository.save(submission);
         try {
             String resultHtml = mossClient.fetchMossHtml(submission.getMossReportUrl());
-            return mossClient.parseMossHtml(submission.getMossReportUrl(), resultHtml, String.valueOf(submission.getSubmissionId()));
+            List<MossMatchResponse> responses = mossClient.parseMossHtml(submission.getMossReportUrl(), resultHtml,
+                    String.valueOf(submission.getSubmissionId()));
+            return responses.stream().map(moss -> {
+                ApiResponse<SingleProfileInformationResponse> response = identityClient
+                        .getSingleProfileInformation(new SingleProfileInformationRequest(moss.getUserId2()))
+                        .block();
 
+                SingleProfileInformationResponse profile = response.getResult();
+                moss.setUsername2(profile.getDisplayName());
+                return moss;
+            }).toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     private String checkMoss(String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
-        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository.findByIsSolvedAndProgrammingLanguageAndProblem_ProblemId(true, language, problemId);
+        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository
+                .findByIsSolvedAndProgrammingLanguageAndProblem_ProblemId(true, language, problemId);
 
         List<MossRequest> requests = acceptedSubmissions.stream().map(submission -> {
             String acceptedLanguage = submission.getProgrammingLanguage().toLowerCase();
@@ -172,13 +179,15 @@ public class ProblemSubmissionService {
                     .build();
         }).toList();
 
-        // List<String> funcCode = acceptedSubmissions.stream().map(acceptedSubmission -> {
-        //     String acceptedLanguage = acceptedSubmission.getProgrammingLanguage().toLowerCase();
+        // List<String> funcCode = acceptedSubmissions.stream().map(acceptedSubmission
+        // -> {
+        // String acceptedLanguage =
+        // acceptedSubmission.getProgrammingLanguage().toLowerCase();
 
-        //     return boilerplateClient.extractFunctionCode(
-        //             acceptedSubmission.getCode(),
-        //             acceptedLanguage,
-        //             acceptedSubmission.getProblem().getProblemStructure());
+        // return boilerplateClient.extractFunctionCode(
+        // acceptedSubmission.getCode(),
+        // acceptedLanguage,
+        // acceptedSubmission.getProblem().getProblemStructure());
         // }).toList();
 
         return mossClient.moss(requests, boilerplateClient.normalizeLanguage(language));
@@ -191,11 +200,14 @@ public class ProblemSubmissionService {
         response.setSubmitDate(result.getCreatedAt());
 
         if (testCaseOutputs != null && !testCaseOutputs.isEmpty()) {
-            Float totalMemories = (float) result.getTestCasesOutput().stream().mapToDouble(testCaseOutput ->
-                    testCaseOutput.getMemory() != null ? testCaseOutput.getMemory() : 0).sum();
+            Float totalMemories = (float) result.getTestCasesOutput().stream()
+                    .mapToDouble(testCaseOutput -> testCaseOutput.getMemory() != null ? testCaseOutput.getMemory() : 0)
+                    .sum();
             response.setUsedMemory(totalMemories);
-            Float totalRuntime = (float) result.getTestCasesOutput().stream().mapToDouble(testCaseOutput ->
-                    testCaseOutput.getRuntime() != null ? testCaseOutput.getRuntime() : 0).sum();
+            Float totalRuntime = (float) result.getTestCasesOutput().stream()
+                    .mapToDouble(
+                            testCaseOutput -> testCaseOutput.getRuntime() != null ? testCaseOutput.getRuntime() : 0)
+                    .sum();
             response.setRuntime(totalRuntime);
         }
 
@@ -210,8 +222,7 @@ public class ProblemSubmissionService {
 
     public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request) {
         TestCaseOutput output = testCaseOutputRepository.findByToken(UUID.fromString(request.getToken())).orElseThrow(
-                () -> new AppException(ErrorCode.TEST_CASE_OUTPUT_NOT_EXIST)
-        );
+                () -> new AppException(ErrorCode.TEST_CASE_OUTPUT_NOT_EXIST));
 
         if (request.getTime() != null) {
             output.setRuntime(Float.valueOf(request.getTime()));
@@ -231,43 +242,44 @@ public class ProblemSubmissionService {
                                             .trim()
                                             .replaceAll(
                                                     "\\s+",
-                                                    ""
-                                            )
-                            )
-                    ).replace(
-                            "\n",
-                            ""
-                    ) // remove newline character
+                                                    "")))
+                            .replace(
+                                    "\n",
+                                    "") // remove newline character
             );
 
         } else {
             output.setSubmission_output(null);
         }
-//        output.setSubmission_output(new String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+", ""))));
+        // output.setSubmission_output(new
+        // String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+",
+        // ""))));
         output.setResult_status(request.getStatus().getDescription());
         testCaseOutputRepository.save(output);
 
-        //        if (result.getTestCasesOutput().size() == result.getProblem().getTestCases().size()) {
-//            boolean allAccepted = result.getTestCasesOutput().stream()
-//                    .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
-//
-//            if (allAccepted) {
-//                if (!result.getIsSolved())
-//                {
-//
-//                }
-//
-//                try {
-//                    courseClient.donePracticeByProblemId(
-//                            result.getProblem().getProblemId(),
-//                            result.getUserId()
-//                    );
-//                } catch (Exception e) {
-//                    log.error("Error while calling course service: {}", e.getMessage());
-//                }
-//
-//            }
-//        }
+        // if (result.getTestCasesOutput().size() ==
+        // result.getProblem().getTestCases().size()) {
+        // boolean allAccepted = result.getTestCasesOutput().stream()
+        // .allMatch(testCaseOutput ->
+        // "Accepted".equals(testCaseOutput.getResult_status()));
+        //
+        // if (allAccepted) {
+        // if (!result.getIsSolved())
+        // {
+        //
+        // }
+        //
+        // try {
+        // courseClient.donePracticeByProblemId(
+        // result.getProblem().getProblemId(),
+        // result.getUserId()
+        // );
+        // } catch (Exception e) {
+        // log.error("Error while calling course service: {}", e.getMessage());
+        // }
+        //
+        // }
+        // }
 
         return output.getSubmission();
     }
@@ -303,7 +315,8 @@ public class ProblemSubmissionService {
     }
 
     public Page<ProblemSubmissionResponse> getSubmissionsByUserId(UUID problemId, UUID userId, Pageable pageable) {
-        Page<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId, problemId, pageable);
+        Page<ProblemSubmission> submissions = problemSubmissionRepository.findAllByUserIdAndProblem_ProblemId(userId,
+                problemId, pageable);
 
         return submissions.map(submission -> {
             double totalRuntime = submission.getTestCasesOutput().stream()
@@ -348,7 +361,6 @@ public class ProblemSubmissionService {
         boolean allAccepted = submission.getTestCasesOutput().stream()
                 .allMatch(testCaseOutput -> "Accepted".equals(testCaseOutput.getResult_status()));
 
-
         if (allAccepted) {
             if (!submission.getIsSolved()) {
                 submission.setIsSolved(true);
@@ -359,8 +371,7 @@ public class ProblemSubmissionService {
             try {
                 courseClient.donePracticeByProblemId(
                         submission.getProblem().getProblemId(),
-                        submission.getUserId()
-                );
+                        submission.getUserId());
             } catch (Exception e) {
                 log.error("Error while calling course service: {}", e.getMessage());
             }
@@ -370,7 +381,8 @@ public class ProblemSubmissionService {
         return getDetailsProblemSubmissionResponse(submission);
     }
 
-    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUidInList(UUID problemId, UUID userUid) {
+    public List<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUidInList(UUID problemId,
+            UUID userUid) {
         // Kiểm tra và lấy Problem từ repository
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
@@ -385,7 +397,8 @@ public class ProblemSubmissionService {
                 .collect(Collectors.toList());
     }
 
-    public Page<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId, UUID userUid, Pageable pageable) {
+    public Page<DetailsProblemSubmissionResponse> getSubmissionDetailsByProblemIdAndUserUid(UUID problemId,
+            UUID userUid, Pageable pageable) {
         // Kiểm tra và lấy Problem từ repository
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
@@ -407,21 +420,20 @@ public class ProblemSubmissionService {
                 .map(this::getDetailsProblemSubmissionResponse);
     }
 
-    public ProblemSubmission submitProblemWithPartialBoilerplate(UUID userUid, DetailsProblemSubmissionRequest request) {
+    public ProblemSubmission submitProblemWithPartialBoilerplate(UUID userUid,
+            DetailsProblemSubmissionRequest request) {
         Problem problem = problemRepository.findById(request.getProblemId())
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
         ProgrammingLanguage language = programmingLanguageRepository.findById(request.getLanguageId())
                 .orElseThrow(() -> new AppException(ErrorCode.PROGRAMMING_LANGUAGE_NOT_EXIST));
 
-
-        //UUID userUid = ParseUUID.normalizeUID(userUid);
-        //UUID.fromString("4d0c8d27-4509-402b-cf6f-58686cd47319");
+        // UUID userUid = ParseUUID.normalizeUID(userUid);
+        // UUID.fromString("4d0c8d27-4509-402b-cf6f-58686cd47319");
 
         List<DetailsProblemSubmissionResponse> submissions = getSubmissionDetailsByProblemIdAndUserUidInList(
                 request.getProblemId(),
-                userUid
-        );
+                userUid);
 
         ProblemSubmission submission = problemSubmissionMapper.toProblemSubmission(request);
 
@@ -433,9 +445,7 @@ public class ProblemSubmissionService {
                 boilerplateClient.enrich(
                         submission.getCode(),
                         request.getLanguageId(),
-                        problem.getProblemStructure()
-                )
-        );
+                        problem.getProblemStructure()));
 
         submission.setProgrammingLanguage(language.getLongName());
 
@@ -448,8 +458,7 @@ public class ProblemSubmissionService {
         } else {
             submission.setSubmitOrder(
                     submissions.get(submissions.size() - 1) // Lấy submission cuối cùng
-                            .getSubmissionOrder() + 1
-            );
+                            .getSubmissionOrder() + 1);
         }
 
         submission.setTestCasesOutput(new ArrayList<>());
@@ -457,8 +466,7 @@ public class ProblemSubmissionService {
         submission = problemSubmissionRepository.save(submission);
 
         List<TestCase> testCases = testCaseRepository.findAllByProblem_ProblemId(
-                request.getProblemId()
-        ); // problem.getTestCases();
+                request.getProblemId()); // problem.getTestCases();
 
         log.info("Test cases: {}", testCases.size());
 
@@ -495,4 +503,3 @@ public class ProblemSubmissionService {
     }
 
 }
-
