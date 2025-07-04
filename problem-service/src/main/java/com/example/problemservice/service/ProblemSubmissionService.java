@@ -149,7 +149,7 @@ public class ProblemSubmissionService {
         problemSubmissionRepository.save(submission);
         try {
             String resultHtml = mossClient.fetchMossHtml(submission.getMossReportUrl());
-            return mossClient.parseMossHtml(resultHtml, String.valueOf(submission.getSubmissionId()));
+            return mossClient.parseMossHtml(submission.getMossReportUrl(), resultHtml, String.valueOf(submission.getSubmissionId()));
 
         } catch (Exception e) {
             throw new RuntimeException(e);

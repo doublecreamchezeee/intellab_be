@@ -13,5 +13,6 @@ public class MossMatchResponse {
     String userId1;
     String submissionId2;
     String userId2;
+    String matchCode;
     int percent;
 }

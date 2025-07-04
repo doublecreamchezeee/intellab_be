@@ -144,7 +144,7 @@ public class MossClient {
         }
         log.info("Created temp folder: {}", runDir.getAbsolutePath());
 
-//        List<File> codeFiles = new ArrayList<>();
+        // List<File> codeFiles = new ArrayList<>();
         File baseFile = null;
 
         // Save code files
@@ -170,10 +170,10 @@ public class MossClient {
         }).toList();
 
         // Save base file if exists
-//        if (baseCode != null) {
-//            baseFile = new File(runDir, "Base." + mossLanguage);
-//            Files.writeString(baseFile.toPath(), baseCode);
-//        }
+        // if (baseCode != null) {
+        // baseFile = new File(runDir, "Base." + mossLanguage);
+        // Files.writeString(baseFile.toPath(), baseCode);
+        // }
 
         // Build Docker command
         List<String> cmd = new ArrayList<>();
@@ -260,6 +260,36 @@ public class MossClient {
         };
     }
 
+    public String fetchHighlightedCode(String baseUrl, Integer order) throws Exception {
+        // Convert .../ -> .../match<i>-1.html
+
+        String codeUrl = baseUrl + "match" + order.toString() + "-1.html";
+
+        HttpClient client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(codeUrl))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Failed to fetch highlighted code: HTTP " + response.statusCode());
+        }
+
+        // Parse the HTML and extract the <pre> block inside <body>
+        Document doc = Jsoup.parse(response.body());
+        Element pre = doc.selectFirst("body pre");
+        if (pre != null) {
+            return pre.text();
+        } else {
+            return "";
+        }
+    }
+
     public String fetchMossHtml(String url) throws Exception {
         // Ensure trailing slash to avoid redirect in the first place
         if (!url.endsWith("/")) {
@@ -284,7 +314,7 @@ public class MossClient {
         }
     }
 
-    public List<MossMatchResponse> parseMossHtml(String html, String submissionId) {
+    public List<MossMatchResponse> parseMossHtml(String url, String html, String submissionId) {
         Document doc = Jsoup.parse(html);
 
         Elements rows = doc.select("table tbody tr");
@@ -305,24 +335,26 @@ public class MossClient {
             // file name format: <submissionId>_<userId>.<language>
             String[] file1Parts = splitFileName(file1Name);
             String[] file2Parts = splitFileName(file2Name);
-
             // Only keep rows where submissionId1 matches
             if (!file1Parts[0].equals(submissionId)) {
                 continue;
             }
 
-            MossMatchResponse result = MossMatchResponse.builder()
-                    .submissionId1(file1Parts[0])
-                    .userId1(file1Parts[1])
-                    .submissionId2(file2Parts[0])
-                    .userId2(file2Parts[1])
-                    .percent(percent)
-                    .build();
-
-            results.add(result);
+            try {
+                String highlightedCode = fetchHighlightedCode(url, i);
+                MossMatchResponse result = MossMatchResponse.builder()
+                        .submissionId1(file1Parts[0])
+                        .userId1(file1Parts[1])
+                        .submissionId2(file2Parts[0])
+                        .userId2(file2Parts[1])
+                        .percent(percent)
+                        .matchCode(highlightedCode)
+                        .build();
+                results.add(result);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
-
-        // Sort by percent descending and limit to top 3
         return results.stream()
                 .sorted(Comparator.comparingInt(MossMatchResponse::getPercent).reversed())
                 .limit(3)
@@ -355,9 +387,9 @@ public class MossClient {
         if (underscoreIndex >= 0 && dotIndex > underscoreIndex) {
             String submissionId = filename.substring(0, underscoreIndex);
             String userId = filename.substring(underscoreIndex + 1, dotIndex);
-            return new String[]{submissionId, userId};
+            return new String[] { submissionId, userId };
         }
-        return new String[]{"unknown", "unknown"};
+        return new String[] { "unknown", "unknown" };
     }
 
 }
