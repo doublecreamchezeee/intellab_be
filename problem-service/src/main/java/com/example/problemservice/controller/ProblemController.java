@@ -1,6 +1,7 @@
 package com.example.problemservice.controller;
 
 import com.example.problemservice.core.DoublePageable;
+import com.example.apigateway.client.IdentityClient;
 import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.dto.request.DefaultCodeRequest;
 import com.example.problemservice.dto.request.problem.EnrichCodeRequest;
