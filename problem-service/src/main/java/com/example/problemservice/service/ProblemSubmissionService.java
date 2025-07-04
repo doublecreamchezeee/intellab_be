@@ -146,7 +146,7 @@ public class ProblemSubmissionService {
         problemSubmissionRepository.save(submission);
         try {
             String resultHtml = mossClient.fetchMossHtml(submission.getMossReportUrl());
-            List<MossMatchResponse> responses = mossClient.parseMossHtml(submission.getMossReportUrl(), resultHtml,
+            List<MossMatchResponse> responses = mossClient.parseMossHtml(resultHtml,
                     String.valueOf(submission.getSubmissionId()));
             return responses.stream().map(moss -> {
                 ApiResponse<SingleProfileInformationResponse> response = identityClient
