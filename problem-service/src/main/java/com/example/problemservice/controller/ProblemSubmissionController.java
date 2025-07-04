@@ -221,9 +221,9 @@ public class ProblemSubmissionController {
     }
 
     @Operation(
-            summary = "BE only"
+            summary = "Get moss response"
     )
-    @PostMapping("/moss/{submissionId}")
+    @GetMapping("/moss/{submissionId}")
     public ResponseEntity<List<MossMatchResponse>> runMoss(
             @PathVariable String submissionId
     ) throws IOException, InterruptedException {
