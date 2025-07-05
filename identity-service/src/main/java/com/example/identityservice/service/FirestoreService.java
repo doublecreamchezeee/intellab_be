@@ -49,6 +49,21 @@ public class FirestoreService {
         return null;
     }
 
+    public User getUserById(String id) throws ExecutionException, InterruptedException {
+        DocumentSnapshot document = firestore.collection("users").document(id).get().get();
+        if (document.exists()) {
+            User user = document.toObject(User.class);
+            if (user != null) {
+                System.out.println("firestore get role: " + user.getRole());
+                return user;
+            } else {
+                log.error("User object is null for UID: {}", id);
+            }
+        }
+        log.error("Document not found for userUid: {}", id);
+        return null;
+    }
+
     public List<User> getAllUsers() throws ExecutionException, InterruptedException {
         CollectionReference collectionRef = firestore.collection("users");
 

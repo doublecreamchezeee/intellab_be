@@ -142,18 +142,22 @@ public class ProblemSubmissionService {
             submission.setMossReportUrl(checkMoss(submission.getProgrammingLanguage(),
                     submission.getProblem().getProblemId(), submission.getUserId()));
             submission.setIsCheckedMoss(true);
+            problemSubmissionRepository.save(submission);
         }
-        problemSubmissionRepository.save(submission);
         try {
             String resultHtml = mossClient.fetchMossHtml(submission.getMossReportUrl());
             List<MossMatchResponse> responses = mossClient.parseMossHtml(resultHtml,
                     String.valueOf(submission.getSubmissionId()));
+
             return responses.stream().map(moss -> {
                 ApiResponse<SingleProfileInformationResponse> response = identityClient
-                        .getSingleProfileInformation(new SingleProfileInformationRequest(moss.getUserId2()))
+                        .getSingleProfileInformationById(new SingleProfileInformationRequest(moss.getUserId2()))
                         .block();
-
+                if (response != null && response.getResult() == null) {
+                    return moss;
+                }
                 SingleProfileInformationResponse profile = response.getResult();
+                System.out.print("Display name: " +  profile.getDisplayName());
                 moss.setUsername2(profile.getDisplayName());
                 return moss;
             }).toList();
@@ -164,7 +168,7 @@ public class ProblemSubmissionService {
 
     private String checkMoss(String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
         List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository
-                .findByIsSolvedAndProgrammingLanguageAndProblem_ProblemId(true, language, problemId);
+                .findTop5ByIsSolvedAndProgrammingLanguageAndProblem_ProblemIdOrderByCreatedAtDesc(true, language, problemId);
 
         List<MossRequest> requests = acceptedSubmissions.stream().map(submission -> {
             String acceptedLanguage = submission.getProgrammingLanguage().toLowerCase();
@@ -178,17 +182,6 @@ public class ProblemSubmissionService {
                     .userId(submission.getUserId())
                     .build();
         }).toList();
-
-        // List<String> funcCode = acceptedSubmissions.stream().map(acceptedSubmission
-        // -> {
-        // String acceptedLanguage =
-        // acceptedSubmission.getProgrammingLanguage().toLowerCase();
-
-        // return boilerplateClient.extractFunctionCode(
-        // acceptedSubmission.getCode(),
-        // acceptedLanguage,
-        // acceptedSubmission.getProblem().getProblemStructure());
-        // }).toList();
 
         return mossClient.moss(requests, boilerplateClient.normalizeLanguage(language));
     }

@@ -384,6 +384,7 @@ public class AdminDashboardService {
                 .filter(p -> status == null || p.getTransactionStatus().equalsIgnoreCase(status))
                 .filter(p -> search == null || p.getUserUid().toLowerCase().contains(search.toLowerCase()))
                 .map(p -> DashboardTableResponse.builder()
+                        .id(String.valueOf(p.getPaymentId()))
                         .user(firebaseAuthClient.getUserInfo(p.getUserUid(), ""))
                         .date(Date.from(p.getCreatedAt()))
                         .amount(p.getTotalPaymentAmount() != null ? p.getTotalPaymentAmount().doubleValue() : 0)

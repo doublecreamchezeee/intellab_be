@@ -19,7 +19,11 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
 
     List<ProblemSubmission> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
 
-    List<ProblemSubmission> findByIsSolvedAndProgrammingLanguageAndProblem_ProblemId(Boolean isSolved, String programmingLanguage, UUID problemId);
+    List<ProblemSubmission> findTop5ByIsSolvedAndProgrammingLanguageAndProblem_ProblemIdOrderByCreatedAtDesc(
+            Boolean isSolved,
+            String programmingLanguage,
+            UUID problemId
+    );
 
     Page<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid, Pageable pageable);
 

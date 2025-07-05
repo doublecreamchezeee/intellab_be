@@ -91,6 +91,37 @@ public class ProfileService {
         }
     }
 
+    public SingleProfileInformationResponse getUserById(
+            @NonNull String userId
+    ) {
+        try {
+            User userFirestore = firestoreService.getUserById(userId);
+            UserRecord userRecord = firebaseAuth.getUser(
+                    userFirestore.getUid()
+            );
+
+
+            return SingleProfileInformationResponse.builder()
+                    .userId(userRecord.getUid())
+                    .isPublic(userFirestore.getIsPublic())
+                    .displayName(userRecord.getDisplayName())
+                    .email(userRecord.getEmail())
+                    .phoneNumber(userRecord.getPhoneNumber())
+                    .photoUrl(userRecord.getPhotoUrl())
+                    .isEmailVerified(userRecord.isEmailVerified())
+                    .isDisabled(userRecord.isDisabled())
+                    .lastSignIn(new Date(userRecord.getUserMetadata().getLastSignInTimestamp()))
+                    .firstName(userFirestore.getFirstName())
+                    .lastName(userFirestore.getLastName())
+                    .build();
+
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error finding user by uid: " + e.getMessage(), e);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public String getProfilePictureUrlByEmail(String userId) {
         try {

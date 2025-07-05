@@ -70,6 +70,19 @@ public class ProfileController {
     }
 
     @Operation(
+            summary = "Get single profile information"
+    )
+    @PublicEndpoint
+    @PostMapping(value = "/single/profile", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ApiResponse<SingleProfileInformationResponse> getSingleProfileInformationByUserId(
+            @RequestBody @Valid SingleProfileInformationRequest request
+    ) {
+        return ApiResponse.<SingleProfileInformationResponse>builder()
+                .result(profileService.getUserById(request.getUserId()))
+                .build();
+    }
+
+    @Operation(
             summary = "Get multiple profile information"
     )
     @PublicEndpoint

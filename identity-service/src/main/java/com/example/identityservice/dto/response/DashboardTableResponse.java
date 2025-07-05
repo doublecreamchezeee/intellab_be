@@ -16,5 +16,5 @@ public class DashboardTableResponse {
     Double amount;
     String status;
     String type;
-
+    String id;
 }

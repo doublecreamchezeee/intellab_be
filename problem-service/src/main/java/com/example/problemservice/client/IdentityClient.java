@@ -19,6 +19,10 @@ public interface IdentityClient {
     Mono<ApiResponse<SingleProfileInformationResponse>> getSingleProfileInformation(
             @RequestBody SingleProfileInformationRequest request);
 
+    @PostExchange(url = "/profile/single/profile", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ApiResponse<SingleProfileInformationResponse>> getSingleProfileInformationById(
+            @RequestBody SingleProfileInformationRequest request);
+
     @PostExchange(url = "/profile/multiple", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<MultipleProfileInformationResponse>> getMultipleProfileInformation(
             @RequestBody MultipleProfileInformationRequest request);
