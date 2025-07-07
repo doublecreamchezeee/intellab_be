@@ -158,6 +158,13 @@ public class BoilerplateClient {
                     #include <iostream>
                     #include <vector>
                     #include <string>
+                    #include <algorithm>
+                    #include <cstring>
+                    #include <cstdlib>
+                    #include <cstdio>
+                    #include <cmath>
+                    
+                    
                     using namespace std;
                                         
 
@@ -178,9 +185,6 @@ public class BoilerplateClient {
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .toArray(String[]::new));
             return String.format("""
-                            #include <iostream>
-                            #include <vector>
-                            #include <string>
                             %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
                             """,
                     mapTypeToCpp(outputFields.get(0).getType()), functionName, inputs);
