@@ -218,9 +218,24 @@ public class BoilerplateClient {
         public String generateJava() {
             String inputReads = inputFields.stream()
                     .map(field -> {
+                        if (field.getType().startsWith("list<string>")) {
+                            return """
+                                    int size_%1$s = scanner.nextInt();
+                                    
+                                    // Đọc dòng tiếp theo chứa các chuỗi
+                                    String[] tokens = sc.nextLine().split(" ");
+                            
+                                    // Lưu vào List<String>
+                                    %2$s %1$s = new ArrayList<>();
+                                    for (int i = 0; i < size_%1$s; i++) {
+                                        %1$s.add(tokens[i]);
+                                    }
+                                    """.formatted(field.getName(), mapTypeToJava(field.getType()));
+                        }
                         if (field.getType().startsWith("list<")) {
                             return """
                                     int size_%1$s = scanner.nextInt();
+                                   
                                     %2$s %1$s = new ArrayList<>();
                                     for (int i = 0; i < size_%1$s; i++) {
                                         %1$s.add(scanner.next%3$s());
@@ -229,7 +244,7 @@ public class BoilerplateClient {
                         } else {
                             return "%s %s = scanner.next%s();".formatted(mapTypeToJava(field.getType()), field.getName(), mapScannerMethodForJava(field.getType()));
                         }
-                    }).collect(Collectors.joining("\n  "));
+                    }).collect(Collectors.joining("\n    "));
 
             String functionCall = "%s result = %s(%s);".formatted(
                     mapTypeToJava(outputFields.get(0).getType()),
@@ -239,7 +254,7 @@ public class BoilerplateClient {
             String outputWrite = "";
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = """
-                        for(List<?> sublist : result) {
+                        for(list<?> sublist : result) {
                                         System.out.println(sublist);
                                     }
                         """;
@@ -252,6 +267,8 @@ public class BoilerplateClient {
 
             return """
                     import java.util.*;
+                    import java.util.stream.Collectors;
+                    
 
                     public class Main {
 
@@ -297,10 +314,10 @@ public class BoilerplateClient {
             }
 
             return switch (type) {
-                case "int" -> "int";
-                case "float" -> "double"; // Java uses double for floating-point numbers by default
+                case "int" -> "Integer";
+                case "float" -> "Double"; // Java uses double for floating-point numbers by default
                 case "string" -> "String";
-                case "bool" -> "boolean";
+                case "bool" -> "Boolean";
                 case "list<int>" -> "List<Integer>";
                 case "list<float>" -> "List<Double>";
                 case "list<string>" -> "List<String>";
