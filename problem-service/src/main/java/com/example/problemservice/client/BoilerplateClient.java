@@ -250,7 +250,7 @@ public class BoilerplateClient {
             String outputWrite = "";
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = """
-                        for(list<?> sublist : result) {
+                        for(List<?> sublist : result) {
                                         System.out.println(sublist);
                                     }
                         """;
