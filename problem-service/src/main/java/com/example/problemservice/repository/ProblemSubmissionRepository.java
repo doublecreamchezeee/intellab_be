@@ -29,7 +29,7 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
     SELECT DISTINCT ON (user_id, code)
         submission_id
     FROM problem_submissions
-    WHERE is_solved = :isSolved
+    WHERE is_solved = true
       AND programming_language = :programmingLanguage
       AND problem_id = :problemId
       AND user_id <> :userId

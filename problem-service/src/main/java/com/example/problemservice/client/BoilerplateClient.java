@@ -821,6 +821,50 @@ public class BoilerplateClient {
         };
     }
 
+    private static String extractPythonFunction(String code, String functionName) {
+        List<String> functions = new ArrayList<>();
+
+        Pattern pattern = Pattern.compile(
+                "(?m)^def\\s+[\\w_]+\\s*\\([^\\)]*\\):\\s*\\n((^[ \\t]+.*\\n?)*)"
+        );
+
+        Matcher matcher = pattern.matcher(code);
+        while (matcher.find()) {
+            functions.add(matcher.group(0)); // Toàn bộ hàm gồm cả 'def' và thân
+        }
+
+        return String.join("\n", functions);
+    }
+
+
+    public static String extractBraceBasedFunction(String code, String language) {
+        List<String> functions = new ArrayList<>();
+        // Regex tìm tất cả hàm có block {}
+        Pattern pattern = Pattern.compile(
+                "(?s)([\\w\\s<>\\[\\],]+\\s+(\\w+)\\s*\\([^)]*\\)\\s*\\{)"
+        );
+        Matcher matcher = pattern.matcher(code);
+        while (matcher.find()) {
+            String header = matcher.group(1);
+            String name = matcher.group(2);
+            if (name.equals("main")) continue;
+
+            // Đếm {} để lấy toàn bộ thân hàm
+            int start = matcher.start();
+            int i = matcher.end();
+            int openBraces = 1;
+            while (i < code.length() && openBraces > 0) {
+                char c = code.charAt(i++);
+                if (c == '{') openBraces++;
+                else if (c == '}') openBraces--;
+            }
+            String fullFunction = code.substring(start, i);
+            functions.add(fullFunction);
+        }
+
+        return String.join("\n", functions);
+    }
+
     public String extractFunctionCode(String code, String language, String structure) {
         BoilerPlateGenerator parser = new BoilerPlateGenerator();
         parser.parse(structure);
@@ -830,36 +874,9 @@ public class BoilerplateClient {
         String functionName = parser.functionName;
         String normalLanguage = normalizeLanguage(language);
         regex = switch (normalLanguage.toLowerCase()) {
-            case "cpp", "c++" ->
-                // C++ function regex
-                    String.format(
-                            "(?s)([ \\t]*(?:[\\w:<>,\\s*&]+)[ \\t]+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                            Pattern.quote(functionName)
-                    );
-            case "java" -> String.format(
-                    "(?s)(public\\s+static\\s+[\\w<>\\[\\]]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "python" -> String.format(
-                    "(?m)(def\\s+%s\\s*\\([^\\)]*\\):\\n(?:[ \\t]+.*\\n)+)",
-                    Pattern.quote(functionName)
-            );
-            case "javascript", "js" -> String.format(
-                    "(?s)(function\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "typescript", "ts" -> String.format(
-                    "(?s)(function\\s+%s\\s*\\([^\\)]*\\)\\s*:\\s*[^\\s\\{]+\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "c" -> String.format(
-                    "(?s)([\\w\\*\\s]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "c#", "csharp" -> String.format(
-                    "(?s)(public\\s+[\\w<>\\[\\]]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
+            case "c", "cpp", "c++", "java", "js", "ts", "c#", "csharp", "javascript" ->
+                    extractBraceBasedFunction(code, language);
+            case "python" -> extractPythonFunction(code, functionName);
             default -> throw new IllegalArgumentException("Unsupported language: " + normalLanguage);
         };
 
