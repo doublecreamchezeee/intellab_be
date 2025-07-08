@@ -869,25 +869,15 @@ public class BoilerplateClient {
         BoilerPlateGenerator parser = new BoilerPlateGenerator();
         parser.parse(structure);
 
-        String regex = null;
 
         String functionName = parser.functionName;
         String normalLanguage = normalizeLanguage(language);
-        regex = switch (normalLanguage.toLowerCase()) {
+        return switch (normalLanguage.toLowerCase()) {
             case "c", "cpp", "c++", "java", "js", "ts", "c#", "csharp", "javascript" ->
                     extractBraceBasedFunction(code, language);
             case "python" -> extractPythonFunction(code, functionName);
             default -> throw new IllegalArgumentException("Unsupported language: " + normalLanguage);
         };
-
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(code);
-
-        if (matcher.find()) {
-            return matcher.group(1).trim();
-        } else {
-            return "// Function not found.";
-        }
     }
 
 }
