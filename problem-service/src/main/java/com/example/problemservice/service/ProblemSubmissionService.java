@@ -139,7 +139,7 @@ public class ProblemSubmissionService {
                 .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
 
         if (submission.getIsCheckedMoss() == null || !submission.getIsCheckedMoss()) {
-            submission.setMossReportUrl(checkMoss(submission.getProgrammingLanguage(),
+            submission.setMossReportUrl(checkMoss(submissionId, submission.getProgrammingLanguage(),
                     submission.getProblem().getProblemId(), submission.getUserId()));
             submission.setIsCheckedMoss(true);
             problemSubmissionRepository.save(submission);
@@ -159,6 +159,7 @@ public class ProblemSubmissionService {
                 SingleProfileInformationResponse profile = response.getResult();
                 System.out.print("Display name: " +  profile.getDisplayName());
                 moss.setUsername2(profile.getDisplayName());
+                moss.setReportUrl(submission.getMossReportUrl());
                 return moss;
             }).toList();
         } catch (Exception e) {
@@ -166,9 +167,16 @@ public class ProblemSubmissionService {
         }
     }
 
-    private String checkMoss(String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
-        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository
-                .findTop5ByIsSolvedAndProgrammingLanguageAndProblem_ProblemIdOrderByCreatedAtDesc(true, language, problemId);
+    private String checkMoss(UUID submissionId, String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
+
+        List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId);
+        ProblemSubmission mySubmission = problemSubmissionRepository.findById(submissionId).orElseThrow(
+                () -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
+        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository.findAllById(submissionIds);
+        acceptedSubmissions.add(0, mySubmission);
+
+//        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository
+//                .findTop50ByIsSolvedAndProgrammingLanguageAndProblem_ProblemIdOrderByCreatedAtDesc(true, language, problemId);
 
         List<MossRequest> requests = acceptedSubmissions.stream().map(submission -> {
             String acceptedLanguage = submission.getProgrammingLanguage().toLowerCase();
@@ -329,7 +337,7 @@ public class ProblemSubmissionService {
                 status = "Accepted";
                 if (submission.getIsSolved() == null || !submission.getIsSolved()) {
                     submission.setIsSolved(true);
-                    notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
+//                    notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
                     problemSubmissionRepository.save(submission);
                 }
             }

@@ -19,10 +19,28 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
 
     List<ProblemSubmission> findProblemSubmissionByProblemAndUserId(Problem problem, UUID userUid);
 
-    List<ProblemSubmission> findTop5ByIsSolvedAndProgrammingLanguageAndProblem_ProblemIdOrderByCreatedAtDesc(
+    List<ProblemSubmission> findTop50ByIsSolvedAndProgrammingLanguageAndProblem_ProblemIdOrderByCreatedAtDesc(
             Boolean isSolved,
             String programmingLanguage,
             UUID problemId
+    );
+
+    @Query(value = """
+    SELECT DISTINCT ON (user_id, code)
+        submission_id
+    FROM problem_submissions
+    WHERE is_solved = :isSolved
+      AND programming_language = :programmingLanguage
+      AND problem_id = :problemId
+      AND user_id <> :userId
+    ORDER BY user_id, code, created_at DESC
+    LIMIT 50
+    """,
+            nativeQuery = true)
+    List<UUID> findUniqueLatestSubmissionsId(
+            @Param("programmingLanguage") String programmingLanguage,
+            @Param("problemId") UUID problemId,
+            @Param("userId") UUID userId
     );
 
     Page<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid, Pageable pageable);
