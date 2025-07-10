@@ -991,6 +991,20 @@ BEGIN
 				END IF;
 			END IF;
 		END IF;
+
+        WITH learning_lesson_problem as (
+            SELECT ll.learning_id, l.lesson_id
+            FROM lessons l join learning_lesson ll
+                                on ll.user_id = NEW.user_id
+                                    and l.lesson_id = ll.lesson_id
+                                    and l.problem_id = NEW.problem_id
+                                    and ll.is_done_practice = false
+        )
+        UPDATE learning_lesson
+        SET is_done_practice = true
+            FROM learning_lesson_problem llp
+        where learning_lesson.learning_id = llp.learning_id;
+
 	END IF;
 	
 	
