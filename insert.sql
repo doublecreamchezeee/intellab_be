@@ -156,7 +156,7 @@ alter table test_case_outputs
 
 create table test_case_run_code_outputs
 (
-    result_status       character varying(30),
+    result_status       text,
     runtime             real,
     submission_output   text,
     token               uuid,

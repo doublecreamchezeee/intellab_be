@@ -103,9 +103,12 @@ public class ProblemSubmissionController {
             summary = "(BE only) Callback update submission by id"
     )
     @PutMapping("/update/submission/callback")
-    public ResponseEntity<Object> callbackUpdateSubmission(@RequestBody SubmissionCallbackResponse request) {
+    public ResponseEntity<Object> callbackUpdateSubmission(
+            @RequestBody SubmissionCallbackResponse request,
+            @RequestParam(name = "has-custom-checker", required = false) Boolean hasCustomChecker
+    ) {
         System.out.println("Callback update submission by id: " + request);
-        ProblemSubmission submission = problemSubmissionService.callbackUpdate(request);
+        ProblemSubmission submission = problemSubmissionService.callbackUpdate(request, hasCustomChecker);
         // Here you can implement further logic like saving to the database or processing the response
 
         return ResponseEntity.ok(request);

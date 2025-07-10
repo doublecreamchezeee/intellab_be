@@ -28,4 +28,6 @@ public class DetailsProblemResponse {
     List<Hint> hints;
     Boolean hasSolution;
     Boolean isSolved;
+    Boolean hasCustomChecker;
+    String additionalCheckerFields;
 }

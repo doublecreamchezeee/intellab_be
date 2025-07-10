@@ -52,6 +52,12 @@ public class TestCaseOutput {
     @Temporal(TemporalType.TIMESTAMP)
     Date createdAt;
 
+    @Column(name = "has_custom_checker", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    Boolean hasCustomChecker;
+
+    @Column(name = "is_passed_by_checking_custom_checker", columnDefinition = "boolean", nullable = true)
+    Boolean isPassedByCheckingCustomChecker;
+
     // Helper method to initialize composite ID
     public void setSubmission(ProblemSubmission submission) {
         this.submission = submission;

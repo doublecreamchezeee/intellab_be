@@ -132,7 +132,7 @@ public class ProfileService {
             User userFirestore = firestoreService.getUserByUid(userUid);
             userInfoResponse.setFirstName(userFirestore.getFirstName());
             userInfoResponse.setLastName(userFirestore.getLastName());
-            userInfoResponse.setPublic(userFirestore.getIsPublic());
+            userInfoResponse.setIsPublic(userFirestore.getIsPublic());
             List<CompleteCourseResponse> completeCourseResponse = Objects.requireNonNull(courseClient.getCourseByUserId().block()).getResult();
             userInfoResponse.setCourseCount(completeCourseResponse.size());
 
@@ -239,9 +239,9 @@ public class ProfileService {
     public UserInfoResponse setPublic(String userUid, Boolean isPublic) throws ExecutionException, InterruptedException {
         UserInfoResponse user = getUserInfo(userUid, "");
         System.out.print("USER PUBLIC" + user);
-        if (isPublic != user.isPublic()) {
+        if (isPublic != user.getIsPublic()) {
             firestoreService.updatePublicUserByUid(userUid, isPublic);
-            user.setPublic(isPublic);
+            user.setIsPublic(isPublic);
         }
         return user;
     }

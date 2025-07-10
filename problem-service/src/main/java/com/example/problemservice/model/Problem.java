@@ -104,6 +104,13 @@ public class Problem {
     @Column(name = "has_custom_checker", columnDefinition = "boolean default false")
     Boolean hasCustomChecker;
 
-    @Column(name = "custom_checker_code", columnDefinition = "TEXT")
-    String customCheckerCode;
+    @JsonIgnore
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<CustomCheckerCode> customCheckerCodes;
+
+    @Column(name = "additional_checker_fields", columnDefinition = "TEXT")
+    String additionalCheckerFields;
+
+    @Column(name = "hidden_input_fields", columnDefinition = "TEXT")
+    String hiddenInputFields;
 }
