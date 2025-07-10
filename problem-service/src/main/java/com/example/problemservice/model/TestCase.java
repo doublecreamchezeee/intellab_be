@@ -37,6 +37,9 @@ public class TestCase {
     @Column(name = "testcase_order")
     Integer order;
 
+    //@Column(name = "is_checker_field", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    //Boolean isCheckerField;
+
     // @JoinColumn(name = "user_id")
     // UUID userId;
 

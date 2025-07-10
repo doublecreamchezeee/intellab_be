@@ -1,4 +1,5 @@
-package com.example.problemservice.dto.request.judeg0;
+package com.example.problemservice.dto.request.judge0.customChecker;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +12,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class TestCaseRequest {
+public class SubmissionToGetUserCodeActualOutputRequest {
     String source_code;
     Integer language_id;
     String stdin;
-    String expected_output;
+    //String expected_output;
     String callback_url;
 }

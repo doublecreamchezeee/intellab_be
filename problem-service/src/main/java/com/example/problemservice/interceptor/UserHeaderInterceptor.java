@@ -22,21 +22,25 @@ public class UserHeaderInterceptor implements HandlerInterceptor {
         String userRole = request.getHeader("X-UserRole");
 
         System.out.println(userId);
-        if (userId == null || userId.isEmpty()) {
+        if (userId == null || userId.isEmpty() || userRole == null || userRole.isEmpty()) {
             System.out.println("No UserId found in the request header");
             return true; // Continue processing if no UserId is present
         }
-        userId = userId.split(",")[0];
-        userRole = userRole.split(",")[0];
-        System.out.println("User Role: " + userRole);
+
+        try {
+            userId = userId.split(",")[0];
+            userRole = userRole.split(",")[0];
+            System.out.println("User Role: " + userRole);
 
 
-        if (userId != null) {
-
-
-            UserContext.setCurrentUser(userId + "," + userRole);
+            if (userId != null) {
+                UserContext.setCurrentUser(userId + "," + userRole);
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error processing UserId or UserRole: " + e.getMessage());
+            return true; // Continue processing even if there's an error
         }
-        return true;
     }
 
     @Override

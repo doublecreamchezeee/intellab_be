@@ -18,5 +18,7 @@ public interface TestCaseRunCodeOutputMapper {
     @Mapping(target = "error", source = "error")
     @Mapping(target = "compileOutput", source = "compileOutput")
     @Mapping(target = "statusId", source = "statusId")
+    @Mapping(target = "hasCustomChecker", source = "hasCustomChecker")
+    @Mapping(target = "isPassedByCheckingCustomChecker", source = "isPassedByCheckingCustomChecker")
     DetailsTestCaseRunCodeOutput toDetailsTestCaseRunCodeOutput(TestCaseRunCodeOutput testCaseRunCodeOutput);
 }

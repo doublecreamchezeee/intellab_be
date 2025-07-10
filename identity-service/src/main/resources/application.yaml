@@ -89,11 +89,11 @@ zeptomail:
     url: https://api.zeptomail.com/v1.1/email
   auth-token: ${ZEPTOMAIL_AUTH_TOKEN}
 
-logging:
-    level:
-        feign:
-          client: DEBUG
-        root: INFO
-        org.springframework.web: DEBUG
-        org.hibernate.SQL: DEBUG
-        org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#logging:
+#    level:
+#        feign:
+#          client: DEBUG
+#        root: INFO
+#        org.springframework.web: DEBUG
+#        org.hibernate.SQL: DEBUG
+#        org.hibernate.type.descriptor.sql.BasicBinder: TRACE

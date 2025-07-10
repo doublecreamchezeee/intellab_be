@@ -1,9 +1,8 @@
 package com.example.problemservice.converter;
 
-import com.example.problemservice.dto.request.judeg0.TestCaseRequest;
+import com.example.problemservice.dto.request.judge0.TestCaseRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 

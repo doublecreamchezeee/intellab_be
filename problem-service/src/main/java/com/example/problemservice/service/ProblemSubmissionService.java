@@ -63,6 +63,41 @@ public class ProblemSubmissionService {
     private final NotificationService notificationService;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
 
+    static final Map<String, Integer> languageIdMap = new HashMap<>();
+    static {
+        languageIdMap.put("C (GCC 7.4.0)", 48);
+        languageIdMap.put("C++ (GCC 7.4.0)", 52);
+        languageIdMap.put("C (GCC 8.3.0)", 49);
+        languageIdMap.put("C++ (GCC 8.3.0)", 53);
+        languageIdMap.put("C (GCC 9.2.0)", 50);
+        languageIdMap.put("C++ (GCC 9.2.0)", 54);
+        languageIdMap.put("C# (Mono 6.6.0.161)", 51);
+        languageIdMap.put("Java (JDK 17.0.6)", 62);
+        languageIdMap.put("JavaScript (Node.js 12.14.0)", 63);
+        languageIdMap.put("Python (3.8.1)", 71);
+        languageIdMap.put("TypeScript (3.7.4)", 74);
+    }
+
+    public Hashtable<Integer, Boolean> getHashTableFromProblemCategories(List<ProblemCategory> problemCategories) {
+        Hashtable<Integer, Boolean> categories = new Hashtable<>();
+        if (problemCategories != null) {
+            for (ProblemCategory problemCategory : problemCategories) {
+                categories.put(problemCategory.getProblemCategoryID().getCategoryId(), true);
+            }
+        }
+        return categories;
+    }
+
+    public String findCustomCheckerCodeByLanguageId(List<CustomCheckerCode> customCheckerCodes, int languageId) {
+        for (CustomCheckerCode checkerCode : customCheckerCodes) {
+            if (checkerCode.getCustomCheckerLanguageId() == languageId) {
+                return checkerCode.getCustomCheckerCode();
+            }
+        }
+
+        return "";
+    }
+
     public DetailsProblemSubmissionResponse submitProblem(SubmitCodeRequest request, Boolean base64) {
 
         // Lấy Problem
@@ -81,10 +116,8 @@ public class ProblemSubmissionService {
         }
 
         ProblemSubmission submission = ProblemSubmission.builder()
-                .code(boilerplateClient.enrich(
-                        request.getCode(),
-                        language.getId(),
-                        problem.getProblemStructure()))
+                .code(request.getCode())
+                .code(request.getCode())
                 .createdAt(new Date())
                 .isSolved(false)
                 .programmingLanguage(request.getProgrammingLanguage())
@@ -94,8 +127,37 @@ public class ProblemSubmissionService {
 
         submission.setProblem(problem);
 
+        if (problem.getHasCustomChecker() != null && problem.getHasCustomChecker()) {
+            log.info("Problem has custom checker, appending custom checker code.");
+            String customCode = findCustomCheckerCodeByLanguageId(
+                    problem.getCustomCheckerCodes(),
+                    language.getId()
+            );
+
+            submission.setCode(
+                    submission.getCode() + "\n" + customCode
+            );
+        } else {
+            log.info("Problem does not have custom checker");
+        }
+
+        submission.setCode(
+                boilerplateClient.enrich(
+                        submission.getCode(),
+                        language.getId(),
+                        problem.getProblemStructure(),
+                        problem.getHasCustomChecker(),
+                        problem.getAdditionalCheckerFields(),
+                        getHashTableFromProblemCategories(
+                                problem.getCategories()
+                        )
+                )
+        );
+
         // Lưu ProblemSubmission trước để đảm bảo có ID
         submission = problemSubmissionRepository.save(submission);
+
+        //problemSubmissionRepository.flush();
 
         // Lấy danh sách TestCase từ Problem
         List<TestCase> testCases = problem.getTestCases();
@@ -106,7 +168,7 @@ public class ProblemSubmissionService {
         // Gửi từng test case đến Judge0 và xử lý kết quả
         for (TestCase testCase : testCases) {
             // Gửi mã nguồn và test case đến Judge0
-            TestCaseOutput output = judge0Client.submitCode(submission, testCase);
+            TestCaseOutput output = judge0Client.submitCode(submission, testCase, problem.getHasCustomChecker());
 
             // Khởi tạo composite ID
             TestCaseOutputID outputId = new TestCaseOutputID();
@@ -117,6 +179,8 @@ public class ProblemSubmissionService {
             output.setTestCaseOutputID(outputId);
             output.setTestcase(testCase);
             output.setSubmission(submission);
+            output.setHasCustomChecker(problem.getHasCustomChecker());
+            output.setIsPassedByCheckingCustomChecker(null);
 
             // Lưu TestCaseOutput
             output = testCaseOutputRepository.save(output);
@@ -195,6 +259,29 @@ public class ProblemSubmissionService {
         return mossClient.moss(requests, boilerplateClient.normalizeLanguage(language));
     }
 
+    private boolean parseLastLineAsBoolean(String input) {
+        String[] lines = input.split("\\R"); // \R matches any line break
+        if (lines.length == 0) return false;
+
+        String lastLine = lines[lines.length - 1].trim();
+        return Boolean.parseBoolean(lastLine);
+    }
+
+    private String removeLastLine(String input) {
+        String[] lines = input.split("\\R"); // \R matches any line break
+        if (lines.length <= 1) return ""; // No line or only one line
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < lines.length - 1; i++) {
+            sb.append(lines[i]);
+            if (i != lines.length - 2) {
+                sb.append(System.lineSeparator());
+            }
+        }
+        return sb.toString();
+    }
+
+
     @NotNull
     private DetailsProblemSubmissionResponse getDetailsProblemSubmissionResponse(ProblemSubmission result) {
         DetailsProblemSubmissionResponse response = problemSubmissionMapper.toDetailsProblemSubmissionResponse(result);
@@ -222,9 +309,11 @@ public class ProblemSubmissionService {
         return response;
     }
 
-    public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request) {
+
+    public ProblemSubmission callbackUpdate(SubmissionCallbackResponse request, Boolean hasCustomChecker) {
         TestCaseOutput output = testCaseOutputRepository.findByToken(UUID.fromString(request.getToken())).orElseThrow(
-                () -> new AppException(ErrorCode.TEST_CASE_OUTPUT_NOT_EXIST));
+                () -> new AppException(ErrorCode.TEST_CASE_OUTPUT_NOT_EXIST)
+        );
 
         if (request.getTime() != null) {
             output.setRuntime(Float.valueOf(request.getTime()));
@@ -244,10 +333,13 @@ public class ProblemSubmissionService {
                                             .trim()
                                             .replaceAll(
                                                     "\\s+",
-                                                    "")))
-                            .replace(
-                                    "\n",
-                                    "") // remove newline character
+                                                    ""
+                                            )
+                            )
+                    ).replace(
+                            "\n",
+                            ""
+                    ) // remove newline character
             );
 
         } else {
@@ -257,6 +349,55 @@ public class ProblemSubmissionService {
         // String(Base64.getDecoder().decode(request.getStdout().trim().replaceAll("\\s+",
         // ""))));
         output.setResult_status(request.getStatus().getDescription());
+
+        if (hasCustomChecker != null && hasCustomChecker) {
+            if (request.getStdout() != null) {
+                String outputWithCustomCheckerResult =
+                        new String(
+                                decoder.decode(
+                                        request.getStdout()
+                                                .trim()
+                                                .replaceAll(
+                                                        "\\s+",
+                                                        ""
+                                                )
+                                )
+                        );/*.replace(
+                                "\n",
+                                ""
+                        ); */// remove newline character
+
+                boolean isPassed = parseLastLineAsBoolean(outputWithCustomCheckerResult);
+                output.setIsPassedByCheckingCustomChecker(
+                        isPassed
+                );
+
+                output.setSubmission_output(
+                        removeLastLine(outputWithCustomCheckerResult).replace(
+                                "\n",
+                                ""
+                        )
+                );
+
+                /*output.setStatusId(
+                        isPassed ? 3 : 4 // Assuming 3 is "Accepted" and 4 is "Wrong Answer"
+                );*/
+
+                output.setResult_status(
+                        isPassed ? "Accepted" : "Wrong Answer"
+                );
+
+
+            } else {
+                output.setSubmission_output(null);
+            }
+
+        } else {
+            output.setSubmission_output(null);
+            /*output.setActualOutput(null);
+            output.setExpectedOutput(null);*/
+        }
+
         testCaseOutputRepository.save(output);
 
         // if (result.getTestCasesOutput().size() ==
@@ -373,7 +514,8 @@ public class ProblemSubmissionService {
             try {
                 courseClient.donePracticeByProblemId(
                         submission.getProblem().getProblemId(),
-                        submission.getUserId());
+                        submission.getUserId()
+                );
             } catch (Exception e) {
                 log.error("Error while calling course service: {}", e.getMessage());
             }
@@ -447,7 +589,14 @@ public class ProblemSubmissionService {
                 boilerplateClient.enrich(
                         submission.getCode(),
                         request.getLanguageId(),
-                        problem.getProblemStructure()));
+                        problem.getProblemStructure(),
+                        problem.getHasCustomChecker(),
+                        problem.getAdditionalCheckerFields(),
+                        getHashTableFromProblemCategories(
+                                problem.getCategories()
+                        )
+                )
+        );
 
         submission.setProgrammingLanguage(language.getLongName());
 
@@ -460,7 +609,8 @@ public class ProblemSubmissionService {
         } else {
             submission.setSubmitOrder(
                     submissions.get(submissions.size() - 1) // Lấy submission cuối cùng
-                            .getSubmissionOrder() + 1);
+                            .getSubmissionOrder() + 1
+            );
         }
 
         submission.setTestCasesOutput(new ArrayList<>());
@@ -468,7 +618,8 @@ public class ProblemSubmissionService {
         submission = problemSubmissionRepository.save(submission);
 
         List<TestCase> testCases = testCaseRepository.findAllByProblem_ProblemId(
-                request.getProblemId()); // problem.getTestCases();
+                request.getProblemId()
+        ); // problem.getTestCases();
 
         log.info("Test cases: {}", testCases.size());
 
@@ -476,7 +627,7 @@ public class ProblemSubmissionService {
 
         for (TestCase testCase : testCases) {
             // Gửi mã nguồn và test case đến Judge0
-            TestCaseOutput output = judge0Client.submitCode(submission, testCase);
+            TestCaseOutput output = judge0Client.submitCode(submission, testCase, problem.getHasCustomChecker());
 
             // Khởi tạo composite ID
             TestCaseOutputID outputId = new TestCaseOutputID();

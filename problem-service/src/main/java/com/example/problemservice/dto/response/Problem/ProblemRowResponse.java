@@ -22,4 +22,6 @@ public class ProblemRowResponse {
     Boolean hasSolution;
     Boolean isPublished;
     List<CategoryResponse> categories;
+    Boolean hasCustomChecker;
+    String additionalCheckerFields;
 }
