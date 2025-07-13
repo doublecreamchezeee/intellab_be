@@ -77,7 +77,7 @@ public class Judge0Client {
             //todo: tien
             //input = input + "\r\n" + testCase.getOutput();
 
-            log.info("Appending expected output to input for custom checker: {}", input);
+            //log.info("Appending expected output to input for custom checker: {}", input);
         }
 
         String expectedOutput = testCase.getOutput();
@@ -299,7 +299,7 @@ public class Judge0Client {
             throw new IllegalArgumentException("Invalid programming language: " + language);
         }
 
-        log.info("hasCustomChecker in runCodeBatch: {}", hasCustomChecker);
+        //log.info("hasCustomChecker in runCodeBatch: {}", hasCustomChecker);
         List<TestCaseRequest> submissions = new ArrayList<>();
         for (TestCase testCase : testCases) {
             // Extract input and expected output from the TestCase

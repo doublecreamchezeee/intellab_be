@@ -27,10 +27,27 @@ create table problems
     current_creation_step integer       default 1,
 	created_at timestamp(6) without time zone,
 	current_creation_step_description character varying(255) COLLATE pg_catalog."default",
-    is_completed_creation boolean       default false
+    is_completed_creation boolean       default false,
+    has_custom_checker boolean default false,
+    additional_checker_fields text default null,
+    hidden_input_fields text default null
 );
 
 alter table problems
+    owner to postgres;
+
+create table custom_checker_code
+(
+    custom_checker_code_id         uuid not null default uuid_generate_v4()
+        primary key,
+    custom_checker_code text,
+    custom_checker_language_id integer default null,
+    problem_id uuid not null
+        constraint fk2354pvm70hldsde6hqff186uj
+            references problems on DELETE CASCADE
+);
+
+alter table custom_checker_code
     owner to postgres;
 
 create table solutions
@@ -143,6 +160,8 @@ create table test_case_outputs
     runtime           real,
     submission_output text,
     memory            real,
+    has_custom_checker boolean default false,
+    is_passed_by_checking_custom_checker boolean default null,
     submission_id     uuid not null
         constraint fkniol765wvj61q9t6lrlhhx091
             references problem_submissions,
@@ -172,6 +191,8 @@ create table test_case_run_code_outputs
     memory_usage        text,
     message             text,
     status_id           integer,
+    has_custom_checker boolean default false,
+    is_passed_by_checking_custom_checker boolean default null,
     constraint test_case_run_code_outputs_pkey
         primary key (run_code_id, testcase_id)
 );
