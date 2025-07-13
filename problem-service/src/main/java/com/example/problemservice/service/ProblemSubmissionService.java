@@ -370,8 +370,11 @@ public class ProblemSubmissionService {
         if (allAccepted) {
             if (!submission.getIsSolved()) {
                 submission.setIsSolved(true);
+                if (submission.getIsNotify() == null || !submission.getIsNotify()) {
+                    notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
+                    submission.setIsNotify(true);
+                }
                 problemSubmissionRepository.save(submission);
-                notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
             }
 
             try {
