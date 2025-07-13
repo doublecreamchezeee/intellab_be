@@ -643,6 +643,28 @@ public class BoilerplateClient {
         public String generateJava() {
             String inputReads = inputFields.stream()
                     .map(field -> {
+                        if (field.getType().startsWith("list<list<")) {
+                            return """
+                                    int size_%1$s = scanner.nextInt();
+                                    
+                                    // Đọc từng dòng cho mỗi sublist
+                                    List<List<%2$s>> %1$s = new ArrayList<>();
+                                    
+                                    for (int i = 0; i < size_%1$s; i++) {
+                                        String line = scanner.nextLine();
+                                        if (line.trim().isEmpty()) {
+                                            %1$s.add(new ArrayList<>());
+                                        } else {
+                                            String[] tokens = line.split(" ");
+                                            List<%2$s> sublist = new ArrayList<>();
+                                            for (String token : tokens) {
+                                                sublist.add(%2$s.valueOf(token));
+                                            }
+                                            %1$s.add(sublist);
+                                        }
+                                    }
+                                    """.formatted(field.getName(), mapTypeToJava(field.getType().replace("list<list<", "").replace(">>", "")));
+                        }
                         if (field.getType().startsWith("list<string>")) {
                             return """
                                     int size_%1$s = scanner.nextInt();
@@ -937,13 +959,26 @@ public class BoilerplateClient {
         public String generateJavaScript() {
             String inputReads = inputFields.stream()
                     .map(field -> {
-                        if (field.getType().startsWith("list<")) {
+                        if (field.getType().startsWith("list<list<")) {
                             return """
-                                    const size_%1$s = Number(input.shift());
-                                    const %1$s = input.splice(0, size_%1$s).map(%2$s);
+                                    const size_%1$s = Number(input[nextLine++]);
+                                    const %1$s = [];
+                                    for (let i = 0; i < size_%1$s; i++) {
+                                        const line = input[nextLine++];
+                                        if (!line || line.trim() === '') {
+                                            listOfLists.push([]);
+                                        }
+                                        const sublist = line.trim().split(/\\s+/).map(%2$s);
+                                        %1$s.push(sublist);
+                                    }
+                                    """.formatted(field.getName(), mapTypeToJavaScript(field.getType().replace("list<", "").replace(">", "")));
+                        } else if (field.getType().startsWith("list<")) {
+                            return """
+                                    const size_%1$s = Number(input[nextLine++]);
+                                    const %1$s = input[nextLine++].trim().split(/\\s+/).map(%2$s);
                                     """.formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         } else {
-                            return "const %s = %s(input.shift());".formatted(field.getName(), mapTypeToJavaScript(field.getType()));
+                            return "const %s = %s(input[nextLine++]);".formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         }
                     }).collect(Collectors.joining("\n  "));
 
@@ -974,8 +1009,9 @@ public class BoilerplateClient {
                     let input = [];
                                         
                     rl.on('line', (line) => {
-                         input.push(...line.trim().split(/\\s+/));
+                         input.push(line);
                     }).on('close', () => {
+                        let nextLine = 0;
                         %s
                         %s
                         %s
