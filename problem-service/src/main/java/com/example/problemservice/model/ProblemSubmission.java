@@ -54,6 +54,9 @@ public class ProblemSubmission {
     @JoinColumn(name = "user_id")
     UUID userId;
 
+    @Column(name = "is_notify")
+    Boolean isNotify;
+
     @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference("submission-output")
     List<TestCaseOutput> testCasesOutput;
