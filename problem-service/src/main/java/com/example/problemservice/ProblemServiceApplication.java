@@ -13,7 +13,10 @@ public class ProblemServiceApplication {
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure().load();
-        dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
+        dotenv.entries().forEach(entry -> {
+            //System.out.println("Setting property: " + entry.getKey() + "=" + entry.getValue());
+            System.setProperty(entry.getKey(), entry.getValue());
+        });
 
         SpringApplication.run(ProblemServiceApplication.class, args);
     }

@@ -12,9 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -24,6 +26,7 @@ public class BoilerplateClient {
 
 
     //    @Component
+//    @Component
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
@@ -34,7 +37,154 @@ public class BoilerplateClient {
         private List<Field> inputFields;
         private List<Field> outputFields;
 
-        public void parse(String structure) {
+        public static final Map<Integer, String> problemCategoryMap = Map.of(
+                11, "Tree",
+                12, "Graph",
+                9, "Dynamic Programming",
+                15, "Backtracking"
+        );
+
+        final String EXPECTED_OUTPUT_FIELD_NAME = "expectedOutput";
+        final String treeNodeDefinitionCpp = """
+                class TreeNode {
+                    public:
+                        int val;
+                        TreeNode* left;
+                        TreeNode* right;
+                
+                        TreeNode(int x) { val = x; left = nullptr; right = nullptr; }
+                        TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+                        TreeNode* buildTree(const vector<string>& nodes);
+                        TreeNode* buildTree(const vector<int>& nodes) ;
+                };
+                """;
+
+        final String treeBuilderDefinitionCpp = """
+                    TreeNode* buildTree(const vector<string>& nodes) {
+                            if (nodes.empty() || nodes[0] == "null") return nullptr;
+                
+                            TreeNode* root = new TreeNode(stoi(nodes[0]));
+                            queue<TreeNode*> q;
+                            q.push(root);
+                            int i = 1;
+                
+                            while (!q.empty() && i < nodes.size()) {
+                                TreeNode* current = q.front();
+                                q.pop();
+                
+                                // Left child
+                                if (i < nodes.size() && nodes[i] != "null") {
+                                    current->left = new TreeNode(stoi(nodes[i]));
+                                    q.push(current->left);
+                                }
+                                i++;
+                
+                                // Right child
+                                if (i < nodes.size() && nodes[i] != "null") {
+                                    current->right = new TreeNode(stoi(nodes[i]));
+                                    q.push(current->right);
+                                }
+                                i++;
+                            }
+                    
+                            return root;
+                        }
+                        
+                    TreeNode* buildTree(const vector<int>& nodes) {
+                        if (nodes.empty() || nodes[0] == -1) return nullptr;
+                    
+                        TreeNode* root = new TreeNode(nodes[0]);
+                        queue<TreeNode*> q;
+                        q.push(root);
+                        int i = 1;
+                    
+                        while (!q.empty() && i < nodes.size()) {
+                            TreeNode* current = q.front();
+                            q.pop();
+                    
+                            // Left child
+                            if (i < nodes.size() && nodes[i] != -1) {
+                                current->left = new TreeNode(nodes[i]);
+                                q.push(current->left);
+                            }
+                            i++;
+                    
+                            // Right child
+                            if (i < nodes.size() && nodes[i] != -1) {
+                                current->right = new TreeNode(nodes[i]);
+                                q.push(current->right);
+                            }
+                            i++;
+                        }
+                    
+                        return root;
+                    }
+                """;
+
+        final String treeNodeDefinitionPython = """
+                class TreeNode:
+                    def __init__(self, x):
+                        self.val = x
+                        self.left = None
+                        self.right = None
+                """;
+
+        final String treeBuilderDefinitionPython = """
+               def build_tree(nodes):
+                    if not nodes or nodes[0] == "null":
+                        return None
+
+                    root = TreeNode(int(nodes[0]))
+                    queue = [root]
+                    i = 1
+
+                    while queue and i < len(nodes):
+                        current = queue.pop(0)
+
+                        # Left child
+                        if i < len(nodes) and nodes[i] != "null":
+                            current.left = TreeNode(int(nodes[i]))
+                            queue.append(current.left)
+                        i += 1
+
+                        # Right child
+                        if i < len(nodes) and nodes[i] != "null":
+                            current.right = TreeNode(int(nodes[i]))
+                            queue.append(current.right)
+                        i += 1
+
+                    return root
+               """;
+        /* """
+                class TreeBuilder {
+                public:
+                    static TreeNode* buildTree(const std::vector<int>& values) {
+                        if (values.empty()) return nullptr;
+                        std::queue<TreeNode*> queue;
+                        TreeNode* root = new TreeNode(values[0]);
+                        queue.push(root);
+                        for (size_t i = 1; i < values.size(); ++i) {
+                            TreeNode* current = queue.front();
+                            queue.pop();
+                            if (values[i] != -1) {
+                                current->left = new TreeNode(values[i]);
+                                queue.push(current->left);
+                            }
+                            if (++i < values.size() && values[i] != -1) {
+                                current->right = new TreeNode(values[i]);
+                                queue.push(current->right);
+                            }
+                        }
+                        return root;
+                    }
+                };
+                """;*/
+
+        public void parse(String structure, Boolean hasCustomChecker) {
+            if (hasCustomChecker == null) {
+                hasCustomChecker = false;
+            }
+
             String[] lines = structure.split("\n");
             String currentSection = null;
             inputFields = new ArrayList<>();
@@ -73,6 +223,11 @@ public class BoilerplateClient {
                 }
             }
 
+            if (hasCustomChecker) {
+                Field expectedOutputField = new Field(outputFields.get(0).getType(), EXPECTED_OUTPUT_FIELD_NAME);
+                inputFields.add(expectedOutputField);
+            }
+
             /*System.out.println("--------------------");
 
             for (Field field : inputFields) {
@@ -104,9 +259,13 @@ public class BoilerplateClient {
         }
 
         //=================================== C++ ===========================================
-        public String generateCpp() {
+        public String generateCpp(Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+            if (hasCustomChecker == null) {
+                hasCustomChecker = false;
+            }
+
             String inputs = inputFields.stream()
-                    .filter(field -> !field.getType().startsWith("list<"))
+                    .filter(field -> !field.getType().startsWith("list<") && !field.getType().startsWith("tree<") && !field.getType().startsWith("graph<")) //todo: handle checker field
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining("; \n"));
 
@@ -114,30 +273,205 @@ public class BoilerplateClient {
 
             //log.info("inputs: {}", inputs);
 
+            /*
+            * "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) {\n    int size_sublist;\n    std::cin >> size_sublist;\n    " +
+                                    field.getName() + "[i].resize(size_sublist);\n    for(int j = 0; j < size_sublist; ++j) std::cin >> " + field.getName() + "[i][j];\n  }";
+            * */
+
+            /*if (field.getType().startsWith("list<string")) {
+                            return "int size_" + field.getName() + ";\n  std::cin >> size_" + field.getName() + ";\n  " +
+                                    mapTypeToCpp(field.getType()) + " "
+                                    + field.getName() + "(size_" + field.getName() + ");" +
+                                    "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) {\n    std::getline(std::cin, line);\n    std::istringstream sublistStream(line);\n    int size_sublist;\n    sublistStream >> size_sublist;\n    " +
+                                    field.getName() + "[i].resize(size_sublist);\n    for(int j = 0; j < size_sublist; ++j) sublistStream >> " + field.getName() + "[i][j];\n  }";
+                        } else */
+
+                        /*"int rowSize_" + field.getName() + ", colSize_ " + field.getName() + ";\n  std::cin >> rowSize_" + field.getName() + ";\n  "
+                                    + "std::cin >> colSize_" + field.getName() + ";\n " +
+                                    mapTypeToCpp(field.getType()) + " "
+                                    + field.getName() + "(size_" + field.getName() + ");" +
+                                    "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) {\n    std::getline(std::cin, line);\n    std::istringstream sublistStream(line);\n    int size_sublist;\n    sublistStream >> size_sublist;\n    " +
+                                    field.getName() + "[i].resize(size_sublist);\n    for(int j = 0; j < size_sublist; ++j) sublistStream >> " + field.getName() + "[i][j];\n  }";
+                                     */
+            /*
+            * int rowSize_%1$s, colSize_%1$s;
+                                        std::cin >> rowSize_%1$s >> colSize_%1$s;
+                                        %2$s %1$s(rowSize_%1$s, std::vector<%3$s>(colSize_%1$s));
+                                        for (int i = 0; i < rowSize_%1$s; ++i) {
+                                            for (int j = 0; j < colSize_%1$s; ++j) {
+                                                std::cin >> %1$s[i][j];
+                                            }
+                                            * std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore the newline character after reading rowSize
+                                        }*/
+            //for(int i = 0; i < size_strs; ++i) std::cout << strs[i]  << " ";
+
+            /*
+            * cout<< endl << "Input size: " << strs.size() << endl;
+              for(int i = 0; i < strs.size(); ++i) std::cout <<"size: " << strs[i].length() << " -" << strs[i]  << " ";
+            * */
+
+            /*
+            *
+                                        std::cout << endl <<  "Result size: " << expectedOutput.size() << std::endl;
+                                                                         for (int i = 0; i < expectedOutput.size(); ++i) {
+                                                                                 for (int j = 0; j < expectedOutput[i].size(); ++j) {
+                                                                                     std::cout<< "size: " << expectedOutput[i][j].length() << " -"<<expectedOutput[i][j] << " ";
+                                                                                 }
+                                                                                 std::cout<< std::endl;
+                                                                         }
+            * */
             String inputReads = inputFields.stream()
                     .map(field -> {
-                        if (field.getType().startsWith("list<")) {
+                        //2d array string
+                        if (field.getType().startsWith("list<list<string")){
+                            return  """
+                                        int rowSize_%1$s;
+                                        std::cin >> rowSize_%1$s;
+                                        //std::cin.ignore();
+                                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n');
+                                        %2$s %1$s(rowSize_%1$s);
+                                        for (int i = 0; i < rowSize_%1$s; ++i) {
+                                                std::string line;
+                                                std::getline(std::cin, line); // Read the entire line
+                                                std::istringstream iss(line); // Create a string stream to split the line
+                                                std::string word;
+                                                while (iss >> word) { // Split the line into words
+                                                    %1$s[i].push_back(word);
+                                                }
+                                        }
+                                    """.formatted(field.getName(), mapTypeToCpp(field.getType()), mapTypeToCpp(field.getType().substring(10, field.getType().length() - 2)));
+                        } else if (field.getType().startsWith("list<list<int")) {
+                            return """
+                                        int rowSize_%1$s;
+                                        std::cin >> rowSize_%1$s;
+                                        //std::cin.ignore();
+                                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n');
+                                        %2$s %1$s(rowSize_%1$s);
+                                        for (int i = 0; i < rowSize_%1$s; ++i) {
+                                                std::string line;
+                                                std::getline(std::cin, line); // Read the entire line
+                                                std::istringstream iss(line); // Create a string stream to split the line
+                                                int value;
+                                                while (iss >> value) { // Split the line into words
+                                                    %1$s[i].push_back(value);
+                                                }
+                                        }
+                                    """.formatted(field.getName(), mapTypeToCpp(field.getType()), mapTypeToCpp(field.getType().substring(10, field.getType().length() - 2)));
+                        } else if (field.getType().startsWith("list<list<")) {
+                            return """
+                                        int rowSize_%1$s, colSize_%1$s;
+                                        std::cin >> rowSize_%1$s >> colSize_%1$s;
+                                        %2$s %1$s(rowSize_%1$s, std::vector<%3$s>(colSize_%1$s));
+                                        for (int i = 0; i < rowSize_%1$s; ++i) {
+                                            for (int j = 0; j < colSize_%1$s; ++j) {
+                                                std::cin >> %1$s[i][j];
+                                            }
+                                            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n'); // Ignore the newline character after reading rowSize
+                                        }
+                                    """.formatted(field.getName(), mapTypeToCpp(field.getType()), mapTypeToCpp(field.getType().substring(10, field.getType().length() - 2)));
+                        } else if (field.getType().startsWith("list<int>")) {
                             return "int size_" + field.getName() + ";\n  std::cin >> size_" + field.getName() + ";\n  " +
                                     mapTypeToCpp(field.getType()) + " "
                                     + field.getName() + "(size_" + field.getName() + ");" +
                                     "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) std::cin >> " + field.getName() + "[i];";
-                        } else {
+                        } else if (field.getType().startsWith("list<float>")) {
+                            return "int size_" + field.getName() + ";\n  std::cin >> size_" + field.getName() + ";\n  " +
+                                    mapTypeToCpp(field.getType()) + " "
+                                    + field.getName() + "(size_" + field.getName() + ");" +
+                                    "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) std::cin >> " + field.getName() + "[i];";
+                        } else if (field.getType().startsWith("list<string")) {
+                            return "int size_" + field.getName() + ";\n  std::cin >> size_" + field.getName() + ";\n  " +
+                                    mapTypeToCpp(field.getType()) + " "
+                                    + field.getName() + "(size_" + field.getName() + ");" +
+                                    "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) {" +
+                                    "\nstd::cin >> " + field.getName() + "[i];\n" +
+                                    field.getName() +  "[i].erase(std::remove(" + field.getName() + "[i].begin(), "+ field.getName() + "[i].end(), '\\n'), " +  field.getName()+"[i].end());\n" +
+                                    field.getName() +  "[i].erase(std::remove(" + field.getName() + "[i].begin(), "+ field.getName() + "[i].end(), '\\r'), " +  field.getName()+"[i].end());" +
+                                    "}";
+                        } else if (field.getType().startsWith("graph<int")) {
+                            // read from adjacency list
+                            return """
+                                    int size_%1$s;
+                                    std::cin >> size_%1$s;
+                                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n');
+                                    %2$s %1$s(size_%1$s);
+                                    for (int i = 0; i < size_%1$s; ++i) {
+                                        std::string line;
+                                        std::getline(std::cin, line); // Read the entire line
+                                
+                                        if (line.empty()) {
+                                            continue; // Move to the next node
+                                        }
+                                        std::istringstream iss(line); // Create a string stream to split the line
+                                        int neighbor;
+                                        while (iss >> neighbor) { // Split the line into neighbors
+                                            %1$s[i].push_back(neighbor);
+                                        }
+                                    }
+                                    """.formatted(field.getName(), mapTypeToCpp(field.getType()));
+
+                            /*
+                            * std::cout << endl <<  "graph size: " << %1$s.size() << std::endl;
+                                                                     for (int i = 0; i < %1$s.size(); ++i) {
+                                                                             for (int j = 0; j < %1$s[i].size(); ++j) {
+                                                                                 std::cout << %1$s[i][j] << " ";
+                                                                             }
+                                                                             std::cout<< std::endl;
+                                                                     }
+                            * */
+
+                        } else if (field.getType().startsWith("list<")) {
+                            return "int size_" + field.getName() + ";\n  std::cin >> size_" + field.getName() + ";\n  " +
+                                    mapTypeToCpp(field.getType()) + " "
+                                    + field.getName() + "(size_" + field.getName() + ");" +
+                                    "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) std::cin >> " + field.getName() + "[i];";
+                        } else if (field.getType().startsWith("tree<")) {
+                            return """
+                                    std::string treeInput;
+                                    std::getline(std::cin, treeInput);
+                                    std::vector<std::string> nodes;
+                                    std::istringstream iss(treeInput);
+                                    std::string node;
+                                    while (iss >> node) {
+                                        nodes.push_back(node);
+                                    }
+                                    TreeNode* %s = buildTree(nodes);
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("str")) {
+                            return "std::string " + field.getName() + ";\n  std::getline(std::cin, " + field.getName() + ");";
+                        } else if (field.getType().startsWith("bool")) {
+                            return "bool " + field.getName() + ";\n  std::cin >> " + field.getName() + ";";
+                        }
+                        else {
                             return "std::cin >> " + field.getName() + ";";
                         }
                     }).collect(Collectors.joining("\n "));
             String outputType = mapTypeToCpp(outputFields.get(0).getType());
+
             String functionCall = outputType + " result = " + functionName + "(" +
-                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", ")) + ");";
+                    inputFields.stream()
+                            .filter(field -> !field.getName().contains(EXPECTED_OUTPUT_FIELD_NAME)) //todo: handle checker field
+                            .map(Field::getName)
+                            .collect(Collectors.joining(", ")) + ");";
 
             String outputWrite = null;
 
+            /*
+            * std::cout << endl <<  "Result size: " << result.size() << std::endl;
+                                 for (int i = 0; i < result.size(); ++i) {
+                                         for (int j = 0; j < result[i].size(); ++j) {
+                                             std::cout<< "size: " << result[i][j].length() << " -"<<result[i][j] << " ";
+                                         }
+                                         std::cout<< std::endl;
+                                 }
+
+            * */
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = """
                         bool isFirstSublist = true;
                             for (const auto &sublist : result) {
                                 if (!isFirstSublist) std::cout << "\\n";
                                 isFirstSublist = false;
-                                                
                                 std::cout << "[";
                                 // Duyệt qua từng phần tử trong sublist
                                 bool isFirstItem = true;
@@ -150,8 +484,45 @@ public class BoilerplateClient {
                             }""";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "for (const auto &item : result) std::cout << item << ' ';\nstd::cout << std::endl;";
+            } else if (outputFields.get(0).getType().startsWith("tree<")) {
+                //todo: tien implement tree output
             } else {
                 outputWrite = "std::cout << result << std::endl;";
+            }
+
+
+            /*if (hasCustomChecker && outputFields.get(0).getType().startsWith("list<")) {
+                outputWrite = "std::cout << result.size() << std::endl;\n" + outputWrite;
+            }*/
+
+            if (hasCustomChecker) { // && outputFields.get(0).getType().startsWith("list<")
+                String functionCustomCheckerCall = "bool isPassed = customChecker(result,expectedOutput";
+
+                if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
+                    String[] additionalFields = additionalCheckerFields.split(",");
+                    String functionCallWithAdditionalFields = String.join(", ", additionalFields);
+
+                    if (!functionCallWithAdditionalFields.isEmpty()) {
+                        functionCustomCheckerCall += ", " + functionCallWithAdditionalFields;
+                    }
+                }
+
+                outputWrite = functionCustomCheckerCall + ");\n" + outputWrite + """
+                        if (isPassed) {
+                            std::cout << std::endl << "true" << std::endl;
+                        } else {
+                            std::cout << std::endl << "false" << std::endl;
+                        }
+                        """;
+            }
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append(treeNodeDefinitionCpp)
+                        .append("\n")
+                        .append(treeBuilderDefinitionCpp);
             }
 
             return """
@@ -161,8 +532,17 @@ public class BoilerplateClient {
                     #include <algorithm>
                     
                     
+                    #include <sstream>
+                    #include <unordered_map>
+                    #include <fstream>
+                    #include <queue>
+                    #include <limits>
+                    #include <algorithm>
+                    #include <set>
                     using namespace std;
                                         
+                    
+                    %s
 
                     ##USER_CODE_HERE##
 
@@ -173,17 +553,64 @@ public class BoilerplateClient {
                       %s
                       return 0;
                     }
-                            """.formatted(inputs, inputReads, functionCall, outputWrite);
+                            """.formatted(additionalDataStructureDeclaration, inputs, inputReads, functionCall, outputWrite);
         }
 
-        public String generateFunctionCpp() {
+        /*
+        *
+                      std::cout << endl <<  "expected output size: " << expectedOutput.size() << std::endl;
+                       for (int i = 0; i < expectedOutput.size(); ++i) {
+                               for (int j = 0; j < expectedOutput[i].size(); ++j) {
+                                   std::cout<< expectedOutput[i][j] << " ";
+                               }
+                               std::cout<< std::endl;
+                       }
+
+                       std::cout << endl <<  "result size: " << result.size() << std::endl;
+                       for (int i = 0; i < result.size(); ++i) {
+                               for (int j = 0; j < result[i].size(); ++j) {
+                                   std::cout<< result[i][j] << " ";
+                               }
+                               std::cout<< std::endl;
+                       }
+
+        *
+        * */
+
+        /*std::cout<< "Result: " << std::endl;
+                      for (int i = 0; i < result.size(); ++i) {
+                              for (int j = 0; j < result[i].size(); ++j) {
+                                  std::cout<< result[i][j] << " ";
+                              }
+                              std::cout<< std::endl;
+                          }*/
+        public String generateFunctionCpp(Hashtable<Integer, Boolean> categoryIds) {
             String inputs = String.join(", ", inputFields.stream()
+                           // .filter(field -> !field.getType().startsWith("list<")) //todo: handle checker field
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .toArray(String[]::new));
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append("/*")
+                        .append(treeNodeDefinitionCpp)
+                        .append("*/")
+                        .append("\n");
+            }
+
+
             return String.format("""
-                            %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
-                            """,
-                    mapTypeToCpp(outputFields.get(0).getType()), functionName, inputs);
+                    %s
+                    
+                    %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
+                    """,
+                        additionalDataStructureDeclaration,
+                        mapTypeToCpp(outputFields.get(0).getType()),
+                        functionName,
+                        inputs
+            );
         }
 
         private String mapTypeToCpp(String type) {
@@ -206,6 +633,8 @@ public class BoilerplateClient {
                 case "list<float>" -> "std::vector<float>";
                 case "list<string>" -> "std::vector<std::string>";
                 case "list<bool>" -> "std::vector<bool>";
+                case "tree<int>" -> "TreeNode*";
+                case "graph<int>" -> "std::vector<std::vector<int>>"; //"std::unordered_map<int, std::vector<int>>"; // Example for graph representation
                 default -> "unknown";
             };
         }
@@ -355,14 +784,54 @@ public class BoilerplateClient {
         }
 
         //=================================== Python ========================================
-        public String generatePython() {
+        public String generatePython(Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+            if (hasCustomChecker == null) {
+                hasCustomChecker = false;
+            }
+
             String inputReads = inputFields.stream()
                     .map(field -> {
-                        if (field.getType().startsWith("list<")) {
+                        if (field.getType().startsWith("list<list<string")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = [input().split() for _ in range(size%1$s)]
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<list<int")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = [list(map(int, input().split())) for _ in range(size%1$s)]
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<list<")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = [list(map(%2$s, input().split())) for _ in range(size%1$s)]
+                                    """.formatted(field.getName(), mapTypeToPython(field.getType().substring(10, field.getType().length() - 2)));
+                        } else if (field.getType().startsWith("list<string>")) {
+                            return """
+                                    size%1$s = int(input())
+                                        #%1$s = [input().strip() for _ in range(size%1$s)]
+                                        %1$s = input().strip().split()[:size%1$s]
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<bool>")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = list(map(lambda x: x.lower() == 'true', input().split()[:size%1$s]))
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<")) {
                             return """
                                     size%1$s = int(input())
                                         %1$s = list(map(%2$s, input().split()[:size%1$s]))
                                     """.formatted(field.getName(), mapTypeToPython(field.getType()));
+                        } else if (field.getType().startsWith("tree<")) {
+                            return """
+                                    nodes = input().split()  # Read the list of strings
+                                        %1$s = build_tree(nodes)
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("graph<int")) {
+                            return """
+                                    size_%1$s = int(input())
+                                        %1$s = [list(map(int, input().split())) for _ in range(size_%1$s)]
+                                    """.formatted(field.getName());
                         } else {
                             return "%s = %s(input())".formatted(field.getName(), mapTypeToPython(field.getType()));
                         }
@@ -370,39 +839,99 @@ public class BoilerplateClient {
 
             String functionCall = "result = %s(%s)".formatted(
                     functionName,
-                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
+                    inputFields.stream()
+                            .filter(field -> !field.getName().contains(EXPECTED_OUTPUT_FIELD_NAME)) //todo: handle checker field
+                            .map(Field::getName)
+                            .collect(Collectors.joining(", "))
             );
             String outputWrite = null;
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = "for sublist in result: print(sublist)\n";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
-                outputWrite = "print(' '.join(map(str, result)))";
+                outputWrite = "print(' '.join(map(str, result)))\n";
             } else {
-                outputWrite = "print(result)";
+                outputWrite = "print(result)\n";
+            }
+
+            if (hasCustomChecker) { // && outputFields.get(0).getType().startsWith("list<")
+                String functionCustomCheckerCall = "isPassed = customChecker(result, expectedOutput";
+
+                if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
+                    String[] additionalFields = additionalCheckerFields.split(",");
+                    String functionCallWithAdditionalFields = String.join(", ", additionalFields);
+
+                    if (!functionCallWithAdditionalFields.isEmpty()) {
+                        functionCustomCheckerCall += ", " + functionCallWithAdditionalFields;
+                    }
+                }
+
+                outputWrite = functionCustomCheckerCall + ")\n" + outputWrite +
+                        """
+                        if isPassed:
+                            print("true")
+                        else:
+                            print("false")
+                        """;
+            }
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append(treeNodeDefinitionPython)
+                        .append("\n")
+                        .append(treeBuilderDefinitionPython);
             }
 
             return """
                     import sys
+                    from typing import List, Any, Union, Tuple
+                    from collections import defaultdict
                     ##USER_CODE_HERE##
+                  
+                    %s
 
                     if __name__ == '__main__':
                         %s
                         %s
+                        
                         %s
-                            """.formatted(inputReads, functionCall, outputWrite);
+                            """.formatted(additionalDataStructureDeclaration, inputReads, functionCall, outputWrite);
         }
 
-        public String generateFunctionPython() {
+        /*
+
+      print("size candidates:", sizecandidates)
+                        print("candidates:", candidates)
+                        print("target:", target)
+                        print("size expected output:", sizeexpectedOutput)
+                        print("expected output:", expectedOutput)
+        * */
+
+        public String generateFunctionPython(Hashtable<Integer, Boolean> categoryIds) {
             StringBuilder pythonCode = new StringBuilder();
 
             // Generate method signature
             String inputs = inputFields.stream()
                     .map(Field::getName)
                     .collect(Collectors.joining(", "));
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append("'''\n")
+                        .append(treeNodeDefinitionPython)
+                        .append("'''")
+                        .append("\n");
+            }
+
             pythonCode.append(String.format("""
                     import sys
+                    
+                    %s
+                    
                     def %s(%s):\n
-                    """, functionName, inputs));
+                    """, additionalDataStructureDeclaration, functionName, inputs));
             pythonCode.append("    # Implementation goes here\n");
             pythonCode.append("    return None\n");
 
@@ -413,9 +942,15 @@ public class BoilerplateClient {
 
             return switch (type) {
                 case "int", "list<int>" -> "int";
-                case "float", "list<float>" -> "float";
-                case "string", "list<string>" -> "str";
-                case "bool", "list<bool>" -> "bool"; // Note: Boolean parsing may require additional handling
+                case "float" -> "float";
+                case "string" -> "str";
+                case "bool"-> "bool"; // Note: Boolean parsing may require additional handling
+                case "list<list<int>>" -> "list[list[int]]";
+                case "list<list<float>>" -> "list[list[float]]";
+                case "list<list<string>>" -> "list[list[str]]";
+                case  "list<float>" -> "list[float]";
+                case  "list<string>" -> "list[str]";
+                case  "list<bool>" -> "list[bool]";
                 default -> "str"; // Default to string for unknown types
             };
         }
@@ -786,24 +1321,23 @@ public class BoilerplateClient {
             };
         }
 
-        public static String defaultCodeGenerator(String structure, int languageId) {
+        public static String defaultCodeGenerator(String structure, int languageId, Hashtable<Integer, Boolean> categoryIds) {
             BoilerPlateGenerator parser = new BoilerPlateGenerator();
-            parser.parse(structure);
+            parser.parse(structure, false); // dont add the expected output field into the partial boilerplate
 //            System.out.println(structure);
 //            System.out.println(parser.functionName);
             return switch (languageId) {
                 case 48, 49, 50 -> parser.generateFunctionC();
                 case 51 -> parser.generateFunctionCSharp();
-                case 52, 53, 54 -> parser.generateFunctionCpp();
+                case 52, 53, 54 -> parser.generateFunctionCpp(categoryIds);
                 case 62, 91 -> parser.generateFunctionJava();
                 case 63 -> parser.generateFunctionJavaScript();
-                case 71 -> parser.generateFunctionPython();
+                case 71 -> parser.generateFunctionPython(categoryIds);
                 case 74 -> parser.generateFunctionTypeScript();
                 default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
             };
             //return defaultCode;
         }
-
 
         @AllArgsConstructor
         @NoArgsConstructor
@@ -815,19 +1349,24 @@ public class BoilerplateClient {
         }
     }
 
-
     //
-    public String enrich(String code, int languageId, String structure) {
+    public String enrich(String code, int languageId, String structure, Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+        if (hasCustomChecker == null) {
+            hasCustomChecker = false;
+        }
+
         BoilerPlateGenerator parser = new BoilerPlateGenerator();
-        parser.parse(structure);
+        parser.parse(structure, hasCustomChecker);
+
+
 
         String enrichBoilerPlate = switch (languageId) {
             case 48, 49, 50 -> parser.generateC();
             case 51 -> parser.generateCSharp();
-            case 52, 53, 54 -> parser.generateCpp();
+            case 52, 53, 54 -> parser.generateCpp(hasCustomChecker, additionalCheckerFields, categoryIds);
             case 62, 91 -> parser.generateJava();
             case 63 -> parser.generateJavaScript();
-            case 71 -> parser.generatePython();
+            case 71 -> parser.generatePython(hasCustomChecker, additionalCheckerFields, categoryIds);
             case 74 -> parser.generateTypeScript();
             default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
         };
@@ -903,7 +1442,7 @@ public class BoilerplateClient {
 
     public String extractFunctionCode(String code, String language, String structure) {
         BoilerPlateGenerator parser = new BoilerPlateGenerator();
-        parser.parse(structure);
+        parser.parse(structure, false); // false to not include expected output field
 
 
         String functionName = parser.functionName;

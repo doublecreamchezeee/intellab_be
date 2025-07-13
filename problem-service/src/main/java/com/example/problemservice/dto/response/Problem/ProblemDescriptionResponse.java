@@ -18,4 +18,6 @@ public class ProblemDescriptionResponse {
     String description;
     String level;
     List<Category> categories;
+    Boolean hasCustomChecker;
+    String additionalCheckerFields;
 }

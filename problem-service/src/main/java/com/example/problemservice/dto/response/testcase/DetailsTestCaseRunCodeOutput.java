@@ -19,4 +19,6 @@ public class DetailsTestCaseRunCodeOutput {
     String memoryUsage;
     String error;
     String compileOutput;
+    Boolean hasCustomChecker;
+    Boolean isPassedByCheckingCustomChecker;
 }
