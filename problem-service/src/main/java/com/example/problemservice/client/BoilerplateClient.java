@@ -121,7 +121,7 @@ public class BoilerplateClient {
                     }
                 """;
 
-        final String treeDefinitionPython = """
+        final String treeNodeDefinitionPython = """
                 class TreeNode:
                     def __init__(self, x):
                         self.val = x
@@ -323,7 +323,7 @@ public class BoilerplateClient {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         //2d array string
-                        if (field.getType().startsWith("list<list<string")) {
+                        if (field.getType().startsWith("list<list<string")){
                             return  """
                                         int rowSize_%1$s;
                                         std::cin >> rowSize_%1$s;
@@ -472,7 +472,6 @@ public class BoilerplateClient {
                             for (const auto &sublist : result) {
                                 if (!isFirstSublist) std::cout << "\\n";
                                 isFirstSublist = false;
-                                                
                                 std::cout << "[";
                                 // Duyệt qua từng phần tử trong sublist
                                 bool isFirstItem = true;
@@ -496,7 +495,7 @@ public class BoilerplateClient {
                 outputWrite = "std::cout << result.size() << std::endl;\n" + outputWrite;
             }*/
 
-            if (hasCustomChecker && outputFields.get(0).getType().startsWith("list<")) {
+            if (hasCustomChecker) { // && outputFields.get(0).getType().startsWith("list<")
                 String functionCustomCheckerCall = "bool isPassed = customChecker(result,expectedOutput";
 
                 if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
@@ -764,13 +763,53 @@ public class BoilerplateClient {
 
         //=================================== Python ========================================
         public String generatePython(Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+            if (hasCustomChecker == null) {
+                hasCustomChecker = false;
+            }
+
             String inputReads = inputFields.stream()
                     .map(field -> {
-                        if (field.getType().startsWith("list<")) {
+                        if (field.getType().startsWith("list<list<string")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = [input().split() for _ in range(size%1$s)]
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<list<int")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = [list(map(int, input().split())) for _ in range(size%1$s)]
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<list<")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = [list(map(%2$s, input().split())) for _ in range(size%1$s)]
+                                    """.formatted(field.getName(), mapTypeToPython(field.getType().substring(10, field.getType().length() - 2)));
+                        } else if (field.getType().startsWith("list<string>")) {
+                            return """
+                                    size%1$s = int(input())
+                                        #%1$s = [input().strip() for _ in range(size%1$s)]
+                                        %1$s = input().strip().split()[:size%1$s]
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<bool>")) {
+                            return """
+                                    size%1$s = int(input())
+                                        %1$s = list(map(lambda x: x.lower() == 'true', input().split()[:size%1$s]))
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("list<")) {
                             return """
                                     size%1$s = int(input())
                                         %1$s = list(map(%2$s, input().split()[:size%1$s]))
                                     """.formatted(field.getName(), mapTypeToPython(field.getType()));
+                        } else if (field.getType().startsWith("tree<")) {
+                            return """
+                                    nodes = input().split()  # Read the list of strings
+                                        %1$s = build_tree(nodes)
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("graph<int")) {
+                            return """
+                                    size_%1$s = int(input())
+                                        %1$s = [list(map(int, input().split())) for _ in range(size_%1$s)]
+                                    """.formatted(field.getName());
                         } else {
                             return "%s = %s(input())".formatted(field.getName(), mapTypeToPython(field.getType()));
                         }
@@ -778,39 +817,99 @@ public class BoilerplateClient {
 
             String functionCall = "result = %s(%s)".formatted(
                     functionName,
-                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
+                    inputFields.stream()
+                            .filter(field -> !field.getName().contains(EXPECTED_OUTPUT_FIELD_NAME)) //todo: handle checker field
+                            .map(Field::getName)
+                            .collect(Collectors.joining(", "))
             );
             String outputWrite = null;
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = "for sublist in result: print(sublist)\n";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
-                outputWrite = "print(' '.join(map(str, result)))";
+                outputWrite = "print(' '.join(map(str, result)))\n";
             } else {
-                outputWrite = "print(result)";
+                outputWrite = "print(result)\n";
+            }
+
+            if (hasCustomChecker) { // && outputFields.get(0).getType().startsWith("list<")
+                String functionCustomCheckerCall = "isPassed = customChecker(result, expectedOutput";
+
+                if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
+                    String[] additionalFields = additionalCheckerFields.split(",");
+                    String functionCallWithAdditionalFields = String.join(", ", additionalFields);
+
+                    if (!functionCallWithAdditionalFields.isEmpty()) {
+                        functionCustomCheckerCall += ", " + functionCallWithAdditionalFields;
+                    }
+                }
+
+                outputWrite = functionCustomCheckerCall + ")\n" + outputWrite +
+                        """
+                        if isPassed:
+                            print("true")
+                        else:
+                            print("false")
+                        """;
+            }
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append(treeNodeDefinitionPython)
+                        .append("\n")
+                        .append(treeBuilderDefinitionPython);
             }
 
             return """
                     import sys
+                    from typing import List, Any, Union, Tuple
+                    from collections import defaultdict
                     ##USER_CODE_HERE##
+                  
+                    %s
 
                     if __name__ == '__main__':
                         %s
                         %s
+                        
                         %s
-                            """.formatted(inputReads, functionCall, outputWrite);
+                            """.formatted(additionalDataStructureDeclaration, inputReads, functionCall, outputWrite);
         }
 
-        public String generateFunctionPython() {
+        /*
+
+      print("size candidates:", sizecandidates)
+                        print("candidates:", candidates)
+                        print("target:", target)
+                        print("size expected output:", sizeexpectedOutput)
+                        print("expected output:", expectedOutput)
+        * */
+
+        public String generateFunctionPython(Hashtable<Integer, Boolean> categoryIds) {
             StringBuilder pythonCode = new StringBuilder();
 
             // Generate method signature
             String inputs = inputFields.stream()
                     .map(Field::getName)
                     .collect(Collectors.joining(", "));
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append("'''\n")
+                        .append(treeNodeDefinitionPython)
+                        .append("'''")
+                        .append("\n");
+            }
+
             pythonCode.append(String.format("""
                     import sys
+                    
+                    %s
+                    
                     def %s(%s):\n
-                    """, functionName, inputs));
+                    """, additionalDataStructureDeclaration, functionName, inputs));
             pythonCode.append("    # Implementation goes here\n");
             pythonCode.append("    return None\n");
 
@@ -821,9 +920,15 @@ public class BoilerplateClient {
 
             return switch (type) {
                 case "int", "list<int>" -> "int";
-                case "float", "list<float>" -> "float";
-                case "string", "list<string>" -> "str";
-                case "bool", "list<bool>" -> "bool"; // Note: Boolean parsing may require additional handling
+                case "float" -> "float";
+                case "string" -> "str";
+                case "bool"-> "bool"; // Note: Boolean parsing may require additional handling
+                case "list<list<int>>" -> "list[list[int]]";
+                case "list<list<float>>" -> "list[list[float]]";
+                case "list<list<string>>" -> "list[list[str]]";
+                case  "list<float>" -> "list[float]";
+                case  "list<string>" -> "list[str]";
+                case  "list<bool>" -> "list[bool]";
                 default -> "str"; // Default to string for unknown types
             };
         }
@@ -1191,7 +1296,7 @@ public class BoilerplateClient {
                 case 52, 53, 54 -> parser.generateFunctionCpp(categoryIds);
                 case 62, 91 -> parser.generateFunctionJava();
                 case 63 -> parser.generateFunctionJavaScript();
-                case 71 -> parser.generateFunctionPython();
+                case 71 -> parser.generateFunctionPython(categoryIds);
                 case 74 -> parser.generateFunctionTypeScript();
                 default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
             };
