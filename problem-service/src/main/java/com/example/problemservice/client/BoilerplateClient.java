@@ -155,6 +155,93 @@ public class BoilerplateClient {
 
                     return root
                """;
+
+        final String treeNodeDefinitionJavascript = """
+                class TreeNode {
+                    constructor(x) {
+                        this.val = x;
+                        this.left = null;
+                        this.right = null;
+                    }
+                }
+                """;
+
+        final String treeBuilderDefinitionJavascript = """
+                function buildTree(nodes) {
+                    if (!nodes || nodes.length === 0 || nodes[0] === "null") return null;
+
+                    const root = new TreeNode(parseInt(nodes[0]));
+                    const queue = [root];
+                    let i = 1;
+
+                    while (queue.length > 0 && i < nodes.length) {
+                        const current = queue.shift();
+
+                        // Left child
+                        if (i < nodes.length && nodes[i] !== "null") {
+                            current.left = new TreeNode(parseInt(nodes[i]));
+                            queue.push(current.left);
+                        }
+                        i++;
+
+                        // Right child
+                        if (i < nodes.length && nodes[i] !== "null") {
+                            current.right = new TreeNode(parseInt(nodes[i]));
+                            queue.push(current.right);
+                        }
+                        i++;
+                    }
+
+                    return root;
+                }
+                """;
+
+        final String treeNodeDefinitionJava = """
+                public class TreeNode {
+                    public int val;
+                    public TreeNode left;
+                    public TreeNode right;
+
+                    public TreeNode(int x) {
+                        this.val = x;
+                        this.left = null;
+                        this.right = null;
+                    }
+                }
+                """;
+        final String treeBuilderDefinitionJava = """
+                public class TreeBuilder
+                {
+                    public static Main.TreeNode buildTree(List<String> nodes) {
+                        if (nodes == null || nodes.isEmpty() || "null".equals(nodes.get(0))) return null;
+
+                        Main.TreeNode root = new Main.TreeNode(Integer.parseInt(nodes.get(0)));
+                        Queue<Main.TreeNode> queue = new LinkedList<>();
+                        queue.add(root);
+                        int i = 1;
+
+                        while (!queue.isEmpty() && i < nodes.size()) {
+                            Main.TreeNode current = queue.poll();
+
+                            // Left child
+                            if (i < nodes.size() && !"null".equals(nodes.get(i))) {
+                                current.left = new Main.TreeNode(Integer.parseInt(nodes.get(i)));
+                                queue.add(current.left);
+                            }
+                            i++;
+
+                            // Right child
+                            if (i < nodes.size() && !"null".equals(nodes.get(i))) {
+                                current.right = new Main.TreeNode(Integer.parseInt(nodes.get(i)));
+                                queue.add(current.right);
+                            }
+                            i++;
+                        }
+
+                        return root;
+                    }
+                }
+                """;
         /* """
                 class TreeBuilder {
                 public:
@@ -640,22 +727,32 @@ public class BoilerplateClient {
         }
 
         //================================= Java =================================
-        public String generateJava() {
+        public String generateJava(Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+            if (hasCustomChecker == null) {
+                hasCustomChecker = false;
+            }
+
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<list<")) {
                             return """
                                     int size_%1$s = scanner.nextInt();
+                                    scanner.nextLine(); // Consume the leftover newline character
+                                    //Integer.parseInt(scanner.nextLine().trim()); //scanner.nextInt();
                                     
                                     // Đọc từng dòng cho mỗi sublist
                                     List<List<%2$s>> %1$s = new ArrayList<>();
                                     
                                     for (int i = 0; i < size_%1$s; i++) {
-                                        String line = scanner.nextLine();
+                                        if (!scanner.hasNextLine()) {
+                                            %1$s.add(new ArrayList<>());
+                                            continue;
+                                        }
+                                        String line = scanner.nextLine().trim();
                                         if (line.trim().isEmpty()) {
                                             %1$s.add(new ArrayList<>());
                                         } else {
-                                            String[] tokens = line.split(" ");
+                                            String[] tokens = line.split("\\\\s+");
                                             List<%2$s> sublist = new ArrayList<>();
                                             for (String token : tokens) {
                                                 sublist.add(%2$s.valueOf(token));
@@ -688,17 +785,42 @@ public class BoilerplateClient {
                                         %1$s.add(scanner.next%3$s());
                                     }
                                     """.formatted(field.getName(), mapTypeToJava(field.getType()), mapScannerMethodForJava(field.getType()));
+                        } else if (field.getType().startsWith("graph<int")) {
+                            return """
+                                    int size_%1$s = scanner.nextInt();
+                                    List<List<Integer>> %1$s = new ArrayList<>();
+                                    for (int i = 0; i < size_%1$s; i++) {
+                                        int size_sublist = scanner.nextInt();
+                                        List<Integer> sublist = new ArrayList<>();
+                                        for (int j = 0; j < size_sublist; j++) {
+                                            sublist.add(scanner.nextInt());
+                                        }
+                                        %1$s.add(sublist);
+                                    }
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("tree<")) {
+                            return """
+                                    String treeInput = scanner.nextLine();
+                                    String[] nodes = treeInput.split(" ");
+                                    ArrayList<String> nodeList = new ArrayList<>(Arrays.asList(nodes));
+                                    %s %s = (new Main().new TreeBuilder()).buildTree(nodes);
+                                    """.formatted(mapTypeToJava(field.getType()), field.getName());
                         } else {
                             return "%s %s = scanner.next%s();".formatted(mapTypeToJava(field.getType()), field.getName(), mapScannerMethodForJava(field.getType()));
                         }
                     }).collect(Collectors.joining("\n    "));
 
-            String functionCall = "%s result = %s(%s);".formatted(
+            String functionCall = "%s result = (new Main().new Solution()).%s(%s);".formatted(
                     mapTypeToJava(outputFields.get(0).getType()),
                     functionName,
-                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
+                    inputFields.stream()
+                            .filter(field -> !field.getName().contains(EXPECTED_OUTPUT_FIELD_NAME)) //todo: handle checker field
+                            .map(Field::getName)
+                            .collect(Collectors.joining(", "))
             );
-            String outputWrite = "";
+
+            String outputWrite = null;
+
             if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = """
                         for(List<?> sublist : result) {
@@ -706,10 +828,41 @@ public class BoilerplateClient {
                                     }
                         """;
             } else if (outputFields.get(0).getType().startsWith("list<")) {
-                outputWrite = "System.out.println(result.stream().map(Object::toString).collect(Collectors.joining(\" \")));";
+                outputWrite = "System.out.println(result.stream().map(Object::toString).collect(Collectors.joining(\" \")));\n";
             } else {
                 // For single value output
-                outputWrite = "System.out.println(result);";
+                outputWrite = "System.out.println(result);\n";
+            }
+
+            if (hasCustomChecker) { // && outputFields.get(0).getType().startsWith("list<") .new Solution()
+                String functionCustomCheckerCall = "boolean isPassed = (new Main()).customChecker(result, expectedOutput";
+
+                if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
+                    String[] additionalFields = additionalCheckerFields.split(",");
+                    String functionCallWithAdditionalFields = String.join(", ", additionalFields);
+
+                    if (!functionCallWithAdditionalFields.isEmpty()) {
+                        functionCustomCheckerCall += ", " + functionCallWithAdditionalFields;
+                    }
+                }
+
+                outputWrite = functionCustomCheckerCall + ");\n" + outputWrite +
+                        """
+                        if (isPassed) {
+                            System.out.println("true");
+                        } else {
+                            System.out.println("false");
+                        }
+                        """;
+            }
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append(treeNodeDefinitionJava)
+                        .append("\n")
+                        .append(treeBuilderDefinitionJava);
             }
 
             return """
@@ -718,6 +871,7 @@ public class BoilerplateClient {
                     
 
                     public class Main {
+                        %s
 
                         ##USER_CODE_HERE##
                         
@@ -728,10 +882,35 @@ public class BoilerplateClient {
                             %s
                         }
                     }
-                            """.formatted(inputReads, functionCall, outputWrite);
+                            """.formatted(
+                                additionalDataStructureDeclaration,
+                                inputReads,
+                                functionCall,
+                                outputWrite
+                        );
         }
 
-        public String generateFunctionJava() {
+        /*
+        * System.out.println("Expected Output:");
+                            for (List<Integer> innerList : expectedOutput) {
+                                        for (Integer element : innerList) {
+                                            System.out.print(element + " ");
+                                        }
+                                        System.out.println(); // New line after each inner list
+                                    }
+
+                            System.out.println("Actual Output:");
+                            for (List<Integer> innerList : result) {
+                                        for (Integer element : innerList) {
+                                            System.out.print(element + " ");
+                                        }
+                                        System.out.println(); // New line after each inner list
+                                    }
+
+                             //System.out.println("Actual Checker:" + isPassed);
+        * */
+
+        public String generateFunctionJava(Hashtable<Integer, Boolean> categoryIds) {
             StringBuilder javaCode = new StringBuilder();
 
             // Generate method signature
@@ -739,12 +918,34 @@ public class BoilerplateClient {
                     .map(field -> mapTypeToJava(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining(", "));
             String outputType = mapTypeToJava(outputFields.get(0).getType());
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append("/*")
+                        .append(treeNodeDefinitionJava)
+                        .append("*/")
+                        .append("\n");
+            }
+
             javaCode.append(String.format("""
-                    public static %s %s(%s) {\n
-                    """, outputType, functionName, inputs));
-            javaCode.append("    // Implementation goes here\n");
+                    %s
+                    public class Solution {
+                        public %s %s(%s) {\n
+                            // Implementation goes here
+                            return null;\n
+                        }
+                    }
+                    """,
+                    additionalDataStructureDeclaration,
+                    outputType,
+                    functionName,
+                    inputs)
+            );
+            /*javaCode.append("    // Implementation goes here\n");
             javaCode.append("    return null;\n");
-            javaCode.append("}\n");
+            javaCode.append("}\n");*/
 
             return javaCode.toString();
         }
@@ -769,6 +970,8 @@ public class BoilerplateClient {
                 case "list<float>" -> "List<Double>";
                 case "list<string>" -> "List<String>";
                 case "list<bool>" -> "List<Boolean>";
+                case "tree<int>" -> "Main.TreeNode";
+                case "graph<int>" -> "std::vector<std::vector<int>>";
                 default -> "Object"; // Fallback for unknown types
             };
         }
@@ -951,12 +1154,19 @@ public class BoilerplateClient {
                 case  "list<float>" -> "list[float]";
                 case  "list<string>" -> "list[str]";
                 case  "list<bool>" -> "list[bool]";
+                /*case "tree<int>" -> "TreeNode"; // Assuming TreeNode is defined in the user code
+                case "graph<int>" -> "List[List[int]]"; // Example for graph representation
+                case "list<int>" -> "list[int]";*/
                 default -> "str"; // Default to string for unknown types
             };
         }
 
         //============================== Java Script ==============================================
-        public String generateJavaScript() {
+        public String generateJavaScript(Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+            if (hasCustomChecker == null) {
+                hasCustomChecker = false;
+            }
+
             String inputReads = inputFields.stream()
                     .map(field -> {
                         if (field.getType().startsWith("list<list<")) {
@@ -977,6 +1187,30 @@ public class BoilerplateClient {
                                     const size_%1$s = Number(input[nextLine++]);
                                     const %1$s = input[nextLine++].trim().split(/\\s+/).map(%2$s);
                                     """.formatted(field.getName(), mapTypeToJavaScript(field.getType()));
+                        } else if (field.getType().startsWith("tree<")) {
+                            return """
+                                    const nodes = input[nextLine++].trim().split(/\\s+/);
+                                    const %1$s = buildTree(nodes);
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("graph<")) {
+                            return """
+                                    const size_%1$s = Number(input[nextLine++]);
+                                    const %1$s = [];
+                                    for (let i = 0; i < size_%1$s; i++) {
+                                        const line = input[nextLine++];
+                                        if (!line || line.trim() === '') {
+                                            %1$s.push([]);
+                                        } else {
+                                            const neighbors = line.trim().split(/\\s+/).map(Number);
+                                            %1$s.push(neighbors);
+                                        }
+                                    }
+                                    """.formatted(field.getName());
+                        } else if (field.getType().startsWith("str")) {
+                            return "const %s = input[nextLine++];".formatted(field.getName());
+                        } else if (field.getType().startsWith("bool")) {
+                            return "const %s = input[nextLine++] === 'true';".formatted(field.getName());
+
                         } else {
                             return "const %s = %s(input[nextLine++]);".formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         }
@@ -984,30 +1218,65 @@ public class BoilerplateClient {
 
             String functionCall = "const result = %s(%s);".formatted(
                     functionName,
-                    inputFields.stream().map(Field::getName).collect(Collectors.joining(", "))
+                    inputFields.stream()
+                            .filter(field -> !field.getName().contains(EXPECTED_OUTPUT_FIELD_NAME)) //todo: handle checker field
+                            .map(Field::getName)
+                            .collect(Collectors.joining(", "))
             );
-            String outputWrite = "";// "console.log(result);";
+            String outputWrite = null;// "console.log(result);";
 
             if (outputFields.get(0).getType().startsWith("list<list<")) {
-                outputWrite = "result.forEach(sublist => {console.log(`[${sublist.join(\", \")}]`);});";
+                outputWrite = "result.forEach(sublist => {console.log(`[${sublist.join(\", \")}]`);});\n";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
-                outputWrite = "console.log(result.join(' '));";
+                outputWrite = "console.log(result.join(' '));\n";
             } else {
-                outputWrite = "console.log(result);";
+                outputWrite = "console.log(result);\n";
+            }
+
+            if (hasCustomChecker) { // && outputFields.get(0).getType().startsWith("list<")
+                String functionCustomCheckerCall = "const isPassed = customChecker(result, expectedOutput";
+
+                if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
+                    String[] additionalFields = additionalCheckerFields.split(",");
+                    String functionCallWithAdditionalFields = String.join(", ", additionalFields);
+
+                    if (!functionCallWithAdditionalFields.isEmpty()) {
+                        functionCustomCheckerCall += ", " + functionCallWithAdditionalFields;
+                    }
+                }
+
+                outputWrite = functionCustomCheckerCall + ");\n" + outputWrite +
+                        """
+                        if (isPassed) {
+                            console.log("true");
+                        } else {
+                            console.log("false");
+                        }
+                        """;
+            }
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append(treeNodeDefinitionJavascript)
+                        .append("\n")
+                        .append(treeBuilderDefinitionJavascript);
             }
 
             return """
+                    %s
+                    
                     ##USER_CODE_HERE##
 
                     const readline = require('readline');
-                                        
+                    
                     const rl = readline.createInterface({
                          input: process.stdin,
                          output: process.stdout,
                     });
-                                        
+                    
                     let input = [];
-                                        
+                   
                     rl.on('line', (line) => {
                          input.push(line);
                     }).on('close', () => {
@@ -1016,17 +1285,37 @@ public class BoilerplateClient {
                         %s
                         %s
                     });
-                            """.formatted(inputReads, functionCall, outputWrite);
+                            """.formatted(
+                                    additionalDataStructureDeclaration,
+                        inputReads,
+                        functionCall,
+                        outputWrite
+            );
         }
 
-        public String generateFunctionJavaScript() {
+        public String generateFunctionJavaScript(Hashtable<Integer, Boolean> categoryIds) {
             StringBuilder jsCode = new StringBuilder();
 
             // Generate function signature
             String inputs = inputFields.stream()
                     .map(Field::getName)
                     .collect(Collectors.joining(", "));
-            jsCode.append(String.format("function %s(%s) {\n", functionName, inputs));
+
+            StringBuilder additionalDataStructureDeclaration = new StringBuilder();
+
+            if (categoryIds != null && categoryIds.containsKey(11) && categoryIds.get(11)) {
+                additionalDataStructureDeclaration
+                        .append("/*")
+                        .append(treeNodeDefinitionJavascript)
+                        .append("*/")
+                        .append("\n");
+            }
+
+            jsCode.append(String.format("""
+                    %s
+                    function %s(%s) {
+                    """, additionalDataStructureDeclaration, functionName, inputs));
+
             jsCode.append("    // Implementation goes here\n");
             jsCode.append("    return null;\n");
             jsCode.append("}\n");
@@ -1040,6 +1329,13 @@ public class BoilerplateClient {
                 case "float", "list<float>" -> "parseFloat";
                 case "string", "list<string>" -> "String";
                 case "bool", "list<bool>" -> "Boolean";
+                /*case "list<list<int>>" -> "Array";
+                case "list<list<float>>" -> "Array";
+                case "list<list<string>>" -> "Array";*/
+                /*case "tree<int>" -> "TreeNode"; // Assuming TreeNode is defined in the user code
+                case "graph<int>" -> "Array"; // Example for graph representation
+                case "list<bool>" -> "Array";
+                case "list<list<bool>>" -> "Array";*/
                 default -> "String"; // Default for unknown types
             };
         }
@@ -1330,8 +1626,8 @@ public class BoilerplateClient {
                 case 48, 49, 50 -> parser.generateFunctionC();
                 case 51 -> parser.generateFunctionCSharp();
                 case 52, 53, 54 -> parser.generateFunctionCpp(categoryIds);
-                case 62, 91 -> parser.generateFunctionJava();
-                case 63 -> parser.generateFunctionJavaScript();
+                case 62, 91 -> parser.generateFunctionJava(categoryIds);
+                case 63 -> parser.generateFunctionJavaScript(categoryIds);
                 case 71 -> parser.generateFunctionPython(categoryIds);
                 case 74 -> parser.generateFunctionTypeScript();
                 default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
@@ -1350,7 +1646,12 @@ public class BoilerplateClient {
     }
 
     //
-    public String enrich(String code, int languageId, String structure, Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+    public String enrich(
+            String code, int languageId,
+            String structure, Boolean hasCustomChecker,
+            String additionalCheckerFields,
+            Hashtable<Integer, Boolean> categoryIds
+    ) {
         if (hasCustomChecker == null) {
             hasCustomChecker = false;
         }
@@ -1364,8 +1665,8 @@ public class BoilerplateClient {
             case 48, 49, 50 -> parser.generateC();
             case 51 -> parser.generateCSharp();
             case 52, 53, 54 -> parser.generateCpp(hasCustomChecker, additionalCheckerFields, categoryIds);
-            case 62, 91 -> parser.generateJava();
-            case 63 -> parser.generateJavaScript();
+            case 62, 91 -> parser.generateJava(hasCustomChecker, additionalCheckerFields, categoryIds);
+            case 63 -> parser.generateJavaScript(hasCustomChecker, additionalCheckerFields, categoryIds);
             case 71 -> parser.generatePython(hasCustomChecker, additionalCheckerFields, categoryIds);
             case 74 -> parser.generateTypeScript();
             default -> throw new AppException(ErrorCode.INVALID_PROGRAMMING_LANGUAGE);
