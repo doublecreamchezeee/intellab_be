@@ -139,8 +139,12 @@ public class ProblemSubmissionService {
                 .orElseThrow(() -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
 
         if (submission.getIsCheckedMoss() == null || !submission.getIsCheckedMoss()) {
-            submission.setMossReportUrl(checkMoss(submissionId, submission.getProgrammingLanguage(),
-                    submission.getProblem().getProblemId(), submission.getUserId()));
+            String mossReport = checkMoss(submissionId, submission.getProgrammingLanguage(),
+                    submission.getProblem().getProblemId(), submission.getUserId());
+            if (mossReport == null) {
+                return List.of();
+            }
+            submission.setMossReportUrl(mossReport);
             submission.setIsCheckedMoss(true);
             problemSubmissionRepository.save(submission);
         }
@@ -173,6 +177,9 @@ public class ProblemSubmissionService {
         ProblemSubmission mySubmission = problemSubmissionRepository.findById(submissionId).orElseThrow(
                 () -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
         List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository.findAllById(submissionIds);
+        if (acceptedSubmissions.isEmpty()) {
+            return null;
+        }
         acceptedSubmissions.add(0, mySubmission);
 
 //        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository
