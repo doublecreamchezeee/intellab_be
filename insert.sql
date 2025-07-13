@@ -1,4 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "vector";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE IF NOT EXISTS embeddings (
                                           id SERIAL PRIMARY KEY,
@@ -7,7 +9,6 @@ CREATE TABLE IF NOT EXISTS embeddings (
                                           created_at timestamptz DEFAULT now()
     );
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 create table problems
 (
@@ -990,6 +991,24 @@ BEGIN
 				END IF;
 			END IF;
 		END IF;
+
+
+        WITH learning_lesson_problem as (
+            SELECT ll.learning_id, l.lesson_id
+            FROM lessons l join learning_lesson ll
+                                on ll.user_id = NEW.user_id
+                                    and l.lesson_id = ll.lesson_id
+                                    and l.problem_id = NEW.problem_id
+                                    and ll.is_done_practice = false
+        )
+        UPDATE learning_lesson
+        SET is_done_practice = true,
+            status = case when is_done_theory is not null
+                              then 'Done'
+                          else status end
+            FROM learning_lesson_problem llp
+        where learning_lesson.learning_id = llp.learning_id;
+
 	END IF;
 	
 	
@@ -77906,6 +77925,49 @@ CREATE TRIGGER add_higher_point_badge
 AFTER UPDATE ON leaderboard
 FOR EACH ROW
 EXECUTE FUNCTION create_point_badge();
+
+-- FUNCTION: public.gen_achievement_streak_badges()
+
+-- DROP FUNCTION IF EXISTS public.gen_achievement_streak_badges();
+
+CREATE OR REPLACE FUNCTION public.gen_achievement_streak_badges()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+DECLARE
+	user_uuid UUID;
+BEGIN
+	IF (NEW.streak_score = 14) THEN
+		user_uuid := uuid_in(encode(substring(digest(NEW.user_uid, 'sha256') for 16), 'hex')::cstring);
+		INSERT INTO achievements (user_id, achieved_date, badge_id)
+		SELECT user_uuid, now(), 9
+		WHERE NOT EXISTS (SELECT 1 FROM achievements where user_id = user_uuid and badge_id = 9);
+	ELSIF (NEW.streak_score = 50) THEN
+		user_uuid := uuid_in(encode(substring(digest(NEW.user_uid, 'sha256') for 16), 'hex')::cstring);
+		INSERT INTO achievements (user_id, achieved_date, badge_id)
+		SELECT user_uuid, now(), 10
+		WHERE NOT EXISTS (SELECT 1 FROM achievements where user_id = user_uuid and badge_id = 10);
+	ELSIF (NEW.streak_score = 150) THEN
+		user_uuid := uuid_in(encode(substring(digest(NEW.user_uid, 'sha256') for 16), 'hex')::cstring);
+		INSERT INTO achievements (user_id, achieved_date, badge_id)
+		SELECT user_uuid, now(), 11
+		WHERE NOT EXISTS (SELECT 1 FROM achievements where user_id = user_uuid and badge_id = 11);
+	END IF;
+    RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.gen_achievement_streak_badges()
+    OWNER TO postgres;
+
+
+CREATE OR REPLACE TRIGGER trigger_gen_achievement_streak
+    AFTER UPDATE
+    ON public.streak_records
+    FOR EACH ROW
+    EXECUTE FUNCTION public.gen_achievement_streak_badges();
 
 
 

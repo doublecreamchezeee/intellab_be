@@ -214,6 +214,28 @@ public class BoilerplateClient {
         public String generateJava() {
             String inputReads = inputFields.stream()
                     .map(field -> {
+                        if (field.getType().startsWith("list<list<")) {
+                            return """
+                                    int size_%1$s = scanner.nextInt();
+                                    
+                                    // Đọc từng dòng cho mỗi sublist
+                                    List<List<%2$s>> %1$s = new ArrayList<>();
+                                    
+                                    for (int i = 0; i < size_%1$s; i++) {
+                                        String line = scanner.nextLine();
+                                        if (line.trim().isEmpty()) {
+                                            %1$s.add(new ArrayList<>());
+                                        } else {
+                                            String[] tokens = line.split(" ");
+                                            List<%2$s> sublist = new ArrayList<>();
+                                            for (String token : tokens) {
+                                                sublist.add(%2$s.valueOf(token));
+                                            }
+                                            %1$s.add(sublist);
+                                        }
+                                    }
+                                    """.formatted(field.getName(), mapTypeToJava(field.getType().replace("list<list<", "").replace(">>", "")));
+                        }
                         if (field.getType().startsWith("list<string>")) {
                             return """
                                     int size_%1$s = scanner.nextInt();
@@ -402,13 +424,26 @@ public class BoilerplateClient {
         public String generateJavaScript() {
             String inputReads = inputFields.stream()
                     .map(field -> {
-                        if (field.getType().startsWith("list<")) {
+                        if (field.getType().startsWith("list<list<")) {
                             return """
-                                    const size_%1$s = Number(input.shift());
-                                    const %1$s = input.splice(0, size_%1$s).map(%2$s);
+                                    const size_%1$s = Number(input[nextLine++]);
+                                    const %1$s = [];
+                                    for (let i = 0; i < size_%1$s; i++) {
+                                        const line = input[nextLine++];
+                                        if (!line || line.trim() === '') {
+                                            listOfLists.push([]);
+                                        }
+                                        const sublist = line.trim().split(/\\s+/).map(%2$s);
+                                        %1$s.push(sublist);
+                                    }
+                                    """.formatted(field.getName(), mapTypeToJavaScript(field.getType().replace("list<", "").replace(">", "")));
+                        } else if (field.getType().startsWith("list<")) {
+                            return """
+                                    const size_%1$s = Number(input[nextLine++]);
+                                    const %1$s = input[nextLine++].trim().split(/\\s+/).map(%2$s);
                                     """.formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         } else {
-                            return "const %s = %s(input.shift());".formatted(field.getName(), mapTypeToJavaScript(field.getType()));
+                            return "const %s = %s(input[nextLine++]);".formatted(field.getName(), mapTypeToJavaScript(field.getType()));
                         }
                     }).collect(Collectors.joining("\n  "));
 
@@ -439,8 +474,9 @@ public class BoilerplateClient {
                     let input = [];
                                         
                     rl.on('line', (line) => {
-                         input.push(...line.trim().split(/\\s+/));
+                         input.push(line);
                     }).on('close', () => {
+                        let nextLine = 0;
                         %s
                         %s
                         %s
@@ -821,56 +857,63 @@ public class BoilerplateClient {
         };
     }
 
+    private static String extractPythonFunction(String code, String functionName) {
+        List<String> functions = new ArrayList<>();
+
+        Pattern pattern = Pattern.compile(
+                "(?m)^def\\s+[\\w_]+\\s*\\([^\\)]*\\):\\s*\\n((^[ \\t]+.*\\n?)*)"
+        );
+
+        Matcher matcher = pattern.matcher(code);
+        while (matcher.find()) {
+            functions.add(matcher.group(0)); // Toàn bộ hàm gồm cả 'def' và thân
+        }
+
+        return String.join("\n", functions);
+    }
+
+
+    public static String extractBraceBasedFunction(String code, String language) {
+        List<String> functions = new ArrayList<>();
+        // Regex tìm tất cả hàm có block {}
+        Pattern pattern = Pattern.compile(
+                "(?s)([\\w\\s<>\\[\\],]+\\s+(\\w+)\\s*\\([^)]*\\)\\s*\\{)"
+        );
+        Matcher matcher = pattern.matcher(code);
+        while (matcher.find()) {
+            String header = matcher.group(1);
+            String name = matcher.group(2);
+            if (name.equals("main")) continue;
+
+            // Đếm {} để lấy toàn bộ thân hàm
+            int start = matcher.start();
+            int i = matcher.end();
+            int openBraces = 1;
+            while (i < code.length() && openBraces > 0) {
+                char c = code.charAt(i++);
+                if (c == '{') openBraces++;
+                else if (c == '}') openBraces--;
+            }
+            String fullFunction = code.substring(start, i);
+            functions.add(fullFunction);
+        }
+
+        return String.join("\n", functions);
+    }
+
     public String extractFunctionCode(String code, String language, String structure) {
         BoilerPlateGenerator parser = new BoilerPlateGenerator();
         parser.parse(structure);
 
-        String regex = null;
 
         String functionName = parser.functionName;
         String normalLanguage = normalizeLanguage(language);
-        regex = switch (normalLanguage.toLowerCase()) {
-            case "cpp", "c++" ->
-                // C++ function regex
-                    String.format(
-                            "(?s)([ \\t]*(?:[\\w:<>,\\s*&]+)[ \\t]+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                            Pattern.quote(functionName)
-                    );
-            case "java" -> String.format(
-                    "(?s)(public\\s+static\\s+[\\w<>\\[\\]]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "python" -> String.format(
-                    "(?m)(def\\s+%s\\s*\\([^\\)]*\\):\\n(?:[ \\t]+.*\\n)+)",
-                    Pattern.quote(functionName)
-            );
-            case "javascript", "js" -> String.format(
-                    "(?s)(function\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "typescript", "ts" -> String.format(
-                    "(?s)(function\\s+%s\\s*\\([^\\)]*\\)\\s*:\\s*[^\\s\\{]+\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "c" -> String.format(
-                    "(?s)([\\w\\*\\s]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
-            case "c#", "csharp" -> String.format(
-                    "(?s)(public\\s+[\\w<>\\[\\]]+\\s+%s\\s*\\([^\\)]*\\)\\s*\\{.*?\\})",
-                    Pattern.quote(functionName)
-            );
+        return switch (normalLanguage.toLowerCase()) {
+            case "c", "cpp", "c++", "java", "js", "ts", "c#", "csharp", "javascript" ->
+                    extractBraceBasedFunction(code, language);
+            case "python" -> extractPythonFunction(code, functionName);
             default -> throw new IllegalArgumentException("Unsupported language: " + normalLanguage);
         };
-
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(code);
-
-        if (matcher.find()) {
-            return matcher.group(1).trim();
-        } else {
-            return "// Function not found.";
-        }
     }
 
 }

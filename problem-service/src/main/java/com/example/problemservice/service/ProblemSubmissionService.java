@@ -176,10 +176,8 @@ public class ProblemSubmissionService {
         List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId);
         ProblemSubmission mySubmission = problemSubmissionRepository.findById(submissionId).orElseThrow(
                 () -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
-        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository.findAllById(submissionIds);
-        if (acceptedSubmissions.isEmpty()) {
-            return null;
-        }
+        List<ProblemSubmission> acceptedSubmissions = new ArrayList<>(problemSubmissionRepository.findAllById(submissionIds));
+
         acceptedSubmissions.add(0, mySubmission);
 
 //        List<ProblemSubmission> acceptedSubmissions = problemSubmissionRepository
