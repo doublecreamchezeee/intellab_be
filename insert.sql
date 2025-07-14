@@ -77990,5 +77990,409 @@ CREATE OR REPLACE TRIGGER trigger_gen_achievement_streak
     FOR EACH ROW
     EXECUTE FUNCTION public.gen_achievement_streak_badges();
 
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields) VALUES ('d0dee495-b861-4d6c-930b-37e66af65ea3', 0.00, e'#  Traverse All Nodes of a Binary Tree
 
+##  Problem Description
 
+You are given the root of a binary tree. Your task is to **traverse all nodes** of the tree and return the values in a list.
+
+There are **multiple valid traversal orders** for this problem. Any of the following are accepted as correct:
+
+* [Preorder Traversal](w): Visit the root node, then the left subtree, then the right subtree.
+* [Inorder Traversal](w): Visit the left subtree, then the root node, then the right subtree.
+* [Postorder Traversal](w): Visit the left subtree, then the right subtree, then the root node.
+
+##  Goal
+
+Write a function that returns a list of all node values in the binary tree using **any one** of the valid depth-first traversal strategies (preorder, inorder, or postorder).
+
+##  Function Signature
+
+```cpp
+vector<int> traverseTree(TreeNode* root);
+```
+
+##  Example
+
+### Input Tree:
+
+```
+        1
+       / \\
+      2   3
+     / \\
+    4   5
+```
+
+### Valid Outputs:
+
+* Preorder: `[1, 2, 4, 5, 3]`
+* Inorder: `[4, 2, 5, 1, 3]`
+* Postorder: `[4, 5, 2, 3, 1]`
+
+All of these are **accepted answers**.
+
+##  Constraints
+
+* The number of nodes in the tree is in the range `1 <= n <= 10⁴`
+* `-10⁵ <= Node.val <= 10⁵`', true, true, 'easy', 'traverse tree', e'Problem Name: traverse tree
+Function Name: traverseTree
+Input Structure:
+Input Field: tree<int> root
+Output Structure:
+Output Field: list<int> result', 100, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-05 13:37:00.937265', 'Final Step', true, 'root', null);
+
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields) VALUES ('f1b1e333-2ba5-4e6a-99da-a595a8a10574', 0.00, e'#  Group Anagrams
+
+Given an array of strings `strs`, group the anagrams together. You can return the answer in **any order**.
+
+An **anagram** is a word or phrase formed by rearranging the letters of a different word or phrase, typically using **all the original letters exactly once**.
+
+---
+
+##  Example 1
+
+**Input:**
+
+```text
+strs = ["eat","tea","tan","ate","nat","bat"]
+```
+
+**Output:**
+
+```text
+[["bat"],["nat","tan"],["ate","eat","tea"]]
+```
+
+---
+
+##  Example 2
+
+**Input:**
+
+```text
+strs = [""]
+```
+
+**Output:**
+
+```text
+[[""]]
+```
+
+---
+
+##  Example 3
+
+**Input:**
+
+```text
+strs = ["a"]
+```
+
+**Output:**
+
+```text
+[["a"]]
+```
+
+---
+
+##  Constraints
+
+* `1 <= strs.length <= 10⁴`
+* `0 <= strs[i].length <= 100`
+* `strs[i]` consists of lowercase English letters.
+
+---
+
+## 💡 Hints
+
+* You may assume that the string contains only lowercase alphabets.
+* Anagrams can be grouped by sorting the characters in each word or by using a character count as a signature.
+', true, true, 'easy', 'group anagram', e'Problem Name: group Anagram
+Function Name: groupAnagram
+Input Structure:
+Input Field: list<string> strs
+Output Structure:
+Output Field: list<list<string>> result', 100, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-05 17:51:57.591819', 'Final Step', true, null, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields) VALUES ('880bd667-b060-42f4-883b-f2714e43172e', 0.00, e'##  Combination Sum
+###  Problem Description
+
+Given an array of **distinct integers** `candidates` and a **target** integer `target`, return *a list of all **unique combinations** of `candidates` where the chosen numbers sum to `target`*. You may return the combinations in **any order**.
+
+* The **same number** from `candidates` may be **chosen unlimited times**.
+* Two combinations are unique if the frequency of at least one element is different.
+* All numbers (including `target`) are **positive integers**.
+* The solution set must not contain **duplicate combinations**.
+
+---
+
+###  Constraints
+
+* `1 <= candidates.length <= 30`
+* `2 <= candidates[i] <= 40`
+* `All elements of candidates are distinct.`
+* `1 <= target <= 40`
+
+---
+
+###  Input
+
+* `candidates`: A list of distinct integers.
+* `target`: An integer to be achieved by summing elements from `candidates`.
+
+---
+
+###  Output
+
+* A list of lists. Each inner list represents a unique combination that adds up to `target`.
+
+---
+
+###  Example
+
+**Input:**
+
+```text
+candidates = [2, 3, 6, 7], target = 7
+```
+
+**Output:**
+
+```text
+[
+  [2, 2, 3],
+  [7]
+]
+```
+
+**Explanation:**
+
+* `2 + 2 + 3 = 7`
+* `7 = 7`
+
+---
+
+### 💡 Hints
+
+* Try using **backtracking**.
+* For each candidate, you can either:
+
+  * Include it again (since unlimited use is allowed),
+  * Skip to the next candidate.
+* Ensure combinations are **non-decreasing** to avoid duplicates.', true, true, 'easy', 'combination sum', e'Problem Name: combination sum
+Function Name: combinationSum
+Input Structure:
+Input Field: list<int> candidates
+Input Field: int target
+Output Structure:
+Output Field: list<list<int>> result', 100, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-06 05:49:53.890806', 'Final Step', true, null, null);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields) VALUES ('ea839282-6484-4358-a805-a93139d393ef', 0.00, e'##  Problem: All Paths From Source to Target
+###  Description
+
+Given a **directed acyclic graph** (DAG) of `n` nodes labeled from `0` to `n - 1`, find **all possible paths** from node `0` to node `n - 1`, and return them in **any order**.
+
+The graph is represented as a list of adjacency lists — `graph[i]` is a list of all nodes you can visit from node `i` directly.
+
+---
+
+###  Example
+
+**Input:**
+
+```
+graph = [[1,2],[3],[3],[]]
+```
+
+**Output:**
+
+```
+[
+  [0,1,3],
+  [0,2,3]
+]
+```
+
+---
+
+### 💡 Constraints
+
+* `n == graph.length`
+* `2 <= n <= 15`
+* `0 <= graph[i].length <= n - 1`
+* `0 <= graph[i][j] <= n - 1`
+* `graph[i][j] != i` (No self-loops)
+* All elements in `graph[i]` are **unique**
+* The graph is guaranteed to be a **DAG**
+
+---
+
+###  Notes
+
+* You must return **all valid paths** from the start node (`0`) to the end node (`n - 1`).
+* Order of output paths does **not** matter.
+* Recursive DFS or backtracking is commonly used to solve this problem.', true, true, 'easy', 'all paths from source to target', e'Problem Name: all Paths Source Target
+Function Name: allPathsSourceTarget
+Input Structure:
+Input Field: graph<int> graph
+Output Structure:
+Output Field: list<list<int>> result', 100, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-06 06:48:07.053176', 'Final Step', true, 'graph', null);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields) VALUES ('7921cb57-c325-4391-b29e-1bbde4a5ac32', 0.00, e'#  Permutations II
+
+---
+
+##  Problem Description
+
+Given a collection of **numbers** that might contain **duplicates**, return **all possible unique permutations** of those numbers.
+
+---
+
+##  Input
+
+* A list of integers `nums` of length `n` where:
+
+  * `1 <= n <= 8`
+  * `-10 <= nums[i] <= 10`
+
+---
+
+##  Output
+
+* A list of all **unique permutations**, where each permutation is represented as a list of integers.
+
+* The order of the permutations in the output does **not** matter.
+
+---
+
+##  Example 1
+
+```
+Input: nums = [1, 1, 2]
+
+Output:
+[
+  [1,1,2],
+  [1,2,1],
+  [2,1,1]
+]
+```
+
+---
+
+##  Example 2
+
+```
+Input: nums = [1, 2, 3]
+
+Output:
+[
+  [1,2,3],
+  [1,3,2],
+  [2,1,3],
+  [2,3,1],
+  [3,1,2],
+  [3,2,1]
+]
+```
+
+---
+
+## 🔒 Constraints
+
+* `1 <= nums.length <= 8`
+* `-10 <= nums[i] <= 10`
+
+---
+
+##  Follow-up
+
+Can you do it without generating duplicate permutations?', true, true, 'easy', 'permutation II',e'Problem Name: permutation II
+Function Name: permutationII
+Input Structure:
+Input Field: list<int> nums
+Output Structure:
+Output Field: list<list<int>> result', 100, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-06 06:48:07.053176', 'Final Step',true, null, null);
+
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('c3d37008-ddb6-405c-bbcc-4c0cde00ee2d', e'4
+2 3 6 7
+7', 1, e'2
+2 2 3
+7', '880bd667-b060-42f4-883b-f2714e43172e');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('dc44010c-7690-4657-9e24-a756ffa3e8be', e'2
+2 3
+6', 1, e'2
+2 2 2
+3 3', '880bd667-b060-42f4-883b-f2714e43172e');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('6e6e7b6c-2dd8-4fcf-8223-8a5c04ce4792', e'3
+2 3 5
+8', 1, e'3
+2 2 2 2
+2 3 3
+3 5', '880bd667-b060-42f4-883b-f2714e43172e');
+
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('95db196e-a418-4f00-af59-d56a074692d9', e'4
+1 2
+3
+3
+', 1, e'2
+0 1 3
+0 2 3', 'ea839282-6484-4358-a805-a93139d393ef');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('c44c2db9-2d7b-412d-b176-0f73efed0fd7', e'5
+4 3 1
+3 2 4
+3
+4
+', 1, e'5
+0 4
+0 3 4
+0 1 3 4
+0 1 2 3 4
+0 1 4', 'ea839282-6484-4358-a805-a93139d393ef');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('338937d2-5cb5-4ad9-be1d-28bed53e7618', e'2
+1
+', 1, e'1
+0 1', 'ea839282-6484-4358-a805-a93139d393ef');
+
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('6ea64dd0-cdd6-4976-9c9b-96a6afb9ce99', e'6
+eat tea tan ate nat bat', 1, e'3
+bat
+tan nat
+tea ate eat', 'f1b1e333-2ba5-4e6a-99da-a595a8a10574');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('80d93593-d34d-4e15-970c-f01272ff8289', e'6
+abc bca cab cba bac acb', 1, e'1
+abc bca cab cba bac acb', 'f1b1e333-2ba5-4e6a-99da-a595a8a10574');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('5e2dcea4-c847-4d4e-bc26-15811059dccd', e'3
+dog cat bird', 1, e'3
+dog
+cat
+bird', 'f1b1e333-2ba5-4e6a-99da-a595a8a10574');
+
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('8acd7978-e5e3-4179-a860-e3084b251d96', e'3
+1 1 2', 1, e'3
+1 1 2
+1 2 1
+2 1 1', '7921cb57-c325-4391-b29e-1bbde4a5ac32');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('a83523c9-30aa-495c-b734-652da0316e6f', e'4
+2 2 1 1', 1, e'6
+1 1 2 2
+1 2 1 2
+1 2 2 1
+2 1 1 2
+2 1 2 1
+2 2 1 1', '7921cb57-c325-4391-b29e-1bbde4a5ac32');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('8bf20faf-a714-425e-9836-d2f704acc6bf', e'3
+1 2 3', 1, e'6
+1 2 3
+1 3 2
+2 1 3
+2 3 1
+3 1 2
+3 2 1', '7921cb57-c325-4391-b29e-1bbde4a5ac32');
+
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('5e3516c0-2b5f-432e-8346-720c4cab20c1', '1 2 3 4 5 6 7', 1, e'7
+4 5 2 6 7 3 1', 'd0dee495-b861-4d6c-930b-37e66af65ea3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('3f6b8ae3-8f6f-437d-811e-874bdadfbf51', '1 2 3 4 5 6 7', 1, e'7
+1 2 4 5 3 6 7', 'd0dee495-b861-4d6c-930b-37e66af65ea3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('b7735150-798a-4ee4-836b-d3afdaea043d', '1 2 3 4 5 6 7', 1, e'7
+1 2 4 5 3 6 7', 'd0dee495-b861-4d6c-930b-37e66af65ea3');
