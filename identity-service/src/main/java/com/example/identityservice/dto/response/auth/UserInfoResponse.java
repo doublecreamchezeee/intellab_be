@@ -21,7 +21,7 @@ public class UserInfoResponse {
     private boolean isDisabled;
     private Date lastSignIn;
     private int courseCount;
-    private boolean isPublic;
+    private Boolean isPublic;
     public Date getLastSignIn() {
         if (lastSignIn == null || lastSignIn.toString().contains("1970")) {
             return null;

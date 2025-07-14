@@ -31,8 +31,13 @@ server:
 judge0:
   api:
     url: ${JUDGE0_URL} #http://localhost:2358 #
-    callback_url: "http://host.minikube.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
-    run_code_callback_url: "http://host.minikube.internal:${PROBLEM_PORT}/problem/problem-run-code/update/run-code/callback"
+    #callback_url: "http://host.minikube.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
+    #run_code_callback_url: "http://host.minikube.internal:${PROBLEM_PORT}/problem/problem-run-code/update/run-code/callback"
+    callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/update/submission/callback"
+    run_code_callback_url: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-run-code/update/run-code/callback"
+    custom_checker_callback_url_to_get_actual_output: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-submissions/custom-checker/update/submission/callback"
+    custom_checker_run_code_callback_url_to_get_actual_output: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-run-code/custom-checker/update/run-code/callback-to-get-actual-output"
+    custom_checker_run_code_callback_url_to_get_checking_result: "http://host.docker.internal:${PROBLEM_PORT}/problem/problem-run-code/custom-checker/update/run-code/callback-to-checking-result"
 
 k8s:
   server:

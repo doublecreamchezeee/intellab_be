@@ -32,7 +32,7 @@ public class TestCaseRunCodeOutput {
     @Column(name = "submission_output",columnDefinition = "TEXT")
     String submissionOutput;
 
-    @Column(name = "result_status", columnDefinition = "VARCHAR(30)")
+    @Column(name = "result_status", columnDefinition = "TEXT")
     String resultStatus;
 
     @Column(name = "status_id", columnDefinition = "INTEGER", nullable = true)
@@ -61,6 +61,12 @@ public class TestCaseRunCodeOutput {
     @JoinColumn(name = "run_code_id")
     @JsonBackReference("runCode-output")
     ProblemRunCode runCode;
+
+    @Column(name = "has_custom_checker", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    Boolean hasCustomChecker;
+
+    @Column(name = "is_passed_by_checking_custom_checker", columnDefinition = "boolean", nullable = true)
+    Boolean isPassedByCheckingCustomChecker;
 
     public void setRunCode(ProblemRunCode runCode) {
         this.runCode = runCode;

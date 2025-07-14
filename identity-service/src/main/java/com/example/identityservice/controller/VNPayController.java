@@ -55,6 +55,7 @@ public class VNPayController {
         userId = userId.split(",")[0];
 
         String ipAddr = HashUtility.getIpAddress(request); //request.getRemoteAddr();
+        log.info("IP Address: {}", ipAddr);
 
         VNPayPaymentCreationResponse response = vnPayService.createSingleCoursePayment(
                 ipAddr,
@@ -83,6 +84,7 @@ public class VNPayController {
         userId = userId.split(",")[0];
 
         String ipAddr = HashUtility.getIpAddress(request);
+        log.info("IP Address: {}", ipAddr);
 
         VNPayPaymentCreationResponse response = vnPayService.createUpgradeAccountPayment(
                 ipAddr,

@@ -15,14 +15,12 @@ import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.DefaultCodeMapper;
 import com.example.problemservice.mapper.ProblemMapper;
-import com.example.problemservice.mapper.ProblemcategoryMapper;
 import com.example.problemservice.mapper.SolutionMapper;
 import com.example.problemservice.model.*;
 import com.example.problemservice.model.ViewSolutionBehavior;
 import com.example.problemservice.model.composite.DefaultCodeId;
 import com.example.problemservice.model.composite.ProblemCategoryID;
 import com.example.problemservice.model.course.Category;
-import com.example.problemservice.model.course.Course;
 import com.example.problemservice.repository.*;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
@@ -34,6 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.Named;
 import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -708,6 +709,17 @@ public class ProblemService {
         return problemMapper.toProblemCreationResponse(updatedProblem);
     }
 
+    public Hashtable<Integer, Boolean> getHashTableFromProblemCategories(List<ProblemCategory> problemCategories) {
+        Hashtable<Integer, Boolean> categories = new Hashtable<>();
+        if (problemCategories != null) {
+            for (ProblemCategory problemCategory : problemCategories) {
+                //log.info("Problem Category ID: {}", problemCategory.getProblemCategoryID().getCategoryId());
+                categories.put(problemCategory.getProblemCategoryID().getCategoryId(), true);
+            }
+        }
+        return categories;
+    }
+
     @Transactional
     public List<DefaultCodeResponse> generateDefaultCodes(UUID problemId, String structure) {
         Problem problem = problemRepository.findById(problemId)
@@ -720,9 +732,13 @@ public class ProblemService {
 
         List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepository.findAll();
 
+        //log.info("Problem name: {}", problem.getProblemName());
         for (ProgrammingLanguage programmingLanguage : programmingLanguages) {
-            String defaultCode = BoilerplateClient.BoilerPlateGenerator.defaultCodeGenerator(structure,
-                    programmingLanguage.getId());
+            String defaultCode = BoilerplateClient.BoilerPlateGenerator.defaultCodeGenerator(
+                    structure,
+                    programmingLanguage.getId(),
+                    getHashTableFromProblemCategories(problem.getCategories())
+            );
             DefaultCodeId id = new DefaultCodeId(programmingLanguage.getId(), problemId);
 
             DefaultCode new_defaultCode = new DefaultCode();
@@ -741,7 +757,14 @@ public class ProblemService {
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
         String structure = problem.getProblemStructure();
         System.out.println(structure);
-        return boilerplateClient.enrich(code, languageId, structure);
+        return boilerplateClient.enrich(
+                code,
+                languageId,
+                structure,
+                problem.getHasCustomChecker(),
+                problem.getAdditionalCheckerFields(),
+                getHashTableFromProblemCategories(problem.getCategories())
+        );
     }
 
     public void getProblemById(UUID problemId) {

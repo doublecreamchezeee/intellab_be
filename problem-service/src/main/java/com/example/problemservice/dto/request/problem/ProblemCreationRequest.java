@@ -20,4 +20,5 @@ public class ProblemCreationRequest {
     Boolean isPublished;
     ProblemStructure problemStructure;
     List<Integer> categories;
+
 }

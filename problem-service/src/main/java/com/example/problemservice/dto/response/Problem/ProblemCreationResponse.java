@@ -44,4 +44,6 @@ public class ProblemCreationResponse {
     }
 
     Date createdAt;
+    Boolean hasCustomChecker;
+    String additionalCheckerFields;
 }

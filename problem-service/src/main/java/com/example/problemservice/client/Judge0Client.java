@@ -1,7 +1,7 @@
 package com.example.problemservice.client;
 
 import com.example.problemservice.core.TokenExtractor;
-import com.example.problemservice.dto.request.judeg0.TestCaseRequest;
+import com.example.problemservice.dto.request.judge0.TestCaseRequest;
 import com.example.problemservice.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -51,10 +51,11 @@ public class Judge0Client {
     }
 
     // Submit code to Judge0 API and retrieve result
-// Submit code to Judge0 API and retrieve result
-    public TestCaseOutput submitCode(ProblemSubmission submission, TestCase testCase) {
+    public TestCaseOutput submitCode(ProblemSubmission submission, TestCase testCase, Boolean hasCustomChecker) {
         // Extract details from the submission
         String code = submission.getCode();
+
+        //log.info("Submitting code: {}", code);
         String language = submission.getProgrammingLanguage();
 
         // Map the programming language to the corresponding language_id
@@ -66,15 +67,29 @@ public class Judge0Client {
 
         // Extract input and expected output from the TestCase
         String input = testCase.getInput();
+        if (hasCustomChecker != null && hasCustomChecker) {
+            //input = input + "\r\n" + testCase.getOutput(); // Append expected output to input if custom checker is used  // System.lineSeparator()
+            input = """
+                    %s
+                    %s
+                    """.formatted(input, testCase.getOutput());
+
+            //todo: tien
+            //input = input + "\r\n" + testCase.getOutput();
+
+            //log.info("Appending expected output to input for custom checker: {}", input);
+        }
+
         String expectedOutput = testCase.getOutput();
 
+        String hasCustomCheckerStr = hasCustomChecker != null ? hasCustomChecker.toString()  : "false";
         // Create the request body as a Map
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("source_code", code);
         requestBody.put("language_id", languageId);
         requestBody.put("stdin", input);
         requestBody.put("expected_output", expectedOutput);
-        requestBody.put("callback_url", CALLBACK_BASE_URL);
+        requestBody.put("callback_url", CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr);
         // Convert the request body to JSON
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonRequestBody;
@@ -205,7 +220,7 @@ public class Judge0Client {
         }
     }
 
-    public TestCaseRunCodeOutput runCode(ProblemRunCode problemRunCode, TestCase testCase) {
+    public TestCaseRunCodeOutput runCode(ProblemRunCode problemRunCode, TestCase testCase, Boolean hasCustomChecker) {
         // Extract details from the submission
         String code = problemRunCode.getCode();
         String language = problemRunCode.getProgrammingLanguage();
@@ -222,13 +237,14 @@ public class Judge0Client {
 
         log.info("Request body: {}", code);
 
+        String hasCustomCheckerStr = hasCustomChecker != null ? hasCustomChecker.toString()  : "false";
         // Create the request body as a Map
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("source_code", code);
         requestBody.put("language_id", languageId);
         requestBody.put("stdin", input);
         requestBody.put("expected_output", expectedOutput);
-        requestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL);
+        requestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr);
 
         // Convert the request body to JSON
         ObjectMapper objectMapper = new ObjectMapper();
@@ -272,7 +288,7 @@ public class Judge0Client {
         }
     }
 
-    public List<TestCaseRunCodeOutput> runCodeBatch(ProblemRunCode problemRunCode, List<TestCase> testCases) {
+    public List<TestCaseRunCodeOutput> runCodeBatch(ProblemRunCode problemRunCode, List<TestCase> testCases, Boolean hasCustomChecker) {
         // Extract details from the submission
         String code = problemRunCode.getCode();
         String language = problemRunCode.getProgrammingLanguage();
@@ -283,11 +299,27 @@ public class Judge0Client {
             throw new IllegalArgumentException("Invalid programming language: " + language);
         }
 
+        //log.info("hasCustomChecker in runCodeBatch: {}", hasCustomChecker);
         List<TestCaseRequest> submissions = new ArrayList<>();
         for (TestCase testCase : testCases) {
             // Extract input and expected output from the TestCase
             String input = testCase.getInput();
+            if (hasCustomChecker != null && hasCustomChecker) {
+                //input = input + "\r\n" + testCase.getOutput(); // Append expected output to input if custom checker is used  // System.lineSeparator()
+                //log.info("Appending expected output to input for custom checker");
+                input = """
+                        %s
+                        %s
+                        """.formatted(input, testCase.getOutput());
+
+                //todo: tien
+               // input = input + "\r\n" + testCase.getOutput();
+
+                log.info("Appending expected output to input for custom checker: {}", input);
+            }
             String expectedOutput = testCase.getOutput();
+
+
 
             // Create the request body as a Map
             /*Map<String, Object> testCaseRequestBody = new HashMap<>();
@@ -298,13 +330,14 @@ public class Judge0Client {
             testCaseRequestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL);
             */
 
+            String hasCustomCheckerStr = hasCustomChecker != null ? hasCustomChecker.toString()  : "false";
             TestCaseRequest request = TestCaseRequest
                     .builder()
                     .source_code(code)
                     .language_id(languageId)
                     .stdin(input)
                     .expected_output(expectedOutput)
-                    .callback_url(RUN_CODE_CALLBACK_BASE_URL)
+                    .callback_url(RUN_CODE_CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr)
                     .build();
 
             submissions.add(request);

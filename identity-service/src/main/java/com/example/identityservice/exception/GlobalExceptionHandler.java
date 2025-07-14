@@ -125,6 +125,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleGenericExceptions(Exception ex) {
         log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+        if (ex instanceof AppException) {
+            AppException appEx = (AppException) ex;
+            HttpStatus statusCode = appEx.getErrorCode().getStatusCode();
+            //HttpStatus statusCode = appEx.getErrorCode().getCode() >= 500 ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.CLIENT_ERROR;
+            return ResponseEntity.status(statusCode).body(
+                    ApiResponse.builder()
+                            .code(appEx.getErrorCode().getCode())
+                            .message(appEx.getMessage())
+                            .build()
+            );
+        }
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 ApiResponse.builder()
                         .code(ErrorCode.INTERNAL_SERVER_ERROR.getCode())

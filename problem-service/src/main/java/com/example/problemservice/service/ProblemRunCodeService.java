@@ -19,10 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +35,26 @@ public class ProblemRunCodeService {
     private final TestCaseRunCodeOutputRepository testCaseRunCodeOutputRepository;
     private final TestCaseRunCodeOutputMapper testCaseRunCodeOutputMapper;
     private final int NUMBER_OF_TEST_CASE = 3;
+
+    public Hashtable<Integer, Boolean> getHashTableFromProblemCategories(List<ProblemCategory> problemCategories) {
+        Hashtable<Integer, Boolean> categories = new Hashtable<>();
+        if (problemCategories != null) {
+            for (ProblemCategory problemCategory : problemCategories) {
+                categories.put(problemCategory.getProblemCategoryID().getCategoryId(), true);
+            }
+        }
+        return categories;
+    }
+
+    public String findCustomCheckerCodeByLanguageId(List<CustomCheckerCode> customCheckerCodes, int languageId) {
+        for (CustomCheckerCode checkerCode : customCheckerCodes) {
+            if (checkerCode.getCustomCheckerLanguageId() == languageId) {
+                return checkerCode.getCustomCheckerCode();
+            }
+        }
+
+        return "";
+    }
 
     public CreationProblemRunCodeResponse runCode(UUID userId, DetailsProblemRunCodeRequest request, Boolean base64) {
         // Get problem by problemId
@@ -75,11 +92,30 @@ public class ProblemRunCodeService {
             );
         }
 
+        if (problem.getHasCustomChecker() != null && problem.getHasCustomChecker()) {
+            log.info("Problem has custom checker, appending custom checker code.");
+            String customCode = findCustomCheckerCodeByLanguageId(
+                    problem.getCustomCheckerCodes(),
+                    language.getId()
+            );
+
+            problemRunCode.setCode(
+                    problemRunCode.getCode() + "\n" + customCode
+            );
+        } else {
+            log.info("Problem does not have custom checker, skipping custom checker code.");
+        }
+
+        log.info("Enriching code with boilerplate for problem ID: {}, {}", request.getProblemId(), problemRunCode.getCode());
+
         problemRunCode.setCode(
                 boilerplateClient.enrich(
                         problemRunCode.getCode(),
                         request.getLanguageId(),
-                        problem.getProblemStructure()
+                        problem.getProblemStructure(),
+                        problem.getHasCustomChecker(),
+                        problem.getAdditionalCheckerFields(),
+                        getHashTableFromProblemCategories(problem.getCategories())
                 )
         );
 
@@ -98,7 +134,8 @@ public class ProblemRunCodeService {
 
             TestCaseRunCodeOutput output = judge0Client.runCode(
                     problemRunCode,
-                    testCase
+                    testCase,
+                    problem.getHasCustomChecker()
             );
 
             // Khởi tạo composite ID
@@ -159,13 +196,35 @@ public class ProblemRunCodeService {
             );
         }
 
+        if (problem.getHasCustomChecker() != null && problem.getHasCustomChecker()) {
+            log.info("Problem has custom checker, appending custom checker code.");
+            String customCode = findCustomCheckerCodeByLanguageId(
+                    problem.getCustomCheckerCodes(),
+                    language.getId()
+            );
+
+            problemRunCode.setCode(
+                    problemRunCode.getCode() + "\n" + customCode
+            );
+        } else {
+            log.info("Problem does not have custom checker, skipping custom checker code.");
+        }
+
+
+
         problemRunCode.setCode(
                 boilerplateClient.enrich(
                         problemRunCode.getCode(),
                         request.getLanguageId(),
-                        problem.getProblemStructure()
+                        problem.getProblemStructure(),
+                        problem.getHasCustomChecker(),
+                        problem.getAdditionalCheckerFields(),
+                        getHashTableFromProblemCategories(problem.getCategories())
                 )
         );
+
+
+        log.info("Enriching code with boilerplate for problem ID: {}, {}", request.getProblemId(), problemRunCode.getCode());
 
         problemRunCode.setProgrammingLanguage(language.getLongName());
 
@@ -175,12 +234,17 @@ public class ProblemRunCodeService {
                 request.getProblemId()
         );
 
+        int maxSize = testCases.size();
         // Limit the number of test cases to NUMBER_OF_TEST_CASE
-        testCases = testCases.subList(0, Math.min(3, NUMBER_OF_TEST_CASE));
+        if (testCases.size() > NUMBER_OF_TEST_CASE) {
+            maxSize = NUMBER_OF_TEST_CASE;
+        }
+        testCases = testCases.subList(0, Math.min(3, maxSize));
 
         List<TestCaseRunCodeOutput> outputs = judge0Client.runCodeBatch(
                 problemRunCode,
-                testCases
+                testCases,
+                problem.getHasCustomChecker()
         );
 
         for (int i = 0; i < outputs.size(); i++) {
@@ -194,6 +258,8 @@ public class ProblemRunCodeService {
             output.setTestCaseRunCodeOutputID(outputId);
             output.setTestcase(testCases.get(i));
             output.setRunCode(problemRunCode);
+            output.setHasCustomChecker(problem.getHasCustomChecker());
+            output.setIsPassedByCheckingCustomChecker(null);
 
             output = testCaseRunCodeOutputRepository.save(output);
 
@@ -207,8 +273,29 @@ public class ProblemRunCodeService {
         return problemRunCodeMapper.toCreationProblemRunCodeResponse(problemRunCode);
     }
 
+    private boolean parseLastLineAsBoolean(String input) {
+        String[] lines = input.split("\\R"); // \R matches any line break
+        if (lines.length == 0) return false;
 
-    public CreationProblemRunCodeResponse callbackUpdate(SubmissionCallbackResponse request) {
+        String lastLine = lines[lines.length - 1].trim();
+        return Boolean.parseBoolean(lastLine);
+    }
+
+    private String removeLastLine(String input) {
+        String[] lines = input.split("\\R"); // \R matches any line break
+        if (lines.length <= 1) return ""; // No line or only one line
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < lines.length - 1; i++) {
+            sb.append(lines[i]);
+            if (i != lines.length - 2) {
+                sb.append(System.lineSeparator());
+            }
+        }
+        return sb.toString();
+    }
+
+    public CreationProblemRunCodeResponse callbackUpdate(SubmissionCallbackResponse request, Boolean hasCustomChecker) {
         TestCaseRunCodeOutput output = testCaseRunCodeOutputRepository.findByToken(
                 UUID.fromString(
                         request.getToken()
@@ -258,6 +345,54 @@ public class ProblemRunCodeService {
                 request.getStatus()
                         .getId()
         );
+
+        if (hasCustomChecker != null && hasCustomChecker) {
+            if (request.getStdout() != null) {
+                String outputWithCustomCheckerResult =
+                        new String(
+                                decoder.decode(
+                                        request.getStdout()
+                                                .trim()
+                                                .replaceAll(
+                                                    "\\s+",
+                                                    ""
+                                                )
+                                )
+                        );/*.replace(
+                                "\n",
+                                ""
+                        ); */// remove newline character
+
+                boolean isPassed = parseLastLineAsBoolean(outputWithCustomCheckerResult);
+                output.setIsPassedByCheckingCustomChecker(
+                        isPassed
+                );
+
+                output.setSubmissionOutput(
+                        removeLastLine(outputWithCustomCheckerResult).replace(
+                                "\n",
+                                ""
+                        )
+                );
+
+                output.setStatusId(
+                        isPassed ? 3 : 4 // Assuming 3 is "Accepted" and 4 is "Wrong Answer"
+                );
+
+                output.setResultStatus(
+                        isPassed ? "Accepted" : "Wrong Answer"
+                );
+
+
+            } else {
+                output.setSubmissionOutput(null);
+            }
+
+        } else {
+            output.setSubmissionOutput(null);
+            /*output.setActualOutput(null);
+            output.setExpectedOutput(null);*/
+        }
 
         if (request.getStderr() != null) {
             output.setError(
