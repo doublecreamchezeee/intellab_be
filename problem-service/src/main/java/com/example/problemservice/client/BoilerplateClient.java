@@ -552,7 +552,23 @@ public class BoilerplateClient {
                                  }
 
             * */
-            if (outputFields.get(0).getType().startsWith("list<list<")) {
+            if (outputFields.get(0).getType().startsWith("list<list<bool>>")){
+                outputWrite = """
+                        bool isFirstSublist = true;
+                            for (const auto &sublist : result) {
+                                if (!isFirstSublist) std::cout << "\\n";
+                                isFirstSublist = false;
+                                std::cout << "[";
+                                // Duyệt qua từng phần tử trong sublist
+                                bool isFirstItem = true;
+                                for (const auto &item : sublist) {
+                                    if (!isFirstItem) std::cout << ", ";
+                                    isFirstItem = false;
+                                    std::cout << (item ? "true" : "false");
+                                }
+                                std::cout << "]";
+                            }""";
+            } else if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = """
                         bool isFirstSublist = true;
                             for (const auto &sublist : result) {
@@ -1051,10 +1067,16 @@ public class BoilerplateClient {
                             .collect(Collectors.joining(", "))
             );
             String outputWrite = null;
-            if (outputFields.get(0).getType().startsWith("list<list<")) {
+            if (outputFields.get(0).getType().startsWith("list<list<bool>>")) {
+                outputWrite = "for sublist in result:\n    print(' '.join(['true' if item else 'false' for item in sublist]))\n";
+            } else if (outputFields.get(0).getType().startsWith("list<list<")) {
                 outputWrite = "for sublist in result: print(sublist)\n";
+            } else if (outputFields.get(0).getType().startsWith("list<bool>")) {
+                outputWrite = "print(' '.join(['true' if item else 'false' for item in result]))\n";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "print(' '.join(map(str, result)))\n";
+            } else if (outputFields.get(0).getType().startsWith("bool")) {
+                outputWrite = "print('true\\n' if result else 'false\\n')\n";
             } else {
                 outputWrite = "print(result)\n";
             }
