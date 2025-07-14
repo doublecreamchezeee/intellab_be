@@ -410,8 +410,8 @@ public class BoilerplateClient {
             String inputReads = inputFields.stream()
                     .map(field -> {
                         //2d array string
-                        if (field.getType().startsWith("list<list<string")){
-                            return  """
+                        if (field.getType().startsWith("list<list<string")) {
+                            return """
                                         int rowSize_%1$s;
                                         std::cin >> rowSize_%1$s;
                                         //std::cin.ignore();
@@ -472,8 +472,8 @@ public class BoilerplateClient {
                                     + field.getName() + "(size_" + field.getName() + ");" +
                                     "\n  for(int i = 0; i < size_" + field.getName() + "; ++i) {" +
                                     "\nstd::cin >> " + field.getName() + "[i];\n" +
-                                    field.getName() +  "[i].erase(std::remove(" + field.getName() + "[i].begin(), "+ field.getName() + "[i].end(), '\\n'), " +  field.getName()+"[i].end());\n" +
-                                    field.getName() +  "[i].erase(std::remove(" + field.getName() + "[i].begin(), "+ field.getName() + "[i].end(), '\\r'), " +  field.getName()+"[i].end());" +
+                                    field.getName() + "[i].erase(std::remove(" + field.getName() + "[i].begin(), " + field.getName() + "[i].end(), '\\n'), " + field.getName() + "[i].end());\n" +
+                                    field.getName() + "[i].erase(std::remove(" + field.getName() + "[i].begin(), " + field.getName() + "[i].end(), '\\r'), " + field.getName() + "[i].end());" +
                                     "}";
                         } else if (field.getType().startsWith("graph<int")) {
                             // read from adjacency list
@@ -485,7 +485,7 @@ public class BoilerplateClient {
                                     for (int i = 0; i < size_%1$s; ++i) {
                                         std::string line;
                                         std::getline(std::cin, line); // Read the entire line
-                                
+                                    
                                         if (line.empty()) {
                                             continue; // Move to the next node
                                         }
@@ -528,8 +528,7 @@ public class BoilerplateClient {
                             return "std::string " + field.getName() + ";\n  std::getline(std::cin, " + field.getName() + ");";
                         } else if (field.getType().startsWith("bool")) {
                             return "bool " + field.getName() + ";\n  std::cin >> " + field.getName() + ";";
-                        }
-                        else {
+                        } else {
                             return "std::cin >> " + field.getName() + ";";
                         }
                     }).collect(Collectors.joining("\n "));
@@ -569,10 +568,14 @@ public class BoilerplateClient {
                                 }
                                 std::cout << "]";
                             }""";
+            } else if (outputFields.get(0).getType().startsWith("list<bool>")){
+                outputWrite = "for (const auto &item : result) std::cout << (item ? \"true\" : \"false\") << ' ';\nstd::cout << std::endl;";
             } else if (outputFields.get(0).getType().startsWith("list<")) {
                 outputWrite = "for (const auto &item : result) std::cout << item << ' ';\nstd::cout << std::endl;";
             } else if (outputFields.get(0).getType().startsWith("tree<")) {
                 //todo: tien implement tree output
+            } else if (outputFields.get(0).getType().startsWith("bool")){
+                outputWrite = "std::cout << (result ? \"true\" : \"false\") << std::endl;";
             } else {
                 outputWrite = "std::cout << result << std::endl;";
             }
