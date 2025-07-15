@@ -60,7 +60,7 @@ public class ProblemSubmissionService {
     private final TestCaseRepository testCaseRepository;
     private final CourseClient courseClient;
     private final IdentityClient identityClient;
-    private final NotificationService notificationService;
+    //private final NotificationService notificationService;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
 
     static final Map<String, Integer> languageIdMap = new HashMap<>();
@@ -396,11 +396,12 @@ public class ProblemSubmissionService {
                 output.setSubmission_output(null);
             }
 
-        } else {
-            output.setSubmission_output(null);
-            /*output.setActualOutput(null);
-            output.setExpectedOutput(null);*/
         }
+        /*else {
+            output.setSubmission_output(null);
+            *//*output.setActualOutput(null);
+            output.setExpectedOutput(null);*//*
+        }*/
 
         testCaseOutputRepository.save(output);
 
@@ -512,7 +513,7 @@ public class ProblemSubmissionService {
             if (!submission.getIsSolved()) {
                 submission.setIsSolved(true);
                 if (submission.getIsNotify() == null || !submission.getIsNotify()) {
-                    notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
+                    //notificationService.solveProblemNotification(submission.getProblem(), submission.getUserId());
                     submission.setIsNotify(true);
                 }
                 problemSubmissionRepository.save(submission);

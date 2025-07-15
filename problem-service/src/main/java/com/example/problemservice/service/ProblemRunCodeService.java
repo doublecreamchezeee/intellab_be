@@ -388,11 +388,12 @@ public class ProblemRunCodeService {
                 output.setSubmissionOutput(null);
             }
 
-        } else {
-            output.setSubmissionOutput(null);
-            /*output.setActualOutput(null);
-            output.setExpectedOutput(null);*/
         }
+        /*else {
+            output.setSubmissionOutput(null);
+            *//*output.setActualOutput(null);
+            output.setExpectedOutput(null);*//*
+        }*/
 
         if (request.getStderr() != null) {
             output.setError(
