@@ -78035,7 +78035,7 @@ All of these are **accepted answers**.
 ##  Constraints
 
 * The number of nodes in the tree is in the range `1 <= n <= 10⁴`
-* `-10⁵ <= Node.val <= 10⁵`', true, true, 'easy', 'traverse tree', e'Problem Name: traverse tree
+* `-10⁵ <= Node.val <= 10⁵`', true, true, 'easy', 'Traverse Tree', e'Problem Name: traverse tree
 Function Name: traverseTree
 Input Structure:
 Input Field: tree<int> root
@@ -78110,7 +78110,7 @@ strs = ["a"]
 
 * You may assume that the string contains only lowercase alphabets.
 * Anagrams can be grouped by sorting the characters in each word or by using a character count as a signature.
-', true, true, 'easy', 'group anagram', e'Problem Name: group Anagram
+', true, true, 'medium', 'Group Anagram', e'Problem Name: group Anagram
 Function Name: groupAnagram
 Input Structure:
 Input Field: list<string> strs
@@ -78181,7 +78181,7 @@ candidates = [2, 3, 6, 7], target = 7
 
   * Include it again (since unlimited use is allowed),
   * Skip to the next candidate.
-* Ensure combinations are **non-decreasing** to avoid duplicates.', true, true, 'easy', 'combination sum', e'Problem Name: combination sum
+* Ensure combinations are **non-decreasing** to avoid duplicates.', true, true, 'medium', 'Combination Sum', e'Problem Name: combination sum
 Function Name: combinationSum
 Input Structure:
 Input Field: list<int> candidates
@@ -78232,7 +78232,7 @@ graph = [[1,2],[3],[3],[]]
 
 * You must return **all valid paths** from the start node (`0`) to the end node (`n - 1`).
 * Order of output paths does **not** matter.
-* Recursive DFS or backtracking is commonly used to solve this problem.', true, true, 'easy', 'all paths from source to target', e'Problem Name: all Paths Source Target
+* Recursive DFS or backtracking is commonly used to solve this problem.', true, true, 'medium', 'All Paths From Source To Target', e'Problem Name: all Paths Source Target
 Function Name: allPathsSourceTarget
 Input Structure:
 Input Field: graph<int> graph
@@ -78307,7 +78307,7 @@ Output:
 
 ##  Follow-up
 
-Can you do it without generating duplicate permutations?', true, true, 'easy', 'permutation II',e'Problem Name: permutation II
+Can you do it without generating duplicate permutations?', true, true, 'easy', 'Permutation II',e'Problem Name: permutation II
 Function Name: permutationII
 Input Structure:
 Input Field: list<int> nums
@@ -78396,3 +78396,5 @@ INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, probl
 1 2 4 5 3 6 7', 'd0dee495-b861-4d6c-930b-37e66af65ea3');
 INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, problem_id) VALUES ('b7735150-798a-4ee4-836b-d3afdaea043d', '1 2 3 4 5 6 7', 1, e'7
 1 2 4 5 3 6 7', 'd0dee495-b861-4d6c-930b-37e66af65ea3');
+
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (11, 'd0dee495-b861-4d6c-930b-37e66af65ea3');
