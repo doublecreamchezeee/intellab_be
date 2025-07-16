@@ -709,7 +709,6 @@ public class BoilerplateClient {
 
             return String.format("""
                     %s
-                    
                     %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
                     """,
                         additionalDataStructureDeclaration,
@@ -1154,10 +1153,7 @@ public class BoilerplateClient {
             }
 
             pythonCode.append(String.format("""
-                    import sys
-                    
                     %s
-                    
                     def %s(%s):\n
                     """, additionalDataStructureDeclaration, functionName, inputs));
             pythonCode.append("    # Implementation goes here\n");
