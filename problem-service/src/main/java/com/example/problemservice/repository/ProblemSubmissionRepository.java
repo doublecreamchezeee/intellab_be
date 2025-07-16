@@ -33,6 +33,7 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
       AND programming_language = :programmingLanguage
       AND problem_id = :problemId
       AND user_id <> :userId
+      AND user_id <> :adminId
     ORDER BY user_id, code, created_at DESC
     LIMIT 50
     """,
@@ -40,7 +41,8 @@ public interface ProblemSubmissionRepository extends JpaRepository<ProblemSubmis
     List<UUID> findUniqueLatestSubmissionsId(
             @Param("programmingLanguage") String programmingLanguage,
             @Param("problemId") UUID problemId,
-            @Param("userId") UUID userId
+            @Param("userId") UUID userId, 
+            @Param("adminId") UUID adminId
     );
 
     Page<ProblemSubmission> findProblemSubmissionByUserId(UUID userUid, Pageable pageable);

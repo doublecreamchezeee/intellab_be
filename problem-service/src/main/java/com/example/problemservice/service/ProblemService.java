@@ -349,7 +349,7 @@ public class ProblemService {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
 
-        if (problem.getCurrentCreationStep() < 5) {
+        if (problem.getCurrentCreationStep() < 4) {
             throw new AppException(ErrorCode.PROBLEM_NOT_COMPLETE);
         }
 
