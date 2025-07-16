@@ -62,7 +62,8 @@ public class ProblemSubmissionService {
     private final IdentityClient identityClient;
     //private final NotificationService notificationService;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
-
+    
+    static final String ADMIN_ID = "4d0c8d27-4509-402b-cf6f-58686cd47319";  
     static final Map<String, Integer> languageIdMap = new HashMap<>();
     static {
         languageIdMap.put("C (GCC 7.4.0)", 48);
@@ -237,7 +238,7 @@ public class ProblemSubmissionService {
 
     private String checkMoss(UUID submissionId, String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
 
-        List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId);
+        List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId, ADMIN_ID);
         ProblemSubmission mySubmission = problemSubmissionRepository.findById(submissionId).orElseThrow(
                 () -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
         List<ProblemSubmission> acceptedSubmissions = new ArrayList<>(problemSubmissionRepository.findAllById(submissionIds));
