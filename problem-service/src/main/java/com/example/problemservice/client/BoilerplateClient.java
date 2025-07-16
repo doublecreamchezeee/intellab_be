@@ -635,9 +635,6 @@ public class BoilerplateClient {
                     #include <iostream>
                     #include <vector>
                     #include <string>
-                    #include <algorithm>
-                    
-                    
                     #include <sstream>
                     #include <unordered_map>
                     #include <fstream>
@@ -646,12 +643,9 @@ public class BoilerplateClient {
                     #include <algorithm>
                     #include <set>
                     using namespace std;
-                                        
-                    
                     %s
-
                     ##USER_CODE_HERE##
-
+                    
                     int main() {
                       %s
                       %s
@@ -886,11 +880,8 @@ public class BoilerplateClient {
             return """
                     import java.util.*;
                     import java.util.stream.Collectors;
-                    
-
                     public class Main {
                         %s
-
                         ##USER_CODE_HERE##
                         
                         public static void main(String[] args) {
@@ -1113,14 +1104,12 @@ public class BoilerplateClient {
                     import sys
                     from typing import List, Any, Union, Tuple
                     from collections import defaultdict
-                    ##USER_CODE_HERE##
-                  
                     %s
-
+                    ##USER_CODE_HERE##
+                    
                     if __name__ == '__main__':
                         %s
                         %s
-                        
                         %s
                             """.formatted(additionalDataStructureDeclaration, inputReads, functionCall, outputWrite);
         }
@@ -1286,18 +1275,14 @@ public class BoilerplateClient {
 
             return """
                     %s
-                    
                     ##USER_CODE_HERE##
 
                     const readline = require('readline');
-                    
                     const rl = readline.createInterface({
                          input: process.stdin,
                          output: process.stdout,
                     });
-                    
                     let input = [];
-                   
                     rl.on('line', (line) => {
                          input.push(line);
                     }).on('close', () => {
