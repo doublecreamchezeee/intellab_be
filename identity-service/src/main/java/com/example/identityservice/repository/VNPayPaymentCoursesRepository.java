@@ -14,9 +14,9 @@ import java.util.UUID;
 public interface VNPayPaymentCoursesRepository extends JpaRepository<VNPayPaymentCourses, VNPayPaymentCoursesId> {
     Optional<VNPayPaymentCourses> findByPayment_paymentId(UUID payment_paymentId);
 
-    @Query("SELECT COUNT(c) FROM VNPayPaymentCourses c WHERE c.payment.transactionStatus = 'Active'")
+    @Query("SELECT COUNT(c) FROM VNPayPaymentCourses c WHERE c.payment.transactionStatus = '00'")
     int countSuccessfulCoursePurchases();
 
-    @Query("SELECT COUNT(c) FROM VNPayPaymentCourses c WHERE c.payment.transactionStatus = 'Active' AND MONTH(c.payment.createdAt) = :month AND YEAR(c.payment.createdAt) = :year")
+    @Query("SELECT COUNT(c) FROM VNPayPaymentCourses c WHERE c.payment.transactionStatus = '00' AND MONTH(c.payment.createdAt) = :month AND YEAR(c.payment.createdAt) = :year")
     int countSuccessfulCoursePurchasesByMonth(@Param("month") int month, @Param("year") int year);
 }

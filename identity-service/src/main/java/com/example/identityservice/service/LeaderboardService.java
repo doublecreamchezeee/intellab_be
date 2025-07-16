@@ -178,7 +178,7 @@ public class LeaderboardService {
                 problemStat.getEasy(),
                 problemStat.getMedium(),
                 problemStat.getHard(),
-                problemStat.getTotalProblem()
+                problemStat.getTotalProblem()!= null ? problemStat.getTotalProblem() : 0
         );
     }
 
@@ -187,7 +187,7 @@ public class LeaderboardService {
                 courseStat.getBeginner(),
                 courseStat.getIntermediate(),
                 courseStat.getAdvanced(),
-                courseStat.getTotalCourse()
+                courseStat.getTotalCourse() != null ? courseStat.getTotalCourse() : 0
         );
     }
 
