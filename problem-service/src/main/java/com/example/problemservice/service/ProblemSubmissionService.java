@@ -238,7 +238,7 @@ public class ProblemSubmissionService {
 
     private String checkMoss(UUID submissionId, String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
 
-        List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId, ADMIN_ID);
+        List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId, UUID.fromString(ADMIN_ID));
         ProblemSubmission mySubmission = problemSubmissionRepository.findById(submissionId).orElseThrow(
                 () -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
         List<ProblemSubmission> acceptedSubmissions = new ArrayList<>(problemSubmissionRepository.findAllById(submissionIds));
