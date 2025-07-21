@@ -150,15 +150,23 @@ public class ProblemService {
             PolygonProblemData data = PolygonParser.parse(problemXml, statementsDir, testsDir);
 
             ProblemCreationRequest request = PolygonMapper.toProblemCreationRequest(data);
-            ProblemCreationResponse response = generalStep(request, userId);
+            Problem problem = problemMapper.toProblem(request);
+            problem.setAuthorId(userId);
+            problem.setCreatedAt(new Date());
+            problem.setIsCompletedCreation(false);
+            problem.setCurrentCreationStep(1);
+            problem.setCurrentCreationStepDescription("General Step");
+            ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problemRepository.save(problem));
 
             TestCaseMultipleCreationRequest testcaseRequest = PolygonMapper.toTestCases(data, response.getProblemId());
             List<TestCaseCreationResponse> testcaseResponse = testCaseService.createMultipleTestCases(testcaseRequest);
 
             SolutionCreationRequest solution = PolygonMapper.toSolutionCreationRequest(data, response.getProblemId(), String.valueOf(userId));
             SolutionCreationResponse solutionResponse = solutionService.createSolution(solution);
-
-            return response;
+            
+            Problem responseProblem = problemRepository.findById(UUID.fromString(response.getProblemId()))
+                    .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+            return problemMapper.toProblemCreationResponse(responseProblem);
         } catch (IOException e) {
             throw new RuntimeException("Failed to unzip or parse polygon zip", e);
         }

@@ -154,6 +154,12 @@ public class TestCaseService {
             throw new IllegalArgumentException("Inputs and outputs lists must have the same size");
         }
 
+        if (!problem.getIsCompletedCreation() && problem.getCurrentCreationStep() <= 4){
+            problem.setCurrentCreationStep(4);
+            problem.setCurrentCreationStepDescription("Testcase Step");
+        }
+        problemRepository.save(problem);
+
         List<TestCase> testCases = new ArrayList<>();
         for (int i = 0; i < request.getInputs().size(); i++) {
             TestCase testCase = TestCase.builder()
