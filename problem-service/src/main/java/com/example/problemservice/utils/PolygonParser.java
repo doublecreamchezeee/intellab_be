@@ -16,6 +16,20 @@ import java.util.List;
 
 @Slf4j
 public class PolygonParser {
+    public static String parseProblemTitle(Document doc) {
+        Element root = doc.getDocumentElement(); // <problem>
+
+        NodeList nameList = root.getElementsByTagName("name");
+        for (int i = 0; i < nameList.getLength(); i++) {
+            Element nameElement = (Element) nameList.item(i);
+            String lang = nameElement.getAttribute("language");
+            if ("english".equalsIgnoreCase(lang)) {
+                return nameElement.getAttribute("value");
+            }
+        }
+
+        return null; // fallback if no english name found
+    }
 
     public static PolygonProblemData parse(File problemXmlFile, File statementsDir, File testsDir) {
         try {
@@ -28,7 +42,7 @@ public class PolygonParser {
 
             Element root = doc.getDocumentElement();
 
-            data.setTitle(root.getAttribute("name"));
+            data.setTitle(parseProblemTitle(doc));
 
             // Parse statement HTML
             File htmlStatement = new File(statementsDir, "english/problem.html");
