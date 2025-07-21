@@ -22,6 +22,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,6 +58,41 @@ public class AdminProblemController {
                 .message("Created")
                 .build();
     }
+
+
+    @Operation(summary = "Import problem from Polygon ZIP")
+    @PostMapping("/polygon")
+    public ApiResponse<ProblemCreationResponse> importProblemFromPolygonZip(
+            @RequestHeader("X-UserRole") String role,
+            @RequestHeader("X-UserId") String userUid,
+            @RequestParam("file") MultipartFile zipFile
+    ) {
+        if (!isAdmin(role)) {
+            return ApiResponse.<ProblemCreationResponse>builder()
+                    .result(null)
+                    .code(403)
+                    .message("Forbidden").build();
+        }
+
+        try {
+            userUid = userUid.split(",")[0];
+            UUID userId = ParseUUID.normalizeUID(userUid);
+
+            ProblemCreationResponse response = problemService.importProblemFromZip(zipFile, userId);
+
+            return ApiResponse.<ProblemCreationResponse>builder()
+                    .result(response)
+                    .code(200)
+                    .message("Success").build();
+        } catch (Exception e) {
+            log.error("Error importing polygon problem: ", e);
+            return ApiResponse.<ProblemCreationResponse>builder()
+                    .result(null)
+                    .code(500)
+                    .message("Failed to import problem: " + e.getMessage()).build();
+        }
+    }
+
 
     @Operation(
             summary = "Get all problems with search and filter"

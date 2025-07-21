@@ -9,7 +9,6 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
 	implementation("io.grpc:grpc-netty:1.56.0")
     implementation("io.grpc:grpc-protobuf:1.56.0")
     implementation("io.grpc:grpc-stub:1.56.0")
