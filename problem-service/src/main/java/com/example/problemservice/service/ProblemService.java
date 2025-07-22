@@ -483,7 +483,8 @@ public class ProblemService {
                                 .map(problemCategory -> problemCategory.getProblemCategoryID().getCategoryId())
                                 .toList())
                 .getResult();
-        response.setTestCases(response.getTestCases().subList(0, 3));
+        int maxSize = response.getTestCases().size();
+        response.setTestCases(response.getTestCases().subList(0, Math.min(3, maxSize)));
         response.setCategories(category);
 
         response.setIsSolved(isDoneProblem(problemId, userUuid));

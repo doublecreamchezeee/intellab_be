@@ -63,7 +63,7 @@ public class ProblemSubmissionService {
     //private final NotificationService notificationService;
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
     
-    static final String ADMIN_ID = "4d0c8d27-4509-402b-cf6f-58686cd47319";  
+    static final UUID ADMIN_ID = UUID.fromString("4d0c8d27-4509-402b-cf6f-58686cd47319");
     static final Map<String, Integer> languageIdMap = new HashMap<>();
     static {
         languageIdMap.put("C (GCC 7.4.0)", 48);
@@ -87,6 +87,17 @@ public class ProblemSubmissionService {
             }
         }
         return categories;
+    }
+
+    public String findAdminMainCodeByLanguageId(List<AdminMainCode> adminMainCodes, int languageId) {
+        for (AdminMainCode mainCode : adminMainCodes) {
+            log.info("Checking admin main code for language ID: {}", languageId);
+            if (mainCode.getAdminMainLanguageId() == languageId) {
+                return mainCode.getAdminMainCode();
+            }
+        }
+
+        return "";
     }
 
     public String findCustomCheckerCodeByLanguageId(List<CustomCheckerCode> customCheckerCodes, int languageId) {
@@ -142,23 +153,39 @@ public class ProblemSubmissionService {
             log.info("Problem does not have custom checker");
         }
 
-        submission.setCode(
-                boilerplateClient.enrich(
-                        submission.getCode(),
-                        language.getId(),
-                        problem.getProblemStructure(),
-                        problem.getHasCustomChecker(),
-                        problem.getAdditionalCheckerFields(),
-                        getHashTableFromProblemCategories(
-                                problem.getCategories()
-                        )
-                )
-        );
+        Hashtable<Integer, Boolean> problemCategoriesHashTable = getHashTableFromProblemCategories(problem.getCategories());
+
+        if (problem.getAutoGenerateBoilerplate() != null && problem.getAutoGenerateBoilerplate()) {
+            submission.setCode(
+                    boilerplateClient.enrich(
+                            submission.getCode(),
+                            language.getId(),
+                            problem.getProblemStructure(),
+                            problem.getHasCustomChecker(),
+                            problem.getAdditionalCheckerFields(),
+                            problemCategoriesHashTable
+                    )
+            );
+        } else {
+            log.info("Problem does not have auto-generated boilerplate {}", language.getId());
+            String adminMainCode = findAdminMainCodeByLanguageId(
+                    problem.getAdminMainCodes(),
+                    language.getId()
+            );
+
+            submission.setCode(
+                    submission.getCode() + "\n" + adminMainCode
+            );
+
+            log.info("full code: {}", submission.getCode());
+        }
 
         // Lưu ProblemSubmission trước để đảm bảo có ID
         submission = problemSubmissionRepository.save(submission);
 
         //problemSubmissionRepository.flush();
+
+        boolean isOOPProblem = problemCategoriesHashTable.containsKey(20) && problemCategoriesHashTable.get(20); // 20 is the category ID for OOP problems
 
         // Lấy danh sách TestCase từ Problem
         List<TestCase> testCases = problem.getTestCases();
@@ -169,7 +196,11 @@ public class ProblemSubmissionService {
         // Gửi từng test case đến Judge0 và xử lý kết quả
         for (TestCase testCase : testCases) {
             // Gửi mã nguồn và test case đến Judge0
-            TestCaseOutput output = judge0Client.submitCode(submission, testCase, problem.getHasCustomChecker());
+            TestCaseOutput output = judge0Client.submitCode(
+                    submission, testCase,
+                    problem.getHasCustomChecker(),
+                    !isOOPProblem
+            );
 
             // Khởi tạo composite ID
             TestCaseOutputID outputId = new TestCaseOutputID();
@@ -238,7 +269,7 @@ public class ProblemSubmissionService {
 
     private String checkMoss(UUID submissionId, String language, UUID problemId, UUID userId) throws IOException, InterruptedException {
 
-        List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId, UUID.fromString(ADMIN_ID));
+        List<UUID> submissionIds = problemSubmissionRepository.findUniqueLatestSubmissionsId(language, problemId, userId, (ADMIN_ID));
         ProblemSubmission mySubmission = problemSubmissionRepository.findById(submissionId).orElseThrow(
                 () -> new AppException(ErrorCode.SUBMISSION_NOT_EXIST));
         List<ProblemSubmission> acceptedSubmissions = new ArrayList<>(problemSubmissionRepository.findAllById(submissionIds));
@@ -636,7 +667,11 @@ public class ProblemSubmissionService {
 
         for (TestCase testCase : testCases) {
             // Gửi mã nguồn và test case đến Judge0
-            TestCaseOutput output = judge0Client.submitCode(submission, testCase, problem.getHasCustomChecker());
+            TestCaseOutput output = judge0Client.submitCode(
+                    submission, testCase,
+                    problem.getHasCustomChecker(),
+                    true // this logic is default
+            );
 
             // Khởi tạo composite ID
             TestCaseOutputID outputId = new TestCaseOutputID();

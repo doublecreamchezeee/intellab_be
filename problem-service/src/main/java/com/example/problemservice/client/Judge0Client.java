@@ -51,7 +51,10 @@ public class Judge0Client {
     }
 
     // Submit code to Judge0 API and retrieve result
-    public TestCaseOutput submitCode(ProblemSubmission submission, TestCase testCase, Boolean hasCustomChecker) {
+    public TestCaseOutput submitCode(
+            ProblemSubmission submission, TestCase testCase,
+            Boolean hasCustomChecker, Boolean needToTrimOutput
+    ) {
         // Extract details from the submission
         String code = submission.getCode();
 
@@ -82,6 +85,7 @@ public class Judge0Client {
 
         String expectedOutput = testCase.getOutput();
 
+        String needToTrimOutputStr = needToTrimOutput != null ? needToTrimOutput.toString() : "false";
         String hasCustomCheckerStr = hasCustomChecker != null ? hasCustomChecker.toString()  : "false";
         // Create the request body as a Map
         Map<String, Object> requestBody = new HashMap<>();
@@ -89,7 +93,7 @@ public class Judge0Client {
         requestBody.put("language_id", languageId);
         requestBody.put("stdin", input);
         requestBody.put("expected_output", expectedOutput);
-        requestBody.put("callback_url", CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr);
+        requestBody.put("callback_url", CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr + "&need-to-trim-output=" + needToTrimOutputStr);
         // Convert the request body to JSON
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonRequestBody;
@@ -220,7 +224,9 @@ public class Judge0Client {
         }
     }
 
-    public TestCaseRunCodeOutput runCode(ProblemRunCode problemRunCode, TestCase testCase, Boolean hasCustomChecker) {
+    public TestCaseRunCodeOutput runCode(
+            ProblemRunCode problemRunCode, TestCase testCase,
+            Boolean hasCustomChecker, Boolean needToTrimOutput) {
         // Extract details from the submission
         String code = problemRunCode.getCode();
         String language = problemRunCode.getProgrammingLanguage();
@@ -237,6 +243,7 @@ public class Judge0Client {
 
         log.info("Request body: {}", code);
 
+        String needToTrimOutputStr = needToTrimOutput != null ? needToTrimOutput.toString() : "false";
         String hasCustomCheckerStr = hasCustomChecker != null ? hasCustomChecker.toString()  : "false";
         // Create the request body as a Map
         Map<String, Object> requestBody = new HashMap<>();
@@ -244,7 +251,7 @@ public class Judge0Client {
         requestBody.put("language_id", languageId);
         requestBody.put("stdin", input);
         requestBody.put("expected_output", expectedOutput);
-        requestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr);
+        requestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr + "&need-to-trim-output=" + needToTrimOutputStr);
 
         // Convert the request body to JSON
         ObjectMapper objectMapper = new ObjectMapper();
@@ -288,7 +295,9 @@ public class Judge0Client {
         }
     }
 
-    public List<TestCaseRunCodeOutput> runCodeBatch(ProblemRunCode problemRunCode, List<TestCase> testCases, Boolean hasCustomChecker) {
+    public List<TestCaseRunCodeOutput> runCodeBatch(
+            ProblemRunCode problemRunCode, List<TestCase> testCases,
+            Boolean hasCustomChecker, Boolean needToTrimOutput) {
         // Extract details from the submission
         String code = problemRunCode.getCode();
         String language = problemRunCode.getProgrammingLanguage();
@@ -330,6 +339,7 @@ public class Judge0Client {
             testCaseRequestBody.put("callback_url", RUN_CODE_CALLBACK_BASE_URL);
             */
 
+            String needToTrimOutputStr = needToTrimOutput != null ? needToTrimOutput.toString() : "false";
             String hasCustomCheckerStr = hasCustomChecker != null ? hasCustomChecker.toString()  : "false";
             TestCaseRequest request = TestCaseRequest
                     .builder()
@@ -337,7 +347,7 @@ public class Judge0Client {
                     .language_id(languageId)
                     .stdin(input)
                     .expected_output(expectedOutput)
-                    .callback_url(RUN_CODE_CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr)
+                    .callback_url(RUN_CODE_CALLBACK_BASE_URL + "?has-custom-checker=" + hasCustomCheckerStr + "&need-to-trim-output=" + needToTrimOutputStr)
                     .build();
 
             submissions.add(request);

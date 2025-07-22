@@ -11,12 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -346,13 +343,20 @@ public class BoilerplateClient {
         }
 
         //=================================== C++ ===========================================
-        public String generateCpp(Boolean hasCustomChecker, String additionalCheckerFields, Hashtable<Integer, Boolean> categoryIds) {
+        public String generateCpp(
+                Boolean hasCustomChecker, String additionalCheckerFields,
+                Hashtable<Integer, Boolean> categoryIds
+                //,Map<String, Object> classOopMetadata
+        ) {
             if (hasCustomChecker == null) {
                 hasCustomChecker = false;
             }
 
             String inputs = inputFields.stream()
-                    .filter(field -> !field.getType().startsWith("list<") && !field.getType().startsWith("tree<") && !field.getType().startsWith("graph<")) //todo: handle checker field
+                    .filter(field -> !field.getType().startsWith("list<") && !field.getType().startsWith("tree<")
+                            && !field.getType().startsWith("graph<") && !field.getType().startsWith("object<")
+                            && !field.getType().startsWith("pointer<")
+                    ) //todo: handle checker field
                     .map(field -> mapTypeToCpp(field.getType()) + " " + field.getName())
                     .collect(Collectors.joining("; \n"));
 
@@ -524,6 +528,65 @@ public class BoilerplateClient {
                                     }
                                     TreeNode* %s = buildTree(nodes);
                                     """.formatted(field.getName());
+                        } else if (field.getType().startsWith("object<") || field.getType().startsWith("pointer<")) {
+
+                            return "";
+                            /*String className = field.getType().substring(7, field.getType().length() - 1);
+                            Map<String, List<String>> classProperties = parseClassMetadata(classOopMetadata);
+
+                            if (classProperties.containsKey(className)) {
+                                List<String> properties = classProperties.get(className);
+                                StringBuilder objectRead = new StringBuilder();
+
+                                //Generate class definition
+                                *//*objectRead.append("class ").append(className).append(" {\n");
+                                objectRead.append("public:\n");
+                                for (String property : properties) {
+                                    objectRead.append("    int ").append(property).append(";\n"); // Assuming int type, adjust as needed
+                                }
+                                objectRead.append("};\n\n");*//*
+
+                                // Generate object instantiation and reading
+                                if (field.getType().startsWith("pointer<")) {
+                                    objectRead.append(className).append("* ").append(field.getName()).append(" = new ").append(className).append("()").append(";\n");
+                                    for (String property : properties) {
+                                        // property is id:string etc.
+                                        String[] propertyParts = property.split(":");
+                                        if (propertyParts.length == 2 && propertyParts[1].equals("string")) {
+                                            objectRead.append("std::cin.ignore();\n");
+                                        } else if (propertyParts.length == 2 && propertyParts[1].equals("int")) {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append("->").append(propertyParts[0]).append(";\n");
+                                        } else if (propertyParts.length == 2 && propertyParts[1].equals("float")) {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append("->").append(propertyParts[0]).append(";\n");
+                                        } else if (propertyParts.length == 2 && propertyParts[1].equals("bool")) {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append("->").append(propertyParts[0]).append(";\n");
+                                        } else {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append("->").append(property).append(";\n");
+                                        }
+                                    }
+                                } else {
+                                    objectRead.append(className).append(" ").append(field.getName()).append(" = ").append(className).append("()").append(";\n");
+                                    for (String property : properties) {
+                                        String[] propertyParts = property.split(":");
+                                        if (propertyParts.length == 2 && propertyParts[1].equals("string")) {
+                                            objectRead.append("std::cin.ignore();\n");
+                                        } else if (propertyParts.length == 2 && propertyParts[1].equals("int")) {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append(".").append(propertyParts[0]).append(";\n");
+                                        } else if (propertyParts.length == 2 && propertyParts[1].equals("float")) {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append(".").append(propertyParts[0]).append(";\n");
+                                        } else if (propertyParts.length == 2 && propertyParts[1].equals("bool")) {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append(".").append(propertyParts[0]).append(";\n");
+                                        } else {
+                                            objectRead.append("std::cin >> ").append(field.getName()).append(".").append(property).append(";\n");
+                                        }
+                                    }
+                                }
+
+                                return objectRead.toString();
+                            } else {
+                                throw new AppException(ErrorCode.INVALID_OOP_METADATA);
+                            }*/
+
                         } else if (field.getType().startsWith("str")) {
                             return "std::string " + field.getName() + ";\n  std::getline(std::cin, " + field.getName() + ");";
                         } else if (field.getType().startsWith("bool")) {
@@ -539,7 +602,6 @@ public class BoilerplateClient {
                             .filter(field -> !field.getName().contains(EXPECTED_OUTPUT_FIELD_NAME)) //todo: handle checker field
                             .map(Field::getName)
                             .collect(Collectors.joining(", ")) + ");";
-
             String outputWrite = null;
 
             /*
@@ -602,24 +664,30 @@ public class BoilerplateClient {
             }*/
 
             if (hasCustomChecker) { // && outputFields.get(0).getType().startsWith("list<")
-                String functionCustomCheckerCall = "bool isPassed = customChecker(result,expectedOutput";
+                if (categoryIds != null && categoryIds.containsKey(20) && categoryIds.get(20)) {
+                    functionCall = ""; // if problem is OOP, we don't need to call any functions, just use the custom checker
+                    //outputWrite =
+                } else {
 
-                if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
-                    String[] additionalFields = additionalCheckerFields.split(",");
-                    String functionCallWithAdditionalFields = String.join(", ", additionalFields);
+                    String functionCustomCheckerCall = "bool isPassed = customChecker(result,expectedOutput";
 
-                    if (!functionCallWithAdditionalFields.isEmpty()) {
-                        functionCustomCheckerCall += ", " + functionCallWithAdditionalFields;
-                    }
-                }
+                    if (additionalCheckerFields != null && !additionalCheckerFields.isEmpty()) {
+                        String[] additionalFields = additionalCheckerFields.split(",");
+                        String functionCallWithAdditionalFields = String.join(", ", additionalFields);
 
-                outputWrite = functionCustomCheckerCall + ");\n" + outputWrite + """
-                        if (isPassed) {
-                            std::cout << std::endl << "true" << std::endl;
-                        } else {
-                            std::cout << std::endl << "false" << std::endl;
+                        if (!functionCallWithAdditionalFields.isEmpty()) {
+                            functionCustomCheckerCall += ", " + functionCallWithAdditionalFields;
                         }
-                        """;
+                    }
+
+                    outputWrite = functionCustomCheckerCall + ");\n" + outputWrite + """
+                            if (isPassed) {
+                                std::cout << std::endl << "true" << std::endl;
+                            } else {
+                                std::cout << std::endl << "false" << std::endl;
+                            }
+                            """;
+                }
             }
 
             StringBuilder additionalDataStructureDeclaration = new StringBuilder();
@@ -635,9 +703,6 @@ public class BoilerplateClient {
                     #include <iostream>
                     #include <vector>
                     #include <string>
-                    #include <algorithm>
-                    
-                    
                     #include <sstream>
                     #include <unordered_map>
                     #include <fstream>
@@ -646,12 +711,9 @@ public class BoilerplateClient {
                     #include <algorithm>
                     #include <set>
                     using namespace std;
-                                        
-                    
                     %s
-
                     ##USER_CODE_HERE##
-
+                    
                     int main() {
                       %s
                       %s
@@ -706,10 +768,13 @@ public class BoilerplateClient {
                         .append("\n");
             }
 
+            if (categoryIds != null && categoryIds.containsKey(20) && categoryIds.get(20)) {
+                return ""; // if problem is OOP, we don't generate function code
+            }
+
 
             return String.format("""
                     %s
-                    
                     %s %s(%s) {\n    // Implementation goes here\n    return result;\n}
                     """,
                         additionalDataStructureDeclaration,
@@ -887,11 +952,8 @@ public class BoilerplateClient {
             return """
                     import java.util.*;
                     import java.util.stream.Collectors;
-                    
-
                     public class Main {
                         %s
-
                         ##USER_CODE_HERE##
                         
                         public static void main(String[] args) {
@@ -946,6 +1008,14 @@ public class BoilerplateClient {
                         .append(treeNodeDefinitionJava)
                         .append("*/")
                         .append("\n");
+            }
+
+            if (categoryIds != null && categoryIds.containsKey(20) && categoryIds.get(20)) {
+                return """
+                        public class Solution {
+                        
+                        }
+                        """;
             }
 
             javaCode.append(String.format("""
@@ -1114,14 +1184,12 @@ public class BoilerplateClient {
                     import sys
                     from typing import List, Any, Union, Tuple
                     from collections import defaultdict
-                    ##USER_CODE_HERE##
-                  
                     %s
-
+                    ##USER_CODE_HERE##
+                    
                     if __name__ == '__main__':
                         %s
                         %s
-                        
                         %s
                             """.formatted(additionalDataStructureDeclaration, inputReads, functionCall, outputWrite);
         }
@@ -1153,11 +1221,12 @@ public class BoilerplateClient {
                         .append("\n");
             }
 
+            if (categoryIds != null && categoryIds.containsKey(20) && categoryIds.get(20)) {
+                return ""; // if problem is OOP, we don't generate function code
+            }
+
             pythonCode.append(String.format("""
-                    import sys
-                    
                     %s
-                    
                     def %s(%s):\n
                     """, additionalDataStructureDeclaration, functionName, inputs));
             pythonCode.append("    # Implementation goes here\n");
@@ -1290,18 +1359,14 @@ public class BoilerplateClient {
 
             return """
                     %s
-                    
                     ##USER_CODE_HERE##
 
                     const readline = require('readline');
-                    
                     const rl = readline.createInterface({
                          input: process.stdin,
                          output: process.stdout,
                     });
-                    
                     let input = [];
-                   
                     rl.on('line', (line) => {
                          input.push(line);
                     }).on('close', () => {
@@ -1334,6 +1399,10 @@ public class BoilerplateClient {
                         .append(treeNodeDefinitionJavascript)
                         .append("*/")
                         .append("\n");
+            }
+
+            if (categoryIds != null && categoryIds.containsKey(20) && categoryIds.get(20)) {
+                return ""; // if problem is OOP, we don't generate function code
             }
 
             jsCode.append(String.format("""
@@ -1660,6 +1729,28 @@ public class BoilerplateClient {
             //return defaultCode;
         }
 
+        private Map<String, List<String>> parseClassMetadata(Map<String, Object> classOopMetadata) {
+            Map<String, List<String>> classProperties = new HashMap<>();
+
+            if (classOopMetadata != null && classOopMetadata.containsKey("classes")) {
+                List<Map<String, Object>> classes = (List<Map<String, Object>>) classOopMetadata.get("classes");
+
+                for (Map<String, Object> classObj : classes) {
+                    for (String className : classObj.keySet()) {
+                        List<Map<String, Object>> classDetails = (List<Map<String, Object>>) classObj.get(className);
+
+                        for (Map<String, Object> detail : classDetails) {
+                            if (detail.containsKey("Properties")) {
+                                List<String> properties = (List<String>) detail.get("Properties");
+                                classProperties.put(className, properties);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return classProperties;
+        }
         @AllArgsConstructor
         @NoArgsConstructor
         @Builder

@@ -93,12 +93,13 @@ public class ProblemRunCodeController {
     @PutMapping("/update/run-code/callback")
     public ApiResponse<Object> callbackUpdateRunCode(
             @RequestBody SubmissionCallbackResponse request,
-            @RequestParam(name = "has-custom-checker", required = false) Boolean hasCustomChecker
+            @RequestParam(name = "has-custom-checker", required = false) Boolean hasCustomChecker,
+            @RequestHeader(name = "need-to-trim-output", required = false) Boolean needToTrimOutput
     ) {
         //System.out.println("Callback update run code by id: " + request);
         log.info("hasCustomChecker in callback: {}", hasCustomChecker);
 
-        problemRunCodeService.callbackUpdate(request, hasCustomChecker);
+        problemRunCodeService.callbackUpdate(request, hasCustomChecker, needToTrimOutput);
 
         return ApiResponse.<Object>builder()
                 .message("Callback update runcode successfully")

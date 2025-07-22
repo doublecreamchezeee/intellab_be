@@ -30,7 +30,8 @@ create table problems
     is_completed_creation boolean       default false,
     has_custom_checker boolean default false,
     additional_checker_fields text default null,
-    hidden_input_fields text default null
+    hidden_input_fields text default null,
+    auto_generate_boilerplate boolean default true
 );
 
 alter table problems
@@ -48,6 +49,20 @@ create table custom_checker_code
 );
 
 alter table custom_checker_code
+    owner to postgres;
+
+create table admin_main_code
+(
+    admin_main_code_id uuid not null default uuid_generate_v4()
+        primary key,
+    admin_main_code text,
+    admin_main_language_id integer default null,
+    problem_id uuid not null
+        constraint fk2vnl6elt6x6prqxktco49ts1o
+            references problems on DELETE CASCADE
+);
+
+alter table admin_main_code
     owner to postgres;
 
 create table solutions
@@ -78398,3 +78413,718 @@ INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, probl
 1 2 4 5 3 6 7', 'd0dee495-b861-4d6c-930b-37e66af65ea3');
 
 INSERT INTO public.problem_category (category_id, problem_id) VALUES (11, 'd0dee495-b861-4d6c-930b-37e66af65ea3');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'3
+2 2 2', 1, e'1
+2 2 2', '7921cb57-c325-4391-b29e-1bbde4a5ac32');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'4
+1 1 1 2', 1, e'4
+1 2 1 1
+1 1 1 2
+2 1 1 1
+1 1 2 1', '7921cb57-c325-4391-b29e-1bbde4a5ac32');
+
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'3
+0 1 9', 1, e'6
+1 0 9
+1 9 0
+9 0 1
+0 9 1
+9 1 0
+0 1 9', '7921cb57-c325-4391-b29e-1bbde4a5ac32');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'3
+abc def ghi', 1, e'3
+def
+ghi
+abc', 'f1b1e333-2ba5-4e6a-99da-a595a8a10574');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'3
+ab ba a', 1, e'2
+ab ba
+a', 'f1b1e333-2ba5-4e6a-99da-a595a8a10574');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'3
+bob obb boo', 1, e'2
+bob obb
+boo', 'f1b1e333-2ba5-4e6a-99da-a595a8a10574');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'3
+2 4 6
+8', 1, e'5
+2 2 2 2
+2 2 4
+4 4
+2 6
+6 2', '880bd667-b060-42f4-883b-f2714e43172e');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'3
+3 5 7
+12', 1, e'2
+3 3 3 3
+5 7', '880bd667-b060-42f4-883b-f2714e43172e');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'1
+9
+18', 1, e'1
+9 9', '880bd667-b060-42f4-883b-f2714e43172e');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'5
+1 2 3
+4
+4
+4
+', 4, e'3
+0 3 4
+0 2 4
+0 1 4', 'ea839282-6484-4358-a805-a93139d393ef');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'5
+4 3 1
+3 2 4
+3
+4
+', 5, e'5
+0 1 3 4
+0 1 2 3 4
+0 4
+0 3 4
+0 1 4', 'ea839282-6484-4358-a805-a93139d393ef');
+
+INSERT INTO public.test_cases (input, testcase_order, output, problem_id) VALUES (e'4
+1
+2
+3
+', 6, e'1
+0 1 2 3', 'ea839282-6484-4358-a805-a93139d393ef');
+
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields, auto_generate_boilerplate) VALUES ('4928ad2b-7c6f-457f-bb60-1962998b4232', 0.00, e'## Problem: Employee Management System
+
+### 1. Abstract Base Class: `Employee`
+
+Create an abstract class `Employee` with the following attributes:
+
+* `string name`: Name of the employee.
+* `int id`: Employee ID.
+* `double baseSalary`: Base salary.
+
+#### Methods:
+
+* **Constructor**:
+  `Employee(string name, int id, double baseSalary)`
+
+* **Getters**:
+  `string getName()`
+  `int getID()`
+  `double getBaseSalary()`
+
+* **Abstract Methods** (must be overridden in derived classes):
+
+  ```cpp
+  virtual string getType() const = 0;
+  virtual double getTotalSalary() const = 0;
+  ```
+
+* **Display Method**:
+
+  ```cpp
+  void display();
+  ```
+
+  * Prints employee info in the format:
+    `[Type] Name - ID - TotalSalary`
+  * `TotalSalary` should be rounded to two decimal places.
+
+---
+
+### 2. Derived Class: `Office`
+
+Inherits from `Employee`.
+
+#### Additional Attribute:
+
+* `double allowance`: Additional allowance.
+
+#### Methods:
+
+* **Constructor**:
+  `Office(string name, int id, double baseSalary, double allowance)`
+
+* **Overrides**:
+
+  * `getType()` returns `"Office"`
+  * `getTotalSalary()` returns `baseSalary + allowance`
+
+---
+
+### 3. Derived Class: `Engineer`
+
+Inherits from `Employee`.
+
+#### Additional Attributes:
+
+* `int overtimeHours`: Number of overtime hours worked.
+* `double overtimeRate`: Salary rate per overtime hour.
+
+#### Methods:
+
+* **Constructor**:
+  `Engineer(string name, int id, double baseSalary, int overtimeHours, double overtimeRate)`
+
+* **Overrides**:
+
+  * `getType()` returns `"Engineer"`
+  * `getTotalSalary()` returns `baseSalary + overtimeHours * overtimeRate`
+
+---
+
+###  Example Input
+
+```cpp
+EmployeeList list;
+
+list.add("Office,Alice,1001,3000,500");
+list.add("Engineer,Bob,1002,3200,10,50");
+list.add("Office,Carol,1003,2900,300");
+
+list.remove(1002);
+
+list.display();
+```
+
+###  Expected Output
+
+```cpp
+[Office] Alice - 1001 - 3500.00
+[Office] Carol - 1003 - 3200.00
+```
+
+', true, true, 'easy', 'Employee', e'Problem Name: Employee OOP
+Function Name: employeeOOP
+Input Structure:
+Input Field: object<Employee> employee
+Output Structure:
+Output Field: list<string> result', 10, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-20 06:15:24.892174', 'Final Step', false, null, null, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields, auto_generate_boilerplate) VALUES ('8504488f-dfd5-45e5-971b-e7de57937bc3', 0.00, e'## Problem: Employee Management System
+
+### 1. Abstract Base Class: `Employee`
+
+Create an abstract class `Employee` with the following attributes:
+
+* `string name`: Name of the employee.
+* `int id`: Employee ID.
+* `double baseSalary`: Base salary.
+
+#### Methods:
+
+* **Constructor**:
+  `Employee(string name, int id, double baseSalary)`
+
+* **Getters**:
+  `string getName()`
+  `int getID()`
+  `double getBaseSalary()`
+
+* **Abstract Methods** (must be overridden in derived classes):
+
+  ```cpp
+  virtual string getType() const = 0;
+  virtual double getTotalSalary() const = 0;
+  ```
+
+* **Display Method**:
+
+  ```cpp
+  void display();
+  ```
+
+  * Prints employee info in the format:
+    `[Type] Name - ID - TotalSalary`
+  * `TotalSalary` should be rounded to two decimal places.
+
+---
+
+### 2. Derived Class: `Office`
+
+Inherits from `Employee`.
+
+#### Additional Attribute:
+
+* `double allowance`: Additional allowance.
+
+#### Methods:
+
+* **Constructor**:
+  `Office(string name, int id, double baseSalary, double allowance)`
+
+* **Overrides**:
+
+  * `getType()` returns `"Office"`
+  * `getTotalSalary()` returns `baseSalary + allowance`
+
+---
+
+### 3. Derived Class: `Engineer`
+
+Inherits from `Employee`.
+
+#### Additional Attributes:
+
+* `int overtimeHours`: Number of overtime hours worked.
+* `double overtimeRate`: Salary rate per overtime hour.
+
+#### Methods:
+
+* **Constructor**:
+  `Engineer(string name, int id, double baseSalary, int overtimeHours, double overtimeRate)`
+
+* **Overrides**:
+
+  * `getType()` returns `"Engineer"`
+  * `getTotalSalary()` returns `baseSalary + overtimeHours * overtimeRate`
+
+---
+
+### 4. Class: `EmployeeList`
+
+Manages a list of employees, which may include both `Office` and `Engineer` objects.
+
+* The list is stored as a collection of `Employee*` pointers (e.g., `vector<Employee*>`).
+
+#### Methods:
+
+* `void add(string line)`:
+
+  * Parses an input string and creates an `Office` or `Engineer` object accordingly.
+  * Adds the object to the list.
+  * Input format:
+
+    * `Office,name,id,baseSalary,allowance`
+    * `Engineer,name,id,baseSalary,overtimeHours,overtimeRate`
+
+* `void remove(int id)`:
+
+  * Removes the employee with the specified `id` from the list, if exists.
+  * The order of remaining employees is preserved.
+
+* `void display()`:
+
+  * Displays information of all employees in the list, in order.
+
+---
+
+###  Example Input
+
+```cpp
+3
+Office,Alice,1001,3000,500
+Office,Carol,1003,2900,300
+```
+
+###  Expected Output
+
+```cpp
+[Office] Alice - 1001 - 3500.00
+[Office] Carol - 1003 - 3200.00
+```
+
+', true, true, 'easy', 'List Employee', e'Problem Name: List Employee OOP
+Function Name: listEmployeeOOP
+Input Structure:
+Input Field: object<EmployeeList> employee
+Output Structure:
+Output Field: list<string> result', 10, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-21 16:56:05.967368', 'Final Step', false, null, null, false);
+INSERT INTO public.problems (problem_id, acceptance_rate, description, is_available, is_published, problem_level, problem_name, problem_structure, score, author_id, current_creation_step, is_completed_creation, created_at, current_creation_step_description, has_custom_checker, additional_checker_fields, hidden_input_fields, auto_generate_boilerplate) VALUES ('4486e2b7-4ec7-48aa-a7b4-64e49900a574', 0.00, e'##  Vehicle Management System (OOP C++ Project)
+
+### Objective
+
+Design a system to manage a list of different types of vehicles (`Car` and `Motorcycle`) using object-oriented programming principles, particularly **inheritance**, **polymorphism**, and **dynamic memory management**.
+
+---
+
+###  Class Descriptions
+
+#### 1. `Vehicle` (Abstract Base Class)
+
+Represents the general concept of a vehicle.
+
+##### Attributes:
+
+* `string name`: Name of the vehicle.
+* `string type`: Type of the vehicle (e.g., `"Car"`, `"Motorcycle"`).
+* `double price`: Price of the vehicle.
+
+##### Methods:
+
+* `Vehicle(string name, string type, double price)`: Constructor.
+* `string getName()`
+* `string getType()`
+* `double getPrice()`
+* `virtual void display() = 0`: Pure virtual function for displaying vehicle details.
+* `virtual ~Vehicle()`: Virtual destructor for proper cleanup.
+* Overloaded `>>` operator to read base vehicle data.
+
+---
+
+#### 2. `Car` (Derived from `Vehicle`)
+
+Represents a car.
+
+##### Additional Attribute:
+
+* `int numDoors`: Number of doors.
+
+##### Methods:
+
+* `Car(string name, double price, int numDoors)`
+* `int getNumDoors()`
+* `void display() override`: Displays car information.
+* Overloaded `>>` operator to read car data.
+
+---
+
+#### 3. `Motorcycle` (Derived from `Vehicle`)
+
+Represents a motorcycle.
+
+##### Additional Attribute:
+
+* `bool hasSidecar`: Indicates whether the motorcycle has a sidecar.
+
+##### Methods:
+
+* `Motorcycle(string name, double price, bool hasSidecar)`
+* `bool getHasSidecar()`
+* `void display() override`: Displays motorcycle information.
+* Overloaded `>>` operator to read motorcycle data.
+
+---
+
+#### 4. `VehicleList`
+
+Manages a list of vehicles (both `Car` and `Motorcycle` objects stored as `Vehicle*`).
+
+##### Attributes:
+
+* `vector<Vehicle*> vehicles`: Stores pointers to `Vehicle` objects.
+
+##### Methods:
+
+* `void addVehicle(Vehicle* vehicle)`: Adds a new vehicle to the list.
+* `void displayVehicles()`: Displays all vehicles in the list.
+* `void add(const string& line)`: Parses a string and creates the appropriate vehicle object (`Car` or `Motorcycle`).
+* `void readFromStream(istream& input)`: Reads multiple vehicle records from an input stream.
+* `~VehicleList()`: Destructor to deallocate memory for all vehicles.
+
+---
+
+###  Input Format (for `add()` method)
+
+Each vehicle is added from a single line in the following formats:
+
+```
+Car,<name>,<price>,<numDoors>
+Motorcycle,<name>,<price>,<hasSidecar>
+```
+
+* `<price>` is a floating-point number.
+* `<hasSidecar>` is `"Yes"` or `"No"` (case-insensitive).
+
+### Output Format
+
+Each vehicle\'s info is printed using the `display()` method, e.g.:
+
+```cpp
+Vehicle Name: Honda Civic, Type: Car, Price: 30000.00, Number of Doors: 4
+Vehicle Name: Yamaha R15, Type: Motorcycle, Price: 15000.00, Has Sidecar: No
+```
+
+---
+
+###  Example Input
+
+```cpp
+2
+Car,Honda Civic,30000,4
+Motorcycle,Yamaha R15,15000,No
+```
+
+###  Example Output
+
+```cpp
+Vehicle Name: Honda Civic, Type: Car, Price: 30000.00, Number of Doors: 4
+Vehicle Name: Yamaha R15, Type: Motorcycle, Price: 15000.00, Has Sidecar: No
+```
+
+---
+', true, true, 'easy', 'List Vehicle', e'Problem Name: List Vehicle OOP
+Function Name: listVehicleOOP
+Input Structure:
+Input Field: object<VehicleList> vehicles
+Output Structure:
+Output Field: list<string> result', 10, '4d0c8d27-4509-402b-cf6f-58686cd47319', 6, true, '2025-07-21 18:06:37.325907', 'Final Step', false, null, null, false);
+
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (20, '4928ad2b-7c6f-457f-bb60-1962998b4232');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (20, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.problem_category (category_id, problem_id) VALUES (20, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+
+INSERT INTO public.admin_main_code (admin_main_code_id, admin_main_code, admin_main_language_id, problem_id) VALUES ('9a53e4b8-b599-44ee-864c-4d0bfe123580', e'int main() {
+    VehicleList vehicleList;
+
+    // Read from console
+    vehicleList.readFromStream(std::cin);
+
+    // Display all vehicles
+    vehicleList.displayVehicles();
+
+    return 0;
+}', 54, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+INSERT INTO public.admin_main_code (admin_main_code_id, admin_main_code, admin_main_language_id, problem_id) VALUES ('fb9a988d-3bdb-42c5-bbf9-30ac4ece2398', e'int main() {
+    EmployeeList empList;
+
+    // Read from console
+    empList.readFromStream(std::cin);
+
+    // Display all employees
+    empList.display();
+
+    return 0;
+}', 54, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.admin_main_code (admin_main_code_id, admin_main_code, admin_main_language_id, problem_id) VALUES ('670ecf9c-d498-454a-9226-7070ead64ed3', e'def main():
+    emp_list = EmployeeList()
+
+    # Read from console input
+    emp_list.read_from_input()
+
+    # Display all employees
+    emp_list.display()
+
+if __name__ == "__main__":
+    # Choose which main function to run:
+    main()', 71, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.admin_main_code (admin_main_code_id, admin_main_code, admin_main_language_id, problem_id) VALUES ('f29c7ccf-7710-4bff-9118-37e7f0b46258', e'function main() {
+    const readline = require(\'readline\');
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    let inputLines = [];
+    let numEmployees = 0;
+    let currentLine = 0;
+
+    rl.on(\'line\', (line) => {
+        if (currentLine === 0) {
+            numEmployees = parseInt(line);
+            currentLine++;
+        } else {
+            inputLines.push(line);
+            if (inputLines.length === numEmployees) {
+                rl.close();
+            }
+        }
+    });
+
+    rl.on(\'close\', () => {
+        const empList = new EmployeeList();
+        inputLines.forEach(line => empList.add(line));
+        empList.display();
+    });
+}
+main();', 63, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.admin_main_code (admin_main_code_id, admin_main_code, admin_main_language_id, problem_id) VALUES ('a23bab67-1c14-48b0-8c9f-58595d03ead0', e'int main() {
+    std::vector<Employee*> employees;
+        employees.push_back(new Office("Alice", 1001, 3000.0, 500.0));
+        employees.push_back(new Engineer("Bob", 1002, 3200.0, 10, 50.0));
+        employees.push_back(new Office("AliceNguyen", 1001, 3000, 500));
+        employees.push_back(new Engineer("BobTran", 1002, 3200, 8, 60));
+        employees.push_back(new Office("CarolLe", 1003, 2800, 400));
+        employees.push_back(new Engineer("DavidPham", 1004, 3500, 12, 45));
+        employees.push_back(new Office("EvaDang", 1005, 3100, 350));
+        employees.push_back(new Engineer("FrankVu", 1006, 3300, 10, 55));
+        employees.push_back(new Office("GinaHo", 1007, 3050, 420));
+        employees.push_back(new Engineer("HenryDo", 1008, 3400, 9, 50));
+        employees.push_back(new Office("IvyNguyen", 1009, 2900, 300));
+        employees.push_back(new Engineer("JasonPhan", 1010, 3600, 11, 52));
+        employees.push_back(new Office("KellyTran", 1011, 2750, 380));
+        employees.push_back(new Engineer("LeoNguyen", 1012, 3450, 10, 48));
+    for (Employee* emp : employees) {
+        emp->display();
+        std::cout << std::endl;
+    }
+
+    return 0;
+}
+', 54, '4928ad2b-7c6f-457f-bb60-1962998b4232');
+INSERT INTO public.admin_main_code (admin_main_code_id, admin_main_code, admin_main_language_id, problem_id) VALUES ('ff4dd959-08ae-40b8-b997-9991329adca1', e'def main():
+    vehicle_list = VehicleList()
+
+    # Read from console input
+    vehicle_list.read_from_input()
+
+    # Display all vehicles
+    vehicle_list.display_vehicles()
+
+if __name__ == "__main__":
+    # Choose which main function to run:
+    main()  # For reading from console', 71, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+INSERT INTO public.admin_main_code (admin_main_code_id, admin_main_code, admin_main_language_id, problem_id) VALUES ('cec66a98-7e3a-4904-afc4-9e98858475d8', e'function main() {
+    const readline = require(\'readline\');
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    let inputLines = [];
+    let numVehicles = 0;
+    let currentLine = 0;
+
+    rl.on(\'line\', (line) => {
+        if (currentLine === 0) {
+            numVehicles = parseInt(line);
+            currentLine++;
+        } else {
+            inputLines.push(line);
+            if (inputLines.length === numVehicles) {
+                rl.close();
+            }
+        }
+    });
+
+    rl.on(\'close\', () => {
+        const vehicleList = new VehicleList();
+        inputLines.forEach(line => vehicleList.add(line));
+        vehicleList.display();
+    });
+}
+main();', 63, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('b8ffd722-558c-49c7-b2fa-c2b7e22cccc7', e'4
+Engineer,Frank,2001,4000,8,30
+Office,Grace,2002,2900,550
+Engineer,Hannah,2003,3600,9,40
+Office,Ian,2004,2700,600', 2, e'[Engineer] Frank - 2001 - 4240.00
+[Office] Grace - 2002 - 3450.00
+[Engineer] Hannah - 2003 - 3960.00
+[Office] Ian - 2004 - 3300.00', null, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('8c244d42-9197-4d9e-aa8d-b9b147d61629', '', 1, e'[Office] Alice - 1001 - 3500.00
+
+[Engineer] Bob - 1002 - 3700.00
+
+[Office] AliceNguyen - 1001 - 3500.00
+
+[Engineer] BobTran - 1002 - 3680.00
+
+[Office] CarolLe - 1003 - 3200.00
+
+[Engineer] DavidPham - 1004 - 4040.00
+
+[Office] EvaDang - 1005 - 3450.00
+
+[Engineer] FrankVu - 1006 - 3850.00
+
+[Office] GinaHo - 1007 - 3470.00
+
+[Engineer] HenryDo - 1008 - 3850.00
+
+[Office] IvyNguyen - 1009 - 3200.00
+
+[Engineer] JasonPhan - 1010 - 4172.00
+
+[Office] KellyTran - 1011 - 3130.00
+
+[Engineer] LeoNguyen - 1012 - 3930.00
+', null, '4928ad2b-7c6f-457f-bb60-1962998b4232');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('8cfd0c50-e43b-4cf2-86e2-69a072fdd489', e'5
+Office,Alice,1001,3000,500
+Engineer,Bob,1002,3200,10,50
+Office,Carol,1003,2800,400
+Engineer,David,1004,3500,12,45
+Office,Eva,1005,3100,350', 1, e'[Office] Alice - 1001 - 3500.00
+[Engineer] Bob - 1002 - 3700.00
+[Office] Carol - 1003 - 3200.00
+[Engineer] David - 1004 - 4040.00
+[Office] Eva - 1005 - 3450.00', null, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('3dc1d467-dea9-4cc6-b79b-5fa6e5d72e05', e'6
+Office,Jack,3001,3100,400
+Engineer,Kate,3002,3800,11,55
+Engineer,Luke,3003,3900,7,60
+Office,Mary,3004,2950,450
+Engineer,Nina,3005,3700,10,35
+Office,Owen,3006,2800,500', 3, e'[Office] Jack - 3001 - 3500.00
+[Engineer] Kate - 3002 - 4405.00
+[Engineer] Luke - 3003 - 4320.00
+[Office] Mary - 3004 - 3400.00
+[Engineer] Nina - 3005 - 4050.00
+[Office] Owen - 3006 - 3300.00', null, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('521d2103-3162-4ca2-8fdc-3886ebecf1a6', e'3
+Engineer,Paul,4001,4100,6,20
+Office,Quinn,4002,3050,500
+Engineer,Rachel,4003,3850,10,50', 4, e'[Engineer] Paul - 4001 - 4220.00
+[Office] Quinn - 4002 - 3550.00
+[Engineer] Rachel - 4003 - 4350.00', null, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('634b4631-818a-417d-b327-980384308fae', e'5
+Office,Steve,5001,3150,300
+Engineer,Tina,5002,3600,8,45
+Office,Uma,5003,3400,350
+Engineer,Victor,5004,3750,9,40
+Office,Wendy,5005,3250,420', 5, e'[Office] Steve - 5001 - 3450.00
+[Engineer] Tina - 5002 - 3960.00
+[Office] Uma - 5003 - 3750.00
+[Engineer] Victor - 5004 - 4110.00
+[Office] Wendy - 5005 - 3670.00', null, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('d0df720d-56bd-46f4-95ea-9c086ad11527', e'4
+Engineer,Xavier,6001,4000,7,55
+Office,Yara,6002,3100,600
+Engineer,Zane,6003,3950,10,50
+Office,Anna,6004,3050,480', 6, e'[Engineer] Xavier - 6001 - 4385.00
+[Office] Yara - 6002 - 3700.00
+[Engineer] Zane - 6003 - 4450.00
+[Office] Anna - 6004 - 3530.00', null, '8504488f-dfd5-45e5-971b-e7de57937bc3');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('c65ad2c7-f5dd-4847-88a0-2f649ab2402a', e'2
+Car,Mercedes,55000.00,4
+Motorcycle,Ducati,18000.25,No', 1, e'Vehicle Name: Mercedes, Type: Car, Price: 55000.00, Number of Doors: 4
+Vehicle Name: Ducati, Type: Motorcycle, Price: 18000.25, Has Sidecar: No', null, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('5faafba0-a351-4011-a18b-403870c4e715', e'4
+Motorcycle,Yamaha,12000.50,No
+Car,BMW,45000.00,4
+Motorcycle,Harley,25000.00,Yes
+Car,Audi,38000.75,2
+', 2, e'Vehicle Name: Yamaha, Type: Motorcycle, Price: 12000.50, Has Sidecar: No
+Vehicle Name: BMW, Type: Car, Price: 45000.00, Number of Doors: 4
+Vehicle Name: Harley, Type: Motorcycle, Price: 25000.00, Has Sidecar: Yes
+Vehicle Name: Audi, Type: Car, Price: 38000.75, Number of Doors: 2', null, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('2df18c3a-d5ae-4884-9c41-1c14546c25d3', e'3
+Car,Toyota,30000.00,4
+Motorcycle,Honda,15000.00,Yes
+Car,Ford,25000.00,2', 3, e'Vehicle Name: Toyota, Type: Car, Price: 30000.00, Number of Doors: 4
+Vehicle Name: Honda, Type: Motorcycle, Price: 15000.00, Has Sidecar: Yes
+Vehicle Name: Ford, Type: Car, Price: 25000.00, Number of Doors: 2', null, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('0e54d3d6-4b13-4ef3-9082-daf0b9406a64', e'1
+Motorcycle,Indian,35000.00,Yes', 6, 'Vehicle Name: Indian, Type: Motorcycle, Price: 35000.00, Has Sidecar: Yes', null, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('ee550c87-70f9-4933-8e47-52c57717b0d3', e'6
+Car,Tesla,75000.00,4
+Motorcycle,Triumph,22000.00,No
+Car,Lexus,48000.25,2
+Car,Mazda,26500.00,4
+Motorcycle,KTM,19500.50,Yes
+Car,Subaru,32000.00,4', 5, e'Vehicle Name: Tesla, Type: Car, Price: 75000.00, Number of Doors: 4
+Vehicle Name: Triumph, Type: Motorcycle, Price: 22000.00, Has Sidecar: No
+Vehicle Name: Lexus, Type: Car, Price: 48000.25, Number of Doors: 2
+Vehicle Name: Mazda, Type: Car, Price: 26500.00, Number of Doors: 4
+Vehicle Name: KTM, Type: Motorcycle, Price: 19500.50, Has Sidecar: Yes
+Vehicle Name: Subaru, Type: Car, Price: 32000.00, Number of Doors: 4', null, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+INSERT INTO public.test_cases (testcase_id, input, testcase_order, output, user_id, problem_id) VALUES ('f923ea15-46be-4384-b195-00f79f6d535a', e'5
+Car,Volkswagen,22000.00,4
+Car,Nissan,28000.50,2
+Motorcycle,Kawasaki,16500.00,Yes
+Car,Hyundai,20000.00,4
+Motorcycle,Suzuki,14000.75,No', 4, e'Vehicle Name: Volkswagen, Type: Car, Price: 22000.00, Number of Doors: 4
+Vehicle Name: Nissan, Type: Car, Price: 28000.50, Number of Doors: 2
+Vehicle Name: Kawasaki, Type: Motorcycle, Price: 16500.00, Has Sidecar: Yes
+Vehicle Name: Hyundai, Type: Car, Price: 20000.00, Number of Doors: 4
+Vehicle Name: Suzuki, Type: Motorcycle, Price: 14000.75, Has Sidecar: No', null, '4486e2b7-4ec7-48aa-a7b4-64e49900a574');
+
+INSERT INTO categories (category_id, category_name, parent_id) values (20, 'OOP', null);

@@ -46,6 +46,16 @@ public class ProblemRunCodeService {
         return categories;
     }
 
+    public String findAdminMainCodeByLanguageId(List<AdminMainCode> adminMainCodes, int languageId) {
+        for (AdminMainCode mainCode : adminMainCodes) {
+            if (mainCode.getAdminMainLanguageId() == languageId) {
+                return mainCode.getAdminMainCode();
+            }
+        }
+
+        return "";
+    }
+
     public String findCustomCheckerCodeByLanguageId(List<CustomCheckerCode> customCheckerCodes, int languageId) {
         for (CustomCheckerCode checkerCode : customCheckerCodes) {
             if (checkerCode.getCustomCheckerLanguageId() == languageId) {
@@ -106,18 +116,31 @@ public class ProblemRunCodeService {
             log.info("Problem does not have custom checker, skipping custom checker code.");
         }
 
-        log.info("Enriching code with boilerplate for problem ID: {}, {}", request.getProblemId(), problemRunCode.getCode());
+        //log.info("Enriching code with boilerplate for problem ID: {}, {}", request.getProblemId(), problemRunCode.getCode());
 
-        problemRunCode.setCode(
-                boilerplateClient.enrich(
-                        problemRunCode.getCode(),
-                        request.getLanguageId(),
-                        problem.getProblemStructure(),
-                        problem.getHasCustomChecker(),
-                        problem.getAdditionalCheckerFields(),
-                        getHashTableFromProblemCategories(problem.getCategories())
-                )
-        );
+        Hashtable<Integer, Boolean> problemCategoriesHashTable = getHashTableFromProblemCategories(problem.getCategories());
+
+        if (problem.getAutoGenerateBoilerplate() != null && problem.getAutoGenerateBoilerplate()) {
+            problemRunCode.setCode(
+                    boilerplateClient.enrich(
+                            problemRunCode.getCode(),
+                            request.getLanguageId(),
+                            problem.getProblemStructure(),
+                            problem.getHasCustomChecker(),
+                            problem.getAdditionalCheckerFields(),
+                            problemCategoriesHashTable
+                    )
+            );
+        } else {
+            log.info("Problem does not have auto-generated boilerplate");
+            String adminMainCode = findAdminMainCodeByLanguageId(
+                    problem.getAdminMainCodes(),
+                    language.getId()
+            );
+            problemRunCode.setCode(
+                    problemRunCode.getCode() + "\n" + adminMainCode
+            );
+        }
 
         problemRunCode.setProgrammingLanguage(language.getLongName());
 
@@ -129,13 +152,16 @@ public class ProblemRunCodeService {
 
         List<TestCaseRunCodeOutput> outputs = new ArrayList<>();
 
+        boolean isOOPProblem = problemCategoriesHashTable.containsKey(20) && problemCategoriesHashTable.get(20) ; // 20 is the category ID for OOP problems
+
         for (int i = 0; i < 3 && i < NUMBER_OF_TEST_CASE; i++) {
             TestCase testCase = testCases.get(i);
 
             TestCaseRunCodeOutput output = judge0Client.runCode(
                     problemRunCode,
                     testCase,
-                    problem.getHasCustomChecker()
+                    problem.getHasCustomChecker(),
+                    !isOOPProblem // If it is an OOP problem, do not need to trim the output
             );
 
             // Khởi tạo composite ID
@@ -210,19 +236,30 @@ public class ProblemRunCodeService {
             log.info("Problem does not have custom checker, skipping custom checker code.");
         }
 
+        Hashtable<Integer, Boolean> problemCategoriesHashTable = getHashTableFromProblemCategories(problem.getCategories());
 
+        if (problem.getAutoGenerateBoilerplate() != null && problem.getAutoGenerateBoilerplate()) {
+            problemRunCode.setCode(
+                    boilerplateClient.enrich(
+                            problemRunCode.getCode(),
+                            request.getLanguageId(),
+                            problem.getProblemStructure(),
+                            problem.getHasCustomChecker(),
+                            problem.getAdditionalCheckerFields(),
+                            problemCategoriesHashTable
+                    )
+            );
+        } else {
+            log.info("Problem does not have auto-generated boilerplate");
+            String adminMainCode = findAdminMainCodeByLanguageId(
+                    problem.getAdminMainCodes(),
+                    language.getId()
+            );
 
-        problemRunCode.setCode(
-                boilerplateClient.enrich(
-                        problemRunCode.getCode(),
-                        request.getLanguageId(),
-                        problem.getProblemStructure(),
-                        problem.getHasCustomChecker(),
-                        problem.getAdditionalCheckerFields(),
-                        getHashTableFromProblemCategories(problem.getCategories())
-                )
-        );
-
+            problemRunCode.setCode(
+                    problemRunCode.getCode() + "\n" + adminMainCode
+            );
+        }
 
         log.info("Enriching code with boilerplate for problem ID: {}, {}", request.getProblemId(), problemRunCode.getCode());
 
@@ -241,10 +278,13 @@ public class ProblemRunCodeService {
         }
         testCases = testCases.subList(0, Math.min(3, maxSize));
 
+        boolean isOOPProblem = problemCategoriesHashTable.containsKey(20) && problemCategoriesHashTable.get(20) ; // 20 is the category ID for OOP problems
+
         List<TestCaseRunCodeOutput> outputs = judge0Client.runCodeBatch(
                 problemRunCode,
                 testCases,
-                problem.getHasCustomChecker()
+                problem.getHasCustomChecker(),
+                !isOOPProblem // If it is an OOP problem, do not need to trim the output
         );
 
         for (int i = 0; i < outputs.size(); i++) {
@@ -295,7 +335,7 @@ public class ProblemRunCodeService {
         return sb.toString();
     }
 
-    public CreationProblemRunCodeResponse callbackUpdate(SubmissionCallbackResponse request, Boolean hasCustomChecker) {
+    public CreationProblemRunCodeResponse callbackUpdate(SubmissionCallbackResponse request, Boolean hasCustomChecker, Boolean needToTrimOutput) {
         TestCaseRunCodeOutput output = testCaseRunCodeOutputRepository.findByToken(
                 UUID.fromString(
                         request.getToken()
@@ -316,21 +356,23 @@ public class ProblemRunCodeService {
 
         if (request.getStdout()!= null) {
 
-            output.setSubmissionOutput(
-                    new String(
-                            decoder.decode(
-                                    request.getStdout()
-                                            .trim()
-                                            .replaceAll(
-                                                "\\s+",
-                                                ""
-                                            )
-                            )
-                    ).replace(
-                            "\n",
-                            ""
-                    ) // remove newline character
+            String tempStdout = new String(
+                    decoder.decode(
+                            request.getStdout()
+                                    .trim()
+                                    .replaceAll(
+                                            "\\s+",
+                                            ""
+                                    )
+                    )
             );
+            if (needToTrimOutput != null && needToTrimOutput) {
+                tempStdout = tempStdout.replace(
+                        "\n",
+                        ""
+                );  // remove newline character
+            }
+            output.setSubmissionOutput(tempStdout);
 
         } else {
             output.setSubmissionOutput(null);
@@ -368,12 +410,16 @@ public class ProblemRunCodeService {
                         isPassed
                 );
 
-                output.setSubmissionOutput(
-                        removeLastLine(outputWithCustomCheckerResult).replace(
-                                "\n",
-                                ""
-                        )
-                );
+                String tempOutput = removeLastLine(outputWithCustomCheckerResult);
+
+                if (needToTrimOutput != null && needToTrimOutput) {
+                    tempOutput = tempOutput.replace(
+                            "\n",
+                            ""
+                    );  // remove newline character
+                }
+
+                output.setSubmissionOutput(tempOutput);
 
                 output.setStatusId(
                         isPassed ? 3 : 4 // Assuming 3 is "Accepted" and 4 is "Wrong Answer"
@@ -387,7 +433,6 @@ public class ProblemRunCodeService {
             } else {
                 output.setSubmissionOutput(null);
             }
-
         }
         /*else {
             output.setSubmissionOutput(null);
