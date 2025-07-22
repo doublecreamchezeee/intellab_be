@@ -77,7 +77,7 @@ public class AdminDashboardService {
                         .title("Subscriptions")
                         .value(currentSubscriptions)
                         .change("+" + newThisMonth)
-                        .changeNote("new users this month")
+                        .changeNote("new users since last month")
                         .changeType("increase")
                         .build(),
 
@@ -85,7 +85,7 @@ public class AdminDashboardService {
                         .title("New Users")
                         .value(currentMonthNewUsers)
                         .change(userChange)
-                        .changeNote("new users this month")
+                        .changeNote("new users since last month")
                         .changeType(getChangeType(userChange))
                         .build(),
 

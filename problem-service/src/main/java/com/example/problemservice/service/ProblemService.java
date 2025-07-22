@@ -4,16 +4,24 @@ import com.example.problemservice.client.AiServiceClient;
 import com.example.problemservice.client.CourseClient;
 import com.example.problemservice.converter.ProblemStructureConverter;
 import com.example.problemservice.client.BoilerplateClient;
+import com.example.problemservice.core.DataField;
 import com.example.problemservice.core.ProblemStructure;
+import com.example.problemservice.dto.PolygonProblemData;
+import com.example.problemservice.dto.request.TestCaseCreationRequest;
 import com.example.problemservice.dto.request.course.CheckingUserCourseExistedRequest;
 import com.example.problemservice.dto.request.problem.ProblemCreationRequest;
+import com.example.problemservice.dto.request.solution.SolutionCreationRequest;
+import com.example.problemservice.dto.request.testcase.TestCaseMultipleCreationRequest;
 import com.example.problemservice.dto.response.DefaultCode.DefaultCodeResponse;
 import com.example.problemservice.dto.response.DefaultCode.PartialBoilerplateResponse;
 import com.example.problemservice.dto.response.Problem.*;
+import com.example.problemservice.dto.response.solution.SolutionCreationResponse;
+import com.example.problemservice.dto.response.testcase.TestCaseCreationResponse;
 import com.example.problemservice.enums.PremiumPackage;
 import com.example.problemservice.exception.AppException;
 import com.example.problemservice.exception.ErrorCode;
 import com.example.problemservice.mapper.DefaultCodeMapper;
+import com.example.problemservice.mapper.PolygonMapper;
 import com.example.problemservice.mapper.ProblemMapper;
 import com.example.problemservice.mapper.SolutionMapper;
 import com.example.problemservice.model.*;
@@ -26,6 +34,7 @@ import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.repository.specification.ProblemSpecification;
 import com.example.problemservice.utils.MarkdownUtility;
+import com.example.problemservice.utils.PolygonParser;
 import com.example.problemservice.utils.TestCaseFileReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +48,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.zeroturnaround.zip.ZipUtil;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,6 +74,8 @@ public class ProblemService {
     private final ViewSolutionBehaviorRepository viewSolutionBehaviorRepository;
     private final ProblemRunCodeRepository problemRunCodeRepository;
     private final AiServiceClient aiServiceClient;
+    private final TestCaseService testCaseService;
+    private final SolutionService solutionService;
 
     private <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
         int start = (int) pageable.getOffset();
@@ -119,6 +135,50 @@ public class ProblemService {
                 .toList();
     }
 
+    public ProblemCreationResponse importProblemFromZip(MultipartFile zipFile, UUID userId) {
+        try {
+            File tempZip = File.createTempFile("polygon-problem", ".zip");
+            zipFile.transferTo(tempZip);
+
+            File unzipDir = Files.createTempDirectory("unzipped-polygon").toFile();
+            ZipUtil.unpack(tempZip, unzipDir); // Dùng zip4j, Apache commons-compress hoặc ZipUtil (dưới)
+
+            File problemXml = new File(unzipDir, "problem.xml");
+            File statementsDir = new File(unzipDir, "statements");
+            File testsDir = new File(unzipDir, "tests");
+
+            // Parse XML và các folder phụ
+            PolygonProblemData data = PolygonParser.parse(problemXml, statementsDir, testsDir);
+
+            ProblemCreationRequest request = PolygonMapper.toProblemCreationRequest(data);
+            Problem problem = problemMapper.toProblem(request);
+            problem.setAuthorId(userId);
+            problem.setCreatedAt(new Date());
+            problem.setIsCompletedCreation(false);
+            ProblemStructure structure = new ProblemStructure();
+            structure.setFunctionName("function_name");
+            structure.setProblemName(problem.getProblemName());
+            structure.setInputStructure(new ArrayList<>());
+            List<DataField> output = new ArrayList<>();
+            output.add(new DataField("int", "result"));
+            structure.setOutputStructure(output);
+            problem.setCurrentCreationStep(1);
+            problem.setCurrentCreationStepDescription("General Step");
+            ProblemCreationResponse response = problemMapper.toProblemCreationResponse(problemRepository.save(problem));
+
+            TestCaseMultipleCreationRequest testcaseRequest = PolygonMapper.toTestCases(data, response.getProblemId());
+            List<TestCaseCreationResponse> testcaseResponse = testCaseService.createMultipleTestCases(testcaseRequest);
+
+            SolutionCreationRequest solution = PolygonMapper.toSolutionCreationRequest(data, response.getProblemId(), String.valueOf(userId));
+            SolutionCreationResponse solutionResponse = solutionService.createSolution(solution);
+            
+            Problem responseProblem = problemRepository.findById(UUID.fromString(response.getProblemId()))
+                    .orElseThrow(() -> new AppException(ErrorCode.PROBLEM_NOT_EXIST));
+            return problemMapper.toProblemCreationResponse(responseProblem);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to unzip or parse polygon zip", e);
+        }
+    }
 
     public Page<ProblemCreationResponse> getCompleteCreationProblem(Boolean isCompleted, String search, Pageable pageable) {
         // Fetch all problems without paging
