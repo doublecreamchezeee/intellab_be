@@ -20,6 +20,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.8.3")
 }
 
 tasks.withType<BootJar> {

@@ -89,6 +89,17 @@ public class ProblemSubmissionService {
         return categories;
     }
 
+    public String findAdminMainCodeByLanguageId(List<AdminMainCode> adminMainCodes, int languageId) {
+        for (AdminMainCode mainCode : adminMainCodes) {
+            log.info("Checking admin main code for language ID: {}", languageId);
+            if (mainCode.getAdminMainLanguageId() == languageId) {
+                return mainCode.getAdminMainCode();
+            }
+        }
+
+        return "";
+    }
+
     public String findCustomCheckerCodeByLanguageId(List<CustomCheckerCode> customCheckerCodes, int languageId) {
         for (CustomCheckerCode checkerCode : customCheckerCodes) {
             if (checkerCode.getCustomCheckerLanguageId() == languageId) {
@@ -142,23 +153,39 @@ public class ProblemSubmissionService {
             log.info("Problem does not have custom checker");
         }
 
-        submission.setCode(
-                boilerplateClient.enrich(
-                        submission.getCode(),
-                        language.getId(),
-                        problem.getProblemStructure(),
-                        problem.getHasCustomChecker(),
-                        problem.getAdditionalCheckerFields(),
-                        getHashTableFromProblemCategories(
-                                problem.getCategories()
-                        )
-                )
-        );
+        Hashtable<Integer, Boolean> problemCategoriesHashTable = getHashTableFromProblemCategories(problem.getCategories());
+
+        if (problem.getAutoGenerateBoilerplate() != null && problem.getAutoGenerateBoilerplate()) {
+            submission.setCode(
+                    boilerplateClient.enrich(
+                            submission.getCode(),
+                            language.getId(),
+                            problem.getProblemStructure(),
+                            problem.getHasCustomChecker(),
+                            problem.getAdditionalCheckerFields(),
+                            problemCategoriesHashTable
+                    )
+            );
+        } else {
+            log.info("Problem does not have auto-generated boilerplate {}", language.getId());
+            String adminMainCode = findAdminMainCodeByLanguageId(
+                    problem.getAdminMainCodes(),
+                    language.getId()
+            );
+
+            submission.setCode(
+                    submission.getCode() + "\n" + adminMainCode
+            );
+
+            log.info("full code: {}", submission.getCode());
+        }
 
         // Lưu ProblemSubmission trước để đảm bảo có ID
         submission = problemSubmissionRepository.save(submission);
 
         //problemSubmissionRepository.flush();
+
+        boolean isOOPProblem = problemCategoriesHashTable.containsKey(20) && problemCategoriesHashTable.get(20); // 20 is the category ID for OOP problems
 
         // Lấy danh sách TestCase từ Problem
         List<TestCase> testCases = problem.getTestCases();
@@ -169,7 +196,11 @@ public class ProblemSubmissionService {
         // Gửi từng test case đến Judge0 và xử lý kết quả
         for (TestCase testCase : testCases) {
             // Gửi mã nguồn và test case đến Judge0
-            TestCaseOutput output = judge0Client.submitCode(submission, testCase, problem.getHasCustomChecker());
+            TestCaseOutput output = judge0Client.submitCode(
+                    submission, testCase,
+                    problem.getHasCustomChecker(),
+                    !isOOPProblem
+            );
 
             // Khởi tạo composite ID
             TestCaseOutputID outputId = new TestCaseOutputID();
@@ -636,7 +667,11 @@ public class ProblemSubmissionService {
 
         for (TestCase testCase : testCases) {
             // Gửi mã nguồn và test case đến Judge0
-            TestCaseOutput output = judge0Client.submitCode(submission, testCase, problem.getHasCustomChecker());
+            TestCaseOutput output = judge0Client.submitCode(
+                    submission, testCase,
+                    problem.getHasCustomChecker(),
+                    true // this logic is default
+            );
 
             // Khởi tạo composite ID
             TestCaseOutputID outputId = new TestCaseOutputID();

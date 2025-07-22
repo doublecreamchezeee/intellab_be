@@ -1,13 +1,19 @@
 package com.example.problemservice.model;
 
 import com.fasterxml.jackson.annotation.*;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Type;
+import jakarta.persistence.Convert;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -17,6 +23,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "\"problems\"")
+@Convert(attributeName  = "jsonb", converter  = JsonBinaryType.class)
 public class Problem {
     @Id
     @GeneratedValue
@@ -108,9 +115,24 @@ public class Problem {
     @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<CustomCheckerCode> customCheckerCodes;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<AdminMainCode> adminMainCodes;
+
     @Column(name = "additional_checker_fields", columnDefinition = "TEXT")
     String additionalCheckerFields;
 
     @Column(name = "hidden_input_fields", columnDefinition = "TEXT")
     String hiddenInputFields;
+
+    // When this field is false, problem category usually is OOP (Object-Oriented Programming) problem
+    @Column(name = "auto_generate_boilerplate", columnDefinition = "boolean default true")
+    Boolean autoGenerateBoilerplate; // whether to auto generate boilerplate code for the problem, if not, user must provide their own main code
+
+    /*@Column(name = "admin_main_code", columnDefinition = "TEXT")
+    String adminMainCode;*/
+
+    /*@JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "class_oop_metadata", columnDefinition = "jsonb")
+    Map<String, Object> classOopMetadata;*/
 }
