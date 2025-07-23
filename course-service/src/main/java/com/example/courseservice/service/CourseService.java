@@ -200,7 +200,7 @@ public class CourseService {
             case "hourly" -> "hour";
             case "daily" -> "day";
             case "weekly" -> "week";
-            case "monthly" -> "month";
+            case "monthly" -> "week";//"month";
             case "custom" -> "day";
             default -> throw new IllegalArgumentException("Invalid type: " + type);
         };
