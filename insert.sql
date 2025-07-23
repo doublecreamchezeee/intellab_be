@@ -1105,15 +1105,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (1, 'Data Structure', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (2, 'Algorithm', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (5, 'Problem Solving', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (6, 'Array', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (7, 'Queue', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (8, 'Recursive', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (9, 'Dynamic Programming', null);
-INSERT INTO public.categories (category_id, category_name, parent_id) VALUES (10, 'Matrix', null);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('1', 'Data Structure', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('2', 'Algorithm', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('5', 'Problem Solving', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('6', 'Array', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('7', 'Queue', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('8', 'Recursive', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('9', 'Dynamic Programming', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('10', 'Matrix', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('11', 'Tree', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('12', 'Graph', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('13', 'Hash Table', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('14', 'Binary Tree', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('15', 'Sort Algorithm', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('16', 'Prefix Sum', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('17', 'String', NULL);
+INSERT INTO "categories" ("category_id", "category_name", "parent_id") VALUES ('20', 'OOP', NULL);
 
 
 INSERT INTO public.topics (topic_id, content, number_of_likes, post_reach, title, user_id) VALUES ('dbfea360-dda9-46a5-9487-ea624080bb60', 'What is Stack Data Structure? A Complete Tutorial', null, null, 'Stack', null);
