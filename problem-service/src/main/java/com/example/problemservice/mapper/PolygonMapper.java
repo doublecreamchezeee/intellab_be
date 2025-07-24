@@ -21,6 +21,7 @@ public class PolygonMapper {
     public static ProblemCreationRequest toProblemCreationRequest(PolygonProblemData data) {
         ProblemCreationRequest request = new ProblemCreationRequest();
         request.setProblemName(data.getTitle());
+        request.setDescription(data.getDescriptionHtml());
         return request;
     }
 

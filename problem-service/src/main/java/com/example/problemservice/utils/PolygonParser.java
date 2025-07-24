@@ -11,8 +11,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONObject;
 
 @Slf4j
 public class PolygonParser {
@@ -45,9 +47,15 @@ public class PolygonParser {
             data.setTitle(parseProblemTitle(doc));
 
             // Parse statement HTML
-            File htmlStatement = new File(statementsDir, "english/problem.html");
-            if (htmlStatement.exists()) {
-                data.setDescriptionHtml(Files.readString(htmlStatement.toPath()));
+            File jsonFile = new File(statementsDir, "english/problem-properties.json");
+            if (jsonFile.exists()) {
+                String content = Files.readString(jsonFile.toPath());
+                JSONObject json = new JSONObject(content);
+
+                if (json.has("legend")) {
+                    String legend = json.getString("legend");
+                    data.setDescriptionHtml(legend); // or however you want to store/use it
+                }
             }
 
             // Load test cases
@@ -82,10 +90,14 @@ public class PolygonParser {
                     if (solutionFile.exists()) {
                         data.setSolutionCode(Files.readString(solutionFile.toPath()));
                         // Infer language by file extension
-                        if (path.endsWith(".cpp")) data.setSolutionLanguage("cpp");
-                        else if (path.endsWith(".java")) data.setSolutionLanguage("java");
-                        else if (path.endsWith(".py")) data.setSolutionLanguage("python");
-                        else data.setSolutionLanguage("unknown");
+                        if (path.endsWith(".cpp"))
+                            data.setSolutionLanguage("cpp");
+                        else if (path.endsWith(".java"))
+                            data.setSolutionLanguage("java");
+                        else if (path.endsWith(".py"))
+                            data.setSolutionLanguage("python");
+                        else
+                            data.setSolutionLanguage("unknown");
                     }
                     break;
                 }
