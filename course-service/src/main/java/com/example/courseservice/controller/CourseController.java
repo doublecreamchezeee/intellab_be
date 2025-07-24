@@ -493,6 +493,20 @@ public class CourseController {
     }
 
     @Operation(
+            summary = "Get number of completed courses of user by user id"
+    )
+    @GetMapping("/me/completedCoursesCount")
+    public ApiResponse<Long> getCompletedCoursesCountByUserId(
+            @RequestHeader("X-UserId") String userUid) {
+        userUid = userUid.split(",")[0];
+        log.info("UserUid: " + ParseUUID.normalizeUID(userUid));
+
+        return ApiResponse.<Long>builder()
+                .result(courseService.getNumberOfCompletedCoursesByUserId(ParseUUID.normalizeUID(userUid)))
+                .build();
+    }
+
+    @Operation(
             summary = "Get all courses that a user has enrolled"
     )
     @GetMapping("/me/enrolledCourses")

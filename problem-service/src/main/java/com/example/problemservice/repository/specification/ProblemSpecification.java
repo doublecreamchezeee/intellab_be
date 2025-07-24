@@ -4,10 +4,7 @@ package com.example.problemservice.repository.specification;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.model.course.Category;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -68,7 +65,7 @@ public class ProblemSpecification {
     }
 
     public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
-        return (root, query, criteriaBuilder) ->{
+        /*return (root, query, criteriaBuilder) ->{
             if(status == null) {
                 return null;
             }
@@ -92,6 +89,50 @@ public class ProblemSpecification {
                         );
 
                 return criteriaBuilder.not(criteriaBuilder.exists(subquery));
+            }
+        };*/
+        return (root, query, criteriaBuilder) -> {
+            // Case 1: status is null - no filtering on solved status for this user
+            if (status == null) {
+                return null; // Returning null means no predicate is added, effectively no filter
+            }
+
+            // Case 2: status is true - find problems the user HAS solved
+            if (status) {
+                // We need to join to submissions to check for a solved entry by the user.
+                // An INNER JOIN is appropriate here because we only care about problems
+                // that *have* a matching submission. If a problem has no submissions
+                // at all, it won't be considered "solved" by anyone.
+                Join<Problem, ProblemSubmission> submissionJoin = root.join("submissions", JoinType.INNER);
+
+                // Predicate: submission must belong to the specified user
+                Predicate userPredicate = criteriaBuilder.equal(submissionJoin.get("userId"), userId);
+                // Predicate: submission must be marked as solved
+                Predicate solvedPredicate = criteriaBuilder.isTrue(submissionJoin.get("isSolved"));
+
+                // Combine conditions: problem has a submission by this user that is solved
+                return criteriaBuilder.and(userPredicate, solvedPredicate);
+            }
+            // Case 3: status is false - find problems the user has NOT solved
+            else {
+                // We need to find problems for which there is NO submission
+                // by this user where isSolved is TRUE.
+                // This correctly identifies problems that are "unsolved" by the user,
+                // including problems with no submissions from them, or problems
+                // where all their submissions are isSolved=false.
+
+                Subquery<UUID> subquery = query.subquery(UUID.class); // Select problemId
+                Root<ProblemSubmission> submission = subquery.from(ProblemSubmission.class);
+
+                // Select the problemId from submissions that meet the "solved by this user" criteria
+                subquery.select(submission.get("problem").get("problemId")) // Select the problem's ID
+                        .where(
+                                criteriaBuilder.equal(submission.get("userId"), userId), // By the specific user
+                                criteriaBuilder.isTrue(submission.get("isSolved"))     // And is marked as solved
+                        );
+
+                // The main query should return problems whose problemId is NOT IN the subquery's results.
+                return criteriaBuilder.not(root.get("problemId").in(subquery));
             }
         };
     }

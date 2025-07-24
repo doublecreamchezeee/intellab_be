@@ -13,4 +13,5 @@ public class User {
     String firstName;
     String lastName;
     String role;
+    Boolean isPublic;
 }

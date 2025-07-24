@@ -1017,6 +1017,19 @@ public class CourseService {
         return listEnrolledUsersResponse;
     }
 
+    public Long getNumberOfCompletedCoursesByUserId(UUID userUid) {
+        if (userUid == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
+
+        Specification<UserCourses> specification = Specification.where(
+                UserCoursesSpecification.hasUserUid(userUid)
+                        .and(UserCoursesSpecification.hasStatus(PredefinedLearningStatus.DONE))
+        );
+
+        return userCoursesRepository.count(specification);
+    }
+
     public Page<DetailCourseResponse> getEnrolledCoursesOfUser(UUID userUuid, Pageable pageable) {
         if (userUuid == null) {
             throw new AppException(ErrorCode.BAD_REQUEST);
