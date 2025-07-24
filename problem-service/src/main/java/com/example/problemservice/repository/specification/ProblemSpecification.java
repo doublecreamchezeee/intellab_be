@@ -4,7 +4,10 @@ package com.example.problemservice.repository.specification;
 import com.example.problemservice.model.Problem;
 import com.example.problemservice.model.ProblemSubmission;
 import com.example.problemservice.model.course.Category;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -64,78 +67,74 @@ public class ProblemSpecification {
         };
     }
 
+//    public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
+//        return (root, query, criteriaBuilder) ->{
+//            if(status == null) {
+//                return null;
+//            }
+//
+//            if (status) {
+//                // lọc các submission của người dùng với problem đã giải quyết
+//                if (userId == null) {
+//                    return criteriaBuilder.conjunction(); // Trả về điều kiện rỗng nếu userId không được cung cấp
+//                }
+//
+//
+//                Join<Problem, ProblemSubmission> join = root.join("submissions", JoinType.LEFT);
+//
+//                var userSubmission = criteriaBuilder.equal(join.get("userId"), userId);
+//
+//                var isSolved = criteriaBuilder.equal(join.get("isSolved"), status);
+//
+//                return criteriaBuilder.and(userSubmission, isSolved);
+//            }
+//            else {
+//                Subquery<ProblemSubmission> subquery = query.subquery(ProblemSubmission.class);
+//                Root<ProblemSubmission> submission = subquery.from(ProblemSubmission.class);
+//                subquery.select(submission)
+//                        .where(
+//                                criteriaBuilder.equal(submission.get("problem"), root),
+//                                criteriaBuilder.equal(submission.get("isSolved"), status)
+//                        );
+//
+//                return criteriaBuilder.not(criteriaBuilder.exists(subquery));
+//            }
+//        };
+//    }
+
     public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
-        /*return (root, query, criteriaBuilder) ->{
-            if(status == null) {
+        return (root, query, criteriaBuilder) -> {
+            if (status == null || userId == null) {
                 return null;
             }
 
             if (status) {
-                Join<Problem, ProblemSubmission> join = root.join("submissions", JoinType.LEFT);
-
-                var userSubmission = criteriaBuilder.equal(join.get("userId"), userId);
-
-                var isSolved = criteriaBuilder.equal(join.get("isSolved"), status);
-
-                return criteriaBuilder.and(userSubmission, isSolved);
-            }
-            else {
+                // Bài toán mà user này đã solve ít nhất 1 lần
                 Subquery<ProblemSubmission> subquery = query.subquery(ProblemSubmission.class);
-                Root<ProblemSubmission> submission = subquery.from(ProblemSubmission.class);
-                subquery.select(submission)
+                Root<ProblemSubmission> subRoot = subquery.from(ProblemSubmission.class);
+                subquery.select(subRoot)
                         .where(
-                                criteriaBuilder.equal(submission.get("problem"), root),
-                                criteriaBuilder.equal(submission.get("isSolved"), status)
+                                criteriaBuilder.equal(subRoot.get("problem"), root),
+                                criteriaBuilder.equal(subRoot.get("userId"), userId),
+                                criteriaBuilder.isTrue(subRoot.get("isSolved"))
                         );
-
+                return criteriaBuilder.exists(subquery);
+            } else {
+                // Bài toán mà user này **chưa từng solve**
+                // Có thể có submission nhưng tất cả đều chưa solve, hoặc không có submission nào
+                Subquery<ProblemSubmission> subquery = query.subquery(ProblemSubmission.class);
+                Root<ProblemSubmission> subRoot = subquery.from(ProblemSubmission.class);
+                subquery.select(subRoot)
+                        .where(
+                                criteriaBuilder.equal(subRoot.get("problem"), root),
+                                criteriaBuilder.equal(subRoot.get("userId"), userId),
+                                criteriaBuilder.isTrue(subRoot.get("isSolved"))
+                        );
                 return criteriaBuilder.not(criteriaBuilder.exists(subquery));
-            }
-        };*/
-        return (root, query, criteriaBuilder) -> {
-            // Case 1: status is null - no filtering on solved status for this user
-            if (status == null) {
-                return null; // Returning null means no predicate is added, effectively no filter
-            }
-
-            // Case 2: status is true - find problems the user HAS solved
-            if (status) {
-                // We need to join to submissions to check for a solved entry by the user.
-                // An INNER JOIN is appropriate here because we only care about problems
-                // that *have* a matching submission. If a problem has no submissions
-                // at all, it won't be considered "solved" by anyone.
-                Join<Problem, ProblemSubmission> submissionJoin = root.join("submissions", JoinType.INNER);
-
-                // Predicate: submission must belong to the specified user
-                Predicate userPredicate = criteriaBuilder.equal(submissionJoin.get("userId"), userId);
-                // Predicate: submission must be marked as solved
-                Predicate solvedPredicate = criteriaBuilder.isTrue(submissionJoin.get("isSolved"));
-
-                // Combine conditions: problem has a submission by this user that is solved
-                return criteriaBuilder.and(userPredicate, solvedPredicate);
-            }
-            // Case 3: status is false - find problems the user has NOT solved
-            else {
-                // We need to find problems for which there is NO submission
-                // by this user where isSolved is TRUE.
-                // This correctly identifies problems that are "unsolved" by the user,
-                // including problems with no submissions from them, or problems
-                // where all their submissions are isSolved=false.
-
-                Subquery<UUID> subquery = query.subquery(UUID.class); // Select problemId
-                Root<ProblemSubmission> submission = subquery.from(ProblemSubmission.class);
-
-                // Select the problemId from submissions that meet the "solved by this user" criteria
-                subquery.select(submission.get("problem").get("problemId")) // Select the problem's ID
-                        .where(
-                                criteriaBuilder.equal(submission.get("userId"), userId), // By the specific user
-                                criteriaBuilder.isTrue(submission.get("isSolved"))     // And is marked as solved
-                        );
-
-                // The main query should return problems whose problemId is NOT IN the subquery's results.
-                return criteriaBuilder.not(root.get("problemId").in(subquery));
             }
         };
     }
+
 
 
     public static Specification<Problem> problemStructureNotNullSpecification(Boolean problemStructureNotNull) {
