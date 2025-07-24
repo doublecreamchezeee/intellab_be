@@ -67,34 +67,74 @@ public class ProblemSpecification {
         };
     }
 
+//    public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
+//        return (root, query, criteriaBuilder) ->{
+//            if(status == null) {
+//                return null;
+//            }
+//
+//            if (status) {
+//                // lọc các submission của người dùng với problem đã giải quyết
+//                if (userId == null) {
+//                    return criteriaBuilder.conjunction(); // Trả về điều kiện rỗng nếu userId không được cung cấp
+//                }
+//
+//
+//                Join<Problem, ProblemSubmission> join = root.join("submissions", JoinType.LEFT);
+//
+//                var userSubmission = criteriaBuilder.equal(join.get("userId"), userId);
+//
+//                var isSolved = criteriaBuilder.equal(join.get("isSolved"), status);
+//
+//                return criteriaBuilder.and(userSubmission, isSolved);
+//            }
+//            else {
+//                Subquery<ProblemSubmission> subquery = query.subquery(ProblemSubmission.class);
+//                Root<ProblemSubmission> submission = subquery.from(ProblemSubmission.class);
+//                subquery.select(submission)
+//                        .where(
+//                                criteriaBuilder.equal(submission.get("problem"), root),
+//                                criteriaBuilder.equal(submission.get("isSolved"), status)
+//                        );
+//
+//                return criteriaBuilder.not(criteriaBuilder.exists(subquery));
+//            }
+//        };
+//    }
+
     public static Specification<Problem> StatusFilter(Boolean status, UUID userId) {
-        return (root, query, criteriaBuilder) ->{
-            if(status == null) {
+        return (root, query, criteriaBuilder) -> {
+            if (status == null || userId == null) {
                 return null;
             }
 
             if (status) {
-                Join<Problem, ProblemSubmission> join = root.join("submissions", JoinType.LEFT);
-
-                var userSubmission = criteriaBuilder.equal(join.get("userId"), userId);
-
-                var isSolved = criteriaBuilder.equal(join.get("isSolved"), status);
-
-                return criteriaBuilder.and(userSubmission, isSolved);
-            }
-            else {
+                // Bài toán mà user này đã solve ít nhất 1 lần
                 Subquery<ProblemSubmission> subquery = query.subquery(ProblemSubmission.class);
-                Root<ProblemSubmission> submission = subquery.from(ProblemSubmission.class);
-                subquery.select(submission)
+                Root<ProblemSubmission> subRoot = subquery.from(ProblemSubmission.class);
+                subquery.select(subRoot)
                         .where(
-                                criteriaBuilder.equal(submission.get("problem"), root),
-                                criteriaBuilder.equal(submission.get("isSolved"), status)
+                                criteriaBuilder.equal(subRoot.get("problem"), root),
+                                criteriaBuilder.equal(subRoot.get("userId"), userId),
+                                criteriaBuilder.isTrue(subRoot.get("isSolved"))
                         );
-
+                return criteriaBuilder.exists(subquery);
+            } else {
+                // Bài toán mà user này **chưa từng solve**
+                // Có thể có submission nhưng tất cả đều chưa solve, hoặc không có submission nào
+                Subquery<ProblemSubmission> subquery = query.subquery(ProblemSubmission.class);
+                Root<ProblemSubmission> subRoot = subquery.from(ProblemSubmission.class);
+                subquery.select(subRoot)
+                        .where(
+                                criteriaBuilder.equal(subRoot.get("problem"), root),
+                                criteriaBuilder.equal(subRoot.get("userId"), userId),
+                                criteriaBuilder.isTrue(subRoot.get("isSolved"))
+                        );
                 return criteriaBuilder.not(criteriaBuilder.exists(subquery));
             }
         };
     }
+
 
 
     public static Specification<Problem> problemStructureNotNullSpecification(Boolean problemStructureNotNull) {
