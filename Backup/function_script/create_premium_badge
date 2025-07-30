@@ -1,0 +1,34 @@
+-- FUNCTION: public.create_premium_badge()
+
+-- DROP FUNCTION IF EXISTS public.create_premium_badge();
+
+CREATE OR REPLACE FUNCTION public.create_premium_badge()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+	IF (NEW.payment_for = 'Subscription' AND NEW.transaction_status = '00') THEN
+		
+		IF NOT EXISTS(	SELECT 1 FROM achievements 
+						WHERE user_id = NEW.user_uuid 
+						AND badge_id = (	SELECT badge_id 
+											FROM badges 
+											WHERE badge_name = 'Premium User'
+										)
+			) THEN 
+			INSERT INTO achievements(user_id, badge_id, achieved_date)
+			SELECT NEW.user_uuid, b.badge_id, now()
+			FROM badges b
+			WHERE b.badge_name = 'Premium User';
+		END IF;
+	END IF;
+	
+	
+	RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.create_premium_badge()
+    OWNER TO postgres;

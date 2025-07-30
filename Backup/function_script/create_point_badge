@@ -1,0 +1,59 @@
+-- FUNCTION: public.create_point_badge()
+
+-- DROP FUNCTION IF EXISTS public.create_point_badge();
+
+CREATE OR REPLACE FUNCTION public.create_point_badge()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+
+BEGIN
+	IF (NEW.type = 'all') THEN 
+		RETURN NEW;
+	END IF;
+	
+	IF (NEW.type = 'course') THEN
+		IF (NEW.total_course = 5) THEN 
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 6
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 6);
+			END IF;
+			
+		ELSIF (NEW.total_course = 10) THEN
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 5
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 5);
+			END IF;
+			
+		END IF;
+		
+	ELSIF (NEW.type = 'problem') THEN
+		IF (NEW.total_problem = 10) THEN 
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 8
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 8);
+			END IF;
+		ELSIF (NEW.total_problem = 20) THEN
+			IF NOT EXISTS(	SELECT 1 FROM achievements 
+							WHERE user_id = NEW.user_id AND badge_id = 7
+						) THEN
+				INSERT INTO achievements(user_id, achieved_date, badge_id)
+				VALUES (NEW.user_id, NOW(), 7);
+			END IF;
+		END IF;
+	END IF;
+	
+	RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.create_point_badge()
+    OWNER TO postgres;

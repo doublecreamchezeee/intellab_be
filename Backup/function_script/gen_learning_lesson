@@ -1,0 +1,34 @@
+-- FUNCTION: public.gen_learning_lesson()
+
+-- DROP FUNCTION IF EXISTS public.gen_learning_lesson();
+
+CREATE OR REPLACE FUNCTION public.gen_learning_lesson()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+	IF NOT EXISTS (
+	    SELECT 1 
+	    FROM user_courses 
+	    WHERE course_id = NEW.course_id
+	) THEN
+	    RETURN NEW;
+	END IF;
+
+	WITH user_ids AS(
+		SELECT user_uid as user_id
+		FROM user_courses
+		WHERE course_id = NEW.course_id
+	)
+	INSERT INTO learning_lesson(is_done_practice,status,user_id,lesson_id)
+	SELECT false, 'NEW', user_ids.user_id, NEW.lesson_id
+	FROM user_ids; 
+	
+    RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.gen_learning_lesson()
+    OWNER TO postgres;

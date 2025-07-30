@@ -1,0 +1,37 @@
+-- FUNCTION: public.create_problem_trigger_function()
+
+-- DROP FUNCTION IF EXISTS public.create_problem_trigger_function();
+
+CREATE OR REPLACE FUNCTION public.create_problem_trigger_function()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+	IF (NEW.current_creation_step < 6) THEN
+		RETURN NEW;
+	END IF;
+
+	IF (NEW.current_creation_step = OLD.current_creation_step) THEN
+		RETURN NEW;
+	END IF;
+
+	IF (NEW.current_creation_step = 6) THEN
+		IF NEW.problem_structure IS NULL THEN
+			RAISE EXCEPTION 'VALIDATE DATA: %', 'problem_structure MUST NOT BE NULL';
+		END IF;
+	END IF;
+
+	IF (NOT OLD.is_completed_creation AND NEW.is_completed_creation) THEN
+		IF NEW.problem_structure IS NULL THEN
+			RAISE EXCEPTION 'VALIDATE DATA: %', 'problem_structure MUST NOT BE NULL';
+		END IF;
+	END IF;
+
+	RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.create_problem_trigger_function()
+    OWNER TO postgres;
